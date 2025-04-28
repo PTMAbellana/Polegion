@@ -1,0 +1,125 @@
+/* login.module.css */
+
+/* Container */
+.container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Form Title */
+.title {
+    text-align: center;
+    font-size: 2rem;
+    margin-bottom: 20px;
+    color: #2c3e50;
+}
+
+/* Form Styles */
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.formGroup {
+    display: flex;
+    flex-direction: column;
+}
+
+.label {
+    font-size: 1rem;
+    color: #2c3e50;
+}
+
+.input {
+    padding: 10px;
+    font-size: 1rem;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+    margin-top: 5px;
+    width: 100%;
+}
+
+.input:focus {
+    outline: none;
+    border-color: #3498db;
+}
+
+.error {
+    color: #e74c3c;
+    font-size: 0.875rem;
+    margin-top: 5px;
+}
+
+/* Submit Button */
+.submitButton {
+    padding: 12px 20px;
+    background-color: #3498db;
+    color: white;
+    font-size: 1.1rem;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.submitButton:disabled {
+    background-color: #b0bec5;
+    cursor: not-allowed;
+}
+
+.submitButton:hover {
+    background-color: #2980b9;
+}
+
+/* Social Buttons */
+.socialButtons {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.googleButton,
+.githubButton {
+    padding: 12px 20px;
+    border: none;
+    border-radius: 5px;
+    color: white;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.googleButton {
+    background-color: #db4437;
+}
+
+.googleButton:hover {
+    background-color: #c1351d;
+}
+
+.githubButton {
+    background-color: #333;
+}
+
+.githubButton:hover {
+    background-color: #444;
+}
+
+/* Register Prompt */
+.registerPrompt {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 1rem;
+}
+
+.registerLink {
+    color: #3498db;
+    text-decoration: none;
+}
+
+.registerLink:hover {
+    text-decoration: underline;
+}
