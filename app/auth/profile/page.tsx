@@ -1,8 +1,7 @@
 "use client";
-import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
 import { myAppHook } from "@/context/AppUtils";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import styles from '@/styles/dashboard.module.css';
 
 export default function Profile() {

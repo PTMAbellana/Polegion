@@ -104,6 +104,7 @@
   min-width: 20px;
   display: flex;
   justify-content: center;
+  margin: 5px 5px 5px 0;
 }
 
 .nav-text {
