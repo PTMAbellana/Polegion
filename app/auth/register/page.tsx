@@ -1,14 +1,21 @@
 "use client";
+import Head from 'next/head';
+import Image from 'next/image';
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
 import { supabase } from "@/lib/supabaseClient";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import * as yup from "yup";
 
-// Import custom CSS for Register component
+// Import icons
+import { FcGoogle } from 'react-icons/fc';
+import { FaGithub, FaEye, FaEyeSlash } from 'react-icons/fa';
+
+// Import CSS Module
 import styles from '@/styles/register.module.css';
 
 const formSchema = yup.object().shape({
@@ -22,6 +29,9 @@ const formSchema = yup.object().shape({
 
 export default function Register() {
     const router = useRouter();
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
     const { 
         register,
         handleSubmit,
@@ -31,80 +41,207 @@ export default function Register() {
     });
 
     const onSubmit = async (formdata: any) => {
-        const { fullName, email, password, gender, phone } = formdata;
-        const { data, error } = await supabase.auth.signUp({
-            email,
-            password,
-            options: {
-                data: {
-                    fullName,
-                    gender,
-                    phone
+        try {
+            const { fullName, email, password, gender, phone } = formdata;
+            const { data, error } = await supabase.auth.signUp({
+                email,
+                password,
+                options: {
+                    data: {
+                        fullName,
+                        gender,
+                        phone
+                    }
                 }
-            }
-        });
+            });
 
-        if (error) {
-            toast.error("Failed to register user");
+            if (error) {
+                toast.error("Failed to register user");
+            } else {
+                toast.success("User registered successfully.");
+                router.push("/auth/login");
+            }
+        } catch (error) {
+            toast.error("An error occurred during registration");
+        }
+    };
+
+    const handleLoginRedirect = () => {
+        router.push("/auth/login");
+    };
+
+    const handleSocialOauth = async (provider: "google" | "github") => {
+        try {
+            const { data, error } = await supabase.auth.signInWithOAuth({
+                provider,
+                options: {
+                    redirectTo: `${window.location.origin}/auth/dashboard`
+                }
+            });
+
+            if (error) {
+                toast.error(`Failed to register via ${provider.charAt(0).toUpperCase() + provider.slice(1)}`);
+            }
+        } catch (error) {
+            toast.error("An error occurred during authentication");
+        }
+    };
+
+    const togglePasswordVisibility = (field: 'password' | 'confirm') => {
+        if (field === 'password') {
+            setShowPassword(!showPassword);
         } else {
-            toast.success("User registered successfully.");
-            router.push("/auth/login");
+            setShowConfirmPassword(!showConfirmPassword);
         }
     };
 
     return (
         <>
+            <Head>
+                <title>Register | Your App Name</title>
+                <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;700&display=swap" rel="stylesheet" />
+            </Head>
+
             <Navbar />
-            <div className={styles.container}>
-                <h2 className={styles.title}>Register</h2>
-                <form onSubmit={handleSubmit(onSubmit)} className={styles.form}>
-                    <div className={styles.formGroup}>
-                        <label className={styles.label}>Display Name</label>
-                        <input type="text" className={styles.input} {...register("fullName")} />
-                        <p className={styles.error}>{errors.fullName?.message}</p>
+
+            <div className={styles.registerPage}>
+                <div className={styles.registerCard}>
+                    <div className={styles.cardContent}>
+                        {/* Logo */}
+                        <div className={styles.logoContainer}>
+                            <img 
+                                src="/images/polegionLogo.png" 
+                                alt="Logo" 
+                                className={styles.logo} 
+                            />
+                        </div>
+
+                        <h1 className={styles.welcomeTitle}>Create Account</h1>
+                        <p className={styles.welcomeSubtitle}>Join us and unleash your potential!</p>
+
+                        <form onSubmit={handleSubmit(onSubmit)}>
+                            <div className={styles.formGrid}>
+                                <div className={styles.formGroup}>
+                                    <input 
+                                        type="text" 
+                                        className={styles.inputField} 
+                                        placeholder="Full Name"
+                                        {...register("fullName")} 
+                                    />
+                                    {errors.fullName && <p className={styles.error}>{errors.fullName.message?.toString()}</p>}
+                                </div>
+
+                                <div className={styles.formGroup}>
+                                    <input 
+                                        type="text" 
+                                        className={styles.inputField} 
+                                        placeholder="Phone Number"
+                                        {...register("phone")} 
+                                    />
+                                    {errors.phone && <p className={styles.error}>{errors.phone.message?.toString()}</p>}
+                                </div>
+
+                                <div className={`${styles.formGroup} ${styles.fullWidth}`}>
+                                    <input 
+                                        type="email" 
+                                        className={styles.inputField} 
+                                        placeholder="Email Address"
+                                        {...register("email")} 
+                                    />
+                                    {errors.email && <p className={styles.error}>{errors.email.message?.toString()}</p>}
+                                </div>
+
+                                <div className={`${styles.formGroup} ${styles.fullWidth}`}>
+                                    <select 
+                                        className={styles.selectField} 
+                                        {...register("gender")}
+                                    >
+                                        <option value="Select Gender" disabled selected>Select Gender</option>
+                                        <option value="Male">Male</option>
+                                        <option value="Female">Female</option>
+                                        <option value="Other">Other</option>
+                                    </select>
+                                    {errors.gender && <p className={styles.error}>{errors.gender.message?.toString()}</p>}
+                                </div>
+
+                                <div className={styles.formGroup}>
+                                    <div className={styles.passwordInput}>
+                                        <input 
+                                            type={showPassword ? "text" : "password"} 
+                                            className={styles.inputField} 
+                                            placeholder="Password"
+                                            {...register("password")} 
+                                        />
+                                        <button 
+                                            type="button" 
+                                            className={styles.passwordToggle} 
+                                            onClick={() => togglePasswordVisibility('password')}
+                                        >
+                                            {showPassword ? <FaEyeSlash size={20} /> : <FaEye size={20} />}
+                                        </button>
+                                    </div>
+                                    {errors.password && <p className={styles.error}>{errors.password.message?.toString()}</p>}
+                                </div>
+
+                                <div className={styles.formGroup}>
+                                    <div className={styles.passwordInput}>
+                                        <input 
+                                            type={showConfirmPassword ? "text" : "password"} 
+                                            className={styles.inputField} 
+                                            placeholder="Confirm Password"
+                                            {...register("confirm_password")} 
+                                        />
+                                        <button 
+                                            type="button" 
+                                            className={styles.passwordToggle} 
+                                            onClick={() => togglePasswordVisibility('confirm')}
+                                        >
+                                            {showConfirmPassword ? <FaEyeSlash size={20} /> : <FaEye size={20} />}
+                                        </button>
+                                    </div>
+                                    {errors.confirm_password && <p className={styles.error}>{errors.confirm_password.message?.toString()}</p>}
+                                </div>
+                            </div>
+
+                            <button 
+                                type="submit" 
+                                className={styles.registerButton} 
+                                disabled={isSubmitting}
+                            >
+                                {isSubmitting ? "Registering..." : "Register"}
+                            </button>
+                        </form>
+
+                        <div className={styles.socialDivider}>
+                            <div className={styles.dividerLine}></div>
+                            <span className={styles.dividerText}>OR REGISTER WITH</span>
+                            <div className={styles.dividerLine}></div>
+                        </div>
+
+                        <div className={styles.socialButtons}>
+                            <button 
+                                className={styles.socialButton} 
+                                onClick={() => handleSocialOauth("google")}
+                            >
+                                <FcGoogle size={24} className={styles.socialIcon} />
+                                Google
+                            </button>
+                            <button 
+                                className={styles.socialButton} 
+                                onClick={() => handleSocialOauth("github")}
+                            >
+                                <FaGithub size={24} className={styles.socialIcon} />
+                                GitHub
+                            </button>
+                        </div>
+
+                        <p className={styles.loginPrompt}>
+                            Already have an account? <span onClick={handleLoginRedirect} className={styles.loginLink}>Login</span>
+                        </p>
                     </div>
-
-                    <div className={styles.formGroup}>
-                        <label className={styles.label}>Email</label>
-                        <input type="email" className={styles.input} {...register("email")} />
-                        <p className={styles.error}>{errors.email?.message}</p>
-                    </div>
-
-                    <div className={styles.formGroup}>
-                        <label className={styles.label}>Phone</label>
-                        <input type="text" className={styles.input} {...register("phone")} />
-                        <p className={styles.error}>{errors.phone?.message}</p>
-                    </div>
-
-                    <div className={styles.formGroup}>
-                        <label className={styles.label}>Gender</label>
-                        <select className={styles.select} {...register("gender")}>
-                            <option value="Male">Male</option>
-                            <option value="Female">Female</option>
-                            <option value="Other">Other</option>
-                        </select>
-                        <p className={styles.error}>{errors.gender?.message}</p>
-                    </div>
-
-                    <div className={styles.formGroup}>
-                        <label className={styles.label}>Password</label>
-                        <input type="password" className={styles.input} {...register("password")} />
-                        <p className={styles.error}>{errors.password?.message}</p>
-                    </div>
-
-                    <div className={styles.formGroup}>
-                        <label className={styles.label}>Confirm Password</label>
-                        <input type="password" className={styles.input} {...register("confirm_password")} />
-                        <p className={styles.error}>{errors.confirm_password?.message}</p>
-                    </div>
-
-                    <button type="submit" className={styles.submitButton} disabled={isSubmitting}>Register</button>
-                </form>
-
-                <p className={styles.registerPrompt}>
-                    Already have an account? <a href="/auth/login" className={styles.registerLink}>Login</a>
-                </p>
+                </div>
             </div>
+
             <Footer />
         </>
     );

@@ -12,11 +12,13 @@
     "@hookform/resolvers": "^5.0.1",
     "@supabase/supabase-js": "^2.49.4",
     "bootstrap": "^5.3.5",
+    "lucide-react": "^0.503.0",
     "next": "15.2.4",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-hook-form": "^7.55.0",
     "react-hot-toast": "^2.5.2",
+    "react-icons": "^5.5.0",
     "sweetalert2": "^11.17.2",
     "yup": "^1.6.1"
   },

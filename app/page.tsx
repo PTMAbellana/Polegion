@@ -11,6 +11,7 @@ export default function Home() {
       <Head>
         <title>GeoPlay - Fun Geometry Visualizer</title>
         <meta name="description" content="Explore interactive geometry visualizations and gamified learning" />
+        <link rel="icon" type="image/png" href="/images/polegionIcon.png" />
       </Head>
 
       <Navbar />
