@@ -15,7 +15,7 @@ export default function Profile() {
     };
 
     return (
-        <>
+        <div className={styles["dashboard-container"]}>
             <Navbar onToggleSidebar={toggleSidebar} /> {/* Pass toggle function to Navbar */}
             
             <div className={`${styles["main-content"]} ${sidebarOpen ? styles["sidebar-open"] : ''}`}>
@@ -34,7 +34,7 @@ export default function Profile() {
                 )}
             </div>
 
-            <Footer />
-        </>
+            {/* <Footer /> */}
+        </div>
     );
 }
