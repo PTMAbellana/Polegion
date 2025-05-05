@@ -14,7 +14,7 @@ import Loader from "@/components/Loader";
 
 // Import icons
 import { FcGoogle } from 'react-icons/fc';
-import { FaGithub, FaEye, FaEyeSlash } from 'react-icons/fa';
+import { FaGithub, FaEye, FaEyeSlash, FaTimes } from 'react-icons/fa';
 
 // Import CSS Module
 import styles from '@/styles/login.module.css';
@@ -24,11 +24,17 @@ const formSchema = yup.object().shape({
     password: yup.string().required("Password is required")
 });
 
+const forgotPasswordSchema = yup.object().shape({
+    email: yup.string().required("Email is required").email("Invalid Email value")
+});
+
 export default function Login() {
     const router = useRouter();
     const { isLoggedIn, setIsLoggedIn, setAuthToken } = myAppHook();
     const [showPassword, setShowPassword] = useState(false);
     const [rememberMe, setRememberMe] = useState(false);
+    const [showForgotPasswordModal, setShowForgotPasswordModal] = useState(false);
+    const [resetPasswordSubmitting, setResetPasswordSubmitting] = useState(false);
 
     const {
         register,
@@ -36,6 +42,14 @@ export default function Login() {
         formState: { isSubmitting, errors }
     } = useForm({
         resolver: yupResolver(formSchema)
+    });
+
+    const {
+        register: registerForgotPassword,
+        handleSubmit: handleForgotPasswordSubmit,
+        formState: { errors: forgotPasswordErrors }
+    } = useForm({
+        resolver: yupResolver(forgotPasswordSchema)
     });
 
     useEffect(() => {
@@ -99,9 +113,47 @@ export default function Login() {
     };
 
     const handleForgotPassword = () => {
-        router.push("/auth/forgot-password");
-        // Or implement a modal/popup for password reset
+        setShowForgotPasswordModal(true);
     };
+
+    const handleCloseModal = () => {
+        setShowForgotPasswordModal(false);
+    };
+
+    const onForgotPasswordSubmit = async (formdata: any) => {
+        try {
+            setResetPasswordSubmitting(true);
+            const { email } = formdata;
+            
+            const { error } = await supabase.auth.resetPasswordForEmail(email, {
+                redirectTo: `${window.location.origin}/auth/reset-password`
+            });
+            
+            if (error) {
+                toast.error("Failed to send password reset email");
+            } else {
+                toast.success("Password reset link sent to your email");
+                setShowForgotPasswordModal(false);
+            }
+        } catch (error) {
+            toast.error("An error occurred while processing your request");
+        } finally {
+            setResetPasswordSubmitting(false);
+        }
+    };
+
+    // Prevent scrolling when modal is open
+    useEffect(() => {
+        if (showForgotPasswordModal) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = 'unset';
+        }
+        
+        return () => {
+            document.body.style.overflow = 'unset';
+        };
+    }, [showForgotPasswordModal]);
 
     return (
         <>
@@ -216,7 +268,53 @@ export default function Login() {
                 </div>
             </div>
 
-            
+            {/* Forgot Password Modal */}
+            {showForgotPasswordModal && (
+                <div className={styles.modalOverlay}>
+                    <div className={styles.modalContent}>
+                        <div className={styles.modalHeader}>
+                            <h2 className={styles.modalTitle}>Reset Password</h2>
+                            <button 
+                                className={styles.closeButton}
+                                onClick={handleCloseModal}
+                            >
+                                <FaTimes size={20} />
+                            </button>
+                        </div>
+                        
+                        <p className={styles.modalDescription}>
+                            Enter your email address and we'll send you a link to reset your password.
+                        </p>
+                        
+                        <form onSubmit={handleForgotPasswordSubmit(onForgotPasswordSubmit)}>
+                            <div className={styles.formGroup}>
+                                <input 
+                                    type="email" 
+                                    className={styles.inputField} 
+                                    placeholder="Enter your email"
+                                    {...registerForgotPassword("email")} 
+                                />
+                                {forgotPasswordErrors.email && 
+                                    <p className={styles.error}>{forgotPasswordErrors.email.message?.toString()}</p>
+                                }
+                            </div>
+                            
+                            <button 
+                                type="submit" 
+                                className={styles.forgotPasswordButton}
+                                disabled={resetPasswordSubmitting}
+                            >
+                                {resetPasswordSubmitting ? (
+                                    <>
+                                        <Loader size="tiny" />
+                                        <span>Sending...</span>
+                                    </>
+                                ) : "Send Reset Link"}
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            )}
         </>
     );
 }
