@@ -1,7 +1,6 @@
 "use client";
 import Head from 'next/head';
 import Image from 'next/image';
-import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
 import { supabase } from "@/lib/supabaseClient";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -242,7 +241,6 @@ export default function Register() {
                 </div>
             </div>
 
-            <Footer />
         </>
     );
 }

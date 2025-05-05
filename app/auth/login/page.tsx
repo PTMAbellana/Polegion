@@ -11,6 +11,7 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import * as yup from "yup";
+import Loader from "@/components/Loader"; 
 
 // Import icons
 import { FcGoogle } from 'react-icons/fc';
@@ -115,7 +116,8 @@ export default function Login() {
             <div className={styles.loginPage}>
                 <div className={styles.loginCard}>
                     <div className={styles.cardContent}>
-                        {/* Logo */}
+                    {isSubmitting ? <Loader size="small" /> : ""}
+                    {/* Logo */}
                         <div className={styles.logoContainer}>
                             <img 
                                 src="/images/polegionLogo.png" 
@@ -215,7 +217,7 @@ export default function Login() {
                 </div>
             </div>
 
-            <Footer />
+            
         </>
     );
 }

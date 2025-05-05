@@ -10,7 +10,7 @@ import Swal from "sweetalert2";
 import { supabase } from "@/lib/supabaseClient";
 import { myAppHook } from "@/context/AppUtils";
 import Navbar from "@/components/Navbar";
-import styles from '@/styles/dashboard.module.css';
+import styles from '@/styles/room.module.css';
 
 interface RoomType {
   id?: number;
@@ -21,25 +21,18 @@ interface RoomType {
   created_at?: string;
 }
 
-interface AdventureType {
-  id: number;
-  title: string;
-  date: string;
-}
-
 const formSchema = yup.object().shape({
   title: yup.string().required("Room title is required"),
   description: yup.string().required("Room description is required"),
   mantra: yup.string().required("Room mantra is required")
 });
 
-export default function virtualRooms() {
+export default function VirtualRooms() {
   const [previewImage, setPreviewImage] = useState(null);
   const [rooms, setRooms] = useState<RoomType[]>([]);
   const [userId, setUserId] = useState(null);
   const [editId, setEditId] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [adventures, setAdventures] = useState<AdventureType[]>([]);
   const [isLoading, setLocalLoading] = useState(false);
 
   const { setAuthToken, setIsLoggedIn, isLoggedIn, setUserProfile, setIsLoading } = myAppHook();
@@ -76,7 +69,6 @@ export default function virtualRooms() {
           phone: data.session.user?.user_metadata.phone,
         }));
         fetchRoomsFromTable(data.session.user.id);
-        fetchAdventures(data.session.user.id);
       }
       setIsLoading(false);
     };
@@ -163,32 +155,6 @@ export default function virtualRooms() {
     setLocalLoading(false);
   };
 
-  const fetchAdventures = async (userId: string) => {
-    // This is a placeholder for fetching real adventure data
-    // You would implement the actual fetch from your database
-    setLocalLoading(true);
-    
-    // Example fetch from adventures table
-    const { data, error } = await supabase
-      .from("adventures")
-      .select("*")
-      .eq("user_id", userId)
-      .order('created_at', { ascending: false })
-      .limit(3);
-    
-    if (data) {
-      setAdventures(data);
-    } else {
-      // If no adventures or table doesn't exist yet, use mock data
-      setAdventures([
-        { id: 1, title: "Virtual Reality Exploration", date: "Monday, 28 April 2025" },
-        { id: 2, title: "Mindfulness Session", date: "Friday, 25 April 2025" },
-        { id: 3, title: "Creative Writing Workshop", date: "Tuesday, 22 April 2025" }
-      ]);
-    }
-    setLocalLoading(false);
-  };
-
   // Edit data
   const handleEditData = (room: RoomType) => {
     setValue("title", room.title);
@@ -197,6 +163,12 @@ export default function virtualRooms() {
     setValue("banner_image", room.banner_image);
     setPreviewImage(room.banner_image);
     setEditId(room.id);
+    
+    // Scroll to form
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
   };
 
   // Cancel Edit
@@ -237,11 +209,6 @@ export default function virtualRooms() {
     router.push(`/rooms/${roomId}`);
   };
 
-  // View Adventure Details
-  const handleViewAdventure = (adventureId: number) => {
-    router.push(`/adventures/${adventureId}`);
-  };
-
   // Toggle Sidebar
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
@@ -259,7 +226,7 @@ export default function virtualRooms() {
       <div className={`${styles["main-content"]} ${sidebarOpen ? styles["sidebar-open"] : ''}`}>
         <div className={styles["welcome-section"]}>
           <h3>Welcome, {userProfile.name}!</h3>
-          <h1>Dashboard</h1>
+          <h1>Virtual Rooms</h1>
         </div>
 
         {isLoading ? (
@@ -339,91 +306,55 @@ export default function virtualRooms() {
               </form>
             </div>
 
-            {/* Room List Table */}
-            <div className={`${styles.card} ${styles["room-list-card"]}`}>
-              <h3>Room List</h3>
-              <div className={styles["table-responsive"]}>
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Title</th>
-                      <th>Description</th>
-                      <th>Mantra</th>
-                      <th>Banner</th>
-                      <th>Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {rooms && rooms.length > 0 ? (
-                      rooms.map((room, index) => (
-                        <tr key={index}>
-                          <td>{room.title}</td>
-                          <td className={styles["description-cell"]}>{room.description}</td>
-                          <td>{room.mantra}</td>
-                          <td>
-                            {room.banner_image ? (
-                              <div className={styles["banner-thumbnail"]}>
-                                <img src={room.banner_image} alt="Room Banner" />
-                              </div>
-                            ) : (
-                              "--"
-                            )}
-                          </td>
-                          <td>
-                            <div className={styles["action-buttons"]}>
-                              <button 
-                                className={styles["view-btn"]} 
-                                onClick={() => handleViewRoom(room.id)}
-                              >
-                                View
-                              </button>
-                              <button 
-                                className={styles["edit-btn"]} 
-                                onClick={() => handleEditData(room)}
-                              >
-                                Edit
-                              </button>
-                              <button 
-                                className={styles["delete-btn"]} 
-                                onClick={() => handleDeleteData(room.id)}
-                              >
-                                Delete
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))
-                    ) : (
-                      <tr>
-                        <td colSpan={5} className={styles["no-data"]}>No Rooms found.</td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
-            {/* Previous Adventures Section */}
-            <div className={styles["adventures-section"]}>
-              <h2>Previous Adventures</h2>
-              <div className={styles["adventure-cards"]}>
-                {adventures.map((adventure, index) => (
-                  <div className={styles["adventure-card"]} key={index}>
-                    <div className={styles["card-header"]}>
-                      <span>{adventure.date}</span>
+            {/* Room Cards Section - Replaces Previous Adventures */}
+            <div className={styles["room-cards-section"]}>
+              <h2>Your Virtual Rooms</h2>
+              {rooms && rooms.length > 0 ? (
+                <div className={styles["room-cards"]}>
+                  {rooms.map((room, index) => (
+                    <div className={styles["room-card"]} key={index}>
+                      <div className={styles["room-card-banner"]}>
+                        {room.banner_image ? (
+                          <img src={room.banner_image} alt={room.title} />
+                        ) : (
+                          <div className={styles["room-card-banner-placeholder"]}>
+                            No Image
+                          </div>
+                        )}
+                      </div>
+                      <div className={styles["room-card-content"]}>
+                        <h3 className={styles["room-card-title"]}>{room.title}</h3>
+                        <p className={styles["room-card-description"]}>{room.description}</p>
+                        <p className={styles["room-card-mantra"]}>"{room.mantra}"</p>
+                        <div className={styles["room-card-actions"]}>
+                          <button
+                            className={styles["view-btn"]}
+                            onClick={() => handleViewRoom(room.id)}
+                          >
+                            View
+                          </button>
+                          <button
+                            className={styles["edit-btn"]}
+                            onClick={() => handleEditData(room)}
+                          >
+                            Edit
+                          </button>
+                          <button
+                            className={styles["delete-btn"]}
+                            onClick={() => handleDeleteData(room.id)}
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </div>
                     </div>
-                    <div className={styles["card-body"]}>
-                      <h3>{adventure.title}</h3>
-                      <button 
-                        className={styles["review-btn"]}
-                        onClick={() => handleViewAdventure(adventure.id)}
-                      >
-                        Review
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              ) : (
+                <div className={styles["no-data"]}>
+                  No rooms found. Create your first virtual room!
+                </div>
+              )}
             </div>
           </div>
         )}

@@ -1,11 +1,22 @@
+"use client"
 import Head from 'next/head';
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
 
 // Import the CSS module
 import styles from '../styles/home.module.css'; // Adjusted path for your setup
+import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
+
 
 export default function Home() {
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleRegisterRedirect = () => {
+      setIsLoading(true);
+      router.push("/auth/register");
+  };
   return (
     <>
       <Head>
@@ -14,13 +25,16 @@ export default function Home() {
         <link rel="icon" type="image/png" href="/images/polegionIcon.png" />
       </Head>
 
-      <Navbar />
 
       <div className={styles.container}>
         <header className={styles.header}>
-          <h1 className={styles.headerTitle}>Welcome to GeoPlay</h1>
+          <h1 className={styles.headerTitle}>Welcome to Polegion</h1>
           <p className={styles.headerText}>Your fun and interactive geometry visualizer! Explore math like never before, aligned with your curriculum!</p>
-          <button className={styles.headerButton}>Start Exploring</button>
+          <button 
+            className={styles.headerButton} 
+            onClick={handleRegisterRedirect} 
+            disabled={ isLoading}
+          > { isLoading ? "Loading..." : "Start Exploring"}</button>
         </header>
 
         <section className={styles.customRow}>
@@ -51,7 +65,7 @@ export default function Home() {
         </section>
       </div>
 
-      <Footer />
+      {/* <Footer /> */}
     </>
   );
 }

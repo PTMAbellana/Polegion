@@ -63,9 +63,18 @@ const Navbar = () => {
         }
     };
 
-    const isActive = (path) => {
+    const isActive = (path: string) => {
         return pathname === path;
     };
+
+    // Determine sidebar class based on state
+    const sidebarClass = `
+        ${styles.sidebar} 
+        ${isCollapsed && !isHovering ? styles.collapsed : ''} 
+        ${!isCollapsed || isHovering ? styles.expanded : ''}
+        ${!isCollapsed && isMobile ? styles.open : ''}
+        ${isCollapsed && isMobile ? styles.closed : ''}
+    `;
 
     return (
         <>
@@ -74,6 +83,7 @@ const Navbar = () => {
                 <button 
                     className={`${styles["mobile-toggle-btn"]} ${!isCollapsed ? styles["sidebar-open"] : ''}`}
                     onClick={toggleSidebar}
+                    aria-label="Toggle menu"
                 >
                     {!isCollapsed ? <FaTimes /> : <FaBars />}
                 </button>
@@ -83,20 +93,23 @@ const Navbar = () => {
                 <>
                     {/* Sidebar */}
                     <div 
-                        className={`
-                            ${styles.sidebar} 
-                            ${isCollapsed && !isHovering ? styles.collapsed : styles.expanded}
-                            ${!isCollapsed && isMobile ? styles.open : ''}
-                            ${isCollapsed && isMobile ? styles.closed : ''}
-                        `}
+                        className={sidebarClass}
                         onMouseEnter={handleMouseEnter}
                         onMouseLeave={handleMouseLeave}
                     >
                         <div className={styles["logo-container"]}>
                             {isCollapsed && !isHovering ? (
-                                <div className={styles["logo-icon"]}>P</div>
+                                <img
+                                src="/images/polegionIcon.png"
+                                alt="Polegion Icon"
+                                className={styles["logo-icon"]}
+                                />
                             ) : (
-                                <h2>Polegion</h2>
+                                <img
+                                src="/images/polegionLogoWhite.png"
+                                alt="Polegion Logo"
+                                className={styles["logo-text"]}
+                                />
                             )}
                         </div>
                         <nav className={styles["sidebar-nav"]}>
@@ -113,8 +126,8 @@ const Navbar = () => {
                                         <span className={styles["nav-text"]}>Virtual Rooms</span>
                                     </Link>
                                 </li>
-                                <li className={isActive("/leaderboard") ? styles.active : ""}>
-                                    <Link href="/leaderboard" title="Leaderboard">
+                                <li className={isActive("/auth/leaderboard") ? styles.active : ""}>
+                                    <Link href="/auth/leaderboard" title="Leaderboard">
                                         <FaTrophy className={styles["nav-icon"]} />
                                         <span className={styles["nav-text"]}>Leaderboard</span>
                                     </Link>
@@ -138,7 +151,7 @@ const Navbar = () => {
             ) : (
                 <nav className={styles["public-nav"]}>
                     <div className={styles["logo-container"]}>
-                        <h2>EduVR</h2>
+                        <h2 className={styles["logo-text"]}>Polegion</h2>
                     </div>
                     <ul>
                         <li>
