@@ -1,34 +1,19 @@
 {
-  "name": "supa-next",
-  "version": "0.1.0",
-  "private": true,
+  "name": "polegion",
+  "version": "1.0.0",
+  "main": "index.js",
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "frontend": "cd frontend && npm run dev",
+    "backend": "cd backend && npm run dev",
+    "dev": "concurrently \"npm run backend\" \"npm run frontend\"",
+    "install-all": "npm install && cd frontend && npm install && cd ../backend && npm install"
   },
-  "dependencies": {
-    "@hookform/resolvers": "^5.0.1",
-    "@supabase/supabase-js": "^2.49.4",
-    "bootstrap": "^5.3.5",
-    "lucide-react": "^0.503.0",
-    "next": "15.2.4",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
-    "react-hook-form": "^7.55.0",
-    "react-hot-toast": "^2.5.2",
-    "react-icons": "^5.5.0",
-    "sweetalert2": "^11.17.2",
-    "yup": "^1.6.1"
-  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
   "devDependencies": {
-    "@eslint/eslintrc": "^3",
-    "@types/node": "^20",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
-    "eslint": "^9",
-    "eslint-config-next": "15.2.4",
-    "typescript": "^5"
+    "concurrently": "^9.1.2"
   }
 }
