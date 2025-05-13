@@ -1,0 +1,492 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+.variables {
+  --primary-color: #2C514C;
+  --secondary-color: #122932;
+  --accent-color: #2F3E75;
+  --text-primary: #000000;
+  --text-secondary: #555555;
+  --text-light: #FFFFFF;
+  --border-radius: 20px;
+  --box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  --transition: all 0.3s ease;
+}
+
+.dashboard-container {
+    display: flex;
+    min-height: 100vh;
+    position: relative;
+    composes: variables;
+  }
+  
+
+/* Main Content Styles */
+.main-content {
+  flex: 1;
+  margin-left: 280px;
+  padding: 30px;
+  transition: var(--transition);
+}
+
+.main-content.sidebar-open {
+  margin-left: 280px;
+}
+
+.main-content:not(.sidebar-open) {
+  margin-left: 70px;
+}
+
+
+/* Welcome Section */
+.welcome-section {
+  margin-bottom: 30px;
+  text-align: left;
+}
+
+.welcome-section h3 {
+  font-size: 18px;
+  color: var(--text-secondary);
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
+.welcome-section h1 {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 700;
+  font-size: 48px;
+  line-height: 72px;
+  text-align: left;
+  color: var(--text-primary);
+  margin-bottom: 2rem;
+}
+
+/* Loading Indicator */
+.loading-indicator {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+  font-size: 1.2rem;
+  color: #666;
+}
+
+/* Dashboard Grid Layout */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 30px;
+}
+
+@media (min-width: 992px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr 2fr;
+  }
+}
+
+/* Card Styles */
+.card {
+  background: #FFFFFF;
+  border-radius: var(--border-radius);
+  padding: 25px;
+  box-shadow: var(--box-shadow);
+  margin-bottom: 2rem;
+  border: 1px solid #e0e0e0;
+}
+
+.room-form-card {
+  position: relative;
+  grid-column: 1 / 2;
+}
+
+.card h3 {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 600;
+  font-size: 24px;
+  line-height: 36px;
+  color: var(--text-primary);
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+/* Form Status Label */
+.form-status {
+  position: absolute;
+  top: 2rem;
+  right: 2rem;
+  background: var(--accent-color);
+  color: #000;
+  font-weight: 500;
+  padding: 0.5rem 1.5rem;
+  border-radius: 20px;
+  font-size: 0.9rem;
+}
+
+/* Form Styles */
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: var(--text-primary);
+  font-size: 0.95rem;
+}
+
+.form-control {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #e0e0e0;
+  border-radius: 10px;
+  font-family: 'Poppins';
+  font-size: 1rem;
+  background: #FFFFFF;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-control:focus {
+  border-color: var(--accent-color);
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(250, 188, 96, 0.2);
+}
+
+textarea.form-control {
+  min-height: 100px;
+  resize: vertical;
+}
+
+.form-control.error {
+  border-color: #dc3545;
+}
+
+.error-message {
+  color: #dc3545;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}
+
+/* Banner Image Upload */
+.banner-upload {
+  border: 1px dashed #ccc;
+  border-radius: 8px;
+  background: #f5f5f5;
+  padding: 1.5rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.banner-upload:hover {
+  border-color: var(--accent-color);
+  background: #fafafa;
+}
+
+/* Preview Image */
+.preview-image {
+  margin: 10px 0;
+  text-align: center;
+}
+
+.preview-image img {
+  border-radius: 8px;
+  object-fit: cover;
+  width: 100px;
+  height: 100px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Form Buttons */
+.form-actions {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.submit-btn {
+  background: var(--primary-color);
+  border-radius: 8px;
+  padding: 0.75rem 2rem;
+  color: white;
+  font-family: 'Poppins';
+  font-weight: 500;
+  font-size: 1rem;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  width: auto;
+  min-width: 160px;
+}
+
+.submit-btn:hover {
+    color: black;
+  background: #f9b143;
+}
+
+.submit-btn:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+.cancel-btn {
+  background: transparent;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 0.75rem 2rem;
+  color: #666;
+  font-family: 'Poppins';
+  font-weight: 500;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.cancel-btn:hover {
+  background: #f5f5f5;
+}
+
+/* Room Cards Section - Keeping Original Styles */
+.room-cards-section {
+  grid-column: 1 / -1;
+}
+
+.room-cards-section h2 {
+  font-family: 'Poppins';
+  font-weight: 700;
+  font-size: 32px;
+  margin-bottom: 1.5rem;
+  color: #000000;
+}
+
+.room-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 2rem;
+}
+
+.room-card {
+  background: #FFFFFF;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.room-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+}
+
+.room-card-banner {
+  height: 160px;
+  overflow: hidden;
+  background: #C4C4C4;
+  position: relative;
+}
+
+.room-card-banner img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.room-card-banner-placeholder {
+  width: 100%;
+  height: 100%;
+  background: #e0e0e0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #999;
+}
+
+.room-card-content {
+  padding: 1.5rem;
+}
+
+.room-card-title {
+  font-family: 'Poppins';
+  font-weight: 600;
+  font-size: 1.25rem;
+  margin-bottom: 0.5rem;
+  color: #000;
+}
+
+.room-card-description {
+  font-size: 0.875rem;
+  color: #666;
+  margin-bottom: 1rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.room-card-mantra {
+  font-size: 0.875rem;
+  font-style: italic;
+  color: #555;
+  margin-bottom: 1.25rem;
+}
+
+.room-card-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+/* Button Styles for Room Cards - Kept Original */
+.view-btn, .edit-btn, .delete-btn {
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-family: 'Poppins';
+  font-weight: 500;
+  font-size: 0.875rem;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s;
+  flex: 1;
+  text-align: center;
+}
+
+.view-btn {
+  background: #4CAF50;
+  color: white;
+}
+
+.view-btn:hover {
+  background: #43a047;
+}
+
+.edit-btn {
+  background: #2196F3;
+  color: white;
+}
+
+.edit-btn:hover {
+  background: #1e88e5;
+}
+
+.delete-btn {
+  background: #F44336;
+  color: white;
+}
+
+.delete-btn:hover {
+  background: #e53935;
+}
+
+/* Table Styles from dashboard */
+.table-responsive {
+  overflow-x: auto;
+}
+
+.table-responsive table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table-responsive th, 
+.table-responsive td {
+  padding: 15px;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+}
+
+.table-responsive th {
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.description-cell {
+  max-width: 200px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.banner-thumbnail {
+  width: 60px;
+  height: 60px;
+  overflow: hidden;
+  border-radius: 8px;
+}
+
+.banner-thumbnail img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* No Data Message */
+.no-data {
+  text-align: center;
+  padding: 2rem;
+  color: #666;
+  font-style: italic;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 1200px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .room-form-card {
+    grid-column: 1 / 2;
+  }
+}
+
+@media (max-width: 768px) {
+  .main-content {
+    padding: 20px;
+    margin-left: 0 !important;
+  }
+  
+  .welcome-section h1 {
+    font-size: 36px;
+    line-height: 54px;
+  }
+  
+  .card h3 {
+    font-size: 24px;
+    line-height: 36px;
+  }
+  
+  .form-actions {
+    flex-direction: column;
+  }
+  
+  .submit-btn, .cancel-btn {
+    width: 100%;
+  }
+  
+  .room-cards {
+    grid-template-columns: 1fr;
+  }
+  
+  .action-buttons {
+    flex-direction: column;
+    gap: 5px;
+  }
+}
+
+@media (max-width: 480px) {
+  .welcome-section h1 {
+    font-size: 28px;
+    line-height: 42px;
+  }
+  
+  .room-card-actions {
+    flex-direction: column;
+  }
+  
+  .edit-btn, .delete-btn {
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+}
