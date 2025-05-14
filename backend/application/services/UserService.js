@@ -13,7 +13,8 @@ class UserService {
     
     async updateUserProfile(userData) {
         try {
-            return await this.userRepo.updateUser(token)
+            await this.userRepo.getUserById(userData.token)
+            return await this.userRepo.updateUser(userData)
         } catch (error) {
             throw error
         }

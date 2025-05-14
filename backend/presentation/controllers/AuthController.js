@@ -4,12 +4,14 @@ class AuthController {
     }
 
     loginUser = async (req, res) => {
+        console.log('auth controller')
+        console.log(req.body)
         const { email, password } = req.body
     
         try {
             const data = await this.authService.login(email, password)
     
-            if (error) res.status(400).json({
+            if (!data) res.status(400).json({
                 error: error.message
             })
     
@@ -22,6 +24,8 @@ class AuthController {
     }
     
     registerUser = async (req, res) => {
+        console.log(req.body)
+
         const { 
             email, 
             password, 
@@ -38,8 +42,10 @@ class AuthController {
                 gender,
                 phone
             )
+
+            console.log(data)
     
-            if (error) return res.status(400).json({
+            if (!data) return res.status(400).json({
                 error: error.message
             })
             return res.status(201).json(data)
@@ -59,9 +65,6 @@ class AuthController {
                 `${req.headers.origin}/auth/reset-password`
             )
     
-            if (error) return res.status(400).json({
-                error: error.message
-            })
             return res.status(200).json({
                 message: 'Password reset email sent'
             })
@@ -75,9 +78,6 @@ class AuthController {
     logout = async (req, res) => {
         try {
             await this.authService.logout()
-            if (error) return res.json({
-                error: error.message
-            })
             return res.status(200).json({
                 message: 'Logout successfully'
             })

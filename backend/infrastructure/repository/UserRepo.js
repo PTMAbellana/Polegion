@@ -81,7 +81,7 @@ class UserRepo extends BaseRepo{
             const { 
                 data, 
                 error 
-            } = await supabase.auth.signUp({
+            } = await this.supabase.auth.signUp({
                 email,
                 password,
                 options

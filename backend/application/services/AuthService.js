@@ -11,7 +11,7 @@ class AuthService {
         }
     }
     
-    async register (emai, password, fullName, gender, phone){
+    async register (email, password, fullName, gender, phone){
         try {
             return await this.userRepo.signUp(email, password, {
                 data: {

@@ -21,7 +21,8 @@ class UserController {
             const updateUser = await this.userService.updateUserProfile({
                 fullName,
                 gender,
-                phone
+                phone,
+                token: req.token
             })
             return res.status(200).json(updateUser.toDTO())
         } catch (error) {
