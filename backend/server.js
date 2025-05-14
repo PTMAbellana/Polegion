@@ -3,13 +3,12 @@ const cors = require('cors')
 const bodyParser = require('body-parser')
 require('dotenv').config()
 
+const {
+    authRoutes, userRoutes, roomRoutes
+} = require('./container')
+
 const app = express()
 const PORT = process.env.PORT || 5000
-
-//import routes
-const authRoutes = require('./routes/auth')
-const roomRoutes = require('./routes/rooms')      //later nani
-const userRoutes = require('./routes/users')
 
 //middleware
 app.use(cors())
@@ -17,10 +16,7 @@ app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({
     extended: true
 }))
-// app.use(express.json())
-// app.use(express.urlencoded({
-//     extended: true
-// }))
+
 
 //routes
 app.use('/api/auth', authRoutes)
@@ -36,3 +32,5 @@ app.get('/', (req, res) => {
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`)
 })
+
+module.exports = app
