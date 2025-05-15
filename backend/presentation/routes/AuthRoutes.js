@@ -12,6 +12,7 @@ class AuthRoutes {
         this.router.post('/register', this.authController.registerUser)
         this.router.post('/reset-password', this.authController.resetPassword)
         this.router.post('/logout', this.authController.logout)
+        this.router.post('/refresh-token', this.authController.refreshToken)
     }
 
     getRouter() {

@@ -6,6 +6,21 @@ class UserRepo extends BaseRepo{
         super(supabase)
     }
 
+    async refreshSession(refreshToken) {
+        try {
+            const {
+                data,
+                error
+            } = await this.supabase.auth.refreshSession({
+                refresh_token: refreshToken
+            })
+
+            if (error) throw error
+        } catch (error) {
+            throw error
+        }
+    }
+
     async getUserById(token){
         try {
             const {
@@ -54,6 +69,8 @@ class UserRepo extends BaseRepo{
                 email, 
                 password
             })
+
+            console.log(this.supabase.auth.getSession())
 
             if (error) throw error
             

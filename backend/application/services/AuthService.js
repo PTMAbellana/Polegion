@@ -3,6 +3,21 @@ class AuthService {
         this.userRepo = userRepo
     }
 
+
+    async refreshToken(refreshToken){
+        try {
+            const {
+                data, 
+                error
+            } = await this.userRepo.refreshSession(refreshToken)
+            
+            if (error) throw error
+            return data
+        } catch (error){
+            throw error
+        }
+    }
+
     async login(email, password){
         try {
             return await this.userRepo.signInWithPassword(email, password)

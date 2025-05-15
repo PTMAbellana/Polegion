@@ -3,6 +3,24 @@ class AuthController {
         this.authService = authService
     }
 
+    refreshToken = async (req, res) => {
+        const { refresh_token } = req.body
+
+        if (!refresh_token)
+            return res.status(400).json({
+                error: 'Refresh token is required'
+            })
+
+        try {
+            const data = await this.authService.refreshToken(refresh_token)
+            return res.status(200).json(data)
+        } catch (error) {
+            return res.status(401).json({
+                error: 'Invalid or expired refresh token'
+            })
+        }
+    }
+
     loginUser = async (req, res) => {
         console.log('auth controller')
         console.log(req.body)
