@@ -13,6 +13,7 @@ class AuthRoutes {
         this.router.post('/reset-password', this.authController.resetPassword)
         this.router.post('/logout', this.authController.logout)
         this.router.post('/refresh-token', this.authController.refreshToken)
+        this.router.post('/reset-password/confirm', this.authController.resetPasswordConfirm)
     }
 
     getRouter() {

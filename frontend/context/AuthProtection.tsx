@@ -25,13 +25,13 @@ export function AuthProtection () {
                 const isAuth = await refreshUserSession()
                 console.log("Auth protection check - Path:", pathname, "IsLoggedIn:", isAuth)
     
-                if (
-                    !isAuth && 
-                    !PUBLIC_ROUTES.includes(pathname)
-                ) {
-                    console.log("Redirecting to login: User not logged in and route is protected")
-                    router.push(ROUTES.LOGIN)
-                }
+                // if (
+                //     !isAuth && 
+                //     !PUBLIC_ROUTES.includes(pathname)
+                // ) {
+                //     console.log("Redirecting to login: User not logged in and route is protected")
+                //     router.push(ROUTES.LOGIN)
+                // }
                 
                 if (
                     isAuth && 

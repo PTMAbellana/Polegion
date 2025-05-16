@@ -119,7 +119,7 @@ export default function Dashboard() {
                                                 <div className={styles["room-card-actions"]}>
                                                     <button
                                                         className={styles["view-btn"]}
-                                                        onClick={() => handleViewRoom(room.code || room.id?.toString() || '')}
+                                                        onClick={() => handleViewRoom(room.code || '')}
                                                     >
                                                         View
                                                     </button>

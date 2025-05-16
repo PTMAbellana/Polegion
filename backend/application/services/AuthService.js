@@ -63,6 +63,14 @@ class AuthService {
             throw error
         }
     }
+
+    async resetPasswordWithToken(token, newPassword) {
+        try {
+            return await this.userRepo.updatePasswordWithToken(token, newPassword)
+        } catch (error) {
+            throw error
+        }
+    }
 }
 
 module.exports = AuthService

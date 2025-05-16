@@ -105,6 +105,66 @@ class AuthController {
             })
         }
     }
+
+    resetPasswordConfirm = async (req, res) => {
+
+        // Extract token from query parameters or body
+        let token;
+        
+        // Get token from URL query parameters if it exists there
+        if (req.query && req.query.token) {
+            token = req.query.token;
+        } 
+        // Otherwise get it from request body
+        else if (req.body && req.body.token) {
+            token = req.body.token;
+        }
+        
+        const { password } = req.body;
+
+        if (!token || !password) {
+            return res.status(400).json({
+                error: 'Token and new password are required'
+            });
+        }
+
+        try {
+            const result = await this.authService.resetPasswordWithToken(token, password);
+            
+            return res.status(200).json({
+                message: 'Password reset successfully'
+            });
+        } catch (error) {
+            console.error('Password reset error in controller:', error);
+            
+            return res.status(401).json({
+                error: 'Invalid or expired reset token'
+            });
+        }
+
+        // console.error('req', req)
+        // console.error('res', res)
+        // const { token, password } = req.body
+
+        // if (!token || !password) {
+        //     return res.status(400).json({
+        //         error: 'Token and new password are required'
+        //     })
+        // }
+
+        // try {
+        //     const result = await this.authService.resetPasswordWithToken(token, password)
+        //     console.log('result ', result)
+        //     return res.status(200).json({
+        //         message: 'Password reset successfully'
+        //     })
+        // } catch (error) {
+        //     console.error(error)
+        //     return res.status(401).json({
+        //         error: 'Invalid or expired reset token'
+        //     })
+        // }
+    }
 }
 
 
