@@ -12,22 +12,44 @@ class AuthMiddleware {
         ){
             try{
                 token = req.headers.authorization.split(' ')[1]
+
+                if (!token) {
+                    return res.status(401).json({
+                        error: 'Not authorized, token is empty'
+                    })
+                }
     
                 const user = await this.authService.validateToken(token)
+
+                if (!user) {
+                    return res.status(401).json({
+                        error: 'Not authorized, invalid token'
+                    })
+                }
     
                 req.user = user
                 req.token = token
     
                 next()
             } catch (error) {
-                console.error(error)
+                console.error('Middleware error: ',error)
+                
+                if (error.message === 'User not found or token invalid') {
+                    return res.status(401).json({
+                        error: 'Not authorized, invalid token'
+                    })
+                }
+                
+                if (error.code === 'UND_ERR_CONNECT_TIMEOUT') {
+                    return res.status(503).json({
+                        error: 'Authentication service temporarily unavailable'
+                    })
+                }
                 res.status(401).json({
                     error: 'Not authorized, token failed'
                 })
             }
-        }
-    
-        if (!token) res.status(401).json({
+        } else res.status(401).json({
             error: 'Not authorized, no token'
         })
     }

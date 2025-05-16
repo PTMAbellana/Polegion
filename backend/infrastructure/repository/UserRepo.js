@@ -16,6 +16,7 @@ class UserRepo extends BaseRepo{
             })
 
             if (error) throw error
+            return data
         } catch (error) {
             throw error
         }
@@ -70,7 +71,7 @@ class UserRepo extends BaseRepo{
                 password
             })
 
-            console.log(this.supabase.auth.getSession())
+            // console.log(this.supabase.auth.getSession())
 
             if (error) throw error
             
@@ -82,12 +83,15 @@ class UserRepo extends BaseRepo{
     
     async resetPassword (email, redirectUrl){
         try {
-            const { error } = await this.supabase.auth.resetPasswordForEmail(email,{
-                redirectTo: redirectUrl
-            })
+            const { data, error } = await this.supabase.auth.resetPasswordForEmail(
+                email,
+                {
+                    redirectTo: redirectUrl
+                }
+            )
             
             if (error) throw error
-            return true
+            return data
         } catch (error) {
             throw error
         }

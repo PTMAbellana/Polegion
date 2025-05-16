@@ -8,8 +8,13 @@ import toast from "react-hot-toast";
 import { FaHome, FaDoorOpen, FaTrophy, FaUser, FaSignOutAlt, FaBars, FaTimes } from 'react-icons/fa';
 import styles from '@/styles/navbar.module.css';
 
+import { ROUTES } from '@/constants/routes'
+
 const Navbar = () => {
-    const { isLoggedIn, setIsLoggedIn, setAuthToken, setUserProfile } = myAppHook();
+    const { 
+        isLoggedIn, 
+        logout: contextLogout 
+    } = myAppHook();
     const router = useRouter();
     const pathname = usePathname();
     const [isCollapsed, setIsCollapsed] = useState(true);
@@ -33,22 +38,19 @@ const Navbar = () => {
     }, []);
 
     const handleLogout = async () => {
+        console.log('clicked 0')
         try{
-            const response = await logout()
-            if (
-                response.data.session?.access_token &&
-                response.data.session?.access_profile
-            ) {
-                localStorage.removeItem("access_token")
-                localStorage.removeItem("access_profile")
-                setIsLoggedIn(false)
-                setAuthToken(null)
-                setUserProfile(null)
-                toast.success("Logged out successfully")
-                router.push("/auth/login")
-            }
+            await logout()
+            contextLogout()
+            
+            toast.success("Logged out successfully")
+            router.push(ROUTES.LOGIN)
+            
         } catch (error){
-            toast.error('Failed to logout')
+            console.log('Logout error: ', error)
+            contextLogout()
+            toast.error('Error during logout, session cleared')
+            router.push(ROUTES.LOGIN)
         }
     };
 
@@ -119,26 +121,26 @@ const Navbar = () => {
                         </div>
                         <nav className={styles["sidebar-nav"]}>
                             <ul>
-                                <li className={isActive("/dashboard") ? styles.active : ""}>
-                                    <Link href="/dashboard" title="Home">
+                                <li className={isActive(ROUTES.DASHBOARD) ? styles.active : ""}>
+                                    <Link href={ROUTES.DASHBOARD} title="Home">
                                         <FaHome className={styles["nav-icon"]} />
                                         <span className={styles["nav-text"]}>Home</span>
                                     </Link>
                                 </li>
-                                <li className={isActive("/virtualRooms") ? styles.active : ""}>
-                                    <Link href="/virtualRooms" title="Virtual Rooms">
+                                <li className={isActive(ROUTES.VIRTUAL_ROOMS) ? styles.active : ""}>
+                                    <Link href={ROUTES.VIRTUAL_ROOMS} title="Virtual Rooms">
                                         <FaDoorOpen className={styles["nav-icon"]} />
                                         <span className={styles["nav-text"]}>Virtual Rooms</span>
                                     </Link>
                                 </li>
-                                <li className={isActive("/leaderboard") ? styles.active : ""}>
-                                    <Link href="/leaderboard" title="Leaderboard">
+                                <li className={isActive(ROUTES.LEADERBOARD) ? styles.active : ""}>
+                                    <Link href={ROUTES.LEADERBOARD} title="Leaderboard">
                                         <FaTrophy className={styles["nav-icon"]} />
                                         <span className={styles["nav-text"]}>Leaderboard</span>
                                     </Link>
                                 </li>
-                                <li className={isActive("/profile") ? styles.active : ""}>
-                                    <Link href="/profile" title="Profile">
+                                <li className={isActive(ROUTES.PROFILE) ? styles.active : ""}>
+                                    <Link href={ROUTES.PROFILE} title="Profile">
                                         <FaUser className={styles["nav-icon"]} />
                                         <span className={styles["nav-text"]}>Profile</span>
                                     </Link>
@@ -160,10 +162,10 @@ const Navbar = () => {
                     </div>
                     <ul>
                         <li>
-                            <Link href="/">Home</Link>
+                            <Link href={ROUTES.HOME}>Home</Link>
                         </li>
                         <li>
-                            <Link href="/auth/login">Login</Link>
+                            <Link href={ROUTES.LOGIN}>Login</Link>
                         </li>
                     </ul>
                 </nav>

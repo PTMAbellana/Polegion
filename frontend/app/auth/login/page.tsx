@@ -1,51 +1,61 @@
 "use client"
-import Loader from "@/components/Loader";
-import Head from "next/head";
+import Loader from "@/components/Loader"
+import { myAppHook } from "@/context/AppUtils"
+import { login, resetPassword } from "@/lib/apiService"
+import { yupResolver } from "@hookform/resolvers/yup"
+import Head from "next/head"
+import { useRouter } from "next/navigation"
+import { useEffect, useState } from "react"
+import { useForm } from "react-hook-form"
+import toast from "react-hot-toast"
+import * as yup from "yup"
 
 import styles from '@/styles/login.module.css'
-import { FcGoogle } from "react-icons/fc";
-import { FaEye, FaEyeSlash, FaGithub, FaTimes } from "react-icons/fa";
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { FaEye, FaEyeSlash, FaGithub, FaTimes } from "react-icons/fa"
+import { FcGoogle } from "react-icons/fc"
 
-import * as yup from "yup"
-import { myAppHook } from "@/context/AppUtils";
-import { useForm } from "react-hook-form";
-import { yupResolver } from "@hookform/resolvers/yup";
+import { ROUTES } from '@/constants/routes'
 
-import { login } from '@/lib/apiService'
-import toast from "react-hot-toast";
+interface LoginFormData {
+    email: string
+    password: string
+}
+
+interface ForgotPasswordFormData {
+    email: string
+}
 
 const formSchema = yup.object().shape({
-    email: yup.string().required("Email is required").email("Invalid email address"),
-    password: yup.string().required("Password is required")
+    email: yup.string().required('Email is required').email('Invalid email address'),
+    password: yup.string().required('Password is required')
 })
 
 const forgotPasswordSchema = yup.object().shape({
-    email: yup.string().required("Email is required").email("Invalid email address")
+    email: yup.string().required('Email is required').email('Invalid email address')
 })
 
 export default function Login() {
     const router = useRouter()
-    
-    const { 
-        isLoggedIn, 
-        setIsLoggedIn, 
-        setAuthToken, 
-        setUserProfile 
-    } = myAppHook()
-    
-    const [ showPassword, setShowPassword ] = useState(false)
-    const [ rememberMe, setRememberMe ] = useState(false)
-    const [ showForgotPasswordModal, setShowForgotPasswordModal ] = useState(false)
-    const [resetPasswordSubmitting, setResetPasswordSubmitting] = useState(false);
 
-    useEffect( () => {
-        if (isLoggedIn) {
-            router.push("/dashboard")
-            return
-        }
-    }, [isLoggedIn, router])
+    const {
+        isLoggedIn,
+        setIsLoggedIn,
+        setAuthToken,
+        setUserProfile,
+        refreshUserSession,
+        userProfile
+    } = myAppHook()
+
+    const [showPassword, setShowPassword] = useState(false) 
+    const [rememberMe, setRememberMe] = useState(false)
+    const [showForgotPasswordModal, setShowForgotPasswordModal] = useState(false)
+    const [resetPasswordSubmitting, setResetPasswordSubmitting] = useState(false)
+
+    useEffect (() => {
+        refreshUserSession()
+
+        if (isLoggedIn) router.push(ROUTES.DASHBOARD)
+    }, [isLoggedIn, router, refreshUserSession])
 
     const {
         register,
@@ -54,78 +64,103 @@ export default function Login() {
             isSubmitting,
             errors
         }
-    } = useForm({
-        resolver: yupResolver(formSchema)
+    } = useForm<LoginFormData>({
+        resolver:yupResolver(formSchema)
     })
 
     const {
         register: registerForgotPassword,
-        handleSubmit: handleForgotPasswordSubmit, 
+        handleSubmit: handleForgotPasswordSubmit,
         formState: {
             errors: forgotPasswordErrors
-        }
-    } = useForm({
+        },
+        reset: resetForgotPasswordForm
+    } = useForm<ForgotPasswordFormData>({
         resolver: yupResolver(forgotPasswordSchema)
     })
 
-    const handleSocialOauth = async (provider: "google" | "github") => {
-        console.log('google or github')
-        // todo:
-        //      server side of signin with authentication (google | github)
+    const handleSocialOauth = async (provider: 'google' | 'github') => {
+        toast.error(`${provider} authentication not implemented yet`)
     }
 
-    const onSubmit = async (formdata: any) => {
+    const onSubmit = async (formdata: LoginFormData) => {
         try {
-            const { email, password } = formdata
-            const response = await login(email,password)
+            const {
+                email,
+                password
+            } = formdata
+            const response = await login(email, password)
 
-            if (response.data.session?.access_token) {
+            if (response?.data?.session?.access_token) {
                 setAuthToken(response.data.session.access_token)
-                localStorage.setItem("access_token", response.data.session.access_token)
-                
-                if (rememberMe) localStorage.setItem("remember_user", "true")
-            }
-            setIsLoggedIn(true)
 
-            // there's something at the metro ka talaga! 
-            // pero k nalang
-            setUserProfile({
-                name: response.data.session.user?.user_metadata.fullName,
-                email: response.data.session.user?.user_metadata.email,
-                gender: response.data.session.user?.user_metadata.gender,
-                phone: response.data.session.user?.user_metadata.phone,
-            })
-        } catch (error) {
-            toast.error("An error occurred during login");
+                if (rememberMe) localStorage.setItem('remember_user', 'true')
+                
+                if (response.data.user) {
+                    setUserProfile({
+                        id: response.data.user.id,
+                        email: response.data.user.email,
+                        fullName: response.data.user.user_metadata?.fullName,
+                        gender: response.data.user.user_metadata?.gender,
+                        phone: response.data.user.user_metadata?.phone
+                    })
+                }
+
+                setIsLoggedIn(true)
+                console.log(isLoggedIn)
+                console.log(userProfile)
+                toast.success('Login successful!')
+                router.push(ROUTES.DASHBOARD)
+            } else toast.error('Invalid login response')
+        } catch (error : any) {
+            console.error('Login error: ', error)
+            toast.error(
+                error?.response?.data?.message ||
+                'An error occured during login' 
+            )
         }
     }
 
     const handleRegisterRedirect = () => {
-        router.push("/auth/register");
-    };
-
-    const togglePasswordVisibility = () => {
-        setShowPassword(!showPassword);
-    };
-
-    const handleForgotPassword = () => {
-        setShowForgotPasswordModal(true);
-    };
-
-    const handleCloseModal = () => {
-        setShowForgotPasswordModal(false);
-    };
-
-    const onForgotPasswordSubmit = async (formdata: any) => {
-        console.log('forgot password ohno!')
+        router.push(ROUTES.REGISTER)
     }
 
-    useEffect( () => {
+    const togglePasswordVisibility = () => {
+        setShowPassword(!showPassword)
+    }
+
+    const handleForgotPassword = () => {
+        setShowForgotPasswordModal(true)
+    }
+
+    const handleCloseModal = () => {
+        setShowForgotPasswordModal(false)
+        resetForgotPasswordForm()
+    }
+
+    const onForgotPasswordSubmit = async (formdata: ForgotPasswordFormData) => {
+        try {
+            setResetPasswordSubmitting(true)
+            await resetPassword(formdata.email)
+            toast.success('Password reset link sent to your email')
+            handleCloseModal()
+        } catch (error : any) {
+            console.error('Reset password error: ', error)
+            toast.error(
+                error?.response?.data?.message || 
+                'Failed to send reset link'
+            )
+        } finally {
+            setResetPasswordSubmitting(false)
+        }
+    }
+
+    useEffect(() => {
         if (showForgotPasswordModal) document.body.style.overflow = 'hidden'
-        else document.body.style.overflow = 'unset'
+        else  document.body.style.overflow = 'unset'
 
         return () => {
-            document.body.style.overflow = 'unset'
+             document.body.style.overflow = 'unset'
         }
     }, [showForgotPasswordModal])
 
@@ -138,7 +173,7 @@ export default function Login() {
             <div className={styles.loginPage}>
                 <div className={styles.loginCard}>
                     <div className={styles.cardContent}>
-                    {isSubmitting ? <Loader /> : ""}
+                    {isSubmitting && <Loader />}
                     {/* Logo */}
                         <div className={styles.logoContainer}>
                             <img 
@@ -159,7 +194,7 @@ export default function Login() {
                                     placeholder="Enter your email"
                                     {...register("email")} 
                                 />
-                                {errors.email && <p className={styles.error}>{errors.email.message?.toString()}</p>}
+                                {errors.email && <p className={styles.error}>{errors.email.message}</p>}
                             </div>
 
                             <div className={styles.formGroup}>
@@ -178,7 +213,7 @@ export default function Login() {
                                         {showPassword ? <FaEyeSlash size={20} /> : <FaEye size={20} />}
                                     </button>
                                 </div>
-                                {errors.password && <p className={styles.error}>{errors.password.message?.toString()}</p>}
+                                {errors.password && <p className={styles.error}>{errors.password.message}</p>}
                             </div>
 
                             <div className={styles.rememberForgot}>
@@ -266,7 +301,7 @@ export default function Login() {
                                     {...registerForgotPassword("email")} 
                                 />
                                 {forgotPasswordErrors.email && 
-                                    <p className={styles.error}>{forgotPasswordErrors.email.message?.toString()}</p>
+                                    <p className={styles.error}>{forgotPasswordErrors.email.message}</p>
                                 }
                             </div>
                             
@@ -288,4 +323,5 @@ export default function Login() {
             )}
         </>
     )
+
 }

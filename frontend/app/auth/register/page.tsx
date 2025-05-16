@@ -7,6 +7,7 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { FaEye, FaEyeSlash, FaGithub } from 'react-icons/fa'
 import { FcGoogle } from 'react-icons/fc'
+import { ROUTES } from '@/constants/routes'
 
 // as registerUser kay naa nay builtin na register function
 import { register as registerUser } from '@/lib/apiService' 
@@ -43,15 +44,16 @@ export default function Register() {
             const response = await registerUser(formdata)
             if (response) {
                 toast.success("User registered successfully")
-                router.push('/auth/login')
+                router.push(ROUTES.LOGIN)
             } else toast.error("Failed to register user")
         } catch (error) {
+            console.error(error)
             toast.error("An error occured during registration")
         }
     }
 
     const handleLoginRedirect = () => {
-        router.push("/auth/login")
+        router.push(ROUTES.LOGIN)
     }
 
     const handleSocialOauth = async (provider: 'google' | 'github') => {
