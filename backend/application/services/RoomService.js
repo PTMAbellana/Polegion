@@ -13,15 +13,27 @@ class RoomService {
         }
     }
 
-    async getRoom (roomId, userId){
+    async getRoomById (roomId, userId){
         try {
             return await this.roomRepo.getRoomId(roomId, userId)
         } catch (error) {
             throw error
         }
     }
+
+    async getRoomByCode (roomCode, userId){
+        console.log(roomCode)
+        try {
+            console.log('natawag ko')
+            const res = await this.roomRepo.getRoomByCode(roomCode, userId)
+            console.log(res)
+            return res
+        } catch (error) {
+            throw error
+        }
+    }
     
-    async createRoom (title, description, mantra, bannerImage, userId){
+    async createRoom (title, description, mantra, bannerImage, userId, code){
         try {
             const newRoom = new roomModel (
                 null,
@@ -29,7 +41,8 @@ class RoomService {
                 description,
                 mantra,
                 bannerImage,
-                userId
+                userId,
+                code
             )
             return await this.roomRepo.createRoom(newRoom)
         } catch (error) {
@@ -45,7 +58,8 @@ class RoomService {
                 description,
                 mantra,
                 bannerImage,
-                userId
+                userId,
+                null
             )
             return await this.roomRepo.updateRoom(roomId, userId, ur)
         } catch (error) {

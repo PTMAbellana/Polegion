@@ -33,14 +33,29 @@ export default function Dashboard() {
             isLoggedIn 
             && !authLoading
         ) {
+            console.log('current user: ', userProfile)
             fetchRooms()
         } else {
             console.log('Dashboard: user not logged in yet, waiting for auth')
+            // Show full page loader while auth is being checked
+            if (authLoading) fullLoader()
+            // If auth check is complete but user is not logged in, let AuthProtection handle redirect
+            if (!isLoggedIn) fullLoader()
         }
+
     }, [
         isLoggedIn,
         authLoading
     ])
+
+    const fullLoader = () => {
+        console.log('Dashboard: Auth is still loading')
+        return (
+            <div className={styles["loading-container"]}>
+                <Loader/>
+            </div>
+        )
+    }
 
     const fetchRooms = async () => {
         try {
@@ -61,26 +76,6 @@ export default function Dashboard() {
 
     const handleViewRoom = (roomId: string) => {
         router.push(`/virtual-rooms/${roomId}`)
-    }
-
-    // Show full page loader while auth is being checked
-    if (authLoading) {
-        console.log('Dashboard: Auth is still loading')
-        return (
-            <div className={styles["loading-container"]}>
-                <Loader/>
-            </div>
-        )
-    }
-
-    // If auth check is complete but user is not logged in, let AuthProtection handle redirect
-    if (!isLoggedIn) {
-        console.log('Dashboard: User is not logged in')
-        return (
-            <div className={styles["loading-container"]}>
-                <Loader/>
-            </div>
-        )
     }
 
     return (

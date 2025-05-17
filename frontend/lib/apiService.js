@@ -179,9 +179,6 @@ export const resetPassword = async (email) => {
     })
 }
 
-// teka ende ko alam pano mag logout TTOTT
-// pero ok ramn ang backend ani
-// so why? hmm
 export const logout = async () => {
     try {
         const response = await api.post('/auth/logout')
@@ -228,11 +225,17 @@ export const updateUserProfile = async (profileData) => {
 
 // export mga rooms api 
 export const getRooms = async () => {
-    return await api.get('/rooms')
+    const res = await api.get('/rooms')
+    console.log('from api getrooms: ', res)
+    return res
 }
 
-export const getRoom = async (id) => {
-    return await api.get(`/rooms/${id}`)
+export const getRoomById = async (id) => {
+    return await api.get(`/rooms/id/${id}`)
+}
+
+export const getRoomByCode = async (code) => {
+    return await api.get(`/rooms/code/${code}`)
 }
 
 export const createRoom = async (roomData) => {
@@ -240,11 +243,11 @@ export const createRoom = async (roomData) => {
 }
 
 export const updateRoom = async (id, roomData) => {
-    return await api.put(`/rooms/${id}`, roomData)
+    return await api.put(`/rooms/id/${id}`, roomData)
 }
 
 export const deleteRoom = async (id) => {
-    return await api.delete(`/rooms/${id}`)
+    return await api.delete(`/rooms/id/${id}`)
 }
 
 export const uploadImage = async (file) => {

@@ -16,10 +16,13 @@ class RoomRoutes {
         .get(this.roomController.getRooms)
         .post(this.roomController.createRoom);
     
-    this.router.route('/:id')
-        .get(this.roomController.getRoom)
+    this.router.route('/id/:id')
+        .get(this.roomController.getRoomById)
         .put(this.roomController.updateRoom)
         .delete(this.roomController.deleteRoom);
+    
+    this.router.route('/code/:code')
+      .get(this.roomController.getRoomByCode)
     
     this.router.post('/upload', this.roomController.uploadBannerImage);
   }

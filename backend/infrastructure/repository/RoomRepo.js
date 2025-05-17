@@ -18,6 +18,8 @@ class RoomRepo extends BaseRepo {
             .eq('user_id', userId)
             .order('created_at', { ascending: false } )
 
+            console.log('room data ', data)
+
             if (error) throw error
             return data.map( room => roomModel.fromDbRoom(room) )
         } catch (error) {
@@ -33,6 +35,28 @@ class RoomRepo extends BaseRepo {
             } = await this.supabase.from(this.tableName)
             .select('*')
             .eq('id', roomId)
+            .eq('user_id', userId)
+            .single()
+
+            console.log(`room id: ${roomId} data: ${data}`)
+    
+            if (error) throw error
+            if (!data) throw new Error('Room not found')
+            return roomModel.fromDbRoom(data)
+        } catch (error) {
+            throw error
+        }    
+    }
+
+    async getRoomByCode(roomCode, userId){
+        console.log( 'room repo ', roomCode)
+        try {
+            const {
+                data,
+                error
+            } = await this.supabase.from(this.tableName)
+            .select('*')
+            .eq('code', roomCode)
             .eq('user_id', userId)
             .single()
     
@@ -106,7 +130,8 @@ class RoomRepo extends BaseRepo {
             const {
                 data,
                 error
-            } = await this.supabase.storage.from(this.tableName)
+            } = await this.supabase.storage
+            // .from(this.tableName)
             .from(this.storageBucket)
             .upload(fileName, fileBuffer, {
                 contentType: mimeType
