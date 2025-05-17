@@ -77,7 +77,7 @@ export const AppUtilsProvider = ({ children }: { children: React.ReactNode }) =>
                     if (pr?.data){
                         console.log('Fresh profile data received: ' , pr.data)
                         setUserProfile(pr.data)
-
+                        // console.log(userProfile)
                         const updateUser = {
                             ...authData.user,
                             ...pr.data

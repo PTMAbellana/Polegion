@@ -31,15 +31,15 @@ export default function Dashboard() {
         // Only fetch rooms when authentication is confirmed
         if (
             isLoggedIn 
-            // && !authLoading
+            && !authLoading
         ) {
             fetchRooms()
         } else {
             console.log('Dashboard: user not logged in yet, waiting for auth')
         }
     }, [
-        isLoggedIn
-        // authLoading
+        isLoggedIn,
+        authLoading
     ])
 
     const fetchRooms = async () => {
