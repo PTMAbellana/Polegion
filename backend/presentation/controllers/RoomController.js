@@ -6,7 +6,9 @@ class RoomController {
     // Get all rooms for a user
     getRooms = async (req, res) => {
         try {
-            const rooms = await this.roomService.getRooms(req.user.id)
+            console.log('get roms get user ', req.user)
+            console.log( 'getRooms ', req.user.id)
+            const rooms = await this.roomService.getRooms(req.user.user.id)
             
             if (!rooms) return res.status(400).json({ error: error.message });
             
@@ -47,14 +49,71 @@ class RoomController {
             res.status(500).json({ error: 'Server error fetching room' });
         }
     };
+
+
+    getAllRoomCodes = async (req, res) => {
+        console.log('getAllRoomCodes called');
+        console.log('Room codes requests ', req)
+        console.log('Request method:', req.method);
+        console.log('Request body:', req.body);
+        console.log('Request query:', req.query);
+        
+        const { code } = req.body;
+        
+        if (!code) {
+            console.log('No code provided in request body');
+            return res.status(400).json({
+                error: 'Room code is required'
+            });
+        }
+        
+        try {
+            console.log(`Checking uniqueness for code: ${code}`);
+            const codeExists = await this.roomService.getAllRoomCodes(code);
+            console.log(`Code exists result: ${codeExists}`);
+            
+            if (codeExists) {
+                return res.status(409).json({
+                    error: 'Room code already exists',
+                    unique: false
+                });
+            }
+            
+            return res.status(200).json({
+                message: 'Room code is unique',
+                unique: true
+            });
+        } catch (error) {
+            console.error('Error checking room code:', error);
+            console.error('Error stack:', error.stack);
+            res.status(500).json({ error: 'Server error checking room code' });
+        }
+    }
+
+    // getAllRoomCodes = async (req, res) => {
+    //     const { code } = req.body
+    //     try {
+    //         const exist = await this.roomService.getAllRoomCodes(code)
+    //         if (exist) return res.status(409).json({
+    //             error: 'Room already exists'
+    //         })
+    //         return res.status(200).json({
+    //             success: 'Room Code Unique'
+    //         })
+    //     } catch (error) {
+    //         res.status(500).json({ error: 'Server error get all room code' });
+    //     }
+    // };
     
     // Create a room
     createRoom = async (req, res) => {
+        console.log('create room request' , req)
         const { 
             title, 
             description, 
             mantra, 
-            banner_image 
+            banner_image,
+            code
         } = req.body;
         
         try {
@@ -63,7 +122,8 @@ class RoomController {
                 description, 
                 mantra, 
                 banner_image, 
-                req.user.id
+                req.user.id,
+                code
             )
             
             if (!room) return res.status(400).json({ error: error.message });

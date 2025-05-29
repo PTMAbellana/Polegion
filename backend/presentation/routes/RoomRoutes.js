@@ -25,6 +25,9 @@ class RoomRoutes {
       .get(this.roomController.getRoomByCode)
     
     this.router.post('/upload', this.roomController.uploadBannerImage);
+    
+    this.router.route('/room-codes')
+    .get(this.roomController.getAllRoomCodes)
   }
 
   getRouter(){

@@ -8,8 +8,88 @@ class RoomRepo extends BaseRepo {
         this.storageBucket = 'room-images'
     }
 
+    async generateRoomCode(length = 6) {
+        // Use letters and numbers, excluding similar-looking characters
+        const characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ123456789';
+        let result = '';
+        
+        for (let i = 0; i < length; i++) {
+            result += characters.charAt(Math.floor(Math.random() * characters.length));
+        }
+        
+        return result;
+    }
+
+    async createCode () {
+        let isUnique = false;
+        let newCode = "";
+        
+        while (!isUnique) {
+            newCode = generateRoomCode();
+            
+            console.log(newCode)
+
+            try {
+                const { data, error } = await supabase
+                .from("rooms")
+                .select("code")
+                .eq("code", newCode);
+                
+            if (error) {
+                console.error("Error checking room code:", error);
+                toast.error("Failed to generate room code");
+                return null;
+            }
+            
+            // If no data returned, code is unique
+            if (data.length === 0) {
+                isUnique = true;
+            }
+ 
+            } catch (error){
+                throw error
+            }
+
+            // // Check if code exists in database
+            // const { data, error } = await supabase
+            //     .from("rooms")
+            //     .select("code")
+            //     .eq("code", newCode);
+                
+            // if (error) {
+            //     console.error("Error checking room code:", error);
+            //     toast.error("Failed to generate room code");
+            //     return null;
+            // }
+            
+            // // If no data returned, code is unique
+            // if (data.length === 0) {
+            //     isUnique = true;
+            // }
+        }
+    }
+
+    async getAllRoomCodes (code) {
+        try {
+            const{
+                data, 
+                error
+            } = await this.supabase.from(this.tableName)
+            .select('*')
+            .eq('code', code)
+
+            if (error) throw error
+            // return data
+            console.log('room codes ', data)
+            return data && data.length > 0
+        } catch (error) {
+            throw error
+        }
+    }
+
     async getAllRooms(userId){
         try {
+            console.log('get all rooms userid ', userId)
             const {
                 data,
                 error
@@ -69,6 +149,8 @@ class RoomRepo extends BaseRepo {
     }
     
     async createRoom(room){
+        // const code = this.createCode()
+        
         try {
             const {
                 data,

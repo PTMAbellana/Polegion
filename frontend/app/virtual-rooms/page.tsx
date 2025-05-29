@@ -3,8 +3,9 @@ import Loader from '@/components/Loader'
 import { ROUTES } from '@/constants/routes'
 import { myAppHook } from '@/context/AppUtils'
 import { AuthProtection } from '@/context/AuthProtection'
-import { getRooms } from '@/lib/apiService'
-import styles from '@/styles/dashboard.module.css'
+import { createRoom, getAllRoomCodes, getRooms } from '@/lib/apiService'
+// import styles from '@/styles/dashboard.module.css'
+import styles from '@/styles/room.module.css'
 import { yupResolver } from '@hookform/resolvers/yup'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
@@ -100,31 +101,89 @@ export default function VirtualRooms() {
     const createUniqueRoomCode = async () => {
         let isUnique = false;
         let newCode = "";
+        let attempts = 0;
+        const maxAttempts = 20; // Prevent infinite loops
         
-        while (!isUnique) {
+        while (!isUnique && attempts < maxAttempts) {
             newCode = generateRoomCode();
+            attempts++;
             
-            console.log(newCode)
-            // // Check if code exists in database
-            // const { data, error } = await supabase
-            //     .from("rooms")
-            //     .select("code")
-            //     .eq("code", newCode);
+            console.log(`Checking code: ${newCode} (attempt ${attempts})`);
+
+            try {
+                const response = await getAllRoomCodes(newCode);
+                console.log('Room code check response:', response);
                 
-            // if (error) {
-            //     console.error("Error checking room code:", error);
-            //     toast.error("Failed to generate room code");
-            //     return null;
-            // }
-            
-            // // If no data returned, code is unique
-            // if (data.length === 0) {
-            //     isUnique = true;
-            // }
+                // Check if the response indicates the code is unique
+                if (response && response.data && response.data.unique === true) {
+                    isUnique = true;
+                    console.log(`Unique code found: ${newCode}`);
+                    return newCode;
+                } else {
+                    console.log(`Code ${newCode} already exists, generating new one...`);
+                    isUnique = false;
+                }
+            } catch (error) {
+                // If we get a 409 status (conflict), it means code exists
+                if (error.response && error.response.status === 409) {
+                    console.log(`Code ${newCode} already exists (409 response)`);
+                    isUnique = false;
+                } else {
+                    console.error('Error checking room code:', error);
+                    throw error;
+                }
+            }
         }
-        isUnique = true
+        
+        if (attempts >= maxAttempts) {
+            throw new Error('Failed to generate unique room code after maximum attempts');
+        }
+        
         return newCode;
     }
+
+    // const createUniqueRoomCode = async () => {
+    //     let isUnique = false;
+    //     let newCode = "";
+        
+    //     while (!isUnique) {
+    //         newCode = generateRoomCode();
+            
+    //         console.log(newCode)
+
+    //         try {
+    //             const res = await getAllRoomCodes(newCode)
+    //             console.log(res)
+    //             if (res) {
+
+    //                 isUnique = true
+    //                 return newCode;
+    //             } else {
+    //                 isUnique = false
+    //             }
+ 
+    //         } catch (error){
+    //             throw error
+    //         }
+
+    //         // // Check if code exists in database
+    //         // const { data, error } = await supabase
+    //         //     .from("rooms")
+    //         //     .select("code")
+    //         //     .eq("code", newCode);
+                
+    //         // if (error) {
+    //         //     console.error("Error checking room code:", error);
+    //         //     toast.error("Failed to generate room code");
+    //         //     return null;
+    //         // }
+            
+    //         // // If no data returned, code is unique
+    //         // if (data.length === 0) {
+    //         //     isUnique = true;
+    //         // }
+    //     }
+    // }
 
     const uploadImageFile = async (file: File) => {
         const fileExtension = file.name.split(".").pop();
@@ -185,6 +244,36 @@ export default function VirtualRooms() {
                 setLocalLoading(false);
                 return;
             }
+
+            const {
+                title,
+                description,
+                mantra
+            } = formData
+
+            const data = {
+                title: title,
+                description: description,
+                mantra: mantra,
+                banner_image: imagePath
+            }
+
+            try {
+                const res = await createRoom({
+                    data
+                })
+                console.log(res)
+                // toast.success('Room created successfully')
+                Swal.fire({
+                title: "Room Created!",
+                html: `Your room join code is: <strong>${newRoomCode}</strong><br/>Share this code with others to let them join your room.`,
+                icon: "success",
+                confirmButtonText: "Got it!"
+                });
+            } catch (error){
+                toast.error('Create room failed')
+                throw error
+            }
         
             // const { data, error } = await supabase.from("rooms").insert({
             //     ...formData,
@@ -199,12 +288,6 @@ export default function VirtualRooms() {
             // } else {
             //     toast.success("Successfully Created Room!");
             //     // Show the join code to the user
-            //     Swal.fire({
-            //     title: "Room Created!",
-            //     html: `Your room join code is: <strong>${newRoomCode}</strong><br/>Share this code with others to let them join your room.`,
-            //     icon: "success",
-            //     confirmButtonText: "Got it!"
-            //     });
             // }
             reset();
         }

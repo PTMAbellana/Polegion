@@ -32,6 +32,16 @@ class RoomService {
             throw error
         }
     }
+
+    async getAllRoomCodes (code) {
+        try {
+            const res = await this.roomRepo.getAllRoomCodes(code)
+            return res
+        } catch (error) {
+            throw error;
+            
+        }
+    }
     
     async createRoom (title, description, mantra, bannerImage, userId, code){
         try {

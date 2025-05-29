@@ -141,29 +141,72 @@ class AuthController {
                 error: 'Invalid or expired reset token'
             });
         }
+    }
 
-        // console.error('req', req)
-        // console.error('res', res)
-        // const { token, password } = req.body
+    signInWithOAuth = async (req, res) => {
+        const { provider } = req.body
+        
+        if (!provider) return res.status(400).json({
+            error: 'Provider is required'
+        })
 
-        // if (!token || !password) {
-        //     return res.status(400).json({
-        //         error: 'Token and new password are required'
-        //     })
-        // }
+        try {
+            const redirectUrl = `${req.headers.origin}/auth/callback`
+            // const redirectUrl = `${req.headers.origin}/dashboard`
+            // console.log(redirectUrl)
+            const data = await this.authService.signInWithOAuth(provider, redirectUrl)
+            console.log(data.url)
+            return res.status(200).json(data)
+        } catch (error) {
+            console.error('OAuth login/register error: ', error)
+            return res.status(500).json({
+                error: 'Server error during OAuth login/register'
+            })
+        }
 
-        // try {
-        //     const result = await this.authService.resetPasswordWithToken(token, password)
-        //     console.log('result ', result)
-        //     return res.status(200).json({
-        //         message: 'Password reset successfully'
-        //     })
-        // } catch (error) {
-        //     console.error(error)
-        //     return res.status(401).json({
-        //         error: 'Invalid or expired reset token'
-        //     })
-        // }
+    }
+    
+    handleOAuthCallback = async (req, res) => {
+        console.log('request',req)
+        // console.log(req.query)
+        const { code } = req.query
+        
+        if (!code) return res.status(400).json({
+            error: 'Authorization code is required'
+        })
+
+        try {
+            const data = await this.authService.handleOAuthCallback(code)
+            console.log('OAuth callback', data)
+            return res.status(200).json(data)
+        } catch (error) {
+            console.error('OAuth callback error: ', error)
+            return res.status(500).json({
+                error: 'Server error during OAuth callback'
+            })
+        }
+    }
+
+    verifyUser = async (req, res) => {
+        console.log( 'request params', req.params)
+        console.log('request body', req.body)
+        const { access_token } = req.body
+        if (!access_token) return res.status(400).json({
+            error: 'Missing required tokens'
+        })
+        try {
+            const data = await this.authService.validateToken(access_token)
+            console.log('data ', data)
+            return res.status(200).json({
+                data
+                // token: access_token
+            })
+        } catch (error) {
+            console.log('Verify User Error: ', error)
+            return res.status(500).json({
+                error: 'Internal server error in verifying user'
+            })
+        }
     }
 }
 

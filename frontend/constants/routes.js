@@ -6,12 +6,15 @@ export const ROUTES = {
     DASHBOARD: '/dashboard',
     VIRTUAL_ROOMS: '/virtual-rooms',
     LEADERBOARD: '/leaderboard',
-    PROFILE: '/profile'
+    PROFILE: '/profile',
+
+    OAUTH_CALLBACK: '/auth/callback'
 }
 
 export const PUBLIC_ROUTES = [
     ROUTES.HOME,
     ROUTES.LOGIN,
     ROUTES.REGISTER,
-    ROUTES.RESET_PASSWORD
+    ROUTES.RESET_PASSWORD,
+    ROUTES.OAUTH_CALLBACK
 ]

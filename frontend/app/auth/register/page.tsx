@@ -10,7 +10,7 @@ import { FcGoogle } from 'react-icons/fc'
 import { ROUTES } from '@/constants/routes'
 
 // as registerUser kay naa nay builtin na register function
-import { register as registerUser } from '@/lib/apiService' 
+import { register as registerUser, signInWithOAuth } from '@/lib/apiService' 
 
 import * as yup from "yup"
 import toast from 'react-hot-toast'
@@ -57,8 +57,23 @@ export default function Register() {
     }
 
     const handleSocialOauth = async (provider: 'google' | 'github') => {
-        console.log('is clicked! from register: ' + provider)
         // todo: server side ani niya
+        try {
+            console.log('is clicked! from register: ' + provider)
+            const response = await signInWithOAuth(provider)
+
+            if (response.data && response.data.url) { 
+                window.location.href = response.data.url
+                // console.log(response.data.url)
+            }
+            else {
+                console.error('No redirect URL received')
+                toast.error('Failed to initialize OAuth register')
+            }
+        } catch (error) {
+            console.log('OAuth error: ', error) 
+            toast.error(`Failed to login via ${provider.charAt(0).toUpperCase() + provider.slice(1)}`)
+        }
     }
 
     const togglePasswordVisibility = (field: 'password' | 'confirm') => {

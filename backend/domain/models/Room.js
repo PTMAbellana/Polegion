@@ -1,5 +1,5 @@
 class Room {
-    constructor(id, title, description, mantra, banner_image, userId, create_at = new Date(), code){
+    constructor(id, title, description, mantra, banner_image, userId, create_at = new Date(), code, visibility = 'public'){
         this.id = id
         this.title = title
         this.description = description
@@ -8,6 +8,7 @@ class Room {
         this.userId = userId
         this.create_at = create_at
         this.code = code
+        this.visibility = visibility
     }
 
     static fromDbRoom (roomData){
@@ -19,7 +20,8 @@ class Room {
             roomData.banner_image,
             roomData.userId,
             roomData.create_at,
-            roomData.code   
+            roomData.code,
+            roomData.visibility   
         )
     }
 
@@ -30,7 +32,8 @@ class Room {
             mantra: this.mantra, 
             banner_image: this.banner_image,
             userId: this.userId,
-            code: this.code
+            code: this.code,
+            visibility: this.visibility
         }
     }
 
@@ -43,7 +46,8 @@ class Room {
             banner_image: this.banner_image,
             userId: this.userId,
             create_at: this.create_at,
-            code: this.code
+            code: this.code,
+            visibility: this.visibility
         }
     }
 }

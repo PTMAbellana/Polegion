@@ -12,7 +12,7 @@ class User {
         return new User (
             supabaseUser.id,
             supabaseUser.email,
-            supabaseUser.user_metadata?.fullName || 'User',
+            supabaseUser.user_metadata?.fullName || supabaseUser.user_metadata?.full_name || 'User',
             supabaseUser.user_metadata?.gender || '',
             supabaseUser.user_metadata?.phone || ''
         )

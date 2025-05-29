@@ -58,7 +58,9 @@ class AuthService {
     
     async validateToken (token){
         try {
-            return await this.userRepo.getUserById(token)
+            const res= await this.userRepo.getUserById(token)
+            console.log('result ', res)
+            return res
         } catch (error) { 
             throw error
         }
@@ -69,6 +71,22 @@ class AuthService {
             return await this.userRepo.updatePasswordWithToken(token, newPassword)
         } catch (error) {
             throw error
+        }
+    }
+
+    async signInWithOAuth (provider, redirectUrl) {
+        try {
+            return await this.userRepo.signInWithOAuth(provider, redirectUrl)
+        } catch (error){
+            throw error
+        }
+    }
+
+    async handleOAuthCallback (code) {
+        try {
+            return await this.userRepo.handleOAuthCallback(code)
+        } catch (error) {
+            throw error 
         }
     }
 }

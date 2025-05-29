@@ -14,6 +14,7 @@ const authUtils = {
                 localStorage.setItem('expires_at', new Date(authData.session.expires_at).getTime().toString())
             } else {
                 const defaultExpiry = Date.now() + (24 * 60 * 60 * 1000);
+                console.log('default expire: ', defaultExpiry)
                 localStorage.setItem('expires_at', defaultExpiry.toString());
                 console.error("Warning: `expires_at` is missing in authData!")
             }
@@ -61,7 +62,7 @@ const api = axios.create({
     headers:{
         'Content-Type' : 'application/json'
     },
-    timeout: 10000
+    timeout: 8640000
 })
 
 api.interceptors.request.use(
@@ -199,6 +200,46 @@ export const getCurrentUser = () => {
     return authUtils.getAuthData().user
 }
 
+export const signInWithOAuth = async (provider) => {
+    try {
+        const response = await api.post('/auth/oauth', {
+            provider
+        })
+        authUtils.saveAuthData(response.data)
+        return response
+    } catch (error) {
+        throw error
+    }
+}
+
+export const handleOAuthCallback = async (code) => {
+    try {
+        const response = await api.post('/auth/oauth/callback', {
+            code
+        })
+        if (response.data){
+            authUtils.saveAuthData(response.data)
+            return response
+        } else throw new Error ('Invalid response from OAuth callback')
+    } catch (error) {
+        throw error
+    }
+}
+
+export const verifyUser = async (access_token) => {
+    try {
+        const response = await api.post('/auth/oauth/verify-user', {
+            access_token
+        })
+        if (response.data){
+            authUtils.saveAuthData(response.data)
+            return response
+        } else throw new Error ('Invalid response from OAuth verify user')
+    } catch (error) {
+        throw error
+    }
+}
+
 // user api
 export const getUserProfile = async () => {
     return await api.get('/users/profile')
@@ -225,10 +266,13 @@ export const updateUserProfile = async (profileData) => {
 
 // export mga rooms api 
 export const getRooms = async () => {
+    console.log('tawag')
     const res = await api.get('/rooms')
     console.log('from api getrooms: ', res)
     return res
 }
+
+
 
 export const getRoomById = async (id) => {
     return await api.get(`/rooms/id/${id}`)
@@ -237,6 +281,10 @@ export const getRoomById = async (id) => {
 export const getRoomByCode = async (code) => {
     return await api.get(`/rooms/code/${code}`)
 }
+
+export const getAllRoomCodes = async (code) => {
+    return await api.get(`/rooms/room-codes`, {code})
+} 
 
 export const createRoom = async (roomData) => {
     return await api.post('/rooms', roomData)

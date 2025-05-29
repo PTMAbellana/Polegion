@@ -1,6 +1,7 @@
 const BaseRepo = require('./BaseRepo')
 const userModel = require('../../domain/models/User')
 const jwt = require('jsonwebtoken')
+const { options } = require('../../server')
 
 class UserRepo extends BaseRepo{
     constructor(supabase){
@@ -24,18 +25,20 @@ class UserRepo extends BaseRepo{
     }
 
     async getUserById(token){
+        console.log('token', token)
         try {
             const {
                 data,
                 error
             } = await this.supabase.auth.getUser(token)
-            
+            console.log('data ', data)
             if (
                 error ||
                 !data.user
             ) throw new Error ("User not found or token invalid")
             
-            return userModel.fromDbUser(data.user)
+            // return userModel.fromDbUser(data)
+            return data
         } catch (error) {
             throw error
         }
@@ -71,6 +74,8 @@ class UserRepo extends BaseRepo{
                 email, 
                 password
             })
+
+            console.log('login data', data)
 
             // console.log(this.supabase.auth.getSession())
 
@@ -161,60 +166,38 @@ class UserRepo extends BaseRepo{
             }
     }
 
-    // async updatePasswordWithToken(token, newPassword) {
-    //     try {
-    //         // Verify token first
-    //         // const { data: userData, error: userError } = await this.supabase.auth.getUser(token)
-            
-    //         // console.error('userrespo data', userData)
-    //         // console.error('userrespo data.user', userData.user)
-    //         // console.error('userrespo error', userError)
+    async signInWithOAuth(provider, redirectUrl) {
+        try {
+            const {
+                data,
+                error
+            } = await this.supabase.auth.signInWithOAuth({
+                provider
+                // options:{
+                //     redirectTo: redirectUrl
+                // }
+            })
 
-    //         // if (userError || !userData.user) {
-    //         //     throw new Error('Invalid or expired reset token')
-    //         // }
+            if (error) throw error
+            return data
+        } catch (error) {
+            throw error
+        }
+    }
 
-    //         // const { data: sessionData, error: sessionError } = await this.supabase.auth.setSession({
-    //         //     access_token: token
-    //         // })
+    async handleOAuthCallback(code){
+        try {
+            const {
+                data,
+                error
+            } = await this.supabase.auth.exchangeCodeForSession(code)
 
-    //         // console.log('sessionData ', sessionData)
-
-    //         // if (sessionError || !sessionData.session) {
-    //         //     throw new Error('Failed to authenticate with token')
-    //         // }
-
-    //         console.log('token ', token)
-    //         const { data: sessionData, error: verifyError } = await this.supabase.auth.verifyOtp({
-    //             token,
-    //             type: 'recovery'
-    //         })
-
-    //         console.error('sessionData ', sessionData)
-
-    //         if (verifyError || !sessionData.session) {
-    //             throw new Error('Invalid or expired reset token')
-    //         }
-
-    //         // Update password
-    //         const { data, error } = await this.supabase.auth.updateUser({
-    //             password: newPassword
-    //         })
-
-    //         console.error('data ', data)
-    //         console.error('error ', error)
-
-    //         if (error) throw error
-
-    //         // return userModel.fromDbUser(data.user)
-    //         return {
-    //             user: data.user, 
-    //             message: 'Password updated successfully'
-    //         }
-    //     } catch (error) {
-    //         throw error
-    //     }
-    // }
+            if (error) throw error
+            return data
+        } catch (error) {
+            throw error
+        }
+    }
 }
 
 module.exports = UserRepo
