@@ -3,7 +3,7 @@ import Loader from '@/components/Loader'
 import { myAppHook } from '@/context/AppUtils'
 import { AuthProtection } from '@/context/AuthProtection'
 import { getRoomByCode } from '@/lib/apiService'
-import styles from '@/styles/room.module.css'
+import styles from '@/styles/room-competition.module.css'
 import { use, useEffect, useState } from 'react'
 
 interface Room{
@@ -72,108 +72,153 @@ export default function RoomDetail({ params } : { params  : Promise<{roomCode : 
     return (
         <div className={styles["dashboard-container"]}>
             {/* Header Section */}
-            <div className={styles["header-section"]}>
-                <div className={styles["welcome-text"]}>
-                    <h1>Room Details</h1>
-                    <p>Viewing room: {roomCode.roomCode}</p>
+            <div className={styles["room-header"]}>
+                <div className={styles["room-header-content"]}>
+                    <div className={styles["room-title-section"]}>
+                        <h1 className={styles["room-title"]}>{roomDetails.title}</h1>
+                        <div className={styles["room-code-display"]}>
+                            Room Code: <span>{roomDetails.code}</span>
+                        </div>
+                    </div>
+                    <div className={styles["room-actions"]}>
+                        <button className={styles["share-btn"]}>
+                            <span className={styles["share-icon"]}>📤</span>
+                            Share Room
+                        </button>
+                        <button className={styles["edit-room-btn"]}>
+                            <span className={styles["edit-icon"]}>✏️</span>
+                            Edit Room
+                        </button>
+                    </div>
                 </div>
             </div>
 
-            {/* Main Content */}
-            <div className={styles["main-content"]}>
-                <div className={styles["dashboard-grid"]}>
-                    {/* Room Detail Card */}
-                    <div className={styles["card"]}>
-                        <div className={styles["room-card-banner"]}>
+            {/* Main Content Grid */}
+            <div className={styles["room-content"]}>
+                {/* Left Column */}
+                <div className={styles["left-column"]}>
+                    {/* Room Banner */}
+                    <div className={styles["room-banner-section"]}>
+                        <div className={styles["room-banner"]}>
                             {roomDetails.banner_image ? (
                                 <img 
                                     src={typeof roomDetails.banner_image === 'string' ? roomDetails.banner_image : ''} 
                                     alt={roomDetails.title}
+                                    className={styles["banner-image"]}
                                 />
                             ) : (
-                                <div className={styles["room-card-banner-placeholder"]}>
-                                    No Image Available
+                                <div className={styles["banner-placeholder"]}>
+                                    <div className={styles["placeholder-icon"]}>🖼️</div>
+                                    <span>No Banner Image</span>
                                 </div>
                             )}
                         </div>
-                        
-                        <div className={styles["room-card-content"]}>
-                            <h3 className={styles["room-card-title"]}>{roomDetails.title}</h3>
-                            
-                            <div className={styles["room-code"]}>
-                                Room Code: {roomDetails.code}
+                    </div>
+
+                    {/* Room Description */}
+                    <div className={styles["room-info-card"]}>
+                        <h3>About This Room</h3>
+                        <div className={styles["room-description"]}>
+                            {roomDetails.description}
+                        </div>
+                        <div className={styles["room-mantra"]}>
+                            <div className={styles["mantra-label"]}>Room Mantra:</div>
+                            <div className={styles["mantra-text"]}>"{roomDetails.mantra}"</div>
+                        </div>
+                    </div>
+
+                    {/* Problems Section */}
+                    <div className={styles["problems-card"]}>
+                        <div className={styles["section-header"]}>
+                            <h3>Problems</h3>
+                            <button className={styles["add-btn"]}>+ Add Problem</button>
+                        </div>
+                        <div className={styles["problems-list"]}>
+                            <div className={styles["empty-state"]}>
+                                <div className={styles["empty-icon"]}>❓</div>
+                                <p>No problems added yet</p>
+                                <span>Start by adding your first problem to discuss</span>
                             </div>
-                            
-                            <div className={styles["form-group"]}>
-                                <label>Description:</label>
-                                <div className={styles["room-card-description"]}>
-                                    {roomDetails.description}
+                        </div>
+                    </div>
+                </div>
+
+                {/* Right Column */}
+                <div className={styles["right-column"]}>
+                    {/* Participants Section */}
+                    <div className={styles["participants-card"]}>
+                        <div className={styles["section-header"]}>
+                            <h3>Participants</h3>
+                            <div className={styles["participants-count"]}>0 members</div>
+                        </div>
+                        <div className={styles["participants-list"]}>
+                            <div className={styles["empty-state"]}>
+                                <div className={styles["empty-icon"]}>👥</div>
+                                <p>No participants yet</p>
+                                <span>Invite people to join this room</span>
+                            </div>
+                        </div>
+                        <div className={styles["invite-section"]}>
+                            <button className={styles["invite-btn"]}>
+                                <span className={styles["invite-icon"]}>✉️</span>
+                                Invite Participants
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Room Settings */}
+                    <div className={styles["settings-card"]}>
+                        <h3>Room Settings</h3>
+                        <div className={styles["settings-list"]}>
+                            <div className={styles["setting-item"]}>
+                                <span className={styles["setting-label"]}>Room Code</span>
+                                <div className={styles["setting-value"]}>
+                                    <span>{roomDetails.code}</span>
+                                    <button 
+                                        className={styles["copy-btn"]}
+                                        onClick={() => {
+                                            navigator.clipboard.writeText(roomDetails.code)
+                                            alert('Room code copied to clipboard!')
+                                        }}
+                                    >
+                                        📋
+                                    </button>
                                 </div>
                             </div>
-                            
-                            <div className={styles["form-group"]}>
-                                <label>Mantra:</label>
-                                <div className={styles["room-card-mantra"]}>
-                                    "{roomDetails.mantra}"
+                            <div className={styles["setting-item"]}>
+                                <span className={styles["setting-label"]}>Room Link</span>
+                                <div className={styles["setting-value"]}>
+                                    <button 
+                                        className={styles["copy-btn"]}
+                                        onClick={() => {
+                                            const url = window.location.href
+                                            navigator.clipboard.writeText(url)
+                                            alert('Room link copied to clipboard!')
+                                        }}
+                                    >
+                                        🔗 Copy Link
+                                    </button>
                                 </div>
-                            </div>
-                            
-                            <div className={styles["room-card-actions"]}>
-                                <button 
-                                    className={styles["edit-btn"]}
-                                    onClick={() => {
-                                        // Add edit functionality here
-                                        console.log('Edit room:', roomDetails.code)
-                                    }}
-                                >
-                                    Edit Room
-                                </button>
-                                <button 
-                                    className={styles["view-btn"]}
-                                    onClick={() => {
-                                        // Add join/enter room functionality here
-                                        console.log('Enter room:', roomDetails.code)
-                                    }}
-                                >
-                                    Enter Room
-                                </button>
                             </div>
                         </div>
                     </div>
 
-                    {/* Additional Information Card */}
-                    <div className={styles["card"]}>
-                        <h3>Room Information</h3>
-                        <div className={styles["form-group"]}>
-                            <label>Room Code:</label>
-                            <div className={styles["form-control"]} style={{background: '#f8f9fa', cursor: 'text'}}>
-                                {roomDetails.code}
-                            </div>
-                        </div>
-                        
-                        <div className={styles["form-group"]}>
-                            <label>Share this room:</label>
-                            <div className={styles["form-actions"]}>
-                                <button 
-                                    className={styles["submit-btn"]}
-                                    onClick={() => {
-                                        navigator.clipboard.writeText(roomDetails.code)
-                                        alert('Room code copied to clipboard!')
-                                    }}
-                                >
-                                    Copy Room Code
-                                </button>
-                                <button 
-                                    className={styles["cancel-btn"]}
-                                    onClick={() => {
-                                        const url = window.location.href
-                                        navigator.clipboard.writeText(url)
-                                        alert('Room link copied to clipboard!')
-                                    }}
-                                >
-                                    Copy Room Link
-                                </button>
-                            </div>
+                    {/* Quick Actions */}
+                    <div className={styles["quick-actions-card"]}>
+                        <h3>Quick Actions</h3>
+                        <div className={styles["action-buttons"]}>
+                            <button className={styles["action-btn", "primary"]}>
+                                <span className={styles["action-icon"]}>🚀</span>
+                                Start Session
+                            </button>
+                            <button className={styles["action-btn", "secondary"]}>
+                                <span className={styles["action-icon"]}>📊</span>
+                                View Analytics
+                            </button>
+                            <button className={styles["action-btn", "secondary"]}>
+                                <span className={styles["action-icon"]}>⚙️</span>
+                                Room Settings
+                            </button>
                         </div>
                     </div>
                 </div>
