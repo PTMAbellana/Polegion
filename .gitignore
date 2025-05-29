@@ -1,42 +1,65 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+# Dependencies
+node_modules/
+backend/node_modules/
+frontend/node_modules/
 
-# dependencies
-*/node_modules
-/.pnp
-.pnp.*
-.yarn/*
-!.yarn/patches
-!.yarn/plugins
-!.yarn/releases
-!.yarn/versions
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+backend/.env
+backend/.env.local
+frontend/.env
+frontend/.env.local
 
-# testing
-coverage
+# Build outputs
+build/
+dist/
+frontend/build/
+frontend/dist/
+backend/build/
+backend/dist/
 
-# next.js
-*/.next/
-*/out/
-
-# production
-*/build
-
-# misc
-.DS_Store
-*.pem
-
-# debug
+# Logs
+*.log
+logs/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-.pnpm-debug.log*
 
-# env files (can opt-in for committing if needed)
-.env*
-.env
+# Runtime data
+*.pid
+*.seed
+*.pid.lock
 
-# vercel
-.vercel
+# Coverage
+coverage/
 
-# typescript
-*.tsbuildinfo
-frontend/next-env.d.ts
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+Thumbs.db
+ehthumbs.db
+
+# ESLint cache
+.eslintcache
+
+# Next.js (if using)
+.next/
+out/
+
+# Nuxt.js (if using)
+.nuxt/
+
+# Temporary folders
+tmp/
+temp/

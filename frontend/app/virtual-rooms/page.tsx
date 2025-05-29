@@ -3,8 +3,8 @@ import Loader from '@/components/Loader'
 import { ROUTES } from '@/constants/routes'
 import { myAppHook } from '@/context/AppUtils'
 import { AuthProtection } from '@/context/AuthProtection'
-import { getRooms } from '@/lib/apiService'
-import styles from '@/styles/dashboard.module.css'
+import { createRoom, updateRoom, getRooms } from '@/lib/apiService'
+import styles from '@/styles/room.module.css'
 import { yupResolver } from '@hookform/resolvers/yup'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
@@ -30,6 +30,10 @@ interface EditCreateFormData {
     banner_image?: string | File | null
 }
 
+interface JoinRoomFormData {
+    roomCode: string
+}
+
 function generateRoomCode(length = 6) {
   // Use letters and numbers, excluding similar-looking characters
   const characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ123456789';
@@ -42,11 +46,14 @@ function generateRoomCode(length = 6) {
   return result;
 }
 
-
 const formSchema = yup.object().shape({
   title: yup.string().required("Room title is required"),
   description: yup.string().required("Room description is required"),
   mantra: yup.string().required("Room mantra is required")
+})
+
+const joinRoomSchema = yup.object().shape({
+  roomCode: yup.string().required("Room code is required").min(6, "Room code must be at least 6 characters")
 })
 
 export default function VirtualRooms() {
@@ -58,6 +65,7 @@ export default function VirtualRooms() {
     const [ roomId, setRoomId ] = useState(null)
     const [ previewImage, setPreviewImage ] = useState(undefined)
     const [ isLocalLoading, setLocalLoading ] = useState(false)
+    const [ showJoinModal, setShowJoinModal ] = useState(false)
 
     useEffect(() => {
         console.log('isLoggedin ', isLoggedIn)
@@ -81,9 +89,9 @@ export default function VirtualRooms() {
         )
     }
 
-    const fetchRoomsFromTable = async (userId: string | undefined) => {
-        console.log(userId)
-        if (!userId) toast.error('No current user')
+    const fetchRoomsFromTable = async (user_id: string | undefined) => {
+        console.log(user_id)
+        if (!user_id) toast.error('No current user')
         try {
             setLocalLoading(true)
             const response = await getRooms()
@@ -103,39 +111,16 @@ export default function VirtualRooms() {
         
         while (!isUnique) {
             newCode = generateRoomCode();
-            
             console.log(newCode)
-            // // Check if code exists in database
-            // const { data, error } = await supabase
-            //     .from("rooms")
-            //     .select("code")
-            //     .eq("code", newCode);
-                
-            // if (error) {
-            //     console.error("Error checking room code:", error);
-            //     toast.error("Failed to generate room code");
-            //     return null;
-            // }
-            
-            // // If no data returned, code is unique
-            // if (data.length === 0) {
-            //     isUnique = true;
-            // }
+            // Check if code exists in database would go here
+            isUnique = true
         }
-        isUnique = true
         return newCode;
     }
 
     const uploadImageFile = async (file: File) => {
         const fileExtension = file.name.split(".").pop();
         const fileName = `${Date.now()}.${fileExtension}`;
-
-        // const { data, error } = await supabase.storage.from("room-images").upload(fileName, file);
-        // if (error) {
-        //     toast.error("Failed to upload banner image");
-        //     return null;
-        // }
-        // return supabase.storage.from("room-images").getPublicUrl(fileName).data.publicUrl;
         return fileName
     }
 
@@ -151,6 +136,58 @@ export default function VirtualRooms() {
         resolver: yupResolver(formSchema)
     })
 
+    const { 
+        register: registerJoin, 
+        reset: resetJoin, 
+        handleSubmit: handleSubmitJoin, 
+        formState: { 
+            errors: errorsJoin 
+        }
+    } = useForm<JoinRoomFormData>({
+        resolver: yupResolver(joinRoomSchema)
+    })
+
+    // const onFormSubmit = async (formData: any) => {
+    //     setLocalLoading(true);
+    //     let imagePath = formData.banner_image;
+
+    //     if (formData.banner_image instanceof File) {
+    //         imagePath = await uploadImageFile(formData.banner_image);
+    //         if (!imagePath) {
+    //             setLocalLoading(false);
+    //             return;
+    //         }
+    //     }
+
+    //     if (roomId) {
+    //         // Update room logic would go here
+    //         console.log('Update room with:', formData)
+    //     } else {
+    //         // Generate unique room code for new rooms
+    //         const newRoomCode = await createUniqueRoomCode();
+    //         if (!newRoomCode) {
+    //             setLocalLoading(false);
+    //             return;
+    //         }
+            
+    //         console.log('Create new room with:', { ...formData, code: newRoomCode })
+            
+    //         // Show the join code to the user
+    //         Swal.fire({
+    //             title: "Room Created!",
+    //             html: `Your room join code is: <strong>${newRoomCode}</strong><br/>Share this code with others to let them join your room.`,
+    //             icon: "success",
+    //             confirmButtonText: "Got it!"
+    //         });
+            
+    //         reset();
+    //     }
+
+    //     setPreviewImage(undefined);
+    //     fetchRoomsFromTable(userProfile?.id);
+    //     setLocalLoading(false);
+    // };
+    // Replace your existing onFormSubmit function with this:
     const onFormSubmit = async (formData: any) => {
         setLocalLoading(true);
         let imagePath = formData.banner_image;
@@ -163,56 +200,84 @@ export default function VirtualRooms() {
             }
         }
 
-        if (roomId) {
-            // const { data, error } = await supabase.from("rooms").update({
-            //     ...formData,
-            //     banner_image: imagePath
-            // }).match({
-            //     id: editId,
-            //     user_id: userId
-            // });
-
-            // if (error) {
-            //     toast.error("Failed to update room data");
-            // } else {
-            //     toast.success("Room has been updated successfully");
-            //     setRoomId(null);
-            // }
-        } else {
-        // Generate unique room code for new rooms
-            const newRoomCode = await createUniqueRoomCode();
-            if (!newRoomCode) {
-                setLocalLoading(false);
-                return;
+        try {
+            if (roomId) {
+                // UPDATE ROOM
+                const updatePayload = {
+                    title: formData.title,
+                    description: formData.description,
+                    mantra: formData.mantra,
+                    banner_image: imagePath
+                };
+                
+                console.log('Updating room with:', updatePayload);
+                await updateRoom(roomId, updatePayload);
+                
+                toast.success('Room updated successfully!');
+                reset();
+                setRoomId(null);
+            } else {
+                // CREATE NEW ROOM
+                const newRoomCode = await createUniqueRoomCode();
+                if (!newRoomCode) {
+                    setLocalLoading(false);
+                    return;
+                }
+                
+                const createPayload = {
+                    title: formData.title,
+                    description: formData.description,
+                    mantra: formData.mantra,
+                    banner_image: imagePath,
+                    code: newRoomCode
+                };
+                
+                console.log('Creating room with:', createPayload);
+                
+                // ✅ ACTUALLY CALL THE API TO CREATE THE ROOM
+                const response = await createRoom(createPayload);
+                console.log('Room created successfully:', response.data);
+                
+                // Show success message with room code
+                Swal.fire({
+                    title: "Room Created!",
+                    html: `Your room join code is: <strong>${newRoomCode}</strong><br/>Share this code with others to let them join your room.`,
+                    icon: "success",
+                    confirmButtonText: "Got it!"
+                });
+                
+                reset();
             }
-        
-            // const { data, error } = await supabase.from("rooms").insert({
-            //     ...formData,
-            //     user_id: userId,
-            //     banner_image: imagePath,
-            //     code: newRoomCode
-            // });
-        
-            // if (error) {
-            //     console.error("Insert error:", error);
-            //     toast.error("Failed to Create Room");
-            // } else {
-            //     toast.success("Successfully Created Room!");
-            //     // Show the join code to the user
-            //     Swal.fire({
-            //     title: "Room Created!",
-            //     html: `Your room join code is: <strong>${newRoomCode}</strong><br/>Share this code with others to let them join your room.`,
-            //     icon: "success",
-            //     confirmButtonText: "Got it!"
-            //     });
-            // }
-            reset();
-        }
 
-        setPreviewImage(undefined);
-        fetchRoomsFromTable(userProfile?.id);
-        setLocalLoading(false);
+            // Reset form state
+            setPreviewImage(undefined);
+            
+            // Refresh the rooms list
+            await fetchRoomsFromTable(userProfile?.id);
+            
+        } catch (error) {
+            console.error('Error with room operation:', error);
+            
+            // Show appropriate error message
+            if (roomId) {
+                toast.error('Failed to update room. Please try again.');
+            } else {
+                toast.error('Failed to create room. Please try again.');
+            }
+        } finally {
+            setLocalLoading(false);
+        }
     };
+
+    const onJoinRoomSubmit = async (formData: JoinRoomFormData) => {
+        console.log('Attempting to join room with code:', formData.roomCode)
+        // Here you would validate the room code and join the room
+        toast.success(`Joining room with code: ${formData.roomCode}`)
+        setShowJoinModal(false)
+        resetJoin()
+        // Navigate to room
+        router.push(`${ROUTES.VIRTUAL_ROOMS}/${formData.roomCode}`)
+    }
 
     const handleViewRoom = (roomCode: string | undefined, roomId: number | undefined) => {
         console.log('view code ', roomCode)
@@ -255,27 +320,85 @@ export default function VirtualRooms() {
                 if (result.isConfirmed) {
                     console.log('perform delete room here')
                     console.log('trying to delete: ', roomId)
-                    // const { data, error } = await supabase.from("rooms").delete().match({
-                    //     id: roomId,
-                    //     user_id: userProfile?.id
-                    // });
-                    // if (error) {
-                    //     toast.error("Failed to delete room.");
-                    // } else {
-                    //     toast.success("Room deleted successfully.");
-                    //     fetchRoomsFromTable(userProfile?.id);
-                    // }
+                    // Delete logic would go here
                 }
         })
     }
 
     return (
         <div className={styles['dashboard-container']}>
-            <div className={styles["main-content"]}>
-                <div className={styles["welcome-section"]}>
-                    <h1>Virtual Rooms</h1>
+            {/* Header Section */}
+            <div className={styles["header-section"]}>
+                <div className={styles["user-avatar"]}>
+                    <span className={styles["avatar-letter"]}>
+                        {userProfile?.fullName?.charAt(0)?.toUpperCase() || 'J'}
+                    </span>
                 </div>
+                <div className={styles["welcome-text"]}>
+                    <h1>Hello there, {userProfile?.fullName || 'John Doe'}</h1>
+                    <p>Let your imagination run wild!</p>
+                </div>
+                <div className={styles["search-section"]}>
+                    <span>Search</span>
+                    <div className={styles["search-icon"]}>🔍</div>
+                </div>
+            </div>
 
+            {/* Action Buttons Section */}
+            <div className={styles["action-buttons-section"]}>
+                <button 
+                    className={styles["action-button"]}
+                    onClick={() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' })}
+                >
+                    <div className={styles["button-icon"]}>➕</div>
+                    <span>Create a Virtual Room</span>
+                </button>
+                <button 
+                    className={styles["action-button"]}
+                    onClick={() => setShowJoinModal(true)}
+                >
+                    <div className={styles["button-icon"]}>🔑</div>
+                    <span>Join a Virtual Room</span>
+                </button>
+            </div>
+
+            {/* Join Room Modal */}
+            {showJoinModal && (
+                <div className={styles["modal-overlay"]} onClick={() => setShowJoinModal(false)}>
+                    <div className={styles["modal-content"]} onClick={(e) => e.stopPropagation()}>
+                        <h3>Join Virtual Room</h3>
+                        <form onSubmit={handleSubmitJoin(onJoinRoomSubmit)}>
+                            <div className={styles["form-group"]}>
+                                <label>Room Code</label>
+                                <input 
+                                    type="text" 
+                                    placeholder="Enter room code"
+                                    className={`${styles["form-control"]} ${errorsJoin.roomCode ? styles.error : ''}`} 
+                                    {...registerJoin("roomCode")}
+                                />
+                                {errorsJoin.roomCode && <small className={styles["error-message"]}>{errorsJoin.roomCode.message}</small>}
+                            </div>
+                            <div className={styles["modal-actions"]}>
+                                <button 
+                                    type="button" 
+                                    className={styles["cancel-btn"]}
+                                    onClick={() => setShowJoinModal(false)}
+                                >
+                                    Cancel
+                                </button>
+                                <button 
+                                    type="submit" 
+                                    className={styles["submit-btn"]}
+                                >
+                                    Join Room
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+
+            <div className={styles["main-content"]}>
                 {isLocalLoading ? (
                     <div className={styles["loading-indicator"]}>Loading...</div>
                     ) : (
@@ -329,6 +452,7 @@ export default function VirtualRooms() {
                             <input 
                                 type="file" 
                                 className={styles["form-control"]}
+                                accept="image/*"
                                 onChange={(event) => {
                                 if (event.target.files && event.target.files[0]) {
                                     setValue("banner_image", event.target.files[0]);
@@ -350,7 +474,7 @@ export default function VirtualRooms() {
                             )}
                             <button 
                                 type="submit" 
-                                className={styles["submit-btn"]}
+                                className={styles["create-room-btn"]}
                                 disabled={isLocalLoading}
                             >
                                 {isLocalLoading ? "Processing..." : roomId ? "Update Room" : "Create Room"}
@@ -358,7 +482,8 @@ export default function VirtualRooms() {
                             </div>
                         </form>
                         </div>
-                        {/* Room Cards Section - Replaces Previous Adventures */}
+                        
+                        {/* Room Cards Section */}
                         <div className={styles["room-cards-section"]}>
                         <h2>Your Virtual Rooms</h2>
                         {rooms && rooms.length > 0 ? (
@@ -378,6 +503,9 @@ export default function VirtualRooms() {
                                     <h3 className={styles["room-card-title"]}>{room.title}</h3>
                                     <p className={styles["room-card-description"]}>{room.description}</p>
                                     <p className={styles["room-card-mantra"]}>{room.mantra}</p>
+                                    <div className={styles["room-code"]}>
+                                        <strong>Room Code: {room.code}</strong>
+                                    </div>
                                     <div className={styles["room-card-actions"]}>
                                     <button
                                         className={styles["view-btn"]}

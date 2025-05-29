@@ -54,7 +54,8 @@ class RoomController {
             title, 
             description, 
             mantra, 
-            banner_image 
+            banner_image, 
+            code
         } = req.body;
         
         try {
@@ -63,7 +64,8 @@ class RoomController {
                 description, 
                 mantra, 
                 banner_image, 
-                req.user.id
+                req.user.id,
+                code
             )
             
             if (!room) return res.status(400).json({ error: error.message });

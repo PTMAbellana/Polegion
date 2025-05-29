@@ -8,14 +8,14 @@ class RoomRepo extends BaseRepo {
         this.storageBucket = 'room-images'
     }
 
-    async getAllRooms(userId){
+    async getAllRooms(user_id){
         try {
             const {
                 data,
                 error
             } = await this.supabase.from(this.tableName)
             .select('*')
-            .eq('user_id', userId)
+            .eq('user_id', user_id)
             .order('created_at', { ascending: false } )
 
             console.log('room data ', data)
@@ -27,7 +27,7 @@ class RoomRepo extends BaseRepo {
         }
     }
     
-    async getRoomById(roomId, userId){
+    async getRoomById(roomId, user_id){
         try {
             const {
                 data,
@@ -35,7 +35,7 @@ class RoomRepo extends BaseRepo {
             } = await this.supabase.from(this.tableName)
             .select('*')
             .eq('id', roomId)
-            .eq('user_id', userId)
+            .eq('user_id', user_id)
             .single()
 
             console.log(`room id: ${roomId} data: ${data}`)
@@ -48,7 +48,7 @@ class RoomRepo extends BaseRepo {
         }    
     }
 
-    async getRoomByCode(roomCode, userId){
+    async getRoomByCode(roomCode, user_id){
         console.log( 'room repo ', roomCode)
         try {
             const {
@@ -57,7 +57,7 @@ class RoomRepo extends BaseRepo {
             } = await this.supabase.from(this.tableName)
             .select('*')
             .eq('code', roomCode)
-            .eq('user_id', userId)
+            .eq('user_id', user_id)
             .single()
     
             if (error) throw error
@@ -74,18 +74,23 @@ class RoomRepo extends BaseRepo {
                 data,
                 error
             } = await this.supabase.from(this.tableName)
-            .select('*')
             .insert(room.toDbObject())
             .select()
     
-            if (error) throw error
+            if (error) {
+                console.error('Database error:', error);
+                throw error;
+            }
+            if (!data || data.length === 0) {
+                throw new Error('Failed to create room - no data returned');
+            }
             return roomModel.fromDbRoom(data[0])
         } catch (error) {
             throw error
         }    
     }
     
-    async updateRoom (roomId, userId, room){
+    async updateRoom (roomId, user_id, room){
         try {
             const {
                 data,
@@ -93,7 +98,7 @@ class RoomRepo extends BaseRepo {
             } = await this.supabase.from(this.tableName)
             .update(room.toDbObject())
             .eq('id', roomId)
-            .eq('user_id', userId)
+            .eq('user_id', user_id)
             .select()
     
             if (error) throw error
@@ -108,7 +113,7 @@ class RoomRepo extends BaseRepo {
     // remember maam leah
     // dont actually delete the room
     // ghad, add another column in the db
-    async deleteRoom (roomId, userId){  
+    async deleteRoom (roomId, user_id){  
         try {
             const {
                 data,
@@ -116,7 +121,7 @@ class RoomRepo extends BaseRepo {
             } = await this.supabase.from(this.tableName)
             .delete()
             .eq('id', roomId)
-            .eq('user_id', userId)
+            .eq('user_id', user_id)
     
             if (error) throw error
             return true
@@ -141,7 +146,7 @@ class RoomRepo extends BaseRepo {
 
             const publicUrl = this.supabase.storage
             .from(this.storageBucket)
-            .getPublicUrl(filename).data.publicUrl
+            .getPublicUrl(fileName).data.publicUrl
             return publicUrl
         } catch (error) {
             throw error

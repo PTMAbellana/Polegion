@@ -5,27 +5,27 @@ class RoomService {
         this.roomRepo = roomRepo
     }
 
-    async getRooms (userId){
+    async getRooms (user_id){
         try {
-            return await this.roomRepo.getAllRooms(userId)
+            return await this.roomRepo.getAllRooms(user_id)
         } catch (error) {
             throw error
         }
     }
 
-    async getRoomById (roomId, userId){
+    async getRoomById (roomId, user_id){
         try {
-            return await this.roomRepo.getRoomId(roomId, userId)
+            return await this.roomRepo.getRoomById(roomId, user_id)
         } catch (error) {
             throw error
         }
     }
 
-    async getRoomByCode (roomCode, userId){
+    async getRoomByCode (roomCode, user_id){
         console.log(roomCode)
         try {
             console.log('natawag ko')
-            const res = await this.roomRepo.getRoomByCode(roomCode, userId)
+            const res = await this.roomRepo.getRoomByCode(roomCode, user_id)
             console.log(res)
             return res
         } catch (error) {
@@ -33,7 +33,7 @@ class RoomService {
         }
     }
     
-    async createRoom (title, description, mantra, bannerImage, userId, code){
+    async createRoom (title, description, mantra, bannerImage, user_id, code){
         try {
             const newRoom = new roomModel (
                 null,
@@ -41,7 +41,8 @@ class RoomService {
                 description,
                 mantra,
                 bannerImage,
-                userId,
+                user_id,
+                new Date(),
                 code
             )
             return await this.roomRepo.createRoom(newRoom)
@@ -50,7 +51,7 @@ class RoomService {
         }
     }
     
-    async updateRoom (roomId, title, description, mantra, bannerImage, userId){
+    async updateRoom (roomId, title, description, mantra, bannerImage, user_id){
         try {
             const ur = new roomModel(
                 roomId,
@@ -58,18 +59,18 @@ class RoomService {
                 description,
                 mantra,
                 bannerImage,
-                userId,
+                user_id,
                 null
             )
-            return await this.roomRepo.updateRoom(roomId, userId, ur)
+            return await this.roomRepo.updateRoom(roomId, user_id, ur)
         } catch (error) {
             throw error
         }
     }
     
-    async deleteRoom (roomId, userId) {
+    async deleteRoom (roomId, user_id) {
         try {
-            return await this.roomRepo.deleteRoom(roomId, userId)
+            return await this.roomRepo.deleteRoom(roomId, user_id)
         } catch (error) {
             throw error
         }

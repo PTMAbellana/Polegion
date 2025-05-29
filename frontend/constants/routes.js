@@ -6,7 +6,8 @@ export const ROUTES = {
     DASHBOARD: '/dashboard',
     VIRTUAL_ROOMS: '/virtual-rooms',
     LEADERBOARD: '/leaderboard',
-    PROFILE: '/profile'
+    PROFILE: '/profile',
+    EDIT_PROFILE: '/profile/edit'
 }
 
 export const PUBLIC_ROUTES = [

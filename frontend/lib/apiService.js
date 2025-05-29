@@ -250,10 +250,7 @@ export const deleteRoom = async (id) => {
     return await api.delete(`/rooms/id/${id}`)
 }
 
-export const uploadImage = async (file) => {
-    const formData = new FormData()
-    formData.append('image', file)
-
+export const uploadImage = async (formData) => {
     return await api.post('/rooms/upload', formData, {
         headers: {
             'Content-Type': 'multipart/form-data'
@@ -262,4 +259,4 @@ export const uploadImage = async (file) => {
 }
 
 export { authUtils }
-export default api
+export default api  
