@@ -6,6 +6,8 @@ import { getRoomByCode } from '@/lib/apiService'
 import styles from '@/styles/room-competition.module.css'
 import { use, useEffect, useState } from 'react'
 
+import { useRouter } from "next/navigation";
+
 interface Room{
     title: string
     description: string
@@ -21,6 +23,8 @@ export default function RoomDetail({ params } : { params  : Promise<{roomCode : 
 
     const { isLoggedIn } = myAppHook()
     const { isLoading: authLoading } = AuthProtection()
+
+    const router = useRouter();
 
     console.log('room code ', roomCode)
 
@@ -131,7 +135,12 @@ export default function RoomDetail({ params } : { params  : Promise<{roomCode : 
                     <div className={styles["problems-card"]}>
                         <div className={styles["section-header"]}>
                             <h3>Problems</h3>
-                            <button className={styles["add-btn"]}>+ Add Problem</button>
+                            <button
+                                className={styles["add-btn"]}
+                                onClick={() => router.push(`/virtual-rooms/${roomCode.roomCode}/create-problem`)}
+                            >
+                                + Add Problem
+                            </button>
                         </div>
                         <div className={styles["problems-list"]}>
                             <div className={styles["empty-state"]}>
