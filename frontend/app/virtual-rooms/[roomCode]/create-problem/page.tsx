@@ -9,6 +9,12 @@ const TOOLBOX_SHAPES = [
   { type: "triangle", label: "Triangle" },
 ];
 
+const DIFFICULTY_COLORS = {
+  Easy: "#8FFFC2",
+  Intermediate: "#FFFD9B",
+  Hard: "#FFB49B",
+};
+
 const DEFAULT_SIZE = 100;
 
 export default function CreateProblem() {
@@ -18,6 +24,27 @@ export default function CreateProblem() {
   const [selectedId, setSelectedId] = useState(null);
   const dragOffset = useRef({ x: 0, y: 0 });
   const [scale, setScale] = useState(1);
+
+  const [difficulty, setDifficulty] = useState("Easy");
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
+  const [prompt, setPrompt] = useState("");
+  const [editingPrompt, setEditingPrompt] = useState(false);
+  const promptInputRef = useRef(null);
+
+  const mainAreaRef = useRef(null);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setDropdownOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   // Responsive scaling to fit window
   useEffect(() => {
@@ -32,6 +59,25 @@ export default function CreateProblem() {
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
+
+  // Focus textarea when editingPrompt becomes true
+  useEffect(() => {
+    if (editingPrompt && promptInputRef.current) {
+      promptInputRef.current.focus();
+    }
+  }, [editingPrompt]);
+
+  // Remove shape when Delete key is pressed
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if ((e.key === "Delete" || e.key === "Backspace") && selectedId !== null) {
+        setShapes((prev) => prev.filter((shape) => shape.id !== selectedId));
+        setSelectedId(null);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [selectedId]);
 
   // Handle drag start from toolbox
   const handleDragStart = (type) => setDraggedShape(type);
@@ -59,7 +105,7 @@ export default function CreateProblem() {
 
   const handleDragOver = (e) => e.preventDefault();
 
-  // Move shape
+  // Move shape (removes if outside main area)
   const handleShapeMouseDown = (id, e) => {
     e.stopPropagation();
     setSelectedId(id);
@@ -81,7 +127,25 @@ export default function CreateProblem() {
         )
       );
     };
-    const onMouseUp = () => {
+    const onMouseUp = (moveEvent) => {
+      // Remove shape if outside main area
+      if (mainAreaRef.current) {
+        const areaRect = mainAreaRef.current.getBoundingClientRect();
+        const shapeObj = shapes.find((s) => s.id === id);
+        const x = (moveEvent.clientX - dragOffset.current.x) / scale;
+        const y = (moveEvent.clientY - dragOffset.current.y) / scale;
+        const shapeW = shapeObj.width ?? shapeObj.size ?? 0;
+        const shapeH = shapeObj.height ?? shapeObj.size ?? 0;
+        if (
+          x < 0 ||
+          y < 0 ||
+          x > 1080 - shapeW ||
+          y > 591 - shapeH
+        ) {
+          setShapes((prev) => prev.filter((shape) => shape.id !== id));
+          setSelectedId(null);
+        }
+      }
       window.removeEventListener("mousemove", onMouseMove);
       window.removeEventListener("mouseup", onMouseUp);
     };
@@ -320,80 +384,84 @@ export default function CreateProblem() {
     }
 
     if (shape.type === "triangle") {
-      const size = shape.size;
-      const h = size * Math.sqrt(3) / 2;
-      const points = [
-        [size / 2, 0],
-        [0, h],
-        [size, h],
-      ];
-      const midpoints = [
-        [(points[0][0] + points[1][0]) / 2, (points[0][1] + points[1][1]) / 2],
-        [(points[1][0] + points[2][0]) / 2, (points[1][1] + points[2][1]) / 2],
-        [(points[2][0] + points[0][0]) / 2, (points[2][1] + points[0][1]) / 2],
-      ];
-      return (
+  const size = shape.size;
+  const h = size * Math.sqrt(3) / 2;
+  const stroke = 6;
+  const pad = stroke;
+  const svgWidth = size + pad * 2;
+  const svgHeight = h + pad * 2;
+  const points = [
+    [svgWidth / 2, pad],                // top
+    [pad, h + pad],                     // bottom left
+    [size + pad, h + pad],              // bottom right
+  ];
+  const midpoints = [
+    [(points[0][0] + points[1][0]) / 2, (points[0][1] + points[1][1]) / 2],
+    [(points[1][0] + points[2][0]) / 2, (points[1][1] + points[2][1]) / 2],
+    [(points[2][0] + points[0][0]) / 2, (points[2][1] + points[0][1]) / 2],
+  ];
+  return (
+    <div
+      key={shape.id}
+      style={{
+        position: "absolute",
+        left: shape.x - pad,
+        top: shape.y - pad,
+        width: svgWidth,
+        height: svgHeight,
+        cursor: "move",
+        zIndex: isSelected ? 10 : 2,
+      }}
+      onMouseDown={(e) => handleShapeMouseDown(shape.id, e)}
+      onClick={(e) => {
+        e.stopPropagation();
+        setSelectedId(shape.id);
+      }}
+    >
+      <svg width={svgWidth} height={svgHeight} style={{ position: "absolute", left: 0, top: 0 }}>
+        <polygon
+          points={points.map((p) => p.join(",")).join(" ")}
+          fill="#e3dcc2"
+          stroke="#000"
+          strokeWidth={stroke}
+        />
+        {isSelected &&
+          midpoints.map((m, i) => (
+            <text
+              key={i}
+              x={m[0]}
+              y={m[1] - 8}
+              textAnchor="middle"
+              fontSize="14"
+              fill="#000"
+              stroke="#fff"
+              strokeWidth="0.5"
+              style={{ pointerEvents: "none" }}
+            >
+              {size.toFixed(1)}px
+            </text>
+          ))}
+      </svg>
+      {isSelected && (
         <div
-          key={shape.id}
           style={{
             position: "absolute",
-            left: shape.x,
-            top: shape.y,
-            width: size,
-            height: h,
-            cursor: "move",
-            zIndex: isSelected ? 10 : 2,
+            right: -10,
+            bottom: -10,
+            width: 16,
+            height: 16,
+            background: "#fabc60",
+            border: "2px solid #000",
+            borderRadius: 4,
+            cursor: "nwse-resize",
+            zIndex: 20,
           }}
-          onMouseDown={(e) => handleShapeMouseDown(shape.id, e)}
-          onClick={(e) => {
-            e.stopPropagation();
-            setSelectedId(shape.id);
-          }}
-        >
-          <svg width={size} height={h} style={{ position: "absolute", left: 0, top: 0 }}>
-            <polygon
-              points={points.map((p) => p.join(",")).join(" ")}
-              fill="#e3dcc2"
-              stroke="#000"
-              strokeWidth="6"
-            />
-            {isSelected &&
-              midpoints.map((m, i) => (
-                <text
-                  key={i}
-                  x={m[0]}
-                  y={m[1] - 8}
-                  textAnchor="middle"
-                  fontSize="14"
-                  fill="#000"
-                  stroke="#fff"
-                  strokeWidth="0.5"
-                  style={{ pointerEvents: "none" }}
-                >
-                  {size.toFixed(1)}px
-                </text>
-              ))}
-          </svg>
-          {isSelected && (
-            <div
-              style={{
-                position: "absolute",
-                right: -10,
-                bottom: -10,
-                width: 16,
-                height: 16,
-                background: "#fabc60",
-                border: "2px solid #000",
-                borderRadius: 4,
-                cursor: "nwse-resize",
-                zIndex: 20,
-              }}
-              onMouseDown={(e) => handleResizeMouseDown(shape.id, e)}
-            />
-          )}
-        </div>
-      );
-    }
+          onMouseDown={(e) => handleResizeMouseDown(shape.id, e)}
+        />
+      )}
+    </div>
+  );
+}
   };
 
   return (
@@ -410,6 +478,45 @@ export default function CreateProblem() {
             overflow: "hidden",
           }}
         >
+          {/* Choose Difficulty Button - positioned above toolbox */}
+          <div
+            ref={dropdownRef}
+            className={styles.difficultyBox}
+            style={{
+              background: DIFFICULTY_COLORS[difficulty],
+              cursor: "pointer",
+              zIndex: 20,
+            }}
+            onClick={() => setDropdownOpen((open) => !open)}
+          >
+            <span className={styles.difficultyText}>{difficulty}</span>
+            <span style={{ marginLeft: 12, fontSize: 18, color: "#2c514c" }}>
+              ▼
+            </span>
+            {dropdownOpen && (
+              <div className={styles.difficultyDropdownMenu}>
+                {["Easy", "Intermediate", "Hard"].map((diff) => (
+                  <div
+                    key={diff}
+                    className={styles.difficultyDropdownItem}
+                    style={{
+                      background: DIFFICULTY_COLORS[diff],
+                      color: "#2c514c",
+                      fontWeight: 600,
+                    }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setDifficulty(diff);
+                      setDropdownOpen(false);
+                    }}
+                  >
+                    {diff}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
           {/* Toolbox */}
           <div className={styles.toolbox}>
             <div className={styles.toolboxHeader}></div>
@@ -469,6 +576,7 @@ export default function CreateProblem() {
 
           {/* Main Area */}
           <div
+            ref={mainAreaRef}
             className={styles.mainArea}
             onDrop={handleDrop}
             onDragOver={handleDragOver}
@@ -489,9 +597,47 @@ export default function CreateProblem() {
             </button>
             <span className={styles.goBackText}>Go back</span>
           </div>
+          {/* Prompt */}
           <div className={styles.promptGroup}>
-            <div className={styles.promptBox}></div>
-            <span className={styles.promptText}>Input problem details.</span>
+            <div
+              className={styles.promptBox}
+              onClick={() => {
+                setEditingPrompt(true);
+                if (
+                  prompt.trim() === "" ||
+                  prompt === "Input problem details."
+                ) {
+                  setPrompt("");
+                }
+              }}
+            >
+              {editingPrompt ? (
+                <textarea
+                  ref={promptInputRef}
+                  className={styles.promptTextarea}
+                  value={prompt}
+                  onChange={e => setPrompt(e.target.value)}
+                  onBlur={() => setEditingPrompt(false)}
+                  placeholder="Input problem details."
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    resize: "none",
+                    border: "none",
+                    outline: "none",
+                    background: "transparent",
+                    fontFamily: "Poppins",
+                    fontSize: 24,
+                    fontWeight: 300,
+                    color: "#000",
+                  }}
+                />
+              ) : (
+                <span className={styles.promptText}>
+                  {prompt.trim() === "" ? "Input problem details." : prompt}
+                </span>
+              )}
+            </div>
           </div>
           <div className={styles.solutionHeaderBox}>
             <span className={styles.solutionHeader}>Solution 2</span>
