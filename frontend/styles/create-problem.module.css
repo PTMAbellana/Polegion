@@ -225,12 +225,17 @@
   border-radius: 20px 20px 0 0;
 }
 
+.toolboxContent {
+  padding-top: 73px; /* same as .toolboxHeader height */
+}
+
 .toolboxRow {
   display: flex;
   flex-direction: row;
   justify-content: center;
   align-items: center;
   width: 100%;
+  margin-bottom: 0;
 }
 
 .toolboxSquare {
@@ -371,3 +376,25 @@
   color: #fff;
 }
 
+.shapeFillTool {
+  transition: border 0.2s, box-shadow 0.2s;
+  user-select: none;
+}
+
+.fillPalette {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 18px auto 0 auto;
+  width: 160px;
+  justify-content: center;
+}
+
+.fillColor {
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  cursor: pointer;
+  box-sizing: border-box;
+  transition: border 0.15s;
+}
