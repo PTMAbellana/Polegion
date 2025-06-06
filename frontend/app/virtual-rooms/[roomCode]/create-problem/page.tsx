@@ -15,6 +15,13 @@ const FILL_COLORS = [
 ];
 
 const DEFAULT_SIZE = 100;
+const MIN_SIZE = 50; // 1 unit = 50px
+
+// Helper to convert px to units (1 unit = 50px), always display in one line
+function pxToUnits(px) {
+  const units = (px / 50).toFixed(2).replace(/\.00$/, "");
+  return `${units} units`;
+}
 
 export default function CreateProblem() {
   const router = useRouter();
@@ -198,26 +205,26 @@ export default function CreateProblem() {
         prev.map((shape) => {
           if (shape.id !== id) return shape;
           if (side === "right") {
-            return { ...shape, width: Math.max(30, startWidth + ((moveEvent.clientX - startX) / scale) * 0.1) };
+            return { ...shape, width: Math.max(MIN_SIZE, startWidth + ((moveEvent.clientX - startX) / scale) * 0.1) };
           }
           if (side === "left") {
             const delta = ((moveEvent.clientX - startX) / scale) * 0.1;
-            const newWidth = Math.max(30, startWidth - delta);
+            const newWidth = Math.max(MIN_SIZE, startWidth - delta);
             return {
               ...shape,
-              x: startXPos + delta,
+              x: startXPos + (newWidth < MIN_SIZE ? startWidth - MIN_SIZE : delta),
               width: newWidth,
             };
           }
           if (side === "bottom") {
-            return { ...shape, height: Math.max(30, startHeight + ((moveEvent.clientY - startY) / scale) * 0.1) };
+            return { ...shape, height: Math.max(MIN_SIZE, startHeight + ((moveEvent.clientY - startY) / scale) * 0.1) };
           }
           if (side === "top") {
             const delta = ((moveEvent.clientY - startY) / scale) * 0.1;
-            const newHeight = Math.max(30, startHeight - delta);
+            const newHeight = Math.max(MIN_SIZE, startHeight - delta);
             return {
               ...shape,
-              y: startYPos + delta,
+              y: startYPos + (newHeight < MIN_SIZE ? startHeight - MIN_SIZE : delta),
               height: newHeight,
             };
           }
@@ -245,7 +252,7 @@ export default function CreateProblem() {
       setShapes((prev) =>
         prev.map((shape) =>
           shape.id === id
-            ? { ...shape, size: Math.max(30, startSize + delta) }
+            ? { ...shape, size: Math.max(MIN_SIZE, startSize + delta) }
             : shape
         )
       );
@@ -298,6 +305,8 @@ export default function CreateProblem() {
     if (shape.type === "square") {
       const width = shape.width ?? shape.size;
       const height = shape.height ?? shape.size;
+      // Increase the offset for label so it's farther from the border
+      const labelOffset = 48;
       return (
         <div
           key={shape.id}
@@ -337,24 +346,60 @@ export default function CreateProblem() {
               <>
                 {/* Top */}
                 <span style={{
-                  position: "absolute", top: -24, left: "50%", transform: "translateX(-50%)",
-                  background: "#fff", padding: "2px 8px", borderRadius: 6, border: "1px solid #aaa", fontSize: 14,
-                }}>{width.toFixed(1)}px</span>
+                  position: "absolute",
+                  top: -labelOffset,
+                  left: "50%",
+                  transform: "translateX(-50%)",
+                  background: "#fff",
+                  padding: "2px 8px",
+                  borderRadius: 6,
+                  border: "1px solid #aaa",
+                  fontSize: 14,
+                  boxShadow: "0 2px 6px #0001",
+                  whiteSpace: "nowrap"
+                }}>{pxToUnits(width)}</span>
                 {/* Bottom */}
                 <span style={{
-                  position: "absolute", bottom: -24, left: "50%", transform: "translateX(-50%)",
-                  background: "#fff", padding: "2px 8px", borderRadius: 6, border: "1px solid #aaa", fontSize: 14,
-                }}>{width.toFixed(1)}px</span>
+                  position: "absolute",
+                  bottom: -labelOffset,
+                  left: "50%",
+                  transform: "translateX(-50%)",
+                  background: "#fff",
+                  padding: "2px 8px",
+                  borderRadius: 6,
+                  border: "1px solid #aaa",
+                  fontSize: 14,
+                  boxShadow: "0 2px 6px #0001",
+                  whiteSpace: "nowrap"
+                }}>{pxToUnits(width)}</span>
                 {/* Left */}
                 <span style={{
-                  position: "absolute", left: -38, top: "50%", transform: "translateY(-50%) rotate(-90deg)",
-                  background: "#fff", padding: "2px 8px", borderRadius: 6, border: "1px solid #aaa", fontSize: 14,
-                }}>{height.toFixed(1)}px</span>
+                  position: "absolute",
+                  left: -labelOffset - 16,
+                  top: "50%",
+                  transform: "translateY(-50%) rotate(-90deg)",
+                  background: "#fff",
+                  padding: "2px 8px",
+                  borderRadius: 6,
+                  border: "1px solid #aaa",
+                  fontSize: 14,
+                  boxShadow: "0 2px 6px #0001",
+                  whiteSpace: "nowrap"
+                }}>{pxToUnits(height)}</span>
                 {/* Right */}
                 <span style={{
-                  position: "absolute", right: -38, top: "50%", transform: "translateY(-50%) rotate(-90deg)",
-                  background: "#fff", padding: "2px 8px", borderRadius: 6, border: "1px solid #aaa", fontSize: 14,
-                }}>{height.toFixed(1)}px</span>
+                  position: "absolute",
+                  right: -labelOffset - 16,
+                  top: "50%",
+                  transform: "translateY(-50%) rotate(-90deg)",
+                  background: "#fff",
+                  padding: "2px 8px",
+                  borderRadius: 6,
+                  border: "1px solid #aaa",
+                  fontSize: 14,
+                  boxShadow: "0 2px 6px #0001",
+                  whiteSpace: "nowrap"
+                }}>{pxToUnits(height)}</span>
                 {/* Resize handles */}
                 {/* Top */}
                 <div
@@ -401,8 +446,14 @@ export default function CreateProblem() {
 
     if (shape.type === "circle") {
       const size = shape.size;
-      // For the diameter line, leave a margin so it doesn't go outside the circle
-      const margin = 12;
+      // Move label closer to the center (less negative multiplier)
+      const labelYOffset = -size * 0.18;
+      // Place resize handle on circumference (bottom right, 45deg)
+      const r = size / 2;
+      const handleRadius = r + 6; // 6px outside the border
+      const angleRad = Math.PI / 4; // 45deg
+      const handleX = r + handleRadius * Math.cos(angleRad) - 8; // -8 to center the handle
+      const handleY = r + handleRadius * Math.sin(angleRad) - 8;
       return (
         <div
           key={shape.id}
@@ -477,11 +528,11 @@ export default function CreateProblem() {
                     boxShadow: "0 0 4px #0002"
                   }}
                 />
-                {/* Diameter label, moved a bit up */}
+                {/* Diameter label, moved closer to center */}
                 <span style={{
                   position: "absolute",
-                  top: "40%",
                   left: "50%",
+                  top: `calc(50% + ${labelYOffset}px)`,
                   transform: "translate(-50%, -50%)",
                   background: "#fff",
                   padding: "2px 8px",
@@ -489,14 +540,23 @@ export default function CreateProblem() {
                   border: "1px solid #aaa",
                   fontSize: 14,
                   zIndex: 4,
+                  whiteSpace: "nowrap"
                 }}>
-                  {size.toFixed(1)}px
+                  {pxToUnits(size)}
                 </span>
-                {/* Resize handle */}
+                {/* Resize handle on circumference (bottom right, 45deg) */}
                 <div
                   style={{
-                    position: "absolute", right: -10, bottom: -10, width: 16, height: 16,
-                    background: "#fabc60", border: "2px solid #000", borderRadius: "50%", cursor: "nwse-resize", zIndex: 20,
+                    position: "absolute",
+                    left: handleX,
+                    top: handleY,
+                    width: 16,
+                    height: 16,
+                    background: "#fabc60",
+                    border: "2px solid #000",
+                    borderRadius: "50%",
+                    cursor: "nwse-resize",
+                    zIndex: 20,
                   }}
                   onMouseDown={(e) => handleResizeMouseDown(shape.id, e)}
                 />
@@ -515,15 +575,45 @@ export default function CreateProblem() {
       const svgWidth = size + pad * 2;
       const svgHeight = h + pad * 2;
       const points = [
-        [svgWidth / 2, pad],                // top
-        [pad, h + pad],                     // bottom left
-        [size + pad, h + pad],              // bottom right
+        [svgWidth / 2, pad],                // top (A)
+        [pad, h + pad],                     // bottom left (B)
+        [size + pad, h + pad],              // bottom right (C)
       ];
+
+      // Calculate side lengths
+      function dist(a, b) {
+        return Math.sqrt((a[0] - b[0]) ** 2 + (a[1] - b[1]) ** 2);
+      }
+      const sideLengths = [
+        dist(points[0], points[1]), // AB (left)
+        dist(points[1], points[2]), // BC (bottom)
+        dist(points[2], points[0]), // CA (right)
+      ];
+
+      // Midpoints for label positions
       const midpoints = [
-        [(points[0][0] + points[1][0]) / 2, (points[0][1] + points[1][1]) / 2],
-        [(points[1][0] + points[2][0]) / 2, (points[1][1] + points[2][1]) / 2],
-        [(points[2][0] + points[0][0]) / 2, (points[2][1] + points[0][1]) / 2],
+        [(points[0][0] + points[1][0]) / 2, (points[0][1] + points[1][1]) / 2], // AB
+        [(points[1][0] + points[2][0]) / 2, (points[1][1] + points[2][1]) / 2], // BC
+        [(points[2][0] + points[0][0]) / 2, (points[2][1] + points[0][1]) / 2], // CA
       ];
+
+      // Angle for each side label (for rotation)
+      function angleBetween(a, b) {
+        return Math.atan2(b[1] - a[1], b[0] - a[0]) * 180 / Math.PI;
+      }
+      const angles = [
+        angleBetween(points[0], points[1]), // AB (left)
+        angleBetween(points[1], points[2]), // BC (bottom)
+        angleBetween(points[2], points[0]), // CA (right)
+      ];
+
+      // Rotate left (AB, index 0) and right (CA, index 2) labels by 180deg
+      const labelRotations = [
+        angles[0] + 180, // left side
+        angles[1],       // bottom side
+        angles[2] + 180, // right side
+      ];
+
       return (
         <div
           key={shape.id}
@@ -556,23 +646,41 @@ export default function CreateProblem() {
               stroke="#000"
               strokeWidth={stroke}
             />
-            {isSelected &&
-              midpoints.map((m, i) => (
-                <text
-                  key={i}
-                  x={m[0]}
-                  y={m[1] - 8}
-                  textAnchor="middle"
-                  fontSize="14"
-                  fill="#000"
-                  stroke="#fff"
-                  strokeWidth="0.5"
-                  style={{ pointerEvents: "none" }}
-                >
-                  {size.toFixed(1)}px
-                </text>
-              ))}
           </svg>
+          {isSelected &&
+            midpoints.map((m, i) => (
+              <div
+                key={i}
+                style={{
+                  position: "absolute",
+                  left: m[0],
+                  top: m[1],
+                  transform: `translate(-50%, -50%) rotate(${labelRotations[i]}deg)`,
+                  zIndex: 10,
+                  pointerEvents: "none",
+                }}
+              >
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    background: "#fff",
+                    borderRadius: 6,
+                    border: "1px solid #aaa",
+                    fontSize: 14,
+                    boxShadow: "0 2px 6px #0001",
+                    padding: "2px 8px",
+                    width: "fit-content",
+                    whiteSpace: "nowrap",
+                    height: "24px",
+                    fontWeight: 400,
+                  }}
+                >
+                  {pxToUnits(sideLengths[i])}
+                </div>
+              </div>
+            ))}
           {isSelected && (
             <div
               style={{
