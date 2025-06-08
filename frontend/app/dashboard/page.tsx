@@ -7,7 +7,7 @@ import { getRooms } from "@/lib/apiService"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 
-import styles from '@/styles/dashboard.module.css'
+import styles from '@/styles/room.module.css'
 
 interface RoomType {
     id?: number
