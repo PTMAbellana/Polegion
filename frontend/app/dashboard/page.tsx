@@ -19,6 +19,7 @@ interface RoomType {
     code?: string
 }
 
+
 export default function Dashboard() { 
     const [rooms, setRooms] = useState<RoomType[]>([])
     const [isRoomsLoading, setRoomsLoading] = useState(true)

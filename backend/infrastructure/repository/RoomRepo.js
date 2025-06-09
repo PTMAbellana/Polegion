@@ -10,6 +10,7 @@ class RoomRepo extends BaseRepo {
 
     async getAllRooms(user_id){
         try {
+            console.log('Fetching rooms for user: ', user_id)
             const {
                 data,
                 error
@@ -21,7 +22,18 @@ class RoomRepo extends BaseRepo {
             console.log('room data ', data)
 
             if (error) throw error
-            return data.map( room => roomModel.fromDbRoom(room) )
+            if (!data) {
+                console.log('No rooms returned from supabase')
+                return []
+            }
+            const rooms = data.map(room => {
+                console.log('Processing room:', room)
+                return roomModel.fromDbRoom(room)
+            })
+
+            console.log('Processed rooms:', rooms);
+            return rooms
+            // return data.map( room => roomModel.fromDbRoom(room) )
         } catch (error) {
             throw error
         }

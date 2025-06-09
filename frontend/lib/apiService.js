@@ -11,7 +11,9 @@ const authUtils = {
             localStorage.setItem('user', JSON.stringify(authData.user))
             
             if (authData.session.expires_at) {
-                localStorage.setItem('expires_at', new Date(authData.session.expires_at).getTime().toString())
+                // localStorage.setItem('expires_at', new Date(authData.session.expires_at).getTime().toString())
+                const expiresAt = authData.session.expires_at * 1000
+                localStorage.setItem('expires_at', expiresAt.toString())
             } else {
                 const defaultExpiry = Date.now() + (24 * 60 * 60 * 1000);
                 localStorage.setItem('expires_at', defaultExpiry.toString());
@@ -94,7 +96,9 @@ api.interceptors.response.use(
 
         if ( 
             error.code === 'ECONNABORTED' ||
-            error.message === 'Network Error'
+            error.message === 'Network Error' ||
+            error.response?.status === 403 ||
+            error.response?.status === 404
         ) return Promise.reject(error)
 
         if (
@@ -145,6 +149,8 @@ api.interceptors.response.use(
                 authUtils.clearAuthData()
                 if (typeof window !== 'undefined') window.location.href = ROUTES.LOGIN
                 return Promise.reject(re)
+            } finally {
+                isRefreshing = false
             }
         }
         return Promise.reject(error)

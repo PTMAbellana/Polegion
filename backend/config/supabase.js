@@ -5,6 +5,7 @@ const supabaseUrl = process.env.SUPABASE_URL
 const supabaseKey = process.env.SUPABASE_SERVICE_KEY
 
 const supabase = createClient(supabaseUrl, supabaseKey)
+console.log('supabase is called: ', supabase)
 
 // async function testToken(token) {
 //     const {

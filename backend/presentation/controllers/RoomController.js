@@ -25,11 +25,15 @@ class RoomController {
     
     // Get all rooms for a user
     getRooms = async (req, res) => {
+        console.log(req.user)
         try {
             const rooms = await this.roomService.getRooms(req.user.id)
             
             if (!rooms) return res.status(400).json({ error: error.message })
             
+            console.log('getRooms 1: ', rooms)
+            console.log('getRooms 2: ', rooms.map( room => room.toDTO() ))
+
             res.status(200).json(
                 rooms.map( room => room.toDTO() )
             );
