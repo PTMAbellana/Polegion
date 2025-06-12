@@ -3,7 +3,7 @@ import Loader from '@/components/Loader'
 import { ROUTES } from '@/constants/routes'
 import { myAppHook } from '@/context/AppUtils'
 import { AuthProtection } from '@/context/AuthProtection'
-import { createRoom, updateRoom, getRooms, uploadImage } from '@/lib/apiService'
+import { createRoom, updateRoom, getRooms, uploadImage, joinRoom } from '@/lib/apiService'
 import styles from '@/styles/room.module.css'
 import { yupResolver } from '@hookform/resolvers/yup'
 import { useRouter } from 'next/navigation'
@@ -264,11 +264,19 @@ export default function VirtualRooms() {
     const onJoinRoomSubmit = async (formData: JoinRoomFormData) => {
         console.log('Attempting to join room with code:', formData.roomCode)
         // Here you would validate the room code and join the room
-        toast.success(`Joining room with code: ${formData.roomCode}`)
-        setShowJoinModal(false)
-        resetJoin()
-        // Navigate to room
-        router.push(`${ROUTES.VIRTUAL_ROOMS}/${formData.roomCode}`)
+        try {
+            const response = await joinRoom(formData.roomCode)
+            console.log('Successful join room: ', response.data)
+            toast.success(`Joining room with code: ${formData.roomCode}`)
+            setShowJoinModal(false)
+            setShowJoinModal(false)
+            // resetJoin()      // do not uncomment kay ma undefined ig join, di na nuon mailhan
+            // Navigate to room
+            router.push(`${ROUTES.VIRTUAL_ROOMS}/join/${formData.roomCode}`)
+        } catch (error) {
+            console.log('Error joining room:', error)
+            toast.error(`Error joining room`)
+        }
     }
 
     const handleViewRoom = (roomCode: string | undefined, roomId: number | undefined) => {
