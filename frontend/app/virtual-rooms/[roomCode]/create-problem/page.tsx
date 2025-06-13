@@ -17,7 +17,6 @@ const FILL_COLORS = [
 const DEFAULT_SIZE = 100;
 const MIN_SIZE = 50; // 1 unit = 50px
 
-// Helper to convert px to units (1 unit = 50px), always display in one line
 function pxToUnits(px) {
   const units = (px / 50).toFixed(2).replace(/\.00$/, "");
   return `${units} units`;
@@ -45,6 +44,15 @@ export default function CreateProblem() {
   const [fillMode, setFillMode] = useState(false);
   const [fillColor, setFillColor] = useState("#E3DCC2");
   const [draggingFill, setDraggingFill] = useState(false);
+
+  // Toolbox highlight state
+  const [selectedTool, setSelectedTool] = useState(null);
+
+  // Timer and Hint UI state
+  const [timerOpen, setTimerOpen] = useState(false);
+  const [timerValue, setTimerValue] = useState(5);
+  const [hintOpen, setHintOpen] = useState(false);
+  const [hint, setHint] = useState("");
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -93,7 +101,6 @@ export default function CreateProblem() {
   // --- CLOSE FILL PALETTE WHEN CLICKING OUTSIDE ---
   useEffect(() => {
     function handleClickOutsideFill(event) {
-      // Check if click is outside the fill tool and color palette
       const fillTool = document.querySelector('.shapeFillTool');
       const fillPalette = document.querySelector('.fillPalette');
       if (fillTool && fillPalette && fillMode) {
@@ -103,7 +110,6 @@ export default function CreateProblem() {
           setFillMode(false);
         }
       } else if (fillTool && fillMode) {
-        // If palette is not open yet, just check fill tool
         if (!fillTool.contains(event.target)) {
           setFillMode(false);
         }
@@ -114,7 +120,10 @@ export default function CreateProblem() {
   }, [fillMode]);
 
   // Handle drag start from toolbox
-  const handleDragStart = (type) => setDraggedShape(type);
+  const handleDragStart = (type) => {
+    setDraggedShape(type);
+    setSelectedTool(type);
+  };
 
   // Handle drop in main area
   const handleDrop = (e) => {
@@ -136,6 +145,7 @@ export default function CreateProblem() {
       },
     ]);
     setDraggedShape(null);
+    setSelectedTool(null); // Remove highlight after drop
   };
 
   const handleDragOver = (e) => e.preventDefault();
@@ -163,7 +173,6 @@ export default function CreateProblem() {
       );
     };
     const onMouseUp = (moveEvent) => {
-      // Remove shape if outside main area
       if (mainAreaRef.current) {
         const areaRect = mainAreaRef.current.getBoundingClientRect();
         const shapeObj = shapes.find((s) => s.id === id);
@@ -266,12 +275,10 @@ export default function CreateProblem() {
   };
 
   // --- Shape Fill Tool Drag ---
-  // When dragging the fill tool, set draggingFill to true
   const handleFillDragStart = (e) => {
     setDraggingFill(true);
     e.dataTransfer.setData("text/plain", "fill-color");
     e.dataTransfer.effectAllowed = "copy";
-    // Set a custom drag image (optional)
     const img = document.createElement("div");
     img.style.width = "24px";
     img.style.height = "24px";
@@ -305,7 +312,6 @@ export default function CreateProblem() {
     if (shape.type === "square") {
       const width = shape.width ?? shape.size;
       const height = shape.height ?? shape.size;
-      // Increase the offset for label so it's farther from the border
       const labelOffset = 48;
       return (
         <div
@@ -446,14 +452,45 @@ export default function CreateProblem() {
 
     if (shape.type === "circle") {
       const size = shape.size;
-      // Move label closer to the center (less negative multiplier)
       const labelYOffset = -size * 0.18;
-      // Place resize handle on circumference (bottom right, 45deg)
       const r = size / 2;
-      const handleRadius = r + 6; // 6px outside the border
-      const angleRad = Math.PI / 4; // 45deg
-      const handleX = r + handleRadius * Math.cos(angleRad) - 8; // -8 to center the handle
-      const handleY = r + handleRadius * Math.sin(angleRad) - 8;
+
+      // Place handle at the right edge of the circle
+      const handleX = size - 9; // 9 = handle radius (half of 18)
+      const handleY = r - 9;
+
+      const handleCircleResizeMouseDown = (id, e) => {
+        e.stopPropagation();
+        setSelectedId(id);
+        const shape = shapes.find((s) => s.id === id);
+        const rect = e.target.closest("div[style]").getBoundingClientRect();
+        const centerX = rect.left + r * scale;
+        const centerY = rect.top + r * scale;
+        const startSize = shape.size;
+
+        document.body.style.cursor = "ew-resize";
+
+        const onMouseMove = (moveEvent) => {
+          // Only use horizontal movement for resizing
+          const dx = (moveEvent.clientX - centerX) / scale;
+          const newRadius = Math.abs(dx);
+          setShapes((prev) =>
+            prev.map((shape) =>
+              shape.id === id
+                ? { ...shape, size: Math.max(MIN_SIZE, newRadius * 2) }
+                : shape
+            )
+          );
+        };
+        const onMouseUp = () => {
+          document.body.style.cursor = "";
+          window.removeEventListener("mousemove", onMouseMove);
+          window.removeEventListener("mouseup", onMouseUp);
+        };
+        window.addEventListener("mousemove", onMouseMove);
+        window.addEventListener("mouseup", onMouseUp);
+      };
+
       return (
         <div
           key={shape.id}
@@ -491,7 +528,7 @@ export default function CreateProblem() {
           >
             {isSelected && (
               <>
-                {/* Diameter line (shortened to stay inside the circle) */}
+                {/* Diameter line */}
                 <svg
                   width={size}
                   height={size}
@@ -505,30 +542,33 @@ export default function CreateProblem() {
                 >
                   <line
                     x1={0}
-                    y1={size / 2 - 7}
-                    x2={size - 10}
+                    y1={size / 2}
+                    x2={size}
                     y2={size / 2}
                     stroke="#222"
                     strokeWidth={3}
                   />
                 </svg>
-                {/* Center dot */}
+                {/* Side handle (resize) */}
                 <div
                   style={{
                     position: "absolute",
-                    left: "50%",
-                    top: "50%",
-                    width: 14,
-                    height: 14,
-                    background: "#222",
+                    left: handleX,
+                    top: handleY,
+                    width: 18,
+                    height: 18,
+                    background: "#fabc60",
                     borderRadius: "50%",
-                    transform: "translate(-50%, -50%)",
-                    zIndex: 3,
-                    border: "2px solid #fff",
-                    boxShadow: "0 0 4px #0002"
+                    zIndex: 20,
+                    border: "2px solid #000",
+                    boxShadow: "0 0 4px #0002",
+                    cursor: "ew-resize",
+                    transition: "cursor 0.1s",
                   }}
+                  onMouseDown={(e) => handleCircleResizeMouseDown(shape.id, e)}
+                  title="Drag horizontally to resize"
                 />
-                {/* Diameter label, moved closer to center */}
+                {/* Diameter label */}
                 <span style={{
                   position: "absolute",
                   left: "50%",
@@ -544,22 +584,6 @@ export default function CreateProblem() {
                 }}>
                   {pxToUnits(size)}
                 </span>
-                {/* Resize handle on circumference (bottom right, 45deg) */}
-                <div
-                  style={{
-                    position: "absolute",
-                    left: handleX,
-                    top: handleY,
-                    width: 16,
-                    height: 16,
-                    background: "#fabc60",
-                    border: "2px solid #000",
-                    borderRadius: "50%",
-                    cursor: "nwse-resize",
-                    zIndex: 20,
-                  }}
-                  onMouseDown={(e) => handleResizeMouseDown(shape.id, e)}
-                />
               </>
             )}
           </div>
@@ -580,7 +604,6 @@ export default function CreateProblem() {
         [size + pad, h + pad],              // bottom right (C)
       ];
 
-      // Calculate side lengths
       function dist(a, b) {
         return Math.sqrt((a[0] - b[0]) ** 2 + (a[1] - b[1]) ** 2);
       }
@@ -590,14 +613,12 @@ export default function CreateProblem() {
         dist(points[2], points[0]), // CA (right)
       ];
 
-      // Midpoints for label positions
       const midpoints = [
         [(points[0][0] + points[1][0]) / 2, (points[0][1] + points[1][1]) / 2], // AB
         [(points[1][0] + points[2][0]) / 2, (points[1][1] + points[2][1]) / 2], // BC
         [(points[2][0] + points[0][0]) / 2, (points[2][1] + points[0][1]) / 2], // CA
       ];
 
-      // Angle for each side label (for rotation)
       function angleBetween(a, b) {
         return Math.atan2(b[1] - a[1], b[0] - a[0]) * 180 / Math.PI;
       }
@@ -607,7 +628,6 @@ export default function CreateProblem() {
         angleBetween(points[2], points[0]), // CA (right)
       ];
 
-      // Rotate left (AB, index 0) and right (CA, index 2) labels by 180deg
       const labelRotations = [
         angles[0] + 180, // left side
         angles[1],       // bottom side
@@ -766,6 +786,7 @@ export default function CreateProblem() {
                   className={styles.toolboxSquare}
                   draggable
                   onDragStart={() => handleDragStart("square")}
+                  onClick={() => setSelectedTool("square")}
                   style={{
                     background: "#e3dcc2",
                     border: "6px solid #000",
@@ -774,12 +795,18 @@ export default function CreateProblem() {
                     height: 100,
                     marginRight: 16,
                     position: "static",
+                    cursor: "pointer",
+                    transform: selectedTool === "square" ? "scale(1.05)" : "scale(1)",
+                    boxShadow: selectedTool === "square" ? "0 0 0 4px #fff, 0 0 0 8px rgba(0,0,0,0.2)" : "none",
+                    opacity: selectedTool === "square" ? 1 : 0.8,
+                    transition: "all 0.2s ease",
                   }}
                 />
                 <div
                   className={styles.toolboxCircle}
                   draggable
                   onDragStart={() => handleDragStart("circle")}
+                  onClick={() => setSelectedTool("circle")}
                   style={{
                     background: "#e3dcc2",
                     border: "6px solid #000",
@@ -787,6 +814,11 @@ export default function CreateProblem() {
                     width: 100,
                     height: 100,
                     position: "static",
+                    cursor: "pointer",
+                    transform: selectedTool === "circle" ? "scale(1.05)" : "scale(1)",
+                    boxShadow: selectedTool === "circle" ? "0 0 0 4px #fff, 0 0 0 8px rgba(0,0,0,0.2)" : "none",
+                    opacity: selectedTool === "circle" ? 1 : 0.8,
+                    transition: "all 0.2s ease",
                   }}
                 />
               </div>
@@ -796,6 +828,7 @@ export default function CreateProblem() {
                   className={styles.toolboxTriangle}
                   draggable
                   onDragStart={() => handleDragStart("triangle")}
+                  onClick={() => setSelectedTool("triangle")}
                   style={{
                     width: 100,
                     height: 100,
@@ -804,6 +837,11 @@ export default function CreateProblem() {
                     justifyContent: "center",
                     marginRight: 24,
                     position: "static",
+                    cursor: "pointer",
+                    transform: selectedTool === "triangle" ? "scale(1.05)" : "scale(1)",
+                    boxShadow: selectedTool === "triangle" ? "0 0 0 4px #fff, 0 0 0 8px rgba(0,0,0,0.2)" : "none",
+                    opacity: selectedTool === "triangle" ? 1 : 0.8,
+                    transition: "all 0.2s ease",
                   }}
                 >
                   <svg width={100} height={100}>
@@ -936,16 +974,126 @@ export default function CreateProblem() {
             onDrop={handleDrop}
             onDragOver={handleDragOver}
             style={{ overflow: "hidden" }}
-            onMouseDown={() => setSelectedId(null)}
+            onMouseDown={() => {
+              setSelectedId(null);
+              setSelectedTool(null); // Remove highlight when clicking main area
+            }}
           >
             {shapes.map(renderShape)}
           </div>
 
           {/* The rest of your layout (buttons, prompt, etc.) */}
-          <button className={styles.saveBtn}>Save</button>
-          <button className={styles.addTimerBtn}>Add Timer</button>
-          <button className={styles.addSolutionBtn}>Add Solution</button>
-          <button className={styles.addHintBtn}>Add Hint</button>
+          <div style={{ marginTop: 24, marginBottom: 16 }}>
+            <button className={styles.saveBtn}>Save</button>
+
+            {/* Add Timer UI */}
+            <span style={{ display: "inline-block", verticalAlign: "middle", marginRight: 12, marginLeft: 12 }}>
+              {!timerOpen ? (
+                <button
+                  className={styles.addTimerBtn}
+                  onClick={() => setTimerOpen(true)}
+                >
+                  Add Timer
+                </button>
+              ) : (
+                <div style={{ display: "inline-flex", alignItems: "center" }}>
+                  <span style={{ fontWeight: 500, marginRight: 8 }}>Timer:</span>
+                  <input
+                    type="number"
+                    min={5}
+                    value={timerValue}
+                    onChange={e => setTimerValue(Math.max(5, Number(e.target.value)))}
+                    style={{
+                      width: 60,
+                      fontSize: 16,
+                      padding: "4px 8px",
+                      borderRadius: 4,
+                      border: "1px solid #aaa",
+                      marginRight: 8,
+                    }}
+                  />
+                  <span style={{ marginRight: 8 }}>seconds</span>
+                  <button
+                    style={{
+                      background: "#fabc60",
+                      border: "1px solid #000",
+                      borderRadius: 4,
+                      padding: "2px 10px",
+                      fontWeight: 600,
+                      cursor: "pointer",
+                      marginRight: 4,
+                    }}
+                    onClick={() => setTimerOpen(false)}
+                    title="Close"
+                  >
+                    ✕
+                  </button>
+                </div>
+              )}
+            </span>
+
+            {/* Add Hint UI */}
+            <span style={{ display: "inline-block", verticalAlign: "middle", marginLeft: 8 }}>
+              {!hintOpen ? (
+                <button
+                  className={styles.addHintBtn}
+                  onClick={() => setHintOpen(true)}
+                >
+                  Add Hint
+                </button>
+              ) : (
+                <div
+                  style={{
+                    background: "#fffbe6",
+                    border: "1px solid #aaa",
+                    borderRadius: 8,
+                    padding: 12,
+                    minWidth: 320,
+                    minHeight: 60,
+                    marginBottom: 4,
+                    position: "relative",
+                    display: "inline-block"
+                  }}
+                >
+                  <textarea
+                    value={hint}
+                    onChange={e => setHint(e.target.value)}
+                    placeholder="Input hint here."
+                    style={{
+                      width: "100%",
+                      minHeight: 40,
+                      resize: "none",
+                      border: "none",
+                      outline: "none",
+                      background: "transparent",
+                      fontFamily: "Poppins",
+                      fontSize: 18,
+                      fontWeight: 300,
+                      color: "#000",
+                    }}
+                  />
+                  <button
+                    style={{
+                      position: "absolute",
+                      top: 6,
+                      right: 8,
+                      background: "#fabc60",
+                      border: "1px solid #000",
+                      borderRadius: 4,
+                      padding: "2px 10px",
+                      fontWeight: 600,
+                      cursor: "pointer",
+                    }}
+                    onClick={() => setHintOpen(false)}
+                    title="Close"
+                  >
+                    ✕
+                  </button>
+                </div>
+              )}
+            </span>
+          </div>
+
           <div className={styles.goBackGroup}>
             <button className={styles.arrowLeft} onClick={() => router.back()}>
               ←
@@ -995,7 +1143,7 @@ export default function CreateProblem() {
             </div>
           </div>
           <div className={styles.solutionHeaderBox}>
-            <span className={styles.solutionHeader}>Solution 2</span>
+            <span className={styles.solutionHeader}>Solution</span>
           </div>
         </div>
       </div>
