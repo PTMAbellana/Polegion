@@ -12,6 +12,11 @@ class RoomRoutes {
   initializeRoutes(){
     this.router.use(this.authMiddleware.protect); // All room routes require authentication
     
+    this.router.post('/upload-banner',
+      this.roomController.getUploadMiddleware(),
+      this.roomController.uploadBannerImage
+    )
+
     this.router.route('/')
         .get(this.roomController.getRooms)
         .post(this.roomController.createRoom);
@@ -24,7 +29,7 @@ class RoomRoutes {
     this.router.route('/code/:code')
       .get(this.roomController.getRoomByCode)
     
-    this.router.post('/upload', this.roomController.uploadBannerImage);
+    // this.router.post('/upload', this.roomController.uploadBannerImage);
   }
 
   getRouter(){

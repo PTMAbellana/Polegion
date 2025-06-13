@@ -4,7 +4,8 @@ const bodyParser = require('body-parser')
 require('dotenv').config()
 
 const {
-    authRoutes, userRoutes, roomRoutes
+    authRoutes, userRoutes, roomRoutes,
+    participantRoutes
 } = require('./container')
 
 const app = express()
@@ -22,6 +23,7 @@ app.use(bodyParser.urlencoded({
 app.use('/api/auth', authRoutes)
 app.use('/api/rooms', roomRoutes)
 app.use('/api/users', userRoutes)
+app.use('/api/participants', participantRoutes)
 
 //basic route
 app.get('/', (req, res) => {

@@ -3,7 +3,7 @@ import Loader from '@/components/Loader'
 import { ROUTES } from '@/constants/routes'
 import { myAppHook } from '@/context/AppUtils'
 import { AuthProtection } from '@/context/AuthProtection'
-import { createRoom, updateRoom, getRooms } from '@/lib/apiService'
+import { createRoom, updateRoom, getRooms, uploadImage, joinRoom } from '@/lib/apiService'
 import styles from '@/styles/room.module.css'
 import { yupResolver } from '@hookform/resolvers/yup'
 import { useRouter } from 'next/navigation'
@@ -147,72 +147,66 @@ export default function VirtualRooms() {
         resolver: yupResolver(joinRoomSchema)
     })
 
-    // const onFormSubmit = async (formData: any) => {
-    //     setLocalLoading(true);
-    //     let imagePath = formData.banner_image;
-
-    //     if (formData.banner_image instanceof File) {
-    //         imagePath = await uploadImageFile(formData.banner_image);
-    //         if (!imagePath) {
-    //             setLocalLoading(false);
-    //             return;
-    //         }
-    //     }
-
-    //     if (roomId) {
-    //         // Update room logic would go here
-    //         console.log('Update room with:', formData)
-    //     } else {
-    //         // Generate unique room code for new rooms
-    //         const newRoomCode = await createUniqueRoomCode();
-    //         if (!newRoomCode) {
-    //             setLocalLoading(false);
-    //             return;
-    //         }
-            
-    //         console.log('Create new room with:', { ...formData, code: newRoomCode })
-            
-    //         // Show the join code to the user
-    //         Swal.fire({
-    //             title: "Room Created!",
-    //             html: `Your room join code is: <strong>${newRoomCode}</strong><br/>Share this code with others to let them join your room.`,
-    //             icon: "success",
-    //             confirmButtonText: "Got it!"
-    //         });
-            
-    //         reset();
-    //     }
-
-    //     setPreviewImage(undefined);
-    //     fetchRoomsFromTable(userProfile?.id);
-    //     setLocalLoading(false);
-    // };
-    // Replace your existing onFormSubmit function with this:
+    // Form submission with proper image handling
     const onFormSubmit = async (formData: any) => {
         setLocalLoading(true);
-        let imagePath = formData.banner_image;
-
-        if (formData.banner_image instanceof File) {
-            imagePath = await uploadImageFile(formData.banner_image);
-            if (!imagePath) {
-                setLocalLoading(false);
-                return;
-            }
-        }
-
+        
         try {
+            console.log('Form submission started')
+            console.log('Form data received:', formData)
+            
+            const roomPayload = {
+                title: formData.title,
+                description: formData.description,
+                mantra: formData.mantra,
+                banner_image: null, // Default to null
+            };
+
+            // Handle image upload if there's a file
+            if (formData.banner_image instanceof File) {
+                console.log('Processing image file:', {
+                    name: formData.banner_image.name,
+                    size: formData.banner_image.size,
+                    type: formData.banner_image.type
+                });
+                
+                // Create FormData for file upload
+                const formDataForUpload = new FormData();
+                formDataForUpload.append('image', formData.banner_image);
+                
+                // Log what we're sending
+                console.log('Sending FormData to server...')
+                for (let pair of formDataForUpload.entries()) {
+                    console.log('FormData pair:', pair[0], pair[1])
+                }
+                
+                try {
+                    // Upload image first
+                    console.log('Calling uploadImage API...')
+                    const uploadResponse = await uploadImage(formDataForUpload);
+                    console.log('Upload response received:', uploadResponse.data);
+                    
+                    if (uploadResponse.data && uploadResponse.data.data && uploadResponse.data.data.imageUrl) {
+                        roomPayload.banner_image = uploadResponse.data.data.imageUrl;
+                        console.log('Image URL set:', roomPayload.banner_image)
+                    } else {
+                        console.error('Invalid upload response structure:', uploadResponse.data)
+                        throw new Error('Failed to get image URL from upload response');
+                    }
+                } catch (uploadError) {
+                    console.error('Image upload failed:', uploadError);
+                    toast.error(`Failed to upload image: ${uploadError.message}`);
+                    setLocalLoading(false);
+                    return;
+                }
+            } else {
+                console.log('ℹNo image file to upload')
+            }
+
             if (roomId) {
                 // UPDATE ROOM
-                const updatePayload = {
-                    title: formData.title,
-                    description: formData.description,
-                    mantra: formData.mantra,
-                    banner_image: imagePath
-                };
-                
-                console.log('Updating room with:', updatePayload);
-                await updateRoom(roomId, updatePayload);
-                
+                console.log('Updating room with payload:', roomPayload);
+                await updateRoom(roomId, roomPayload);
                 toast.success('Room updated successfully!');
                 reset();
                 setRoomId(null);
@@ -220,21 +214,19 @@ export default function VirtualRooms() {
                 // CREATE NEW ROOM
                 const newRoomCode = await createUniqueRoomCode();
                 if (!newRoomCode) {
+                    console.error('Failed to generate room code')
                     setLocalLoading(false);
                     return;
                 }
                 
                 const createPayload = {
-                    title: formData.title,
-                    description: formData.description,
-                    mantra: formData.mantra,
-                    banner_image: imagePath,
+                    ...roomPayload,
                     code: newRoomCode
                 };
                 
-                console.log('Creating room with:', createPayload);
+                console.log('Creating room with payload:', createPayload);
                 
-                // ✅ ACTUALLY CALL THE API TO CREATE THE ROOM
+                // Create the room
                 const response = await createRoom(createPayload);
                 console.log('Room created successfully:', response.data);
                 
@@ -272,11 +264,19 @@ export default function VirtualRooms() {
     const onJoinRoomSubmit = async (formData: JoinRoomFormData) => {
         console.log('Attempting to join room with code:', formData.roomCode)
         // Here you would validate the room code and join the room
-        toast.success(`Joining room with code: ${formData.roomCode}`)
-        setShowJoinModal(false)
-        resetJoin()
-        // Navigate to room
-        router.push(`${ROUTES.VIRTUAL_ROOMS}/${formData.roomCode}`)
+        try {
+            const response = await joinRoom(formData.roomCode)
+            console.log('Successful join room: ', response.data)
+            toast.success(`Joining room with code: ${formData.roomCode}`)
+            setShowJoinModal(false)
+            setShowJoinModal(false)
+            // resetJoin()      // do not uncomment kay ma undefined ig join, di na nuon mailhan
+            // Navigate to room
+            router.push(`${ROUTES.VIRTUAL_ROOMS}/join/${formData.roomCode}`)
+        } catch (error) {
+            console.log('Error joining room:', error)
+            toast.error(`Error joining room`)
+        }
     }
 
     const handleViewRoom = (roomCode: string | undefined, roomId: number | undefined) => {

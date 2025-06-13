@@ -11,7 +11,9 @@ const authUtils = {
             localStorage.setItem('user', JSON.stringify(authData.user))
             
             if (authData.session.expires_at) {
-                localStorage.setItem('expires_at', new Date(authData.session.expires_at).getTime().toString())
+                // localStorage.setItem('expires_at', new Date(authData.session.expires_at).getTime().toString())
+                const expiresAt = authData.session.expires_at * 1000
+                localStorage.setItem('expires_at', expiresAt.toString())
             } else {
                 const defaultExpiry = Date.now() + (24 * 60 * 60 * 1000);
                 localStorage.setItem('expires_at', defaultExpiry.toString());
@@ -94,7 +96,9 @@ api.interceptors.response.use(
 
         if ( 
             error.code === 'ECONNABORTED' ||
-            error.message === 'Network Error'
+            error.message === 'Network Error' ||
+            error.response?.status === 403 ||
+            error.response?.status === 404
         ) return Promise.reject(error)
 
         if (
@@ -145,6 +149,8 @@ api.interceptors.response.use(
                 authUtils.clearAuthData()
                 if (typeof window !== 'undefined') window.location.href = ROUTES.LOGIN
                 return Promise.reject(re)
+            } finally {
+                isRefreshing = false
             }
         }
         return Promise.reject(error)
@@ -225,38 +231,156 @@ export const updateUserProfile = async (profileData) => {
 
 // export mga rooms api 
 export const getRooms = async () => {
-    const res = await api.get('/rooms')
-    console.log('from api getrooms: ', res)
-    return res
+    try {
+        const res = await api.get('/rooms')
+        console.log('from api getrooms: ', res)
+        return res
+    } catch (error) {
+        console.error('Error fetching rooms:', error)
+        throw error
+    }
 }
 
 export const getRoomById = async (id) => {
-    return await api.get(`/rooms/id/${id}`)
+    try {
+        return await api.get(`/rooms/id/${id}`)
+    } catch (error) {
+        console.error('Error fetching room by ID:', error)
+        throw error
+    }
 }
 
 export const getRoomByCode = async (code) => {
-    return await api.get(`/rooms/code/${code}`)
+    try {
+        return await api.get(`/rooms/code/${code}`)
+    } catch (error) {
+        console.error('Error fetching room by code:', error)
+        throw error
+    }
 }
 
 export const createRoom = async (roomData) => {
-    return await api.post('/rooms', roomData)
+    try {
+        console.log('Creating room with data:', roomData)
+        return await api.post('/rooms', roomData)
+    } catch (error) {
+        console.error('Error creating room:', error)
+        throw error
+    }
 }
 
 export const updateRoom = async (id, roomData) => {
-    return await api.put(`/rooms/id/${id}`, roomData)
+     try {
+        console.log('Updating room with data:', roomData)
+        return await api.put(`/rooms/id/${id}`, roomData)
+    } catch (error) {
+        console.error('Error updating room:', error)
+        throw error
+    }
 }
 
 export const deleteRoom = async (id) => {
-    return await api.delete(`/rooms/id/${id}`)
+    try {
+        return await api.delete(`/rooms/id/${id}`)
+    } catch (error) {
+        console.error('Error deleting room:', error)
+        throw error
+    }
 }
 
 export const uploadImage = async (formData) => {
-    return await api.post('/rooms/upload', formData, {
-        headers: {
-            'Content-Type': 'multipart/form-data'
+    try {
+        console.log('Uploading banner image...')
+        
+        // Use the NEW separated endpoint
+        const response = await api.post('/rooms/upload-banner', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            },
+            timeout: 30000 // Longer timeout for file uploads
+        })
+        
+        console.log('Image upload response:', response.data)
+        return response
+    } catch (error) {
+        console.error('Error uploading banner image:', error)
+        
+        // Enhanced error handling for file uploads
+        if (error.response?.data?.error) {
+            throw new Error(error.response.data.error)
+        } else if (error.code === 'ECONNABORTED') {
+            throw new Error('Upload timeout - file may be too large')
+        } else if (error.message === 'Network Error') {
+            throw new Error('Network error - please check your connection')
+        } else if (error.response?.status === 404) {
+            throw new Error('Upload endpoint not found - check server configuration')
+        } else {
+            throw new Error(`Failed to upload image: ${error.message}`)
         }
-    })
+    }
+    // return await api.post('/rooms/upload', formData, {
+    //     headers: {
+    //         'Content-Type': 'multipart/form-data'
+    //     }
+    // })
 }
+
+
+// Participant API
+export const joinRoom = async (room_code) => {
+    try {
+        const response = await api.post('/participants/join', {
+            room_code
+        })
+        return response
+    } catch (error) {
+        throw error
+    }
+}
+
+export const leaveRoom = async (room_id) => {
+    try {
+        return await api.delete(`/participants/leave/${room_id}`)
+    } catch (error) {
+        throw error
+    }
+}
+
+//kani kay to check if current user is a participant or not
+export const isParticipant = async (room_id) => {
+    try {
+        return await api.get(`/participants/status/${room_id}`)
+    } catch (error) {
+        throw error
+    }
+}
+
+export const totalParticipant = async (room_id) => {
+    try {
+        return await api.get(`/participants/count/${room_id}`)
+    } catch (error) {
+        throw error
+    }
+}
+
+export const getAllParticipants = async (room_id) => {
+    try {
+        return await api.get(`/participants/all/`, {
+            room_id
+        })
+    } catch (error) {
+        throw error
+    }
+}
+
+export const kickParticipant = async (room_id, part_id) => {
+    try {
+        return await api.delete(`/participants/room/${room_id}/participant/${part_id}`)
+    } catch (error) {
+        throw error
+    }
+}
+
 
 export { authUtils }
 export default api  

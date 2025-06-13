@@ -54,9 +54,10 @@ export const AppUtilsProvider = ({ children }: { children: React.ReactNode }) =>
                 userProfile: authData.user
             });
         
+            //da kapoya aning tokenvalid oiiiii rarararar gi kapoy nako nimoooooooooooooooooo
             if (
                 authData.accessToken 
-                // && authUtils.isTokenValid()      //da kapoya aning tokenvalid oiiiii rarararar gi kapoy nako nimoooooooooooooooooo
+                && authUtils.isTokenValid()
             ) {
                 console.log('Access token exists, treating as valid')
                 setAuthToken(authData.accessToken);
@@ -99,20 +100,24 @@ export const AppUtilsProvider = ({ children }: { children: React.ReactNode }) =>
             } else {
                 // If token is expired and can't be refreshed, reset state
                 console.log("No valid token found: User is logged out");
-                setAuthToken(null);
-                setUserProfile(null);
-                setIsLoggedIn(false);
+                // setAuthToken(null);
+                // setUserProfile(null);
+                // setIsLoggedIn(false);
+                logout()
                 return false
             }
         } catch (error) {
             console.error('Session refresh error: ', error)
-            setIsLoggedIn(false)
+            // setIsLoggedIn(false)
+            logout()
             return false
         } finally {
             isRefreshing.current = false
-            hasInitialized.current = false
-            setIsLoading(false)
-            console.log('Session refresh completed, loading state set to false')
+            // hasInitialized.current = false
+            if (hasInitialized.current){
+                setIsLoading(false)
+                console.log('Session refresh completed, loading state set to false')
+            }
         }
 
     };
@@ -128,27 +133,41 @@ export const AppUtilsProvider = ({ children }: { children: React.ReactNode }) =>
     // Initialize on component mount
     useEffect(() => {
         if (!hasInitialized.current) {
-            hasInitialized.current = true
-            refreshUserSession();
+            hasInitialized.current = true;
+            console.log('Initializing AppUtils...');
+            refreshUserSession().finally(() => {
+                setIsLoading(false);
+            });
         }
-    }, []);
+    }, [])
+    // useEffect(() => {
+    //     if (!hasInitialized.current) {
+    //         hasInitialized.current = true
+    //         refreshUserSession();
+    //     }
+    // }, []);
+
+    // Debug logging for state changes
+    useEffect(() => {
+        console.log('Auth state changed:', { isLoggedIn, hasToken: !!authToken, hasProfile: !!userProfile });
+    }, [isLoggedIn, authToken, userProfile]);
 
     return (
         <AppUtilsContext.Provider 
-        value={{ 
-            isLoggedIn, 
-            setIsLoggedIn, 
-            authToken, 
-            setAuthToken, 
-            userProfile, 
-            setUserProfile, 
-            isLoading, 
-            setIsLoading,
-            refreshUserSession,
-            logout
-        }}
+            value={{ 
+                isLoggedIn, 
+                setIsLoggedIn, 
+                authToken, 
+                setAuthToken, 
+                userProfile, 
+                setUserProfile, 
+                isLoading, 
+                setIsLoading,
+                refreshUserSession,
+                logout
+            }}
         >
-        {isLoading ? <Loader /> : children}
+            {isLoading ? <Loader /> : children}
         </AppUtilsContext.Provider>
     );
 };
