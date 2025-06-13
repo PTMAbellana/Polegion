@@ -4,7 +4,23 @@ require('dotenv').config()
 const supabaseUrl = process.env.SUPABASE_URL
 const supabaseKey = process.env.SUPABASE_SERVICE_KEY
 
-const supabase = createClient(supabaseUrl, supabaseKey)
+// Add validation
+if (!supabaseUrl || !supabaseKey) {
+    console.error('Missing Supabase environment variables:')
+    console.error('SUPABASE_URL:', supabaseUrl ? 'Present' : 'Missing')
+    console.error('SUPABASE_SERVICE_KEY:', supabaseKey ? 'Present' : 'Missing')
+    process.exit(1)
+}
+
+console.log('Supabase URL:', supabaseUrl)
+console.log('Service Key present:', !!supabaseKey)
+
+const supabase = createClient(supabaseUrl, supabaseKey, {
+    auth: {
+        autoRefreshToken: false,
+        persistSession: false
+    }
+})
 
 // async function testToken(token) {
 //     const {

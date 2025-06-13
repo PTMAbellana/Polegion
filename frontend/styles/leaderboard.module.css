@@ -1,0 +1,375 @@
+/* leaderboard.module.css */
+
+.leaderboard-container {
+    min-height: 100vh;
+    background-color: #2C514C;
+    width: 100%;
+}
+
+.loading-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: #2C514C;
+}
+
+/* Browser Header */
+.browser-header {
+    width: 100%;
+    background-color: #C4C4C4;
+    padding: 21px 8px;
+}
+
+.browser-content {
+    max-width: 1920px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.browser-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.browser-right {
+    display: flex;
+    align-items: center;
+}
+
+.browser-dots {
+    display: flex;
+    gap: 4px;
+}
+
+.dot {
+    width: 16px;
+    height: 16px;
+    background-color: #F8F8F8;
+    border-radius: 3px;
+}
+
+.url-bar {
+    background-color: #F8F8F8;
+    border-radius: 3px;
+    padding: 8px;
+    min-width: 400px;
+    max-width: 600px;
+}
+
+.url-bar span {
+    font-family: 'Poppins', sans-serif;
+    font-size: 16px;
+    font-weight: 400;
+    color: #000000;
+}
+
+/* Main Content */
+.main-content {
+    max-width: 1534px;
+    margin: 0 auto;
+    padding: 40px 20px;
+}
+
+.welcome-section {
+    text-align: center;
+    margin-bottom: 60px;
+}
+
+.welcome-section h1 {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 700;
+    font-size: 64px;
+    line-height: 96px;
+    color: #FFFFFF;
+    margin: 0;
+}
+
+/* Leaderboard List */
+.leaderboard-list {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.leaderboard-item {
+    display: flex;
+    align-items: center;
+    padding: 40px;
+    border-radius: 20px;
+    position: relative;
+    min-height: 207px;
+}
+
+.leaderboard-item.gold {
+    background-color: #FABC60;
+}
+
+.leaderboard-item.silver {
+    background-color: #E3DCC2;
+}
+
+/* Rank Section */
+.rank-section {
+    flex-shrink: 0;
+    width: 80px;
+    text-align: center;
+    margin-right: 24px;
+}
+
+.rank-text {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 700;
+    font-size: 32px;
+    line-height: 48px;
+    color: #000000;
+}
+
+/* Avatar */
+.avatar {
+    width: 125px;
+    height: 125px;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-right: 40px;
+}
+
+.avatar.red {
+    background-color: #E16262;
+}
+
+.avatar.blue {
+    background-color: #2F3E75;
+}
+
+.avatar.pink {
+    background-color: #CD6969;
+}
+
+.avatar-text {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 700;
+    font-size: 64px;
+    line-height: 96px;
+    color: #FFFFFF;
+}
+
+/* Player Info */
+.player-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.player-name {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 700;
+    font-size: 32px;
+    line-height: 48px;
+    color: #000000;
+    margin: 0 0 16px 0;
+}
+
+/* Progress Bar */
+.progress-container {
+    margin-bottom: 16px;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 30px;
+    background-color: #FFFFFF;
+    border-radius: 60px;
+    overflow: hidden;
+    position: relative;
+}
+
+.progress-fill {
+    height: 100%;
+    background-color: #4CAF50;
+    border-radius: 60px;
+    transition: width 0.5s ease;
+}
+
+/* Score Change */
+.score-change {
+    margin-top: 16px;
+}
+
+.change-text {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 700;
+    font-size: 32px;
+    line-height: 48px;
+    color: #000000;
+}
+
+/* Score Section */
+.score-section {
+    flex-shrink: 0;
+    margin-right: 24px;
+    text-align: center;
+}
+
+.score-text {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 700;
+    font-size: 32px;
+    line-height: 48px;
+    color: #000000;
+}
+
+/* Trending Section */
+.trending-section {
+    flex-shrink: 0;
+    width: 60px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.trending-up {
+    color: #4CAF50;
+}
+
+.trending-down {
+    color: #E16262;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+    .main-content {
+        max-width: 100%;
+        padding: 30px 15px;
+    }
+    
+    .leaderboard-item {
+        padding: 30px 20px;
+    }
+    
+    .avatar {
+        width: 100px;
+        height: 100px;
+        margin-right: 30px;
+    }
+    
+    .avatar-text {
+        font-size: 48px;
+        line-height: 72px;
+    }
+}
+
+@media (max-width: 768px) {
+    .browser-content {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .browser-left {
+        width: 100%;
+        justify-content: space-between;
+    }
+    
+    .url-bar {
+        min-width: 200px;
+        max-width: 300px;
+    }
+    
+    .url-bar span {
+        font-size: 12px;
+    }
+    
+    .welcome-section h1 {
+        font-size: 48px;
+        line-height: 72px;
+    }
+    
+    .leaderboard-item {
+        flex-direction: column;
+        text-align: center;
+        padding: 20px;
+        gap: 20px;
+    }
+    
+    .rank-section,
+    .avatar,
+    .player-info,
+    .score-section,
+    .trending-section {
+        margin-right: 0;
+    }
+    
+    .avatar {
+        width: 80px;
+        height: 80px;
+    }
+    
+    .avatar-text {
+        font-size: 36px;
+        line-height: 54px;
+    }
+    
+    .rank-text,
+    .player-name,
+    .change-text,
+    .score-text {
+        font-size: 24px;
+        line-height: 36px;
+    }
+    
+    .progress-bar {
+        height: 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    .main-content {
+        padding: 20px 10px;
+    }
+    
+    .welcome-section h1 {
+        font-size: 36px;
+        line-height: 54px;
+    }
+    
+    .leaderboard-item {
+        padding: 15px;
+        gap: 15px;
+    }
+    
+    .avatar {
+        width: 60px;
+        height: 60px;
+    }
+    
+    .avatar-text {
+        font-size: 28px;
+        line-height: 42px;
+    }
+    
+    .rank-text,
+    .player-name,
+    .change-text,
+    .score-text {
+        font-size: 18px;
+        line-height: 27px;
+    }
+    
+    .progress-bar {
+        height: 16px;
+    }
+    
+    .url-bar {
+        min-width: 150px;
+        max-width: 200px;
+    }
+    
+    .url-bar span {
+        font-size: 10px;
+    }
+}
