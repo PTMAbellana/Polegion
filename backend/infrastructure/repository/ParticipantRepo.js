@@ -14,7 +14,7 @@ class ParticipantRepo extends BaseRepo {
         // then if room exists, check if current user is admin
         // if admin, return 'is already an admin'
         // if not, then add them as participant
-        console.log('repo called')
+        // console.log('repo called')
         try {
             const {
                 data: rd,
@@ -24,7 +24,7 @@ class ParticipantRepo extends BaseRepo {
             .eq('code', room_code)
             .single()
 
-            console.log('room exists: ', rd)
+            // console.log('room exists: ', rd)
 
             if (re || !rd) throw new Error ('Room not found')
             
@@ -58,11 +58,11 @@ class ParticipantRepo extends BaseRepo {
 
             if (error) throw error
 
-            console.log('inseting participant to table: ', data)
+            // console.log('inseting participant to table: ', data)
             return data
 
         } catch(error){
-            console.log('I am called: ', error)
+            // console.log('I am called: ', error)
             throw error
         }
     }
@@ -92,7 +92,7 @@ class ParticipantRepo extends BaseRepo {
         // todo:
         // get all participants in the current room
         // para ni sa admin na part 
-        console.log('getAllParticipants called: ', room_id)
+        // console.log('getAllParticipants called: ', room_id)
         try {
             const {
                 data,
@@ -104,12 +104,12 @@ class ParticipantRepo extends BaseRepo {
             if (error) throw error
             if (!data) return []
             
-            console.log('getAllParticipants: ', data)
+            // console.log('getAllParticipants: ', data)
             return data
 
         } catch (error) {
-            console.log('natawag ko')
-            console.log(error)
+            // console.log('natawag ko')
+            // console.log(error)
             throw error
         }
     }

@@ -26,12 +26,12 @@ class ParticipantService {
 
     //ang mu get kay ang owner or ang admin
     async getRoomParticipants(room_id, creator_id){
-        console.log('getRoomParticipants called: ', room_id, creator_id)
+        // console.log('getRoomParticipants called: ', room_id, creator_id)
         
         try {
             //verify if room exists
             const exist = await this.roomService.getRoomById(room_id, creator_id)
-            console.log('getRoomParticipants data: ', exist)
+            // console.log('getRoomParticipants data: ', exist)
             
             if (!exist) throw new Error ('Room not found or not authorized')
             // return await this.participantRepo.getAllParticipants(room_id)
@@ -45,22 +45,22 @@ class ParticipantService {
                         
                         console.log('getRoomParticipants userData: ', userData)
                         if (!userData) {
-                            console.warn(`User not found for ID: ${participant.user_id}`)
+                            // console.warn(`User not found for ID: ${participant.user_id}`)
                             return {}
                         }
 
                         return userData
                         
                     } catch (error) {
-                        console.warn(`Error fetching user ${participant.user_id}:`, error)
+                        // console.warn(`Error fetching user ${participant.user_id}:`, error)
                         return {}
                     }
                 })
             )
-            console.log('getRoomParticipants parts: ', participants)
+            // console.log('getRoomParticipants parts: ', participants)
             return participants
         } catch (error){
-            console.log('Error in getRoomParticipants service: ', error)
+            // console.log('Error in getRoomParticipants service: ', error)
             throw error
         }
     }

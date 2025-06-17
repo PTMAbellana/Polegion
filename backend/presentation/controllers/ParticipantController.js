@@ -6,10 +6,10 @@ class ParticipantController {
     joinRoom = async (req, res) => {
         console.log('join is called')
         // console.log(req.body)
-        console.log(req.user)
+        // console.log(req.user)
         const { room_code } = req.body
         // const { room_code } = req.params
-        console.log(room_code)
+        // console.log(room_code)
 
         if (!room_code) return res.status(400).json({
             error: 'Room code is required'
@@ -22,7 +22,7 @@ class ParticipantController {
                 data: data
             })
         } catch (error) {
-             console.error('Error joining room:', error.message)
+            //  console.error('Error joining room:', error.message)
             
             if (error.message === 'Room not found') 
                 return res.status(404).json({ error: 'Room not found' })
@@ -72,16 +72,16 @@ class ParticipantController {
         // console.log('getRoomParticipants called: ' , req)
         // const {room_id} = req.body
         const { room_id } = req.params 
-        console.log('getRoomParticipants called 1: ', room_id)
+        // console.log('getRoomParticipants called 1: ', room_id)
         try {
             const participants = await this.participantService.getRoomParticipants(room_id, req.user.id)
-            console.log('getRoomParticipants called 2: ', participants)
+            // console.log('getRoomParticipants called 2: ', participants)
             res.status(200).json({
                 participants
             })
             // console.log('getRoomParticipants called 3: ', res.data)
         } catch (error) {
-            console.log('Error fetching participants: ', error)
+            // console.log('Error fetching participants: ', error)
 
             if (error.message === 'Room not found or not authorized')
                 return res.status(404).json({
@@ -104,7 +104,7 @@ class ParticipantController {
                 isParticipant:isParticipant
             })
         } catch (error) {
-            console.error('Error checking participant: ', error)
+            // console.error('Error checking participant: ', error)
             res.status(500).json({
                 error: 'Server error checking participant status'
             })
@@ -121,7 +121,7 @@ class ParticipantController {
                 total_participants: count
             })
         } catch (error) {
-            console.error('Error getting participant count')
+            // console.error('Error getting participant count')
             res.status(500).json({
                 error: 'Server error getting participant count'
             })
@@ -136,7 +136,7 @@ class ParticipantController {
         try {
             await this.participantService.removeParticipant(req.user.id, user_id, room_id)
         } catch (error) {
-            console.error('Error removing participant: ', error)
+            // console.error('Error removing participant: ', error)
             res.status(500).json({
                 error: 'Server error removing participant'
             })
