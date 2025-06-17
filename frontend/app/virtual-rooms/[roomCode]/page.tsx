@@ -2,11 +2,12 @@
 import Loader from '@/components/Loader'
 import { myAppHook } from '@/context/AppUtils'
 import { AuthProtection } from '@/context/AuthProtection'
-import { getRoomByCode } from '@/lib/apiService'
+import { getAllParticipants, getRoomByCode } from '@/lib/apiService'
 import styles from '@/styles/room-competition.module.css'
 import { use, useEffect, useState } from 'react'
 
 import { useRouter } from "next/navigation";
+import { set } from 'react-hook-form'
 
 interface Room{
     title: string
@@ -16,9 +17,17 @@ interface Room{
     code: string
 }
 
+interface Participant {
+    id?:string
+    fullName?: string
+    gender?: string
+    email?: string
+}
+
 export default function RoomDetail({ params } : { params  : Promise<{roomCode : string }> }){
     const roomCode = use(params)
     const [ roomDetails, setRoomDetails ] = useState<Room | null>(null)
+    const [ participants, setParticipants ] = useState<Participant[]>([])
     const [ isLoading, setIsLoading ] = useState(true)
 
     const { isLoggedIn } = myAppHook()
@@ -44,6 +53,10 @@ export default function RoomDetail({ params } : { params  : Promise<{roomCode : 
             const res = await getRoomByCode(roomCode.roomCode)
             console.log(res.data)
             setRoomDetails(res.data)
+            const test = await getAllParticipants(res.data.id)
+            setParticipants( test.data.participants || [] )
+            console.log('Attempting to get all participants: ', test.data)
+            // console.log('Participants: ', participants)
         } catch (error) {
             console.error('Error fetching room details:', error)
         } finally {
@@ -72,6 +85,8 @@ export default function RoomDetail({ params } : { params  : Promise<{roomCode : 
             </div>
         )
     }
+
+    console.log('Participants: ', participants[0].fullName)
 
     return (
         <div className={styles["dashboard-container"]}>

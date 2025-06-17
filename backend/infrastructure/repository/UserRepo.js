@@ -40,6 +40,21 @@ class UserRepo extends BaseRepo{
             throw error
         }
     }
+
+    async getUserByuid(userId) {
+        try {
+            const {
+                data,
+                error
+            } = await this.supabase.auth.admin.getUserById(userId)
+
+            if (error || !data.user) throw new Error("User not found or invalid user ID")
+
+            return userModel.fromDbUser(data.user)
+        } catch (error) {
+            throw error
+        }
+    }
     
     async updateUser(userData) {
         try {

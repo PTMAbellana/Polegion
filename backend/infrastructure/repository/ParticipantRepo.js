@@ -92,20 +92,24 @@ class ParticipantRepo extends BaseRepo {
         // todo:
         // get all participants in the current room
         // para ni sa admin na part 
+        console.log('getAllParticipants called: ', room_id)
         try {
             const {
                 data,
                 error
             } = await this.supabase.from(this.tableName)
             .select('user_id')
-            .eq(room_id)
+            .eq('room_id', room_id)
             
             if (error) throw error
             if (!data) return []
             
+            console.log('getAllParticipants: ', data)
             return data
 
         } catch (error) {
+            console.log('natawag ko')
+            console.log(error)
             throw error
         }
     }

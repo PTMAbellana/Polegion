@@ -22,12 +22,15 @@ class ParticipantController {
                 data: data
             })
         } catch (error) {
-             console.error('Error joining room:', error)
+             console.error('Error joining room:', error.message)
             
             if (error.message === 'Room not found') 
                 return res.status(404).json({ error: 'Room not found' })
             
-            if (error.message === 'Room owner cannot be added as participant') 
+            if (
+                error.message === 'Room owner cannot be added as participant' || 
+                error.message === 'Already an admin'
+            ) 
                 return res.status(400).json({ error: 'Room owner cannot join as participant' })
 
             if (error.message === 'User is already a participant in this room') 
@@ -66,14 +69,17 @@ class ParticipantController {
 
     // for admin
     getRoomParticipants = async (req, res) => {
-        const {room_id} = req.body
-        // const {room_id} = req.params
-
+        // console.log('getRoomParticipants called: ' , req)
+        // const {room_id} = req.body
+        const { room_id } = req.params 
+        console.log('getRoomParticipants called 1: ', room_id)
         try {
             const participants = await this.participantService.getRoomParticipants(room_id, req.user.id)
+            console.log('getRoomParticipants called 2: ', participants)
             res.status(200).json({
-                data: participants
+                participants
             })
+            // console.log('getRoomParticipants called 3: ', res.data)
         } catch (error) {
             console.log('Error fetching participants: ', error)
 

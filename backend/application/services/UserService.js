@@ -10,6 +10,14 @@ class UserService {
             throw error
         }
     }
+
+    async getUserById(userId) {
+        try {
+            return await this.userRepo.getUserByuid(userId)
+        } catch (error) {
+            throw error
+        }
+    }
     
     async updateUserProfile(userData) {
         try {

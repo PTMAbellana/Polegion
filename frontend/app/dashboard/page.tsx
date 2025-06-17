@@ -63,6 +63,8 @@ export default function Dashboard() {
             setRoomsLoading(true)
             const response = await getRooms()
 
+            console.log('Fetched rooms: ', response)
+
             if (
                 response && 
                 response.data

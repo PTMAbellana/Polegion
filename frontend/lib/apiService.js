@@ -365,9 +365,10 @@ export const totalParticipant = async (room_id) => {
 
 export const getAllParticipants = async (room_id) => {
     try {
-        return await api.get(`/participants/all/`, {
-            room_id
-        })
+        // return await api.get(`/participants/all`, {
+        //     room_id
+        // })
+        return await api.get(`/participants/all/${room_id}`)
     } catch (error) {
         throw error
     }

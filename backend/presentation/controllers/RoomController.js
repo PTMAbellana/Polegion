@@ -25,7 +25,7 @@ class RoomController {
     
     // Get all rooms for a user
     getRooms = async (req, res) => {
-        console.log(req.user)
+        // console.log(req.user)
         try {
             const rooms = await this.roomService.getRooms(req.user.id)
             
@@ -44,8 +44,8 @@ class RoomController {
     
     // Get a single room
     getRoomById = async (req, res) => {
-        console.log(typeof req.params.id)
-        console.log(req.params.id)
+        // console.log(typeof req.params.id)
+        // console.log(req.params.id)
         try {
             let room = await this.roomService.getRoomById(req.params.id, req.user.id)  
             
@@ -58,9 +58,9 @@ class RoomController {
     };
     
     getRoomByCode = async (req, res) => {
-        console.log(typeof req.params)
-        console.log(req.params)
-        console.log(req.user)
+        // console.log(typeof req.params)
+        // console.log(req.params)
+        // console.log(req.user)
         try {
             let room = await this.roomService.getRoomByCode(req.params.code, req.user.id)  
                         
