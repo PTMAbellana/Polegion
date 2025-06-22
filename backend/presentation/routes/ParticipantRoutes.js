@@ -17,6 +17,7 @@ class ParticipantRoutes {
         this.router.get('count/:room_id', this.participantController.getRoomParticipantCount)
         this.router.get('/all/:room_id', this.participantController.getRoomParticipants)
         this.router.delete('/room/:room_id/participant/:user_id', this.participantController.removeParticipant)
+        this.router.get('/joined', this.participantController.joinedRooms)
     }
     
     getRouter(){

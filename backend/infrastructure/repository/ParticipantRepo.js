@@ -151,6 +151,22 @@ class ParticipantRepo extends BaseRepo {
             throw error
         }
     }
+
+    async getJoinedRooms(user_id) {
+        try {
+            const { data, error } = await this.supabase
+                .from(this.tableName)
+                .select('room_id')
+                .eq('user_id', user_id)
+
+            if (error) throw error
+
+            console.log('getJoinedRooms: ', data)
+            return data || []
+        } catch (error) {
+            throw error
+        }
+    }
 }
 
 module.exports = ParticipantRepo

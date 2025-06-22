@@ -31,8 +31,8 @@ class RoomController {
             
             if (!rooms) return res.status(400).json({ error: error.message })
             
-            console.log('getRooms 1: ', rooms)
-            console.log('getRooms 2: ', rooms.map( room => room.toDTO() ))
+            // console.log('getRooms 1: ', rooms)
+            // console.log('getRooms 2: ', rooms.map( room => room.toDTO() ))
 
             res.status(200).json(
                 rooms.map( room => room.toDTO() )
@@ -122,7 +122,7 @@ class RoomController {
             if (!room) return res.status(400).json({ error: error.message })
             res.status(200).json(room.toDTO())
         } catch (error) {
-            console.error('Error updating room:', error)
+            // console.error('Error updating room:', error)
             if (error.message === 'Room not found or not authorized') return res.status(404).json({ error: 'Room not found or not authorized' })
             res.status(500).json({ error: 'Server error updating room' })
         }
@@ -142,8 +142,8 @@ class RoomController {
     // Handle file uploads for banner images
     uploadBannerImage = async (req, res) => {
         try {
-            console.log('Upload endpoint hit')
-            console.log('File received:', req.file ? req.file.originalname : 'No file')
+            // console.log('Upload endpoint hit')
+            // console.log('File received:', req.file ? req.file.originalname : 'No file')
 
             if (!req.file) {
                 return res.status(400).json({ error: 'No file uploaded' })
@@ -153,7 +153,7 @@ class RoomController {
             const fileExtension = file.originalname.split('.').pop()
             const fileName = `${Date.now()}.${fileExtension}`
 
-            console.log('Uploading file:', fileName)
+            // console.log('Uploading file:', fileName)
         
             // This implementation will depend on how you handle file uploads
             // You might need to use multer or another library
@@ -163,7 +163,7 @@ class RoomController {
                 file.mimetype
             )
 
-            console.log('Image uploaded successfully:', url)
+            // console.log('Image uploaded successfully:', url)
             
             if (!url) return res.status(400).json({ error: error.message })
                         

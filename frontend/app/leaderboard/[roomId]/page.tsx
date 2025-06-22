@@ -1,6 +1,6 @@
 "use client"
 
-import React from 'react'
+import React, { use } from 'react'
 import Loader from '@/components/Loader'
 import { myAppHook } from '@/context/AppUtils'
 import styles from '@/styles/leaderboard.module.css'
@@ -79,7 +79,9 @@ const TrendingIcon = ({ direction }) => {
   }
 };
 
-export default function Leaderboard() {
+export default function LeaderboardDetail({ params } : { params  : Promise<{roomId : number }> }) {
+    const roomId = use(params)
+    console.log('get roomId: ', roomId)
     const { isLoggedIn, userProfile, isLoading } = myAppHook()
 
     if (isLoading || !isLoggedIn) {

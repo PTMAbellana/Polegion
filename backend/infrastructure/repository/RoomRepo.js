@@ -10,7 +10,7 @@ class RoomRepo extends BaseRepo {
 
     async getAllRooms(user_id){
         try {
-            console.log('Fetching rooms for user: ', user_id)
+            // console.log('Fetching rooms for user: ', user_id)
             const {
                 data,
                 error
@@ -23,17 +23,45 @@ class RoomRepo extends BaseRepo {
 
             if (error) throw error
             if (!data) {
-                console.log('No rooms returned from supabase')
+                // console.log('No rooms returned from supabase')
                 return []
             }
             const rooms = data.map(room => {
-                console.log('Processing room:', room)
+                // console.log('Processing room:', room)
                 return roomModel.fromDbRoom(room)
             })
 
             // console.log('Processed rooms:', rooms);
             return rooms
             // return data.map( room => roomModel.fromDbRoom(room) )
+        } catch (error) {
+            throw error
+        }
+    }
+
+    async getRoomsById(room_id){
+        try { 
+            const {
+                data,
+                error
+            } = await this.supabase.from(this.tableName)
+            .select('*')
+            .eq('id', room_id)
+            .order('created_at', { ascending: false } )
+            .single()
+
+            if (error) throw error
+            if (!data || data.length === 0) {
+                throw new Error('Room not found')
+            }
+
+            // const rooms = data.map(room => {
+            //     // console.log('Processing room:', room)
+            //     return roomModel.fromDbRoom(room)
+            // })
+            // // console.log('Processed rooms:', rooms);
+            // return rooms 
+            return roomModel.fromDbRoom(data)
         } catch (error) {
             throw error
         }
@@ -172,7 +200,7 @@ class RoomRepo extends BaseRepo {
             })
     
             if (error){
-                console.log('Upload image error: ', error) 
+                // console.log('Upload image error: ', error) 
                 throw error
             }
 
@@ -189,7 +217,7 @@ class RoomRepo extends BaseRepo {
 
             return urlData.publicUrl
         } catch (error) {
-            console.error('Error in uploadBannerImage:', error)
+            // console.error('Error in uploadBannerImage:', error)
             throw error
         }    
     }

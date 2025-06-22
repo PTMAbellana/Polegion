@@ -13,6 +13,14 @@ class RoomService {
         }
     }
 
+    async getRoomsById (room_id){
+        try {
+            return await this.roomRepo.getRoomsById(room_id)
+        } catch (error) {
+            throw error
+        }
+    }
+
     async getRoomById (roomId, user_id){
         try {
             return await this.roomRepo.getRoomById(roomId, user_id)

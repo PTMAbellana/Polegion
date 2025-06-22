@@ -143,6 +143,21 @@ class ParticipantController {
         }
     }
 
+    joinedRooms = async (req, res) => {
+        console.log('joinedRooms called: ', req.user.id)
+        try {
+            const rooms = await this.participantService.getJoinedRooms(req.user.id)
+            res.status(200).json({
+                rooms
+            })
+        } catch (error) {
+            console.error('Error fetching joined rooms: ', error)
+            res.status(500).json({
+                error: 'Server error fetching joined rooms'
+            })
+        }
+    }
+
 }
 
 module.exports = ParticipantController
