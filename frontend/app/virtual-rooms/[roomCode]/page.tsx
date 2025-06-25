@@ -86,7 +86,10 @@ export default function RoomDetail({ params } : { params  : Promise<{roomCode : 
         )
     }
 
-    console.log('Participants: ', participants[0].fullName)
+    console.log(
+        'Participants: ',
+        participants && participants.length > 0 ? participants[0].fullName : 'No participants'
+    );
 
     return (
         <div className={styles["dashboard-container"]}>

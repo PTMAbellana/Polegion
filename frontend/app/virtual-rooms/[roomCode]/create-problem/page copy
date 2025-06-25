@@ -3,7 +3,6 @@ import styles from "@/styles/create-problem.module.css";
 import { useRouter } from "next/navigation";
 import React, { useState, useRef, useEffect } from "react";
 import Toolbox from "./components/Toolbox";
-import DifficultyDropdown from "./components/DifficultyDropdown";
 import FillTool from "./components/FillTool";
 import Timer from "./components/Timer";
 import HintBox from "./components/HintBox";
@@ -403,15 +402,57 @@ export default function CreateProblem() {
   return (
     <div className={styles.root}>
       <div className={styles.scalableWorkspace}>
-        {/* Sidebar group: Difficulty dropdown above Toolbox */}
-        <div style={{ gridArea: "sidebar", display: "flex", flexDirection: "column", alignItems: "center" }}>
-          <DifficultyDropdown
-            difficulty={difficulty}
-            setDifficulty={setDifficulty}
-            dropdownOpen={dropdownOpen}
-            setDropdownOpen={setDropdownOpen}
-            dropdownRef={dropdownRef}
-          />
+        <div
+          style={{
+            width: 1920,
+            height: 1080,
+            transform: `scale(${scale})`,
+            transformOrigin: "top left",
+            position: "relative",
+            background: "#fff",
+            overflow: "hidden",
+          }}
+        >
+          {/* Difficulty Dropdown */}
+          <div
+            ref={dropdownRef}
+            className={styles.difficultyBox}
+            style={{
+              background: DIFFICULTY_COLORS[difficulty],
+              cursor: "pointer",
+              zIndex: 20,
+            }}
+            onClick={() => setDropdownOpen((open) => !open)}
+          >
+            <span className={styles.difficultyText}>{difficulty}</span>
+            <span style={{ marginLeft: 12, fontSize: 18, color: "#2c514c" }}>
+              ▼
+            </span>
+            {dropdownOpen && (
+              <div className={styles.difficultyDropdownMenu}>
+                {["Easy", "Intermediate", "Hard"].map((diff) => (
+                  <div
+                    key={diff}
+                    className={styles.difficultyDropdownItem}
+                    style={{
+                      background: DIFFICULTY_COLORS[diff],
+                      color: "#2c514c",
+                      fontWeight: 600,
+                    }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setDifficulty(diff);
+                      setDropdownOpen(false);
+                    }}
+                  >
+                    {diff}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Toolbox */}
           <Toolbox
             selectedTool={selectedTool}
             setSelectedTool={setSelectedTool}
@@ -422,47 +463,80 @@ export default function CreateProblem() {
             handleFillDragStart={handleFillDragStart}
             handleFillDragEnd={handleFillDragEnd}
           />
-        </div>
 
-        {/* Prompt */}
-        <div className={styles.promptGroup}>
-          <PromptBox
-            prompt={prompt}
-            setPrompt={setPrompt}
-            editingPrompt={editingPrompt}
-            setEditingPrompt={setEditingPrompt}
-            promptInputRef={promptInputRef}
+          {/* Fill Tool Palette */}
+          <FillTool
+            fillMode={fillMode}
+            fillColor={fillColor}
+            setFillColor={setFillColor}
+            FILL_COLORS={FILL_COLORS}
           />
-        </div>
 
-        {/* Main Area */}
-        <div
-          ref={mainAreaRef}
-          className={styles.mainArea}
-          onDrop={handleDrop}
-          onDragOver={handleDragOver}
-          style={{ overflow: "hidden" }}
-          onMouseDown={() => {
-            setSelectedId(null);
-            setSelectedTool(null);
-          }}
-        >
-          {shapes.map(renderShape)}
-        </div>
+          {/* Main Area */}
+          <div
+            ref={mainAreaRef}
+            className={styles.mainArea}
+            onDrop={handleDrop}
+            onDragOver={handleDragOver}
+            style={{ overflow: "hidden" }}
+            onMouseDown={() => {
+              setSelectedId(null);
+              setSelectedTool(null);
+            }}
+          >
+            {shapes.map(renderShape)}
+          </div>
 
-        {/* Controls Row (Save, Timer, Hint) */}
-        <div className={styles.controlsRow}>
-          <button className={`${styles.addTimerBtn} ${styles.rowBtn}`}>Add Timer</button>
-          <button className={`${styles.saveBtn} ${styles.rowBtn}`}>Save</button>
-          <button className={`${styles.addHintBtn} ${styles.rowBtn}`}>Add Hint</button>
-        </div>
+          {/* Save, Timer, Hint */}
+          {/* <div style={{ marginTop: 24, marginBottom: 16 }}>
+            <button className={styles.saveBtn}>Save</button>
+            <Timer
+              timerOpen={timerOpen}
+              setTimerOpen={setTimerOpen}
+              timerValue={timerValue}
+              setTimerValue={setTimerValue}
+            />
+            <HintBox
+              hintOpen={hintOpen}
+              setHintOpen={setHintOpen}
+              hint={hint}
+              setHint={setHint}
+            />
+          </div> */}
+          <div style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            gap: 24,
+            marginTop: 24,
+            marginBottom: 16,
+          }}>
+            <button className={`${styles.addTimerBtn} ${styles.rowBtn}`}>Add Timer</button>
+            <button className={`${styles.saveBtn} ${styles.rowBtn}`}>Save</button>
+            <button className={`${styles.addHintBtn} ${styles.rowBtn}`}>Add Hint</button>
+          </div>
 
-        {/* Go Back */}
-        <div className={styles.goBackGroup}>
-          <button className={styles.arrowLeft} onClick={() => router.back()}>
-            ←
-          </button>
-          <span className={styles.goBackText}>Go back</span>
+          {/* Go Back */}
+          <div className={styles.goBackGroup}>
+            <button className={styles.arrowLeft} onClick={() => router.back()}>
+              ←
+            </button>
+            <span className={styles.goBackText}>Go back</span>
+          </div>
+
+          {/* Prompt */}
+          <div className={styles.promptGroup}>
+            <PromptBox
+              prompt={prompt}
+              setPrompt={setPrompt}
+              editingPrompt={editingPrompt}
+              setEditingPrompt={setEditingPrompt}
+              promptInputRef={promptInputRef}
+            />
+          </div>
+          <div className={styles.solutionHeaderBox}>
+            <span className={styles.solutionHeader}>Solution</span>
+          </div>
         </div>
       </div>
     </div>
