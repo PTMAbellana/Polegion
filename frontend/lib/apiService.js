@@ -151,6 +151,16 @@ api.interceptors.response.use(
   },
 );
 
+export const refreshToken = async () => {
+  try {
+    return await api.post(`auth/refresh-token`, {
+      refresh_token: localStorage.getItem("refresh_token"),
+    });
+  } catch (error) {
+    throw error;
+  }
+};
+
 // auth api
 export const login = async (email, password) => {
   try {
@@ -376,15 +386,14 @@ export const kickParticipant = async (room_id, part_id) => {
   }
 };
 
-export const refreshToken = async () => {
-  try {
-    return await api.post(`auth/refresh-token`, {
-      refresh_token: localStorage.getItem("refresh_token"),
-    });
-  } catch (error) {
-    throw error;
-  }
-};
+export const getJoinedRooms = async() => {
+    try {
+        return await api.get('/participants/joined')
+    } catch (error) {
+        console.error('Error fetching joined rooms:', error)
+        throw error
+    }
+}
 
 export { authUtils };
 export default api;

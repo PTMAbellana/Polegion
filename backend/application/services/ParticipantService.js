@@ -93,6 +93,37 @@ class ParticipantService {
         }
     }
 
+    async getJoinedRooms(user_id) {
+        try {
+            const data = await this.participantRepo.getJoinedRooms(user_id)
+            
+            const rooms = await Promise.all(
+                data.map(async (room) => {
+                    try {
+                        // Fetch user data from users table using user_id
+                        const roomData = await this.roomService.getRoomsById(room.room_id)
+                        
+                        console.log('getRoomParticipants userData: ', roomData)
+                        if (!roomData) {
+                            console.warn(`User not found for ID: ${room.room_id}`)
+                            return null
+                        }
+
+                        return roomData
+                        
+                    } catch (error) {
+                        console.warn(`Error fetching user ${room.room_id}:`, error)
+                        return null
+                    }
+                })
+            )
+            
+            return rooms
+        } catch (error) {
+            throw error
+        }
+    }
+
 }
 
 module.exports = ParticipantService
