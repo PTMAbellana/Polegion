@@ -1,8 +1,10 @@
+// const userModel = require('../../domain/models/User')
+
 class ParticipantService {
-    constructor(participantRepo, roomRepo, userRepo){
+    constructor(participantRepo, roomService, userService){
         this.participantRepo = participantRepo
-        this.roomRepo = roomRepo
-        this.userRepo = userRepo
+        this.roomService = roomService
+        this.userService = userService
     }
 
     async joinRoom(user_id, room_code){
@@ -24,17 +26,41 @@ class ParticipantService {
 
     //ang mu get kay ang owner or ang admin
     async getRoomParticipants(room_id, creator_id){
+        // console.log('getRoomParticipants called: ', room_id, creator_id)
         
         try {
             //verify if room exists
-            const {
-                data, error
-            }  = await this.roomRepo.getRoomById(room_id, creator_id)
+            const exist = await this.roomService.getRoomById(room_id, creator_id)
+            // console.log('getRoomParticipants data: ', exist)
+            
+            if (!exist) throw new Error ('Room not found or not authorized')
+            // return await this.participantRepo.getAllParticipants(room_id)
+            const data = await this.participantRepo.getAllParticipants(room_id)
+            
+            const participants = await Promise.all(
+                data.map(async (participant) => {
+                    try {
+                        // Fetch user data from users table using user_id
+                        const userData = await this.userService.getUserById(participant.user_id)
+                        
+                        console.log('getRoomParticipants userData: ', userData)
+                        if (!userData) {
+                            // console.warn(`User not found for ID: ${participant.user_id}`)
+                            return {}
+                        }
 
-            if (error) throw error
-            if (!data) throw new Error ('Room not found or not authorized')
-            return await this.participantRepo.getAllParticipants(room_id)
+                        return userData
+                        
+                    } catch (error) {
+                        // console.warn(`Error fetching user ${participant.user_id}:`, error)
+                        return {}
+                    }
+                })
+            )
+            // console.log('getRoomParticipants parts: ', participants)
+            return participants
         } catch (error){
+            // console.log('Error in getRoomParticipants service: ', error)
             throw error
         }
     }
@@ -58,15 +84,42 @@ class ParticipantService {
     async removeParticipant (creator, participant, room) {
         try {
             // verify if room exists
-            const {
-                data,
-                error
-            } = await this.roomRepo.getRoomById(room, creator)
-            if (error) throw error
+            const data = await this.roomService.getRoomById(room, creator)
             if (!data) throw new Error('Room not found or not authorized')
 
             return await this.participantRepo.removeParticipant(participant, room)
         } catch (error){
+            throw error
+        }
+    }
+
+    async getJoinedRooms(user_id) {
+        try {
+            const data = await this.participantRepo.getJoinedRooms(user_id)
+            
+            const rooms = await Promise.all(
+                data.map(async (room) => {
+                    try {
+                        // Fetch user data from users table using user_id
+                        const roomData = await this.roomService.getRoomsById(room.room_id)
+                        
+                        console.log('getRoomParticipants userData: ', roomData)
+                        if (!roomData) {
+                            console.warn(`User not found for ID: ${room.room_id}`)
+                            return null
+                        }
+
+                        return roomData
+                        
+                    } catch (error) {
+                        console.warn(`Error fetching user ${room.room_id}:`, error)
+                        return null
+                    }
+                })
+            )
+            
+            return rooms
+        } catch (error) {
             throw error
         }
     }

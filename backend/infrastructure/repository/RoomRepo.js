@@ -10,7 +10,7 @@ class RoomRepo extends BaseRepo {
 
     async getAllRooms(user_id){
         try {
-            console.log('Fetching rooms for user: ', user_id)
+            // console.log('Fetching rooms for user: ', user_id)
             const {
                 data,
                 error
@@ -19,21 +19,49 @@ class RoomRepo extends BaseRepo {
             .eq('user_id', user_id)
             .order('created_at', { ascending: false } )
 
-            console.log('room data ', data)
+            // console.log('room data ', data)
 
             if (error) throw error
             if (!data) {
-                console.log('No rooms returned from supabase')
+                // console.log('No rooms returned from supabase')
                 return []
             }
             const rooms = data.map(room => {
-                console.log('Processing room:', room)
+                // console.log('Processing room:', room)
                 return roomModel.fromDbRoom(room)
             })
 
-            console.log('Processed rooms:', rooms);
+            // console.log('Processed rooms:', rooms);
             return rooms
             // return data.map( room => roomModel.fromDbRoom(room) )
+        } catch (error) {
+            throw error
+        }
+    }
+
+    async getRoomsById(room_id){
+        try { 
+            const {
+                data,
+                error
+            } = await this.supabase.from(this.tableName)
+            .select('*')
+            .eq('id', room_id)
+            .order('created_at', { ascending: false } )
+            .single()
+
+            if (error) throw error
+            if (!data || data.length === 0) {
+                throw new Error('Room not found')
+            }
+
+            // const rooms = data.map(room => {
+            //     // console.log('Processing room:', room)
+            //     return roomModel.fromDbRoom(room)
+            // })
+            // // console.log('Processed rooms:', rooms);
+            // return rooms 
+            return roomModel.fromDbRoom(data)
         } catch (error) {
             throw error
         }
@@ -50,7 +78,7 @@ class RoomRepo extends BaseRepo {
             .eq('user_id', user_id)
             .single()
 
-            console.log(`room id: ${roomId} data: ${data}`)
+            // console.log(`room id: ${roomId} data: ${data}`)
     
             if (error) throw error
             if (!data) throw new Error('Room not found')
@@ -61,7 +89,7 @@ class RoomRepo extends BaseRepo {
     }
 
     async getRoomByCode(roomCode, user_id){
-        console.log( 'room repo ', roomCode)
+        // console.log( 'room repo ', roomCode)
         try {
             const {
                 data,
@@ -144,11 +172,11 @@ class RoomRepo extends BaseRepo {
     
     async uploadBannerImage(fileBuffer, fileName, mimeType){
         try {
-            console.log('Uploading to Supabase storage:')
-            console.log('- Bucket:', this.storageBucket)
-            console.log('- File name:', fileName)
-            console.log('- MIME type:', mimeType)
-            console.log('- Buffer size:', fileBuffer.length)
+            // console.log('Uploading to Supabase storage:')
+            // console.log('- Bucket:', this.storageBucket)
+            // console.log('- File name:', fileName)
+            // console.log('- MIME type:', mimeType)
+            // console.log('- Buffer size:', fileBuffer.length)
 
             // const {
             //     data,
@@ -172,7 +200,7 @@ class RoomRepo extends BaseRepo {
             })
     
             if (error){
-                console.log('Upload image error: ', error) 
+                // console.log('Upload image error: ', error) 
                 throw error
             }
 
@@ -184,12 +212,12 @@ class RoomRepo extends BaseRepo {
                 throw new Error('Failed to get public URL for uploaded image');
             }
 
-            console.log('Public URL generated:', urlData.publicUrl)
-            console.log('url data:', urlData)
+            // console.log('Public URL generated:', urlData.publicUrl)
+            // console.log('url data:', urlData)
 
             return urlData.publicUrl
         } catch (error) {
-            console.error('Error in uploadBannerImage:', error)
+            // console.error('Error in uploadBannerImage:', error)
             throw error
         }    
     }

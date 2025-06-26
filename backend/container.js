@@ -35,7 +35,7 @@ const participantRepository = new ParticipantRepository(supabase);
 const authService = new AuthService(userRepository);
 const userService = new UserService(userRepository);
 const roomService = new RoomService(roomRepository);
-const participantService = new ParticipantService(participantRepository, roomRepository, userRepository);
+const participantService = new ParticipantService(participantRepository, roomService, userService);
 
 // Initialize middleware
 const authMiddleware = new AuthMiddleware(authService);

@@ -275,7 +275,8 @@ export default function VirtualRooms() {
             router.push(`${ROUTES.VIRTUAL_ROOMS}/join/${formData.roomCode}`)
         } catch (error) {
             console.log('Error joining room:', error)
-            toast.error(`Error joining room`)
+            // toast.error(`Error joining room`)
+            toast.error(error.response?.data?.error)
         }
     }
 

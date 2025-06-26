@@ -13,6 +13,14 @@ class RoomService {
         }
     }
 
+    async getRoomsById (room_id){
+        try {
+            return await this.roomRepo.getRoomsById(room_id)
+        } catch (error) {
+            throw error
+        }
+    }
+
     async getRoomById (roomId, user_id){
         try {
             return await this.roomRepo.getRoomById(roomId, user_id)
@@ -22,11 +30,11 @@ class RoomService {
     }
 
     async getRoomByCode (roomCode, user_id){
-        console.log(roomCode)
+        // console.log(roomCode)
         try {
-            console.log('natawag ko')
+            // console.log('natawag ko')
             const res = await this.roomRepo.getRoomByCode(roomCode, user_id)
-            console.log(res)
+            // console.log(res)
             return res
         } catch (error) {
             throw error
