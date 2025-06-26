@@ -1,12 +1,13 @@
 "use client"
 
 import React from 'react'
-import Loader from '@/components/Loader'
-import { myAppHook } from '@/context/AppUtils'
-import styles from '@/styles/dashboard.module.css'
 import { useRouter } from 'next/navigation'
+import { myAppHook } from '@/context/AppUtils'
+import Loader from '@/components/Loader'
+import styles from '@/styles/profile.module.css'
+import { ROUTES } from '@/constants/routes'
 
-export default function Profile() {
+export default function ProfilePage() {
     const router = useRouter()
     const { isLoggedIn, userProfile, isLoading } = myAppHook()
 
@@ -18,44 +19,66 @@ export default function Profile() {
         )
     }
 
-    return (
-        <div className={styles['dashboard-container']}>
-            <div className={styles["main-content"]}>
-                <div className={styles["welcome-section"]}>
-                    <h1>Profile</h1>
-                </div>
+    const handleEditProfile = () => {
+        router.push(`${ROUTES.PROFILE}/edit`)
+    }
 
-                <div className={styles["dashboard-grid"]}>
-                    <div className={`${styles.card} ${styles["profile-card"]}`}>
-                        <h3>User Information</h3>
-                        <div className={styles["profile-info"]}>
-                            <div className={styles["info-item"]}>
-                                <label>Name</label>
-                                <p>{userProfile?.fullName || "Not provided"}</p>
-                            </div>
-                            <div className={styles["info-item"]}>
-                                <label>Email</label>
-                                <p>{userProfile?.email || "Not provided"}</p>
-                            </div>
-                            <div className={styles["info-item"]}>
-                                <label>Phone</label>
-                                <p>{userProfile?.phone || "Not provided"}</p>
-                            </div>
-                            <div className={styles["info-item"]}>
-                                <label>Gender</label>
-                                <p>{userProfile?.gender || "Not provided"}</p>
-                            </div>
-                            <div className={styles["form-actions"]}>
-                                <button
-                                    className={styles["submit-btn"]}
-                                    onClick={() => router.push("/profile/edit")}
-                                >
-                                    Edit Profile
-                                </button>
-                            </div>
-                        </div>
+    return (
+        <div className={styles['profile-page']}>
+            <div className={styles['container']}>
+             <div className={styles['left-section']}> 
+            {/* Page Title */}
+            <h1 className={styles['page-title']}>User Profile</h1>
+
+            {/* Profile Image */}
+            <div className={styles['profile-image-container']}>
+                <div className={styles['profile-image']}></div>
+            </div>
+            </div>  
+            <div className={styles['right-section']}>
+            {/* Form Fields (Read-only) */}
+            <div className={styles['profile-info']}>
+                {/* Full Name Field */}
+                <div className={styles['info-group']}>
+                    <label className={styles['info-label']}>Full Name</label>
+                    <div className={styles['info-value']}>
+                        {userProfile?.fullName || 'Enter your Full Name'}
                     </div>
                 </div>
+
+                {/* Phone Field */}
+                <div className={styles['info-group']}>
+                    <label className={styles['info-label']}>Phone Number</label>
+                    <div className={styles['info-value']}>
+                        {userProfile?.phone || 'Enter your Phone Number'}
+                    </div>
+                </div>
+
+                {/* Email Field */}
+                <div className={styles['info-group']}>
+                    <label className={styles['info-label']}>Email</label>
+                    <div className={styles['info-value']}>
+                        {userProfile?.email || 'Enter your Email'}
+                    </div>
+                </div>
+
+                {/* Gender Field */}
+                <div className={styles['info-group']}>
+                    <label className={styles['info-label']}>Gender</label>
+                    <div className={styles['info-value']}>
+                        {userProfile?.gender || 'Not specified'}
+                    </div>
+                </div>
+            </div>
+
+            {/* Edit Profile Button */}
+            <button
+                onClick={handleEditProfile}
+                className={styles['edit-profile-button']}
+            >
+                Edit Profile
+            </button>
+            </div>
             </div>
         </div>
     )

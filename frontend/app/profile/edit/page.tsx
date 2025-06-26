@@ -5,8 +5,7 @@ import { useRouter } from 'next/navigation'
 import { updateUserProfile } from '@/lib/apiService'
 import { myAppHook } from '@/context/AppUtils'
 import Loader from '@/components/Loader'
-import { FormField, FormButtons } from '@/components/FormComponents'
-import styles from '@/styles/dashboard.module.css'
+import styles from '@/styles/profile.module.css'
 import { ROUTES } from '@/constants/routes'
 
 // Define the form data interface
@@ -114,77 +113,160 @@ export default function EditProfile() {
         }
     }
 
+    const handleBack = () => {
+        router.push(ROUTES.PROFILE)
+    }
+
     return (
-        <div className={styles['dashboard-container']}>
-            <div className={styles["main-content"]}>
-                <div className={styles["welcome-section"]}>
-                    <h1>Edit Profile</h1>
+        <div className={styles['edit-profile-page']}>
+            {/* Back Button */}
+            <button className={styles['back-button']} onClick={handleBack}>
+                &lt; Back
+            </button>
+
+            {/* Edit Profile Title */}
+            <h1 className={styles['edit-page-title']}>Edit Profile</h1>
+
+            {/* Profile Section */}
+            <div className={styles['profile-section']}>
+                {/* Profile Image */}
+                <div className={styles['edit-profile-image-container']}>
+                    <div className={styles['edit-profile-image']}></div>
                 </div>
-                
-                <div className={styles["dashboard-grid"]}>
-                    <div className={`${styles.card} ${styles["profile-card"]}`}>
-                        <h3>Update Your Information</h3>
-                        
-                        {success && (
-                            <div className={styles["success-message"]}>
-                                Profile updated successfully! Redirecting...
-                            </div>
-                        )}
-                        
-                        {error && (
-                            <div className={styles["error-message"]}>
-                                {error}
-                            </div>
-                        )}
-                        
-                        <form onSubmit={handleSubmit} className={styles["profile-form"]}>
-                            <FormField
-                                id="fullName"
-                                name="fullName"
-                                label="Full Name"
+
+                {/* Form Section */}
+                <form onSubmit={handleSubmit} className={styles['edit-form']}>
+                    {/* Full Name Field */}
+                    <div className={styles['form-group']}>
+                        <label className={styles['form-label']}>Full Name</label>
+                        <div className={styles['input-container']}>
+                            <input
                                 type="text"
+                                name="fullName"
                                 value={formData.fullName}
                                 onChange={handleChange}
-                                required={true}
-                                error={formErrors.fullName}
+                                placeholder="Enter your Full Name"
+                                className={styles['form-input']}
+                                required
                             />
-                            
-                            <FormField
-                                id="gender"
-                                name="gender"
-                                label="Gender"
-                                type="select"
-                                value={formData.gender}
-                                onChange={handleChange}
-                                options={[
-                                    { value: 'Male', label: 'Male' },
-                                    { value: 'Female', label: 'Female' },
-                                    { value: 'other', label: 'Other' },
-                                    { value: 'prefer-not-to-say', label: 'Prefer not to say' }
-                                ]}
-                                error={formErrors.gender}
-                            />
-                            
-                            <FormField
-                                id="phone"
-                                name="phone"
-                                label="Phone Number"
+                        </div>
+                        {formErrors.fullName && (
+                            <span className={styles['error-text']}>{formErrors.fullName}</span>
+                        )}
+                    </div>
+
+                    {/* Phone Field */}
+                    <div className={styles['form-group']}>
+                        <label className={styles['form-label']}>Phone Number</label>
+                        <div className={styles['input-container']}>
+                            <input
                                 type="tel"
+                                name="phone"
                                 value={formData.phone}
                                 onChange={handleChange}
-                                error={formErrors.phone}
+                                placeholder="Enter your Phone Number"
+                                className={styles['form-input']}
                             />
-                            
-                            <FormButtons
-                                cancelHandler={() => router.push(ROUTES.PROFILE)}
-                                isSubmitting={isSubmitting}
-                                submitLabel="Update Profile"
-                                cancelLabel="Cancel"
-                            />
-                        </form>
+                        </div>
+                        {formErrors.phone && (
+                            <span className={styles['error-text']}>{formErrors.phone}</span>
+                        )}
                     </div>
+
+                    {/* Gender Selection */}
+                    <div className={styles['form-group']}>
+                        <label className={styles['gender-label']}>Gender</label>
+                        <div className={styles['gender-options']}>
+                            <label className={styles['gender-option']}>
+                                <input
+                                    type="radio"
+                                    name="gender"
+                                    value="Male"
+                                    checked={formData.gender === 'Male'}
+                                    onChange={handleChange}
+                                    className={styles['gender-radio']}
+                                />
+                                <span className={styles['gender-text']}>Male</span>
+                            </label>
+                            <label className={styles['gender-option']}>
+                                <input
+                                    type="radio"
+                                    name="gender"
+                                    value="Female"
+                                    checked={formData.gender === 'Female'}
+                                    onChange={handleChange}
+                                    className={styles['gender-radio']}
+                                />
+                                <span className={styles['gender-text']}>Female</span>
+                            </label>
+                            <label className={styles['gender-option']}>
+                                <input
+                                    type="radio"
+                                    name="gender"
+                                    value="Others"
+                                    checked={formData.gender === 'Others'}
+                                    onChange={handleChange}
+                                    className={styles['gender-radio']}
+                                />
+                                <span className={styles['gender-text']}>Others</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    {/* Save Changes Button */}
+                    <button
+                        type="submit"
+                        disabled={isSubmitting}
+                        className={styles['save-button']}
+                    >
+                        {isSubmitting ? 'Saving...' : 'Save Changes'}
+                    </button>
+                </form>
+            </div>
+
+            {/* Account Security Section */}
+            <div className={styles['security-section']}>
+                <div className={styles['warning-section']}>
+                    <div className={styles['warning-icon']}></div>
+                    <span className={styles['warning-text']}>WARNING! Danger Zone!</span>
+                </div>
+                
+                <h2 className={styles['security-title']}>Account Security</h2>
+                
+                <div className={styles['security-item']}>
+                    <div className={styles['security-info']}>
+                        <h3 className={styles['security-label']}>Email</h3>
+                        <p className={styles['security-value']}>{userProfile?.email || "janedoe@email.com"}</p>
+                    </div>
+                    <button type="button" className={styles['change-button']}>Change Email</button>
+                </div>
+                
+                <div className={styles['security-item']}>
+                    <div className={styles['security-info']}>
+                        <h3 className={styles['security-label']}>Password</h3>
+                        <p className={styles['security-value']}>Change your password to login to your account.</p>
+                    </div>
+                    <button type="button" className={styles['change-button']}>Change Password</button>
                 </div>
             </div>
+
+            {/* Deactivate Account */}
+            <div className={styles['deactivate-section']}>
+                <button className={styles['deactivate-button']}>Deactivate Account</button>
+            </div>
+
+            {/* Success/Error Messages */}
+            {success && (
+                <div className={styles["success-message"]}>
+                    Profile updated successfully! Redirecting...
+                </div>
+            )}
+            
+            {error && (
+                <div className={styles["error-message"]}>
+                    {error}
+                </div>
+            )}
         </div>
     )
 }
