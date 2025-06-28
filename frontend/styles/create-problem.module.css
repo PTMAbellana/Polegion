@@ -9,6 +9,21 @@
   padding-left: 60px;
 }
 
+@media (max-width: 900px) {
+  .scalableWorkspace {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "sidebar"
+      "header"
+      "prompt"
+      "main"
+      "controls";
+  }
+  .mainColumn, .toolbox {
+    max-width: 100%;
+  }
+}
+
 /* Flexible grid layout for the workspace */
 .scalableWorkspace {
   display: grid;
@@ -24,7 +39,16 @@
   min-height: 100vh;
   background: #fff;
   box-sizing: border-box;
-  padding: 32px 24px;
+  padding: 0px 24px 8px 24px;
+}
+
+.mainColumn {
+  width: 100%;
+  max-width: 1000px; /* or 700px, adjust as you like */
+  /* margin: 0 auto; */ /* This is to put it right beside the sidebar*/
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
 /* Top left group */
@@ -125,6 +149,21 @@
   justify-content: flex-start;
 }
 
+.mainAreaHeader {
+  width: 100%;
+  height: 48px;
+  background: #2c514c; /* Same dark green as toolbox */
+  border-radius: 20px 20px 0 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-family: 'Poppins', sans-serif;
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
 .solutionShape {
   position: absolute;
   width: 228px;
@@ -175,8 +214,9 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  min-width: 200px;
-  max-width: 260px;
+  /* min-width: 200px;
+  max-width: 260px; */
+  width: 100%;
   height: 100%;
   box-sizing: border-box;
 }
@@ -188,7 +228,13 @@
   background: #2c514c;
   border-radius: 20px 20px 0 0;
   margin-bottom: 16px;
-  /* Remove position, left, top, and set width to 100% */
+  color: #fff;
+  font-family: 'Poppins', sans-serif;
+  font-size: 24px;
+  font-weight: 600;
+  display: flex;                /* Add this */
+  align-items: center;          /* Vertically center */
+  justify-content: center;      /* Horizontally center */
 }
 
 .toolboxContent {
@@ -202,7 +248,7 @@
   justify-content: center;
   align-items: center;
   width: 100%;
-  margin-bottom: 0;
+  gap: 8px;
 }
 
 .toolboxSquare {
@@ -252,12 +298,16 @@
 
 .toolboxSquare,
 .toolboxCircle,
-.toolboxTriangle {
+.toolboxTriangle,
+.shapeFillTool {
   width: 64px;
   height: 64px;
   flex-shrink: 0;
-  margin: 0 4px;
+  margin: 0;
   box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* Go Back */
@@ -290,28 +340,48 @@
 .promptGroup {
   grid-area: prompt;
   width: 100%;
-  min-height: 80px;
+  min-height: 100px;
   margin-bottom: 8px;
 }
+
 .promptBox {
-  position: absolute;
-  width: 1080px;
-  height: 106px;
-  left: 0;
-  top: 0;
-  background: #dadada;
-  border-radius: 20px;
+  background: #d9d9d9;
+  border-radius: 16px;
+  padding: 16px 20px;
+  height: 100px;
+  min-height: 100px;
+  max-height: 100px;
+  overflow: auto;
+  width: 100%;
+  box-sizing: border-box;
+  font-family: 'Poppins', sans-serif;
+  font-size: 24px;
+  font-weight: 300;
+  color: #000;
+  transition: background 0.2s;
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
+
 .promptText {
-  position: absolute;
-  left: 21px;
-  top: 14px;
+  height: 100%;
+  min-height: 100px;
+  max-height: 100px;
   font-family: 'Poppins';
   font-style: normal;
   font-weight: 300;
   font-size: 24px;
   line-height: 36px;
   color: #000;
+  display: block;
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  overflow: auto;
+  resize: none;
+  text-overflow: ellipsis;
+  /* Remove extra padding here */
 }
 
 .promptTextarea {
@@ -325,7 +395,7 @@
   border: none;
   outline: none;
   resize: none;
-  padding: 21px 21px 0 21px;
+  padding: 0; /* <-- Remove padding here */
   box-sizing: border-box;
 }
 
