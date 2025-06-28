@@ -27,6 +27,32 @@ class UserService {
             throw error
         }
     }
+
+    async updateEmail (email, userId) {
+        try {
+            return await this.userRepo.updateUserEmail(email, userId)
+        } catch (error) {
+            throw error
+        }
+    }
+
+    async updatePassword (password, userId) {
+        try {
+            return await this.userRepo.updateUserPassword(password, userId)
+        } catch (error) {
+            throw error
+        }
+    }
+
+    // will get back at you
+    async updateUserBan(userId, duration) {
+        try {
+            // await this.userRepo.getUserById(userData.token)
+            return await this.userRepo.updateUserBan(userId, duration)
+        } catch (error) {
+            throw error
+        }
+    } 
 }
 
 module.exports = UserService

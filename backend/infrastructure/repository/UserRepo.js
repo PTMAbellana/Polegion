@@ -76,6 +76,51 @@ class UserRepo extends BaseRepo{
             throw error
         }
     }
+
+    async updateUserEmail(email, userId) {
+        try {
+            const { data, error } = await this.supabase.auth.admin.updateUserById(
+                userId,
+                { email: email }
+            )
+            
+            if (error) throw error
+            return userModel.fromDbUser(data.user)
+        } catch (error) {
+            throw error
+        }
+    }
+
+    async updateUserPassword(password, userId) {
+        try {
+            const { data, error } = await this.supabase.auth.admin.updateUserById(
+                userId,
+                { password: password }
+            )
+            
+            if (error) throw error
+            return userModel.fromDbUser(data.user)
+        } catch (error) {
+            throw error
+        }
+    }
+
+    async updateUserBan (userId, duration = 'none') {
+        try {
+            const {
+                data,
+                error
+            } = await this.supabase.auth.admin.updateUserById(
+                userId, 
+                { ban_duration: duration}
+            )
+
+            if (error) throw error
+            return data
+        } catch (error) {
+            throw error
+        }
+    }
     
     async signInWithPassword (email, password){
         try {

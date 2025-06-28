@@ -116,7 +116,7 @@ export default function Login() {
     } catch (error: any) {
       console.error("Login error: ", error);
       toast.error(
-        error?.response?.data?.message || "An error occured during login",
+        error?.response?.data?.error || "An error occured during login",
       );
     }
   };

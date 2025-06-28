@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { updateUserProfile } from '@/lib/apiService'
+import { deactivateAccount, logout, updateEmail, updatePassword, updateUserProfile } from '@/lib/apiService'
 import { myAppHook } from '@/context/AppUtils'
 import Loader from '@/components/Loader'
 import styles from '@/styles/profile.module.css'
@@ -34,6 +34,13 @@ export default function EditProfile() {
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
     const [error, setError] = useState<string>('')
     const [success, setSuccess] = useState<boolean>(false)
+    
+    // Add states for email and password modals/inputs
+    const [showEmailModal, setShowEmailModal] = useState<boolean>(false)
+    const [showPasswordModal, setShowPasswordModal] = useState<boolean>(false)
+    const [newEmail, setNewEmail] = useState<string>('')
+    const [newPassword, setNewPassword] = useState<string>('')
+    const [confirmPassword, setConfirmPassword] = useState<string>('')
 
     useEffect(() => {
         if (userProfile) {
@@ -115,6 +122,108 @@ export default function EditProfile() {
 
     const handleBack = () => {
         router.push(ROUTES.PROFILE)
+    }
+
+    // Fixed: Remove the immediate function call
+    const handleChangeEmailClick = () => {
+        setShowEmailModal(true)
+        setError('')
+    }
+
+    const handleChangePasswordClick = () => {
+        setShowPasswordModal(true)
+        setError('')
+    }
+
+    const handleEmailSubmit = async (e: React.FormEvent) => {
+        e.preventDefault()
+        
+        if (!newEmail.trim()) {
+            setError('Please enter a valid email address')
+            return
+        }
+
+        // Basic email validation
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+        if (!emailRegex.test(newEmail)) {
+            setError('Please enter a valid email address')
+            return
+        }
+
+        setIsSubmitting(true)
+        setError('')
+        
+        try {
+            await updateEmail(newEmail)
+            await refreshUserSession()
+            setSuccess(true)
+            setShowEmailModal(false)
+            setNewEmail('')
+            setTimeout(() => {
+                router.push(ROUTES.PROFILE)
+            }, 2000)
+        } catch (error: any) {
+            console.error('Error updating email:', error)
+            setError(error?.response?.data?.error || 'Failed to update email. Please try again.')   
+        } finally {
+            setIsSubmitting(false)
+        }
+    }
+
+    const handlePasswordSubmit = async (e: React.FormEvent) => {
+        e.preventDefault()
+        
+        if (!newPassword.trim()) {
+            setError('Please enter a new password')
+            return
+        }
+
+        if (newPassword.length < 6) {
+            setError('Password must be at least 6 characters long')
+            return
+        }
+
+        if (newPassword !== confirmPassword) {
+            setError('Passwords do not match')
+            return
+        }
+
+        setIsSubmitting(true)
+        setError('')
+        
+        try {
+            await updatePassword(newPassword)
+            await refreshUserSession()
+            setSuccess(true)
+            setShowPasswordModal(false)
+            setNewPassword('')
+            setConfirmPassword('')
+            setTimeout(() => {
+                router.push(ROUTES.PROFILE)
+            }, 2000)
+        } catch (error: any) {
+            console.error('Error updating password:', error)
+            setError(error?.response?.data?.error || 'Failed to update password. Please try again.')   
+        } finally {
+            setIsSubmitting(false)
+        }
+    }
+
+    const handleDeactivateAccount = async() => {
+        // not yet implemented in backend, teka lang kayo
+        console.log('Deactivate account clicked')
+        alert("You're deactivating account, contact admin to activate again")
+        try {
+            await deactivateAccount()
+            setSuccess(true)
+            await logout()
+            setTimeout(() => {
+                router.push(ROUTES.LOGIN)
+            }, 2000)
+        } catch (error) {
+            console.log('Error in deactivating account: ', error)
+            // setError(error?..data?.error || 'Failed to update password. Please try again.')
+        }
     }
 
     return (
@@ -238,7 +347,10 @@ export default function EditProfile() {
                         <h3 className={styles['security-label']}>Email</h3>
                         <p className={styles['security-value']}>{userProfile?.email || "janedoe@email.com"}</p>
                     </div>
-                    <button type="button" className={styles['change-button']}>Change Email</button>
+                    {/* Fixed: Pass function reference, not function call */}
+                    <button type="button" className={styles['change-button']} onClick={handleChangeEmailClick}>
+                        Change Email
+                    </button>
                 </div>
                 
                 <div className={styles['security-item']}>
@@ -246,14 +358,102 @@ export default function EditProfile() {
                         <h3 className={styles['security-label']}>Password</h3>
                         <p className={styles['security-value']}>Change your password to login to your account.</p>
                     </div>
-                    <button type="button" className={styles['change-button']}>Change Password</button>
+                    {/* Fixed: Pass function reference, not function call */}
+                    <button type="button" className={styles['change-button']} onClick={handleChangePasswordClick}>
+                        Change Password
+                    </button>
                 </div>
             </div>
 
             {/* Deactivate Account */}
             <div className={styles['deactivate-section']}>
-                <button className={styles['deactivate-button']}>Deactivate Account</button>
+                <button className={styles['deactivate-button']} onClick={handleDeactivateAccount}>
+                    Deactivate Account
+                </button>
             </div>
+
+            {/* Email Change Modal */}
+            {showEmailModal && (
+                <div className={styles['modal-overlay']}>
+                    <div className={styles['modal']}>
+                        <h3>Change Email</h3>
+                        <form onSubmit={handleEmailSubmit}>
+                            <div className={styles['form-group']}>
+                                <label>New Email</label>
+                                <input
+                                    type="email"
+                                    value={newEmail}
+                                    onChange={(e) => setNewEmail(e.target.value)}
+                                    placeholder="Enter new email"
+                                    required
+                                />
+                            </div>
+                            <div className={styles['modal-buttons']}>
+                                <button 
+                                    type="button" 
+                                    onClick={() => {
+                                        setShowEmailModal(false)
+                                        setNewEmail('')
+                                        setError('')
+                                    }}
+                                >
+                                    Cancel
+                                </button>
+                                <button type="submit" disabled={isSubmitting}>
+                                    {isSubmitting ? 'Updating...' : 'Update Email'}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+
+            {/* Password Change Modal */}
+            {showPasswordModal && (
+                <div className={styles['modal-overlay']}>
+                    <div className={styles['modal']}>
+                        <h3>Change Password</h3>
+                        <form onSubmit={handlePasswordSubmit}>
+                            <div className={styles['form-group']}>
+                                <label>New Password</label>
+                                <input
+                                    type="password"
+                                    value={newPassword}
+                                    onChange={(e) => setNewPassword(e.target.value)}
+                                    placeholder="Enter new password"
+                                    required
+                                />
+                            </div>
+                            <div className={styles['form-group']}>
+                                <label>Confirm Password</label>
+                                <input
+                                    type="password"
+                                    value={confirmPassword}
+                                    onChange={(e) => setConfirmPassword(e.target.value)}
+                                    placeholder="Confirm new password"
+                                    required
+                                />
+                            </div>
+                            <div className={styles['modal-buttons']}>
+                                <button 
+                                    type="button" 
+                                    onClick={() => {
+                                        setShowPasswordModal(false)
+                                        setNewPassword('')
+                                        setConfirmPassword('')
+                                        setError('')
+                                    }}
+                                >
+                                    Cancel
+                                </button>
+                                <button type="submit" disabled={isSubmitting}>
+                                    {isSubmitting ? 'Updating...' : 'Update Password'}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
 
             {/* Success/Error Messages */}
             {success && (
