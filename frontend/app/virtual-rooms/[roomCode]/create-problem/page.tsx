@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import React, { useState, useRef, useEffect } from "react";
 import Toolbox from "./components/Toolbox";
 import DifficultyDropdown from "./components/DifficultyDropdown";
-import FillTool from "./components/FillTool";
+import MainArea from "./components/MainArea";
 import Timer from "./components/Timer";
 import HintBox from "./components/HintBox";
 import PromptBox from "./components/PromptBox";
@@ -134,12 +134,15 @@ export default function CreateProblem() {
     setSelectedTool(null);
   };
 
-  // Drop in main area
+  const MAIN_AREA_HEADER_HEIGHT = 48; // px, match your .mainAreaHeader height
+
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     const rect = e.currentTarget.getBoundingClientRect();
+    const header = e.currentTarget.querySelector(`.${styles.mainAreaHeader}`) as HTMLElement;
+    const headerHeight = header ? header.offsetHeight : 0;
     const x = (e.clientX - rect.left - DEFAULT_SIZE / 2) / scale;
-    const y = (e.clientY - rect.top - DEFAULT_SIZE / 2) / scale;
+    const y = (e.clientY - rect.top - headerHeight - DEFAULT_SIZE / 2) / scale;
     setShapes([
       ...shapes,
       {
@@ -164,9 +167,14 @@ export default function CreateProblem() {
     e.stopPropagation();
     setSelectedId(id);
     const shape = shapes.find((s) => s.id === id);
+
+    // Get header height
+    const header = mainAreaRef.current?.querySelector(`.${styles.mainAreaHeader}`) as HTMLElement;
+    const headerHeight = header ? header.offsetHeight : 0;
+
     dragOffset.current = {
       x: (e.clientX - shape.x * scale),
-      y: (e.clientY - shape.y * scale),
+      y: (e.clientY - (shape.y + headerHeight) * scale),
     };
     const onMouseMove = (moveEvent: MouseEvent) => {
       setShapes((prev) =>
@@ -405,6 +413,14 @@ export default function CreateProblem() {
       <div className={styles.scalableWorkspace}>
         {/* Sidebar group: Difficulty dropdown above Toolbox */}
         <div style={{ gridArea: "sidebar", display: "flex", flexDirection: "column", alignItems: "center" }}>
+          <div style={{ width: "100%", display: "flex", flexDirection: "row", gap: 8, marginBottom: 16 }}>
+            <div className={styles.goBackGroup}>
+              <button className={styles.arrowLeft} onClick={() => router.back()}>
+                ←
+              </button>
+              <span className={styles.goBackText}>Go back</span>
+            </div>
+          </div>
           <DifficultyDropdown
             difficulty={difficulty}
             setDifficulty={setDifficulty}
@@ -412,6 +428,9 @@ export default function CreateProblem() {
             setDropdownOpen={setDropdownOpen}
             dropdownRef={dropdownRef}
           />
+          {dropdownOpen && (
+            <div style={{ height: 360 /* or whatever fits your dropdown */ }} />
+          )}
           <Toolbox
             selectedTool={selectedTool}
             setSelectedTool={setSelectedTool}
@@ -421,48 +440,43 @@ export default function CreateProblem() {
             setFillMode={setFillMode}
             handleFillDragStart={handleFillDragStart}
             handleFillDragEnd={handleFillDragEnd}
+            FILL_COLORS={FILL_COLORS}
+            setFillColor={setFillColor}
           />
         </div>
+        
+        <div className={styles.mainColumn}>
 
-        {/* Prompt */}
-        <div className={styles.promptGroup}>
-          <PromptBox
-            prompt={prompt}
-            setPrompt={setPrompt}
-            editingPrompt={editingPrompt}
-            setEditingPrompt={setEditingPrompt}
-            promptInputRef={promptInputRef}
+          <div style={{ height: 32 /* or match your back button row height */ }} />
+
+          {/* Prompt */}
+          <div className={styles.promptGroup}>
+            <PromptBox
+              prompt={prompt}
+              setPrompt={setPrompt}
+              editingPrompt={editingPrompt}
+              setEditingPrompt={setEditingPrompt}
+              promptInputRef={promptInputRef}
+            />
+          </div>
+
+          {/* Main Area */}
+          <MainArea
+            mainAreaRef={mainAreaRef}
+            shapes={shapes}
+            renderShape={renderShape}
+            handleDrop={handleDrop}
+            handleDragOver={handleDragOver}
+            setSelectedId={setSelectedId}
+            setSelectedTool={setSelectedTool}
           />
         </div>
-
-        {/* Main Area */}
-        <div
-          ref={mainAreaRef}
-          className={styles.mainArea}
-          onDrop={handleDrop}
-          onDragOver={handleDragOver}
-          style={{ overflow: "hidden" }}
-          onMouseDown={() => {
-            setSelectedId(null);
-            setSelectedTool(null);
-          }}
-        >
-          {shapes.map(renderShape)}
-        </div>
-
+        
         {/* Controls Row (Save, Timer, Hint) */}
         <div className={styles.controlsRow}>
           <button className={`${styles.addTimerBtn} ${styles.rowBtn}`}>Add Timer</button>
           <button className={`${styles.saveBtn} ${styles.rowBtn}`}>Save</button>
           <button className={`${styles.addHintBtn} ${styles.rowBtn}`}>Add Hint</button>
-        </div>
-
-        {/* Go Back */}
-        <div className={styles.goBackGroup}>
-          <button className={styles.arrowLeft} onClick={() => router.back()}>
-            ←
-          </button>
-          <span className={styles.goBackText}>Go back</span>
         </div>
       </div>
     </div>

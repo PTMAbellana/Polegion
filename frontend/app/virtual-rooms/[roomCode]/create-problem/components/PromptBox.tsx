@@ -1,4 +1,5 @@
 import React from "react";
+import styles from "@/styles/create-problem.module.css";
 
 export default function PromptBox({
   prompt,
@@ -8,7 +9,7 @@ export default function PromptBox({
   promptInputRef,
 }: any) {
   return (
-    <div>
+    <div className={styles.promptBox}>
       <div
         onClick={() => {
           setEditingPrompt(true);
@@ -27,21 +28,10 @@ export default function PromptBox({
             onChange={e => setPrompt(e.target.value)}
             onBlur={() => setEditingPrompt(false)}
             placeholder="Input problem details."
-            style={{
-              width: "100%",
-              height: "100%",
-              resize: "none",
-              border: "none",
-              outline: "none",
-              background: "transparent",
-              fontFamily: "Poppins",
-              fontSize: 24,
-              fontWeight: 300,
-              color: "#000",
-            }}
+            className={styles.promptTextarea}
           />
         ) : (
-          <span>
+          <span className={styles.promptText}>
             {prompt.trim() === "" ? "Input problem details." : prompt}
           </span>
         )}
