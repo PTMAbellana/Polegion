@@ -146,7 +146,7 @@ class ParticipantRepo extends BaseRepo {
 
             if (error) throw error
             
-            return data || 0
+            return data.length || 0
         } catch (error) {
             throw error
         }

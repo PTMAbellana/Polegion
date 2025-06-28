@@ -113,6 +113,7 @@ class ParticipantController {
 
     getRoomParticipantCount = async (req, res) => {
         // const {room_id} = req.body
+        // console.log(req.params)
         const {room_id} = req.params
 
         try {
@@ -121,7 +122,7 @@ class ParticipantController {
                 total_participants: count
             })
         } catch (error) {
-            // console.error('Error getting participant count')
+            console.error('Error getting participant count')
             res.status(500).json({
                 error: 'Server error getting participant count'
             })

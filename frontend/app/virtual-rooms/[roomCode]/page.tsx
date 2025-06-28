@@ -2,7 +2,7 @@
 import Loader from '@/components/Loader'
 import { myAppHook } from '@/context/AppUtils'
 import { AuthProtection } from '@/context/AuthProtection'
-import { getAllParticipants, getRoomByCode } from '@/lib/apiService'
+import { getAllParticipants, getRoomByCode, totalParticipant } from '@/lib/apiService'
 import styles from '@/styles/room-competition.module.css'
 import { use, useEffect, useState } from 'react'
 
@@ -54,10 +54,13 @@ export default function RoomDetail({ params } : { params  : Promise<{roomCode : 
             console.log(res.data)
             setRoomDetails(res.data)
             const test = await getAllParticipants(res.data.id)
+            const total = await totalParticipant(res.data.id)
             setParticipants( test.data.participants || [] )
             console.log('Attempting to get all participants: ', test.data)
+            console.log('Attempting to total participants: ', total.data.total_participants)
             // console.log('Participants: ', participants)
         } catch (error) {
+            console.log(error)
             console.error('Error fetching room details:', error)
         } finally {
             setIsLoading(false)
@@ -86,10 +89,7 @@ export default function RoomDetail({ params } : { params  : Promise<{roomCode : 
         )
     }
 
-    console.log(
-        'Participants: ',
-        participants && participants.length > 0 ? participants[0].fullName : 'No participants'
-    );
+    console.log('Participants: ', participants[0].fullName)
 
     return (
         <div className={styles["dashboard-container"]}>

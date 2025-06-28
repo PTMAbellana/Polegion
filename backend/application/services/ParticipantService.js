@@ -43,7 +43,7 @@ class ParticipantService {
                         // Fetch user data from users table using user_id
                         const userData = await this.userService.getUserById(participant.user_id)
                         
-                        console.log('getRoomParticipants userData: ', userData)
+                        // console.log('getRoomParticipants userData: ', userData)
                         if (!userData) {
                             // console.warn(`User not found for ID: ${participant.user_id}`)
                             return {}
