@@ -1,5 +1,22 @@
 /* Profile Module CSS */
 
+/* Import Poppins font */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+/* CSS Variables */
+.variables {
+  --primary-color: #2C514C;
+  --secondary-color: #122932;
+  --accent-color: #FABC60;
+  --text-primary: #000000;
+  --text-secondary: #555555;
+  --text-light: #FFFFFF;
+  --border-radius: 20px;
+  --box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  --transition: all 0.3s ease;
+  --sidebar-width: 50px;
+}
+
 /* Common Styles */
 .loading-container {
   display: flex;
@@ -19,6 +36,7 @@
   margin-left: 30px; /* Space for sidebar */
   padding-top: 50px; /* Space for topbar */
   box-sizing: border-box;
+  composes: variables;
 }
 
 .page-title {
@@ -127,6 +145,7 @@
   margin-left: 124px; /* Space for sidebar */
   padding-top: 86px; /* Space for topbar */
   box-sizing: border-box;
+  composes: variables;
 }
 
 .back-button {
@@ -144,8 +163,8 @@
   margin-bottom: 16px;
   padding: 0;
   max-width: 1200px;
-  /* margin-left: auto; */
   margin-right: auto;
+  transition: var(--transition);
 }
 
 .back-button:hover {
@@ -192,8 +211,47 @@
   max-width: 482px;
 }
 
+/* Form Styles - Updated to match room modal design */
 .form-group {
-  margin-bottom: 32px;
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: var(--text-primary);
+  font-size: 0.95rem;
+  font-family: 'Poppins', sans-serif;
+}
+
+.form-control {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #e0e0e0;
+  border-radius: 10px;
+  font-family: 'Poppins';
+  font-size: 1rem;
+  background: #FFFFFF;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  transition: border-color 0.2s, box-shadow 0.2s;
+  box-sizing: border-box;
+  color: #000;
+}
+
+.form-control:focus {
+  border-color: var(--accent-color);
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(250, 188, 96, 0.2);
+}
+
+textarea.form-control {
+  min-height: 100px;
+  resize: vertical;
+}
+
+.form-control.error {
+  border-color: #dc3545;
 }
 
 .form-label {
@@ -226,6 +284,7 @@
   line-height: 30px;
   color: #000000;
   outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
 
 .form-input:focus {
@@ -462,6 +521,155 @@
   z-index: 1000;
 }
 
+/* Modal Styles - Updated to match room modal design */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.modal-content {
+  background: #FFFFFF;
+  border-radius: var(--border-radius);
+  padding: 30px;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  border: 1px solid #878787;
+}
+
+.modal-content h3 {
+  font-family: 'Poppins', sans-serif;
+  font-style: normal;
+  font-weight: 600;
+  font-size: 24px;
+  line-height: 36px;
+  color: var(--text-primary);
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.modal-content .form-group {
+  margin-bottom: 20px;
+}
+
+.modal-content .form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: var(--text-primary);
+  font-size: 0.95rem;
+  font-family: 'Poppins', sans-serif;
+}
+
+.modal-content .form-group input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #e0e0e0;
+  border-radius: 10px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 1rem;
+  background: #FFFFFF;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  transition: border-color 0.2s, box-shadow 0.2s;
+  box-sizing: border-box;
+  color: #000;
+}
+
+.modal-content .form-group input:focus {
+  border-color: var(--accent-color);
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(250, 188, 96, 0.2);
+}
+
+.modal-content .form-group input.error {
+  border-color: #dc3545;
+}
+
+/* Modal Buttons - Following room modal design pattern */
+.modal-buttons, .modal-actions {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 20px;
+  flex-wrap: wrap;
+}
+
+.modal-buttons button, .modal-actions button {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 500;
+  font-size: 1rem;
+  border-radius: 20px;
+  padding: 12px 24px;
+  cursor: pointer;
+  transition: all 0.3s;
+  min-width: 120px;
+  border: none;
+}
+
+/* Cancel Button */
+.modal-buttons button[type="button"], 
+.modal-actions .cancel-btn {
+  background: transparent;
+  border: 1px solid #ccc !important;
+  color: #666;
+}
+
+.modal-buttons button[type="button"]:hover,
+.modal-actions .cancel-btn:hover {
+  background: #f5f5f5;
+}
+
+/* Submit Button */
+.modal-buttons button[type="submit"],
+.modal-actions .submit-btn {
+  background: #4CAF50;
+  color: white;
+}
+
+.modal-buttons button[type="submit"]:hover,
+.modal-actions .submit-btn:hover {
+  background: #43a047;
+}
+
+.modal-buttons button[type="submit"]:disabled,
+.modal-actions .submit-btn:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+/* Container and section styles for better spacing */
+.container {
+  display: flex;
+  gap: 40px;
+  max-width: 1200px;
+  margin: 0 auto;
+  align-items: flex-start;
+}
+
+.left-section {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 500px;
+}
+
+.right-section {
+  flex: 1;
+  min-width: 0;
+  padding-top: 130px;
+  max-width: 600px;
+}
+
 /* Responsive Design */
 @media (max-width: 1200px) {
   .profile-page,
@@ -485,6 +693,24 @@
     max-width: 100%;
     padding: 0 20px;
   }
+  
+  .container {
+    gap: 30px;
+    max-width: 100%;
+    padding: 0 20px;
+  }
+  
+  .left-section {
+    max-width: 400px;
+  }
+  
+  .right-section {
+    max-width: 500px;
+  }
+  
+  .edit-form {
+    min-width: 300px;
+  }
 }
 
 @media (max-width: 768px) {
@@ -498,6 +724,7 @@
     font-size: 36px;
     line-height: 54px;
     text-align: center;
+    white-space: normal;
   }
   
   .profile-section {
@@ -544,6 +771,32 @@
   .change-button {
     align-self: flex-end;
   }
+  
+  .container {
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+  }
+  
+  .left-section,
+  .right-section {
+    max-width: 100%;
+    width: 100%;
+  }
+  
+  .right-section {
+    padding-top: 0;
+  }
+  
+  .modal-buttons,
+  .modal-actions {
+    flex-direction: column;
+  }
+  
+  .modal-buttons button,
+  .modal-actions button {
+    width: 100%;
+  }
 }
 
 @media (max-width: 480px) {
@@ -584,146 +837,27 @@
   .back-button {
     font-size: 20px;
   }
-}
-
-/* Updated container and section styles for better spacing */
-
-.container {
-  display: flex;
-  gap: 40px; /* Increased from 5px for better visual separation */
-  max-width: 1200px; /* Constrain total width */
-  margin: 0 auto; /* Center the container */
-  align-items: flex-start; /* Align items to top */
-}
-
-.left-section {
-  flex: 0 0 auto; /* Don't grow/shrink, use natural width */
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  max-width: 500px; /* Constrain left section width */
-}
-
-.right-section {
-  flex: 1;
-  min-width: 0; /* Allow shrinking */
-  padding-top: 130px; /* Reduced from 150px to align better with image */
-  max-width: 600px; /* Constrain right section width */
-}
-
-/* Update existing profile-section to have better spacing */
-.profile-section {
-  max-width: 1200px;
-  margin: 0 auto;
-  display: flex;
-  gap: 40px; /* Reduced from 60px for closer positioning */
-  align-items: flex-start;
-}
-
-/* Adjust profile image container for better alignment */
-.profile-image-container {
-  display: flex;
-  justify-content: center;
-  margin: 20px 0; /* Reduced margin */
-}
-
-/* Update edit profile image container for consistency */
-.edit-profile-image-container {
-  flex-shrink: 0;
-  max-width: 400px; /* Constrain image container width */
-}
-
-/* Update edit form to prevent it from being too far */
-.edit-form {
-  flex: 1;
-  max-width: 500px; /* Reduced from 482px */
-  min-width: 400px; /* Minimum width to prevent too much shrinking */
-}
-
-/* Ensure page title doesn't take full width in left section */
-.page-title {
-  font-family: 'Poppins', sans-serif;
-  font-style: normal;
-  font-weight: 700;
-  font-size: 48px;
-  line-height: 72px;
-  display: flex;
-  align-items: center;
-  text-align: center;
-  color: #000000;
-  margin: 40px 0 20px 0; /* Adjusted margins */
-  white-space: nowrap; /* Prevent title from wrapping */
-}
-
-/* Responsive adjustments */
-@media (max-width: 1024px) {
-  .container {
-    gap: 30px;
-    max-width: 100%;
-    padding: 0 20px;
-  }
   
-  .left-section {
-    max-width: 400px;
-  }
-  
-  .right-section {
-    max-width: 500px;
-  }
-  
-  .profile-section {
-    gap: 30px; /* Reduce gap on tablets */
-    padding: 0 20px;
-  }
-  
-  .edit-form {
-    min-width: 300px;
-  }
-}
-
-@media (max-width: 768px) {
-  .container {
-    flex-direction: column;
-    align-items: center;
-    gap: 20px;
-  }
-  
-  .left-section,
-  .right-section {
-    max-width: 100%;
-    width: 100%;
-  }
-  
-  .right-section {
-    padding-top: 0;
-  }
-  
-  .page-title {
-    font-size: 36px;
-    line-height: 54px;
-    white-space: normal; /* Allow wrapping on mobile */
-  }
-  
-  .profile-section {
-    flex-direction: column;
-    align-items: center;
-    gap: 20px;
-  }
-  
-  .edit-form {
-    max-width: 100%;
-    width: 100%;
-    min-width: auto;
-  }
-}
-
-@media (max-width: 480px) {
   .container {
     padding: 0 10px;
   }
   
-  .page-title {
-    font-size: 28px;
-    line-height: 42px;
+  .modal-content {
+    padding: 20px;
+  }
+}
+
+/* Print Styles */
+@media print {
+  .modal-overlay,
+  .modal-content,
+  .change-button,
+  .deactivate-button {
+    display: none !important;
+  }
+  
+  .profile-page,
+  .edit-profile-page {
+    margin-left: 0 !important;
   }
 }

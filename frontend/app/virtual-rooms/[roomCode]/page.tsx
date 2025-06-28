@@ -28,6 +28,7 @@ export default function RoomDetail({ params } : { params  : Promise<{roomCode : 
     const roomCode = use(params)
     const [ roomDetails, setRoomDetails ] = useState<Room | null>(null)
     const [ participants, setParticipants ] = useState<Participant[]>([])
+    const [ totalParticipants, setTotalParticipants ] = useState<number>(0)
     const [ isLoading, setIsLoading ] = useState(true)
 
     const { isLoggedIn } = myAppHook()
@@ -53,14 +54,19 @@ export default function RoomDetail({ params } : { params  : Promise<{roomCode : 
             const res = await getRoomByCode(roomCode.roomCode)
             console.log(res.data)
             setRoomDetails(res.data)
+
             const test = await getAllParticipants(res.data.id)
-            const total = await totalParticipant(res.data.id)
+            console.log('Attempting to get all participants: ', test.data)
+
             setParticipants( test.data.participants || [] )
             console.log('Attempting to get all participants: ', test.data)
+
+            const total = await totalParticipant(res.data.id)
+            setTotalParticipants(total.data.total_participants || 0)
             console.log('Attempting to total participants: ', total.data.total_participants)
+            
             // console.log('Participants: ', participants)
         } catch (error) {
-            console.log(error)
             console.error('Error fetching room details:', error)
         } finally {
             setIsLoading(false)
@@ -88,8 +94,11 @@ export default function RoomDetail({ params } : { params  : Promise<{roomCode : 
             </div>
         )
     }
-
-    console.log('Participants: ', participants[0].fullName)
+    
+    console.log(
+        'Participants: ',
+        participants && participants.length > 0 ? participants[0].fullName : 'No participants'
+    );
 
     return (
         <div className={styles["dashboard-container"]}>
@@ -176,14 +185,22 @@ export default function RoomDetail({ params } : { params  : Promise<{roomCode : 
                     <div className={styles["participants-card"]}>
                         <div className={styles["section-header"]}>
                             <h3>Participants</h3>
-                            <div className={styles["participants-count"]}>0 members</div>
+                            <div className={styles["participants-count"]}> { totalParticipants } members</div>
                         </div>
                         <div className={styles["participants-list"]}>
-                            <div className={styles["empty-state"]}>
-                                <div className={styles["empty-icon"]}>👥</div>
-                                <p>No participants yet</p>
-                                <span>Invite people to join this room</span>
-                            </div>
+                            {participants.length === 0 ? (
+                                <div className={styles["empty-state"]}>
+                                    <div className={styles["empty-icon"]}>👥</div>
+                                    <p>No participants yet</p>
+                                    <span>Invite people to join this room</span>
+                                </div>
+                            ) : (
+                                participants.map((p, idx) => (
+                                    <div key={p.id || idx} className={styles["participant-item"]}>
+                                        {p.fullName}
+                                    </div>
+                                ))
+                            )}
                         </div>
                         <div className={styles["invite-section"]}>
                             <button className={styles["invite-btn"]}>
