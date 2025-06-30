@@ -24,7 +24,7 @@ export default function RootLayout({
           <Toaster/>
           {children}
         </AppUtilsProvider>
-        <Footer /> 
+        <Footer />
       </body>
     </html>
   );

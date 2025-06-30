@@ -563,3 +563,14 @@
     grid-template-columns: 1fr;
   }
 }
+
+.participant-item {
+  padding: 8px 12px;
+  background: #f8f8f8;
+  border-radius: 6px;
+  font-size: 16px;
+  color: #222;
+  font-weight: 500;
+  /* Optional: add a subtle border */
+  border: 1px solid #ececec;
+}

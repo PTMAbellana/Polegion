@@ -1,19 +1,18 @@
 "use client";
 import Head from "next/head";
-
-// Import the CSS module
-import styles from "../styles/home.module.css"; // Adjusted path for your setup
-import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
 import { ROUTES } from "@/constants/routes";
 import { refreshToken } from "@/lib/apiService";
 import { myAppHook } from "@/context/AppUtils";
 import { getUserProfile } from "@/lib/apiService";
+import styles from "../styles/home.module.css";
 
 export default function Home() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
 
   const { setIsLoggedIn, setUserProfile } = myAppHook();
 
@@ -40,7 +39,6 @@ export default function Home() {
         if (error) {
           console.error("Failed to set session:", error.message);
         } else {
-          //TODO: get user info??
           refreshToken();
           setIsLoggedIn(true);
 
@@ -48,7 +46,6 @@ export default function Home() {
           if (pr?.data) {
             console.log("Fresh profile data received: ", pr.data);
             setUserProfile(pr.data);
-            // console.log(userProfile)
             const updateUser = {
               ...pr.data,
             };
@@ -59,18 +56,27 @@ export default function Home() {
       }
     };
 
+    const handleMouseMove = (e) => {
+      setMousePosition({ x: e.clientX, y: e.clientY });
+    };
+
     handleTokens();
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
   }, []);
 
   const handleRegisterRedirect = () => {
     setIsLoading(true);
-    router.push("/auth/login");
-    // router.push("/auth/register");
+    setTimeout(() => {
+      setIsLoading(false);
+      router.push("/auth/login");
+    }, 1000);
   };
+
   return (
     <>
       <Head>
-        <title>GeoPlay - Fun Geometry Visualizer</title>
+        <title>Polegion - Fun Geometry Visualizer</title>
         <meta
           name="description"
           content="Explore interactive geometry visualizations and gamified learning"
@@ -79,59 +85,129 @@ export default function Home() {
       </Head>
 
       <div className={styles.container}>
+        {/* Animated background elements */}
+        <div className={styles.backgroundElements}>
+          <div 
+            className={styles.mouseFollower}
+            style={{
+              left: mousePosition.x / 15,
+              top: mousePosition.y / 15,
+            }}
+          />
+          <div className={styles.floatingShape1} />
+          <div className={styles.floatingShape2} />
+          <div className={styles.floatingShape3} />
+          <div className={styles.floatingShape4} />
+          <div className={styles.floatingShape5} />
+        </div>
+
+        {/* Geometric floating shapes */}
+        <div className={styles.geometricShapes}>
+          <div className={styles.shape1} />
+          <div className={styles.shape2} />
+          <div className={styles.shape3} />
+          <div className={styles.shape4} />
+          <div className={styles.shape5} />
+          <div className={styles.shape6} />
+        </div>
+
         <header className={styles.header}>
-          <h1 className={styles.headerTitle}>Welcome to Polegion</h1>
+          <div className={styles.badge}>
+            <span className={styles.badgeIcon}>🎯</span>
+            <span>Next-Generation Geometry Learning</span>
+          </div>
+          
+          <h1 className={styles.headerTitle}>
+            <span className={styles.titleWelcome}>Welcome to</span>
+            <br />
+            <span className={styles.brandName}>Polegion</span>
+          </h1>
+          
           <p className={styles.headerText}>
-            Your fun and interactive geometry visualizer! Explore math like
-            never before, aligned with your curriculum!
+            Your fun and interactive geometry visualizer! Explore math like never before, 
+            perfectly aligned with your curriculum and designed to make learning addictive.
           </p>
+          
           <button
             className={styles.headerButton}
             onClick={handleRegisterRedirect}
             disabled={isLoading}
           >
-            {" "}
-            {isLoading ? "Loading..." : "Start Exploring"}
+            {isLoading ? (
+              <>
+                <div className={styles.spinner} />
+                Loading...
+              </>
+            ) : (
+              <>
+                Start Exploring
+                <span className={styles.arrow}>→</span>
+              </>
+            )}
           </button>
         </header>
 
         <section className={styles.customRow}>
           <div className={styles.customCol}>
-            <div className={styles.customCard}>
+            <div className={`${styles.customCard} ${styles.cardGreen}`}>
+              <div className={styles.cardIcon}>✨</div>
               <div className={styles.cardBody}>
                 <h5 className={styles.cardTitle}>Interactive Visualizations</h5>
                 <p className={styles.cardText}>
-                  Bring geometric shapes and concepts to life with engaging,
-                  real-time visualizations.
+                  Bring geometric shapes and concepts to life with engaging, 
+                  real-time visualizations that respond to your touch.
                 </p>
               </div>
             </div>
           </div>
           <div className={styles.customCol}>
-            <div className={styles.customCard}>
+            <div className={`${styles.customCard} ${styles.cardBlue}`}>
+              <div className={styles.cardIcon}>📚</div>
               <div className={styles.cardBody}>
-                <h5 className={styles.cardTitle}>
-                  Curriculum-Aligned Learning
-                </h5>
+                <h5 className={styles.cardTitle}>Curriculum-Aligned Learning</h5>
                 <p className={styles.cardText}>
-                  Tailored to your curriculum, helping you understand geometry
-                  concepts step by step.
+                  Perfectly tailored to your curriculum, helping you master geometry 
+                  concepts with structured, progressive learning paths.
                 </p>
               </div>
             </div>
           </div>
           <div className={styles.customCol}>
-            <div className={styles.customCard}>
+            <div className={`${styles.customCard} ${styles.cardOrange}`}>
+              <div className={styles.cardIcon}>🏆</div>
               <div className={styles.cardBody}>
                 <h5 className={styles.cardTitle}>Gamified Challenges</h5>
                 <p className={styles.cardText}>
-                  Complete fun geometry challenges, earn points, and level up
-                  your math skills!
+                  Complete exciting geometry challenges, earn achievements, unlock new levels, 
+                  and compete with friends while mastering math!
                 </p>
               </div>
             </div>
           </div>
         </section>
+
+        {/* CTA Section */}
+        <section className={styles.ctaSection}>
+          <button
+            className={styles.ctaButton}
+            onClick={handleRegisterRedirect}
+            disabled={isLoading}
+          >
+            {isLoading ? (
+              <>
+                <div className={styles.spinner} />
+                Loading...
+              </>
+            ) : (
+              <>
+                Get Started Now
+                <span className={styles.arrow}>→</span>
+              </>
+            )}
+          </button>
+        </section>
+
+        
       </div>
     </>
   );
