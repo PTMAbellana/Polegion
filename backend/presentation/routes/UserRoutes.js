@@ -23,6 +23,12 @@ class UserRoutes {
 
         this.router.route('/deactivate')
         .put(this.authMiddleware.protect, this.userController.deactivateAccount)
+
+        this.router.route('/upload-profile-image')
+        .post(
+            this.userController.getUploadMiddleware(),
+            this.userController.uploadProfileImage,
+        )
     }
 
     getRouter(){

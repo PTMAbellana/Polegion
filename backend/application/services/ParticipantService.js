@@ -30,10 +30,10 @@ class ParticipantService {
         
         try {
             //verify if room exists
-            const exist = await this.roomService.getRoomById(room_id, creator_id)
+            // const exist = await this.roomService.getRoomById(room_id, creator_id)
             // console.log('getRoomParticipants data: ', exist)
             
-            if (!exist) throw new Error ('Room not found or not authorized')
+            // if (!exist) throw new Error ('Room not found or not authorized')
             // return await this.participantRepo.getAllParticipants(room_id)
             const data = await this.participantRepo.getAllParticipants(room_id)
             

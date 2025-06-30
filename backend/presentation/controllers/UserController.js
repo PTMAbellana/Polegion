@@ -1,6 +1,26 @@
+const multer = require('multer')
+
+//configure multer for memory storage
+const storage = multer.memoryStorage()
+const upload = multer({
+    storage: storage,
+    limits: {
+        fileSize: 10 * 1024 * 1024  //10 mb file size
+    },
+    fileFilter: (req, file, cb) => {
+        // Check if file is an image
+        if (file.mimetype.startsWith('image/')) {
+            cb(null, true)
+        } else {
+            cb(new Error('Only image files are allowed!'), false)
+        }
+    }
+})
+
 class UserController {
     constructor (userService){
         this.userService = userService
+        this.uploadMiddleware = upload.single('image')
     }
     
     getUserProfile = async (req, res) => {
@@ -75,7 +95,50 @@ class UserController {
             })
         }
     }
+    uploadProfileImage = async (req, res) => {
+        try {
+            // console.log('Upload endpoint hit')
+            // console.log('File received:', req.file ? req.file.originalname : 'No file')
 
+            if (!req.file) {
+                return res.status(400).json({ error: 'No file uploaded' })
+            }
+            
+            const file = req.file
+            const fileExtension = file.originalname.split('.').pop()
+            const fileName = `${Date.now()}.${fileExtension}`
+
+            // console.log('Uploading file:', fileName)
+        
+            // This implementation will depend on how you handle file uploads
+            // You might need to use multer or another library
+            const url = await this.userService.uploadProfileImage(
+                file.buffer,
+                fileName,
+                file.mimetype,
+                req.user.id
+            )
+
+            // console.log('Image uploaded successfully:', url)
+            
+            if (!url) return res.status(400).json({ error: error.message })
+                        
+            res.status(200).json({ 
+                data: {
+                        imageUrl: url,
+                        fileName: fileName
+                },
+                message: 'Image uploaded successfully'
+             })
+        } catch (error) {
+            console.error('Error uploading image:', error)
+            res.status(500).json({ error: 'Server error uploading image' })
+        }
+    };
+// Middleware getter for multer
+    getUploadMiddleware() {
+        return this.uploadMiddleware;
+    }
 }
 
 module.exports = UserController
