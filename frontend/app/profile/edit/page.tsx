@@ -2,17 +2,19 @@
 
 import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { deactivateAccount, logout, updateEmail, updatePassword, updateUserProfile } from '@/lib/apiService'
+import { deactivateAccount, logout, updateEmail, updatePassword, updateUserProfile, uploadImage, uploadProfileImage } from '@/lib/apiService'
 import { myAppHook } from '@/context/AppUtils'
 import Loader from '@/components/Loader'
 import styles from '@/styles/profile.module.css'
 import { ROUTES } from '@/constants/routes'
+import toast from 'react-hot-toast'
 
 // Define the form data interface
 interface ProfileFormData {
   fullName: string;
   gender: string;
   phone: string;
+  profileImage?: string | File | null;
 }
 
 interface FormErrors {
@@ -28,12 +30,14 @@ export default function EditProfile() {
     const [formData, setFormData] = useState<ProfileFormData>({
         fullName: '',
         gender: '',
-        phone: ''
+        phone: '',
+        profileImage: null
     })
     const [formErrors, setFormErrors] = useState<FormErrors>({})
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
     const [error, setError] = useState<string>('')
     const [success, setSuccess] = useState<boolean>(false)
+    const [previewProfileImage, setPreviewProfileImage] = useState<string | undefined>(undefined)
     
     // Add states for email and password modals/inputs
     const [showEmailModal, setShowEmailModal] = useState<boolean>(false)
@@ -47,8 +51,14 @@ export default function EditProfile() {
             setFormData({
                 fullName: userProfile.fullName || '',
                 gender: userProfile.gender || '',
-                phone: userProfile.phone || ''
+                phone: userProfile.phone || '',
+                profileImage: userProfile.profileImage || null
             })
+            
+            // Set preview image if user already has a profile image
+            if (userProfile.profileImage) {
+                setPreviewProfileImage(userProfile.profileImage)
+            }
         }
     }, [userProfile])
 
@@ -73,6 +83,31 @@ export default function EditProfile() {
                 ...prev,
                 [name]: undefined
             }))
+        }
+    }
+
+    const handleProfileImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        if (event.target.files && event.target.files[0]) {
+            const file = event.target.files[0]
+            
+            // Validate file type
+            if (!file.type.startsWith('image/')) {
+                toast.error('Please select a valid image file')
+                return
+            }
+            
+            // Validate file size (e.g., max 5MB)
+            const maxSize = 5 * 1024 * 1024 // 5MB in bytes
+            if (file.size > maxSize) {
+                toast.error('Image size should be less than 5MB')
+                return
+            }
+            
+            setFormData(prev => ({
+                ...prev,
+                profileImage: file
+            }))
+            setPreviewProfileImage(URL.createObjectURL(file))
         }
     }
 
@@ -106,15 +141,75 @@ export default function EditProfile() {
         setError('')
         
         try {
-            await updateUserProfile(formData)
+            console.log('Form submission started')
+            console.log('Form data received:', formData)
+            
+            const profilePayload = {
+                fullName: formData.fullName,
+                gender: formData.gender,
+                phone: formData.phone,
+                profileImage: null, // Default to null
+            };
+
+            // Handle profile image upload if there's a file
+            if (formData.profileImage instanceof File) {
+                console.log('Processing profile image file:', {
+                    name: formData.profileImage.name,
+                    size: formData.profileImage.size,
+                    type: formData.profileImage.type
+                });
+                
+                // Create FormData for file upload
+                const formDataForUpload = new FormData();
+                formDataForUpload.append('image', formData.profileImage);
+                
+                // Log what we're sending
+                console.log('Sending FormData to server...')
+                for (let pair of formDataForUpload.entries()) {
+                    console.log('FormData pair:', pair[0], pair[1])
+                }
+                
+                try {
+                    // Upload image first
+                    console.log('Calling uploadImage API...')
+                    const uploadResponse = await uploadProfileImage(formDataForUpload);
+                    console.log('Upload response received:', uploadResponse.data);
+                    
+                    if (uploadResponse.data && uploadResponse.data.data && uploadResponse.data.data.imageUrl) {
+                        profilePayload.profileImage = uploadResponse.data.data.imageUrl;
+                        console.log('Profile image URL set:', profilePayload.profileImage)
+                    } else {
+                        console.error('Invalid upload response structure:', uploadResponse.data)
+                        throw new Error('Failed to get image URL from upload response');
+                    }
+                } catch (uploadError) {
+                    console.error('Profile image upload failed:', uploadError);
+                    toast.error(`Failed to upload profile image: ${uploadError.message}`);
+                    setIsSubmitting(false);
+                    return;
+                }
+            } else {
+                console.log('No profile image file to upload')
+                // If no new image is uploaded, keep the existing one
+                if (typeof formData.profileImage === 'string') {
+                    profilePayload.profileImage = formData.profileImage;
+                }
+            }
+
+            console.log('Updating profile with payload:', profilePayload);
+            
+            await updateUserProfile(profilePayload)
             await refreshUserSession()
             setSuccess(true)
+            toast.success('Profile updated successfully!')
+            
             setTimeout(() => {
                 router.push(ROUTES.PROFILE)
             }, 2000)
         } catch (err: any) {
             console.error('Error updating profile:', err)
             setError(err?.response?.data?.error || 'Failed to update profile. Please try again.')
+            toast.error('Failed to update profile. Please try again.')
         } finally {
             setIsSubmitting(false)
         }
@@ -159,12 +254,14 @@ export default function EditProfile() {
             setSuccess(true)
             setShowEmailModal(false)
             setNewEmail('')
+            toast.success('Email updated successfully!')
             setTimeout(() => {
                 router.push(ROUTES.PROFILE)
             }, 2000)
         } catch (error: any) {
             console.error('Error updating email:', error)
             setError(error?.response?.data?.error || 'Failed to update email. Please try again.')   
+            toast.error('Failed to update email. Please try again.')
         } finally {
             setIsSubmitting(false)
         }
@@ -198,12 +295,14 @@ export default function EditProfile() {
             setShowPasswordModal(false)
             setNewPassword('')
             setConfirmPassword('')
+            toast.success('Password updated successfully!')
             setTimeout(() => {
                 router.push(ROUTES.PROFILE)
             }, 2000)
         } catch (error: any) {
             console.error('Error updating password:', error)
             setError(error?.response?.data?.error || 'Failed to update password. Please try again.')   
+            toast.error('Failed to update password. Please try again.')
         } finally {
             setIsSubmitting(false)
         }
@@ -240,7 +339,41 @@ export default function EditProfile() {
             <div className={styles['profile-section']}>
                 {/* Profile Image */}
                 <div className={styles['edit-profile-image-container']}>
-                    <div className={styles['edit-profile-image']}></div>
+                    <div className={styles['edit-profile-image']}>
+                        {previewProfileImage ? (
+                            <img 
+                                src={previewProfileImage} 
+                                alt="Profile Preview" 
+                                style={{
+                                    width: '100%',
+                                    height: '100%',
+                                    objectFit: 'cover',
+                                    borderRadius: '50%'
+                                }}
+                            />
+                        ) : (
+                            <div style={{
+                                width: '100%',
+                                height: '100%',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                backgroundColor: '#f0f0f0',
+                                borderRadius: '50%',
+                                fontSize: '2rem',
+                                color: '#666'
+                            }}>
+                                {userProfile?.fullName?.charAt(0)?.toUpperCase() || 'U'}
+                            </div>
+                        )}
+                    </div>
+                    <input 
+                        type='file' 
+                        accept='image/*' 
+                        className={styles['image-upload-input']}
+                        onChange={handleProfileImageChange}
+                    />
+                    <span className={styles['image-upload-text']}>Change Profile Image</span>
                 </div>
 
                 {/* Form Section */}
@@ -374,8 +507,8 @@ export default function EditProfile() {
 
             {/* Email Change Modal */}
             {showEmailModal && (
-                <div className={styles['modal-overlay']}>
-                    <div className={styles['modal']}>
+                <div className={styles['modal-overlay']} >
+                    <div className={styles['modal-content']}>
                         <h3>Change Email</h3>
                         <form onSubmit={handleEmailSubmit}>
                             <div className={styles['form-group']}>
@@ -411,7 +544,7 @@ export default function EditProfile() {
             {/* Password Change Modal */}
             {showPasswordModal && (
                 <div className={styles['modal-overlay']}>
-                    <div className={styles['modal']}>
+                    <div className={styles['modal-content']}>
                         <h3>Change Password</h3>
                         <form onSubmit={handlePasswordSubmit}>
                             <div className={styles['form-group']}>

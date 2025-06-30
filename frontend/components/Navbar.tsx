@@ -44,13 +44,13 @@ const Navbar = () => {
             contextLogout()
             
             toast.success("Logged out successfully")
-            router.push(ROUTES.LOGIN)
+            router.push(ROUTES.HOME)
             
         } catch (error){
             console.log('Logout error: ', error)
             contextLogout()
             toast.error('Error during logout, session cleared')
-            router.push(ROUTES.LOGIN)
+            router.push(ROUTES.HOME)
         }
     };
 
@@ -96,7 +96,7 @@ const Navbar = () => {
                 </button>
             )}
 
-            {isLoggedIn ? (
+            {isLoggedIn && (
                 <>
                     {/* Sidebar */}
                     <div 
@@ -155,20 +155,6 @@ const Navbar = () => {
                         </div>
                     </div>
                 </>
-            ) : (
-                <nav className={styles["public-nav"]}>
-                    <div className={styles["logo-container"]}>
-                        <h2 className={styles["logo-text"]}>Polegion</h2>
-                    </div>
-                    <ul>
-                        <li>
-                            <Link href={ROUTES.HOME}>Home</Link>
-                        </li>
-                        <li>
-                            <Link href={ROUTES.LOGIN}>Login</Link>
-                        </li>
-                    </ul>
-                </nav>
             )}
         </>
     );

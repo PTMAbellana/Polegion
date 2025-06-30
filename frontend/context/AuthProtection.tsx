@@ -71,7 +71,7 @@ export function AuthProtection () {
                 // Redirect to login if not authenticated and route is protected
                 if (!isLoggedIn && !PUBLIC_ROUTES.includes(pathname)) {
                     console.log("Redirecting to login: User not logged in and route is protected")
-                    router.push(ROUTES.LOGIN)
+                    router.push(ROUTES.HOME)
                     return
                 }
                 
