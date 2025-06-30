@@ -12,6 +12,7 @@ interface MainAreaProps {
   handleDragOver: (e: React.DragEvent) => void;
   setSelectedId: (id: number | null) => void;
   setSelectedTool: (tool: string | null) => void;
+  saveButton?: React.ReactNode;
 }
 
 const MainArea: React.FC<MainAreaProps> = ({
@@ -22,13 +23,14 @@ const MainArea: React.FC<MainAreaProps> = ({
   handleDragOver,
   setSelectedId,
   setSelectedTool,
+  saveButton,
 }) => (
   <div
     ref={mainAreaRef}
     className={styles.mainArea}
     onDrop={handleDrop}
     onDragOver={handleDragOver}
-    style={{ overflow: "hidden" }}
+    style={{ overflow: "hidden", position: "relative" }}
     onMouseDown={() => {
       setSelectedId(null);
       setSelectedTool(null);
@@ -38,6 +40,7 @@ const MainArea: React.FC<MainAreaProps> = ({
       Main Area
     </div>
     {shapes.map(renderShape)}
+    {saveButton}
   </div>
 );
 

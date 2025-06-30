@@ -57,8 +57,8 @@ export default function TriangleShape({
     <div
       style={{
         position: "absolute",
-        left: shape.x - pad,
-        top: shape.y - pad,
+        left: shape.x, // was: shape.x - pad
+        top: shape.y, // was: shape.y - pad
         width: svgWidth,
         height: svgHeight,
         cursor: "move",

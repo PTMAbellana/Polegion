@@ -17,6 +17,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        {/* Place your meta tags here */}
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+      </head>
       <body>
       <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;700&display=swap" rel="stylesheet" />
         <AppUtilsProvider>
