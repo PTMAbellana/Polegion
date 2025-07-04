@@ -1,10 +1,13 @@
 const BaseRepo = require('./BaseRepo')
 const userModel = require('../../domain/models/User')
 const jwt = require('jsonwebtoken')
+const { data } = require('autoprefixer')
 
 class UserRepo extends BaseRepo{
     constructor(supabase){
         super(supabase)
+        this.tableName = 'user_profiles'
+        this.storageBucket = 'profile-images'
     }
 
     async refreshSession(refreshToken) {
@@ -220,6 +223,49 @@ class UserRepo extends BaseRepo{
                 throw new Error(error.message || 'Something went wrong')
             }
     }
+
+    async uploadProfileImage(fileBuffer, fileName, mimeType, userId){
+        try {
+            const {
+                data: bucket,
+                error: bucketerror
+            } = await this.supabase.storage
+            .from(this.storageBucket)
+            .upload(fileName, fileBuffer, {
+                contentType: mimeType,
+                // upsert: false // Set to true if you want to overwrite existing files
+                upsert: true
+            })
+    
+            if (bucketerror){
+                // console.log('Upload image error: ', error) 
+                throw bucketerror
+            }
+
+            const { data: urlData } = this.supabase.storage
+            .from(this.storageBucket)
+            .getPublicUrl(fileName)
+
+            if (!urlData || !urlData.publicUrl) {
+                throw new Error('Failed to get public URL for uploaded image');
+            }
+
+            // console.log('Public URL generated:', urlData.publicUrl)
+            // console.log('url data:', urlData)
+            const link = urlData.publicUrl;
+            const { data: user, error: userError } = await this.supabase.from(this.tableName).insert({
+                profile_pic: link, user_id: userId})
+            if (userError) {
+                throw new Error('Failed to update user profile image: ' + userError.message)    
+            }
+
+            return data
+        } catch (error) {
+            // console.error('Error in uploadBannerImage:', error)
+            throw error
+        }    
+    }
+    
 
     // async updatePasswordWithToken(token, newPassword) {
     //     try {

@@ -1,4 +1,4 @@
-    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
 
 .variables {
   --primary-color: #2C514C;
@@ -28,7 +28,7 @@
     transition: margin-left 0.3s ease;
 }
 
-/* Room Header */
+/* Room Header - Modified for join room (no edit actions) */
 .room-header {
   background: #FFFFFF;
   border-bottom: 1px solid #e0e0e0;
@@ -82,7 +82,7 @@
   flex-wrap: wrap;
 }
 
-.share-btn, .edit-room-btn {
+.share-btn, .leave-room-btn {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -95,9 +95,6 @@
   cursor: pointer;
   transition: var(--transition);
   white-space: nowrap;
-}
-
-.share-btn {
   background: var(--primary-color);
   color: white;
 }
@@ -107,22 +104,21 @@
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(44, 81, 76, 0.3);
 }
-
-.edit-room-btn {
+.leave-room-btn {
   background: var(--accent-color);
   color: var(--text-primary);
 }
 
-.edit-room-btn:hover {
+.leave-room-btn:hover {
   background: #f9b143;
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(250, 188, 96, 0.3);
 }
 
-/* Main Content Layout */
+/* Main Content Layout - Single column for join room */
 .room-content {
-  display: grid;
-  grid-template-columns: 2fr 1fr;
+  display: flex;
+  flex-direction: column;
   gap: 30px;
   padding: 30px 40px;
   max-width: 1400px;
@@ -131,14 +127,14 @@
   box-sizing: border-box;
 }
 
-.left-column, .right-column {
+.main-column {
   display: flex;
   flex-direction: column;
   gap: 25px;
 }
 
 /* Card Base Styles */
-.room-info-card, .problems-card, .participants-card, .settings-card, .quick-actions-card {
+.room-info-card, .problems-card, .participants-card, .settings-card {
   background: #FFFFFF;
   border-radius: var(--border-radius);
   padding: 25px;
@@ -258,8 +254,113 @@
   font-weight: 500;
 }
 
-/* Add/Action Buttons */
-.add-btn, .invite-btn {
+/* Problems Section - Read only for join room */
+.problems-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.problem-item {
+  padding: 20px;
+  background: #f8f9fa;
+  border-radius: 12px;
+  border-left: 4px solid var(--primary-color);
+  transition: var(--transition);
+}
+
+.problem-item:hover {
+  background: #e9ecef;
+  transform: translateX(5px);
+}
+
+.problem-title {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 600;
+  font-size: 16px;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+
+.problem-description {
+  font-family: 'Poppins', sans-serif;
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+/* Participants Section - Full width below main content */
+.participants-card {
+  margin-top: 10px;
+}
+
+.participants-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.participant-item {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 12px;
+  border: 1px solid #e0e0e0;
+  transition: var(--transition);
+}
+
+.participant-item:hover {
+  background: #e9ecef;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.participant-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--primary-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 600;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.participant-info {
+  flex: 1;
+}
+
+.participant-name {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 500;
+  font-size: 14px;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.participant-email {
+  font-family: 'Poppins', sans-serif;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.participant-role {
+  padding: 4px 8px;
+  background: var(--accent-color);
+  color: var(--text-primary);
+  border-radius: 10px;
+  font-size: 10px;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+.invite-btn {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -271,16 +372,6 @@
   font-size: 14px;
   cursor: pointer;
   transition: var(--transition);
-}
-
-.add-btn {
-  background: var(--success-color);
-  color: white;
-}
-
-.add-btn:hover {
-  background: #43a047;
-  transform: translateY(-1px);
 }
 
 .invite-btn {
@@ -379,53 +470,6 @@
   transform: scale(1.05);
 }
 
-/* Quick Actions */
-.action-buttons {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.action-btn {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 15px 20px;
-  border-radius: 12px;
-  border: none;
-  font-family: 'Poppins', sans-serif;
-  font-weight: 500;
-  font-size: 14px;
-  cursor: pointer;
-  transition: var(--transition);
-  justify-content: flex-start;
-}
-
-.action-btn.primary {
-  background: var(--success-color);
-  color: white;
-}
-
-.action-btn.primary:hover {
-  background: #43a047;
-  transform: translateX(5px);
-}
-
-.action-btn.secondary {
-  background: #f8f9fa;
-  color: var(--text-primary);
-  border: 1px solid #e0e0e0;
-}
-
-.action-btn.secondary:hover {
-  background: #e9ecef;
-  transform: translateX(5px);
-}
-
-.action-icon {
-  font-size: 16px;
-}
-
 /* Loading and Error States */
 .loading-container {
   display: flex;
@@ -448,11 +492,28 @@
   box-shadow: var(--box-shadow);
 }
 
+/* Join Room Specific Styles */
+.join-status {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 15px 20px;
+  background: var(--success-color);
+  color: white;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 500;
+}
+
+.join-status-icon {
+  font-size: 20px;
+}
+
 /* Responsive Design */
 @media (max-width: 1200px) {
-  .room-content {
-    grid-template-columns: 1fr;
-    gap: 25px;
+  .participants-list {
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   }
   
   .room-header-content {
@@ -489,7 +550,7 @@
     height: 200px;
   }
   
-  .room-info-card, .problems-card, .participants-card, .settings-card, .quick-actions-card {
+  .room-info-card, .problems-card, .participants-card, .settings-card {
     padding: 20px;
   }
   
@@ -502,7 +563,7 @@
     flex-direction: column;
   }
   
-  .share-btn, .edit-room-btn {
+  .share-btn {
     width: 100%;
     justify-content: center;
   }
@@ -516,6 +577,14 @@
   .setting-value {
     width: 100%;
     justify-content: space-between;
+  }
+  
+  .participants-list {
+    grid-template-columns: 1fr;
+  }
+  
+  .participant-item {
+    padding: 12px;
   }
 }
 
@@ -536,7 +605,7 @@
     height: 150px;
   }
   
-  .room-info-card, .problems-card, .participants-card, .settings-card, .quick-actions-card {
+  .room-info-card, .problems-card, .participants-card, .settings-card {
     padding: 15px;
   }
   
@@ -547,6 +616,16 @@
   .empty-icon {
     font-size: 36px;
   }
+  
+  .participant-item {
+    gap: 10px;
+  }
+  
+  .participant-avatar {
+    width: 35px;
+    height: 35px;
+    font-size: 14px;
+  }
 }
 
 /* Print Styles */
@@ -555,22 +634,11 @@
     margin-left: 0 !important;
   }
   
-  .room-actions, .action-buttons, .invite-btn, .add-btn {
+  .room-actions {
     display: none !important;
   }
   
-  .room-content {
-    grid-template-columns: 1fr;
+  .participants-list {
+    grid-template-columns: repeat(2, 1fr);
   }
-}
-
-.participant-item {
-  padding: 8px 12px;
-  background: #f8f8f8;
-  border-radius: 6px;
-  font-size: 16px;
-  color: #222;
-  font-weight: 500;
-  /* Optional: add a subtle border */
-  border: 1px solid #ececec;
 }

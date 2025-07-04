@@ -53,6 +53,15 @@ class UserService {
             throw error
         }
     } 
+
+    async uploadProfileImage(fileBuffer, fileName, mimeType, userId) {
+        try {
+            return await this.userRepo.uploadProfileImage(fileBuffer, fileName, mimeType, userId)
+        } catch (error) {
+            throw error
+        }
+    }
+
 }
 
 module.exports = UserService

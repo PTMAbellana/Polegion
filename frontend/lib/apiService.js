@@ -442,6 +442,42 @@ export const getJoinedRooms = async() => {
     }
 }
 
+export const uploadProfileImage = async (formData) => {
+  try {
+    console.log("Uploading profile image...");
+
+    // Use the NEW separated endpoint
+    const response = await api.post("/users/upload-profile-image", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+      timeout: 30000, // Longer timeout for file uploads
+    });
+
+    console.log("Image upload response:", response.data);
+    return response;
+  } catch (error) {
+    console.error("Error uploading profile image:", error);
+
+    // Enhanced error handling for file uploads
+    if (error.response?.data?.error) {
+      throw new Error(error.response.data.error);
+    } else if (error.code === "ECONNABORTED") {
+      throw new Error("Upload timeout - file may be too large");
+    } else if (error.message === "Network Error") {
+      throw new Error("Network error - please check your connection");
+    } else if (error.response?.status === 404) {
+      throw new Error("Upload endpoint not found - check server configuration");
+    } else {
+      throw new Error(`Failed to upload image: ${error.message}`);
+    }
+  }
+  // return await api.post('/rooms/upload', formData, {
+  //     headers: {
+  //         'Content-Type': 'multipart/form-data'
+  //     }
+  // })
+};
 export { authUtils };
 export default api;
 

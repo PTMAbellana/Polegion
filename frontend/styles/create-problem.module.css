@@ -9,6 +9,115 @@
   padding-left: 60px;
 }
 
+@media (max-width: 900px) {
+  .scalableWorkspace {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "header"
+      "sidebar"
+      "prompt"
+      "main"
+      "controls";
+    gap: 16px;
+    padding: 0 4vw 8px 4vw;
+  }
+  .mainColumn, .toolbox {
+    max-width: 100%;
+    width: 100%;
+  }
+  .mainArea {
+    min-width: 0;
+    width: 100%;
+    min-height: 240px;
+    border-radius: 16px;
+  }
+  .toolbox {
+    min-width: 0;
+    width: 100%;
+    height: auto;
+    margin-bottom: 16px;
+    border-radius: 16px;
+    padding: 12px 0;
+  }
+  .difficultyBox {
+    font-size: 18px;
+    height: 48px;
+    border-radius: 16px;
+  }
+  .saveBtn, .addTimerBtn, .addHintBtn, .limitedAttemptsBtn, .setVisibilityBtn {
+    min-width: 100px;
+    min-height: 36px;
+    font-size: 1rem;
+    padding: 0 10px;
+    border-radius: 12px;
+  }
+  .controlsRow {
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+  }
+  .promptBox, .promptText, .promptTextarea {
+    font-size: 18px;
+    min-height: 60px;
+    max-height: 60px;
+    height: 60px;
+  }
+}
+
+/* Even more compact for mobile */
+@media (max-width: 600px) {
+  .scalableWorkspace {
+    padding: 0 2vw 4px 2vw;
+    gap: 8px;
+  }
+  .mainAreaHeader {
+    font-size: 14px;
+    height: 32px;
+    border-radius: 12px 12px 0 0;
+  }
+  .difficultyBox {
+    font-size: 14px;
+    height: 40px;
+    border-radius: 12px;
+  }
+  .saveBtn, .addTimerBtn, .addHintBtn, .limitedAttemptsBtn, .setVisibilityBtn {
+    min-width: 70px;
+    min-height: 28px;
+    font-size: 0.9rem;
+    padding: 0 4px;
+    border-radius: 8px;
+  }
+  .toolbox {
+    border-radius: 12px;
+    padding: 6px 0;
+  }
+  .promptBox, .promptText, .promptTextarea {
+    font-size: 14px;
+    min-height: 40px;
+    max-height: 40px;
+    height: 40px;
+    border-radius: 8px;
+  }
+}
+
+/* Make sure the main area and toolbox never overflow horizontally */
+.mainArea, .toolbox {
+  max-width: 100vw;
+  box-sizing: border-box;
+}
+
+/* Make shapes scale down if needed */
+@media (max-width: 600px) {
+  .toolboxSquare,
+  .toolboxCircle,
+  .toolboxTriangle,
+  .shapeFillTool {
+    width: 40px;
+    height: 40px;
+  }
+}
+
 /* Flexible grid layout for the workspace */
 .scalableWorkspace {
   display: grid;
@@ -24,7 +133,16 @@
   min-height: 100vh;
   background: #fff;
   box-sizing: border-box;
-  padding: 32px 24px;
+  padding: 0px 24px 8px 24px;
+}
+
+.mainColumn {
+  width: 100%;
+  max-width: 1000px; /* or 700px, adjust as you like */
+  /* margin: 0 auto; */ /* This is to put it right beside the sidebar*/
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
 /* Top left group */
@@ -72,6 +190,7 @@
   user-select: none;
   transition: background 0.2s;
   position: relative;
+  margin-bottom: 16px;
 }
 
 /* Difficulty text inside the box */
@@ -87,14 +206,12 @@
 
 /* Dropdown menu for difficulties */
 .difficultyDropdownMenu {
-  position: absolute;
-  top: 64px;
-  left: 0;
   width: 100%;
   border-radius: 0 0 20px 20px;
   box-shadow: 0 4px 16px rgba(0,0,0,0.12);
   overflow: hidden;
   z-index: 100;
+  margin-bottom: 16px;
 }
 
 /* Each dropdown item */
@@ -119,10 +236,25 @@
   margin: 0 auto;
   position: relative;
   overflow: hidden;
-  display: flex;
+  /* display: flex;
   flex-wrap: wrap;
   align-items: flex-start;
-  justify-content: flex-start;
+  justify-content: flex-start; */
+}
+
+.mainAreaHeader {
+  width: 100%;
+  height: 48px;
+  background: #2c514c; /* Same dark green as toolbox */
+  border-radius: 20px 20px 0 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-family: 'Poppins', sans-serif;
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 8px;
 }
 
 .solutionShape {
@@ -144,7 +276,7 @@
 }
 
 /* Save, Timer, Hint Buttons */
-.saveBtn, .addTimerBtn, .addHintBtn {
+.saveBtn, .addTimerBtn, .addHintBtn, .limitedAttemptsBtn, .setVisibilityBtn {
   background: #fabc60;
   border-radius: 20px;
   font-family: 'Poppins';
@@ -162,12 +294,42 @@
   display: inline-block;
 }
 
-.saveBtn:hover, .addTimerBtn:hover, .addHintBtn:hover {
+.limitedAttemptsBtn,
+.addTimerBtn,
+.addHintBtn,
+.setVisibilityBtn {
+  font-size: 0.9rem;      /* Make text smaller */
+  font-weight: normal;    /* Not bold */
+}
+
+.saveBtn:hover,
+.addTimerBtn:hover,
+.addHintBtn:hover,
+.limitedAttemptsBtn:hover,
+.setVisibilityBtn:hover {
   background: #f9a825;
+}
+
+.saveBtnFloating {
+  position: absolute;
+  bottom: 24px;
+  right: 24px;
+  z-index: 20;
+}
+
+.hintInput {
+  min-width: 160px;
+  min-height: 36px;
+  padding: 0 16px;
+  margin: 0 8px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 0.9rem;
 }
 
 /* Toolbox (sidebar) */
 .toolbox {
+  margin-top: 8px;
   grid-area: sidebar;
   background: #6d8a72;
   border-radius: 20px;
@@ -175,9 +337,10 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  min-width: 200px;
-  max-width: 260px;
-  height: 100%;
+  /* min-width: 200px;
+  max-width: 260px; */
+  width: 100%;
+  height: 540px;
   box-sizing: border-box;
 }
 
@@ -188,7 +351,13 @@
   background: #2c514c;
   border-radius: 20px 20px 0 0;
   margin-bottom: 16px;
-  /* Remove position, left, top, and set width to 100% */
+  color: #fff;
+  font-family: 'Poppins', sans-serif;
+  font-size: 24px;
+  font-weight: 600;
+  display: flex;                /* Add this */
+  align-items: center;          /* Vertically center */
+  justify-content: center;      /* Horizontally center */
 }
 
 .toolboxContent {
@@ -202,7 +371,7 @@
   justify-content: center;
   align-items: center;
   width: 100%;
-  margin-bottom: 0;
+  gap: 8px;
 }
 
 .toolboxSquare {
@@ -252,12 +421,16 @@
 
 .toolboxSquare,
 .toolboxCircle,
-.toolboxTriangle {
+.toolboxTriangle,
+.shapeFillTool {
   width: 64px;
   height: 64px;
   flex-shrink: 0;
-  margin: 0 4px;
+  margin: 0;
   box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* Go Back */
@@ -290,28 +463,48 @@
 .promptGroup {
   grid-area: prompt;
   width: 100%;
-  min-height: 80px;
-  margin-bottom: 8px;
+  min-height: 100px;
+  margin-bottom: 0px;
 }
+
 .promptBox {
-  position: absolute;
-  width: 1080px;
-  height: 106px;
-  left: 0;
-  top: 0;
-  background: #dadada;
-  border-radius: 20px;
+  background: #d9d9d9;
+  border-radius: 16px;
+  padding: 16px 20px;
+  height: 100px;
+  min-height: 100px;
+  max-height: 100px;
+  overflow: auto;
+  width: 100%;
+  box-sizing: border-box;
+  font-family: 'Poppins', sans-serif;
+  font-size: 24px;
+  font-weight: 300;
+  color: #000;
+  transition: background 0.2s;
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
+
 .promptText {
-  position: absolute;
-  left: 21px;
-  top: 14px;
+  height: 100%;
+  min-height: 100px;
+  max-height: 100px;
   font-family: 'Poppins';
   font-style: normal;
   font-weight: 300;
   font-size: 24px;
   line-height: 36px;
   color: #000;
+  display: block;
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  overflow: auto;
+  resize: none;
+  text-overflow: ellipsis;
+  /* Remove extra padding here */
 }
 
 .promptTextarea {
@@ -325,7 +518,7 @@
   border: none;
   outline: none;
   resize: none;
-  padding: 21px 21px 0 21px;
+  padding: 0; /* <-- Remove padding here */
   box-sizing: border-box;
 }
 
@@ -383,4 +576,27 @@
   gap: 24px;
   margin-top: 24px;
   margin-bottom: 16px;
+}
+
+/* Remove border-radius from buttons when dropdownActive is present */
+.dropdownActive .limitedAttemptsBtn,
+.dropdownActive .addTimerBtn,
+.dropdownActive .addHintBtn,
+.dropdownActive .setVisibilityBtn {
+  border-radius: 0 !important;
+}
+
+/* Difficulty button: keep top corners, remove bottom corners when dropdown is open */
+.dropdownActive .difficultyBox {
+  border-top-left-radius: 20px !important;
+  border-top-right-radius: 20px !important;
+  border-bottom-left-radius: 0 !important;
+  border-bottom-right-radius: 0 !important;
+  margin-bottom: 0 !important;
+}
+
+/* Remove top border-radius from dropdown menu when open */
+.dropdownActive .difficultyDropdownMenu {
+  border-top-left-radius: 0 !important;
+  border-top-right-radius: 0 !important;
 }

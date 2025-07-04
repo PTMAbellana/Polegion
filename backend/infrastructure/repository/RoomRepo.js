@@ -97,7 +97,7 @@ class RoomRepo extends BaseRepo {
             } = await this.supabase.from(this.tableName)
             .select('*')
             .eq('code', roomCode)
-            .eq('user_id', user_id)
+            // .eq('user_id', user_id)
             .single()
     
             if (error) throw error

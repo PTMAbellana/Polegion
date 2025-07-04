@@ -26,8 +26,9 @@ interface AppUtilsType {
   setAuthToken: (token: string | null) => void;
   userProfile: UserProfile | null;
   setUserProfile: (profile: UserProfile | null) => void;
-  isLoading: boolean;
-  setIsLoading: (state: boolean) => void;
+  authLoading: boolean;
+  appLoading: boolean;
+  setAppLoading: (state: boolean) => void;
   refreshUserSession: () => Promise<boolean>;
   logout: () => void;
 }
@@ -42,8 +43,10 @@ export const AppUtilsProvider = ({
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
   const [authToken, setAuthToken] = useState<string | null>(null);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  // const [isRefreshing, setIsRefreshing] = useState(false);
+
+  // Separate loading states
+  const [authLoading, setAuthLoading] = useState(true);
+  const [appLoading, setAppLoading] = useState(true);
 
   const isRefreshing = useRef(false);
   const hasInitialized = useRef(false);
@@ -52,77 +55,48 @@ export const AppUtilsProvider = ({
   const refreshUserSession = async (): Promise<boolean> => {
     if (isRefreshing.current) return isLoggedIn;
 
+    setAuthLoading(true);
     try {
       isRefreshing.current = true;
-      console.log("Start session refresh...");
-
       const authData = authUtils.getAuthData();
 
-      console.log("Auth data from storage:", {
-        hasToken: !!authData.accessToken,
-        isTokenValid: authUtils.isTokenValid(),
-        userProfile: authData.user,
-      });
-
-      //da kapoya aning tokenvalid oiiiii rarararar gi kapoy nako nimoooooooooooooooooo
       if (authData.accessToken && authUtils.isTokenValid()) {
-        console.log("Access token exists, treating as valid");
         setAuthToken(authData.accessToken);
-        console.log(authData);
 
         if (authData.user && Object.keys(authData.user).length > 0) {
-          console.log("Setting user profile from storage: ", authData.user);
           setUserProfile(authData.user);
         }
 
         setIsLoggedIn(true);
 
         try {
-          console.log("Fetching fresh profile data... ");
           const pr = await getUserProfile();
           if (pr?.data) {
-            console.log("Fresh profile data received: ", pr.data);
             setUserProfile(pr.data);
-            // console.log(userProfile)
             const updateUser = {
               ...authData.user,
               ...pr.data,
             };
             localStorage.setItem("user", JSON.stringify(updateUser));
           }
-        } catch (err) {
-          console.error("Error fetching user profile: ", err);
-
+        } catch (err: any) {
           if (err.response && err.response.status === 401) {
-            console.log("Unauthorized access - logging out");
             logout();
             return false;
           }
         }
 
-        console.log("Session restored: User is logged in");
         return true;
       } else {
-        // If token is expired and can't be refreshed, reset state
-        console.log("No valid token found: User is logged out");
-        // setAuthToken(null);
-        // setUserProfile(null);
-        // setIsLoggedIn(false);
         logout();
         return false;
       }
     } catch (error) {
-      console.error("Session refresh error: ", error);
-      // setIsLoggedIn(false)
       logout();
       return false;
     } finally {
       isRefreshing.current = false;
-      // hasInitialized.current = false
-      if (hasInitialized.current) {
-        setIsLoading(false);
-        console.log("Session refresh completed, loading state set to false");
-      }
+      setAuthLoading(false);
     }
   };
 
@@ -138,28 +112,24 @@ export const AppUtilsProvider = ({
   useEffect(() => {
     if (!hasInitialized.current) {
       hasInitialized.current = true;
-      console.log("Initializing AppUtils...");
+      setAppLoading(true);
       refreshUserSession().finally(() => {
-        setIsLoading(false);
+        setAppLoading(false);
       });
     }
   }, []);
-  // useEffect(() => {
-  //     if (!hasInitialized.current) {
-  //         hasInitialized.current = true
-  //         refreshUserSession();
-  //     }
-  // }, []);
 
   // Debug logging for state changes
   useEffect(() => {
-    console.log("Auth state changed:", {
-      isLoggedIn,
-      hasToken: !!authToken,
-      hasProfile: !!userProfile,
-    });
+    // You can keep or remove this log
+    // console.log("Auth state changed:", {
+    //   isLoggedIn,
+    //   hasToken: !!authToken,
+    //   hasProfile: !!userProfile,
+    // });
   }, [isLoggedIn, authToken, userProfile]);
 
+  // Show loader if either authLoading or appLoading is true
   return (
     <AppUtilsContext.Provider
       value={{
@@ -169,13 +139,14 @@ export const AppUtilsProvider = ({
         setAuthToken,
         userProfile,
         setUserProfile,
-        isLoading,
-        setIsLoading,
+        authLoading,
+        appLoading,
+        setAppLoading,
         refreshUserSession,
         logout,
       }}
     >
-      {isLoading ? <Loader /> : children}
+      {(authLoading || appLoading) ? <Loader /> : children}
     </AppUtilsContext.Provider>
   );
 };
@@ -189,4 +160,3 @@ export const myAppHook = () => {
   }
   return context;
 };
-

@@ -27,7 +27,7 @@ const Toolbox: React.FC<ToolboxProps> = ({
   setFillColor,
 }) => (
   <div className={styles.toolbox}>
-    <div className={styles.toolboxHeader}></div>
+    <div className={styles.toolboxHeader}>Tool Box</div>
     <div className={styles.toolboxContent}>
       {/* Row: Square and Circle */}
       <div className={styles.toolboxRow}>
