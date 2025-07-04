@@ -5,23 +5,24 @@ import React, { useState, useRef, useEffect } from "react";
 import Toolbox from "./components/Toolbox";
 import DifficultyDropdown from "./components/DifficultyDropdown";
 import MainArea from "./components/MainArea";
-import Timer from "./components/Timer";
-import HintBox from "./components/HintBox";
 import PromptBox from "./components/PromptBox";
 import SquareShape from "./shapes/SquareShape";
 import CircleShape from "./shapes/CircleShape";
 import TriangleShape from "./shapes/TriangleShape";
+import Timer from "./components/Timer"; 
+import LimitAttempts from "./components/LimitAttempts";
+import SetVisibility from "./components/SetVisibility";
+
+const FILL_COLORS = [
+  "#ffadad", "#ffd6a5", "#fdffb6", "#caffbf",
+  "#9bf6ff", "#a0c4ff", "#bdb2ff", "#ffc6ff", "#E3DCC2"
+];
 
 const DIFFICULTY_COLORS = {
   Easy: "#8FFFC2",
   Intermediate: "#FFFD9B",
   Hard: "#FFB49B",
 };
-
-const FILL_COLORS = [
-  "#ffadad", "#ffd6a5", "#fdffb6", "#caffbf",
-  "#9bf6ff", "#a0c4ff", "#bdb2ff", "#ffc6ff", "#E3DCC2"
-];
 
 const DEFAULT_SIZE = 100;
 const MIN_SIZE = 50;
@@ -39,9 +40,9 @@ export default function CreateProblem() {
   const dragOffset = useRef({ x: 0, y: 0 });
   const [scale, setScale] = useState(1);
 
-  const [difficulty, setDifficulty] = useState("Easy");
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const [difficulty, setDifficulty] = useState("Easy");
 
   const [prompt, setPrompt] = useState("");
   const [editingPrompt, setEditingPrompt] = useState(false);
@@ -57,11 +58,14 @@ export default function CreateProblem() {
   // Toolbox highlight state
   const [selectedTool, setSelectedTool] = useState<string | null>(null);
 
-  // Timer and Hint UI state
   const [timerOpen, setTimerOpen] = useState(false);
   const [timerValue, setTimerValue] = useState(5);
+
   const [hintOpen, setHintOpen] = useState(false);
   const [hint, setHint] = useState("");
+
+  const [limitAttempts, setLimitAttempts] = useState<number | null>(null);
+  const [visible, setVisible] = useState(true);
 
   // Dropdown close on outside click
   useEffect(() => {
@@ -134,15 +138,14 @@ export default function CreateProblem() {
     setSelectedTool(null);
   };
 
-  const MAIN_AREA_HEADER_HEIGHT = 48; // px, match your .mainAreaHeader height
+  // --- DRAG & DROP LOGIC ---
 
+  // Drop shape in main area (centered under cursor)
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     const rect = e.currentTarget.getBoundingClientRect();
-    const header = e.currentTarget.querySelector(`.${styles.mainAreaHeader}`) as HTMLElement;
-    const headerHeight = header ? header.offsetHeight : 0;
     const x = (e.clientX - rect.left - DEFAULT_SIZE / 2) / scale;
-    const y = (e.clientY - rect.top - headerHeight - DEFAULT_SIZE / 2) / scale;
+    const y = (e.clientY - rect.top - DEFAULT_SIZE / 2) / scale;
     setShapes([
       ...shapes,
       {
@@ -162,20 +165,18 @@ export default function CreateProblem() {
 
   const handleDragOver = (e: React.DragEvent) => e.preventDefault();
 
-  // Move shape
+  // Move shape (dragging)
   const handleShapeMouseDown = (id: number, e: React.MouseEvent) => {
     e.stopPropagation();
     setSelectedId(id);
     const shape = shapes.find((s) => s.id === id);
 
-    // Get header height
-    const header = mainAreaRef.current?.querySelector(`.${styles.mainAreaHeader}`) as HTMLElement;
-    const headerHeight = header ? header.offsetHeight : 0;
-
+    // Calculate offset from mouse to shape's top-left
     dragOffset.current = {
-      x: (e.clientX - shape.x * scale),
-      y: (e.clientY - (shape.y + headerHeight) * scale),
+      x: e.clientX - shape.x * scale,
+      y: e.clientY - shape.y * scale,
     };
+
     const onMouseMove = (moveEvent: MouseEvent) => {
       setShapes((prev) =>
         prev.map((shape) =>
@@ -189,30 +190,15 @@ export default function CreateProblem() {
         )
       );
     };
-    const onMouseUp = (moveEvent: MouseEvent) => {
-      if (mainAreaRef.current) {
-        const areaRect = mainAreaRef.current.getBoundingClientRect();
-        const shapeObj = shapes.find((s) => s.id === id);
-        const x = (moveEvent.clientX - dragOffset.current.x) / scale;
-        const y = (moveEvent.clientY - dragOffset.current.y) / scale;
-        const shapeW = shapeObj.width ?? shapeObj.size ?? 0;
-        const shapeH = shapeObj.height ?? shapeObj.size ?? 0;
-        if (
-          x < 0 ||
-          y < 0 ||
-          x > 1080 - shapeW ||
-          y > 591 - shapeH
-        ) {
-          setShapes((prev) => prev.filter((shape) => shape.id !== id));
-          setSelectedId(null);
-        }
-      }
+    const onMouseUp = () => {
       window.removeEventListener("mousemove", onMouseMove);
       window.removeEventListener("mouseup", onMouseUp);
     };
     window.addEventListener("mousemove", onMouseMove);
     window.addEventListener("mouseup", onMouseUp);
   };
+
+  // --- END DRAG & DROP LOGIC ---
 
   // Square resize
   const handleSquareResize = (id: number, side: string, e: React.MouseEvent) => {
@@ -231,10 +217,10 @@ export default function CreateProblem() {
         prev.map((shape) => {
           if (shape.id !== id) return shape;
           if (side === "right") {
-            return { ...shape, width: Math.max(MIN_SIZE, startWidth + ((moveEvent.clientX - startX) / scale) * 0.1) };
+            return { ...shape, width: Math.max(MIN_SIZE, startWidth + (moveEvent.clientX - startX) / scale) };
           }
           if (side === "left") {
-            const delta = ((moveEvent.clientX - startX) / scale) * 0.1;
+            const delta = (moveEvent.clientX - startX) / scale;
             const newWidth = Math.max(MIN_SIZE, startWidth - delta);
             return {
               ...shape,
@@ -243,10 +229,10 @@ export default function CreateProblem() {
             };
           }
           if (side === "bottom") {
-            return { ...shape, height: Math.max(MIN_SIZE, startHeight + ((moveEvent.clientY - startY) / scale) * 0.1) };
+            return { ...shape, height: Math.max(MIN_SIZE, startHeight + (moveEvent.clientY - startY) / scale) };
           }
           if (side === "top") {
-            const delta = ((moveEvent.clientY - startY) / scale) * 0.1;
+            const delta = (moveEvent.clientY - startY) / scale;
             const newHeight = Math.max(MIN_SIZE, startHeight - delta);
             return {
               ...shape,
@@ -274,7 +260,7 @@ export default function CreateProblem() {
     const startX = e.clientX;
     const startSize = shape.size;
     const onMouseMove = (moveEvent: MouseEvent) => {
-      const delta = ((moveEvent.clientX - startX) / scale) * 0.1;
+      const delta = (moveEvent.clientX - startX) / scale;
       setShapes((prev) =>
         prev.map((shape) =>
           shape.id === id
@@ -291,7 +277,7 @@ export default function CreateProblem() {
     window.addEventListener("mouseup", onMouseUp);
   };
 
-  // Circle resize handler
+  // Circle resize handler (for resizing from the edge)
   const handleCircleResizeMouseDown = (id: number, e: React.MouseEvent) => {
     e.stopPropagation();
     setSelectedId(id);
@@ -412,7 +398,10 @@ export default function CreateProblem() {
     <div className={styles.root}>
       <div className={styles.scalableWorkspace}>
         {/* Sidebar group: Difficulty dropdown above Toolbox */}
-        <div style={{ gridArea: "sidebar", display: "flex", flexDirection: "column", alignItems: "center" }}>
+        <div
+          style={{ gridArea: "sidebar", display: "flex", flexDirection: "column", alignItems: "center" }}
+          className={dropdownOpen ? styles.dropdownActive : undefined}
+        >
           <div style={{ width: "100%", display: "flex", flexDirection: "row", gap: 8, marginBottom: 16 }}>
             <div className={styles.goBackGroup}>
               <button className={styles.arrowLeft} onClick={() => router.back()}>
@@ -429,8 +418,28 @@ export default function CreateProblem() {
             dropdownRef={dropdownRef}
           />
           {dropdownOpen && (
-            <div style={{ height: 360 /* or whatever fits your dropdown */ }} />
+            <div className={styles.difficultyDropdownMenu} style={{ width: "100%" }}>
+              {["Easy", "Intermediate", "Hard"].map((diff) => (
+                <div
+                  key={diff}
+                  className={styles.difficultyDropdownItem}
+                  style={{
+                    background: DIFFICULTY_COLORS[diff],
+                    color: "#2c514c",
+                    fontWeight: 600,
+                  }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setDifficulty(diff);
+                    setDropdownOpen(false);
+                  }}
+                >
+                  {diff}
+                </div>
+              ))}
+            </div>
           )}
+          {/* Remove the spacer div here! */}
           <Toolbox
             selectedTool={selectedTool}
             setSelectedTool={setSelectedTool}
@@ -446,9 +455,7 @@ export default function CreateProblem() {
         </div>
         
         <div className={styles.mainColumn}>
-
-          <div style={{ height: 32 /* or match your back button row height */ }} />
-
+          <div style={{ height: 32 }} />
           {/* Prompt */}
           <div className={styles.promptGroup}>
             <PromptBox
@@ -459,7 +466,6 @@ export default function CreateProblem() {
               promptInputRef={promptInputRef}
             />
           </div>
-
           {/* Main Area */}
           <MainArea
             mainAreaRef={mainAreaRef}
@@ -469,14 +475,55 @@ export default function CreateProblem() {
             handleDragOver={handleDragOver}
             setSelectedId={setSelectedId}
             setSelectedTool={setSelectedTool}
+            saveButton={
+              <button className={`${styles.saveBtn} ${styles.rowBtn} ${styles.saveBtnFloating}`}>
+                Save
+              </button>
+            }
           />
-        </div>
-        
-        {/* Controls Row (Save, Timer, Hint) */}
-        <div className={styles.controlsRow}>
-          <button className={`${styles.addTimerBtn} ${styles.rowBtn}`}>Add Timer</button>
-          <button className={`${styles.saveBtn} ${styles.rowBtn}`}>Save</button>
-          <button className={`${styles.addHintBtn} ${styles.rowBtn}`}>Add Hint</button>
+          {/* Controls Row (Timer, Hint, etc) */}
+          <div className={styles.controlsRow}>
+            <div style={{ display: "flex", gap: 12 }}>
+              <LimitAttempts limit={limitAttempts} setLimit={setLimitAttempts} />
+              {!timerOpen ? (
+                <button
+                  className={`${styles.addTimerBtn} ${styles.rowBtn}`}
+                  onClick={() => setTimerOpen(true)}
+                >
+                  Add Timer
+                </button>
+              ) : (
+                <Timer
+                  timerOpen={timerOpen}
+                  setTimerOpen={setTimerOpen}
+                  timerValue={timerValue}
+                  setTimerValue={setTimerValue}
+                />
+              )}
+              {(hintOpen || hint) ? (
+                <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
+                  <span style={{ fontSize: "0.85rem", fontWeight: 500, marginLeft: 4, marginBottom: 2 }}>Hint</span>
+                  <input
+                    className={styles.hintInput}
+                    type="text"
+                    value={hint}
+                    onChange={e => setHint(e.target.value)}
+                    onBlur={() => { if (!hint) setHintOpen(false); }}
+                    placeholder="Enter hint..."
+                    autoFocus={hintOpen}
+                  />
+                </div>
+              ) : (
+                <button
+                  className={`${styles.addHintBtn} ${styles.rowBtn}`}
+                  onClick={() => setHintOpen(true)}
+                >
+                  Add Hint
+                </button>
+              )}
+              <SetVisibility visible={visible} setVisible={setVisible} />
+            </div>
+          </div>
         </div>
       </div>
     </div>

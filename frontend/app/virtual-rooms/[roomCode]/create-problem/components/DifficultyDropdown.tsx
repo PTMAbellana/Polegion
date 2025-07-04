@@ -30,7 +30,7 @@ const DifficultyDropdown: React.FC<Props> = ({
       cursor: "pointer",
       zIndex: 20,
       width: "100%",
-      marginBottom: 16,
+      marginBottom: 0,
       position: "relative",
     }}
     onClick={() => setDropdownOpen((open) => !open)}
@@ -39,28 +39,6 @@ const DifficultyDropdown: React.FC<Props> = ({
     <span style={{ marginLeft: 12, fontSize: 18, color: "#2c514c" }}>
       ▼
     </span>
-    {dropdownOpen && (
-      <div className={styles.difficultyDropdownMenu} style={{ width: "100%" }}>
-        {["Easy", "Intermediate", "Hard"].map((diff) => (
-          <div
-            key={diff}
-            className={styles.difficultyDropdownItem}
-            style={{
-              background: DIFFICULTY_COLORS[diff as keyof typeof DIFFICULTY_COLORS],
-              color: "#2c514c",
-              fontWeight: 600,
-            }}
-            onClick={(e) => {
-              e.stopPropagation();
-              setDifficulty(diff);
-              setDropdownOpen(false);
-            }}
-          >
-            {diff}
-          </div>
-        ))}
-      </div>
-    )}
   </div>
 );
 
