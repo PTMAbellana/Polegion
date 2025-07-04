@@ -3,7 +3,7 @@ import Loader from '@/components/Loader'
 import { ROUTES } from '@/constants/routes'
 import { myAppHook } from '@/context/AppUtils'
 import { AuthProtection } from '@/context/AuthProtection'
-import { createRoom, updateRoom, getRooms, uploadImage, joinRoom } from '@/lib/apiService'
+import { createRoom, updateRoom, getRooms, uploadImage, joinRoom, deleteRoom } from '@/lib/apiService'
 import styles from '@/styles/room.module.css'
 import { yupResolver } from '@hookform/resolvers/yup'
 import { useRouter } from 'next/navigation'
@@ -322,6 +322,16 @@ export default function VirtualRooms() {
                     console.log('perform delete room here')
                     console.log('trying to delete: ', roomId)
                     // Delete logic would go here
+                    try {
+                        if (!roomId) throw new Error('No room ID provided for deletion');
+                        await deleteRoom(roomId);
+                        toast.success('Room deleted successfully!');
+                        // Refresh the rooms list
+                        await fetchRoomsFromTable(userProfile?.id);
+                    } catch (error) {
+                        console.error('Error deleting room:', error);
+                        toast.error('Failed to delete room. Please try again.');
+                    }
                 }
         })
     }
