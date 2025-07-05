@@ -172,7 +172,11 @@ export default function Login() {
       <div className={styles.loginPage}>
         <div className={styles.loginCard}>
           <div className={styles.cardContent}>
-            {isSubmitting && <Loader />}
+            {isSubmitting && (
+              <div className={styles.loaderOverlay}>
+                <Loader />
+              </div>
+            )}
             {/* Logo */}
             <div className={styles.logoContainer}>
               <img
