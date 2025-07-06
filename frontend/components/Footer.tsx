@@ -1,7 +1,12 @@
+import styles from '../styles/Footer.module.css';
+import React from 'react';
+
 const Footer = () => {
     return (
-        <footer className="footer">
-            <p className="mb-0">&copy; {new Date().getFullYear()} Polegion. All Rights Reserved.</p>
+        <footer className={styles.footer}>
+          <p className={styles.footerText}>
+            &copy; {new Date().getFullYear()} Polegion. All Rights Reserved.
+          </p>
         </footer>
     );
 }
