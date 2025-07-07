@@ -12,6 +12,7 @@ class ParticipantRoutes {
         this.router.use(this.authMiddleware.protect)
 
         this.router.post('/join', this.participantController.joinRoom)
+        this.router.post('/invite', this.participantController.inviteByEmail.bind(this.participantController));
         
         this.router.delete('/leave/:room_id', this.participantController.leaveRoom)
         this.router.delete('/room/:room_id/participant/:user_id', this.participantController.removeParticipant)

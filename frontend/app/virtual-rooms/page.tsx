@@ -65,6 +65,7 @@ export default function VirtualRooms() {
     const [ rooms, setRooms ] = useState<RoomType[]>([])
     const [ roomId, setRoomId ] = useState<number | undefined>(undefined)
     const [ previewImage, setPreviewImage ] = useState<string | File | null>(null)
+    const [ previewUrl, setPreviewUrl ] = useState<string | null>(null)
     const [ isLocalLoading, setLocalLoading ] = useState(false)
     const [ showJoinModal, setShowJoinModal ] = useState(false)
 
@@ -362,10 +363,10 @@ export default function VirtualRooms() {
                     <h1>Hello there, {userProfile?.fullName || 'John Doe'}</h1>
                     <p>Let your imagination run wild!</p>
                 </div>
-                <div className={styles["search-section"]}>
+                {/* <div className={styles["search-section"]}>
                     <span>Search</span>
                     <div className={styles["search-icon"]}>🔍</div>
-                </div>
+                </div> */}
             </div>
 
             {/* Action Buttons Section */}
@@ -468,19 +469,46 @@ export default function VirtualRooms() {
                             
                             <div className={styles["form-group"]}>
                             <label>Banner Image</label>
-                            {previewImage && (
-                                <div className={styles["preview-image"]}>
-                                    <img src={previewImage} alt="Preview" width="100" height="100" />
-                                </div>
-                            )}
-                            <input 
-                                type="file" 
+                            <div className={styles["preview-image"]}>
+                                {previewUrl ? (
+                                <>
+                                    <img src={previewUrl} alt="Preview" width="100" height="100" />
+                                    <button
+                                    type="button"
+                                    className={styles["remove-preview-btn"]}
+                                    onClick={() => {
+                                        setPreviewUrl(null);
+                                        setValue("banner_image", null);
+                                        setPreviewImage(null); // Also clear previewImage if needed
+                                    }}
+                                    >
+                                    ✖
+                                    </button>
+                                </>
+                                ) : previewImage && typeof previewImage === "string" ? (
+                                <img src={previewImage} alt="Current Banner" width="100" height="100" />
+                                ) : (
+                                // Placeholder when no image is selected
+                                <span className={styles["preview-placeholder"]}>
+                                    No image selected
+                                </span>
+                                )}
+                            </div>
+                            <input
+                                type="file"
                                 className={styles["form-control"]}
                                 accept="image/*"
                                 onChange={(event) => {
                                 if (event.target.files && event.target.files[0]) {
-                                    setValue("banner_image", event.target.files[0]);
-                                    setPreviewImage(URL.createObjectURL(event.target.files[0]));
+                                    const file = event.target.files[0];
+                                    setValue("banner_image", file);
+
+                                    // Clean up previous preview URL
+                                    if (previewUrl) URL.revokeObjectURL(previewUrl);
+
+                                    const url = URL.createObjectURL(file);
+                                    setPreviewUrl(url);
+                                    setPreviewImage(null); // Clear old previewImage if any
                                 }
                                 }}
                             />
