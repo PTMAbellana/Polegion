@@ -9,9 +9,9 @@ import { ROUTES } from '@/constants/routes'
 
 export default function ProfilePage() {
     const router = useRouter()
-    const { isLoggedIn, userProfile, isLoading } = myAppHook()
+    const { isLoggedIn, userProfile, appLoading } = myAppHook()
 
-    if (isLoading || !isLoggedIn) {
+    if (appLoading || !isLoggedIn) {
         return (
             <div className={styles["loading-container"]}>
                 <Loader/>
@@ -32,7 +32,10 @@ export default function ProfilePage() {
 
             {/* Profile Image */}
             <div className={styles['profile-image-container']}>
-                <div className={styles['profile-image']}></div>
+                <img 
+                className={styles['profile-image']} 
+                src={userProfile?.profile_pic}
+                />
             </div>
             </div>  
             <div className={styles['right-section']}>

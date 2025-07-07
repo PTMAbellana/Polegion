@@ -12,7 +12,7 @@ import { useForm } from "react-hook-form"
 import { yupResolver } from "@hookform/resolvers/yup"
 import toast from "react-hot-toast"
 import { myAppHook } from "@/context/AppUtils"
-import api from "@/lib/apiService"
+import api from "@/api/axios"
 
 interface ResetPasswordFormData {
     password: string,

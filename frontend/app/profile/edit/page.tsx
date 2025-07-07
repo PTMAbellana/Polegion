@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { deactivateAccount, logout, updateEmail, updatePassword, updateUserProfile, uploadImage, uploadProfileImage } from '@/lib/apiService'
+import { logout } from '@/api/auth'
+import { deactivateAccount, updateEmail, updatePassword, updateUserProfile, uploadImage } from '@/api/users'
 import { myAppHook } from '@/context/AppUtils'
 import Loader from '@/components/Loader'
 import styles from '@/styles/profile.module.css'
@@ -25,7 +26,7 @@ interface FormErrors {
 
 export default function EditProfile() {
     const router = useRouter()
-    const { isLoggedIn, userProfile, refreshUserSession, isLoading } = myAppHook()
+    const { isLoggedIn, userProfile, refreshUserSession, appLoading} = myAppHook()
 
     const [formData, setFormData] = useState<ProfileFormData>({
         fullName: '',
@@ -37,7 +38,7 @@ export default function EditProfile() {
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
     const [error, setError] = useState<string>('')
     const [success, setSuccess] = useState<boolean>(false)
-    const [previewProfileImage, setPreviewProfileImage] = useState<string | undefined>(undefined)
+    const [previewProfileImage, setPreviewProfileImage] = useState<string | File | undefined>(undefined)
     
     // Add states for email and password modals/inputs
     const [showEmailModal, setShowEmailModal] = useState<boolean>(false)
@@ -52,17 +53,17 @@ export default function EditProfile() {
                 fullName: userProfile.fullName || '',
                 gender: userProfile.gender || '',
                 phone: userProfile.phone || '',
-                profileImage: userProfile.profileImage || null
+                profileImage: userProfile?.profile_pic || null
             })
             
             // Set preview image if user already has a profile image
-            if (userProfile.profileImage) {
-                setPreviewProfileImage(userProfile.profileImage)
+            if (userProfile?.profile_pic) {
+                setPreviewProfileImage(userProfile?.profile_pic)
             }
         }
     }, [userProfile])
 
-    if (isLoading || !isLoggedIn) {
+    if (appLoading || !isLoggedIn) {
         return (
             <div className={styles["loading-container"]}>
                 <Loader/>
@@ -131,89 +132,125 @@ export default function EditProfile() {
     }
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault()
-        
+        e.preventDefault();
+
         if (!validateForm()) {
-            return
+            return;
         }
-        
-        setIsSubmitting(true)
-        setError('')
-        
+
+        setIsSubmitting(true);
+        setError('');
+
         try {
-            console.log('Form submission started')
-            console.log('Form data received:', formData)
-            
+            // let profileImageUrl = formData.profileImage;
+
+            // 1. Upload image if new file selected
+            if (formData.profileImage instanceof File) {
+                const formDataForUpload = new FormData();
+                formDataForUpload.append('image', formData.profileImage);
+                const uploadResponse = await uploadImage(formDataForUpload);
+                if (
+                    uploadResponse.data &&
+                    uploadResponse.data.data &&
+                    uploadResponse.data.data.imageUrl
+                ) {
+                    // profileImageUrl = uploadResponse.data.data.imageUrl;
+                } else {
+                    throw new Error('Failed to get image URL from upload response');
+                }
+            }
+
+            // 2. Update profile metadata (do NOT send profile_pic)
             const profilePayload = {
                 fullName: formData.fullName,
                 gender: formData.gender,
                 phone: formData.phone,
-                profileImage: null, // Default to null
             };
 
-            // Handle profile image upload if there's a file
-            if (formData.profileImage instanceof File) {
-                console.log('Processing profile image file:', {
-                    name: formData.profileImage.name,
-                    size: formData.profileImage.size,
-                    type: formData.profileImage.type
-                });
-                
-                // Create FormData for file upload
-                const formDataForUpload = new FormData();
-                formDataForUpload.append('image', formData.profileImage);
-                
-                // Log what we're sending
-                console.log('Sending FormData to server...')
-                for (let pair of formDataForUpload.entries()) {
-                    console.log('FormData pair:', pair[0], pair[1])
-                }
-                
-                try {
-                    // Upload image first
-                    console.log('Calling uploadImage API...')
-                    const uploadResponse = await uploadProfileImage(formDataForUpload);
-                    console.log('Upload response received:', uploadResponse.data);
-                    
-                    if (uploadResponse.data && uploadResponse.data.data && uploadResponse.data.data.imageUrl) {
-                        profilePayload.profileImage = uploadResponse.data.data.imageUrl;
-                        console.log('Profile image URL set:', profilePayload.profileImage)
-                    } else {
-                        console.error('Invalid upload response structure:', uploadResponse.data)
-                        throw new Error('Failed to get image URL from upload response');
-                    }
-                } catch (uploadError) {
-                    console.error('Profile image upload failed:', uploadError);
-                    toast.error(`Failed to upload profile image: ${uploadError.message}`);
-                    setIsSubmitting(false);
-                    return;
-                }
-            } else {
-                console.log('No profile image file to upload')
-                // If no new image is uploaded, keep the existing one
-                if (typeof formData.profileImage === 'string') {
-                    profilePayload.profileImage = formData.profileImage;
-                }
-            }
+            await updateUserProfile(profilePayload);
+            await refreshUserSession();
+            setSuccess(true);
+            toast.success('Profile updated successfully!');
 
-            console.log('Updating profile with payload:', profilePayload);
-            
-            await updateUserProfile(profilePayload)
-            await refreshUserSession()
-            setSuccess(true)
-            toast.success('Profile updated successfully!')
-            
             setTimeout(() => {
-                router.push(ROUTES.PROFILE)
-            }, 2000)
-        } catch (err: any) {
-            console.error('Error updating profile:', err)
-            setError(err?.response?.data?.error || 'Failed to update profile. Please try again.')
-            toast.error('Failed to update profile. Please try again.')
+                router.push(ROUTES.PROFILE);
+            }, 2000);
+        } catch (err: unknown) {
+            console.log('Error Update Profile: ', err)
+            setError('Failed to update profile. Please try again.');
+            toast.error('Failed to update profile. Please try again.');
         } finally {
-            setIsSubmitting(false)
+            setIsSubmitting(false);
         }
-    }
+    };
+
+    // const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    //     e.preventDefault()
+        
+    //     if (!validateForm()) {
+    //         return
+    //     }
+        
+    //     setIsSubmitting(true)
+    //     setError('')
+        
+    //     try {
+    //         console.log('Form submission started')
+    //         console.log('Form data received:', formData)
+
+    //         let profileImageUrl = formData.profileImage;
+
+    //         // If a new file is selected, upload it
+    //         if (formData.profileImage instanceof File) {
+    //             const formDataForUpload = new FormData();
+    //             formDataForUpload.append('image', formData.profileImage);
+    //             try {
+    //                 const uploadResponse = await uploadImage(formDataForUpload);
+    //                 if (
+    //                     uploadResponse.data &&
+    //                     uploadResponse.data.data &&
+    //                     uploadResponse.data.data.imageUrl
+    //                 ) {
+    //                     profileImageUrl = uploadResponse.data.data.imageUrl;
+    //                 } else {
+    //                     console.error('Invalid upload response structure:', uploadResponse.data)
+    //                     throw new Error('Failed to get image URL from upload response');
+    //                 }
+    //             } catch (uploadError) {
+    //                 console.error('Profile image upload failed:', uploadError);
+    //                 toast.error(`Failed to upload profile image: ${uploadError}`);
+    //                 setIsSubmitting(false);
+    //                 return;
+    //             }
+    //         }
+
+    //         // Prepare payload for profile update
+    //         const profilePayload = {
+    //             fullName: formData.fullName,
+    //             gender: formData.gender,
+    //             phone: formData.phone,
+    //             profile_pic: typeof profileImageUrl === 'string' ? profileImageUrl : null,
+    //         };
+
+    //         console.log('Updating profile with payload:', profilePayload);
+            
+    //         await updateUserProfile(profilePayload)
+    //         await refreshUserSession()
+    //         setSuccess(true)
+    //         toast.success('Profile updated successfully!')
+            
+    //         setTimeout(() => {
+    //             router.push(ROUTES.PROFILE)
+    //         }, 2000)
+    //     } catch (err) {
+    //         console.error('Error updating profile:', err)
+    //         // setError(err?.response?.data?.error || 'Failed to update profile. Please try again.')
+    //         setError('Failed to update profile. Please try again.')
+    //         toast.error('Failed to update profile. Please try again.')
+    //     } finally {
+    //         setIsSubmitting(false)
+    //     }
+    // }
 
     const handleBack = () => {
         router.push(ROUTES.PROFILE)
@@ -258,9 +295,10 @@ export default function EditProfile() {
             setTimeout(() => {
                 router.push(ROUTES.PROFILE)
             }, 2000)
-        } catch (error: any) {
+        } catch (error) {
             console.error('Error updating email:', error)
-            setError(error?.response?.data?.error || 'Failed to update email. Please try again.')   
+            // setError(error?.response?.data?.error || 'Failed to update email. Please try again.')   
+            setError('Failed to update email. Please try again.')   
             toast.error('Failed to update email. Please try again.')
         } finally {
             setIsSubmitting(false)
@@ -299,9 +337,10 @@ export default function EditProfile() {
             setTimeout(() => {
                 router.push(ROUTES.PROFILE)
             }, 2000)
-        } catch (error: any) {
+        } catch (error) {
             console.error('Error updating password:', error)
-            setError(error?.response?.data?.error || 'Failed to update password. Please try again.')   
+            // setError(error?.response?.data?.error || 'Failed to update password. Please try again.')   
+            setError('Failed to update password. Please try again.')   
             toast.error('Failed to update password. Please try again.')
         } finally {
             setIsSubmitting(false)

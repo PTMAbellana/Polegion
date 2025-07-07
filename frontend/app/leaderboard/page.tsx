@@ -3,10 +3,11 @@ import Loader from '@/components/Loader'
 import { ROUTES } from '@/constants/routes'
 import { myAppHook } from '@/context/AppUtils'
 import { AuthProtection } from '@/context/AuthProtection'
-import { getJoinedRooms, getRooms } from '@/lib/apiService'
+import { getRooms } from '@/api/rooms'
+import { getJoinedRooms } from '@/api/participants'
 import styles from '@/styles/room.module.css'
 import { useRouter } from 'next/navigation'
-import { use, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 
 
 interface RoomType {
@@ -19,7 +20,7 @@ interface RoomType {
 
 export default function LeaderboardRooms() {
     const router = useRouter()
-    const { isLoggedIn, userProfile } = myAppHook()
+    const { isLoggedIn } = myAppHook()
     const { isLoading: authLoading } = AuthProtection()
 
     const [myRooms, setMyRooms] = useState<RoomType[]>([])

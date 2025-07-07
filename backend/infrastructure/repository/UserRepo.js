@@ -8,6 +8,7 @@ class UserRepo extends BaseRepo{
         super(supabase)
         this.tableName = 'user_profiles'
         this.storageBucket = 'profile-images'
+        this.defaultLink = 'https://uwllqanzveqanfpfnndu.supabase.co/storage/v1/object/public/profile-images/1751777126476.png'
     }
 
     async refreshSession(refreshToken) {
@@ -172,7 +173,22 @@ class UserRepo extends BaseRepo{
                 options
             })
     
-            if (error) throw error
+            if (error) throw error 
+
+            const userId = data?.user?.id;
+
+            const { 
+                data: user, 
+                error: userError 
+            } = await this.supabase.from(this.tableName)
+            .insert({
+                user_id: userId,
+                profile_pic: this.defaultLink
+            })
+            if (userError) {
+                throw new Error('Failed to update user profile image: ' + userError.message)    
+            }
+
             return data
         } catch (error) {
             throw error
@@ -224,6 +240,22 @@ class UserRepo extends BaseRepo{
             }
     }
 
+    async getProfilePicture( user_id ) {
+        try {
+            const {
+                data,
+                error
+            } = await this.supabase.from(this.tableName)
+            .select('profile_pic')
+            .eq('user_id', user_id)
+            .single()
+            if (error) throw error
+            return data
+        } catch (error) {
+            throw error
+        }
+    }
+
     async uploadProfileImage(fileBuffer, fileName, mimeType, userId){
         try {
             const {
@@ -249,17 +281,24 @@ class UserRepo extends BaseRepo{
             if (!urlData || !urlData.publicUrl) {
                 throw new Error('Failed to get public URL for uploaded image');
             }
-
-            // console.log('Public URL generated:', urlData.publicUrl)
-            // console.log('url data:', urlData)
             const link = urlData.publicUrl;
-            const { data: user, error: userError } = await this.supabase.from(this.tableName).insert({
-                profile_pic: link, user_id: userId})
+            const {
+                data: user,
+                error: userError
+            } = await this.supabase.from(this.tableName)
+            .update({
+                profile_pic: link
+            })
+            .eq('user_id', userId)
+            .select()
+
             if (userError) {
                 throw new Error('Failed to update user profile image: ' + userError.message)    
             }
 
-            return data
+            console.log(user)
+
+            return link
         } catch (error) {
             // console.error('Error in uploadBannerImage:', error)
             throw error

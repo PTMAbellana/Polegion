@@ -21,9 +21,11 @@ export const getRoomById = async (id) => {
   }
 };
 
-export const getRoomByCode = async (code) => {
+export const getRoomByCode = async (code, type='join') => {
   try {
-    return await api.get(`/rooms/code/${code}`);
+    return type === 'join' ? 
+    await api.get(`/rooms/user/code/${code}`) :
+    await api.get(`/rooms/admin/code/${code}`) 
   } catch (error) {
     console.error("Error fetching room by code:", error);
     throw error;

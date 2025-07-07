@@ -2,12 +2,12 @@
 import Loader from '@/components/Loader'
 import { myAppHook } from '@/context/AppUtils'
 import { AuthProtection } from '@/context/AuthProtection'
-import { getAllParticipants, getRoomByCode, totalParticipant } from '@/lib/apiService'
+import { getRoomByCode } from '@/api/rooms'
+import { getAllParticipants, totalParticipant } from '@/api/participants'
 import styles from '@/styles/room-competition.module.css'
 import { use, useEffect, useState } from 'react'
 
 import { useRouter } from "next/navigation";
-import { set } from 'react-hook-form'
 
 interface Room{
     title: string
@@ -51,11 +51,11 @@ export default function RoomDetail({ params } : { params  : Promise<{roomCode : 
     const callMe = async () => {
         try {
             setIsLoading(true)
-            const res = await getRoomByCode(roomCode.roomCode)
+            const res = await getRoomByCode(roomCode.roomCode, 'admin')
             console.log(res.data)
             setRoomDetails(res.data)
 
-            const test = await getAllParticipants(res.data.id)
+            const test = await getAllParticipants(res.data.id, 'creator')
             console.log('Attempting to get all participants: ', test.data)
 
             setParticipants( test.data.participants || [] )
@@ -154,7 +154,7 @@ export default function RoomDetail({ params } : { params  : Promise<{roomCode : 
                         </div>
                         <div className={styles["room-mantra"]}>
                             <div className={styles["mantra-label"]}>Room Mantra:</div>
-                            <div className={styles["mantra-text"]}>"{roomDetails.mantra}"</div>
+                            <div className={styles["mantra-text"]}>&ldquo;{roomDetails.mantra}&rdquo;</div>
                         </div>
                     </div>
 
@@ -251,15 +251,18 @@ export default function RoomDetail({ params } : { params  : Promise<{roomCode : 
                     <div className={styles["quick-actions-card"]}>
                         <h3>Quick Actions</h3>
                         <div className={styles["action-buttons"]}>
-                            <button className={styles["action-btn", "primary"]}>
+                            {/* <button className={styles["action-btn", "primary"]}> */}
+                            <button className={styles["primary"]}>
                                 <span className={styles["action-icon"]}>🚀</span>
                                 Start Session
                             </button>
-                            <button className={styles["action-btn", "secondary"]}>
+                            {/* <button className={styles["action-btn", "secondary"]}> */}
+                            <button className={styles["secondary"]}>
                                 <span className={styles["action-icon"]}>📊</span>
                                 View Analytics
                             </button>
-                            <button className={styles["action-btn", "secondary"]}>
+                            {/* <button className={styles["action-btn", "secondary"]}> */}
+                            <button className={styles["secondary"]}>
                                 <span className={styles["action-icon"]}>⚙️</span>
                                 Room Settings
                             </button>

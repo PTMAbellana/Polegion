@@ -3,10 +3,13 @@
 import { myAppHook } from "@/context/AppUtils"
 import { AuthProtection } from "@/context/AuthProtection"
 import { use, useEffect, useState } from "react"
-import { getAllParticipants, getRoomByCode, totalParticipant } from '@/lib/apiService'
-
 import styles from '@/styles/join-room.module.css'
 import Loader from "@/components/Loader"
+import { getRoomByCode } from "@/api/rooms"
+import { getAllParticipants, isParticipant, leaveRoom, totalParticipant } from "@/api/participants"
+import { useRouter } from "next/navigation"
+import { ROUTES } from "@/constants/routes"
+import toast from "react-hot-toast"
 
 interface Room{
     id?: string
@@ -27,11 +30,13 @@ interface Participant {
 export default function JoinRoom({ params } : { params  : Promise<{roomCode : string }> }){
     console.log(params)
     const roomCode = use(params)
+    const router = useRouter()
     
     const [roomDetails, setRoomDetails] = useState<Room | null>(null)
     const [ participants, setParticipants ] = useState<Participant[]>([])
     const [ totalParticipants, setTotalParticipants ] = useState<number>(0)
     const [isLoading, setIsLoading] = useState(true)
+    const [ isPart, setIsPart ] = useState(false)
 
     const { isLoggedIn } = myAppHook()
     const { isLoading: authLoading } = AuthProtection()
@@ -52,6 +57,10 @@ export default function JoinRoom({ params } : { params  : Promise<{roomCode : st
             const res = await getRoomByCode(roomCode.roomCode)
             console.log(res.data)
             setRoomDetails(res.data)
+
+            const data = await isParticipant(res.data.id)
+            console.log('isParticipant :', data)
+            setIsPart(data.data?.isParticipant)
             
             const test = await getAllParticipants(res.data.id)
             console.log('Attempting to get all participants: ', test.data)
@@ -88,6 +97,27 @@ export default function JoinRoom({ params } : { params  : Promise<{roomCode : st
             </div>
         )
     }
+    
+    if (!isPart) {
+        return (
+            <div className={styles["dashboard-container"]}>
+                <div className={styles["no-data"]}>
+                    Room not authorized
+                </div>
+            </div>
+        )
+    }
+
+    const handleLeaveRoom = async () => {
+        console.log('isCLicked leave room')
+        try {
+            await leaveRoom(roomDetails.id)
+            router.replace(ROUTES.DASHBOARD)
+        } catch (error) {
+            console.log('Error in leaving room: ', error)
+            toast.error('Error in leaving room')
+        }
+    }
     console.log(
         'Participants: ',
         participants && participants.length > 0 ? participants[0].fullName : 'No participants'
@@ -108,8 +138,8 @@ export default function JoinRoom({ params } : { params  : Promise<{roomCode : st
                             <span className={styles["share-icon"]}>📤</span>
                             Share Room
                         </button>
-                        <button className={styles["leave-room-btn"]}>
-                            <span className={styles["leave-icon"]}>✏️</span>
+                        <button className={styles["leave-room-btn"]} onClick={handleLeaveRoom}>
+                            <span className={styles["leave-icon"]}>🚶🏾</span>
                             Leave Room
                         </button>
                     </div>
@@ -151,7 +181,7 @@ export default function JoinRoom({ params } : { params  : Promise<{roomCode : st
                         </div>
                         <div className={styles["room-mantra"]}>
                             <div className={styles["mantra-label"]}>Room Mantra:</div>
-                            <div className={styles["mantra-text"]}>"{roomDetails.mantra}"</div>
+                            <div className={styles["mantra-text"]}>&ldquo;{roomDetails.mantra}&rdquo;</div>
                         </div>
                     </div>
 

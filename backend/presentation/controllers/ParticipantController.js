@@ -68,13 +68,13 @@ class ParticipantController {
     }
 
     // for admin
-    getRoomParticipants = async (req, res) => {
+    getRoomParticipantsAdmin = async (req, res) => {
         // console.log('getRoomParticipants called: ' , req)
         // const {room_id} = req.body
         const { room_id } = req.params 
         // console.log('getRoomParticipants called 1: ', room_id)
         try {
-            const participants = await this.participantService.getRoomParticipants(room_id, req.user.id)
+            const participants = await this.participantService.getRoomParticipantsForAdmin(room_id, req.user.id)
             // console.log('getRoomParticipants called 2: ', participants)
             res.status(200).json({
                 participants
@@ -88,6 +88,26 @@ class ParticipantController {
                     error: 'Room not found or not authorized'
                 })
 
+            res.status(500).json({
+                error: 'Server error fetching participants'
+            })
+        }
+    }
+    
+    // for users
+    getRoomParticipantsUser = async (req, res) => {
+        const { room_id } = req.params 
+        try {
+            const participants = await this.participantService.getRoomParticipantsForUser(room_id, req.user.id)
+            console.log(participants)
+            res.status(200).json({
+                participants
+            })
+        } catch (error) {
+            if (error.message === 'Room not found or not authorized')
+                return res.status(404).json({
+                    error: 'Room not found or not authorized'
+                })
             res.status(500).json({
                 error: 'Server error fetching participants'
             })

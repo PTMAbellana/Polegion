@@ -34,7 +34,7 @@ export function AuthProtection () {
                 // Redirect to login if not authenticated and route is protected
                 if (!isLoggedIn && !PUBLIC_ROUTES.includes(pathname)) {
                     console.log("Redirecting to login: User not logged in and route is protected")
-                    router.push(ROUTES.HOME)
+                    router.replace(ROUTES.HOME)
                     return;
                 }
 
@@ -44,7 +44,7 @@ export function AuthProtection () {
                     (pathname === ROUTES.LOGIN || pathname === ROUTES.REGISTER)
                 ) {
                     console.log("Redirecting to dashboard: User is logged in and on login/register page")
-                    router.push(ROUTES.DASHBOARD)
+                    router.replace(ROUTES.DASHBOARD)
                     return;
                 }
 

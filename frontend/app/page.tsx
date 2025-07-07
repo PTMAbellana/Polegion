@@ -4,9 +4,9 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
 import { ROUTES } from "@/constants/routes";
-import { refreshToken } from "@/lib/apiService";
+import { refreshToken } from "@/api/auth";
 import { myAppHook } from "@/context/AppUtils";
-import { getUserProfile } from "@/lib/apiService";
+import { getUserProfile } from "@/api/users";
 import styles from "../styles/home.module.css";
 
 export default function Home() {

@@ -57,12 +57,26 @@ class RoomController {
         }
     };
     
+    // for admin
     getRoomByCode = async (req, res) => {
         // console.log(typeof req.params)
         // console.log(req.params)
         // console.log(req.user)
         try {
             let room = await this.roomService.getRoomByCode(req.params.code, req.user.id)  
+                        
+            if (!room) return res.status(404).json({ error: 'Room not found' })
+            
+            res.status(200).json(room.toDTO())
+        } catch (error) {
+            res.status(500).json({ error: 'Server error fetching room' })
+        }
+    }
+    
+    // for participants
+    getRoomByCodeUsers = async (req, res) => {
+        try {
+            let room = await this.roomService.getRoomByCodeUsers(req.params.code)  
                         
             if (!room) return res.status(404).json({ error: 'Room not found' })
             

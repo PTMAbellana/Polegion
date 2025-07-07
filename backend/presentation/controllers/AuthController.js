@@ -36,8 +36,16 @@ class AuthController {
             res.status(200).json(data)
         } catch (error) {
             // console.log(error.code)
-            res.status(error.status).json({
-                error: error.code
+            // res.status(error.status).json({
+            //     error: error.code
+            // })
+            if (error.status === 400)
+            res.status(400).json({
+                error: 'Invalid credentials'
+            })
+            else
+            res.status(500).json({
+                error: 'Server error during login'
             })
         }
     }
@@ -60,14 +68,17 @@ class AuthController {
                 gender,
                 phone
             )
-
-            console.log(data)
     
             if (!data) return res.status(400).json({
                 error: error.message
             })
             return res.status(201).json(data)
         } catch (error) {
+            if (error.status === 422) 
+            res.status(422).json({
+                error: 'Email already exist'
+            })
+            else 
             res.status(500).json({
                 error: 'Server error during registration'
             })

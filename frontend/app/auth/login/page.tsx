@@ -1,7 +1,7 @@
 "use client";
 import Loader from "@/components/Loader";
 import { myAppHook } from "@/context/AppUtils";
-import { login, resetPassword } from "@/lib/apiService";
+import { login, resetPassword } from "@/api/auth";
 import { yupResolver } from "@hookform/resolvers/yup";
 import Head from "next/head";
 import { useRouter } from "next/navigation";
@@ -111,9 +111,9 @@ export default function Login() {
         console.log(isLoggedIn);
         console.log(userProfile);
         toast.success("Login successful!");
-        router.push(ROUTES.DASHBOARD);
+        router.replace(ROUTES.DASHBOARD);
       } else toast.error("Invalid login response");
-    } catch (error: any) {
+    } catch (error : any) {
       console.error("Login error: ", error);
       toast.error(
         error?.response?.data?.error || "An error occured during login",
@@ -277,7 +277,7 @@ export default function Login() {
             </div>
 
             <p className={styles.registerPrompt}>
-              Don't have an Account?{" "}
+              Don&lsquo;t have an Account?{" "}
               <span
                 onClick={handleRegisterRedirect}
                 className={styles.registerLink}
@@ -301,7 +301,7 @@ export default function Login() {
             </div>
 
             <p className={styles.modalDescription}>
-              Enter your email address and we'll send you a link to reset your
+              Enter your email address and we&lsquo;ll send you a link to reset your
               password.
             </p>
 

@@ -88,6 +88,7 @@ class RoomRepo extends BaseRepo {
         }    
     }
 
+    // for admin
     async getRoomByCode(roomCode, user_id){
         // console.log( 'room repo ', roomCode)
         try {
@@ -97,12 +98,48 @@ class RoomRepo extends BaseRepo {
             } = await this.supabase.from(this.tableName)
             .select('*')
             .eq('code', roomCode)
-            // .eq('user_id', user_id)
+            .eq('user_id', user_id)
             .single()
     
             if (error) throw error
             if (!data) throw new Error('Room not found')
             return roomModel.fromDbRoom(data)
+        } catch (error) {
+            throw error
+        }    
+    }
+
+    // for participants na part
+    async getRoomByCodeUsers(roomCode){
+        try {
+            const {
+                data,
+                error
+            } = await this.supabase.from(this.tableName)
+            .select('*')
+            .eq('code', roomCode)
+            .single()
+    
+            if (error) throw error
+            if (!data) throw new Error('Room not found')
+            return roomModel.fromDbRoom(data)
+        } catch (error) {
+            throw error
+        }    
+    }
+    
+    async isRoomExistById(roomId){
+        try {
+            const {
+                data,
+                error
+            } = await this.supabase.from(this.tableName)
+            .select('*')
+            .eq('id', roomId)
+            .single()
+    
+            if (error) throw error
+            return data ? true: false
         } catch (error) {
             throw error
         }    

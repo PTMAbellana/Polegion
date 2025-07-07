@@ -3,8 +3,8 @@
 import Loader from "@/components/Loader"
 import { myAppHook } from "@/context/AppUtils"
 import { AuthProtection } from "@/context/AuthProtection"
-import { getJoinedRooms, getRooms } from "@/lib/apiService"
-
+import { getRooms } from "@/api/rooms"
+import { getJoinedRooms } from "@/api/participants"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 
@@ -89,7 +89,11 @@ export default function Dashboard() {
     }
 
     const handleViewRoom = (roomCode: string) => {
-        router.push(`${ROUTES.VIRTUAL_ROOMS}/join/${roomCode}`)    
+        router.push(`${ROUTES.VIRTUAL_ROOMS}/${roomCode}`)    
+    }
+    
+    const handleViewJoinedRoom = (roomCode: string) => {
+        router.push(`${ROUTES.JOINED_ROOMS}/${roomCode}`)    
     }
 
     return (
@@ -126,7 +130,7 @@ export default function Dashboard() {
                                                     <div className={styles["room-card-actions"]}>
                                                         <button
                                                             className={styles["view-btn"]}
-                                                            onClick={() => handleViewRoom(room.code || '')}
+                                                            onClick={() => handleViewJoinedRoom(room.code || '')}
                                                         >
                                                             View
                                                         </button>

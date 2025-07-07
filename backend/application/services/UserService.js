@@ -62,6 +62,14 @@ class UserService {
         }
     }
 
+    async getProfilePicture(user_id) {
+        try {
+            return await this.userRepo.getProfilePicture(user_id)
+        } catch (error) {
+            throw error
+        }
+    }
+
 }
 
 module.exports = UserService

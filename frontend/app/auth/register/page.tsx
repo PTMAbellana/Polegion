@@ -10,7 +10,7 @@ import { FcGoogle } from "react-icons/fc";
 import { ROUTES } from "@/constants/routes";
 
 // as registerUser kay naa nay builtin na register function
-import { register as registerUser } from "@/lib/apiService";
+import { register as registerUser } from "@/api/auth";
 import { supabase } from "@/lib/supabaseClient";
 
 import * as yup from "yup";
@@ -57,9 +57,12 @@ export default function Register() {
         toast.success("User registered successfully");
         router.push(ROUTES.LOGIN);
       } else toast.error("Failed to register user");
-    } catch (error) {
-      console.error(error);
-      toast.error("An error occured during registration");
+    } catch (error : any) {
+      console.error('Register Error: ', error);
+      toast.error(
+        error?.response?.data?.error ||
+        "An error occured during registration"
+      );
     }
   };
 

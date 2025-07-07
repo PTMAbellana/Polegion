@@ -29,6 +29,7 @@ class RoomService {
         }
     }
 
+    // for admin
     async getRoomByCode (roomCode, user_id){
         // console.log(roomCode)
         try {
@@ -36,6 +37,17 @@ class RoomService {
             const res = await this.roomRepo.getRoomByCode(roomCode, user_id)
             // console.log(res)
             return res
+        } catch (error) {
+            throw error
+        }
+    }
+    
+    // for participants
+    async getRoomByCodeUsers (roomCode){
+        // console.log(roomCode)
+        try {
+            // console.log('natawag ko')
+            return await this.roomRepo.getRoomByCodeUsers(roomCode)
         } catch (error) {
             throw error
         }
@@ -87,6 +99,14 @@ class RoomService {
     async uploadBannerImage(fileBuffer, fileName, mimeType){
         try {
             return await this.roomRepo.uploadBannerImage(fileBuffer, fileName, mimeType)
+        } catch (error) {
+            throw error
+        }
+    }
+
+    async isRoomExist(room_id){
+        try {
+            return await this.roomRepo.isRoomExistById(room_id)
         } catch (error) {
             throw error
         }

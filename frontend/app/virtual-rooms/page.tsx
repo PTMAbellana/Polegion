@@ -3,7 +3,8 @@ import Loader from '@/components/Loader'
 import { ROUTES } from '@/constants/routes'
 import { myAppHook } from '@/context/AppUtils'
 import { AuthProtection } from '@/context/AuthProtection'
-import { createRoom, updateRoom, getRooms, uploadImage, joinRoom, deleteRoom } from '@/lib/apiService'
+import { createRoom, updateRoom, getRooms, uploadImage, deleteRoom } from '@/api/rooms'
+import { joinRoom } from '@/api/participants'
 import styles from '@/styles/room.module.css'
 import { yupResolver } from '@hookform/resolvers/yup'
 import { useRouter } from 'next/navigation'
@@ -62,8 +63,8 @@ export default function VirtualRooms() {
     const { isLoading: authLoading } = AuthProtection()
 
     const [ rooms, setRooms ] = useState<RoomType[]>([])
-    const [ roomId, setRoomId ] = useState(null)
-    const [ previewImage, setPreviewImage ] = useState(undefined)
+    const [ roomId, setRoomId ] = useState<number | undefined>(undefined)
+    const [ previewImage, setPreviewImage ] = useState<string | File | null>(null)
     const [ isLocalLoading, setLocalLoading ] = useState(false)
     const [ showJoinModal, setShowJoinModal ] = useState(false)
 
@@ -118,11 +119,11 @@ export default function VirtualRooms() {
         return newCode;
     }
 
-    const uploadImageFile = async (file: File) => {
-        const fileExtension = file.name.split(".").pop();
-        const fileName = `${Date.now()}.${fileExtension}`;
-        return fileName
-    }
+    // const uploadImageFile = async (file: File) => {
+    //     const fileExtension = file.name.split(".").pop();
+    //     const fileName = `${Date.now()}.${fileExtension}`;
+    //     return fileName
+    // }
 
     const { 
         register, 
@@ -138,7 +139,7 @@ export default function VirtualRooms() {
 
     const { 
         register: registerJoin, 
-        reset: resetJoin, 
+        // reset: resetJoin, 
         handleSubmit: handleSubmitJoin, 
         formState: { 
             errors: errorsJoin 
@@ -148,22 +149,17 @@ export default function VirtualRooms() {
     })
 
     // Form submission with proper image handling
-    const onFormSubmit = async (formData: any) => {
+    const onFormSubmit = async (formData : EditCreateFormData) => {
         setLocalLoading(true);
         
         try {
             console.log('Form submission started')
             console.log('Form data received:', formData)
-            
-            const roomPayload = {
-                title: formData.title,
-                description: formData.description,
-                mantra: formData.mantra,
-                banner_image: null, // Default to null
-            };
 
-            // Handle image upload if there's a file
+            // Determine the correct banner image value
+            let bannerImageUrl: string | File | null = null;
             if (formData.banner_image instanceof File) {
+                // Handle image upload
                 console.log('Processing image file:', {
                     name: formData.banner_image.name,
                     size: formData.banner_image.size,
@@ -176,7 +172,7 @@ export default function VirtualRooms() {
                 
                 // Log what we're sending
                 console.log('Sending FormData to server...')
-                for (let pair of formDataForUpload.entries()) {
+                for (const pair of formDataForUpload.entries()) {
                     console.log('FormData pair:', pair[0], pair[1])
                 }
                 
@@ -187,21 +183,36 @@ export default function VirtualRooms() {
                     console.log('Upload response received:', uploadResponse.data);
                     
                     if (uploadResponse.data && uploadResponse.data.data && uploadResponse.data.data.imageUrl) {
-                        roomPayload.banner_image = uploadResponse.data.data.imageUrl;
-                        console.log('Image URL set:', roomPayload.banner_image)
+                        bannerImageUrl = uploadResponse.data.data.imageUrl;
+                        console.log('Image URL set:', bannerImageUrl)
                     } else {
                         console.error('Invalid upload response structure:', uploadResponse.data)
                         throw new Error('Failed to get image URL from upload response');
                     }
-                } catch (uploadError) {
+                } catch (uploadError : unknown) {
                     console.error('Image upload failed:', uploadError);
-                    toast.error(`Failed to upload image: ${uploadError.message}`);
+                    // toast.error(`Failed to upload image: ${uploadError.message}`);
+                    toast.error(`Failed to upload image: ${uploadError}`);
                     setLocalLoading(false);
                     return;
                 }
-            } else {
-                console.log('ℹNo image file to upload')
+            } else if (typeof formData.banner_image === 'string' && formData.banner_image) {
+                // If it's a string (existing image URL), keep it
+                bannerImageUrl = formData.banner_image;
+            } else if (roomId) {
+                // If editing and no new image/file, get the current image from the room list
+                const currentRoom = rooms.find(r => r.id === roomId);
+                if (currentRoom && currentRoom.banner_image) {
+                    bannerImageUrl = currentRoom.banner_image;
+                }
             }
+
+            const roomPayload = {
+                title: formData.title,
+                description: formData.description,
+                mantra: formData.mantra,
+                banner_image: bannerImageUrl, // Use the correct image URL
+            };
 
             if (roomId) {
                 // UPDATE ROOM
@@ -209,7 +220,8 @@ export default function VirtualRooms() {
                 await updateRoom(roomId, roomPayload);
                 toast.success('Room updated successfully!');
                 reset();
-                setRoomId(null);
+                // setRoomId(null);
+                setRoomId(undefined);
             } else {
                 // CREATE NEW ROOM
                 const newRoomCode = await createUniqueRoomCode();
@@ -242,7 +254,7 @@ export default function VirtualRooms() {
             }
 
             // Reset form state
-            setPreviewImage(undefined);
+            setPreviewImage(null);
             
             // Refresh the rooms list
             await fetchRoomsFromTable(userProfile?.id);
@@ -273,10 +285,11 @@ export default function VirtualRooms() {
             // resetJoin()      // do not uncomment kay ma undefined ig join, di na nuon mailhan
             // Navigate to room
             router.push(`${ROUTES.VIRTUAL_ROOMS}/join/${formData.roomCode}`)
-        } catch (error) {
+        } catch (error:unknown) {
             console.log('Error joining room:', error)
-            // toast.error(`Error joining room`)
-            toast.error(error.response?.data?.error)
+            toast.error(`Cannot join room`)
+            // toast.error(error.response?.data?.error)
+            // toast.error(error.response?.data?.error)
         }
     }
 
@@ -304,8 +317,8 @@ export default function VirtualRooms() {
 
     const handleCancelEdit = () => {
         reset()
-        setPreviewImage(undefined)
-        setRoomId(null)
+        setPreviewImage(null)
+        setRoomId(undefined)
     }
 
     const handleDeleteData = (roomId: number | undefined) => {

@@ -26,8 +26,11 @@ class RoomRoutes {
         .put(this.roomController.updateRoom)
         .delete(this.roomController.deleteRoom);
     
-    this.router.route('/code/:code')
+    this.router.route('/admin/code/:code')
       .get(this.roomController.getRoomByCode)
+    
+      this.router.route('/user/code/:code')
+      .get(this.roomController.getRoomByCodeUsers)
     
     // this.router.post('/upload', this.roomController.uploadBannerImage);
   }

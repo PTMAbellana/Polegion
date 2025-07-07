@@ -26,7 +26,12 @@ class UserController {
     getUserProfile = async (req, res) => {
         try {
             const user = await this.userService.getUserProfile(req.token)
-            res.status(200).json(user.toDTO())
+            const image = await this.userService.getProfilePicture(req.user.id)
+            
+            res.status(200).json({
+                ...user.toDTO(), 
+                profile_pic: image?.profile_pic
+            })
         } catch (error) {
             res.status(500).json({
                 error: 'Server error fethcing user profile'

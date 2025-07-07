@@ -8,7 +8,6 @@ class ParticipantService {
     }
 
     async joinRoom(user_id, room_code){
-        console.log('services called')
         try {
             return await this.participantRepo.addParticipant(user_id, room_code)
         } catch (error) {
@@ -25,18 +24,46 @@ class ParticipantService {
     }
 
     //ang mu get kay ang owner or ang admin
-    async getRoomParticipants(room_id, creator_id){
-        // console.log('getRoomParticipants called: ', room_id, creator_id)
-        
+    async getRoomParticipantsForAdmin(room_id, creator_id){
         try {
             //verify if room exists
-            // const exist = await this.roomService.getRoomById(room_id, creator_id)
-            // console.log('getRoomParticipants data: ', exist)
+            const exist = await this.roomService.getRoomById(room_id, creator_id)
             
-            // if (!exist) throw new Error ('Room not found or not authorized')
-            // return await this.participantRepo.getAllParticipants(room_id)
+            if (!exist) throw new Error ('Room not found or not authorized')
             const data = await this.participantRepo.getAllParticipants(room_id)
             
+            const participants = await Promise.all(
+                data.map(async (participant) => {
+                    try {
+                        // Fetch user data from users table using user_id
+                        const userData = await this.userService.getUserById(participant.user_id)
+                        if (!userData) return {}
+                        return userData
+                        
+                    } catch (error) {
+                        return {}
+                    }
+                })
+            )
+            return participants
+        } catch (error){
+            throw error
+        }
+    }
+
+    //ang mu get kay ang participants
+    async getRoomParticipantsForUser(room_id, user_id){
+        try {
+            // console.log('I am called in services')
+            //verify if room exists
+            const exist = await this.roomService.isRoomExist(room_id)
+            if (!exist) throw new Error ('Room not found')
+            //verify if currentuser is participant
+            const isPart = await this.checkPartStatus(user_id, room_id)
+            if (!isPart) throw new Error ('Not authorized')
+            
+            const data = await this.participantRepo.getAllParticipants(room_id)
+        
             const participants = await Promise.all(
                 data.map(async (participant) => {
                     try {
@@ -66,6 +93,7 @@ class ParticipantService {
     }
 
     async checkPartStatus (user_id, room_id) {
+        console.log('i am calleed check part status ')
         try {
             return await this.participantRepo.isParticipant(user_id, room_id)
         } catch (error) {

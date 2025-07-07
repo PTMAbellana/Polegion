@@ -7,7 +7,8 @@ import React, {
   useState,
 } from "react";
 import Loader from "@/components/Loader";
-import { authUtils, getUserProfile } from "@/lib/apiService";
+import { authUtils } from "@/api/axios";
+import { getUserProfile } from "@/api/users";
 
 // Define proper types for user profile
 interface UserProfile {
@@ -16,7 +17,8 @@ interface UserProfile {
   fullName?: string;
   gender?: string;
   phone?: string;
-  [key: string]: any; // For any additional properties
+  profile_pic?: string,
+  [key: string]: unknown; // For any additional properties
 }
 
 interface AppUtilsType {
@@ -92,6 +94,7 @@ export const AppUtilsProvider = ({
         return false;
       }
     } catch (error) {
+      console.error(error)
       logout();
       return false;
     } finally {

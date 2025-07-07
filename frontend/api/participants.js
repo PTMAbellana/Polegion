@@ -35,9 +35,11 @@ export const totalParticipant = async (room_id) => {
   }
 };
 
-export const getAllParticipants = async (room_id) => {
+export const getAllParticipants = async (room_id, type='user') => {
   try {
-    return await api.get(`/participants/all/${room_id}`);
+    return type === 'user' ? 
+      await api.get(`/participants/user/lists/${room_id}`) : 
+      await api.get(`/participants/creator/lists/${room_id}`) 
   } catch (error) {
     throw error;
   }
