@@ -18,6 +18,14 @@ export default function CircleShape({
   const handleX = size - 9;
   const handleY = r - 9;
 
+  const diameter = size;
+  const circumference = 2 * Math.PI * (size / 2);
+  const area = Math.PI * Math.pow(size / 2, 2);
+
+  const showDiameter = true;
+  const showCircumference = true;
+  const showArea = true;
+
   return (
     <div
       style={{
@@ -34,7 +42,7 @@ export default function CircleShape({
         e.stopPropagation();
         setSelectedId(shape.id);
       }}
-      onDragOver={e => {
+      onDragOver={(e) => {
         if (fillMode && draggingFill) {
           e.preventDefault();
           e.dataTransfer.dropEffect = "copy";
@@ -95,21 +103,81 @@ export default function CircleShape({
               title="Drag horizontally to resize"
             />
             {/* Diameter label */}
-            <span style={{
-              position: "absolute",
-              left: "50%",
-              top: `calc(50% + ${labelYOffset}px)`,
-              transform: "translate(-50%, -50%)",
-              background: "#fff",
-              padding: "2px 8px",
-              borderRadius: 6,
-              border: "1px solid #aaa",
-              fontSize: 14,
-              zIndex: 4,
-              whiteSpace: "nowrap"
-            }}>
+            <span
+              style={{
+                position: "absolute",
+                left: "50%",
+                top: `calc(50% + ${labelYOffset}px)`,
+                transform: "translate(-50%, -50%)",
+                background: "#fff",
+                padding: "2px 8px",
+                borderRadius: 6,
+                border: "1px solid #aaa",
+                fontSize: 14,
+                zIndex: 4,
+                whiteSpace: "nowrap",
+              }}
+            >
               {pxToUnits(size)}
             </span>
+            {/* Additional Info */}
+            {showDiameter && (
+              <div
+                style={{
+                  position: "absolute",
+                  left: "50%",
+                  top: `calc(50% + ${labelYOffset}px + 20px)`,
+                  transform: "translate(-50%, -50%)",
+                  background: "#fff",
+                  padding: "2px 8px",
+                  borderRadius: 6,
+                  border: "1px solid #aaa",
+                  fontSize: 14,
+                  zIndex: 4,
+                  whiteSpace: "nowrap",
+                }}
+              >
+                Diameter: {diameter.toFixed(1)}
+              </div>
+            )}
+            {showCircumference && (
+              <div
+                style={{
+                  position: "absolute",
+                  left: "50%",
+                  top: `calc(50% + ${labelYOffset}px + 40px)`,
+                  transform: "translate(-50%, -50%)",
+                  background: "#fff",
+                  padding: "2px 8px",
+                  borderRadius: 6,
+                  border: "1px solid #aaa",
+                  fontSize: 14,
+                  zIndex: 4,
+                  whiteSpace: "nowrap",
+                }}
+              >
+                Circumference: {circumference.toFixed(1)}
+              </div>
+            )}
+            {showArea && (
+              <div
+                style={{
+                  position: "absolute",
+                  left: "50%",
+                  top: `calc(50% + ${labelYOffset}px + 60px)`,
+                  transform: "translate(-50%, -50%)",
+                  background: "#fff",
+                  padding: "2px 8px",
+                  borderRadius: 6,
+                  border: "1px solid #aaa",
+                  fontSize: 14,
+                  zIndex: 4,
+                  whiteSpace: "nowrap",
+                }}
+              >
+                Area: {area.toFixed(1)}
+              </div>
+            )}
           </>
         )}
       </div>

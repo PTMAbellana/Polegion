@@ -1,30 +1,54 @@
-import styles from "@/styles/create-problem.module.css";
 import React from "react";
+import styles from "@/styles/create-problem.module.css";
 
 interface ToolboxProps {
+  fillMode: boolean;
+  setFillMode: (mode: boolean) => void;
+  fillColor: string;
   selectedTool: string | null;
   setSelectedTool: (tool: string | null) => void;
   handleDragStart: (type: string) => void;
-  fillColor: string;
-  fillMode: boolean;
-  setFillMode: (mode: boolean) => void;
-  handleFillDragStart: (e: React.DragEvent) => void;
-  handleFillDragEnd: () => void;
   FILL_COLORS: string[];
   setFillColor: (color: string) => void;
+  showProperties: boolean;
+  setShowProperties: (show: boolean) => void;
+  showSides: boolean;
+  setShowSides: (show: boolean) => void;
+  showAngles: boolean;
+  setShowAngles: (show: boolean) => void;
+  showArea: boolean;
+  setShowArea: (show: boolean) => void;
+  showHeight: boolean;
+  setShowHeight: (show: boolean) => void;
+  showDiameter: boolean;
+  setShowDiameter: (show: boolean) => void;
+  showCircumference: boolean;
+  setShowCircumference: (show: boolean) => void;
 }
 
 const Toolbox: React.FC<ToolboxProps> = ({
+  fillMode,
+  setFillMode,
+  fillColor,
   selectedTool,
   setSelectedTool,
   handleDragStart,
-  fillColor,
-  fillMode,
-  setFillMode,
-  handleFillDragStart,
-  handleFillDragEnd,
   FILL_COLORS,
   setFillColor,
+  showProperties,
+  setShowProperties,
+  showSides,
+  setShowSides,
+  showAngles,
+  setShowAngles,
+  showArea,
+  setShowArea,
+  showHeight,
+  setShowHeight,
+  showDiameter,
+  setShowDiameter,
+  showCircumference,
+  setShowCircumference,
 }) => (
   <div className={styles.toolbox}>
     <div className={styles.toolboxHeader}>Tool Box</div>
@@ -34,7 +58,7 @@ const Toolbox: React.FC<ToolboxProps> = ({
         <div
           className={styles.toolboxSquare}
           draggable
-          onDragStart={() => handleDragStart("square")}
+          onDragStart={handleDragStart("square")}
           onClick={() => setSelectedTool("square")}
           style={{
             background: "#e3dcc2",
@@ -109,114 +133,40 @@ const Toolbox: React.FC<ToolboxProps> = ({
           </svg>
         </div>
         {/* Fill Tool */}
-        <div
-          className={`${styles.shapeFillTool} shapeFillTool`}
+        <button
+          type="button"
+          className={`${styles.fillButton} ${fillMode ? styles.active : ""}`}
+          onClick={() => setFillMode(!fillMode)}
+          tabIndex={0}
           style={{
-            background: fillColor,
-            border: "5px solid #000",
-            width: 80,
-            height: 80,
-            borderRadius: 16,
+            width: 102,
+            height: 90,
+            position: "relative",
+            cursor: "pointer",
+            margin: "0 auto",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            cursor: fillMode ? "grab" : "pointer",
-            position: "relative",
-            boxShadow: fillMode
-              ? "0 0 0 4px #fff, 0 0 0 8px rgba(0,0,0,0.2)"
-              : "none",
-            opacity: fillMode ? 1 : 0.8,
-            transform: fillMode ? "scale(1.05)" : "scale(1)",
-            transition: "all 0.2s ease",
           }}
-          onClick={e => {
-            e.stopPropagation();
-            setFillMode(!fillMode);
-          }}
-          draggable={fillMode}
-          onDragStart={e => {
-            if (fillMode) {
-              handleFillDragStart(e);
-            } else {
-              e.preventDefault();
-            }
-          }}
-          onDragEnd={handleFillDragEnd}
-          title={
-            fillMode
-              ? "Drag to fill shapes or click outside to close"
-              : "Click to activate fill mode"
-          }
         >
-          {/* Paint bucket icon with dynamic styling */}
-          <svg width="40" height="40" viewBox="0 0 40 40">
-            <g>
-              <rect
-                x="10"
-                y="20"
-                width="20"
-                height="12"
-                rx="4"
-                fill="#fff"
-                stroke="#222"
-                strokeWidth="2"
-                opacity={fillMode ? 1 : 0.9}
-              />
-              <rect
-                x="18"
-                y="8"
-                width="4"
-                height="16"
-                rx="2"
-                fill="#fff"
-                stroke="#222"
-                strokeWidth="2"
-                transform="rotate(-30 20 16)"
-                opacity={fillMode ? 1 : 0.9}
-              />
-              <ellipse
-                cx="20"
-                cy="34"
-                rx="8"
-                ry="3"
-                fill={fillColor}
-                stroke="#222"
-                strokeWidth="2"
-              />
-            </g>
-          </svg>
-          <span
-            style={{
-              position: "absolute",
-              bottom: 6,
-              left: "50%",
-              transform: "translateX(-50%)",
-              fontWeight: 700,
-              color: "#222",
-              fontSize: 14,
-              textShadow: "0 1px 2px #fff",
-              opacity: fillMode ? 1 : 0.8,
-            }}
-          >
-            Fill
-          </span>
-          {/* Active indicator */}
-          {fillMode && (
+          <div className={styles.fillToolLogo}>
+            <div className={styles.bucket}>
+              <span
+                className={styles.label}
+                style={fillMode ? { color: "#fff" } : { color: fillColor }}
+              >
+                FILL
+              </span>
+            </div>
             <div
+              className={styles.droplet}
               style={{
-                position: "absolute",
-                top: -2,
-                right: -2,
-                width: 12,
-                height: 12,
-                background: "#4CAF50",
-                borderRadius: "50%",
-                border: "2px solid #fff",
-                boxShadow: "0 0 4px rgba(0,0,0,0.3)",
+                ["--fillColor" as any]: fillColor,
+                opacity: fillMode ? 1 : undefined,
               }}
-            />
-          )}
-        </div>
+            ></div>
+          </div>
+        </button>
       </div>
       {/* Color Palette (show when fillMode is active) */}
       {fillMode && (
@@ -243,6 +193,102 @@ const Toolbox: React.FC<ToolboxProps> = ({
         </div>
       )}
     </div>
+    <button
+      className={styles.showPropertiesBtn}
+      onClick={() => setShowSides(v => !v)}
+      style={{
+        marginTop: 24,
+        padding: "8px 16px",
+        borderRadius: 8,
+        background: showSides ? "#2c514c" : "#e3dcc2",
+        color: showSides ? "#fff" : "#222",
+        fontWeight: 600,
+        border: "none",
+        cursor: "pointer",
+      }}
+    >
+      {showSides ? "Hide Sides" : "Show Sides"}
+    </button>
+    <button
+      className={styles.showPropertiesBtn}
+      onClick={() => setShowAngles(v => !v)}
+      style={{
+        marginTop: 8,
+        padding: "8px 16px",
+        borderRadius: 8,
+        background: showAngles ? "#2c514c" : "#e3dcc2",
+        color: showAngles ? "#fff" : "#222",
+        fontWeight: 600,
+        border: "none",
+        cursor: "pointer",
+      }}
+    >
+      {showAngles ? "Hide Angles" : "Show Angles"}
+    </button>
+    <button
+      className={styles.showPropertiesBtn}
+      onClick={() => setShowArea(v => !v)}
+      style={{
+        marginTop: 8,
+        padding: "8px 16px",
+        borderRadius: 8,
+        background: showArea ? "#2c514c" : "#e3dcc2",
+        color: showArea ? "#fff" : "#222",
+        fontWeight: 600,
+        border: "none",
+        cursor: "pointer",
+      }}
+    >
+      {showArea ? "Hide Area" : "Show Area"}
+    </button>
+    <button
+      className={styles.showPropertiesBtn}
+      onClick={() => setShowHeight(v => !v)}
+      style={{
+        marginTop: 8,
+        padding: "8px 16px",
+        borderRadius: 8,
+        background: showHeight ? "#2c514c" : "#e3dcc2",
+        color: showHeight ? "#fff" : "#222",
+        fontWeight: 600,
+        border: "none",
+        cursor: "pointer",
+      }}
+    >
+      {showHeight ? "Hide Height" : "Show Height"}
+    </button>
+    <button
+      className={styles.showPropertiesBtn}
+      onClick={() => setShowDiameter(v => !v)}
+      style={{
+        marginTop: 8,
+        padding: "8px 16px",
+        borderRadius: 8,
+        background: showDiameter ? "#2c514c" : "#e3dcc2",
+        color: showDiameter ? "#fff" : "#222",
+        fontWeight: 600,
+        border: "none",
+        cursor: "pointer",
+      }}
+    >
+      {showDiameter ? "Hide Diameter" : "Show Diameter"}
+    </button>
+    <button
+      className={styles.showPropertiesBtn}
+      onClick={() => setShowCircumference(v => !v)}
+      style={{
+        marginTop: 8,
+        padding: "8px 16px",
+        borderRadius: 8,
+        background: showCircumference ? "#2c514c" : "#e3dcc2",
+        color: showCircumference ? "#fff" : "#222",
+        fontWeight: 600,
+        border: "none",
+        cursor: "pointer",
+      }}
+    >
+      {showCircumference ? "Hide Circumference" : "Show Circumference"}
+    </button>
   </div>
 );
 

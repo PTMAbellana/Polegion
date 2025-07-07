@@ -24,10 +24,20 @@ const DIFFICULTY_COLORS = {
   Hard: "#FFB49B",
 };
 
+const DEFAULT_SIZE = 100;
+const MIN_SIZE = 50;
+
+function pxToUnits(px: number) {
+  const units = (px / 50).toFixed(2).replace(/\.00$/, "");
+  return `${units} units`;
+}
+
 export default function CreateProblem() {
   const router = useRouter();
+  const [draggedShape, setDraggedShape] = useState<string | null>(null);
   const [shapes, setShapes] = useState<any[]>([]);
   const [selectedId, setSelectedId] = useState<number | null>(null);
+  const dragOffset = useRef({ x: 0, y: 0 });
   const [scale, setScale] = useState(1);
 
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -56,14 +66,6 @@ export default function CreateProblem() {
 
   const [limitAttempts, setLimitAttempts] = useState<number | null>(null);
   const [visible, setVisible] = useState(true);
-  const [showProperties, setShowProperties] = useState(false);
-
-  const [showSides, setShowSides] = useState(false);
-  const [showAngles, setShowAngles] = useState(false);
-  const [showArea, setShowArea] = useState(false);
-  const [showHeight, setShowHeight] = useState(false);
-  const [showDiameter, setShowDiameter] = useState(false);
-  const [showCircumference, setShowCircumference] = useState(false);
 
   // Dropdown close on outside click
   useEffect(() => {
@@ -130,30 +132,230 @@ export default function CreateProblem() {
     return () => document.removeEventListener("mousedown", handleClickOutsideFill);
   }, [fillMode]);
 
-  // Drag and drop logic
-  const handleDragStart = (type: string) => (e: React.DragEvent) => {
-    e.dataTransfer.setData("shape-type", type);
+  // Toolbox drag
+  const handleDragStart = (type: string) => {
+    setDraggedShape(type);
+    setSelectedTool(null);
   };
 
-  // Render shape (NO drag, drop, or resize logic)
+  // --- DRAG & DROP LOGIC ---
+
+  // Drop shape in main area (centered under cursor)
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = (e.clientX - rect.left - DEFAULT_SIZE / 2) / scale;
+    const y = (e.clientY - rect.top - DEFAULT_SIZE / 2) / scale;
+    setShapes([
+      ...shapes,
+      {
+        id: Date.now(),
+        type: draggedShape,
+        x,
+        y,
+        width: draggedShape === "square" ? DEFAULT_SIZE : undefined,
+        height: draggedShape === "square" ? DEFAULT_SIZE : undefined,
+        size: DEFAULT_SIZE,
+        fill: "#E3DCC2",
+      },
+    ]);
+    setDraggedShape(null);
+    setSelectedTool(null);
+  };
+
+  const handleDragOver = (e: React.DragEvent) => e.preventDefault();
+
+  // Move shape (dragging)
+  const handleShapeMouseDown = (id: number, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setSelectedId(id);
+    const shape = shapes.find((s) => s.id === id);
+
+    // Calculate offset from mouse to shape's top-left
+    dragOffset.current = {
+      x: e.clientX - shape.x * scale,
+      y: e.clientY - shape.y * scale,
+    };
+
+    const onMouseMove = (moveEvent: MouseEvent) => {
+      setShapes((prev) =>
+        prev.map((shape) =>
+          shape.id === id
+            ? {
+                ...shape,
+                x: (moveEvent.clientX - dragOffset.current.x) / scale,
+                y: (moveEvent.clientY - dragOffset.current.y) / scale,
+              }
+            : shape
+        )
+      );
+    };
+    const onMouseUp = () => {
+      window.removeEventListener("mousemove", onMouseMove);
+      window.removeEventListener("mouseup", onMouseUp);
+    };
+    window.addEventListener("mousemove", onMouseMove);
+    window.addEventListener("mouseup", onMouseUp);
+  };
+
+  // --- END DRAG & DROP LOGIC ---
+
+  // Square resize
+  const handleSquareResize = (id: number, side: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setSelectedId(id);
+    const shape = shapes.find((s) => s.id === id);
+    const startX = e.clientX;
+    const startY = e.clientY;
+    const startWidth = shape.width ?? shape.size;
+    const startHeight = shape.height ?? shape.size;
+    const startXPos = shape.x;
+    const startYPos = shape.y;
+
+    const onMouseMove = (moveEvent: MouseEvent) => {
+      setShapes((prev) =>
+        prev.map((shape) => {
+          if (shape.id !== id) return shape;
+          if (side === "right") {
+            return { ...shape, width: Math.max(MIN_SIZE, startWidth + (moveEvent.clientX - startX) / scale) };
+          }
+          if (side === "left") {
+            const delta = (moveEvent.clientX - startX) / scale;
+            const newWidth = Math.max(MIN_SIZE, startWidth - delta);
+            return {
+              ...shape,
+              x: startXPos + (newWidth < MIN_SIZE ? startWidth - MIN_SIZE : delta),
+              width: newWidth,
+            };
+          }
+          if (side === "bottom") {
+            return { ...shape, height: Math.max(MIN_SIZE, startHeight + (moveEvent.clientY - startY) / scale) };
+          }
+          if (side === "top") {
+            const delta = (moveEvent.clientY - startY) / scale;
+            const newHeight = Math.max(MIN_SIZE, startHeight - delta);
+            return {
+              ...shape,
+              y: startYPos + (newHeight < MIN_SIZE ? startHeight - MIN_SIZE : delta),
+              height: newHeight,
+            };
+          }
+          return shape;
+        })
+      );
+    };
+    const onMouseUp = () => {
+      window.removeEventListener("mousemove", onMouseMove);
+      window.removeEventListener("mouseup", onMouseUp);
+    };
+    window.addEventListener("mousemove", onMouseMove);
+    window.addEventListener("mouseup", onMouseUp);
+  };
+
+  // Circle/triangle resize
+  const handleResizeMouseDown = (id: number, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setSelectedId(id);
+    const shape = shapes.find((s) => s.id === id);
+    const startX = e.clientX;
+    const startSize = shape.size;
+    const onMouseMove = (moveEvent: MouseEvent) => {
+      const delta = (moveEvent.clientX - startX) / scale;
+      setShapes((prev) =>
+        prev.map((shape) =>
+          shape.id === id
+            ? { ...shape, size: Math.max(MIN_SIZE, startSize + delta) }
+            : shape
+        )
+      );
+    };
+    const onMouseUp = () => {
+      window.removeEventListener("mousemove", onMouseMove);
+      window.removeEventListener("mouseup", onMouseUp);
+    };
+    window.addEventListener("mousemove", onMouseMove);
+    window.addEventListener("mouseup", onMouseUp);
+  };
+
+  // Circle resize handler (for resizing from the edge)
+  const handleCircleResizeMouseDown = (id: number, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setSelectedId(id);
+    const shape = shapes.find((s) => s.id === id);
+    const size = shape.size;
+    const r = size / 2;
+    const rect = (e.target as HTMLElement).closest("div[style]")!.getBoundingClientRect();
+    const centerX = rect.left + r * scale;
+    const startSize = shape.size;
+
+    document.body.style.cursor = "ew-resize";
+
+    const onMouseMove = (moveEvent: MouseEvent) => {
+      const dx = (moveEvent.clientX - centerX) / scale;
+      const newRadius = Math.abs(dx);
+      setShapes((prev) =>
+        prev.map((shape) =>
+          shape.id === id
+            ? { ...shape, size: Math.max(MIN_SIZE, newRadius * 2) }
+            : shape
+        )
+      );
+    };
+    const onMouseUp = () => {
+      document.body.style.cursor = "";
+      window.removeEventListener("mousemove", onMouseMove);
+      window.removeEventListener("mouseup", onMouseUp);
+    };
+    window.addEventListener("mousemove", onMouseMove);
+    window.addEventListener("mouseup", onMouseUp);
+  };
+
+  // Fill Tool Drag
+  const handleFillDragStart = (e: React.DragEvent) => {
+    setDraggingFill(true);
+    e.dataTransfer.setData("text/plain", "fill-color");
+    e.dataTransfer.effectAllowed = "copy";
+    const img = document.createElement("div");
+    img.style.width = "24px";
+    img.style.height = "24px";
+    img.style.background = fillColor;
+    img.style.borderRadius = "50%";
+    img.style.border = "2px solid #000";
+    document.body.appendChild(img);
+    e.dataTransfer.setDragImage(img, 12, 12);
+    setTimeout(() => document.body.removeChild(img), 0);
+  };
+  const handleFillDragEnd = () => setDraggingFill(false);
+
+  // Render shape
   const renderShape = (shape: any) => {
+    const isSelected = selectedId === shape.id;
+    const handleShapeDrop = (e: React.DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const data = e.dataTransfer.getData("text/plain");
+      if (data === "fill-color" && draggingFill && fillMode) {
+        setShapes((prev) =>
+          prev.map((s) =>
+            s.id === shape.id ? { ...s, fill: fillColor } : s
+          )
+        );
+      }
+    };
+
     if (shape.type === "square") {
       return (
         <SquareShape
           key={shape.id}
           shape={shape}
-          isSelected={selectedId === shape.id}
-          onUpdate={update =>
-            setShapes(prev =>
-              prev.map(s =>
-                s.id === shape.id ? { ...s, ...update } : s
-              )
-            )
-          }
-          showProperties={showProperties}
-          showSides={showSides}
-          showAngles={showAngles}
-          showArea={showArea}
+          isSelected={isSelected}
+          pxToUnits={pxToUnits}
+          handleShapeMouseDown={handleShapeMouseDown}
+          setSelectedId={setSelectedId}
+          handleShapeDrop={handleShapeDrop}
+          handleSquareResize={handleSquareResize}
+          fillMode={fillMode}
+          draggingFill={draggingFill}
         />
       );
     }
@@ -162,11 +364,15 @@ export default function CreateProblem() {
         <CircleShape
           key={shape.id}
           shape={shape}
-          isSelected={selectedId === shape.id}
+          isSelected={isSelected}
+          pxToUnits={pxToUnits}
+          handleShapeMouseDown={handleShapeMouseDown}
+          setSelectedId={setSelectedId}
+          handleShapeDrop={handleShapeDrop}
+          handleCircleResizeMouseDown={handleCircleResizeMouseDown}
+          fillMode={fillMode}
+          draggingFill={draggingFill}
           scale={scale}
-          showDiameter={showDiameter}
-          showCircumference={showCircumference}
-          showArea={showArea}
         />
       );
     }
@@ -175,11 +381,14 @@ export default function CreateProblem() {
         <TriangleShape
           key={shape.id}
           shape={shape}
-          isSelected={selectedId === shape.id}
-          showSides={showSides}
-          showAngles={showAngles}
-          showArea={showArea}
-          showHeight={showHeight}
+          isSelected={isSelected}
+          pxToUnits={pxToUnits}
+          handleShapeMouseDown={handleShapeMouseDown}
+          setSelectedId={setSelectedId}
+          handleShapeDrop={handleShapeDrop}
+          handleResizeMouseDown={handleResizeMouseDown}
+          fillMode={fillMode}
+          draggingFill={draggingFill}
         />
       );
     }
@@ -227,6 +436,7 @@ export default function CreateProblem() {
               ))}
             </div>
           )}
+          {/* Remove the spacer div here! */}
           <Toolbox
             selectedTool={selectedTool}
             setSelectedTool={setSelectedTool}
@@ -234,18 +444,10 @@ export default function CreateProblem() {
             fillColor={fillColor}
             fillMode={fillMode}
             setFillMode={setFillMode}
-            handleFillDragStart={() => {}}
-            handleFillDragEnd={() => {}}
+            handleFillDragStart={handleFillDragStart}
+            handleFillDragEnd={handleFillDragEnd}
             FILL_COLORS={FILL_COLORS}
             setFillColor={setFillColor}
-            showProperties={showProperties}
-            setShowProperties={setShowProperties}
-            showSides={showSides} setShowSides={setShowSides}
-            showAngles={showAngles} setShowAngles={setShowAngles}
-            showArea={showArea} setShowArea={setShowArea}
-            showHeight={showHeight} setShowHeight={setShowHeight}
-            showDiameter={showDiameter} setShowDiameter={setShowDiameter}
-            showCircumference={showCircumference} setShowCircumference={setShowCircumference}
           />
         </div>
         
@@ -266,7 +468,8 @@ export default function CreateProblem() {
             mainAreaRef={mainAreaRef}
             shapes={shapes}
             renderShape={renderShape}
-            setShapes={setShapes}
+            handleDrop={handleDrop}
+            handleDragOver={handleDragOver}
             setSelectedId={setSelectedId}
             setSelectedTool={setSelectedTool}
             saveButton={

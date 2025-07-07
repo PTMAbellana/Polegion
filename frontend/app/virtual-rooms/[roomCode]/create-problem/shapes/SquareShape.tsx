@@ -1,153 +1,121 @@
-import React from "react";
+import React, { useRef } from "react";
+import styles from "@/styles/create-problem.module.css";
 
-export default function SquareShape({
+interface SquareShapeProps {
+  shape: {
+    id: number;
+    x: number;
+    y: number;
+    size: number;
+    color?: string;
+  };
+  isSelected: boolean;
+  onUpdate: (update: Partial<{ x: number; y: number; size: number }>) => void;
+}
+
+const SquareShape: React.FC<SquareShapeProps & { showProperties: boolean }> = ({
   shape,
-  scale,
   isSelected,
-  pxToUnits,
-  handleShapeMouseDown,
-  setSelectedId,
-  handleShapeDrop,
-  handleSquareResize,
-  fillMode,
-  draggingFill,
-}: any) {
-  const width = shape.width ?? shape.size;
-  const height = shape.height ?? shape.size;
-  const labelOffset = 48;
+  onUpdate,
+  showProperties,
+}) => {
+  const dragOffset = useRef<{ x: number; y: number } | null>(null);
+  const resizing = useRef<boolean>(false);
+
+  // Drag logic
+  const onMouseDown = (e: React.MouseEvent) => {
+    if ((e.target as HTMLElement).classList.contains(styles.resizeHandle)) {
+      resizing.current = true;
+    } else {
+      dragOffset.current = { x: e.clientX - shape.x, y: e.clientY - shape.y };
+    }
+    window.addEventListener("mousemove", onMouseMove);
+    window.addEventListener("mouseup", onMouseUp);
+  };
+
+  const onMouseMove = (e: MouseEvent) => {
+    if (resizing.current) {
+      const newSize = Math.max(20, e.clientX - shape.x);
+      onUpdate({ size: newSize });
+    } else if (dragOffset.current) {
+      onUpdate({
+        x: e.clientX - dragOffset.current.x,
+        y: e.clientY - dragOffset.current.y,
+      });
+    }
+  };
+
+  const onMouseUp = () => {
+    dragOffset.current = null;
+    resizing.current = false;
+    window.removeEventListener("mousemove", onMouseMove);
+    window.removeEventListener("mouseup", onMouseUp);
+  };
+
+  const side = shape.size;
+  const area = side * side;
+  const angles = [90, 90, 90, 90];
 
   return (
     <div
+      className={styles.squareShape}
       style={{
         position: "absolute",
         left: shape.x,
         top: shape.y,
-        width,
-        height,
+        width: shape.size,
+        height: shape.size,
+        background: shape.color || "#e3dcc2",
+        border: "6px solid #000", // Match toolbox border
+        borderRadius: 0,
+        boxSizing: "border-box",
         cursor: "move",
-        zIndex: isSelected ? 10 : 2,
+        userSelect: "none",
       }}
-      onMouseDown={(e) => handleShapeMouseDown(shape.id, e)}
-      onClick={(e) => {
-        e.stopPropagation();
-        setSelectedId(shape.id);
-      }}
-      onDragOver={e => {
-        if (fillMode && draggingFill) {
-          e.preventDefault();
-          e.dataTransfer.dropEffect = "copy";
-        }
-      }}
-      onDrop={handleShapeDrop}
+      onMouseDown={onMouseDown}
     >
-      <div
-        style={{
-          width: "100%",
-          height: "100%",
-          background: shape.fill || "#e3dcc2",
-          border: "6px solid #000",
-          borderRadius: 0,
-          position: "relative",
-        }}
-      >
-        {isSelected && (
-          <>
-            {/* Top */}
-            <span style={{
-              position: "absolute",
-              top: -labelOffset,
-              left: "50%",
-              transform: "translateX(-50%)",
-              background: "#fff",
-              padding: "2px 8px",
-              borderRadius: 6,
-              border: "1px solid #aaa",
-              fontSize: 14,
-              boxShadow: "0 2px 6px #0001",
-              whiteSpace: "nowrap"
-            }}>{pxToUnits(width)}</span>
-            {/* Bottom */}
-            <span style={{
-              position: "absolute",
-              bottom: -labelOffset,
-              left: "50%",
-              transform: "translateX(-50%)",
-              background: "#fff",
-              padding: "2px 8px",
-              borderRadius: 6,
-              border: "1px solid #aaa",
-              fontSize: 14,
-              boxShadow: "0 2px 6px #0001",
-              whiteSpace: "nowrap"
-            }}>{pxToUnits(width)}</span>
-            {/* Left */}
-            <span style={{
-              position: "absolute",
-              left: -labelOffset - 16,
-              top: "50%",
-              transform: "translateY(-50%) rotate(-90deg)",
-              background: "#fff",
-              padding: "2px 8px",
-              borderRadius: 6,
-              border: "1px solid #aaa",
-              fontSize: 14,
-              boxShadow: "0 2px 6px #0001",
-              whiteSpace: "nowrap"
-            }}>{pxToUnits(height)}</span>
-            {/* Right */}
-            <span style={{
-              position: "absolute",
-              right: -labelOffset - 16,
-              top: "50%",
-              transform: "translateY(-50%) rotate(-90deg)",
-              background: "#fff",
-              padding: "2px 8px",
-              borderRadius: 6,
-              border: "1px solid #aaa",
-              fontSize: 14,
-              boxShadow: "0 2px 6px #0001",
-              whiteSpace: "nowrap"
-            }}>{pxToUnits(height)}</span>
-            {/* Resize handles */}
-            {/* Top */}
-            <div
-              style={{
-                position: "absolute", top: -8, left: "50%", transform: "translateX(-50%)",
-                width: 16, height: 16, background: "#fabc60", border: "2px solid #000", borderRadius: 4,
-                cursor: "ns-resize", zIndex: 20,
-              }}
-              onMouseDown={(e) => handleSquareResize(shape.id, "top", e)}
-            />
-            {/* Bottom */}
-            <div
-              style={{
-                position: "absolute", bottom: -8, left: "50%", transform: "translateX(-50%)",
-                width: 16, height: 16, background: "#fabc60", border: "2px solid #000", borderRadius: 4,
-                cursor: "ns-resize", zIndex: 20,
-              }}
-              onMouseDown={(e) => handleSquareResize(shape.id, "bottom", e)}
-            />
-            {/* Left */}
-            <div
-              style={{
-                position: "absolute", left: -8, top: "50%", transform: "translateY(-50%)",
-                width: 16, height: 16, background: "#fabc60", border: "2px solid #000", borderRadius: 4,
-                cursor: "ew-resize", zIndex: 20,
-              }}
-              onMouseDown={(e) => handleSquareResize(shape.id, "left", e)}
-            />
-            {/* Right */}
-            <div
-              style={{
-                position: "absolute", right: -8, top: "50%", transform: "translateY(-50%)",
-                width: 16, height: 16, background: "#fabc60", border: "2px solid #000", borderRadius: 4,
-                cursor: "ew-resize", zIndex: 20,
-              }}
-              onMouseDown={(e) => handleSquareResize(shape.id, "right", e)}
-            />
-          </>
-        )}
-      </div>
+      {/* Resize handle (bottom-right corner) */}
+      {isSelected && (
+        <div
+          className={styles.resizeHandle}
+          style={{
+            position: "absolute",
+            right: 0,
+            bottom: 0,
+            width: 16,
+            height: 16,
+            background: "#2c514c",
+            cursor: "nwse-resize",
+            borderRadius: 4,
+          }}
+        />
+      )}
+      {showProperties && (
+        <div
+          style={{
+            position: "absolute",
+            left: "50%",
+            top: "100%",
+            transform: "translate(-50%, 8px)",
+            background: "#fff",
+            color: "#222",
+            fontSize: 14,
+            borderRadius: 6,
+            padding: "4px 10px",
+            boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+            marginTop: 4,
+            zIndex: 10,
+            minWidth: 120,
+            textAlign: "center",
+          }}
+        >
+          {showSides && <div>Side: {side.toFixed(1)}</div>}
+          {showAngles && <div>Angles: {angles.join("°, ")}°</div>}
+          {showArea && <div>Area: {area.toFixed(1)}</div>}
+        </div>
+      )}
     </div>
   );
-}
+};
+
+export default SquareShape;
