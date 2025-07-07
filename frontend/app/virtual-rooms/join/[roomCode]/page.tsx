@@ -37,6 +37,7 @@ export default function JoinRoom({ params } : { params  : Promise<{roomCode : st
     const [ totalParticipants, setTotalParticipants ] = useState<number>(0)
     const [isLoading, setIsLoading] = useState(true)
     const [ isPart, setIsPart ] = useState(false)
+    const [showJoinStatus, setShowJoinStatus] = useState(true);
 
     const { isLoggedIn } = myAppHook()
     const { isLoading: authLoading } = AuthProtection()
@@ -150,10 +151,21 @@ export default function JoinRoom({ params } : { params  : Promise<{roomCode : st
             <div className={styles["room-content"]}>
                 <div className={styles["main-column"]}>
                     {/* Join Status */}
-                    <div className={styles["join-status"]}>
-                        <span className={styles["join-status-icon"]}>✅</span>
-                        You have successfully joined this room!
-                    </div>
+                    {showJoinStatus && (
+                        <div className={styles["modal-overlay"]}>
+                            <div className={styles["join-status-modal"]}>
+                                <span className={styles["join-status-icon"]}>✅</span>
+                                <span>You have successfully joined this room!</span>
+                                <button
+                                    className={styles["close-modal-btn"]}
+                                    onClick={() => setShowJoinStatus(false)}
+                                    aria-label="Close"
+                                >
+                                    ✖
+                                </button>
+                            </div>
+                        </div>
+                    )}
 
                     {/* Room Banner */}
                     <div className={styles["room-banner-section"]}>

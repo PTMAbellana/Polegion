@@ -362,10 +362,10 @@ export default function VirtualRooms() {
                     <h1>Hello there, {userProfile?.fullName || 'John Doe'}</h1>
                     <p>Let your imagination run wild!</p>
                 </div>
-                <div className={styles["search-section"]}>
+                {/* <div className={styles["search-section"]}>
                     <span>Search</span>
                     <div className={styles["search-icon"]}>🔍</div>
-                </div>
+                </div> */}
             </div>
 
             {/* Action Buttons Section */}
