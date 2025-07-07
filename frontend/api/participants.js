@@ -63,3 +63,14 @@ export const getJoinedRooms = async () => {
     throw error;
   }
 };
+
+export const inviteParticipant = async ({ email, roomCode }) => {
+  try {
+    return await api.post('/participants/invite', {
+      email,
+      roomCode,
+    });
+  } catch (error) {
+    throw error;
+  }
+};

@@ -3,7 +3,7 @@ import Loader from '@/components/Loader'
 import { myAppHook } from '@/context/AppUtils'
 import { AuthProtection } from '@/context/AuthProtection'
 import { getRoomByCode } from '@/api/rooms'
-import { getAllParticipants, totalParticipant } from '@/api/participants'
+import { getAllParticipants, totalParticipant, inviteParticipant } from '@/api/participants'
 import styles from '@/styles/room-competition.module.css'
 import { use, useEffect, useState } from 'react'
 
@@ -30,6 +30,10 @@ export default function RoomDetail({ params } : { params  : Promise<{roomCode : 
     const [ participants, setParticipants ] = useState<Participant[]>([])
     const [ totalParticipants, setTotalParticipants ] = useState<number>(0)
     const [ isLoading, setIsLoading ] = useState(true)
+    const [ isPrivate, setIsPrivate] = useState(roomDetails?.isPrivate ?? false);
+    const [showInviteModal, setShowInviteModal] = useState(false);
+    const [recipientEmail, setRecipientEmail] = useState("");
+    const [sending, setSending] = useState(false);
 
     const { isLoggedIn } = myAppHook()
     const { isLoading: authLoading } = AuthProtection()
@@ -72,6 +76,25 @@ export default function RoomDetail({ params } : { params  : Promise<{roomCode : 
             setIsLoading(false)
         }
     }
+
+    const sendInviteEmail = async (email: string, roomCode: string) => {
+        // Implement the email sending logic here
+        console.log(`Sending invite to ${email} for room ${roomCode}`);
+    }
+
+    const handleInvite = async () => {
+        try {
+            setSending(true);
+            await inviteParticipant({ email: recipientEmail, roomCode: roomDetails.code });
+            alert("Invitation sent!");
+            setShowInviteModal(false);
+            setRecipientEmail("");
+        } catch (error) {
+            alert("Failed to send invitation.");
+        } finally {
+            setSending(false);
+        }
+    };
 
     if (isLoading || authLoading) {
         return (
@@ -200,10 +223,11 @@ export default function RoomDetail({ params } : { params  : Promise<{roomCode : 
                                         {p.fullName}
                                     </div>
                                 ))
-                            )}
+                            )
+                            }
                         </div>
                         <div className={styles["invite-section"]}>
-                            <button className={styles["invite-btn"]}>
+                            <button className={styles["invite-btn"]} onClick={() => setShowInviteModal(true)}>
                                 <span className={styles["invite-icon"]}>✉️</span>
                                 Invite Participants
                             </button>
@@ -214,6 +238,17 @@ export default function RoomDetail({ params } : { params  : Promise<{roomCode : 
                     <div className={styles["settings-card"]}>
                         <h3>Room Settings</h3>
                         <div className={styles["settings-list"]}>
+                            <div className={styles["setting-item"]}>
+                                <span className={styles["setting-label"]}>Room Privacy</span>
+                                <div className={styles["setting-value"]}>
+                                    <button
+                                        className={isPrivate ? styles["private-btn"] : styles["public-btn"]}
+                                        onClick={() => setIsPrivate((prev) => !prev)}
+                                    >
+                                        {isPrivate ? "Private" : "Public"}
+                                    </button>
+                                </div>
+                            </div>
                             <div className={styles["setting-item"]}>
                                 <span className={styles["setting-label"]}>Room Code</span>
                                 <div className={styles["setting-value"]}>
@@ -247,29 +282,30 @@ export default function RoomDetail({ params } : { params  : Promise<{roomCode : 
                         </div>
                     </div>
 
-                    {/* Quick Actions */}
-                    <div className={styles["quick-actions-card"]}>
-                        <h3>Quick Actions</h3>
-                        <div className={styles["action-buttons"]}>
-                            {/* <button className={styles["action-btn", "primary"]}> */}
-                            <button className={styles["primary"]}>
-                                <span className={styles["action-icon"]}>🚀</span>
-                                Start Session
-                            </button>
-                            {/* <button className={styles["action-btn", "secondary"]}> */}
-                            <button className={styles["secondary"]}>
-                                <span className={styles["action-icon"]}>📊</span>
-                                View Analytics
-                            </button>
-                            {/* <button className={styles["action-btn", "secondary"]}> */}
-                            <button className={styles["secondary"]}>
-                                <span className={styles["action-icon"]}>⚙️</span>
-                                Room Settings
-                            </button>
-                        </div>
-                    </div>
                 </div>
             </div>
+
+            {/* Invite Participants Modal */}
+            {showInviteModal && (
+                <div className={styles["modal-overlay"]}>
+                    <div className={styles["invite-modal"]}>
+                        <h3>Invite by Email</h3>
+                        <input
+                            type="email"
+                            placeholder="Recipient's email"
+                            value={recipientEmail}
+                            onChange={e => setRecipientEmail(e.target.value)}
+                        />
+                        <button
+                            disabled={sending}
+                            onClick={handleInvite}
+                        >
+                            Send Invite
+                        </button>
+                        <button onClick={() => setShowInviteModal(false)}>Cancel</button>
+                    </div>
+                </div>
+            )}
         </div>
     )
 }

@@ -18,7 +18,6 @@ app.use(bodyParser.urlencoded({
     extended: true
 }))
 
-
 //routes
 app.use('/api/auth', authRoutes)
 app.use('/api/rooms', roomRoutes)

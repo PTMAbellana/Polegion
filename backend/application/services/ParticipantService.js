@@ -1,4 +1,5 @@
 // const userModel = require('../../domain/models/User')
+const Mailer = require('../../utils/Mailer'); // Adjust path as needed
 
 class ParticipantService {
     constructor(participantRepo, roomService, userService){
@@ -152,6 +153,13 @@ class ParticipantService {
         }
     }
 
+    async inviteByEmail(inviter, email, roomCode) {
+        const subject = "You're invited to join a Polegion room!";
+        const content = `Hi! ${inviter.name} (${inviter.email}) has invited you to join a room on Polegion.
+Room Code: ${roomCode}
+Join here: https://your-app-url/virtual-rooms/join/${roomCode}`;
+        await Mailer.sendMail(email, subject, content, inviter.email);
+    }
 }
 
 module.exports = ParticipantService

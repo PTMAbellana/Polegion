@@ -179,6 +179,19 @@ class ParticipantController {
         }
     }
 
+    async inviteByEmail(req, res) {
+        const { email, roomCode } = req.body;
+        const inviter = {
+          name: req.user.fullName,
+          email: req.user.email,
+        };
+        try {
+          await this.participantService.inviteByEmail(inviter, email, roomCode);
+          res.json({ success: true });
+        } catch (error) {
+          res.status(500).json({ error: 'Failed to send invitation.' });
+        }
+      }
 }
 
 module.exports = ParticipantController
