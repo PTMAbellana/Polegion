@@ -1,9 +1,11 @@
 "use client"
 
-import React, { use } from 'react'
+import React, { use, useEffect, useState } from 'react'
 import Loader from '@/components/Loader'
 import { myAppHook } from '@/context/AppUtils'
 import styles from '@/styles/leaderboard.module.css'
+import { getRoomLeaderboards } from '@/api/leaderboards'
+import { getAllParticipants, isParticipant } from '@/api/participants'
 
 const leaderboardData = [
   {
@@ -63,6 +65,13 @@ const leaderboardData = [
   }
 ];
 
+interface Participant {
+    id?:string
+    fullName?: string
+    gender?: string
+    email?: string
+}
+
 const TrendingIcon = ({ direction }) => {
   if (direction === "up") {
     return (
@@ -81,10 +90,50 @@ const TrendingIcon = ({ direction }) => {
 
 export default function LeaderboardDetail({ params } : { params  : Promise<{roomId : number }> }) {
     const roomId = use(params)
-    console.log('get roomId: ', roomId)
-    const { isLoggedIn, userProfile, isLoading } = myAppHook()
+    console.log('get roomId: ', roomId.roomId)
+    const { isLoggedIn, authLoading } = myAppHook()
 
-    if (isLoading || !isLoggedIn) {
+    const [ participants, setParticipants ] =  useState<Participant[]>([])
+    const [ roomBoards, setRoomBoards ] = useState(null)
+    const [ compeBoards, setCompeBoards ] = useState(null)
+
+    useEffect(() => {
+        if (isLoggedIn && !authLoading) {
+            callMe()
+        } else {
+            if (authLoading || !isLoggedIn) fullLoader()
+        }
+    }, [isLoggedIn, authLoading])
+
+    const callMe = async() => {
+        try {
+
+          const data = await isParticipant(roomId.roomId)
+          console.log('isParticipant :', data)
+          // setIsPart(data.data?.isParticipant)
+            
+          const test = await getAllParticipants(roomId.roomId)
+          console.log('Attempting to get all participants: ', test.data)
+
+          setParticipants( test.data.participants || [] )
+
+        } catch (error) {
+            console.log('Error fetching room details: ', error)
+        } 
+    }
+
+    console.log('all participants: ', participants)
+
+    const fullLoader = () => {
+        console.log('Leaderboard Rooms: App is still loading')
+        return (
+            <div className={styles["loading-container"]}>
+                <Loader/>
+            </div>
+        )
+    }
+
+    if (authLoading || !isLoggedIn) {
         return (
             <div className={styles["loading-container"]}>
                 <Loader/>

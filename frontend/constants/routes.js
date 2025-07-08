@@ -12,7 +12,10 @@ export const ROUTES = {
     VIRTUAL_ROOMS: '/virtual-rooms',
     JOINED_ROOMS: '/virtual-rooms/join',
 
+    // leaderboards
     LEADERBOARD: '/leaderboard',
+    LEADERBOARD_YOURS: '/leaderboard/my-rooms',
+    LEADERBOARD_JOINED: '/leaderboard/join-rooms',
     
     //profile
     PROFILE: '/profile',

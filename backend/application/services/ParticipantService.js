@@ -94,7 +94,7 @@ class ParticipantService {
     }
 
     async checkPartStatus (user_id, room_id) {
-        console.log('i am calleed check part status ')
+        // console.log('i am calleed check part status ')
         try {
             return await this.participantRepo.isParticipant(user_id, room_id)
         } catch (error) {
@@ -132,7 +132,7 @@ class ParticipantService {
                         // Fetch user data from users table using user_id
                         const roomData = await this.roomService.getRoomsById(room.room_id)
                         
-                        console.log('getRoomParticipants userData: ', roomData)
+                        // console.log('getRoomParticipants userData: ', roomData)
                         if (!roomData) {
                             console.warn(`User not found for ID: ${room.room_id}`)
                             return null

@@ -15,6 +15,7 @@ interface Room{
     mantra: string
     banner_image: string | File | undefined
     code: string
+    visibility: string
 }
 
 interface Participant {
@@ -30,7 +31,7 @@ export default function RoomDetail({ params } : { params  : Promise<{roomCode : 
     const [ participants, setParticipants ] = useState<Participant[]>([])
     const [ totalParticipants, setTotalParticipants ] = useState<number>(0)
     const [ isLoading, setIsLoading ] = useState(true)
-    const [ isPrivate, setIsPrivate] = useState(roomDetails?.isPrivate ?? false);
+    const [ isPrivate, setIsPrivate] = useState(roomDetails?.visibility === 'private' ? true: false);  // visibility = public matic
     const [showInviteModal, setShowInviteModal] = useState(false);
     const [recipientEmail, setRecipientEmail] = useState("");
     const [sending, setSending] = useState(false);
@@ -85,11 +86,12 @@ export default function RoomDetail({ params } : { params  : Promise<{roomCode : 
     const handleInvite = async () => {
         try {
             setSending(true);
-            await inviteParticipant({ email: recipientEmail, roomCode: roomDetails.code });
+            await inviteParticipant({ email: recipientEmail, roomCode: roomDetails?.code });
             alert("Invitation sent!");
             setShowInviteModal(false);
             setRecipientEmail("");
-        } catch (error) {
+        } catch (error : unknown) {
+            console.log(error)
             alert("Failed to send invitation.");
         } finally {
             setSending(false);

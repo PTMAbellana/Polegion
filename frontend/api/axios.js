@@ -52,8 +52,8 @@ export const authUtils = {
 
   isTokenValid: () => {
     const expiresAt = parseInt(localStorage.getItem("expires_at") || "0");
-    console.log("Token expires at:", new Date(expiresAt).toLocaleString());
-    console.log("Current time:", new Date().toLocaleString());
+    // console.log("Token expires at:", new Date(expiresAt).toLocaleString());
+    // console.log("Current time:", new Date().toLocaleString());
     return expiresAt > Date.now();
   },
 

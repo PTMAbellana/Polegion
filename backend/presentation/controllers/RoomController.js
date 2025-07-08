@@ -1,21 +1,4 @@
-const multer = require('multer')
-
-//configure multer for memory storage
-const storage = multer.memoryStorage()
-const upload = multer({
-    storage: storage,
-    limits: {
-        fileSize: 10 * 1024 * 1024  //10 mb file size
-    },
-    fileFilter: (req, file, cb) => {
-        // Check if file is an image
-        if (file.mimetype.startsWith('image/')) {
-            cb(null, true)
-        } else {
-            cb(new Error('Only image files are allowed!'), false)
-        }
-    }
-})
+const upload = require('../middleware/ImageMiddleware')
 
 class RoomController {
     constructor(roomService){
@@ -93,7 +76,8 @@ class RoomController {
             description, 
             mantra, 
             banner_image, 
-            code
+            code,
+            visibility
         } = req.body
         
         try {
@@ -103,7 +87,8 @@ class RoomController {
                 mantra, 
                 banner_image, //url from the previous upload
                 req.user.id,
-                code
+                code,
+                visibility
             )
             
             if (!room) return res.status(400).json({ error: error.message })
@@ -120,7 +105,8 @@ class RoomController {
             title, 
             description, 
             mantra, 
-            banner_image 
+            banner_image,
+            visibility
         } = req.body
         
         try {
@@ -130,6 +116,7 @@ class RoomController {
                 description, 
                 mantra, 
                 banner_image,
+                visibility,
                 req.user.id
             )
             

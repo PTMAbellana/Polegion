@@ -1,22 +1,4 @@
-const multer = require('multer')
-
-//configure multer for memory storage
-const storage = multer.memoryStorage()
-const upload = multer({
-    storage: storage,
-    limits: {
-        fileSize: 10 * 1024 * 1024  //10 mb file size
-    },
-    fileFilter: (req, file, cb) => {
-        // Check if file is an image
-        if (file.mimetype.startsWith('image/')) {
-            cb(null, true)
-        } else {
-            cb(new Error('Only image files are allowed!'), false)
-        }
-    }
-})
-
+const upload = require('../middleware/ImageMiddleware')
 class UserController {
     constructor (userService){
         this.userService = userService
@@ -58,17 +40,12 @@ class UserController {
     }
 
     updateEmail = async (req, res) => {
-        console.log(req.body)
         const { newEmail } = req.body
-
-        console.log(req.user.id)
 
         try {
             const data = await this.userService.updateEmail(newEmail, req.user.id)
-            console.log(data)
             return res.status(200).json(data.toDTO())
         } catch (error) {
-            console.error(error)
             res.status(500).json({
                 error: 'Server error updating email'
             })
