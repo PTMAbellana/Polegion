@@ -42,7 +42,7 @@ class ParticipantRepo extends BaseRepo {
             // console.log('called')
             if (cd) throw new Error('Already a participant')
             // else if (ce) throw ce
-            else if (ce) console.log('error: ', ce)
+            // else if (ce) console.log('error: ', ce)
             
             // insert if new participant ni sha
             const {
@@ -161,7 +161,7 @@ class ParticipantRepo extends BaseRepo {
 
             if (error) throw error
 
-            console.log('getJoinedRooms: ', data)
+            // console.log('getJoinedRooms: ', data)
             return data || []
         } catch (error) {
             throw error

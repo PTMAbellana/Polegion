@@ -25,7 +25,7 @@ class LeaderboardController {
                 data
             })
         } catch (error){
-            console.log(error)
+            // console.log(error)
             res.status(500).json({
                 error: 'Server error Competition Leaderboard'
             })

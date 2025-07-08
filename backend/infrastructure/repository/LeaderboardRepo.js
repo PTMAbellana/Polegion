@@ -55,10 +55,10 @@ class LeaderboardRepo extends BaseRepo {
     
             if (error) throw error
             if (!data) throw error
-            console.log(data)
+            // console.log(data)
             return data
         } catch (error){
-            console.log('ako gi tawag ', error)
+            // console.log('ako gi tawag ', error)
             throw error
         }
     }

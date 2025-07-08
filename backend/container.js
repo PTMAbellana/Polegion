@@ -40,8 +40,8 @@ const leaderboardRepository = new LeaderboardRepository(supabase);
 const authService = new AuthService(userRepository);
 const userService = new UserService(userRepository);
 const roomService = new RoomService(roomRepository);
-const participantService = new ParticipantService(participantRepository, roomService, userService);
 const leaderboardService = new LeaderboardService(leaderboardRepository, userService);
+const participantService = new ParticipantService(participantRepository, roomService, userService, leaderboardService);
 
 // Initialize middleware
 const authMiddleware = new AuthMiddleware(authService);

@@ -77,14 +77,9 @@ export default function LeaderboardRooms() {
         }
     }
 
-    const handleViewYourRoom = (roomId: number) => {
+    const handleViewRoom = (roomId: number) => {
         console.log('Viewing room with ID: ', roomId)
-        router.push(`${ROUTES.LEADERBOARD_YOURS}/${roomId}`)
-    }
-
-    const handleViewJoinedRoom = (roomId: number) => {
-        console.log('Viewing room with ID: ', roomId)
-        router.push(`${ROUTES.LEADERBOARD_JOINED}/${roomId}`)
+        router.push(`${ROUTES.LEADERBOARD}/${roomId}`)
     }
 
     return (
@@ -100,7 +95,7 @@ export default function LeaderboardRooms() {
                                 <div 
                                     className={styles["room-card"]} 
                                     key={index}
-                                    onClick={() => handleViewYourRoom(room.id || 0)}    // unsa niii?
+                                    onClick={() => handleViewRoom(room.id || 0)}    // unsa niii?
                                 >
                                     <div className={styles["room-card-banner"]}>
                                         {room.banner_image ? (
@@ -120,7 +115,7 @@ export default function LeaderboardRooms() {
                                                 className={styles["view-btn"]}
                                                 onClick={(e) => {
                                                     e.stopPropagation(); // Prevent double click from card onClick
-                                                    handleViewYourRoom(room.id || 0);
+                                                    handleViewRoom(room.id || 0);
                                                 }}
                                             >
                                                 View
@@ -159,7 +154,7 @@ export default function LeaderboardRooms() {
                                                     <div className={styles["room-card-actions"]}>
                                                         <button
                                                             className={styles["view-btn"]}
-                                                            onClick={() => handleViewJoinedRoom(room.id || 0)}
+                                                            onClick={() => handleViewRoom(room.id || 0)}
                                                         >
                                                             View
                                                         </button>

@@ -20,7 +20,7 @@ class LeaderboardService {
                         } 
                     };
                     } catch (err) {
-                    console.error("lookup failed:", err);
+                    // console.error("lookup failed:", err);
                     return { accumulated_xp: row.accumulated_xp };
                     }
                 })
@@ -50,7 +50,7 @@ class LeaderboardService {
                         } 
                     };
                     } catch (err) {
-                    console.error("lookup failed:", err);
+                    // console.error("lookup failed:", err);
                     return { accumulated_xp: row.accumulated_xp };
                     }
                 })

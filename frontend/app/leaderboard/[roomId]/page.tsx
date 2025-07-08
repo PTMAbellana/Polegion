@@ -4,10 +4,7 @@ import React, { use, useEffect, useState } from "react";
 import Loader from "@/components/Loader";
 import { myAppHook } from "@/context/AppUtils";
 import styles from "@/styles/leaderboard.module.css";
-import {
-  getCompetitionLeaderboards,
-  getRoomLeaderboards,
-} from "@/api/leaderboards";
+import { getCompetitionLeaderboards, getRoomLeaderboards } from "@/api/leaderboards";
 
 interface Participant {
   id?: string;

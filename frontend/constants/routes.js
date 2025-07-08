@@ -14,8 +14,6 @@ export const ROUTES = {
 
     // leaderboards
     LEADERBOARD: '/leaderboard',
-    LEADERBOARD_YOURS: '/leaderboard/my-rooms',
-    LEADERBOARD_JOINED: '/leaderboard/join-rooms',
     
     //profile
     PROFILE: '/profile',

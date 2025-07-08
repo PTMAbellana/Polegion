@@ -2,15 +2,19 @@
 const Mailer = require('../../utils/Mailer'); // Adjust path as needed
 
 class ParticipantService {
-    constructor(participantRepo, roomService, userService){
+    constructor(participantRepo, roomService, userService, leaderService){
         this.participantRepo = participantRepo
         this.roomService = roomService
         this.userService = userService
+        this.leaderService = leaderService
     }
 
     async joinRoom(user_id, room_code){
         try {
-            return await this.participantRepo.addParticipant(user_id, room_code)
+            const data = await this.participantRepo.addParticipant(user_id, room_code)
+            // console.log('join room service ', data)
+            await this.leaderService.addRoomBoard(data.room_id, data.id)
+            return data
         } catch (error) {
             throw error
         }

@@ -78,10 +78,10 @@ export default function RoomDetail({ params } : { params  : Promise<{roomCode : 
         }
     }
 
-    const sendInviteEmail = async (email: string, roomCode: string) => {
-        // Implement the email sending logic here
-        console.log(`Sending invite to ${email} for room ${roomCode}`);
-    }
+    // const sendInviteEmail = async (email: string, roomCode: string) => {
+    //     // Implement the email sending logic here
+    //     console.log(`Sending invite to ${email} for room ${roomCode}`);
+    // }
 
     const handleInvite = async () => {
         try {
