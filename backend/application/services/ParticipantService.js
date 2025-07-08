@@ -158,11 +158,20 @@ class ParticipantService {
     }
 
     async inviteByEmail(inviter, email, roomCode) {
-        const subject = "You're invited to join a Polegion room!";
-        const content = `Hi! ${inviter.name} (${inviter.email}) has invited you to join a room on Polegion.
-Room Code: ${roomCode}
-Join here: https://your-app-url/virtual-rooms/join/${roomCode}`;
-        await Mailer.sendMail(email, subject, content, inviter.email);
+//         const subject = "You're invited to join a Polegion room!";
+//         const content = `Hi! ${inviter.name} (${inviter.email}) has invited you to join a room on Polegion.
+// Room Code: ${roomCode}
+// Join here: https://your-app-url/virtual-rooms/join/${roomCode}`;
+        const mailOptions = {
+            from: "Polegion <marga18nins@gmail.com>",
+            to: email,
+            subject: "Invite to join a room",
+            template: "invite",
+            context: {
+                code: roomCode,
+            },
+        }
+        await Mailer.sendMail(mailOptions);
     }
 }
 
