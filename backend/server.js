@@ -5,7 +5,7 @@ require('dotenv').config()
 
 const {
     authRoutes, userRoutes, roomRoutes,
-    participantRoutes
+    participantRoutes, problemRoutes
 } = require('./container')
 
 const app = express()
@@ -23,6 +23,7 @@ app.use('/api/auth', authRoutes)
 app.use('/api/rooms', roomRoutes)
 app.use('/api/users', userRoutes)
 app.use('/api/participants', participantRoutes)
+app.use('/api/problems', problemRoutes)
 
 //basic route
 app.get('/', (req, res) => {
