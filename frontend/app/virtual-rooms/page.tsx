@@ -360,8 +360,8 @@ export default function VirtualRooms() {
                     </span>
                 </div>
                 <div className={styles["welcome-text"]}>
-                    <h1>Hello there, {userProfile?.fullName || 'John Doe'}</h1>
-                    <p>Let your imagination run wild!</p>
+                    <h1>Virtual Rooms</h1>
+                    <p>Hello there, {userProfile?.fullName || 'John Doe'}</p>
                 </div>
                 {/* <div className={styles["search-section"]}>
                     <span>Search</span>

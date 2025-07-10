@@ -20,13 +20,12 @@ interface RoomType {
 
 export default function LeaderboardRooms() {
     const router = useRouter()
-    const { isLoggedIn } = myAppHook()
+    const { isLoggedIn, userProfile } = myAppHook()
     const { isLoading: authLoading } = AuthProtection()
 
     const [myRooms, setMyRooms] = useState<RoomType[]>([])
     const [joinRooms, setJoinRooms] = useState<RoomType[]>([])
     const [isRoomsLoading, setRoomsLoading] = useState(true)
-
     useEffect(() => {
         console.log('isLoggedin ', isLoggedIn)
         console.log('authLoading ', authLoading)
@@ -84,8 +83,23 @@ export default function LeaderboardRooms() {
 
     return (
         <div className={styles['dashboard-container']}>
+             <div className={styles["header-section"]}>
+                <div className={styles["user-avatar"]}>
+                    <span className={styles["avatar-letter"]}>
+                        {userProfile?.fullName?.charAt(0)?.toUpperCase() || 'J'}
+                    </span>
+                </div>
+                <div className={styles["welcome-text"]}>
+                    <h1>Leaderboards</h1>
+                    <p>How well did you do, {userProfile?.fullName || 'John Doe'} ?</p>
+                </div>
+                {/* <div className={styles["search-section"]}>
+                    <span>Search</span>
+                    <div className={styles["search-icon"]}>🔍</div>
+                </div> */}
+            </div>
             <div className={styles["main-content"]}>
-                <h1>Leaderboard is coming soon!</h1>
+                {/* <h1>Leaderboard is coming soon!</h1> */}
                 {/* My Room Section - Updated with consistent UI */}
                 <div className={styles["room-cards-section"]}>
                     <h2>My Room</h2>

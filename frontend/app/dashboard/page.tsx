@@ -64,13 +64,28 @@ export default function Dashboard() {
                 <div className={styles["loading-overlay"]}>
                     <Loader />
                 </div>
-            )}
+            )}{/* Header Section */}
+            <div className={styles["header-section"]}>
+                <div className={styles["user-avatar"]}>
+                    <span className={styles["avatar-letter"]}>
+                        {userProfile?.fullName?.charAt(0)?.toUpperCase() || 'J'}
+                    </span>
+                </div>
+                <div className={styles["welcome-text"]}>
+                    <h1>Dashboard</h1>
+                    <p>Welcome, {userProfile?.fullName || 'John Doe'}</p>
+                    {/* <p>Let your imagination run wild!</p> */}
+                </div>
+                {/* <div className={styles["search-section"]}>
+                    <span>Search</span>
+                    <div className={styles["search-icon"]}>🔍</div>
+                </div> */}
+            </div>
             {/* Main Content */}
             <div className={styles["main-content"]}>
-                <div className={styles["welcome-section"]}>
-                    <h3>Welcome, {userProfile?.fullName || 'User'}!</h3>
+                {/* <div className={styles["welcome-section"]}>
                     <h1>Dashboard</h1>
-                </div>
+                </div> */}
                 <div className={styles["room-cards-section"]}>
                     <h2>Your Joined Rooms</h2>
                     <div className={styles["room-cards"]}>
