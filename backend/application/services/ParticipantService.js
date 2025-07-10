@@ -2,15 +2,19 @@
 const Mailer = require('../../utils/Mailer'); // Adjust path as needed
 
 class ParticipantService {
-    constructor(participantRepo, roomService, userService){
+    constructor(participantRepo, roomService, userService, leaderService){
         this.participantRepo = participantRepo
         this.roomService = roomService
         this.userService = userService
+        this.leaderService = leaderService
     }
 
     async joinRoom(user_id, room_code){
         try {
-            return await this.participantRepo.addParticipant(user_id, room_code)
+            const data = await this.participantRepo.addParticipant(user_id, room_code)
+            // console.log('join room service ', data)
+            await this.leaderService.addRoomBoard(data.room_id, data.id)
+            return data
         } catch (error) {
             throw error
         }
@@ -94,7 +98,7 @@ class ParticipantService {
     }
 
     async checkPartStatus (user_id, room_id) {
-        console.log('i am calleed check part status ')
+        // console.log('i am calleed check part status ')
         try {
             return await this.participantRepo.isParticipant(user_id, room_id)
         } catch (error) {
@@ -132,7 +136,7 @@ class ParticipantService {
                         // Fetch user data from users table using user_id
                         const roomData = await this.roomService.getRoomsById(room.room_id)
                         
-                        console.log('getRoomParticipants userData: ', roomData)
+                        // console.log('getRoomParticipants userData: ', roomData)
                         if (!roomData) {
                             console.warn(`User not found for ID: ${room.room_id}`)
                             return null
@@ -154,11 +158,20 @@ class ParticipantService {
     }
 
     async inviteByEmail(inviter, email, roomCode) {
-        const subject = "You're invited to join a Polegion room!";
-        const content = `Hi! ${inviter.name} (${inviter.email}) has invited you to join a room on Polegion.
-Room Code: ${roomCode}
-Join here: https://your-app-url/virtual-rooms/join/${roomCode}`;
-        await Mailer.sendMail(email, subject, content, inviter.email);
+//         const subject = "You're invited to join a Polegion room!";
+//         const content = `Hi! ${inviter.name} (${inviter.email}) has invited you to join a room on Polegion.
+// Room Code: ${roomCode}
+// Join here: https://your-app-url/virtual-rooms/join/${roomCode}`;
+        const mailOptions = {
+            from: "Polegion <marga18nins@gmail.com>",
+            to: email,
+            subject: "Invite to join a room",
+            template: "invite",
+            context: {
+                code: roomCode,
+            },
+        }
+        await Mailer.sendMail(mailOptions);
     }
 }
 

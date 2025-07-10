@@ -10,6 +10,10 @@ export default function TriangleShape({
   handleResizeMouseDown,
   fillMode,
   draggingFill,
+  showSides,
+  showAngles,
+  showArea,
+  showHeight,
 }: any) {
   const size = shape.size;
   const h = size * Math.sqrt(3) / 2;
@@ -141,6 +145,82 @@ export default function TriangleShape({
           }}
           onMouseDown={(e) => handleResizeMouseDown(shape.id, e)}
         />
+      )}
+      {showSides && (
+        <div
+          style={{
+            position: "absolute",
+            left: 0,
+            top: 0,
+            background: "#fff",
+            borderRadius: 6,
+            border: "1px solid #aaa",
+            fontSize: 14,
+            boxShadow: "0 2px 6px #0001",
+            padding: "4px 8px",
+            pointerEvents: "none",
+            zIndex: 10,
+          }}
+        >
+          Sides: {sideLengths.map(pxToUnits).join(", ")}
+        </div>
+      )}
+      {showAngles && (
+        <div
+          style={{
+            position: "absolute",
+            left: 0,
+            top: 20,
+            background: "#fff",
+            borderRadius: 6,
+            border: "1px solid #aaa",
+            fontSize: 14,
+            boxShadow: "0 2px 6px #0001",
+            padding: "4px 8px",
+            pointerEvents: "none",
+            zIndex: 10,
+          }}
+        >
+          Angles: {angles.map((a) => a.toFixed(1)).join(", ")}
+        </div>
+      )}
+      {showArea && (
+        <div
+          style={{
+            position: "absolute",
+            left: 0,
+            top: 40,
+            background: "#fff",
+            borderRadius: 6,
+            border: "1px solid #aaa",
+            fontSize: 14,
+            boxShadow: "0 2px 6px #0001",
+            padding: "4px 8px",
+            pointerEvents: "none",
+            zIndex: 10,
+          }}
+        >
+          Area: {(0.5 * size * h).toFixed(1)} sq units
+        </div>
+      )}
+      {showHeight && (
+        <div
+          style={{
+            position: "absolute",
+            left: 0,
+            top: 60,
+            background: "#fff",
+            borderRadius: 6,
+            border: "1px solid #aaa",
+            fontSize: 14,
+            boxShadow: "0 2px 6px #0001",
+            padding: "4px 8px",
+            pointerEvents: "none",
+            zIndex: 10,
+          }}
+        >
+          Height: {h.toFixed(1)} units
+        </div>
       )}
     </div>
   );

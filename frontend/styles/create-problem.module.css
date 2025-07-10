@@ -32,6 +32,7 @@
     border-radius: 16px;
   }
   .toolbox {
+    transition: margin-top 0.3s cubic-bezier(0.4,0,0.2,1), height 0.3s cubic-bezier(0.4,0,0.2,1);
     min-width: 0;
     width: 100%;
     height: auto;
@@ -210,8 +211,8 @@
   border-radius: 0 0 20px 20px;
   box-shadow: 0 4px 16px rgba(0,0,0,0.12);
   overflow: hidden;
-  z-index: 100;
-  margin-bottom: 16px;
+  margin-bottom: 0;
+  /* Do NOT set position: absolute here */
 }
 
 /* Each dropdown item */
@@ -291,7 +292,6 @@
   padding: 0 32px;
   margin: 0;
   box-sizing: border-box;
-  display: inline-block;
 }
 
 .limitedAttemptsBtn,
@@ -341,6 +341,7 @@
   max-width: 260px; */
   width: 100%;
   height: 540px;
+  transition: margin-top 0.3s cubic-bezier(0.4,0,0.2,1), height 0.3s cubic-bezier(0.4,0,0.2,1);
   box-sizing: border-box;
 }
 
@@ -599,4 +600,98 @@
 .dropdownActive .difficultyDropdownMenu {
   border-top-left-radius: 0 !important;
   border-top-right-radius: 0 !important;
+}
+
+/* unya saka */
+.dropdownActive .toolbox {
+  margin-top: 64px;
+  height: 300px !important;
+}
+
+.showPropertiesBtn {
+  margin-top: 24px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+}
+
+.fillToolLogo {
+  position: relative;
+  width: 150px;
+  height: 150px;
+}
+
+/* BUCKET */
+.bucket{
+  position: absolute;
+  top: 50px;
+  left: 10px;
+  width: 70px;
+  height: 50px;
+  background-color: #000;
+  transform: rotate(-30deg) skewY(-10deg);
+  border-radius: 6px;
+  box-shadow: 2px 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+.bucket .label {
+  position: absolute;
+  top: 8px;
+  left: 10px;
+  font-size: 24px;
+  font-weight: bold;
+  font-family: sans-serif;
+  transform: rotate(0deg) skewY(0deg);
+  pointer-events: none;
+}
+
+/* DROPLET */
+.droplet {
+  position: absolute;
+  top: 80px;
+  left: 68px;
+  width: 24px;
+  height: 32px;
+  background-color: var(--fillColor, #1e90ff);
+  clip-path: path("M12 32 C18 32, 24 18, 12 0 C0 18, 6 32, 12 32 Z");
+  animation: drop 1.2s ease-in-out infinite;
+  opacity: 0;
+}
+
+@keyframes drop {
+  0% {
+    transform: translateY(0);
+    opacity: 0;
+  }
+  40% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(8px);
+    opacity: 0;
+  }
+}
+
+.fillButton {
+  all: unset;
+  cursor: pointer;
+  display: inline-block;
+  padding: 0;
+}
+
+/* Highlight effect when active */
+.fillButton.active .bucket {
+  background-color: #1e90ff;
+  box-shadow: 0 0 12px #1e90ff, 2px 4px 10px rgba(0, 0, 0, 0.3);
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.fillButton.active .label {
+  color: white !important;
+}
+
+.fillButton.active .droplet {
+  opacity: 1 !important;
 }

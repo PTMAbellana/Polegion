@@ -12,8 +12,8 @@ if (!supabaseUrl || !supabaseKey) {
     process.exit(1)
 }
 
-console.log('Supabase URL:', supabaseUrl)
-console.log('Service Key present:', !!supabaseKey)
+// console.log('Supabase URL:', supabaseUrl)
+// console.log('Service Key present:', !!supabaseKey)
 
 const supabase = createClient(supabaseUrl, supabaseKey, {
     auth: {

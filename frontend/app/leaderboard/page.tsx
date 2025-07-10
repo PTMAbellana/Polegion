@@ -95,7 +95,7 @@ export default function LeaderboardRooms() {
                                 <div 
                                     className={styles["room-card"]} 
                                     key={index}
-                                    onClick={() => handleViewRoom(room.id || 0)}
+                                    onClick={() => handleViewRoom(room.id || 0)}    // unsa niii?
                                 >
                                     <div className={styles["room-card-banner"]}>
                                         {room.banner_image ? (

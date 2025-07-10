@@ -99,7 +99,7 @@ class ParticipantController {
         const { room_id } = req.params 
         try {
             const participants = await this.participantService.getRoomParticipantsForUser(room_id, req.user.id)
-            console.log(participants)
+            // console.log(participants)
             res.status(200).json({
                 participants
             })
@@ -165,7 +165,7 @@ class ParticipantController {
     }
 
     joinedRooms = async (req, res) => {
-        console.log('joinedRooms called: ', req.user.id)
+        // console.log('joinedRooms called: ', req.user.id)
         try {
             const rooms = await this.participantService.getJoinedRooms(req.user.id)
             res.status(200).json({

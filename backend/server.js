@@ -4,8 +4,11 @@ const bodyParser = require('body-parser')
 require('dotenv').config()
 
 const {
-    authRoutes, userRoutes, roomRoutes,
-    participantRoutes, problemRoutes
+    authRoutes, 
+    userRoutes, 
+    roomRoutes,
+    participantRoutes, problemRoutes,
+    leaderboardRoutes
 } = require('./container')
 
 const app = express()
@@ -24,6 +27,7 @@ app.use('/api/rooms', roomRoutes)
 app.use('/api/users', userRoutes)
 app.use('/api/participants', participantRoutes)
 app.use('/api/problems', problemRoutes)
+app.use('/api/leaderboards', leaderboardRoutes)
 
 //basic route
 app.get('/', (req, res) => {

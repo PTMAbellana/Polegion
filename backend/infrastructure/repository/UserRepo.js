@@ -213,11 +213,11 @@ class UserRepo extends BaseRepo{
             try {
                 const decoded = jwt.decode(token)
 
-                console.log('decoded ', decoded)
+                // console.log('decoded ', decoded)
                 
                 const userId = decoded?.sub
 
-                console.log('userId ', userId)
+                // console.log('userId ', userId)
                 
                 if (!userId) throw new Error ('Invalid token')
                 
