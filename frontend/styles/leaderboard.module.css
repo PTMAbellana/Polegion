@@ -72,6 +72,7 @@
     max-width: 1534px;
     margin: 0 auto;
     padding: 40px 20px;
+    color: white;
 }
 
 .welcome-section {
@@ -130,14 +131,22 @@
 
 /* Avatar */
 .avatar {
-    width: 125px;
-    height: 125px;
-    border-radius: 20px;
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    overflow: hidden;
+    background: #f3f3f3;
     display: flex;
     align-items: center;
     justify-content: center;
-    flex-shrink: 0;
-    margin-right: 40px;
+    margin-right: 16px;
+}
+
+.avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
 }
 
 .avatar.red {
@@ -153,11 +162,9 @@
 }
 
 .avatar-text {
-    font-family: 'Poppins', sans-serif;
-    font-weight: 700;
-    font-size: 64px;
-    line-height: 96px;
-    color: #FFFFFF;
+    font-size: 1.3rem;
+    color: #555;
+    font-weight: 600;
 }
 
 /* Player Info */

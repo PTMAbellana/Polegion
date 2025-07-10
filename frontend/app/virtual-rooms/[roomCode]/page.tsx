@@ -8,6 +8,7 @@ import styles from '@/styles/room-competition.module.css'
 import { use, useEffect, useState } from 'react'
 
 import { useRouter } from "next/navigation";
+import { text } from 'stream/consumers'
 
 interface Room{
     title: string
@@ -137,13 +138,13 @@ export default function RoomDetail({ params } : { params  : Promise<{roomCode : 
                         </div>
                     </div>
                     <div className={styles["room-actions"]}>
-                        <button className={styles["share-btn"]}>
+                        {/* <button className={styles["share-btn"]}>
                             <span className={styles["share-icon"]}>📤</span>
                             Share Room
-                        </button>
+                        </button> */}
                         <button className={styles["edit-room-btn"]}>
-                            <span className={styles["edit-icon"]}>✏️</span>
-                            Edit Room
+                            <span className={styles["edit-icon"]}></span>
+                            <b>START COMPETITION</b>
                         </button>
                     </div>
                 </div>
@@ -290,23 +291,42 @@ export default function RoomDetail({ params } : { params  : Promise<{roomCode : 
             {/* Invite Participants Modal */}
             {showInviteModal && (
                 <div className={styles["modal-overlay"]}>
-                    <div className={styles["invite-modal"]}>
-                        <h3>Invite by Email</h3>
-                        <input
-                            type="email"
-                            placeholder="Recipient's email"
-                            value={recipientEmail}
-                            onChange={e => setRecipientEmail(e.target.value)}
-                        />
+                    <div className={styles["modal-content"]}>
+                      <h3>Invite by Email</h3>
+                      <input
+                        type="email"
+                        placeholder="Recipient's email"
+                        value={recipientEmail}
+                        onChange={e => setRecipientEmail(e.target.value)}
+                        style={{
+                          width: "100%",
+                          padding: "12px",
+                          borderRadius: "8px",
+                          border: "1px solid #e0e0e0",
+                          marginBottom: "20px",
+                          fontSize: "16px"
+                        }}
+                      />
+                      <div className={styles["modal-actions"]}>
                         <button
-                            disabled={sending}
-                            onClick={handleInvite}
+                          className={styles["add-btn"]}
+                          disabled={sending}
+                          onClick={handleInvite}
+                          style={{ minWidth: 120 }}
                         >
-                            Send Invite
+                          {sending ? "Sending..." : "Send Invite"}
                         </button>
-                        <button onClick={() => setShowInviteModal(false)}>Cancel</button>
+                        <button
+                          className={styles["edit-room-btn"]}
+                          onClick={() => setShowInviteModal(false)}
+                          type="button"
+                          style={{ minWidth: 100 }}
+                        >
+                          Cancel
+                        </button>
+                      </div>
                     </div>
-                </div>
+                  </div>
             )}
         </div>
     )
