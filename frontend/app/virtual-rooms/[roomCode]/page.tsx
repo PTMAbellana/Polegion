@@ -2,7 +2,7 @@
 import Loader from '@/components/Loader'
 import { myAppHook } from '@/context/AppUtils'
 import { AuthProtection } from '@/context/AuthProtection'
-import { getRoomByCode } from '@/api/rooms'
+import { changeVisibility, getRoomByCode } from '@/api/rooms'
 import { getAllParticipants, totalParticipant, inviteParticipant } from '@/api/participants'
 import styles from '@/styles/room-competition.module.css'
 import { use, useEffect, useState } from 'react'
@@ -10,12 +10,13 @@ import { use, useEffect, useState } from 'react'
 import { useRouter } from "next/navigation";
 
 interface Room{
+    id: number
     title: string
     description: string
     mantra: string
     banner_image: string | File | undefined
     code: string
-    visibility: string
+    visibility: 'private' | 'public'
 }
 
 interface Participant {
@@ -31,7 +32,7 @@ export default function RoomDetail({ params } : { params  : Promise<{roomCode : 
     const [ participants, setParticipants ] = useState<Participant[]>([])
     const [ totalParticipants, setTotalParticipants ] = useState<number>(0)
     const [ isLoading, setIsLoading ] = useState(true)
-    const [ isPrivate, setIsPrivate] = useState(roomDetails?.visibility === 'private' ? true: false);  // visibility = public matic
+    const [ isPrivate, setIsPrivate] = useState<boolean | null>(null)    
     const [showInviteModal, setShowInviteModal] = useState(false);
     const [recipientEmail, setRecipientEmail] = useState("");
     const [sending, setSending] = useState(false);
@@ -52,6 +53,12 @@ export default function RoomDetail({ params } : { params  : Promise<{roomCode : 
             }
         }
     }, [isLoggedIn, authLoading])
+
+    useEffect(() => {
+      if (roomDetails) {
+        setIsPrivate(roomDetails.visibility === 'private')
+        }
+    }, [roomDetails])
 
     const callMe = async () => {
         try {
@@ -82,6 +89,18 @@ export default function RoomDetail({ params } : { params  : Promise<{roomCode : 
     //     // Implement the email sending logic here
     //     console.log(`Sending invite to ${email} for room ${roomCode}`);
     // }
+
+    const handleVisibility = async () => {
+        const nextPrivate = !isPrivate
+        setIsPrivate(nextPrivate)
+        try {
+            await changeVisibility(nextPrivate ? 'private' : 'public', roomDetails?.id);
+            // (optional) toast “saved”
+        } catch (err) {
+            setIsPrivate(!nextPrivate);
+            console.error('visibility change failed:', err);
+        }
+    }
 
     const handleInvite = async () => {
         try {
@@ -245,7 +264,7 @@ export default function RoomDetail({ params } : { params  : Promise<{roomCode : 
                                 <div className={styles["setting-value"]}>
                                     <button
                                         className={isPrivate ? styles["private-btn"] : styles["public-btn"]}
-                                        onClick={() => setIsPrivate((prev) => !prev)}
+                                        onClick={handleVisibility}
                                     >
                                         {isPrivate ? "Private" : "Public"}
                                     </button>

@@ -181,6 +181,23 @@ class RoomController {
         }
     };
 
+    changeVisibility = async (req, res) => {
+        try {
+            const {
+                room_id, visibility
+            } = req.body
+
+            await this.roomService.updateVisibility(room_id, req.user.id, visibility)
+            res.status(201).json({
+                message: 'Successfully change room visibility'
+            })
+        } catch (error) {
+            res.status(500).json({
+                error: 'Server error change room visibility'
+            })
+        }
+    }
+
     // Middleware getter for multer
     getUploadMiddleware() {
         return this.uploadMiddleware;

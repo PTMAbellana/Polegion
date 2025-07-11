@@ -29,8 +29,11 @@ class RoomRoutes {
     this.router.route('/admin/code/:code')
       .get(this.roomController.getRoomByCode)
     
-      this.router.route('/user/code/:code')
+    this.router.route('/user/code/:code')
       .get(this.roomController.getRoomByCodeUsers)
+
+    this.router.route('/change-visibility')
+      .put(this.roomController.changeVisibility)
     
     // this.router.post('/upload', this.roomController.uploadBannerImage);
   }

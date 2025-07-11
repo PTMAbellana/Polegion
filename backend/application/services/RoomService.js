@@ -111,6 +111,14 @@ class RoomService {
             throw error
         }
     }
+
+    async updateVisibility(room_id, user_id, visibility){
+        try {
+            return await this.roomRepo.updateVisibility(room_id, user_id, visibility)
+        } catch (error){
+            throw error
+        }
+    }
 }
 
 module.exports = RoomService

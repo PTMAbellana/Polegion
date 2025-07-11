@@ -206,6 +206,28 @@ class RoomRepo extends BaseRepo {
             throw error
         }    
     }
+
+    async updateVisibility (room_id, creator_id, visibility){
+        console.log(room_id)
+        console.log(creator_id)
+        console.log(visibility)
+        try {
+            const {
+                data,
+                error
+            } = await this.supabase.from(this.tableName)
+            .update({ 'visibility': visibility })
+            .eq('id', room_id)
+            .eq('user_id', creator_id)
+            .select()
+
+            if (error) throw error
+            console.log(data)
+            return data
+        } catch (error){
+            throw error
+        }
+    }
     
     async uploadBannerImage(fileBuffer, fileName, mimeType){
         try {

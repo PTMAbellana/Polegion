@@ -90,3 +90,15 @@ export const uploadImage = async (formData) => {
     }
   }
 };
+
+export const changeVisibility = async (visibility, room_id) => {
+  try {
+    const response = await api.put("/rooms/change-visibility", {
+      room_id,
+      visibility
+    })
+    return response.data
+  } catch (error){
+    throw error
+  }
+}
