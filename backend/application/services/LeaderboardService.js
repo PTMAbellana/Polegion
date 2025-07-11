@@ -1,7 +1,8 @@
 class LeaderboardService {
-    constructor(leaderRepo, userService){
+    constructor(leaderRepo, userService, xpService){
         this.leaderRepo = leaderRepo
         this.userService = userService
+        this.xpService = xpService
     }
 
     async getRoomBoard (room_id) {

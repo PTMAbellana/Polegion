@@ -9,7 +9,9 @@ const {
     roomRoutes,
     participantRoutes, 
     problemRoutes,
-    leaderboardRoutes
+    leaderboardRoutes,
+    attemptsRoutes,
+    competitionRoutes
 } = require('./container')
 
 const app = express()
@@ -29,6 +31,8 @@ app.use('/api/users', userRoutes)
 app.use('/api/participants', participantRoutes)
 app.use('/api/problems', problemRoutes)
 app.use('/api/leaderboards', leaderboardRoutes)
+app.use('/api/attempts', attemptsRoutes)
+app.use('/api/competition', competitionRoutes)
 
 //basic route
 app.get('/', (req, res) => {

@@ -2,6 +2,7 @@ class ProblemRepo {
   constructor(supabase) {
     this.supabase = supabase;
     this.tableName = 'problems'
+    this.tableCompe = 'competition_problems'
   }
 
   async create(problemData) {
