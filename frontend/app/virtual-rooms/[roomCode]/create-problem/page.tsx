@@ -2,7 +2,7 @@
 
 import styles from "@/styles/create-problem.module.css";
 import { useRouter } from "next/navigation";
-import React, { useState, useRef, useEffect, use } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import Toolbox from "./components/Toolbox";
 import DifficultyDropdown from "./components/DifficultyDropdown";
 import MainArea from "./components/MainArea";
@@ -26,19 +26,34 @@ const DIFFICULTY_COLORS = {
   Hard: "#FFB49B",
 };
 
-const XP_MAP = { Easy: 10, Intermediate: 20, Hard: 30 }; // 🔹 XP by difficulty
+const XP_MAP = { Easy: 10, Intermediate: 20, Hard: 30 };
 
-export default function CreateProblem({ params } : { params  : Promise<{roomCode : string }> }) {
+export default function CreateProblem({ params }: { params: Promise<{ roomCode: string }> }) {
   const router = useRouter();
-  const roomCode = use(params)
+  const [roomCode, setRoomCode] = useState<string>("");
 
-  // 🆕 New form fields
+  useEffect(() => {
+    params.then(data => {
+      setRoomCode(data.roomCode);
+    });
+  }, [params]);
+
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
 
   const [shapes, setShapes] = useState<any[]>([]);
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [scale, setScale] = useState(1);
+
+  const [draggingVertex, setDraggingVertex] = useState<{ shapeId: number; vertex: number } | null>(null);
+  const [draggingShapeId, setDraggingShapeId] = useState<number | null>(null);
+  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+
+  const [draggingSide, setDraggingSide] = useState<{
+    shapeId: number;
+    points: (keyof any["shape"]["points"])[];
+    start: { x: number; y: number };
+  } | null>(null);
 
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -50,13 +65,10 @@ export default function CreateProblem({ params } : { params  : Promise<{roomCode
 
   const mainAreaRef = useRef<HTMLDivElement>(null);
 
-  // Fill Tool state
-
   const [fillMode, setFillMode] = useState(false);
   const [fillColor, setFillColor] = useState("#E3DCC2");
   const [draggingFill, setDraggingFill] = useState(false);
 
-  // Toolbox highlight state
   const [selectedTool, setSelectedTool] = useState<string | null>(null);
 
   const [timerOpen, setTimerOpen] = useState(false);
@@ -76,18 +88,154 @@ export default function CreateProblem({ params } : { params  : Promise<{roomCode
   const [showDiameter, setShowDiameter] = useState(false);
   const [showCircumference, setShowCircumference] = useState(false);
 
-  // Dropdown close on outside click
+  const handleShapeMouseDown = (id: number, e: React.MouseEvent) => {
+    e.stopPropagation();
+
+    const shape = shapes.find(s => s.id === id);
+    if (!shape) return;
+
+    const topLeft = shape.points?.topLeft;
+    if (!topLeft) return;
+
+    const rect = mainAreaRef.current?.getBoundingClientRect();
+    if (!rect) return;
+
+    const offsetX = e.clientX - rect.left - topLeft.x;
+    const offsetY = e.clientY - rect.top - topLeft.y;
+
+    setDraggingShapeId(id);
+    setDragOffset({ x: offsetX, y: offsetY });
+  };
+
+  const handleVertexMouseDown = (shapeId: number, vertex: number) => {
+    setDraggingVertex({ shapeId, vertex });
+  };
+
   useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (draggingVertex) {
+        const rect = mainAreaRef.current?.getBoundingClientRect();
+        if (!rect) return;
+
+        const mouseX = e.clientX - rect.left;
+        const mouseY = e.clientY - rect.top;
+
+        setShapes(prev =>
+          prev.map(s => {
+            if (s.id === draggingVertex.shapeId) {
+              const newPoints = { ...s.points };
+              newPoints[draggingVertex.vertex] = { x: mouseX, y: mouseY };
+              return { ...s, points: newPoints };
+            }
+            return s;
+          })
+        );
+      }
+
+      if (draggingSide) {
+        const rect = mainAreaRef.current?.getBoundingClientRect();
+        if (!rect) return;
+
+        const mouseX = e.clientX - rect.left;
+        const mouseY = e.clientY - rect.top;
+
+        const dx = mouseX - draggingSide.start.x;
+        const dy = mouseY - draggingSide.start.y;
+
+        setShapes(prev =>
+          prev.map(s => {
+            if (s.id === draggingSide.shapeId) {
+              const newPoints = { ...s.points };
+              draggingSide.points.forEach(key => {
+                newPoints[key] = {
+                  x: newPoints[key].x + dx,
+                  y: newPoints[key].y + dy
+                };
+              });
+              return { ...s, points: newPoints };
+            }
+            return s;
+          })
+        );
+
+        setDraggingSide(prev => prev ? {
+          ...prev,
+          start: { x: mouseX, y: mouseY }
+        } : null);
+      }
+    };
+
+    const handleMouseUp = () => {
+      setDraggingVertex(null);
+      setDraggingSide(null);
+    };
+
+    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("mouseup", handleMouseUp);
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mouseup", handleMouseUp);
+    };
+  }, [draggingVertex, draggingSide]);
+
+  // ✅ NEW USEEFFECT FOR DRAGGING WHOLE SHAPE
+  useEffect(() => {
+    const handleMoveShape = (e: MouseEvent) => {
+      if (draggingShapeId !== null) {
+        const rect = mainAreaRef.current?.getBoundingClientRect();
+        if (!rect) return;
+
+        const mouseX = e.clientX - rect.left;
+        const mouseY = e.clientY - rect.top;
+
+        const newTopLeftX = mouseX - dragOffset.x;
+        const newTopLeftY = mouseY - dragOffset.y;
+
+        setShapes(prev =>
+          prev.map(s => {
+            if (s.id !== draggingShapeId) return s;
+
+            const offsetPoints = Object.entries(s.points).map(([key, pt]) => ({
+              key,
+              dx: pt.x - s.points.topLeft.x,
+              dy: pt.y - s.points.topLeft.y,
+            }));
+
+            const newPoints = Object.fromEntries(
+              offsetPoints.map(({ key, dx, dy }) => [
+                key,
+                { x: newTopLeftX + dx, y: newTopLeftY + dy }
+              ])
+            );
+
+            return { ...s, points: newPoints };
+          })
+        );
+      }
+    };
+
+    const stopDragging = () => {
+      setDraggingShapeId(null);
+    };
+
+    window.addEventListener("mousemove", handleMoveShape);
+    window.addEventListener("mouseup", stopDragging);
+    return () => {
+      window.removeEventListener("mousemove", handleMoveShape);
+      window.removeEventListener("mouseup", stopDragging);
+    };
+  }, [draggingShapeId, dragOffset]);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setDropdownOpen(false);
       }
-    }
+    };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Responsive scaling
   useEffect(() => {
     const handleResize = () => {
       const w = window.innerWidth;
@@ -101,18 +249,16 @@ export default function CreateProblem({ params } : { params  : Promise<{roomCode
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // Focus textarea when editingPrompt becomes true
   useEffect(() => {
     if (editingPrompt && promptInputRef.current) {
       promptInputRef.current.focus();
     }
   }, [editingPrompt]);
 
-  // Remove shape when Delete key is pressed
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.key === "Delete" || e.key === "Backspace") && selectedId !== null) {
-        setShapes((prev) => prev.filter((shape) => shape.id !== selectedId));
+        setShapes(prev => prev.filter(shape => shape.id !== selectedId));
         setSelectedId(null);
       }
     };
@@ -120,83 +266,84 @@ export default function CreateProblem({ params } : { params  : Promise<{roomCode
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [selectedId]);
 
-  // Fill palette close on outside click
-  useEffect(() => {
-    function handleClickOutsideFill(event: MouseEvent) {
-      const fillTool = document.querySelector('.shapeFillTool');
-      const fillPalette = document.querySelector('.fillPalette');
-      if (fillTool && fillPalette && fillMode) {
-        const clickedInsideFillTool = fillTool.contains(event.target as Node);
-        const clickedInsidePalette = fillPalette.contains(event.target as Node);
-        if (!clickedInsideFillTool && !clickedInsidePalette) {
-          setFillMode(false);
-        }
-      } else if (fillTool && fillMode) {
-        if (!fillTool.contains(event.target as Node)) {
-          setFillMode(false);
-        }
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutsideFill);
-    return () => document.removeEventListener("mousedown", handleClickOutsideFill);
-  }, [fillMode]);
-
-  // Drag and drop logic
   const handleDragStart = (type: string) => (e: React.DragEvent) => {
     e.dataTransfer.setData("shape-type", type);
   };
 
-  // Render shape (NO drag, drop, or resize logic)
-  const renderShape = (shape: any) => {
-    if (shape.type === "square") {
-      return (
-        <SquareShape
-          key={shape.id}
-          shape={shape}
-          isSelected={selectedId === shape.id}
-          onUpdate={update =>
-            setShapes(prev =>
-              prev.map(s =>
-                s.id === shape.id ? { ...s, ...update } : s
-              )
-            )
-          }
-          showProperties={showProperties}
-          showSides={showSides}
-          showAngles={showAngles}
-          showArea={showArea}
-        />
-      );
-    }
-    if (shape.type === "circle") {
-      return (
-        <CircleShape
-          key={shape.id}
-          shape={shape}
-          isSelected={selectedId === shape.id}
-          scale={scale}
-          showDiameter={showDiameter}
-          showCircumference={showCircumference}
-          showArea={showArea}
-        />
-      );
-    }
-    if (shape.type === "triangle") {
-      return (
-        <TriangleShape
-          key={shape.id}
-          shape={shape}
-          isSelected={selectedId === shape.id}
-          showSides={showSides}
-          showAngles={showAngles}
-          showArea={showArea}
-          showHeight={showHeight}
-        />
-      );
+  const pxToUnits = (px: number): string => {
+    const units = px / 10;
+    return `${units.toFixed(1)} units`;
+  };
+
+  const renderShape = (shape) => {
+    const commonProps = {
+      shape,
+      isSelected: selectedId === shape.id,
+      pxToUnits,
+      handleShapeMouseDown,
+      setSelectedId,
+      fillMode,
+      draggingFill,
+      scale,
+    };
+
+    switch (shape.type) {
+      case "square":
+        return (
+          <SquareShape
+            key={shape.id}
+            {...commonProps}
+            showProperties={showProperties}
+            onVertexMouseDown={(vertex) =>
+              setDraggingVertex({ shapeId: shape.id, vertex })
+            }
+            onSideMouseDown={(side, point, e) => {
+              e.stopPropagation();
+              const rect = mainAreaRef.current?.getBoundingClientRect();
+              if (!rect) return;
+              const start = {
+                x: e.clientX - rect.left,
+                y: e.clientY - rect.top,
+              };
+              const pointMapping = {
+                top: ["topLeft", "topRight"],
+                right: ["topRight", "bottomRight"],
+                bottom: ["bottomRight", "bottomLeft"],
+                left: ["bottomLeft", "topLeft"],
+              };
+              setDraggingSide({
+                shapeId: shape.id,
+                points: pointMapping[side],
+                start,
+              });
+            }}
+          />
+        );
+      case "circle":
+        return (
+          <CircleShape
+            key={shape.id}
+            {...commonProps}
+            handleCircleResizeMouseDown={() => { }}
+          />
+        );
+      case "triangle":
+        return (
+          <TriangleShape
+            key={shape.id}
+            {...commonProps}
+            handleResizeMouseDown={() => { }}
+            showSides={showSides}
+            showAngles={showAngles}
+            showArea={showArea}
+            showHeight={showHeight}
+          />
+        );
+      default:
+        return null;
     }
   };
 
-  // 🔹 Submit to backend
   const handleSave = async () => {
     const payload = {
       title,
@@ -208,11 +355,9 @@ export default function CreateProblem({ params } : { params  : Promise<{roomCode
       expected_xp: XP_MAP[difficulty],
     };
 
-    // console.log('data ni shapes: ', shapes)
-
     try {
-      console.log(JSON.stringify(payload))
-      await createProblem(payload, roomCode.roomCode) 
+      console.log(JSON.stringify(payload));
+      await createProblem(payload, roomCode);
     } catch (error) {
       console.error("Save error:", error);
     }
@@ -221,45 +366,15 @@ export default function CreateProblem({ params } : { params  : Promise<{roomCode
   return (
     <div className={styles.root}>
       <div className={styles.scalableWorkspace}>
-        {/* Sidebar group: Difficulty dropdown above Toolbox */}
-        <div
-          style={{ gridArea: "sidebar", display: "flex", flexDirection: "column", alignItems: "center" }}
-          className={dropdownOpen ? styles.dropdownActive : undefined}
-        >
+        {/* Sidebar */}
+        <div style={{ gridArea: "sidebar", display: "flex", flexDirection: "column", alignItems: "center" }}>
           <div style={{ width: "100%", display: "flex", flexDirection: "row", gap: 8, marginBottom: 16 }}>
             <div className={styles.goBackGroup}>
-              <button className={styles.arrowLeft} onClick={() => router.back()}>
-                ←
-              </button>
+              <button className={styles.arrowLeft} onClick={() => router.back()}>←</button>
               <span className={styles.goBackText}>Go back</span>
             </div>
           </div>
-          <DifficultyDropdown
-            difficulty={difficulty}
-            setDifficulty={setDifficulty}
-          />
-          {dropdownOpen && (
-            <div className={styles.difficultyDropdownMenu} style={{ width: "100%" }}>
-              {["Easy", "Intermediate", "Hard"].map((diff) => (
-                <div
-                  key={diff}
-                  className={styles.difficultyDropdownItem}
-                  style={{
-                    background: DIFFICULTY_COLORS[diff],
-                    color: "#2c514c",
-                    fontWeight: 600,
-                  }}
-                  onClick={(e) => {
-                    e.stopPropagation(); 
-                    setDifficulty(diff);
-                    setDropdownOpen(false);
-                  }}
-                >
-                  {diff}
-                </div>
-              ))}
-            </div>
-          )}
+          <DifficultyDropdown difficulty={difficulty} setDifficulty={setDifficulty} />
           <Toolbox
             selectedTool={selectedTool}
             setSelectedTool={setSelectedTool}
@@ -267,8 +382,8 @@ export default function CreateProblem({ params } : { params  : Promise<{roomCode
             fillColor={fillColor}
             fillMode={fillMode}
             setFillMode={setFillMode}
-            handleFillDragStart={() => {}}
-            handleFillDragEnd={() => {}}
+            handleFillDragStart={() => { }}
+            handleFillDragEnd={() => { }}
             FILL_COLORS={FILL_COLORS}
             setFillColor={setFillColor}
             showProperties={showProperties}
@@ -281,15 +396,14 @@ export default function CreateProblem({ params } : { params  : Promise<{roomCode
             showCircumference={showCircumference} setShowCircumference={setShowCircumference}
           />
         </div>
-        
+
+        {/* Main Column */}
         <div className={styles.mainColumn}>
           <div style={{ height: 32 }} />
-          {/* 🔹 Form Inputs */}
           <div className={styles.formRow}>
-            <input className={styles.input} placeholder="Title" value={title} onChange={(e) => setTitle(e.target.value)} />
-            <input className={styles.input} placeholder="Description" value={description} onChange={(e) => setDescription(e.target.value)} />
+            <input className={styles.input} placeholder="Title" value={title} onChange={e => setTitle(e.target.value)} />
+            <input className={styles.input} placeholder="Description" value={description} onChange={e => setDescription(e.target.value)} />
           </div>
-          {/* Prompt */}
           <div className={styles.promptGroup}>
             <PromptBox
               prompt={prompt}
@@ -299,7 +413,6 @@ export default function CreateProblem({ params } : { params  : Promise<{roomCode
               promptInputRef={promptInputRef}
             />
           </div>
-          {/* Main Area */}
           <MainArea
             mainAreaRef={mainAreaRef}
             shapes={shapes}
@@ -313,24 +426,15 @@ export default function CreateProblem({ params } : { params  : Promise<{roomCode
               </button>
             }
           />
-          {/* Controls Row (Timer, Hint, etc) */}
           <div className={styles.controlsRow}>
             <div style={{ display: "flex", gap: 12 }}>
               <LimitAttempts limit={limitAttempts} setLimit={setLimitAttempts} />
               {!timerOpen ? (
-                <button
-                  className={`${styles.addTimerBtn} ${styles.rowBtn}`}
-                  onClick={() => setTimerOpen(true)}
-                >
+                <button className={`${styles.addTimerBtn} ${styles.rowBtn}`} onClick={() => setTimerOpen(true)}>
                   Add Timer
                 </button>
               ) : (
-                <Timer
-                  timerOpen={timerOpen}
-                  setTimerOpen={setTimerOpen}
-                  timerValue={timerValue}
-                  setTimerValue={setTimerValue}
-                />
+                <Timer timerOpen={timerOpen} setTimerOpen={setTimerOpen} timerValue={timerValue} setTimerValue={setTimerValue} />
               )}
               {(hintOpen || hint) ? (
                 <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
@@ -346,10 +450,7 @@ export default function CreateProblem({ params } : { params  : Promise<{roomCode
                   />
                 </div>
               ) : (
-                <button
-                  className={`${styles.addHintBtn} ${styles.rowBtn}`}
-                  onClick={() => setHintOpen(true)}
-                >
+                <button className={`${styles.addHintBtn} ${styles.rowBtn}`} onClick={() => setHintOpen(true)}>
                   Add Hint
                 </button>
               )}

@@ -30,10 +30,17 @@ const MainArea: React.FC<MainAreaProps> = ({
     onDrop={(e) => {
       e.preventDefault();
       const type = e.dataTransfer.getData("shape-type");
+      const rect = mainAreaRef.current.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+
       if (type === "square") {
-        const rect = mainAreaRef.current.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
+  const size = 80;
+  const topLeft = { x: x - size / 2, y: y - size / 2 };
+  const topRight = { x: x + size / 2, y: y - size / 2 };
+  const bottomRight = { x: x + size / 2, y: y + size / 2 };
+  const bottomLeft = { x: x - size / 2, y: y + size / 2 };
+
         setShapes((prev) => [
           ...prev,
           {
@@ -41,8 +48,38 @@ const MainArea: React.FC<MainAreaProps> = ({
             type: "square",
             x: x - 40,
             y: y - 40,
-            size: 80,
-            color: "#e3dcc2", // Match toolbox color
+            size,
+            fill: "#e3dcc2",
+            points: {
+              topLeft,
+              topRight,
+              bottomRight,
+              bottomLeft,
+            },
+          },
+        ]);
+      } else if (type === "circle") {
+        setShapes((prev) => [
+          ...prev,
+          {
+            id: Date.now(),
+            type: "circle",
+            x: x - 40,
+            y: y - 40,
+            size: 80, // diameter
+            color: "#e3dcc2",
+          },
+        ]);
+      } else if (type === "triangle") {
+        setShapes((prev) => [
+          ...prev,
+          {
+            id: Date.now(),
+            type: "triangle",
+            x: x - 45,
+            y: y - 45,
+            size: 90,
+            color: "#e3dcc2",
           },
         ]);
       }
