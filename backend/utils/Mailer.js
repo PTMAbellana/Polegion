@@ -25,7 +25,7 @@ const handlebars = require("handlebars")
 async function sendMail(mailOptions) {
     try {
         const accessToken = await GoogleOAuth2Client.getAccessToken()
-        console.log(accessToken)
+        // console.log(accessToken)
         const transport = nodemailer.createTransport({
             service: "gmail",
             auth: {

@@ -156,6 +156,9 @@ class ParticipantController {
 
         try {
             await this.participantService.removeParticipant(req.user.id, user_id, room_id)
+            res.status(201).json({
+                message: 'Successfully removed a participant'
+            })
         } catch (error) {
             // console.error('Error removing participant: ', error)
             res.status(500).json({

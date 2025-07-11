@@ -47,6 +47,7 @@ export const getAllParticipants = async (room_id, type='user') => {
 
 export const kickParticipant = async (room_id, part_id) => {
   try {
+    console.log({room_id, part_id})
     return await api.delete(
       `/participants/room/${room_id}/participant/${part_id}`,
     );

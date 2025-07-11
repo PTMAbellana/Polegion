@@ -208,9 +208,6 @@ class RoomRepo extends BaseRepo {
     }
 
     async updateVisibility (room_id, creator_id, visibility){
-        console.log(room_id)
-        console.log(creator_id)
-        console.log(visibility)
         try {
             const {
                 data,
@@ -222,7 +219,6 @@ class RoomRepo extends BaseRepo {
             .select()
 
             if (error) throw error
-            console.log(data)
             return data
         } catch (error){
             throw error

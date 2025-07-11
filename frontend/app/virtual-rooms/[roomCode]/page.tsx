@@ -3,11 +3,12 @@ import Loader from '@/components/Loader'
 import { myAppHook } from '@/context/AppUtils'
 import { AuthProtection } from '@/context/AuthProtection'
 import { changeVisibility, getRoomByCode } from '@/api/rooms'
-import { getAllParticipants, totalParticipant, inviteParticipant } from '@/api/participants'
+import { getAllParticipants, totalParticipant, inviteParticipant, kickParticipant } from '@/api/participants'
 import styles from '@/styles/room-competition.module.css'
 import { use, useEffect, useState } from 'react'
 
 import { useRouter } from "next/navigation";
+import Swal from 'sweetalert2'
 
 interface Room{
     id: number
@@ -20,7 +21,7 @@ interface Room{
 }
 
 interface Participant {
-    id?:string
+    id:string
     fullName?: string
     gender?: string
     email?: string
@@ -30,12 +31,14 @@ export default function RoomDetail({ params } : { params  : Promise<{roomCode : 
     const roomCode = use(params)
     const [ roomDetails, setRoomDetails ] = useState<Room | null>(null)
     const [ participants, setParticipants ] = useState<Participant[]>([])
-    const [ totalParticipants, setTotalParticipants ] = useState<number>(0)
+    // const [ totalParticipants, setTotalParticipants ] = useState<number>(0)
     const [ isLoading, setIsLoading ] = useState(true)
     const [ isPrivate, setIsPrivate] = useState<boolean | null>(null)    
     const [showInviteModal, setShowInviteModal] = useState(false);
     const [recipientEmail, setRecipientEmail] = useState("");
     const [sending, setSending] = useState(false);
+    const [fetched, setFetched] = useState(false);
+
 
     const { isLoggedIn } = myAppHook()
     const { isLoading: authLoading } = AuthProtection()
@@ -45,14 +48,15 @@ export default function RoomDetail({ params } : { params  : Promise<{roomCode : 
     console.log('room code ', roomCode)
 
     useEffect(() => {
-        if (isLoggedIn && !authLoading) {
+        if (isLoggedIn && !authLoading && !fetched) {
             callMe()
+            setFetched(true)
         } else {
             if (authLoading || !isLoggedIn) {
                 setIsLoading(true)
             }
         }
-    }, [isLoggedIn, authLoading])
+    }, [isLoggedIn, authLoading, fetched])
 
     useEffect(() => {
       if (roomDetails) {
@@ -73,9 +77,9 @@ export default function RoomDetail({ params } : { params  : Promise<{roomCode : 
             setParticipants( test.data.participants || [] )
             console.log('Attempting to get all participants: ', test.data)
 
-            const total = await totalParticipant(res.data.id)
-            setTotalParticipants(total.data.total_participants || 0)
-            console.log('Attempting to total participants: ', total.data.total_participants)
+            // const total = await totalParticipant(res.data.id)
+            // setTotalParticipants(total.data.total_participants || 0)
+            // console.log('Attempting to total participants: ', total.data.total_participants)
             
             // console.log('Participants: ', participants)
         } catch (error) {
@@ -89,6 +93,41 @@ export default function RoomDetail({ params } : { params  : Promise<{roomCode : 
     //     // Implement the email sending logic here
     //     console.log(`Sending invite to ${email} for room ${roomCode}`);
     // }
+
+    const handleRemoveParticipant = async (part_id: string | undefined, part_name: string | undefined) => {
+        if (!part_id) return;
+
+        const confirm = await Swal.fire({
+            title: `Remove ${part_name}?`,
+            text: "This participant will be removed from the room.",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#d33",
+            cancelButtonColor: "#3085d6",
+            confirmButtonText: "Yes, remove",
+        });
+
+        if (!confirm.isConfirmed) return;
+
+        // ✅ Optimistically remove from UI
+        setParticipants(prev => prev.filter(p => p.id !== part_id));
+
+        try {
+            await kickParticipant(roomDetails?.id, part_id);
+            Swal.fire("Removed!", `${part_name} has been removed.`, "success");
+        } catch (error: unknown) {
+            console.error(error);
+
+            // ❌ If backend failed, re-add the participant to UI
+            setParticipants(prev => [...prev, {
+                id: part_id,
+                fullName: part_name
+            }]);
+
+            Swal.fire("Error", "Failed to remove participant.", "error");
+        }
+        };
+
 
     const handleVisibility = async () => {
         const nextPrivate = !isPrivate
@@ -229,7 +268,7 @@ export default function RoomDetail({ params } : { params  : Promise<{roomCode : 
                     <div className={styles["participants-card"]}>
                         <div className={styles["section-header"]}>
                             <h3>Participants</h3>
-                            <div className={styles["participants-count"]}> { totalParticipants } members</div>
+                            <div className={styles["participants-count"]}> { participants.length } members</div>
                         </div>
                         <div className={styles["participants-list"]}>
                             {participants.length === 0 ? (
@@ -240,8 +279,24 @@ export default function RoomDetail({ params } : { params  : Promise<{roomCode : 
                                 </div>
                             ) : (
                                 participants.map((p, idx) => (
-                                    <div key={p.id || idx} className={styles["participant-item"]}>
-                                        {p.fullName}
+                                    <div key={p.id || idx} className={styles["participant-item"]} style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                                        <button
+                                            onClick={() => handleRemoveParticipant(p.id, p.fullName)}
+                                            style={{
+                                                background: "none",
+                                                border: "none",
+                                                color: "red",
+                                                fontWeight: "bold",
+                                                cursor: "pointer",
+                                                padding: 0,
+                                                fontSize: "1rem",
+                                                lineHeight: 1,
+                                            }}
+                                            aria-label={`Remove ${p.fullName}`}
+                                            >
+                                        ×
+                                        </button>
+                                        <span>{p.fullName}</span>
                                     </div>
                                 ))
                             )
