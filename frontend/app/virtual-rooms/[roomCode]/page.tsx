@@ -8,7 +8,6 @@ import styles from '@/styles/room-competition.module.css'
 import { use, useEffect, useState } from 'react'
 
 import { useRouter } from "next/navigation";
-import { text } from 'stream/consumers'
 
 interface Room{
     title: string

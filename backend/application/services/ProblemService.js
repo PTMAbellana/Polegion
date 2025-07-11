@@ -1,19 +1,22 @@
-/**
- * ProblemService contains business logic for problems.
- */
 class ProblemService {
-  constructor(problemRepo) {
-    this.problemRepo = problemRepo;
+  constructor(problemRepo, roomService) {
+    this.problemRepo = problemRepo
+    this.roomService = roomService
   }
 
-  /**
-   * Creates and saves a new problem.
-   * @param {Object} problemData - The problem data.
-   * @returns {Promise<Object>} - The saved problem.
-   */
-  async createProblem(problemData) {
-    // Add any business logic here (validation, etc.)
-    return await this.problemRepo.createProblem(problemData);
+  async createProblem(data, creator) {
+    try {
+      const room = await this.roomService.getRoomByCodeUsers(data.room_code)
+      const compile = {
+        ...data.problemData,
+        creator_id: creator.id,
+        room_id: room.id
+      }
+      console.log('problems service ', compile)
+      return await this.problemRepo.create(compile);
+    } catch (error) {
+      throw error
+    }
   }
 }
 

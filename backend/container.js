@@ -4,7 +4,7 @@ const supabase = require('./config/supabase')
 const UserRepository = require('./infrastructure/repository/UserRepo');
 const RoomRepository = require('./infrastructure/repository/RoomRepo');
 const ParticipantRepository = require('./infrastructure/repository/ParticipantRepo');
-const ProblemRepo = require('./infrastructure/repository/ProblemRepo');
+const ProblemRepository = require('./infrastructure/repository/ProblemRepo');
 const LeaderboardRepository = require('./infrastructure/repository/LeaderboardRepo');
 
 // Import services
@@ -38,7 +38,7 @@ const LeaderboardRoutes = require('./presentation/routes/LeaderboardRoutes');
 const userRepository = new UserRepository(supabase);
 const roomRepository = new RoomRepository(supabase);
 const participantRepository = new ParticipantRepository(supabase);
-const problemRepo = new ProblemRepo(supabase);
+const problemRepository = new ProblemRepository(supabase);
 const leaderboardRepository = new LeaderboardRepository(supabase);
 
 // Initialize services
@@ -47,7 +47,7 @@ const userService = new UserService(userRepository);
 const roomService = new RoomService(roomRepository);
 const leaderboardService = new LeaderboardService(leaderboardRepository, userService);
 const participantService = new ParticipantService(participantRepository, roomService, userService, leaderboardService);
-const problemService = new ProblemService(problemRepo);
+const problemService = new ProblemService(problemRepository, roomRepository);
 
 // Initialize middleware
 const authMiddleware = new AuthMiddleware(authService);

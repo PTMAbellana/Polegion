@@ -90,6 +90,22 @@ class LeaderboardService {
             throw error
         }
     }
+
+    async updateRoomBoard(room_id, part_id){
+        try{
+            return await this.leaderRepo.updateRoomBoard(room_id, part_id)
+        } catch (error){
+            throw error
+        }
+    }
+
+    async updateCompeBoard(room_id, part_id){
+        try{
+            return await this.leaderRepo.updateCompeBoard(room_id, part_id)
+        } catch (error){
+            throw error
+        }
+    }
 }
 
 module.exports = LeaderboardService

@@ -1,7 +1,8 @@
 "use client";
+
 import styles from "@/styles/create-problem.module.css";
 import { useRouter } from "next/navigation";
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, use } from "react";
 import Toolbox from "./components/Toolbox";
 import DifficultyDropdown from "./components/DifficultyDropdown";
 import MainArea from "./components/MainArea";
@@ -9,9 +10,10 @@ import PromptBox from "./components/PromptBox";
 import SquareShape from "./shapes/SquareShape";
 import CircleShape from "./shapes/CircleShape";
 import TriangleShape from "./shapes/TriangleShape";
-import Timer from "./components/Timer"; 
+import Timer from "./components/Timer";
 import LimitAttempts from "./components/LimitAttempts";
 import SetVisibility from "./components/SetVisibility";
+import { createProblem } from '@/api/problems'
 
 const FILL_COLORS = [
   "#ffadad", "#ffd6a5", "#fdffb6", "#caffbf",
@@ -24,8 +26,16 @@ const DIFFICULTY_COLORS = {
   Hard: "#FFB49B",
 };
 
-export default function CreateProblem() {
+const XP_MAP = { Easy: 10, Intermediate: 20, Hard: 30 }; // 🔹 XP by difficulty
+
+export default function CreateProblem({ params } : { params  : Promise<{roomCode : string }> }) {
   const router = useRouter();
+  const roomCode = use(params)
+
+  // 🆕 New form fields
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+
   const [shapes, setShapes] = useState<any[]>([]);
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [scale, setScale] = useState(1);
@@ -41,6 +51,7 @@ export default function CreateProblem() {
   const mainAreaRef = useRef<HTMLDivElement>(null);
 
   // Fill Tool state
+
   const [fillMode, setFillMode] = useState(false);
   const [fillColor, setFillColor] = useState("#E3DCC2");
   const [draggingFill, setDraggingFill] = useState(false);
@@ -54,7 +65,7 @@ export default function CreateProblem() {
   const [hintOpen, setHintOpen] = useState(false);
   const [hint, setHint] = useState("");
 
-  const [limitAttempts, setLimitAttempts] = useState<number | null>(null);
+  const [limitAttempts, setLimitAttempts] = useState<number | 1>(1);
   const [visible, setVisible] = useState(true);
   const [showProperties, setShowProperties] = useState(false);
 
@@ -185,6 +196,28 @@ export default function CreateProblem() {
     }
   };
 
+  // 🔹 Submit to backend
+  const handleSave = async () => {
+    const payload = {
+      title,
+      description,
+      expected_solution: shapes,
+      difficulty,
+      visibility: visible ? "show" : "hide",
+      max_attempts: limitAttempts,
+      expected_xp: XP_MAP[difficulty],
+    };
+
+    // console.log('data ni shapes: ', shapes)
+
+    try {
+      console.log(JSON.stringify(payload))
+      await createProblem(payload, roomCode.roomCode) 
+    } catch (error) {
+      console.error("Save error:", error);
+    }
+  };
+
   return (
     <div className={styles.root}>
       <div className={styles.scalableWorkspace}>
@@ -251,6 +284,11 @@ export default function CreateProblem() {
         
         <div className={styles.mainColumn}>
           <div style={{ height: 32 }} />
+          {/* 🔹 Form Inputs */}
+          <div className={styles.formRow}>
+            <input className={styles.input} placeholder="Title" value={title} onChange={(e) => setTitle(e.target.value)} />
+            <input className={styles.input} placeholder="Description" value={description} onChange={(e) => setDescription(e.target.value)} />
+          </div>
           {/* Prompt */}
           <div className={styles.promptGroup}>
             <PromptBox
@@ -270,7 +308,7 @@ export default function CreateProblem() {
             setSelectedId={setSelectedId}
             setSelectedTool={setSelectedTool}
             saveButton={
-              <button className={`${styles.saveBtn} ${styles.rowBtn} ${styles.saveBtnFloating}`}>
+              <button className={`${styles.saveBtn} ${styles.rowBtn} ${styles.saveBtnFloating}`} onClick={handleSave}>
                 Save
               </button>
             }

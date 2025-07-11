@@ -1,8 +1,5 @@
 const express = require('express');
 
-/**
- * ProblemRoutes defines the HTTP routes for problems.
- */
 class ProblemRoutes {
   constructor(problemController, authMiddleware) {
     this.problemController = problemController;
@@ -14,7 +11,6 @@ class ProblemRoutes {
   initializeRoutes() {
     this.router.use(this.authMiddleware.protect);
     this.router.post('/', this.problemController.createProblem);
-    // Add more routes as needed
   }
 
   getRouter() {

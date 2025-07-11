@@ -21,6 +21,7 @@ class LeaderboardRepo extends BaseRepo {
                     ), accumulated_xp`)
                 .eq('room_id', room_id)
                 .order('accumulated_xp', { ascending: false })
+                .limit(5)
 
                 if (error) throw error
                 if (!data) throw error
@@ -52,6 +53,7 @@ class LeaderboardRepo extends BaseRepo {
                 foreignTable: 'competition'
              })
             .order('accumulated_xp', { ascending: false })
+            .limit(5)
     
             if (error) throw error
             if (!data) throw error
@@ -95,6 +97,23 @@ class LeaderboardRepo extends BaseRepo {
         } catch (error) {
             throw error
         }
+    }
+
+    // edit 
+    async updateRoomBoard (room_id, part_id){
+        try {
+
+        } catch (error) {
+                throw error
+        }
+    }
+
+    async updateCompeBoard (compe_id, room_id){
+       try {
+
+       } catch (error) {
+            throw error
+       }
     }
 
 }

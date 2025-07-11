@@ -7,7 +7,8 @@ const {
     authRoutes, 
     userRoutes, 
     roomRoutes,
-    participantRoutes, problemRoutes,
+    participantRoutes, 
+    problemRoutes,
     leaderboardRoutes
 } = require('./container')
 
