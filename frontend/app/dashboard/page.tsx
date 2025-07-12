@@ -7,7 +7,7 @@ import { getRooms } from "@/api/rooms"
 import { getJoinedRooms } from "@/api/participants"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
-import styles from '@/styles/room.module.css'
+import styles from '@/styles/dashboard-wow.module.css'
 import { ROUTES } from "@/constants/routes"
 
 interface RoomType {
