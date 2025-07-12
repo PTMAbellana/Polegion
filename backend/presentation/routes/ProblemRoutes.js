@@ -9,13 +9,21 @@ class ProblemRoutes {
   }
 
   initializeRoutes() {
-    this.router.use(this.authMiddleware.protect);
+    this.router.use(this.authMiddleware.protect)
 
     this.router.route('/')
     .post(this.problemController.createProblem)
     
     this.router.route('/:room_id')
     .get(this.problemController.getRoomProblems)
+    
+    this.router.route('/:problem_id')
+    .get(this.problemController.getProblem)
+    .delete(this.problemController.deleteProblem)
+    .put(this.problemController.updateProblem)
+  
+    this.router.route('/room-code/:room_code')
+    .get(this.problemController.getRoomProblemsByCode)
   }
 
   getRouter() {

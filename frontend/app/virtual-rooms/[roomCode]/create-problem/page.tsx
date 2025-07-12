@@ -2,7 +2,7 @@
 
 import styles from "@/styles/create-problem.module.css";
 import { useRouter } from "next/navigation";
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, use, useCallback } from "react";
 import Toolbox from "./components/Toolbox";
 import DifficultyDropdown from "./components/DifficultyDropdown";
 import MainArea from "./components/MainArea";
@@ -13,8 +13,18 @@ import TriangleShape from "./shapes/TriangleShape";
 import Timer from "./components/Timer";
 import LimitAttempts from "./components/LimitAttempts";
 import SetVisibility from "./components/SetVisibility";
-import { createProblem } from '@/api/problems'
+import { createProblem, deleteProblem, getRoomProblemsByCode } from '@/api/problems'
 
+interface Problem {
+  id: string
+  title?: string | null
+  description?: string | null
+  visibility: string
+  expected_solution?: any[]
+  difficulty: string
+  max_attempts: number
+  expected_xp: number
+}
 const FILL_COLORS = [
   "#ffadad", "#ffd6a5", "#fdffb6", "#caffbf",
   "#9bf6ff", "#a0c4ff", "#bdb2ff", "#ffc6ff", "#E3DCC2"
@@ -38,8 +48,8 @@ export default function CreateProblem({ params }: { params: Promise<{ roomCode: 
     });
   }, [params]);
 
+  const [problems, setProblems] = useState<Problem[]>([]);
   const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
 
   const [shapes, setShapes] = useState<any[]>([]);
   const [selectedId, setSelectedId] = useState<number | null>(null);
@@ -87,6 +97,21 @@ export default function CreateProblem({ params }: { params: Promise<{ roomCode: 
   const [showHeight, setShowHeight] = useState(false);
   const [showDiameter, setShowDiameter] = useState(false);
   const [showCircumference, setShowCircumference] = useState(false);
+
+  const fetchProblems = useCallback(async () => {
+    if (!roomCode) return;
+    try {
+      const data = await getRoomProblemsByCode(roomCode);
+      setProblems(data);
+    } catch (error) {
+      console.error("Error fetching problems:", error);
+    }
+  }, [roomCode]);
+
+  useEffect(() => {
+    fetchProblems();
+  }, [fetchProblems]);
+
 
   const handleShapeMouseDown = (id: number, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -347,19 +372,33 @@ export default function CreateProblem({ params }: { params: Promise<{ roomCode: 
   const handleSave = async () => {
     const payload = {
       title,
-      description,
+      description: prompt,
       expected_solution: shapes,
       difficulty,
       visibility: visible ? "show" : "hide",
       max_attempts: limitAttempts,
       expected_xp: XP_MAP[difficulty],
+      timer: timerOpen ? timerValue : null,
+      // hint: hintOpen ? hint : null,
     };
 
     try {
       console.log(JSON.stringify(payload));
       await createProblem(payload, roomCode);
+      await fetchProblems(); // Refresh problems after saving
     } catch (error) {
       console.error("Save error:", error);
+    }
+  };
+
+  const handleDeleteProblem = async (problemId: string) => {
+    if (!confirm("Are you sure you want to delete this problem?")) return;
+    try {
+      // Call API to delete the problem
+      await deleteProblem(problemId);
+      setProblems(prev => prev.filter(p => p.id !== problemId));
+    } catch (error) {
+      console.error("Error deleting problem:", error);
     }
   };
 
@@ -402,7 +441,6 @@ export default function CreateProblem({ params }: { params: Promise<{ roomCode: 
           <div style={{ height: 32 }} />
           <div className={styles.formRow}>
             <input className={styles.input} placeholder="Title" value={title} onChange={e => setTitle(e.target.value)} />
-            <input className={styles.input} placeholder="Description" value={description} onChange={e => setDescription(e.target.value)} />
           </div>
           <div className={styles.promptGroup}>
             <PromptBox
@@ -457,6 +495,32 @@ export default function CreateProblem({ params }: { params: Promise<{ roomCode: 
               <SetVisibility visible={visible} setVisible={setVisible} />
             </div>
           </div>
+        </div>
+        {/* Right Sidebar */}
+        <div>
+          <div>Existing Problems</div>
+          {
+            problems.length > 0 ? (
+              <ul className={styles.problemList}>
+                {problems.map(problem => (
+                  <li key={problem.id} className={styles.problemItem}>
+                    <button onClick={() => handleDeleteProblem (problem.id)} className={styles.deleteButton}>
+                      Delete
+                    </button>
+                    <div className={styles.problemTitle}>{problem.title || "Untitled Problem"}</div>
+                    <div className={styles.problemDetails}>
+                      <span className={styles.problemDifficulty} style={{ backgroundColor: DIFFICULTY_COLORS[problem.difficulty] }}>
+                        {problem.difficulty}
+                      </span>
+                      <span className={styles.problemVisibility}>{problem.visibility}</span>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <div className={styles.noProblems}>No problems created yet.</div>
+            )
+          }
         </div>
       </div>
     </div>

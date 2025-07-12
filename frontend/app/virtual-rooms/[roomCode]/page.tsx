@@ -10,6 +10,7 @@ import { use, useEffect, useState } from 'react'
 import { useRouter } from "next/navigation";
 import Swal from 'sweetalert2'
 import { getRoomProblems } from '@/api/problems'
+import { ROUTES } from '@/constants/routes'
 
 interface Room{
     id: number
@@ -102,6 +103,10 @@ export default function RoomDetail({ params } : { params  : Promise<{roomCode : 
     //     // Implement the email sending logic here
     //     console.log(`Sending invite to ${email} for room ${roomCode}`);
     // }
+
+    const redirectCompe = () => {
+        router.push(ROUTES.COMPETITION)
+    }
 
     const handleRemoveParticipant = async (part_id: string | undefined, part_name: string | undefined) => {
         if (!part_id) return;
@@ -208,9 +213,8 @@ export default function RoomDetail({ params } : { params  : Promise<{roomCode : 
                             <span className={styles["share-icon"]}>📤</span>
                             Share Room
                         </button> */}
-                        <button className={styles["edit-room-btn"]}>
-                            <span className={styles["edit-icon"]}></span>
-                            <b>START COMPETITION</b>
+                        <button onClick={redirectCompe} className={styles["edit-room-btn"]}>
+                            <b>CREATE COMPETITION</b>
                         </button>
                     </div>
                 </div>

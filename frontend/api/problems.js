@@ -1,4 +1,3 @@
-// frontend/api/problems.js
 import api from './axios';
 
 export const createProblem = async (problemData, room_code) => {
@@ -15,6 +14,38 @@ export const createProblem = async (problemData, room_code) => {
 export const getRoomProblems = async(room_id) => {
   try {
     return (await api.get(`/problems/${room_id}`)).data
+  } catch (error) {
+    throw error
+  }
+}
+
+export const getRoomProblemsByCode = async(room_code) => {
+  try {
+    return (await api.get(`/problems/room-code/${room_code}`)).data
+  } catch (error) {
+    throw error
+  }
+}
+
+export const getProblem = async(problem_id) => {
+  try {
+    return (await api.get(`/problems/${problem_id}`)).data
+  } catch (error) {
+    throw error
+  }
+}
+
+export const deleteProblem = async(problem_id) => {
+  try {
+    return (await api.delete(`/problems/${problem_id}`)).data
+  } catch (error) {
+    throw error
+  }
+}
+
+export const updateProblem = async(problem_id, problemData) => {
+  try {
+    return (await api.put(`/problems/${problem_id}`, problemData)).data
   } catch (error) {
     throw error
   }
