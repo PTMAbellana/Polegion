@@ -15,6 +15,19 @@ class ProblemController {
       res.status(500).json({ error: "Failed to create problem" });
     }
   }
+
+  getRoomProblems = async (req, res) => {
+    const { room_id } = req.params
+    try{
+      const problems = await this.problemService.fetchRoomProblems(room_id, req.user.id)
+      res.status(200).json(problems)
+    } catch (error){
+      console.log(error)
+      res.status(500).json({
+        error: 'Server error failed to get problems'
+      })
+    }
+  }
 }
 
 module.exports = ProblemController;

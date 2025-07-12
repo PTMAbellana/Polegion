@@ -11,3 +11,11 @@ export const createProblem = async (problemData, room_code) => {
     throw error
   }
 };
+
+export const getRoomProblems = async(room_id) => {
+  try {
+    return (await api.get(`/problems/${room_id}`)).data
+  } catch (error) {
+    throw error
+  }
+}

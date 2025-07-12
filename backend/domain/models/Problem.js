@@ -19,32 +19,18 @@ class Problem {
             problemData.id,
             problemData.title,
             problemData.description,
-            problemData.created_at,
-            problemData.visibility,
             problemData.room_id,
             problemData.creator_id,
             problemData.expected_solution,
             problemData.difficulty,
+            problemData.visibility,
+            problemData.created_at,
             problemData.updated_at,
             problemData.max_attempts,
             problemData.expected_xp
-        )
+        );
     }
 
-    toDbObject (){
-        return {
-            title: this.title,
-            description: this.description,
-            visibility: this.visibility,
-            room_id: this.room_id,
-            creator_id: this.creator_id,
-            expected_solution: this.expected_solution,
-            difficulty: this.difficulty,
-            updated_at: this.updated_at,
-            max_attempts: this.max_attempts,
-            expected_xp: this.expected_xp
-        }
-    }
 
     toDTO(){
         return {

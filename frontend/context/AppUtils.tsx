@@ -9,6 +9,7 @@ import React, {
 import Loader from "@/components/Loader";
 import { authUtils } from "@/api/axios";
 import { getUserProfile } from "@/api/users";
+import axios from "axios";
 
 // Define proper types for user profile
 interface UserProfile {
@@ -54,54 +55,68 @@ export const AppUtilsProvider = ({
   const hasInitialized = useRef(false);
 
   // Function to refresh user session data from localStorage
-  const refreshUserSession = async (): Promise<boolean> => {
-    if (isRefreshing.current) return isLoggedIn;
+const refreshUserSession = async (): Promise<boolean> => {
+  if (isRefreshing.current) return isLoggedIn;
 
-    setAuthLoading(true);
-    try {
-      isRefreshing.current = true;
-      const authData = authUtils.getAuthData();
+  setAuthLoading(true);
+  try {
+    isRefreshing.current = true;
+    const authData = authUtils.getAuthData();
 
-      if (authData.accessToken && authUtils.isTokenValid()) {
-        setAuthToken(authData.accessToken);
+    // ✅ If access token is valid, use it
+    if (authData.accessToken && authUtils.isTokenValid()) {
+      setAuthToken(authData.accessToken);
+    }
+    // ✅ Else, try to refresh using refresh token
+    else if (authData.refreshToken) {
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"}/auth/refresh-token`, {
+        refresh_token: authData.refreshToken,
+      });
 
-        if (authData.user && Object.keys(authData.user).length > 0) {
-          setUserProfile(authData.user);
-        }
-
-        setIsLoggedIn(true);
-
-        try {
-          const pr = await getUserProfile();
-          if (pr?.data) {
-            setUserProfile(pr.data);
-            const updateUser = {
-              ...authData.user,
-              ...pr.data,
-            };
-            localStorage.setItem("user", JSON.stringify(updateUser));
-          }
-        } catch (err: any) {
-          if (err.response && err.response.status === 401) {
-            logout();
-            return false;
-          }
-        }
-
-        return true;
+      if (response.data && response.data.session) {
+        authUtils.saveAuthData(response.data);
+        setAuthToken(response.data.session.access_token);
       } else {
+        throw new Error("Failed to refresh token");
+      }
+    }
+    // ❌ If nothing works, logout
+    else {
+      logout();
+      return false;
+    }
+
+    setIsLoggedIn(true);
+
+    // ✅ Try to fetch user profile
+    try {
+      const pr = await getUserProfile();
+      if (pr?.data) {
+        setUserProfile(pr.data);
+        const updateUser = {
+          ...authData.user,
+          ...pr.data,
+        };
+        localStorage.setItem("user", JSON.stringify(updateUser));
+      }
+    } catch (err: any) {
+      if (err.response && err.response.status === 401) {
         logout();
         return false;
       }
-    } catch (error) {
-      console.error(error)
-      logout();
-      return false;
-    } finally {
-      isRefreshing.current = false;
-      setAuthLoading(false);
     }
-  };
+
+    return true;
+  } catch (error) {
+    console.error(error);
+    logout();
+    return false;
+  } finally {
+    isRefreshing.current = false;
+    setAuthLoading(false);
+  }
+};
+
 
   // Function to handle logout
   const logout = () => {

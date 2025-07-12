@@ -3,12 +3,13 @@ import Loader from '@/components/Loader'
 import { myAppHook } from '@/context/AppUtils'
 import { AuthProtection } from '@/context/AuthProtection'
 import { changeVisibility, getRoomByCode } from '@/api/rooms'
-import { getAllParticipants, totalParticipant, inviteParticipant, kickParticipant } from '@/api/participants'
+import { getAllParticipants, inviteParticipant, kickParticipant } from '@/api/participants'
 import styles from '@/styles/room-competition.module.css'
 import { use, useEffect, useState } from 'react'
 
 import { useRouter } from "next/navigation";
 import Swal from 'sweetalert2'
+import { getRoomProblems } from '@/api/problems'
 
 interface Room{
     id: number
@@ -27,10 +28,20 @@ interface Participant {
     email?: string
 }
 
+interface Problems {
+    id: string
+    title?: string | 'No Title'
+    description: string
+    difficulty: string
+    max_attempts: number
+    expected_xp: number
+}
+
 export default function RoomDetail({ params } : { params  : Promise<{roomCode : string }> }){
     const roomCode = use(params)
     const [ roomDetails, setRoomDetails ] = useState<Room | null>(null)
     const [ participants, setParticipants ] = useState<Participant[]>([])
+    const [ problems, setProblems ] = useState<Problems[]>([])
     // const [ totalParticipants, setTotalParticipants ] = useState<number>(0)
     const [ isLoading, setIsLoading ] = useState(true)
     const [ isPrivate, setIsPrivate] = useState<boolean | null>(null)    
@@ -76,12 +87,10 @@ export default function RoomDetail({ params } : { params  : Promise<{roomCode : 
 
             setParticipants( test.data.participants || [] )
             console.log('Attempting to get all participants: ', test.data)
-
-            // const total = await totalParticipant(res.data.id)
-            // setTotalParticipants(total.data.total_participants || 0)
-            // console.log('Attempting to total participants: ', total.data.total_participants)
             
-            // console.log('Participants: ', participants)
+            const probs = await getRoomProblems(res.data.id)
+            console.log('Fetching all problems: ', probs)
+            setProblems(probs)
         } catch (error) {
             console.error('Error fetching room details:', error)
         } finally {
@@ -253,11 +262,25 @@ export default function RoomDetail({ params } : { params  : Promise<{roomCode : 
                             </button>
                         </div>
                         <div className={styles["problems-list"]}>
+                        {
+                         problems.length === 0 ? (
                             <div className={styles["empty-state"]}>
                                 <div className={styles["empty-icon"]}>❓</div>
                                 <p>No problems added yet</p>
                                 <span>Start by adding your first problem to discuss</span>
                             </div>
+                         ) : (
+                            problems.map((p, idx) => (
+                                <div key={p.id || idx} className={styles["participant-item"]} style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                                    <span className='p-5'>{p.title === '' ? 'No Title' : p.title }</span>
+                                    <span className='p-5'>{p.description}</span>
+                                    <span className='p-5'>Max Attempts: {p.max_attempts}</span>
+                                    <span className='p-5'>Difficulty: {p.difficulty}</span>
+                                    <span className='p-5'>Expected XP: {p.expected_xp}</span>
+                                </div>
+                            ))
+                         )
+                        }
                         </div>
                     </div>
                 </div>

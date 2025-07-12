@@ -10,7 +10,12 @@ class ProblemRoutes {
 
   initializeRoutes() {
     this.router.use(this.authMiddleware.protect);
-    this.router.post('/', this.problemController.createProblem);
+
+    this.router.route('/')
+    .post(this.problemController.createProblem)
+    
+    this.router.route('/:room_id')
+    .get(this.problemController.getRoomProblems)
   }
 
   getRouter() {

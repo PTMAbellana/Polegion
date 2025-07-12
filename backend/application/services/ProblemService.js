@@ -18,6 +18,13 @@ class ProblemService {
       throw error
     }
   }
+  async fetchRoomProblems(room_id, creator_id){
+    try {
+      return await this.problemRepo.fetchRoomProblems(room_id, creator_id)
+    } catch (error) {
+      throw error
+    }
+  }
 }
 
 module.exports = ProblemService;
