@@ -362,17 +362,58 @@
 }
 
 .toolboxContent {
-  padding: 24px 16px 0 16px; /* Add your desired padding here */
-  width: 100%;
+  margin-bottom: 24px;
+  /* Add padding or adjust as needed */
 }
 
 .toolboxRow {
   display: flex;
   flex-direction: row;
-  justify-content: center;
   align-items: center;
-  width: 100%;
+  gap: 24px;
+  margin-bottom: 16px;
+}
+
+.filterGroupsGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px 24px;
+  margin-top: 8px; /* reduce gap from shapes above */
+  justify-content: flex-start;
+}
+
+.filterGroup {
+  flex: 1 1 0;
+  min-width: 0;
+  max-width: 240px; /* or whatever fits your design */
+  align-self: flex-start;
+}
+
+.filterGroupHeader {
+  font-weight: bold;
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 0;
+}
+
+.filterDropdown {
+  margin-top: 8px;
+  padding-left: 8px;
+  display: flex;
+  flex-direction: column;
   gap: 8px;
+}
+
+/* Optional: Make the tool rows more compact and aligned */
+.toolboxRow {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 24px;
+  margin-bottom: 16px;
 }
 
 .toolboxSquare {
@@ -694,4 +735,117 @@
 
 .fillButton.active .droplet {
   opacity: 1 !important;
+}
+
+.toggleButton {
+  position: relative;
+  width: 80px;
+  height: 40px;
+  background-color: #ccc;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  overflow: hidden;
+  margin: 8px 0;
+}
+
+.toggleLabel {
+  position: absolute;
+  width: 100%;
+  text-align: center;
+  line-height: 40px;
+  font-weight: bold;
+  font-family: sans-serif;
+  color: white;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.toggleButtonActive {
+  background-color: #1e90ff;
+}
+
+.toggleButtonActive .toggleLabel {
+  transform: translateY(-100%);
+  opacity: 0;
+}
+
+.toggleButtonActive::after {
+  content: 'ON';
+  position: absolute;
+  width: 100%;
+  text-align: center;
+  line-height: 40px;
+  font-weight: bold;
+  font-family: sans-serif;
+  color: white;
+  animation: fadeIn 0.3s ease forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(100%); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.toggleSwitch {
+  all: unset;
+  cursor: pointer;
+  display: inline-block;
+  margin: 0 8px 8px 0;
+}
+
+.switchTrack {
+  width: 60px;
+  height: 30px;
+  background-color: #ccc;
+  border-radius: 15px;
+  position: relative;
+  transition: background-color 0.3s ease;
+}
+
+.switchOrb {
+  width: 24px;
+  height: 24px;
+  background-color: white;
+  border-radius: 50%;
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  transition: left 0.3s ease, background-color 0.3s ease;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.toggleSwitchActive .switchTrack {
+  background-color: #1e90ff;
+}
+
+.toggleSwitchActive .switchOrb {
+  left: 33px;
+}
+
+.filterGroup {
+  margin: 0;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  background: #fafafa;
+  padding: 8px 12px;
+  min-width: 0;
+}
+
+.filterGroupHeader {
+  font-weight: bold;
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 0;
+}
+
+.filterDropdown {
+  margin-top: 8px;
+  padding-left: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }

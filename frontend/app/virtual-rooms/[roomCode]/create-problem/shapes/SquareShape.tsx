@@ -1,120 +1,174 @@
-import React, { useRef } from "react";
+"use client";
+
+import React, { useState, useRef, useEffect } from "react";
 import styles from "@/styles/create-problem.module.css";
 
-interface SquareShapeProps {
-  shape: {
-    id: number;
-    x: number;
-    y: number;
-    size: number;
-    color?: string;
-  };
-  isSelected: boolean;
-  onUpdate: (update: Partial<{ x: number; y: number; size: number }>) => void;
+interface Point {
+  x: number;
+  y: number;
 }
 
-const SquareShape: React.FC<SquareShapeProps & { showProperties: boolean }> = ({
+interface Shape {
+  id: number;
+  fill?: string;
+  points: {
+    topLeft: Point;
+    topRight: Point;
+    bottomRight: Point;
+    bottomLeft: Point;
+  };
+}
+
+interface SquareShapeProps {
+  shape: Shape;
+  isSelected: boolean;
+  pxToUnits: (px: number) => string;
+  handleShapeMouseDown: (id: number, e: React.MouseEvent) => void;
+  setSelectedId: (id: number) => void;
+  fillMode: boolean;
+  draggingFill: boolean;
+  scale: number;
+  showProperties: boolean;
+  onVertexMouseDown: (vertex: keyof Shape["points"]) => void;
+  onSideMouseDown: (side: "top" | "bottom" | "left" | "right") => void;
+}
+
+const SquareShape: React.FC<SquareShapeProps> = ({
   shape,
   isSelected,
-  onUpdate,
+  pxToUnits,
+  handleShapeMouseDown,
+  setSelectedId,
+  fillMode,
+  draggingFill,
+  scale,
   showProperties,
+  onVertexMouseDown,
+  onSideMouseDown,
 }) => {
-  const dragOffset = useRef<{ x: number; y: number } | null>(null);
-  const resizing = useRef<boolean>(false);
+  const { topLeft, topRight, bottomRight, bottomLeft } = shape.points;
 
-  // Drag logic
-  const onMouseDown = (e: React.MouseEvent) => {
-    if ((e.target as HTMLElement).classList.contains(styles.resizeHandle)) {
-      resizing.current = true;
-    } else {
-      dragOffset.current = { x: e.clientX - shape.x, y: e.clientY - shape.y };
-    }
-    window.addEventListener("mousemove", onMouseMove);
-    window.addEventListener("mouseup", onMouseUp);
+  const getPolygonPoints = () =>
+    `${topLeft.x},${topLeft.y} ${topRight.x},${topRight.y} ${bottomRight.x},${bottomRight.y} ${bottomLeft.x},${bottomLeft.y}`;
+
+  const calculateSide = (p1: Point, p2: Point) =>
+    Math.sqrt((p2.x - p1.x) ** 2 + (p2.y - p1.y) ** 2);
+
+  const sideLengths = [
+    calculateSide(topLeft, topRight),
+    calculateSide(topRight, bottomRight),
+    calculateSide(bottomRight, bottomLeft),
+    calculateSide(bottomLeft, topLeft),
+  ];
+
+  const area = Math.abs(
+    (topLeft.x * topRight.y + topRight.x * bottomRight.y + bottomRight.x * bottomLeft.y + bottomLeft.x * topLeft.y -
+      topRight.x * topLeft.y - bottomRight.x * topRight.y - bottomLeft.x * bottomRight.y - topLeft.x * bottomLeft.y) /
+      2
+  );
+
+  const sideMidpoints = {
+    top: {
+      x: (topLeft.x + topRight.x) / 2,
+      y: (topLeft.y + topRight.y) / 2,
+    },
+    bottom: {
+      x: (bottomLeft.x + bottomRight.x) / 2,
+      y: (bottomLeft.y + bottomRight.y) / 2,
+    },
+    left: {
+      x: (topLeft.x + bottomLeft.x) / 2,
+      y: (topLeft.y + bottomLeft.y) / 2,
+    },
+    right: {
+      x: (topRight.x + bottomRight.x) / 2,
+      y: (topRight.y + bottomRight.y) / 2,
+    },
   };
-
-  const onMouseMove = (e: MouseEvent) => {
-    if (resizing.current) {
-      const newSize = Math.max(20, e.clientX - shape.x);
-      onUpdate({ size: newSize });
-    } else if (dragOffset.current) {
-      onUpdate({
-        x: e.clientX - dragOffset.current.x,
-        y: e.clientY - dragOffset.current.y,
-      });
-    }
-  };
-
-  const onMouseUp = () => {
-    dragOffset.current = null;
-    resizing.current = false;
-    window.removeEventListener("mousemove", onMouseMove);
-    window.removeEventListener("mouseup", onMouseUp);
-  };
-
-  const side = shape.size;
-  const area = side * side;
-  const angles = [90, 90, 90, 90];
 
   return (
-    <div
-      className={styles.squareShape}
+    <svg
       style={{
         position: "absolute",
-        left: shape.x,
-        top: shape.y,
-        width: shape.size,
-        height: shape.size,
-        background: shape.color || "#e3dcc2",
-        border: "6px solid #000", // Match toolbox border
-        borderRadius: 0,
-        boxSizing: "border-box",
-        cursor: "move",
-        userSelect: "none",
+        left: 0,
+        top: 0,
+        width: "100%",
+        height: "100%",
+        pointerEvents: "none",
       }}
-      onMouseDown={onMouseDown}
     >
-      {/* Resize handle (bottom-right corner) */}
-      {isSelected && (
-        <div
-          className={styles.resizeHandle}
-          style={{
-            position: "absolute",
-            right: 0,
-            bottom: 0,
-            width: 16,
-            height: 16,
-            background: "#2c514c",
-            cursor: "nwse-resize",
-            borderRadius: 4,
-          }}
-        />
+      <polygon
+        points={getPolygonPoints()}
+        fill={shape.fill || "#e3dcc2"}
+        stroke="#000"
+        strokeWidth={4}
+        onMouseDown={(e) => {
+          e.stopPropagation();
+          handleShapeMouseDown(shape.id, e); // 💡 This triggers dragging the entire shape
+          setSelectedId(shape.id);
+        }}
+        style={{ cursor: "move", pointerEvents: "auto" }}
+      />
+
+      {/* Vertex handles */}
+      {isSelected &&
+        Object.entries(shape.points).map(([key, point]) => (
+          <circle
+            key={key}
+            cx={point.x}
+            cy={point.y}
+            r={8}
+            fill="#2c514c"
+            stroke="#fff"
+            strokeWidth={2}
+            onMouseDown={(e) => {
+              e.stopPropagation();
+              onVertexMouseDown(key as keyof typeof shape.points);
+            }}
+            style={{ cursor: "pointer", pointerEvents: "auto" }}
+          />
+        ))}
+
+      {/* Side handles */}
+      {isSelected &&
+        Object.entries(sideMidpoints).map(([side, point]) => (
+          <circle
+            key={side}
+            cx={point.x}
+            cy={point.y}
+            r={6}
+            fill="#555"
+            stroke="#fff"
+            strokeWidth={1.5}
+            onMouseDown={(e) => {
+              e.stopPropagation();
+              onSideMouseDown(side as "top" | "bottom" | "left" | "right", point, e);
+            }}
+            style={{ cursor: "pointer", pointerEvents: "auto" }}
+          />
+        ))}
+
+      {/* Shape properties */}
+      {isSelected && showProperties && (
+        <foreignObject x={topLeft.x} y={topLeft.y - 60} width={160} height={60}>
+          <div
+            style={{
+              background: "#fff",
+              color: "#222",
+              fontSize: 14,
+              borderRadius: 6,
+              padding: "4px 10px",
+              boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+              minWidth: 120,
+              textAlign: "center",
+            }}
+          >
+            <div>Area: {area.toFixed(1)}</div>
+            <div>Sides: {sideLengths.map((s) => pxToUnits(s)).join(", ")}</div>
+          </div>
+        </foreignObject>
       )}
-      {showProperties && (
-        <div
-          style={{
-            position: "absolute",
-            left: "50%",
-            top: "100%",
-            transform: "translate(-50%, 8px)",
-            background: "#fff",
-            color: "#222",
-            fontSize: 14,
-            borderRadius: 6,
-            padding: "4px 10px",
-            boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
-            marginTop: 4,
-            zIndex: 10,
-            minWidth: 120,
-            textAlign: "center",
-          }}
-        >
-          {showSides && <div>Side: {side.toFixed(1)}</div>}
-          {showAngles && <div>Angles: {angles.join("°, ")}°</div>}
-          {showArea && <div>Area: {area.toFixed(1)}</div>}
-        </div>
-      )}
-    </div>
+    </svg>
   );
 };
 
