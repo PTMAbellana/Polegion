@@ -61,8 +61,8 @@
 }
 
 .profile-image {
-  width: 400px;
-  height: 400px;
+  width: 350px;
+  height: 368px;
   background: #f0f0f0;
   border-radius: 50%;
   background-image: url('/placeholder-avatar.png');

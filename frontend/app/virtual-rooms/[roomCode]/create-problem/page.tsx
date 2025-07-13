@@ -496,31 +496,64 @@ export default function CreateProblem({ params }: { params: Promise<{ roomCode: 
             </div>
           </div>
         </div>
-        {/* Right Sidebar */}
-        <div>
-          <div>Existing Problems</div>
-          {
-            problems.length > 0 ? (
+        {/* Right Sidebar - Existing Problems */}
+        <div className={styles.problemsSection}>
+          <div className={styles.problemsSectionHeader}>
+            Existing Problems
+          </div>
+          <div className={styles.problemsContent}>
+            {problems.length > 0 ? (
               <ul className={styles.problemList}>
                 {problems.map(problem => (
                   <li key={problem.id} className={styles.problemItem}>
-                    <button onClick={() => handleDeleteProblem (problem.id)} className={styles.deleteButton}>
-                      Delete
-                    </button>
-                    <div className={styles.problemTitle}>{problem.title || "Untitled Problem"}</div>
+                    <div className={styles.problemItemHeader}>
+                      <div className={styles.problemTitle}>
+                        {problem.title || "Untitled Problem"}
+                      </div>
+                      <button 
+                        onClick={() => handleDeleteProblem(problem.id)} 
+                        className={styles.deleteButton}
+                        title="Delete this problem"
+                      >
+                        Delete
+                      </button>
+                    </div>
                     <div className={styles.problemDetails}>
-                      <span className={styles.problemDifficulty} style={{ backgroundColor: DIFFICULTY_COLORS[problem.difficulty] }}>
+                      <span 
+                        className={styles.problemDifficulty} 
+                        style={{ backgroundColor: DIFFICULTY_COLORS[problem.difficulty] }}
+                      >
                         {problem.difficulty}
                       </span>
-                      <span className={styles.problemVisibility}>{problem.visibility}</span>
+                      <span 
+                        className={`${styles.problemVisibility} ${styles[problem.visibility]}`}
+                      >
+                        {problem.visibility}
+                      </span>
+                      <div className={styles.problemMeta}>
+                        <span className={styles.problemAttempts}>
+                          {problem.max_attempts} {problem.max_attempts === 1 ? 'attempt' : 'attempts'}
+                        </span>
+                        <span className={styles.problemXp}>
+                          {problem.expected_xp} XP
+                        </span>
+                      </div>
                     </div>
                   </li>
                 ))}
               </ul>
             ) : (
-              <div className={styles.noProblems}>No problems created yet.</div>
-            )
-          }
+              <div className={styles.noProblems}>
+                <div className={styles.noProblemsIcon}>📝</div>
+                <div className={styles.noProblemsText}>
+                  No problems created yet.
+                </div>
+                <div className={styles.noProblemsSubtext}>
+                  Create your first problem to get started!
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>
