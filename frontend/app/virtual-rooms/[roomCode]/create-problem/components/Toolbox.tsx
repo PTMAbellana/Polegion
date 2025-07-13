@@ -1,6 +1,5 @@
-import React, { useState } from "react";
+import React from "react";
 import styles from "@/styles/create-problem.module.css";
-import ToggleButton from "./ToggleButton";
 import ToggleSwitch from "./ToggleSwitch";
 
 interface ToolboxProps {
@@ -9,23 +8,41 @@ interface ToolboxProps {
   fillColor: string;
   selectedTool: string | null;
   setSelectedTool: (tool: string | null) => void;
-  handleDragStart: (type: string) => void;
+  handleDragStart: (type: string) => (e: React.DragEvent) => void;
   FILL_COLORS: string[];
   setFillColor: (color: string) => void;
   showProperties: boolean;
   setShowProperties: (show: boolean) => void;
+
+  // These are still global (used for square and triangle)
   showSides: boolean;
   setShowSides: (show: boolean) => void;
   showAngles: boolean;
   setShowAngles: (show: boolean) => void;
-  showArea: boolean;
-  setShowArea: (show: boolean) => void;
-  showHeight: boolean;
-  setShowHeight: (show: boolean) => void;
+
+  // Area is now per shape
+  showAreaByShape: {
+    circle: boolean;
+    triangle: boolean;
+    square: boolean;
+  };
+  setShowAreaByShape: React.Dispatch<React.SetStateAction<{
+    circle: boolean;
+    triangle: boolean;
+    square: boolean;
+  }>>;
+
+  // Circle-specific
   showDiameter: boolean;
   setShowDiameter: (show: boolean) => void;
   showCircumference: boolean;
   setShowCircumference: (show: boolean) => void;
+
+  // Triangle-specific
+  showHeight: boolean;
+  setShowHeight: (show: boolean) => void;
+
+  shapes: any[];
 }
 
 const Toolbox: React.FC<ToolboxProps> = ({
@@ -43,31 +60,27 @@ const Toolbox: React.FC<ToolboxProps> = ({
   setShowSides,
   showAngles,
   setShowAngles,
-  showArea,
-  setShowArea,
+  showAreaByShape,
+  setShowAreaByShape,
   showHeight,
   setShowHeight,
   showDiameter,
   setShowDiameter,
   showCircumference,
   setShowCircumference,
+  shapes,
 }) => {
-  // Dropdown open/close state for each shape
-  const [openSquare, setOpenSquare] = useState(false);
-  const [openCircle, setOpenCircle] = useState(false);
-  const [openTriangle, setOpenTriangle] = useState(false);
-
   return (
     <div className={styles.toolbox}>
       <div className={styles.toolboxHeader}>Tool Box</div>
+
       <div className={styles.toolboxContent}>
-        {/* Row: Square and Circle */}
+        {/* Row 1: Square + Circle */}
         <div className={styles.toolboxRow}>
-          {/* Square */}
           <div
             className={styles.toolboxSquare}
             draggable
-            onDragStart={(e) => handleDragStart("square")(e)}
+            onDragStart={handleDragStart("square")}
             onClick={() => setSelectedTool("square")}
             style={{
               background: "#e3dcc2",
@@ -83,11 +96,11 @@ const Toolbox: React.FC<ToolboxProps> = ({
               transition: "all 0.2s ease",
             }}
           />
-          {/* Circle */}
+
           <div
             className={styles.toolboxCircle}
             draggable
-            onDragStart={(e) => handleDragStart("circle")(e)}
+            onDragStart={handleDragStart("circle")}
             onClick={() => setSelectedTool("circle")}
             style={{
               background: "#e3dcc2",
@@ -103,13 +116,13 @@ const Toolbox: React.FC<ToolboxProps> = ({
             }}
           />
         </div>
-        {/* Row: Triangle and Fill Tool */}
+
+        {/* Row 2: Triangle + Fill */}
         <div className={styles.toolboxRow} style={{ marginTop: 24 }}>
-          {/* Triangle */}
           <div
             className={styles.toolboxTriangle}
             draggable
-            onDragStart={(e) => handleDragStart("triangle")(e)}
+            onDragStart={handleDragStart("triangle")}
             onClick={() => setSelectedTool("triangle")}
             style={{
               width: 100,
@@ -134,12 +147,10 @@ const Toolbox: React.FC<ToolboxProps> = ({
               />
             </svg>
           </div>
-          {/* Fill Tool */}
-          <button
+
+          {/* <button
             type="button"
-            className={`${styles.fillButton} ${
-              fillMode ? styles.active : ""
-            }`}
+            className={`${styles.fillButton} ${fillMode ? styles.active : ""}`}
             onClick={() => setFillMode(!fillMode)}
             tabIndex={0}
             style={{
@@ -170,9 +181,10 @@ const Toolbox: React.FC<ToolboxProps> = ({
                 }}
               ></div>
             </div>
-          </button>
+          </button> */}
         </div>
-        {/* Color Palette (show when fillMode is active) */}
+
+        {/* Fill Color Palette */}
         {fillMode && (
           <div className={`${styles.fillPalette} fillPalette`}>
             {FILL_COLORS.map((color) => (
@@ -181,17 +193,12 @@ const Toolbox: React.FC<ToolboxProps> = ({
                 className={styles.fillColor}
                 style={{
                   background: color,
-                  border:
-                    color === fillColor
-                      ? "3px solid #000"
-                      : "2px solid #000",
-                  transform:
-                    color === fillColor ? "scale(1.1)" : "scale(1)",
+                  border: color === fillColor ? "3px solid #000" : "2px solid #000",
+                  transform: color === fillColor ? "scale(1.1)" : "scale(1)",
                   transition: "all 0.15s ease",
-                  boxShadow:
-                    color === fillColor
-                      ? "0 0 0 2px #fff, 0 0 8px rgba(0,0,0,0.2)"
-                      : "none",
+                  boxShadow: color === fillColor
+                    ? "0 0 0 2px #fff, 0 0 8px rgba(0,0,0,0.2)"
+                    : "none",
                 }}
                 onClick={(e) => {
                   e.stopPropagation();
@@ -202,104 +209,90 @@ const Toolbox: React.FC<ToolboxProps> = ({
           </div>
         )}
       </div>
-      
-      {/* Filter groups for each shape */}
-      <div className={styles.filterGroupsGrid}>
-        {/* Square Filter Group */}
-        <div className={styles.filterGroup}>
-          <div
-            className={styles.filterGroupHeader}
-            onClick={() => setOpenSquare((v) => !v)}
-          >
-            Square Filter
-            <span>{openSquare ? "▲" : "▼"}</span>
-          </div>
-          {openSquare && (
-            <div className={styles.filterDropdown}>
-              <ToggleSwitch
-                checked={showSides}
-                onChange={() => setShowSides((v) => !v)}
-                label="Show Sides"
-              />
-              <ToggleSwitch
-                checked={showAngles}
-                onChange={() => setShowAngles((v) => !v)}
-                label="Show Angles"
-              />
-              <ToggleSwitch
-                checked={showArea}
-                onChange={() => setShowArea((v) => !v)}
-                label="Show Area"
-              />
-            </div>
-          )}
-        </div>
 
-        {/* Circle Filter Group */}
-        <div className={styles.filterGroup}>
-          <div
-            className={styles.filterGroupHeader}
-            onClick={() => setOpenCircle((v) => !v)}
-          >
-            Circle Filter
-            <span>{openCircle ? "▲" : "▼"}</span>
-          </div>
-          {openCircle && (
-            <div className={styles.filterDropdown}>
-              <ToggleSwitch
-                checked={showDiameter}
-                onChange={() => setShowDiameter((v) => !v)}
-                label="Show Diameter"
-              />
-              <ToggleSwitch
-                checked={showCircumference}
-                onChange={() => setShowCircumference((v) => !v)}
-                label="Show Circumference"
-              />
-              <ToggleSwitch
-                checked={showArea}
-                onChange={() => setShowArea((v) => !v)}
-                label="Show Area"
-              />
-            </div>
-          )}
-        </div>
+      {/* Shape Filters */}
+      {shapes.length > 0 && (() => {
+        const hasCircle = shapes.some((s) => s.type === "circle");
+        const hasSquare = shapes.some((s) => s.type === "square");
+        const hasTriangle = shapes.some((s) => s.type === "triangle");
 
-        {/* Triangle Filter Group */}
-        <div className={styles.filterGroup}>
-          <div
-            className={styles.filterGroupHeader}
-            onClick={() => setOpenTriangle((v) => !v)}
-          >
-            Triangle Filter
-            <span>{openTriangle ? "▲" : "▼"}</span>
+        return (
+          <div className={styles.filterGroup} style={{ marginTop: 20 }}>
+            <h4 className={styles.filterGroupHeader}>Shape Filters</h4>
+
+            {hasSquare && (
+              <>
+                <ToggleSwitch
+                  checked={showAreaByShape.square}
+                  onChange={() =>
+                    setShowAreaByShape((prev) => ({ ...prev, square: !prev.square }))
+                  }
+                  label="Show Area (Square)"
+                />
+                <ToggleSwitch
+                  checked={showSides}
+                  onChange={() => setShowSides((v) => !v)}
+                  label="Show Sides"
+                />
+                <ToggleSwitch
+                  checked={showAngles}
+                  onChange={() => setShowAngles((v) => !v)}
+                  label="Show Angles"
+                />
+              </>
+            )}
+
+            {hasTriangle && (
+              <>
+                <ToggleSwitch
+                  checked={showAreaByShape.triangle}
+                  onChange={() =>
+                    setShowAreaByShape((prev) => ({ ...prev, triangle: !prev.triangle }))
+                  }
+                  label="Show Area (Triangle)"
+                />
+                <ToggleSwitch
+                  checked={showSides}
+                  onChange={() => setShowSides((v) => !v)}
+                  label="Show Sides"
+                />
+                <ToggleSwitch
+                  checked={showAngles}
+                  onChange={() => setShowAngles((v) => !v)}
+                  label="Show Angles"
+                />
+                <ToggleSwitch
+                  checked={showHeight}
+                  onChange={() => setShowHeight((v) => !v)}
+                  label="Show Height"
+                />
+              </>
+            )}
+
+            {hasCircle && (
+              <>
+                <ToggleSwitch
+                  checked={showAreaByShape.circle}
+                  onChange={() =>
+                    setShowAreaByShape((prev) => ({ ...prev, circle: !prev.circle }))
+                  }
+                  label="Show Area (Circle)"
+                />
+                <ToggleSwitch
+                  checked={showDiameter}
+                  onChange={() => setShowDiameter((v) => !v)}
+                  label="Show Diameter"
+                />
+                <ToggleSwitch
+                  checked={showCircumference}
+                  onChange={() => setShowCircumference((v) => !v)}
+                  label="Show Circumference"
+                />
+              </>
+            )}
           </div>
-          {openTriangle && (
-            <div className={styles.filterDropdown}>
-              <ToggleSwitch
-                checked={showSides}
-                onChange={() => setShowSides((v) => !v)}
-                label="Show Sides"
-              />
-              <ToggleSwitch
-                checked={showAngles}
-                onChange={() => setShowAngles((v) => !v)}
-                label="Show Angles"
-              />
-              <ToggleSwitch
-                checked={showArea}
-                onChange={() => setShowArea((v) => !v)}
-                label="Show Area"
-              />
-              <ToggleSwitch
-                checked={showHeight}
-                onChange={() => setShowHeight((v) => !v)}
-                label="Show Height"
-              />
-            </div>
-          )}
-        </div>
-      </div>
+        );
+      })()}
     </div>
   );
 };

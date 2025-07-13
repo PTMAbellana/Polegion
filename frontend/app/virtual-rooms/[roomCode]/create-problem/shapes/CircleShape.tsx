@@ -11,6 +11,9 @@ export default function CircleShape({
   fillMode,
   draggingFill,
   scale,
+  showDiameter,
+  showCircumference,
+  showArea,
 }: any) {
   const size = shape.size;
   const labelYOffset = -size * 0.18;
@@ -21,10 +24,6 @@ export default function CircleShape({
   const diameter = size;
   const circumference = 2 * Math.PI * (size / 2);
   const area = Math.PI * Math.pow(size / 2, 2);
-
-  const showDiameter = true;
-  const showCircumference = true;
-  const showArea = true;
 
   return (
     <div
@@ -91,10 +90,10 @@ export default function CircleShape({
                 top: handleY,
                 width: 18,
                 height: 18,
-                background: "#fabc60",
+                background: "#2c514c",
+                border: "2px solid #fff", 
                 borderRadius: "50%",
                 zIndex: 20,
-                border: "2px solid #000",
                 boxShadow: "0 0 4px #0002",
                 cursor: "ew-resize",
                 transition: "cursor 0.1s",

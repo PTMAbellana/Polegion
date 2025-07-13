@@ -13,6 +13,7 @@ import TriangleShape from "./shapes/TriangleShape";
 import Timer from "./components/Timer";
 import LimitAttempts from "./components/LimitAttempts";
 import SetVisibility from "./components/SetVisibility";
+import ShapeLimitPopup from "./components/ShapeLimitPopup";
 import { createProblem, deleteProblem, getRoomProblemsByCode } from '@/api/problems'
 
 interface Problem {
@@ -38,6 +39,8 @@ const DIFFICULTY_COLORS = {
 
 const XP_MAP = { Easy: 10, Intermediate: 20, Hard: 30 };
 
+const MAX_SHAPES = 1;
+
 export default function CreateProblem({ params }: { params: Promise<{ roomCode: string }> }) {
   const router = useRouter();
   const [roomCode, setRoomCode] = useState<string>("");
@@ -59,7 +62,7 @@ export default function CreateProblem({ params }: { params: Promise<{ roomCode: 
   const [draggingShapeId, setDraggingShapeId] = useState<number | null>(null);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
 
-  const [draggingSide, setDraggingSide] = useState<{
+  const draggingSideRef = useRef<{
     shapeId: number;
     points: (keyof any["shape"]["points"])[];
     start: { x: number; y: number };
@@ -91,12 +94,20 @@ export default function CreateProblem({ params }: { params: Promise<{ roomCode: 
   const [visible, setVisible] = useState(true);
   const [showProperties, setShowProperties] = useState(false);
 
+  const [showLimitPopup, setShowLimitPopup] = useState(false);
+
   const [showSides, setShowSides] = useState(false);
   const [showAngles, setShowAngles] = useState(false);
   const [showArea, setShowArea] = useState(false);
   const [showHeight, setShowHeight] = useState(false);
   const [showDiameter, setShowDiameter] = useState(false);
   const [showCircumference, setShowCircumference] = useState(false);
+
+  const [showAreaByShape, setShowAreaByShape] = useState({
+    circle: false,
+    triangle: false,
+    square: false,
+  });
 
   const fetchProblems = useCallback(async () => {
     if (!roomCode) return;
@@ -119,11 +130,22 @@ export default function CreateProblem({ params }: { params: Promise<{ roomCode: 
     const shape = shapes.find(s => s.id === id);
     if (!shape) return;
 
-    const topLeft = shape.points?.topLeft;
-    if (!topLeft) return;
-
     const rect = mainAreaRef.current?.getBoundingClientRect();
     if (!rect) return;
+
+    // ✅ Handle circle dragging first
+    if (shape.type === "circle") {
+      const offsetX = e.clientX - rect.left - shape.x;
+      const offsetY = e.clientY - rect.top - shape.y;
+
+      setDraggingShapeId(id);
+      setDragOffset({ x: offsetX, y: offsetY });
+      return;
+    }
+
+    // ✅ Now safely check for squares/triangles
+    const topLeft = shape.points?.topLeft;
+    if (!topLeft) return;
 
     const offsetX = e.clientX - rect.left - topLeft.x;
     const offsetY = e.clientY - rect.top - topLeft.y;
@@ -132,19 +154,116 @@ export default function CreateProblem({ params }: { params: Promise<{ roomCode: 
     setDragOffset({ x: offsetX, y: offsetY });
   };
 
+  const handleCircleResizeMouseDown = (id: number, e: React.MouseEvent) => {
+    e.stopPropagation();
+
+    const shape = shapes.find((s) => s.id === id);
+    if (!shape) return;
+
+    const startX = e.clientX;
+    const startSize = shape.size;
+
+    const handleMouseMove = (moveEvent: MouseEvent) => {
+      const dx = moveEvent.clientX - startX;
+      const newSize = Math.max(20, startSize + dx);
+
+      setShapes((prevShapes) =>
+        prevShapes.map((s) =>
+          s.id === id ? { ...s, size: newSize } : s
+        )
+      );
+    };
+
+    const handleMouseUp = () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mouseup", handleMouseUp);
+    };
+
+    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("mouseup", handleMouseUp);
+  };
+
   const handleVertexMouseDown = (shapeId: number, vertex: number) => {
     setDraggingVertex({ shapeId, vertex });
   };
 
+  const handleSideMouseDown = (
+    shapeId: number,
+    points: (keyof any["points"])[],
+    e: React.MouseEvent
+  ) => {
+    e.stopPropagation();
+
+    const rect = mainAreaRef.current?.getBoundingClientRect();
+    if (!rect) return;
+
+    const mouseX = e.clientX - rect.left;
+    const mouseY = e.clientY - rect.top;
+
+    draggingSideRef.current = {
+      shapeId,
+      points,
+      start: { x: mouseX, y: mouseY },
+    };
+  };
+
+
+  const handleVertexDrag = (
+    shapeId: number,
+    vertexKey: keyof any["points"],
+    newPos: { x: number; y: number }
+  ) => {
+    setShapes((prevShapes) =>
+      prevShapes.map((shape) => {
+        if (shape.id !== shapeId || !shape.points) return shape;
+
+        const updatedPoints = { ...shape.points, [vertexKey]: newPos };
+        const pointArray = [
+          updatedPoints.topLeft,
+          updatedPoints.topRight,
+          updatedPoints.bottomRight,
+          updatedPoints.bottomLeft,
+        ];
+
+        const isSelfIntersecting = (points: any[]) => {
+          const doLinesIntersect = (p1, p2, p3, p4) => {
+            const ccw = (a, b, c) =>
+              (c.y - a.y) * (b.x - a.x) > (b.y - a.y) * (c.x - a.x);
+            return (
+              ccw(p1, p3, p4) !== ccw(p2, p3, p4) &&
+              ccw(p1, p2, p3) !== ccw(p1, p2, p4)
+            );
+          };
+
+          for (let i = 0; i < points.length; i++) {
+            const a1 = points[i];
+            const a2 = points[(i + 1) % points.length];
+            for (let j = i + 1; j < points.length; j++) {
+              if (Math.abs(i - j) <= 1 || (i === 0 && j === points.length - 1))
+                continue;
+              const b1 = points[j];
+              const b2 = points[(j + 1) % points.length];
+              if (doLinesIntersect(a1, a2, b1, b2)) return true;
+            }
+          }
+          return false;
+        };
+
+        if (isSelfIntersecting(pointArray)) return shape;
+        return { ...shape, points: updatedPoints };
+      })
+    );
+  };
+
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
+      const rect = mainAreaRef.current?.getBoundingClientRect();
+      if (!rect) return;
+
+      const mouseX = e.clientX - rect.left;
+      const mouseY = e.clientY - rect.top;
+
       if (draggingVertex) {
-        const rect = mainAreaRef.current?.getBoundingClientRect();
-        if (!rect) return;
-
-        const mouseX = e.clientX - rect.left;
-        const mouseY = e.clientY - rect.top;
-
         setShapes(prev =>
           prev.map(s => {
             if (s.id === draggingVertex.shapeId) {
@@ -157,13 +276,8 @@ export default function CreateProblem({ params }: { params: Promise<{ roomCode: 
         );
       }
 
+      const draggingSide = draggingSideRef.current;
       if (draggingSide) {
-        const rect = mainAreaRef.current?.getBoundingClientRect();
-        if (!rect) return;
-
-        const mouseX = e.clientX - rect.left;
-        const mouseY = e.clientY - rect.top;
-
         const dx = mouseX - draggingSide.start.x;
         const dy = mouseY - draggingSide.start.y;
 
@@ -183,16 +297,16 @@ export default function CreateProblem({ params }: { params: Promise<{ roomCode: 
           })
         );
 
-        setDraggingSide(prev => prev ? {
-          ...prev,
-          start: { x: mouseX, y: mouseY }
-        } : null);
+        draggingSideRef.current = {
+          ...draggingSide,
+          start: { x: mouseX, y: mouseY },
+        };
       }
     };
 
     const handleMouseUp = () => {
       setDraggingVertex(null);
-      setDraggingSide(null);
+      draggingSideRef.current = null;
     };
 
     window.addEventListener("mousemove", handleMouseMove);
@@ -201,7 +315,7 @@ export default function CreateProblem({ params }: { params: Promise<{ roomCode: 
       window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("mouseup", handleMouseUp);
     };
-  }, [draggingVertex, draggingSide]);
+  }, [draggingVertex]);
 
   // ✅ NEW USEEFFECT FOR DRAGGING WHOLE SHAPE
   useEffect(() => {
@@ -220,36 +334,60 @@ export default function CreateProblem({ params }: { params: Promise<{ roomCode: 
           prev.map(s => {
             if (s.id !== draggingShapeId) return s;
 
-            const offsetPoints = Object.entries(s.points).map(([key, pt]) => ({
-              key,
-              dx: pt.x - s.points.topLeft.x,
-              dy: pt.y - s.points.topLeft.y,
-            }));
-
-            const newPoints = Object.fromEntries(
-              offsetPoints.map(({ key, dx, dy }) => [
+            // ✅ Handle Square and Triangle via `points`
+            if (s.points?.topLeft) {
+              const offsetPoints = Object.entries(s.points).map(([key, pt]) => ({
                 key,
-                { x: newTopLeftX + dx, y: newTopLeftY + dy }
-              ])
-            );
+                dx: pt.x - s.points.topLeft.x,
+                dy: pt.y - s.points.topLeft.y,
+              }));
 
-            return { ...s, points: newPoints };
+              const newPoints = Object.fromEntries(
+                offsetPoints.map(({ key, dx, dy }) => [
+                  key,
+                  { x: newTopLeftX + dx, y: newTopLeftY + dy },
+                ])
+              );
+
+              return { ...s, points: newPoints };
+            }
+
+            // ✅ Handle Circle via `x` and `y`
+            if (s.type === "circle") {
+              return { ...s, x: newTopLeftX, y: newTopLeftY };
+            }
+
+            return s;
           })
         );
       }
     };
 
-    const stopDragging = () => {
+    const stopDragging = (e: MouseEvent) => {
+      if (draggingShapeId !== null && mainAreaRef.current) {
+        const rect = mainAreaRef.current.getBoundingClientRect();
+        const mouseX = e.clientX;
+        const mouseY = e.clientY;
+
+        if (
+          mouseX < rect.left || mouseX > rect.right ||
+          mouseY < rect.top || mouseY > rect.bottom
+        ) {
+          setShapes(prev => prev.filter(s => s.id !== draggingShapeId));
+        }
+      }
+
       setDraggingShapeId(null);
     };
 
     window.addEventListener("mousemove", handleMoveShape);
     window.addEventListener("mouseup", stopDragging);
+
     return () => {
       window.removeEventListener("mousemove", handleMoveShape);
       window.removeEventListener("mouseup", stopDragging);
     };
-  }, [draggingShapeId, dragOffset]);
+  }, [draggingShapeId, dragOffset, mainAreaRef]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -283,13 +421,50 @@ export default function CreateProblem({ params }: { params: Promise<{ roomCode: 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.key === "Delete" || e.key === "Backspace") && selectedId !== null) {
-        setShapes(prev => prev.filter(shape => shape.id !== selectedId));
+        setShapes(prev => {
+          const newShapes = prev.filter(shape => shape.id !== selectedId);
+
+          // If deleting the only shape, reset all property-related UI toggles
+          if (newShapes.length === 0) {
+            setShowSides(false);
+            setShowAngles(false);
+            setShowArea(false);
+            setShowHeight(false);
+            setShowDiameter(false);
+            setShowCircumference(false);
+          }
+
+          return newShapes;
+        });
         setSelectedId(null);
       }
     };
+
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [selectedId]);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const rect = mainAreaRef.current?.getBoundingClientRect();
+      if (!rect) return;
+
+      setShapes((prev) =>
+        prev.filter((s) => {
+          const referencePoint = s.points?.topLeft || s.points?.center || { x: s.x, y: s.y };
+
+          return (
+            referencePoint.x > -80 &&
+            referencePoint.y > -80 &&
+            referencePoint.x < rect.width + 80 &&
+            referencePoint.y < rect.height + 80
+          );
+        })
+      );
+    }, 1000); // every second
+
+    return () => clearInterval(interval);
+  }, []);
 
   const handleDragStart = (type: string) => (e: React.DragEvent) => {
     e.dataTransfer.setData("shape-type", type);
@@ -319,29 +494,14 @@ export default function CreateProblem({ params }: { params: Promise<{ roomCode: 
             key={shape.id}
             {...commonProps}
             showProperties={showProperties}
+            showAngles={showAngles}
+            showSides={showSides}
+            showArea={showArea}
             onVertexMouseDown={(vertex) =>
               setDraggingVertex({ shapeId: shape.id, vertex })
             }
-            onSideMouseDown={(side, point, e) => {
-              e.stopPropagation();
-              const rect = mainAreaRef.current?.getBoundingClientRect();
-              if (!rect) return;
-              const start = {
-                x: e.clientX - rect.left,
-                y: e.clientY - rect.top,
-              };
-              const pointMapping = {
-                top: ["topLeft", "topRight"],
-                right: ["topRight", "bottomRight"],
-                bottom: ["bottomRight", "bottomLeft"],
-                left: ["bottomLeft", "topLeft"],
-              };
-              setDraggingSide({
-                shapeId: shape.id,
-                points: pointMapping[side],
-                start,
-              });
-            }}
+            onSideMouseDown={handleSideMouseDown}
+            handleVertexDrag={handleVertexDrag}
           />
         );
       case "circle":
@@ -349,7 +509,10 @@ export default function CreateProblem({ params }: { params: Promise<{ roomCode: 
           <CircleShape
             key={shape.id}
             {...commonProps}
-            handleCircleResizeMouseDown={() => { }}
+            handleCircleResizeMouseDown={handleCircleResizeMouseDown}
+            showDiameter={showDiameter}
+            showCircumference={showCircumference}
+            showArea={showArea}
           />
         );
       case "triangle":
@@ -415,24 +578,33 @@ export default function CreateProblem({ params }: { params: Promise<{ roomCode: 
           </div>
           <DifficultyDropdown difficulty={difficulty} setDifficulty={setDifficulty} />
           <Toolbox
+            shapes={shapes}
+            disableDrag={shapes.length >= 1}
             selectedTool={selectedTool}
             setSelectedTool={setSelectedTool}
-            handleDragStart={handleDragStart}
-            fillColor={fillColor}
             fillMode={fillMode}
             setFillMode={setFillMode}
-            handleFillDragStart={() => { }}
-            handleFillDragEnd={() => { }}
-            FILL_COLORS={FILL_COLORS}
+            fillColor={fillColor}
             setFillColor={setFillColor}
+            FILL_COLORS={FILL_COLORS}
             showProperties={showProperties}
             setShowProperties={setShowProperties}
-            showSides={showSides} setShowSides={setShowSides}
-            showAngles={showAngles} setShowAngles={setShowAngles}
-            showArea={showArea} setShowArea={setShowArea}
-            showHeight={showHeight} setShowHeight={setShowHeight}
-            showDiameter={showDiameter} setShowDiameter={setShowDiameter}
-            showCircumference={showCircumference} setShowCircumference={setShowCircumference}
+            handleDragStart={handleDragStart}
+
+            // Shape-specific display filters
+            showAreaByShape={showAreaByShape}
+            setShowAreaByShape={setShowAreaByShape}
+
+            showSides={showSides}
+            setShowSides={setShowSides}
+            showAngles={showAngles}
+            setShowAngles={setShowAngles}
+            showHeight={showHeight}
+            setShowHeight={setShowHeight}
+            showDiameter={showDiameter}
+            setShowDiameter={setShowDiameter}
+            showCircumference={showCircumference}
+            setShowCircumference={setShowCircumference}
           />
         </div>
 
@@ -463,6 +635,9 @@ export default function CreateProblem({ params }: { params: Promise<{ roomCode: 
                 Save
               </button>
             }
+            shapeLimit={MAX_SHAPES}
+            shapeCount={shapes.length}
+            onLimitReached={() => setShowLimitPopup(true)}
           />
           <div className={styles.controlsRow}>
             <div style={{ display: "flex", gap: 12 }}>
@@ -556,6 +731,9 @@ export default function CreateProblem({ params }: { params: Promise<{ roomCode: 
           </div>
         </div>
       </div>
+      {showLimitPopup && (
+        <ShapeLimitPopup onClose={() => setShowLimitPopup(false)} />
+      )}
     </div>
   );
 }
