@@ -106,7 +106,7 @@ const CompetitionDashboard = () => {
         <div className={styles.header}>
           <div className={styles.headerContent}>
             <h1 className={styles.title}>
-              Competition 1 Dashboard
+              Competition Dashboard
             </h1>
             <p className={styles.status}>
               Status: <span className={styles.statusValue}>Ongoing</span>
@@ -248,7 +248,7 @@ const CompetitionDashboard = () => {
 
       {/* My Room Section */}
       <div className={styles.myRoomSection}>
-        <h2 className={styles.myRoomTitle}>My Room</h2>
+        <h2 className={styles.myRoomTitle}>Room Competitions</h2>
         <div className={styles.roomGrid}>
           {/* Room Card */}
           <div className={styles.roomCard}>
