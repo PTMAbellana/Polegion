@@ -98,7 +98,7 @@ class ParticipantRepo extends BaseRepo {
                 data,
                 error
             } = await this.supabase.from(this.tableName)
-            .select('user_id')
+            .select('user_id, id')
             .eq('room_id', room_id)
             
             if (error) throw error

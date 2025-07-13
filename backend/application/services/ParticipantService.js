@@ -29,28 +29,46 @@ class ParticipantService {
     }
 
     //ang mu get kay ang owner or ang admin
-    async getRoomParticipantsForAdmin(room_id, creator_id){
+    async getRoomParticipantsForAdmin(room_id, creator_id, with_xp = false){
         try {
             //verify if room exists
             const exist = await this.roomService.getRoomById(room_id, creator_id)
-            
+            // console.log(exist)
             if (!exist) throw new Error ('Room not found or not authorized')
             const data = await this.participantRepo.getAllParticipants(room_id)
-            
+            console.log('data: ', data)
             const participants = await Promise.all(
                 data.map(async (participant) => {
                     try {
                         // Fetch user data from users table using user_id
+                        // console.log('participant: ', participant.id)
                         const userData = await this.userService.getUserById(participant.user_id)
                         if (!userData) return {}
-                        return userData
+                        return {
+                            ...userData,
+                            participant_id: participant.id,
+                        }
                         
                     } catch (error) {
                         return {}
                     }
                 })
             )
-            return participants
+            // console.log('participants: ', participants)
+            if (!with_xp) return participants;
+            else {
+                return await Promise.all(
+                    participants.map(async p => {
+                        console.log('p: ', p.participant_id)
+                        const res = await this.leaderService.getRoomBoardById(room_id, p.participant_id);
+                        console.log('res: ', res)
+                        return {
+                            ...p,
+                            accumulated_xp: res?.accumulated_xp ?? 0
+                        };
+                    })
+                );
+            }
         } catch (error){
             throw error
         }

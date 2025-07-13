@@ -116,6 +116,26 @@ class LeaderboardRepo extends BaseRepo {
        }
     }
 
+    //cheche bureche
+    async getRawBoard (room_id, participant_id) {
+        try {
+            const {
+                data, 
+                error
+            } = await this.supabase.from(this.tableRoom)
+            .select('*')
+            .eq('room_id', room_id)
+            .eq('room_participant_id', participant_id)
+            .single()
+
+            if (error) throw error
+            if (!data) throw new Error('Leaderboard not found')
+            return data
+        } catch (error) {
+            throw error
+        }
+    }
+
 }
 
 module.exports = LeaderboardRepo

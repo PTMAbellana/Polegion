@@ -91,6 +91,24 @@ class ProblemRepo {
     }
   }
 
+  async fetchCompeProblemByProbId(prob_id) {
+    try {
+      const {
+        data, error
+      } = await this.supabase
+      .from(this.tableCompe)
+      .select('*')
+      .eq('problem_id', prob_id)
+      .single()
+
+      if (error) throw error
+      if (!data) throw new Error('Competition problem not found')
+      return data;
+    } catch (error) {
+      throw error
+    }
+  }
+
   async updateProblem(prob_id, user_id, problemData) {
     try {
       const { 

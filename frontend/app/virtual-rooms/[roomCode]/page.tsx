@@ -1,4 +1,5 @@
 "use client"
+
 import Loader from '@/components/Loader'
 import { myAppHook } from '@/context/AppUtils'
 import { AuthProtection } from '@/context/AuthProtection'
@@ -105,7 +106,7 @@ export default function RoomDetail({ params } : { params  : Promise<{roomCode : 
     // }
 
     const redirectCompe = () => {
-        router.push(ROUTES.COMPETITION)
+        router.push(`${ROUTES.COMPETITION}?room=${roomDetails?.id}`)
     }
 
     const handleRemoveParticipant = async (part_id: string | undefined, part_name: string | undefined) => {

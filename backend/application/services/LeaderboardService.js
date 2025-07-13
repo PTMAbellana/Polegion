@@ -107,6 +107,14 @@ class LeaderboardService {
             throw error
         }
     }
+
+    async getRoomBoardById(room_id, part_id) {
+        try {
+            return await this.leaderRepo.getRawBoard(room_id, part_id)
+        } catch (error) {
+            throw error
+        }
+    }
 }
 
 module.exports = LeaderboardService

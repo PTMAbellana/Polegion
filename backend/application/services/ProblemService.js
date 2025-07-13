@@ -25,11 +25,26 @@ class ProblemService {
     }
   }
   
-  async fetchRoomProblems(room_id, creator_id){
+  async fetchRoomProblems(room_id, creator_id) {
     try {
-      return await this.problemRepo.fetchRoomProblems(room_id, creator_id)
+      const problems = await this.problemRepo.fetchRoomProblems(room_id, creator_id);
+      
+      console.log(problems)
+      if (!problems || problems.length === 0) return [];
+      
+      const problemsWithTimers = await Promise.all(
+        problems.map(async problem => {
+          const timerData = await this.problemRepo.fetchCompeProblemByProbId(problem.id);
+          console.log('timerData', timerData)
+          return {
+            ...problem,
+            timer: timerData?.timer
+          };
+        })
+      );
+      return problemsWithTimers;
     } catch (error) {
-      throw error
+      throw error;
     }
   }
   
@@ -45,7 +60,12 @@ class ProblemService {
 
   async fetchProblem(problem_id, creator_id) {
     try {
-      return await this.problemRepo.fetchProblemById(problem_id, creator_id)
+      const res = await this.problemRepo.fetchProblemById(problem_id, creator_id)
+      const data = await this.problemRepo.fetchCompeProblemByProbId(problem_id)
+      return {
+        ...res,
+        timer: data.timer 
+      }
     } catch (error) {
       throw error
     }

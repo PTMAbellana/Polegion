@@ -35,11 +35,12 @@ export const totalParticipant = async (room_id) => {
   }
 };
 
-export const getAllParticipants = async (room_id, type='user') => {
+export const getAllParticipants = async (room_id, type='user', withXp=false) => {
   try {
+    const xpParam = withXp ? '?withXp=true' : '';
     return type === 'user' ? 
-      await api.get(`/participants/user/lists/${room_id}`) : 
-      await api.get(`/participants/creator/lists/${room_id}`) 
+      await api.get(`/participants/user/lists/${room_id}${xpParam}`) : 
+      await api.get(`/participants/creator/lists/${room_id}${xpParam}`);
   } catch (error) {
     throw error;
   }

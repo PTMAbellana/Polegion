@@ -1,23 +1,93 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ChevronDown, ChevronUp, Edit3, Pause, Play, Eye } from 'lucide-react';
 import styles from '@/styles/competition.module.css';
+import { useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/router';
+import { myAppHook } from '@/context/AppUtils';
+import { AuthProtection } from '@/context/AuthProtection';
+import Loader from '@/components/Loader';
+import { getRoomProblems } from '@/api/problems';
+import { getAllParticipants } from '@/api/participants';
+
+interface Participant {
+  id: number;
+  fullName?: string;
+  accumulated_xp: number | 0;
+}
+
+
+interface Problems {
+    id: string
+    title?: string | 'No Title'
+    description: string
+    difficulty: string
+    max_attempts: number
+    expected_xp: number
+    timer: number | null
+}
 
 const CompetitionDashboard = () => {
+  const searchParams = useSearchParams();
+  const roomId = searchParams.get("room");
+
+  // const [participants, setParticipants] = useState<Participant[]>([]);
   const [sortOrder, setSortOrder] = useState('desc');
   const [isPaused, setIsPaused] = useState(false);
+  const [fetched, setFetched] = useState(false);
+  const [ isLoading, setIsLoading ] = useState(true)
   
-  // Sample data
-  const participants = [
-    { id: 1, name: 'Francis Benedict Y. Chavez', xp: 1000, rank: 1 },
-    { id: 2, name: 'Paul Thomas M. Abellana', xp: 600, rank: 2 },
-    { id: 3, name: 'Nicole Ejares', xp: 600, rank: 3 },
-    { id: 4, name: 'Nina Margarette Catubig', xp: 600, rank: 4 },
-  ];
+  const [ participants, setParticipants ] = useState<Participant[]>([])
+  const [ problems, setProblems ] = useState<Problems[]>([])
+
+  const { isLoggedIn } = myAppHook()
+  const { isLoading: authLoading } = AuthProtection()
+  // const router = useRouter();
+
+  useEffect(() => {
+      if (isLoggedIn && !authLoading && !fetched) {
+          callMe()
+          setFetched(true)
+      } else {
+          if (authLoading || !isLoggedIn) {
+              setIsLoading(true)
+          }
+      }
+  }, [isLoggedIn, authLoading, fetched])
+
+    const callMe = async () => {
+        try {
+            setIsLoading(true)
+            // kani without xp ni sha huehue
+            const parts = await getAllParticipants(roomId, 'creator', true)
+            console.log('Attempting to get all participants: ', parts.data)
+
+            setParticipants( parts.data.participants || [] )
+            console.log('Attempting to get all participants: ', parts.data)
+            
+            const probs = await getRoomProblems(roomId)
+            console.log('Fetching all problems: ', probs)
+            setProblems(probs)
+        } catch (error) {
+            console.error('Error fetching room details:', error)
+        } finally {
+            setIsLoading(false)
+        }
+    }
+
+    if (isLoading || authLoading) {
+        return (
+            <div className={styles["dashboard-container"]}>
+                <div className={styles["loading-container"]}>
+                    <Loader/>
+                </div>
+            </div>
+        )
+    }
 
   const sortedParticipants = [...participants].sort((a, b) => {
-    return sortOrder === 'desc' ? b.xp - a.xp : a.xp - b.xp;
+    return sortOrder === 'desc' ? b.accumulated_xp - a.accumulated_xp : a.accumulated_xp - b.accumulated_xp;
   });
 
   const toggleSort = () => {
@@ -68,6 +138,48 @@ const CompetitionDashboard = () => {
           </div>
         </div>
 
+        {/* Problems Section */}
+        <div className={styles.participantsSection}>
+          <div className={styles.participantsHeader}>
+            <h2 className={styles.participantsTitle}>
+              Problems:
+            </h2>
+          </div>
+
+          {/* Problems List */}
+          <div className={styles.participantsList}>
+            {problems.map((problem, index) => (
+              <div
+                key={problem.id}
+                className={styles.problemCard}
+              >
+                <div className={styles.problemContent}>
+                  <div className={styles.problemLeft}>
+                    <div className={styles.problemRank}>
+                      {index + 1}
+                    </div>
+                    <div>
+                      <h3 className={styles.problemName}>
+                        {problem.title || 'No Title'}
+                      </h3>
+                    </div>
+                  </div>
+
+                  <div className={styles.participantRight}>
+                    <div className={styles.participantXp}>
+                      {problem.timer != null ? `${problem.timer} seconds` : 'No timer'}
+                    </div>
+                    <button className={styles.editButton}>
+                      <Edit3 className="w-5 h-5 text-gray-600" />
+                    </button>
+                  </div>  
+                  
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
         {/* Participants Section */}
         <div className={styles.participantsSection}>
           <div className={styles.participantsHeader}>
@@ -106,14 +218,14 @@ const CompetitionDashboard = () => {
                     </div>
                     <div>
                       <h3 className={styles.participantName}>
-                        {participant.name}
+                        {participant.fullName}
                       </h3>
                     </div>
                   </div>
                   
                   <div className={styles.participantRight}>
                     <div className={styles.participantXp}>
-                      {participant.xp} XP
+                      {participant.accumulated_xp} XP
                     </div>
                     <button className={styles.editButton}>
                       <Edit3 className="w-5 h-5 text-gray-600" />
@@ -160,7 +272,7 @@ const CompetitionDashboard = () => {
               <div className={styles.roomMantra}>
                 <h4 className={styles.roomMantraTitle}>Room Mantra</h4>
                 <p className={styles.roomMantraText}>
-                  "Code with passion, compete with honor."
+                  &ldquo;Code with passion, compete with honor.;rdquo;
                 </p>
               </div>
               
