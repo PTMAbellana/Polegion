@@ -122,6 +122,8 @@ export default function Dashboard() {
                     </div>
                 </div>
                 <div className={styles["room-cards-section"]}>
+                    <br></br>
+                    <br></br>
                     <h2>Your Virtual Rooms</h2>
                     {rooms && rooms.length > 0 ? (
                         <div className={styles["room-cards"]}>

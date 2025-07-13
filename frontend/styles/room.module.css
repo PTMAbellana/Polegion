@@ -827,19 +827,29 @@ textarea.form-control {
 /* Room Cards Section */
 .room-cards-section {
   grid-column: 1 / -1;
-  animation: fadeInUp 0.8s ease-out 0.2s both;
+  animation: sectionFadeIn 0.8s ease-out 0.2s both;
+}
+
+@keyframes sectionFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .room-cards-section h2 {
-  font-family: 'Poppins', sans-serif;
+  font-size: 2rem;
   font-weight: 800;
-  font-size: 3rem;
-  line-height: 1.2;
-  margin-bottom: 2rem;
-  background: var(--primary-gradient);
+  background: linear-gradient(45deg, #2C514C, #27926b);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  margin-bottom: 1.5rem;
+  font-family: 'Poppins', sans-serif;
   text-align: center;
   position: relative;
 }
@@ -852,7 +862,7 @@ textarea.form-control {
   transform: translateX(-50%);
   width: 100px;
   height: 4px;
-  background: var(--primary-gradient);
+  background: linear-gradient(45deg, #2C514C, #27926b);
   border-radius: 2px;
 }
 
@@ -863,15 +873,15 @@ textarea.form-control {
 }
 
 .room-card {
-  background: var(--card-gradient);
+  background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(10px);
-  border-radius: var(--border-radius);
+  border-radius: 1.5rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
   overflow: hidden;
-  box-shadow: var(--box-shadow);
-  transition: var(--transition);
+  cursor: pointer;
+  transition: all 0.3s ease;
   border: 2px solid transparent;
   position: relative;
-  cursor: pointer;
 }
 
 .room-card::before {
@@ -881,10 +891,10 @@ textarea.form-control {
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(45deg, #22c55e, #84cc16, #eab308, #f59e0b);
+  background: linear-gradient(45deg, #34d399, #3b82f6, #f59e0b, #ef4444);
   z-index: -1;
   padding: 2px;
-  border-radius: var(--border-radius);
+  border-radius: 1.5rem;
   mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   mask-composite: exclude;
   opacity: 0;
@@ -892,13 +902,39 @@ textarea.form-control {
 }
 
 .room-card:hover {
-  transform: translateY(-10px) scale
+  transform: translateY(-10px) scale(1.02);
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
 }
+
+.room-card:hover::before {
+  opacity: 1;
+}
+
 .room-card-banner {
-  height: 160px;
-  overflow: hidden;
-  background: #C4C4C4;
+  height: 12rem;
+  background: linear-gradient(135deg, #34d399 0%, #3b82f6 30%, #f59e0b 70%, #ef4444 100%);
   position: relative;
+  overflow: hidden;
+}
+
+.room-card-banner::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.1) 50%, transparent 70%);
+  animation: shimmer 3s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
 }
 
 .room-card-banner img {
@@ -908,52 +944,120 @@ textarea.form-control {
 }
 
 .room-card-banner-placeholder {
-  width: 100%;
-  height: 100%;
-  background: #e0e0e0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  color: #999;
-  font-family: 'Poppins';
-  font-weight: 400;
+  position: absolute;
+  bottom: 1.5rem;
+  left: 1.5rem;
+  right: 1.5rem;
+  z-index: 1;
+  color: white;
+  font-size: 1.5rem;
+  font-weight: 800;
+  font-family: 'Poppins', sans-serif;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.room-card-banner-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.1) 0%, rgba(0, 0, 0, 0.3) 100%);
 }
 
 .room-card-content {
-  padding: 1.5rem;
+  padding: 2rem;
 }
 
 .room-card-title {
-  font-family: 'Poppins';
-  font-weight: 600;
-  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1f2937;
   margin-bottom: 0.5rem;
-  color: #000;
+  font-family: 'Poppins', sans-serif;
+  color: #2C514C;
+  font-size: 1.25rem;
 }
 
 .room-card-description {
-  font-size: 0.875rem;
-  color: #666;
-  margin-bottom: 1rem;
+  color: #6b7280;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
   display: -webkit-box;
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  font-family: 'Poppins', sans-serif;
 }
 
 .room-card-mantra {
-  font-size: 0.875rem;
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background: linear-gradient(135deg, #fef3c7 0%, #fef2f2 100%);
+  border-radius: 0.75rem;
+  border-left: 4px solid #f59e0b;
+  color: #92400e;
+  font-size: 0.9rem;
   font-style: italic;
-  color: #555;
-  margin-bottom: 1rem;
+  font-weight: 500;
+  font-family: 'Poppins', sans-serif;
+}
+
+.room-card-mantra::before {
+  content: 'Daily Mantra: ';
+  font-weight: 700;
+  color: #f59e0b;
+  font-style: normal;
+  display: block;
+  margin-bottom: 0.5rem;
 }
 
 .room-code {
-  font-family: 'Poppins';
-  font-size: 0.875rem;
-  color: var(--primary-color);
-  margin-bottom: 1rem;
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.9rem;
+  color: #2C514C;
   font-weight: 500;
+  margin-bottom: 1rem;
+}
+
+.room-code-label {
+  font-weight: 700;
+  color: #34d399;
+}
+
+.room-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 1rem;
+  border-top: 2px solid #f1f5f9;
+}
+
+.room-status {
+  font-size: 0.9rem;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.room-status-label {
+  font-weight: 700;
+  color: #34d399;
+}
+
+.manage-button {
+  background: linear-gradient(45deg, #2C514C, #27926b);
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 50px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: 'Poppins', sans-serif;
+  box-shadow: 0 4px 12px rgba(52, 211, 153, 0.3);
+}
+
+.manage-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(52, 211, 153, 0.4);
 }
 
 /* Room Card Actions */
@@ -978,17 +1082,17 @@ textarea.form-control {
 }
 
 .view-btn {
-  background: var(--primary-color);
+  background: #2C514C;
   color: white;
 }
 
 .view-btn:hover {
-  background: #1e3a36;
+  background: #365551;
 }
 
 .edit-btn {
-  background: var(--accent-color);
-  color: black;
+  background: #f59e0b;
+  color: white;
 }
 
 .edit-btn:hover {
@@ -1003,7 +1107,6 @@ textarea.form-control {
 .delete-btn:hover {
   background: #c82333;
 }
-
 /* No Data State */
 .no-data {
   text-align: center;
