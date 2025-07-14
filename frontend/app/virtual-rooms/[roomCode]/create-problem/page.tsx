@@ -166,10 +166,11 @@ export default function CreateProblem({ params }: { params: Promise<{ roomCode: 
 
     const startX = e.clientX;
     const startSize = shape.size;
+    const MIN_CIRCLE_SIZE = 80; // Increased from 20 to 40
 
     const handleMouseMove = (moveEvent: MouseEvent) => {
       const dx = moveEvent.clientX - startX;
-      const newSize = Math.max(20, startSize + dx);
+      const newSize = Math.max(MIN_CIRCLE_SIZE, startSize + dx);
 
       setShapes((prevShapes) =>
         prevShapes.map((s) =>
@@ -500,7 +501,7 @@ export default function CreateProblem({ params }: { params: Promise<{ roomCode: 
             showProperties={showProperties}
             showAngles={showAngles}
             showSides={showSides}
-            showArea={showArea}
+            showArea={showAreaByShape.square}
             onVertexMouseDown={(vertex) =>
               setDraggingVertex({ shapeId: shape.id, vertex })
             }
@@ -516,7 +517,7 @@ export default function CreateProblem({ params }: { params: Promise<{ roomCode: 
             handleCircleResizeMouseDown={handleCircleResizeMouseDown}
             showDiameter={showDiameter}
             showCircumference={showCircumference}
-            showArea={showArea}
+            showArea={showAreaByShape.circle}
           />
         );
       case "triangle":
@@ -527,7 +528,7 @@ export default function CreateProblem({ params }: { params: Promise<{ roomCode: 
             handleResizeMouseDown={() => { }}
             showSides={showSides}
             showAngles={showAngles}
-            showArea={showArea}
+            showArea={showAreaByShape.triangle}
             showHeight={showHeight}
           />
         );

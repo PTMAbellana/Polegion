@@ -21,9 +21,12 @@ export default function CircleShape({
   const handleX = size - 9;
   const handleY = r - 9;
 
-  const diameter = size;
-  const circumference = 2 * Math.PI * (size / 2);
-  const area = Math.PI * Math.pow(size / 2, 2);
+  const unitLabel = typeof pxToUnits === "function" ? pxToUnits(size) : "0";
+  const unitDiameter = parseFloat(unitLabel.toString().match(/[\d.]+/)?.[0] || "0");
+  const unitRadius = unitDiameter / 2;
+  const diameter = unitDiameter;
+  const circumference = 2 * Math.PI * unitRadius;
+  const area = Math.PI * Math.pow(unitRadius, 2);
 
   return (
     <div
@@ -35,6 +38,7 @@ export default function CircleShape({
         height: size,
         cursor: "move",
         zIndex: isSelected ? 10 : 2,
+        userSelect: "none", // 👈 disables text selection for everything inside
       }}
       onMouseDown={(e) => handleShapeMouseDown(shape.id, e)}
       onClick={(e) => {
@@ -75,14 +79,15 @@ export default function CircleShape({
             >
               <line
                 x1={0}
-                y1={size / 2}
+                y1={size / 2 - 4}
                 x2={size}
-                y2={size / 2}
+                y2={size / 2 - 4}
                 stroke="#222"
                 strokeWidth={3}
               />
             </svg>
-            {/* Side handle (resize) */}
+
+            {/* Resize handle */}
             <div
               style={{
                 position: "absolute",
@@ -91,7 +96,7 @@ export default function CircleShape({
                 width: 18,
                 height: 18,
                 background: "#2c514c",
-                border: "2px solid #fff", 
+                border: "2px solid #fff",
                 borderRadius: "50%",
                 zIndex: 20,
                 boxShadow: "0 0 4px #0002",
@@ -101,83 +106,70 @@ export default function CircleShape({
               onMouseDown={(e) => handleCircleResizeMouseDown(shape.id, e)}
               title="Drag horizontally to resize"
             />
-            {/* Diameter label */}
-            <span
-              style={{
-                position: "absolute",
-                left: "50%",
-                top: `calc(50% + ${labelYOffset}px)`,
-                transform: "translate(-50%, -50%)",
-                background: "#fff",
-                padding: "2px 8px",
-                borderRadius: 6,
-                border: "1px solid #aaa",
-                fontSize: 14,
-                zIndex: 4,
-                whiteSpace: "nowrap",
-              }}
-            >
-              {pxToUnits(size)}
-            </span>
-            {/* Additional Info */}
-            {showDiameter && (
-              <div
-                style={{
-                  position: "absolute",
-                  left: "50%",
-                  top: `calc(50% + ${labelYOffset}px + 20px)`,
-                  transform: "translate(-50%, -50%)",
-                  background: "#fff",
-                  padding: "2px 8px",
-                  borderRadius: 6,
-                  border: "1px solid #aaa",
-                  fontSize: 14,
-                  zIndex: 4,
-                  whiteSpace: "nowrap",
-                }}
-              >
-                Diameter: {diameter.toFixed(1)}
-              </div>
-            )}
-            {showCircumference && (
-              <div
-                style={{
-                  position: "absolute",
-                  left: "50%",
-                  top: `calc(50% + ${labelYOffset}px + 40px)`,
-                  transform: "translate(-50%, -50%)",
-                  background: "#fff",
-                  padding: "2px 8px",
-                  borderRadius: 6,
-                  border: "1px solid #aaa",
-                  fontSize: 14,
-                  zIndex: 4,
-                  whiteSpace: "nowrap",
-                }}
-              >
-                Circumference: {circumference.toFixed(1)}
-              </div>
-            )}
-            {showArea && (
-              <div
-                style={{
-                  position: "absolute",
-                  left: "50%",
-                  top: `calc(50% + ${labelYOffset}px + 60px)`,
-                  transform: "translate(-50%, -50%)",
-                  background: "#fff",
-                  padding: "2px 8px",
-                  borderRadius: 6,
-                  border: "1px solid #aaa",
-                  fontSize: 14,
-                  zIndex: 4,
-                  whiteSpace: "nowrap",
-                }}
-              >
-                Area: {area.toFixed(1)}
-              </div>
-            )}
           </>
+        )}
+
+        {/* Diameter label */}
+        {showDiameter && (
+          <div
+            style={{
+              position: "absolute",
+              left: "50%",
+              top: `calc(50% + ${labelYOffset}px + 20px)`,
+              transform: "translate(-50%, -50%)",
+              background: "#fff",
+              padding: "2px 8px",
+              borderRadius: 6,
+              border: "1px solid #aaa",
+              fontSize: 14,
+              zIndex: 4,
+              whiteSpace: "nowrap",
+            }}
+          >
+            Ø: {diameter.toFixed(1)} u
+          </div>
+        )}
+
+        {/* Circumference label */}
+        {showCircumference && (
+          <div
+            style={{
+              position: "absolute",
+              left: "50%",
+              bottom: `calc(100% + 10px)`,
+              transform: "translateX(-50%)",
+              background: "#fff",
+              padding: "2px 8px",
+              borderRadius: 6,
+              border: "1px solid #aaa",
+              fontSize: 14,
+              zIndex: 4,
+              whiteSpace: "nowrap",
+            }}
+          >
+            C: {circumference.toFixed(1)} u
+          </div>
+        )}
+
+        {/* Area label */}
+        {isSelected && showArea && (
+          <div
+            style={{
+              position: "absolute",
+              left: "calc(100% + 20px)",
+              top: "50%",
+              transform: "translateY(-50%)",
+              background: "#fff",
+              padding: "2px 8px",
+              borderRadius: 6,
+              border: "1px solid #aaa",
+              fontSize: 14,
+              zIndex: 4,
+              whiteSpace: "nowrap",
+            }}
+          >
+            A: {area.toFixed(1)} u²
+          </div>
         )}
       </div>
     </div>

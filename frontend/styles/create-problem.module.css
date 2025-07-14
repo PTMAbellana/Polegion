@@ -244,6 +244,7 @@
 }
 
 .mainAreaHeader {
+  user-select: none; 
   width: 100%;
   height: 48px;
   background: #2c514c; /* Same dark green as toolbox */
@@ -347,6 +348,7 @@
 
 /* Toolbox header bar at the top */
 .toolboxHeader {
+  user-select: none; 
   width: 100%;
   height: 53px;
   background: #2c514c;
