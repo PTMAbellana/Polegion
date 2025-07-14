@@ -35,12 +35,15 @@ export const totalParticipant = async (room_id) => {
   }
 };
 
-export const getAllParticipants = async (room_id, type='user', withXp=false) => {
+export const getAllParticipants = async (room_id, type='user', withXp=false, compe_id = -1) => {
   try {
-    const xpParam = withXp ? '?withXp=true' : '';
+    const xpParam = withXp ? 'withXp=true' : '';
+    const compeParam = compe_id ? `compe_id=${compe_id}` : '';
+    const query = [xpParam, compeParam].filter(Boolean).join('&');
+
     return type === 'user' ? 
-      await api.get(`/participants/user/lists/${room_id}${xpParam}`) : 
-      await api.get(`/participants/creator/lists/${room_id}${xpParam}`);
+      await api.get(`/participants/user/lists/${room_id}${query ? '?' + query : ''}`) : 
+      await api.get(`/participants/creator/lists/${room_id}${query ? '?' + query : ''}`);
   } catch (error) {
     throw error;
   }

@@ -1,15 +1,17 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
-import { ChevronDown, ChevronUp, Edit3, Pause, Play, Eye } from 'lucide-react';
+import { ChevronDown, ChevronUp, Edit3, Pause, Play } from 'lucide-react';
 import styles from '@/styles/competition.module.css';
 import { useSearchParams } from 'next/navigation';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation';
 import { myAppHook } from '@/context/AppUtils';
 import { AuthProtection } from '@/context/AuthProtection';
 import Loader from '@/components/Loader';
 import { getRoomProblems } from '@/api/problems';
 import { getAllParticipants } from '@/api/participants';
+import { getAllCompe } from '@/api/competitions';
+import { ROUTES } from '@/constants/routes';
 
 interface Participant {
   id: number;
@@ -28,15 +30,23 @@ interface Problems {
     timer: number | null
 }
 
+interface Competition {
+  id: number 
+  title: string;
+  status: string;
+}
+
 const CompetitionDashboard = () => {
   const searchParams = useSearchParams();
   const roomId = searchParams.get("room");
+  const router = useRouter();
 
   // const [participants, setParticipants] = useState<Participant[]>([]);
   const [sortOrder, setSortOrder] = useState('desc');
   const [isPaused, setIsPaused] = useState(false);
   const [fetched, setFetched] = useState(false);
   const [ isLoading, setIsLoading ] = useState(true)
+  const [ competition, setCompetition ] = useState<Competition[]>([])
   
   const [ participants, setParticipants ] = useState<Participant[]>([])
   const [ problems, setProblems ] = useState<Problems[]>([])
@@ -60,7 +70,7 @@ const CompetitionDashboard = () => {
         try {
             setIsLoading(true)
             // kani without xp ni sha huehue
-            const parts = await getAllParticipants(roomId, 'creator', true)
+            const parts = await getAllParticipants(roomId, 'creator', 'room')
             console.log('Attempting to get all participants: ', parts.data)
 
             setParticipants( parts.data.participants || [] )
@@ -69,6 +79,10 @@ const CompetitionDashboard = () => {
             const probs = await getRoomProblems(roomId)
             console.log('Fetching all problems: ', probs)
             setProblems(probs)
+
+            const comp = await getAllCompe(roomId)
+            console.log('Fetching all competitions: ', comp)
+            setCompetition(comp)
         } catch (error) {
             console.error('Error fetching room details:', error)
         } finally {
@@ -90,6 +104,10 @@ const CompetitionDashboard = () => {
     return sortOrder === 'desc' ? b.accumulated_xp - a.accumulated_xp : a.accumulated_xp - b.accumulated_xp;
   });
 
+  const redirectToManage = (compe_id : string) => {
+    router.push(`${ROUTES.COMPETITION}/${compe_id}?room=${roomId}`)  
+  };
+
   const toggleSort = () => {
     setSortOrder(sortOrder === 'desc' ? 'asc' : 'desc');
   };
@@ -97,6 +115,8 @@ const CompetitionDashboard = () => {
   const togglePause = () => {
     setIsPaused(!isPaused);
   };
+
+  console.log('competion: ', competition)
 
   return (
     <div className={styles.container}>
@@ -149,22 +169,14 @@ const CompetitionDashboard = () => {
           {/* Problems List */}
           <div className={styles.participantsList}>
             {problems.map((problem, index) => (
-              <div
-                key={problem.id}
-                className={styles.problemCard}
-              >
-                <div className={styles.problemContent}>
-                  <div className={styles.problemLeft}>
-                    <div className={styles.problemRank}>
-                      {index + 1}
-                    </div>
+              <div key={problem.id} className={styles.participantCard}>
+                <div className={styles.participantContent}>
+                  <div className={styles.participantLeft}>
+                    <div className={styles.participantRank}>{index + 1}</div>
                     <div>
-                      <h3 className={styles.problemName}>
-                        {problem.title || 'No Title'}
-                      </h3>
+                      <h3 className={styles.participantName}>{problem.title || 'No Title'}</h3>
                     </div>
                   </div>
-
                   <div className={styles.participantRight}>
                     <div className={styles.participantXp}>
                       {problem.timer != null ? `${problem.timer} seconds` : 'No timer'}
@@ -172,8 +184,7 @@ const CompetitionDashboard = () => {
                     <button className={styles.editButton}>
                       <Edit3 className="w-5 h-5 text-gray-600" />
                     </button>
-                  </div>  
-                  
+                  </div>
                 </div>
               </div>
             ))}
@@ -227,9 +238,9 @@ const CompetitionDashboard = () => {
                     <div className={styles.participantXp}>
                       {participant.accumulated_xp} XP
                     </div>
-                    <button className={styles.editButton}>
+                    {/* <button className={styles.editButton}>
                       <Edit3 className="w-5 h-5 text-gray-600" />
-                    </button>
+                    </button> */}
                   </div>
                 </div>
               </div>
@@ -238,54 +249,44 @@ const CompetitionDashboard = () => {
         </div>
 
         {/* Action Buttons */}
-        <div className={styles.actionSection}>
+        {/* <div className={styles.actionSection}>
           <button className={styles.observeButton}>
             <Eye className="w-5 h-5" />
             <span>Observe</span>
           </button>
-        </div>
+        </div> */}
       </div>
 
       {/* My Room Section */}
       <div className={styles.myRoomSection}>
         <h2 className={styles.myRoomTitle}>Room Competitions</h2>
         <div className={styles.roomGrid}>
-          {/* Room Card */}
-          <div className={styles.roomCard}>
-            {/* Room Banner */}
-            <div className={styles.roomBanner}>
-              <div className={styles.roomBannerOverlay}></div>
-              <div className={styles.roomBannerContent}>
-                <h3 className={styles.roomBannerTitle}>Competition Room 1</h3>
-              </div>
-            </div>
-            
-            {/* Room Content */}
-            <div className={styles.roomContent}>
-              <div className={styles.roomDescription}>
-                <h4 className={styles.roomDescriptionTitle}>Description</h4>
-                <p className={styles.roomDescriptionText}>
-                  A competitive programming challenge for students to test their coding skills.
-                </p>
-              </div>
-              
-              <div className={styles.roomMantra}>
-                <h4 className={styles.roomMantraTitle}>Room Mantra</h4>
-                <p className={styles.roomMantraText}>
-                  &ldquo;Code with passion, compete with honor.;rdquo;
-                </p>
-              </div>
-              
-              <div className={styles.roomFooter}>
-                <div className={styles.roomStatus}>
-                  <span className={styles.roomStatusLabel}>Status:</span> Active
+          {competition.length > 0 ? (
+            competition.map((comp) => (
+              <div key={comp.id} className={styles.roomCard}>
+                {/* Room Banner */}
+                <div className={styles.roomBanner}>
+                  <div className={styles.roomBannerOverlay}></div>
+                  <div className={styles.roomBannerContent}>
+                    <h3 className={styles.roomBannerTitle}>{comp.title}</h3>
+                  </div>
                 </div>
-                <button className={styles.manageButton}>
-                  Manage
-                </button>
+                {/* Room Content (no description/mantra) */}
+                <div className={styles.roomContent}>
+                  <div className={styles.roomFooter}>
+                    <div className={styles.roomStatus}>
+                      <span className={styles.roomStatusLabel}>Status:</span> {comp.status}
+                    </div>
+                    <button className={styles.manageButton} onClick={() => redirectToManage(comp.id)}>
+                      Manage
+                    </button>
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
+            ))
+          ) : (
+            <div style={{ padding: '2rem', textAlign: 'center', width: '100%' }}>No competitions found.</div>
+          )}
         </div>
       </div>
     </div>

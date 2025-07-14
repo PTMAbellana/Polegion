@@ -29,7 +29,7 @@ class ParticipantService {
     }
 
     //ang mu get kay ang owner or ang admin
-    async getRoomParticipantsForAdmin(room_id, creator_id, with_xp = false){
+    async getRoomParticipantsForAdmin(room_id, creator_id, with_xp = false, compe_id = null ){
         try {
             //verify if room exists
             const exist = await this.roomService.getRoomById(room_id, creator_id)
@@ -57,19 +57,31 @@ class ParticipantService {
             // console.log('participants: ', participants)
             if (!with_xp) return participants;
             else {
-                return await Promise.all(
-                    participants.map(async p => {
-                        console.log('p: ', p.participant_id)
-                        const res = await this.leaderService.getRoomBoardById(room_id, p.participant_id);
-                        console.log('res: ', res)
-                        return {
-                            ...p,
-                            accumulated_xp: res?.accumulated_xp ?? 0
-                        };
-                    })
-                );
+                if (compe_id === null || compe_id === -1) {
+                    return await Promise.all(
+                        participants.map(async p => {
+                            const res = await this.leaderService.getRoomBoardById(room_id, p.participant_id);
+                            return {
+                                ...p,
+                                accumulated_xp: res?.accumulated_xp ?? 0
+                            };
+                        })
+                    );
+                }
+                else {
+                    return await Promise.all(
+                        participants.map(async p => {
+                            const res = await this.leaderService.getCompeBoardById(compe_id, p.participant_id);
+                            return {
+                                ...p,
+                                accumulated_xp: res?.accumulated_xp ?? 0
+                            };
+                        })
+                    );
+                }
             }
         } catch (error){
+            console.log('Error in getRoomParticipantsForAdmin service: ', error)
             throw error
         }
     }

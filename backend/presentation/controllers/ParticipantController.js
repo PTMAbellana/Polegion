@@ -73,10 +73,11 @@ class ParticipantController {
         // const {room_id} = req.body
         const { room_id } = req.params
         // console.log(req.query)
-        const withXp = req.query.withXp === 'true'; 
+        const withXp = req.query.withXp === 'true';
+        const compe_id = req.query.compe_id ? parseInt(req.query.compe_id) : -1; 
         // console.log('getRoomParticipants called 1: ', room_id)
         try {
-            const participants = await this.participantService.getRoomParticipantsForAdmin(room_id, req.user.id, withXp)
+            const participants = await this.participantService.getRoomParticipantsForAdmin(room_id, req.user.id, withXp, compe_id)
             // console.log('getRoomParticipants called 2: ', participants)
             res.status(200).json({
                 participants

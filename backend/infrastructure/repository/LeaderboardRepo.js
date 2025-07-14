@@ -135,6 +135,25 @@ class LeaderboardRepo extends BaseRepo {
             throw error
         }
     }
+   
+    async getRawCompeBoard (compe_id, participant_id) {
+        try {
+            const {
+                data, 
+                error
+            } = await this.supabase.from(this.tableCompe)
+            .select('*')
+            .eq('competition_id', compe_id)
+            .eq('room_participant_id', participant_id)
+            .single()
+
+            if (error) throw error
+            if (!data) throw new Error('Leaderboard not found')
+            return data
+        } catch (error) {
+            throw error
+        }
+    }
 
 }
 

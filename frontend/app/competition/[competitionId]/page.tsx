@@ -1,15 +1,15 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
-import { ChevronDown, ChevronUp, Edit3, Pause, Play, Eye } from 'lucide-react';
+import React, { use, useEffect, useState } from 'react';
+import { ChevronDown, ChevronUp, Edit3, Pause, Play } from 'lucide-react';
 import styles from '@/styles/competition.module.css';
-import { useSearchParams } from 'next/navigation';
-import { useRouter } from 'next/router';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { myAppHook } from '@/context/AppUtils';
 import { AuthProtection } from '@/context/AuthProtection';
 import Loader from '@/components/Loader';
 import { getRoomProblems } from '@/api/problems';
 import { getAllParticipants } from '@/api/participants';
+import { getCompeById } from '@/api/competitions';
 
 interface Participant {
   id: number;
@@ -28,10 +28,17 @@ interface Problems {
     timer: number | null
 }
 
-const CompetitionDashboard = () => {
+interface Competition {
+  title: string;
+  status: string;
+}
+
+const CompetitionDashboard = ({ params } : { params  : Promise<{competitionId : number }> }) => {
   const searchParams = useSearchParams();
   const roomId = searchParams.get("room");
+  const compe_id = use(params)
 
+  // console.log('compe_id: ', compe_id.competitionId)
   // const [participants, setParticipants] = useState<Participant[]>([]);
   const [sortOrder, setSortOrder] = useState('desc');
   const [isPaused, setIsPaused] = useState(false);
@@ -40,10 +47,11 @@ const CompetitionDashboard = () => {
   
   const [ participants, setParticipants ] = useState<Participant[]>([])
   const [ problems, setProblems ] = useState<Problems[]>([])
-
+  const [ competition, setCompetition ] = useState<Competition | undefined>(undefined)
+  
   const { isLoggedIn } = myAppHook()
   const { isLoading: authLoading } = AuthProtection()
-  // const router = useRouter();
+  const router = useRouter();
 
   useEffect(() => {
       if (isLoggedIn && !authLoading && !fetched) {
@@ -60,7 +68,7 @@ const CompetitionDashboard = () => {
         try {
             setIsLoading(true)
             // kani without xp ni sha huehue
-            const parts = await getAllParticipants(roomId, 'creator', true)
+            const parts = await getAllParticipants(roomId, 'creator', true, compe_id.competitionId)
             console.log('Attempting to get all participants: ', parts.data)
 
             setParticipants( parts.data.participants || [] )
@@ -69,6 +77,10 @@ const CompetitionDashboard = () => {
             const probs = await getRoomProblems(roomId)
             console.log('Fetching all problems: ', probs)
             setProblems(probs)
+
+            const compe = await getCompeById(roomId, compe_id.competitionId)
+            console.log('Fetching competition details: ', compe)
+            setCompetition(compe)
         } catch (error) {
             console.error('Error fetching room details:', error)
         } finally {
@@ -106,10 +118,10 @@ const CompetitionDashboard = () => {
         <div className={styles.header}>
           <div className={styles.headerContent}>
             <h1 className={styles.title}>
-              Competition Dashboard
+              {competition?.title || 'Competition Dashboard'}
             </h1>
             <p className={styles.status}>
-              Status: <span className={styles.statusValue}>New</span>
+              Status: <span className={styles.statusValue}>{competition?.status}</span>
             </p>
             <p className={styles.description}>
               You can see the progress of the students and how much XP they have garnered already.
@@ -149,22 +161,14 @@ const CompetitionDashboard = () => {
           {/* Problems List */}
           <div className={styles.participantsList}>
             {problems.map((problem, index) => (
-              <div
-                key={problem.id}
-                className={styles.problemCard}
-              >
-                <div className={styles.problemContent}>
-                  <div className={styles.problemLeft}>
-                    <div className={styles.problemRank}>
-                      {index + 1}
-                    </div>
+              <div key={problem.id} className={styles.participantCard}>
+                <div className={styles.participantContent}>
+                  <div className={styles.participantLeft}>
+                    <div className={styles.participantRank}>{index + 1}</div>
                     <div>
-                      <h3 className={styles.problemName}>
-                        {problem.title || 'No Title'}
-                      </h3>
+                      <h3 className={styles.participantName}>{problem.title || 'No Title'}</h3>
                     </div>
                   </div>
-
                   <div className={styles.participantRight}>
                     <div className={styles.participantXp}>
                       {problem.timer != null ? `${problem.timer} seconds` : 'No timer'}
@@ -172,8 +176,7 @@ const CompetitionDashboard = () => {
                     <button className={styles.editButton}>
                       <Edit3 className="w-5 h-5 text-gray-600" />
                     </button>
-                  </div>  
-                  
+                  </div>
                 </div>
               </div>
             ))}
@@ -227,9 +230,9 @@ const CompetitionDashboard = () => {
                     <div className={styles.participantXp}>
                       {participant.accumulated_xp} XP
                     </div>
-                    <button className={styles.editButton}>
+                    {/* <button className={styles.editButton}>
                       <Edit3 className="w-5 h-5 text-gray-600" />
-                    </button>
+                    </button> */}
                   </div>
                 </div>
               </div>
@@ -237,13 +240,14 @@ const CompetitionDashboard = () => {
           </div>
         </div>
 
+
         {/* Action Buttons */}
-        <div className={styles.actionSection}>
+        {/* <div className={styles.actionSection}>
           <button className={styles.observeButton}>
             <Eye className="w-5 h-5" />
             <span>Observe</span>
           </button>
-        </div>
+        </div> */}
       </div>
       
     </div>

@@ -115,6 +115,14 @@ class LeaderboardService {
             throw error
         }
     }
+
+    async getCompeBoardById(compe_id, part_id) {
+        try {
+            return await this.leaderRepo.getRawCompeBoard(compe_id, part_id)
+        } catch (error) {
+            throw error
+        }
+    }
 }
 
 module.exports = LeaderboardService
