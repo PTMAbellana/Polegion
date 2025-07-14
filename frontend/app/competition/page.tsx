@@ -70,7 +70,7 @@ const CompetitionDashboard = () => {
         try {
             setIsLoading(true)
             // kani without xp ni sha huehue
-            const parts = await getAllParticipants(roomId, 'creator', 'room')
+            const parts = await getAllParticipants(roomId, 'creator', true)
             console.log('Attempting to get all participants: ', parts.data)
 
             setParticipants( parts.data.participants || [] )

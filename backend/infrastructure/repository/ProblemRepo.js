@@ -116,7 +116,10 @@ class ProblemRepo {
         error
        } = await this.supabase
         .from(this.tableName)
-        .update(problemData)
+        .update({
+          ...problemData,
+          'updated_at': new Date()
+        })
         .eq('id', prob_id)
         .eq('creator_id', user_id)
         .select()
