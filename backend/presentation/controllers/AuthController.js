@@ -4,20 +4,23 @@ class AuthController {
     }
 
     refreshToken = async (req, res) => {
-        const { refresh_token } = req.body
-
+        const { refresh_token } = req.body;
         if (!refresh_token)
-            return res.status(400).json({
-                error: 'Refresh token is required'
-            })
+            return res.status(400).json({ error: 'Refresh token is required' });
 
         try {
-            const data = await this.authService.refreshToken(refresh_token)
-            return res.status(200).json(data)
+            const data = await this.authService.refreshToken(refresh_token);
+            // Log the data for debugging
+            console.log('Refresh session data:', data);
+            if (!data || !data.session) {
+                return res.status(401).json({ error: 'No session returned from Supabase' });
+            }
+            // Return the session object in the expected format
+            return res.status(200).json({ session: data.session });
         } catch (error) {
-            return res.status(401).json({
-                error: 'Invalid or expired refresh token'
-            })
+            // Log the error for debugging
+            console.error('Refresh token error:', error);
+            return res.status(401).json({ error: 'Invalid or expired refresh token', details: error.message });
         }
     }
 
@@ -32,6 +35,8 @@ class AuthController {
             if (!data) res.status(400).json({
                 error: error.message
             })
+
+            console.log(data)
     
             res.status(200).json(data)
         } catch (error) {

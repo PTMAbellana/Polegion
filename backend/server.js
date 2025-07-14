@@ -32,7 +32,7 @@ app.use('/api/participants', participantRoutes)
 app.use('/api/problems', problemRoutes)
 app.use('/api/leaderboards', leaderboardRoutes)
 app.use('/api/attempts', attemptsRoutes)
-app.use('/api/competition', competitionRoutes)
+app.use('/api/competitions', competitionRoutes)
 
 //basic route
 app.get('/', (req, res) => {

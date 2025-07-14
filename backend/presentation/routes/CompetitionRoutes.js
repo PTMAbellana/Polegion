@@ -11,7 +11,7 @@ class CompeRoutes {
 
     initializeRoutes(){
         this.router.use(this.authMiddleware.protect);
-    
+        this.router.post('/', this.compeController.addCompe);
      }
 
 

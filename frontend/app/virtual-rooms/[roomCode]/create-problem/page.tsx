@@ -542,7 +542,7 @@ export default function CreateProblem({ params }: { params: Promise<{ roomCode: 
       max_attempts: limitAttempts,
       expected_xp: XP_MAP[difficulty],
       timer: timerOpen ? timerValue : null,
-      // hint: hintOpen ? hint : null,
+      hint: hintOpen ? hint : null,
     };
 
     try {
