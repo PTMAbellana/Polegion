@@ -25,8 +25,7 @@ class CompeRepo extends BaseRepo {
         } catch (error) {
             throw error
         }
-    }
-
+    }  
 }
 
 module.exports = CompeRepo

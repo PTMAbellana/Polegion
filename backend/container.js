@@ -60,10 +60,10 @@ const userService = new UserService(userRepository);
 const roomService = new RoomService(roomRepository);
 const problemService = new ProblemService(problemRepository, roomRepository);
 const attemptsService = new AttemptsService(attemptsRepository);
-const competitionService = new CompetitionService(competitionRepository);
 const xpService = new XPService(xpRepository);
 const leaderboardService = new LeaderboardService(leaderboardRepository, userService, xpService);
 const participantService = new ParticipantService(participantRepository, roomService, userService, leaderboardService);
+const competitionService = new CompetitionService(competitionRepository, participantService, leaderboardService);
 
 // Initialize middleware
 const authMiddleware = new AuthMiddleware(authService);

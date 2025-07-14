@@ -136,7 +136,7 @@ class ProblemRepo {
         error
        } = await this.supabase
         .from(this.tableCompe)
-        .update({ timer: timer })
+        .update({ 'timer': timer })
         .eq('problem_id', prob_id)
         .select()
         .single();

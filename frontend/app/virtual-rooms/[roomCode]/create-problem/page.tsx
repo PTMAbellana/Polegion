@@ -14,7 +14,8 @@ import Timer from "./components/Timer";
 import LimitAttempts from "./components/LimitAttempts";
 import SetVisibility from "./components/SetVisibility";
 import ShapeLimitPopup from "./components/ShapeLimitPopup";
-import { createProblem, deleteProblem, getRoomProblemsByCode } from '@/api/problems'
+import { createProblem, deleteProblem, getRoomProblemsByCode, updateProblem } from '@/api/problems'
+import Swal from "sweetalert2";
 
 interface Problem {
   id: string
@@ -25,6 +26,8 @@ interface Problem {
   difficulty: string
   max_attempts: number
   expected_xp: number
+  timer?: number | null
+  hint?: string | null
 }
 const FILL_COLORS = [
   "#ffadad", "#ffd6a5", "#fdffb6", "#caffbf",
@@ -52,6 +55,7 @@ export default function CreateProblem({ params }: { params: Promise<{ roomCode: 
   }, [params]);
 
   const [problems, setProblems] = useState<Problem[]>([]);
+  const [problemId, setProblemId] = useState<string | null>(null);  // para edit problem
   const [title, setTitle] = useState("");
 
   const [shapes, setShapes] = useState<any[]>([]);
@@ -545,12 +549,63 @@ export default function CreateProblem({ params }: { params: Promise<{ roomCode: 
       hint: hintOpen ? hint : null,
     };
 
+    let message = {}
+    let error_message = {}
+    if (!problemId) {
+      error_message = {
+        title: "Error",
+        text: "There was an error creating the problem. Please try again.",
+        icon: "error",
+        confirmButtonText: "OK",
+      }
+    } else {
+      error_message = {
+        title: "Error",
+        text: "There was an error editing the problem. Please try again.",
+        icon: "error",
+        confirmButtonText: "OK",
+      }
+    }
+
     try {
       console.log(JSON.stringify(payload));
-      await createProblem(payload, roomCode);
+      if (!problemId) {
+        await createProblem(payload, roomCode);
+        message = {
+          title: "Problem Created",
+          text: "Your problem has been successfully created!",
+          icon: "success",
+          confirmButtonText: "OK",
+        }; 
+      } else {
+        // api for edit problem
+        console.log("Editing problem with ID:", problemId);
+        await updateProblem(problemId, payload);
+        message = {
+          title: "Problem Edited",
+          text: "Your problem has been successfully edited!",
+          icon: "success",
+          confirmButtonText: "OK",
+        }; 
+      }
       await fetchProblems(); // Refresh problems after saving
+      Swal.fire(message);
     } catch (error) {
       console.error("Save error:", error);
+      Swal.fire(error_message);
+    } finally {
+      setTitle("");
+      setPrompt("");
+      setShapes([]);
+      setSelectedId(null);
+      setDifficulty("Easy");
+      setLimitAttempts(1);
+      setTimerOpen(false);
+      setTimerValue(5);
+      setHintOpen(false);
+      setHint("");
+      setVisible(true);
+      setShowProperties(false);
     }
   };
 
@@ -564,6 +619,28 @@ export default function CreateProblem({ params }: { params: Promise<{ roomCode: 
       console.error("Error deleting problem:", error);
     }
   };
+
+  const handleEditProblem = async (problemId: string) => { 
+    console.log("Edit problem:", problemId);
+    const problem = problems.find(p => p.id === problemId);
+    if (!problem) return;
+    console.log(problem)
+    setProblemId(problemId);
+    setTitle(problem.title || "");
+    setPrompt(problem.description || "");
+    setShapes(problem.expected_solution || []);
+    setDifficulty(problem.difficulty || "Easy");
+    setShowLimitPopup(problem.max_attempts !== null && problem.max_attempts !== undefined);
+    setLimitAttempts(problem.max_attempts || 1);
+    // Timer: open if timer is not null/undefined (even if 0)
+    setTimerOpen(problem.timer !== null && problem.timer !== undefined);
+    setTimerValue(typeof problem.timer === 'number' ? problem.timer : 5);
+    // Hint: open if hint is not null/undefined (even if empty string)
+    setHintOpen(problem.hint !== null && problem.hint !== undefined);
+    setHint(problem.hint ?? "");
+    setVisible(problem.visibility === "show");
+    setShowProperties(true);  
+  }
 
   return (
     <div className={styles.root}>
@@ -685,6 +762,12 @@ export default function CreateProblem({ params }: { params: Promise<{ roomCode: 
                       <div className={styles.problemTitle}>
                         {problem.title || "Untitled Problem"}
                       </div>
+                      <button 
+                        onClick={() => handleEditProblem(problem.id)} 
+                        title="Edit this problem"
+                      >
+                        Edit
+                      </button>
                       <button 
                         onClick={() => handleDeleteProblem(problem.id)} 
                         className={styles.deleteButton}

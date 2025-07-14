@@ -1,5 +1,5 @@
 class Problem {
-    constructor(id, title, description, room_id, creator_id, expected_solution, difficulty = 'easy', visibility = 'show', created_at=new Date(), updated_at, max_attempts = 1, expected_xp=10){
+    constructor(id, title, description, room_id, creator_id, expected_solution, difficulty = 'easy', visibility = 'show', created_at=new Date(), updated_at, max_attempts = 1, expected_xp=10, hint){
         this.id                 = id
         this.title              = title
         this.description        = description
@@ -12,6 +12,7 @@ class Problem {
         this.updated_at         = updated_at
         this.max_attempts       = max_attempts
         this.expected_xp        = expected_xp
+        this.hint               = hint
     }
 
     static fromDbRoom (problemData){
@@ -27,7 +28,8 @@ class Problem {
             problemData.created_at,
             problemData.updated_at,
             problemData.max_attempts,
-            problemData.expected_xp
+            problemData.expected_xp,
+            problemData.hint
         );
     }
 
@@ -45,7 +47,8 @@ class Problem {
             difficulty: this.difficulty,
             updated_at: this.updated_at,
             max_attempts: this.max_attempts,
-            expected_xp: this.expected_xp
+            expected_xp: this.expected_xp,
+            hint: this.hint
         }
     }
 }

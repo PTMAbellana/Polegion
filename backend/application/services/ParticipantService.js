@@ -191,6 +191,15 @@ class ParticipantService {
         }
         await Mailer.sendMail(mailOptions);
     }
+
+    // di ni sha mu ano sa controller
+    getAllParticipants = async (room_id) => {
+        try {
+            return await this.participantRepo.getAllParticipants(room_id)
+        } catch (error) {
+            throw error
+        }
+    }
 }
 
 module.exports = ParticipantService

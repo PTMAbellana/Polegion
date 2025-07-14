@@ -52,7 +52,20 @@ class ProblemService {
     try {
       const room = await this.roomService.getRoomByCodeUsers(room_code)
       if (!room) throw new Error('Room not found')
-      return await this.problemRepo.fetchRoomProblems(room.id, creator_id)
+      const problems = await this.problemRepo.fetchRoomProblems(room.id, creator_id)
+    if (!problems || problems.length === 0) return [];
+      
+      const problemsWithTimers = await Promise.all(
+        problems.map(async problem => {
+          const timerData = await this.problemRepo.fetchCompeProblemByProbId(problem.id);
+          console.log('timerData', timerData)
+          return {
+            ...problem,
+            timer: timerData?.timer
+          };
+        })
+      );
+      return problemsWithTimers;
     } catch (error) {
       throw error
     }
@@ -81,13 +94,15 @@ class ProblemService {
 
   async updateProblem(problem_id, creator_id, problemData) {
     try {
+      console.log('updating problem', problem_id, creator_id, problemData)
       const {timer, ...rest} = problemData
-      const updatedProblem = await this.problemRepo.updateProblem(problem_id, creator_id, ...rest)
+      const updatedProblem = await this.problemRepo.updateProblem(problem_id, creator_id, rest)
       if (timer) {
         await this.problemRepo.updateTimer(problem_id, timer)
       }
       return updatedProblem
     } catch (error) {
+      console.log('Error in updateProblem:', error);
       throw error
     }
   }

@@ -33,6 +33,7 @@ class ProblemController {
     const { room_code } = req.params
     try {
       const problems = await this.problemService.fetchRoomProblemsByCode(room_code, req.user.id)
+      console.log('problems by code', problems)
       res.status(200).json(problems)
     } catch (error) {
       console.error('Error fetching problems by room code:', error);
@@ -44,6 +45,7 @@ class ProblemController {
     const { problem_id } = req.params
     try {
       const problem = await this.problemService.fetchProblem(problem_id, req.user.id)
+      // console.log('problem', problem)
       res.status(200).json(problem)
     } catch (error) {
       console.error('Error fetching problem:', error);
