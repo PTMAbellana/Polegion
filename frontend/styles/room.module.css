@@ -91,6 +91,13 @@
   50% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); }
 }
 
+/* Main Container with Background */
+.dashboard-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  font-family: 'Poppins', sans-serif;
+}
+
 /* Enhanced Dashboard Container */
 .dashboard-container {
   display: flex;
@@ -159,6 +166,36 @@
   background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.05) 50%, transparent 70%);
   animation: shimmer 4s infinite;
   pointer-events: none;
+}
+
+.header-gradient {
+  background: linear-gradient(135deg, #FABC60 0%, #2C514C 50%, #122932 100%);
+  padding: 2rem 0;
+  position: relative;
+}
+
+.header-gradient::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, rgba(250, 188, 96, 0.1), rgba(44, 81, 76, 0.1), rgba(18, 41, 50, 0.1));
+  animation: gradientShift 8s ease infinite;
+}
+
+@keyframes gradientShift {
+  0%, 100% { opacity: 0.1; }
+  50% { opacity: 0.3; }
+}
+
+.header-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 2rem;
+  position: relative;
+  z-index: 2;
 }
 
 /* Enhanced User Avatar */
@@ -756,7 +793,6 @@ textarea.form-control {
   gap: 1.5rem;
   margin-top: 2.5rem;
   flex-wrap: wrap;
-  animation: fadeInUp 0.6s ease-out 1.8s both;
 }
 
 .submit-btn, .create-room-btn {
@@ -795,42 +831,6 @@ textarea.form-control {
 
 .submit-btn:disabled, .create-room-btn:disabled {
   background: linear-gradient(135deg, #ccc 0%, #aaa 100%);
-  cursor: not-allowed;
-  transform: none;
-  box-shadow: none;
-}
-
-.cancel-btn {
-  background: transparent;
-  border: 2px solid rgba(204, 204, 204, 0.5);
-  border-radius: 25px;
-  padding: 15px 30px;
-  color: var(--text-secondary);
-  font-family: 'Poppins', sans-serif;
-  font-weight: 600;
-  font-size: 1.1rem;
-  cursor: pointer;
-  transition: var(--transition);
-  min-width: 140px;
-  position: relative;
-  overflow: hidden;
-  backdrop-filter: blur(10px);
-}
-
-.cancel-btn:hover {
-  background: rgba(245, 245, 245, 0.8);
-  border-color: var(--primary-color);
-  color: var(--primary-color);
-  transform: translateY(-2px);
-}
-
-/* Room Cards Section */
-.room-cards-section {
-  grid-column: 1 / -1;
-  animation: sectionFadeIn 0.8s ease-out 0.2s both;
-}
-
-@keyframes sectionFadeIn {
   from {
     opacity: 0;
     transform: translateY(30px);

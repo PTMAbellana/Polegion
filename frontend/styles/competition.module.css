@@ -251,39 +251,36 @@
 .sortControls {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 0.3rem; /* Reduced gap */
 }
 
 .sortButton {
+  background:rgb(116, 35, 35);
+  border: none;
+  border-radius: 4px; /* Smaller border radius */
+  padding: 4px 8px; /* Reduced padding */
+  cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  background: linear-gradient(45deg, #f59e0b, #ef4444);
+  gap: 0.3rem; /* Smaller gap */
+  font-size: 0.8rem; /* Smaller font */
+  font-weight: 500;
   color: white;
-  border: none;
-  border-radius: 50px;
-  padding: 0.75rem 1.5rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  font-weight: 600;
-  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+  transition: background 0.2s;
 }
 
 .sortButton:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 16px rgba(245, 158, 11, 0.4);
+  background:rgb(232, 107, 107);
 }
 
 .sortIcons {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: 0;
 }
 
 .sortText {
-  font-size: 1rem;
-  font-weight: 600;
-  font-family: 'Poppins', sans-serif;
+  font-size: 0.75rem; /* Even smaller text */
 }
 
 /* Participants List */
@@ -385,19 +382,63 @@
 }
 
 .editButton {
-  padding: 0.75rem;
-  background: linear-gradient(45deg, #f59e0b, #ef4444);
-  color: white;
+  background: white;
+  color: #222;
   border: none;
-  border-radius: 50%;
+  border-radius: 4px;
+  padding: 4px 10px;
+  font-weight: 600;
+  margin-left: 8px;
   cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+  transition: background 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .editButton:hover {
-  transform: scale(1.1);
-  box-shadow: 0 8px 16px rgba(245, 158, 11, 0.4);
+  background: #ffe066;
+}
+
+.saveBtn {
+  background: #f1c40f;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 4px 12px;
+  font-weight: 600;
+  margin-left: 8px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.saveBtn:hover {
+  background: #FABC60;
+}
+
+.cancelBtn {
+  background: #c0392b;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 4px 12px;
+  font-weight: 600;
+  margin-left: 4px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.cancelBtn:hover {
+  background: #e74c3c;
+}
+
+.timerInput {
+  width: 80px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid #bbb;
+  font-size: 15px;
+  margin-right: 8px;
 }
 
 /* Action Buttons */
@@ -559,7 +600,19 @@
 }
 
 .roomContent {
-  padding: 2rem;
+  display: flex;
+  gap: 2rem;
+  padding: 0 2rem 2rem;
+}
+
+.leftColumn {
+  flex: 3; /* 60% width (3 out of 5 parts) */
+  min-width: 0;
+}
+
+.rightColumn {
+  flex: 2; /* 40% width (2 out of 5 parts) */
+  min-width: 300px;
 }
 
 .roomDescription {
@@ -638,6 +691,87 @@
 .manageButton:hover {
   transform: translateY(-2px);
   box-shadow: 0 8px 16px rgba(52, 211, 153, 0.4);
+}
+
+/* Compact problem card styles */
+.problemInfo {
+  flex: 1;
+  min-width: 0; /* Allows text to truncate */
+}
+
+.problemTitle {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #222;
+  margin: 0 0 4px 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 150px; /* Adjust based on your sidebar width */
+}
+
+.problemMeta {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.problemDifficulty {
+  font-size: 0.75rem;
+  font-weight: 500;
+  padding: 2px 6px;
+  border-radius: 8px;
+  text-transform: capitalize;
+  background: #f0f0f0;
+  color: #666;
+}
+
+.problemDifficulty[data-difficulty="Easy"] {
+  background: #8FFFC2;
+  color: #1a6b3a;
+}
+
+.problemDifficulty[data-difficulty="Intermediate"] {
+  background: #FFFD9B;
+  color: #b59b1a;
+}
+
+.problemDifficulty[data-difficulty="Hard"] {
+  background: #FFB49B;
+  color: #b53a1a;
+}
+
+.problemXp {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #2d7a2d;
+}
+
+.problemTimer {
+  font-size: 0.8rem;
+  color: #666;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+/* Make participant cards more compact for sidebar */
+.rightColumn .participantCard {
+  padding: 12px 16px; /* Reduced padding */
+}
+
+.rightColumn .participantName {
+  font-size: 0.9rem; /* Smaller font */
+  font-weight: 600;
+}
+
+.rightColumn .participantXp {
+  font-size: 0.8rem; /* Smaller font */
+}
+
+.rightColumn .participantRank {
+  font-size: 1rem; /* Smaller rank number */
+  min-width: 24px; /* Smaller width */
 }
 
 /* Responsive Design */
@@ -726,6 +860,74 @@
   }
   
   .roomContent {
-    padding: 1.5rem;
+    padding: 1rem;
+  }
+}
+
+@media (max-width: 1024px) {
+  .roomContent {
+    flex-direction: column;
+  }
+  
+  .rightColumn {
+    min-width: 0;
+  }
+}
+
+/* Two-column layout with 2:3 ratio */
+.roomContent {
+  display: flex;
+  gap: 2rem;
+  padding: 0 2rem 2rem;
+}
+
+.leftColumn {
+  flex: 3; /* 60% width (3 out of 5 parts) */
+  min-width: 0;
+}
+
+.rightColumn {
+  flex: 2; /* 40% width (2 out of 5 parts) */
+  min-width: 300px;
+}
+
+/* Add/Remove button styles */
+.addBtn {
+  background: #2d7a2d;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 4px 12px;
+  cursor: pointer;
+  font-weight: 600;
+  margin-left: 8px;
+  transition: background 0.2s;
+}
+
+.addBtn:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+.removeBtn {
+  background: #c0392b;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 4px 12px;
+  cursor: pointer;
+  font-weight: 600;
+  margin-left: 8px;
+  transition: background 0.2s;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+  .roomContent {
+    flex-direction: column;
+  }
+  
+  .rightColumn {
+    min-width: 0;
   }
 }

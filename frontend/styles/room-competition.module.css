@@ -645,3 +645,81 @@
   margin-top: 20px;
   flex-wrap: wrap;
 }
+
+.problem-card {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  padding: 18px 24px;
+  margin-bottom: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  border: 2px solid transparent;
+}
+
+.problem-card:hover {
+  box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+  transform: translateY(-2px);
+  border: 2px solid #FABC60;
+}
+
+.problem-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.problem-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #222;
+}
+
+.problem-difficulty {
+  font-size: 0.95rem;
+  font-weight: 600;
+  padding: 2px 12px;
+  border-radius: 12px;
+  text-transform: capitalize;
+  margin-left: 8px;
+  background: #eee;
+  color: #333;
+}
+.problem-difficulty[data-difficulty="Easy"] {
+  background: #8FFFC2;
+  color: #1a6b3a;
+}
+.problem-difficulty[data-difficulty="Intermediate"] {
+  background: #FFFD9B;
+  color: #b59b1a;
+}
+.problem-difficulty[data-difficulty="Hard"] {
+  background: #FFB49B;
+  color: #b53a1a;
+}
+
+.problem-description {
+  color: #444;
+  font-size: 1rem;
+  margin: 4px 0 0 0;
+}
+
+.problem-meta {
+  display: flex;
+  gap: 1.5rem;
+  font-size: 0.98rem;
+  color: #666;
+  margin-top: 2px;
+}
+
+.problem-xp {
+  font-weight: 600;
+  color: #2d7a2d;
+}
+
+.problem-attempts {
+  color: #888;
+}
