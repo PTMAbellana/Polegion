@@ -827,6 +827,54 @@
   color: var(--text-secondary);
 }
 
+/* Create Problem Section */
+.createProblemSection {
+  margin-top: 3rem;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  overflow: hidden;
+}
+
+.sectionDivider {
+  background: linear-gradient(135deg, #FABC60 0%, #2C514C 50%, #122932 100%);
+  padding: 2rem;
+  text-align: center;
+  color: #fff;
+  position: relative;
+}
+
+.sectionDivider::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, rgba(250, 188, 96, 0.1), rgba(44, 81, 76, 0.1), rgba(18, 41, 50, 0.1));
+  animation: gradientShift 8s ease infinite;
+}
+
+.sectionTitle {
+  font-size: 2rem;
+  font-weight: 800;
+  margin: 0 0 0.5rem 0;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+  position: relative;
+  z-index: 2;
+}
+
+.sectionSubtitle {
+  font-size: 1.1rem;
+  margin: 0;
+  opacity: 0.9;
+  font-weight: 500;
+  position: relative;
+  z-index: 2;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .title {
