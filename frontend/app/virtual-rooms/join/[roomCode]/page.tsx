@@ -6,7 +6,7 @@ import { use, useEffect, useState } from "react"
 import styles from '@/styles/join-room.module.css'
 import Loader from "@/components/Loader"
 import { getRoomByCode } from "@/api/rooms"
-import { getAllParticipants, isParticipant, leaveRoom, totalParticipant } from "@/api/participants"
+import { getAllParticipants, isParticipant, joinRoom, leaveRoom, totalParticipant } from "@/api/participants"
 import { useRouter } from "next/navigation"
 import { ROUTES } from "@/constants/routes"
 import toast from "react-hot-toast"
@@ -37,7 +37,10 @@ export default function JoinRoom({ params } : { params  : Promise<{roomCode : st
     const [ totalParticipants, setTotalParticipants ] = useState<number>(0)
     const [isLoading, setIsLoading] = useState(true)
     const [ isPart, setIsPart ] = useState(false)
-    const [showJoinStatus, setShowJoinStatus] = useState(true);
+    
+    // FIX: Track join status properly
+    const [showJoinStatus, setShowJoinStatus] = useState(false) // Changed from true to false
+    const [hasCheckedJoinStatus, setHasCheckedJoinStatus] = useState(false)
 
     const { isLoggedIn } = myAppHook()
     const { isLoading: authLoading } = AuthProtection()
@@ -51,6 +54,38 @@ export default function JoinRoom({ params } : { params  : Promise<{roomCode : st
             if (authLoading || !isLoggedIn) setIsLoading(true)
         }
     }, [isLoggedIn, authLoading])
+
+    // NEW: Check if user just joined via URL parameters or session storage
+    useEffect(() => {
+        if (!hasCheckedJoinStatus) {
+            // Check URL parameters for 'joined' flag
+            const urlParams = new URLSearchParams(window.location.search)
+            const justJoined = urlParams.get('joined') === 'true'
+            
+            // Or check session storage for join flag
+            const sessionJoinFlag = sessionStorage.getItem(`joined_${roomCode.roomCode}`)
+            
+            if (justJoined || sessionJoinFlag === 'true') {
+                setShowJoinStatus(true)
+                
+                // Clear the session flag so it doesn't show again
+                sessionStorage.removeItem(`joined_${roomCode.roomCode}`)
+                
+                // Clean up URL parameters
+                if (justJoined) {
+                    const url = new URL(window.location.href)
+                    url.searchParams.delete('joined')
+                    window.history.replaceState({}, '', url.toString())
+                }
+                
+                // Auto-hide after 3 seconds
+                setTimeout(() => {
+                    setShowJoinStatus(false)
+                }, 3000)
+            }
+            setHasCheckedJoinStatus(true)
+        }
+    }, [roomCode.roomCode, hasCheckedJoinStatus])
 
     const callMe = async() => {
         try {
@@ -76,6 +111,23 @@ export default function JoinRoom({ params } : { params  : Promise<{roomCode : st
             console.log('Error fetching room details: ', error)
         } finally {
             setIsLoading(false)
+        }
+    }
+
+    const handleJoinRoom = async (roomCode: string) => {
+        try {
+            // Your existing join room API call
+            await joinRoom(roomCode)
+            
+            // Set session flag to show join success popup ONLY ONCE
+            sessionStorage.setItem(`joined_${roomCode}`, 'true')
+            
+            // Navigate to the room with joined flag
+            router.push(`/virtual-rooms/join/${roomCode}?joined=true`)
+            
+        } catch (error) {
+            console.error('Error joining room:', error)
+            toast.error('Failed to join room')
         }
     }
 
@@ -119,10 +171,7 @@ export default function JoinRoom({ params } : { params  : Promise<{roomCode : st
             toast.error('Error in leaving room')
         }
     }
-    console.log(
-        'Participants: ',
-        participants && participants.length > 0 ? participants[0].fullName : 'No participants'
-    );
+
     return (
         <div className={styles["dashboard-container"]}>
             {/* Header Section */}
@@ -150,7 +199,7 @@ export default function JoinRoom({ params } : { params  : Promise<{roomCode : st
             {/* Main Content */}
             <div className={styles["room-content"]}>
                 <div className={styles["main-column"]}>
-                    {/* Join Status */}
+                    {/* Join Status Modal - Only shows when user just joined */}
                     {showJoinStatus && (
                         <div className={styles["modal-overlay"]}>
                             <div className={styles["join-status-modal"]}>
@@ -250,10 +299,11 @@ export default function JoinRoom({ params } : { params  : Promise<{roomCode : st
                 </div>
 
                 {/* Participants Section */}
+                <div className={styles["sidebar-column"]}>
                     <div className={styles["participants-card"]}>
                         <div className={styles["section-header"]}>
                             <h3>Participants</h3>
-                            <div className={styles["participants-count"]}> { totalParticipants } members</div>
+                            <div className={styles["participants-count"]}>{totalParticipants} members</div>
                         </div>
                         <div className={styles["participants-list"]}>
                             {participants.length === 0 ? (
@@ -277,7 +327,7 @@ export default function JoinRoom({ params } : { params  : Promise<{roomCode : st
                             </button>
                         </div>
                     </div>
-
+                </div>
             </div>
         </div>
     )
