@@ -215,7 +215,7 @@ export default function RoomDetail({ params } : { params  : Promise<{roomCode : 
                             Share Room
                         </button> */}
                         <button onClick={redirectCompe} className={styles["edit-room-btn"]}>
-                            <b>CREATE COMPETITION</b>
+                            <b>COMPETITION DASHBOARD</b>
                         </button>
                     </div>
                 </div>
@@ -223,211 +223,222 @@ export default function RoomDetail({ params } : { params  : Promise<{roomCode : 
 
             {/* Main Content Grid */}
             <div className={styles["room-content"]}>
-                {/* Left Column */}
-                <div className={styles["left-column"]}>
-                    {/* Room Banner */}
-                    <div className={styles["room-banner-section"]}>
-                        <div className={styles["room-banner"]}>
-                            {roomDetails.banner_image ? (
-                                <img 
-                                    src={typeof roomDetails.banner_image === 'string' ? roomDetails.banner_image : ''} 
-                                    alt={roomDetails.title}
-                                    className={styles["banner-image"]}
-                                />
-                            ) : (
-                                <div className={styles["banner-placeholder"]}>
-                                    <div className={styles["placeholder-icon"]}>🖼️</div>
-                                    <span>No Banner Image</span>
-                                </div>
-                            )}
+              {/* Left Column */}
+              <div className={styles["left-column"]}>
+                {/* Room Banner */}
+                <div className={styles["room-banner-section"]}>
+                  <div className={styles["room-banner"]}>
+                    {roomDetails.banner_image ? (
+                        <img 
+                            src={typeof roomDetails.banner_image === 'string' ? roomDetails.banner_image : ''} 
+                            alt={roomDetails.title}
+                            className={styles["banner-image"]}
+                        />
+                    ) : (
+                        <div className={styles["banner-placeholder"]}>
+                            <div className={styles["placeholder-icon"]}>🖼️</div>
+                            <span>No Banner Image</span>
                         </div>
-                    </div>
-
-                    {/* Room Description */}
-                    <div className={styles["room-info-card"]}>
-                        <h3>About This Room</h3>
-                        <div className={styles["room-description"]}>
-                            {roomDetails.description}
-                        </div>
-                        <div className={styles["room-mantra"]}>
-                            <div className={styles["mantra-label"]}>Room Mantra:</div>
-                            <div className={styles["mantra-text"]}>&ldquo;{roomDetails.mantra}&rdquo;</div>
-                        </div>
-                    </div>
-
-                    {/* Problems Section */}
-                    <div className={styles["problems-card"]}>
-                        <div className={styles["section-header"]}>
-                            <h3>Problems</h3>
-                            <button
-                                className={styles["add-btn"]}
-                                onClick={() => router.push(`/virtual-rooms/${roomCode.roomCode}/create-problem`)}
-                            >
-                                + Add Problem
-                            </button>
-                        </div>
-                        <div className={styles["problems-list"]}>
-                        {
-                         problems.length === 0 ? (
-                            <div className={styles["empty-state"]}>
-                                <div className={styles["empty-icon"]}>❓</div>
-                                <p>No problems added yet</p>
-                                <span>Start by adding your first problem to discuss</span>
-                            </div>
-                         ) : (
-                            problems.map((p, idx) => (
-                                <div key={p.id || idx} className={styles["participant-item"]} style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                                    <span className='p-5'>{p.title === '' ? 'No Title' : p.title }</span>
-                                    <span className='p-5'>{p.description}</span>
-                                    <span className='p-5'>Max Attempts: {p.max_attempts}</span>
-                                    <span className='p-5'>Difficulty: {p.difficulty}</span>
-                                    <span className='p-5'>Expected XP: {p.expected_xp}</span>
-                                </div>
-                            ))
-                         )
-                        }
-                        </div>
-                    </div>
+                    )}
+                  </div>
                 </div>
 
-                {/* Right Column */}
-                <div className={styles["right-column"]}>
-                    {/* Participants Section */}
-                    <div className={styles["participants-card"]}>
-                        <div className={styles["section-header"]}>
-                            <h3>Participants</h3>
-                            <div className={styles["participants-count"]}> { participants.length } members</div>
-                        </div>
-                        <div className={styles["participants-list"]}>
-                            {participants.length === 0 ? (
-                                <div className={styles["empty-state"]}>
-                                    <div className={styles["empty-icon"]}>👥</div>
-                                    <p>No participants yet</p>
-                                    <span>Invite people to join this room</span>
-                                </div>
-                            ) : (
-                                participants.map((p, idx) => (
-                                    <div key={p.id || idx} className={styles["participant-item"]} style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                                        <button
-                                            onClick={() => handleRemoveParticipant(p.id, p.fullName)}
-                                            style={{
-                                                background: "none",
-                                                border: "none",
-                                                color: "red",
-                                                fontWeight: "bold",
-                                                cursor: "pointer",
-                                                padding: 0,
-                                                fontSize: "1rem",
-                                                lineHeight: 1,
-                                            }}
-                                            aria-label={`Remove ${p.fullName}`}
-                                            >
-                                        ×
-                                        </button>
-                                        <span>{p.fullName}</span>
-                                    </div>
-                                ))
-                            )
-                            }
-                        </div>
-                        <div className={styles["invite-section"]}>
-                            <button className={styles["invite-btn"]} onClick={() => setShowInviteModal(true)}>
-                                <span className={styles["invite-icon"]}>✉️</span>
-                                Invite Participants
-                            </button>
-                        </div>
-                    </div>
-
-                    {/* Room Settings */}
-                    <div className={styles["settings-card"]}>
-                        <h3>Room Settings</h3>
-                        <div className={styles["settings-list"]}>
-                            <div className={styles["setting-item"]}>
-                                <span className={styles["setting-label"]}>Room Privacy</span>
-                                <div className={styles["setting-value"]}>
-                                    <button
-                                        className={isPrivate ? styles["private-btn"] : styles["public-btn"]}
-                                        onClick={handleVisibility}
-                                    >
-                                        {isPrivate ? "Private" : "Public"}
-                                    </button>
-                                </div>
-                            </div>
-                            <div className={styles["setting-item"]}>
-                                <span className={styles["setting-label"]}>Room Code</span>
-                                <div className={styles["setting-value"]}>
-                                    <span>{roomDetails.code}</span>
-                                    <button 
-                                        className={styles["copy-btn"]}
-                                        onClick={() => {
-                                            navigator.clipboard.writeText(roomDetails.code)
-                                            alert('Room code copied to clipboard!')
-                                        }}
-                                    >
-                                        📋
-                                    </button>
-                                </div>
-                            </div>
-                            <div className={styles["setting-item"]}>
-                                <span className={styles["setting-label"]}>Room Link</span>
-                                <div className={styles["setting-value"]}>
-                                    <button 
-                                        className={styles["copy-btn"]}
-                                        onClick={() => {
-                                            const url = window.location.href
-                                            navigator.clipboard.writeText(url)
-                                            alert('Room link copied to clipboard!')
-                                        }}
-                                    >
-                                        🔗 Copy Link
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
+                {/* Room Description */}
+                <div className={styles["room-info-card"]}>
+                  <h3>About This Room</h3>
+                  <div className={styles["room-description"]}>
+                    {roomDetails.description}
+                  </div>
+                  <div className={styles["room-mantra"]}>
+                    <div className={styles["mantra-label"]}>Room Mantra:</div>
+                    <div className={styles["mantra-text"]}>&ldquo;{roomDetails.mantra}&rdquo;</div>
+                  </div>
                 </div>
-            </div>
 
-            {/* Invite Participants Modal */}
-            {showInviteModal && (
-                <div className={styles["modal-overlay"]}>
-                    <div className={styles["modal-content"]}>
-                      <h3>Invite by Email</h3>
-                      <input
-                        type="email"
-                        placeholder="Recipient's email"
-                        value={recipientEmail}
-                        onChange={e => setRecipientEmail(e.target.value)}
-                        style={{
-                          width: "100%",
-                          padding: "12px",
-                          borderRadius: "8px",
-                          border: "1px solid #e0e0e0",
-                          marginBottom: "20px",
-                          fontSize: "16px"
-                        }}
-                      />
-                      <div className={styles["modal-actions"]}>
+                {/* Problems Section */}
+                <div className={styles["problems-card"]}>
+                  <div className={styles["section-header"]}>
+                    <h3>Problems</h3>
+                    <button
+                        className={styles["add-btn"]}
+                        onClick={() => router.push(`/virtual-rooms/${roomCode.roomCode}/create-problem`)}
+                    >
+                        + Add Problem
+                    </button>
+                  </div>
+                  <div className={styles["problems-list"]}>
+                  {
+                   problems.length === 0 ? (
+                      <div className={styles["empty-state"]}>
+                          <div className={styles["empty-icon"]}>❓</div>
+                          <p>No problems added yet</p>
+                          <span>Start by adding your first problem to discuss</span>
+                      </div>
+                   ) : (
+                      problems.map((p, idx) => (
+                          <div key={p.id || idx} className={styles["problem-card"]}>
+                            <div className={styles["problem-header"]}>
+                              <span className={styles["problem-title"]}>{p.title?.trim() ? p.title : "No Title"}</span>
+                              <span
+                                className={styles["problem-difficulty"]}
+                                data-difficulty={p.difficulty}
+                              >
+                                {p.difficulty}
+                              </span>
+                            </div>
+                            <div className={styles["problem-description"]}>
+                              {p.description}
+                            </div>
+                            <div className={styles["problem-meta"]}>
+                              <span className={styles["problem-xp"]}>XP: {p.expected_xp}</span>
+                              <span className={styles["problem-attempts"]}>Max Attempts: {p.max_attempts}</span>
+                            </div>
+                          </div>
+                      ))
+                   )
+                  }
+                  </div>
+                </div>
+              </div>
+
+              {/* Right Column */}
+              <div className={styles["right-column"]}>
+                {/* Participants Section */}
+                <div className={styles["participants-card"]}>
+                  <div className={styles["section-header"]}>
+                    <h3>Participants</h3>
+                    <div className={styles["participants-count"]}> { participants.length } members</div>
+                  </div>
+                  <div className={styles["participants-list"]}>
+                    {participants.length === 0 ? (
+                        <div className={styles["empty-state"]}>
+                            <div className={styles["empty-icon"]}>👥</div>
+                            <p>No participants yet</p>
+                            <span>Invite people to join this room</span>
+                        </div>
+                    ) : (
+                        participants.map((p, idx) => (
+                            <div key={p.id || idx} className={styles["participant-item"]} style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                                <button
+                                    onClick={() => handleRemoveParticipant(p.id, p.fullName)}
+                                    style={{
+                                        background: "none",
+                                        border: "none",
+                                        color: "red",
+                                        fontWeight: "bold",
+                                        cursor: "pointer",
+                                        padding: 0,
+                                        fontSize: "1rem",
+                                        lineHeight: 1,
+                                    }}
+                                    aria-label={`Remove ${p.fullName}`}
+                                    >
+                            ×
+                            </button>
+                            <span>{p.fullName}</span>
+                            </div>
+                        ))
+                    )
+                    }
+                  </div>
+                  <div className={styles["invite-section"]}>
+                    <button className={styles["invite-btn"]} onClick={() => setShowInviteModal(true)}>
+                        <span className={styles["invite-icon"]}>✉️</span>
+                        Invite Participants
+                    </button>
+                  </div>
+                </div>
+
+                {/* Room Settings */}
+                <div className={styles["settings-card"]}>
+                  <h3>Room Settings</h3>
+                  <div className={styles["settings-list"]}>
+                    <div className={styles["setting-item"]}>
+                      <span className={styles["setting-label"]}>Room Privacy</span>
+                      <div className={styles["setting-value"]}>
                         <button
-                          className={styles["add-btn"]}
-                          disabled={sending}
-                          onClick={handleInvite}
-                          style={{ minWidth: 120 }}
+                            className={isPrivate ? styles["private-btn"] : styles["public-btn"]}
+                            onClick={handleVisibility}
                         >
-                          {sending ? "Sending..." : "Send Invite"}
+                            {isPrivate ? "Private" : "Public"}
                         </button>
-                        <button
-                          className={styles["edit-room-btn"]}
-                          onClick={() => setShowInviteModal(false)}
-                          type="button"
-                          style={{ minWidth: 100 }}
+                      </div>
+                    </div>
+                    <div className={styles["setting-item"]}>
+                      <span className={styles["setting-label"]}>Room Code</span>
+                      <div className={styles["setting-value"]}>
+                        <span>{roomDetails.code}</span>
+                        <button 
+                            className={styles["copy-btn"]}
+                            onClick={() => {
+                                navigator.clipboard.writeText(roomDetails.code)
+                                alert('Room code copied to clipboard!')
+                            }}
                         >
-                          Cancel
+                            📋
+                        </button>
+                      </div>
+                    </div>
+                    <div className={styles["setting-item"]}>
+                      <span className={styles["setting-label"]}>Room Link</span>
+                      <div className={styles["setting-value"]}>
+                        <button 
+                            className={styles["copy-btn"]}
+                            onClick={() => {
+                                const url = window.location.href
+                                navigator.clipboard.writeText(url)
+                                alert('Room link copied to clipboard!')
+                            }}
+                        >
+                            🔗 Copy Link
                         </button>
                       </div>
                     </div>
                   </div>
+                </div>
+
+              </div>
+            </div>
+
+            {/* Invite Participants Modal */}
+            {showInviteModal && (
+              <div className={styles["modal-overlay"]}>
+                <div className={styles["modal-content"]}>
+                  <h3>Invite by Email</h3>
+                  <input
+                    type="email"
+                    placeholder="Recipient's email"
+                    value={recipientEmail}
+                    onChange={e => setRecipientEmail(e.target.value)}
+                    style={{
+                      width: "100%",
+                      padding: "12px",
+                      borderRadius: "8px",
+                      border: "1px solid #e0e0e0",
+                      marginBottom: "20px",
+                      fontSize: "16px"
+                    }}
+                  />
+                  <div className={styles["modal-actions"]}>
+                    <button
+                      className={styles["add-btn"]}
+                      disabled={sending}
+                      onClick={handleInvite}
+                      style={{ minWidth: 120 }}
+                    >
+                      {sending ? "Sending..." : "Send Invite"}
+                    </button>
+                    <button
+                      className={styles["edit-room-btn"]}
+                      onClick={() => setShowInviteModal(false)}
+                      type="button"
+                      style={{ minWidth: 100 }}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              </div>
             )}
         </div>
     )

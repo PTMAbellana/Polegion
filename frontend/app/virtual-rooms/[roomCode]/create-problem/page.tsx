@@ -607,6 +607,7 @@ export default function CreateProblem({ params }: { params: Promise<{ roomCode: 
       setHint("");
       setVisible(true);
       setShowProperties(false);
+      setProblemId(null);
     }
   };
 

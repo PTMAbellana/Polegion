@@ -219,187 +219,165 @@ const CompetitionDashboard = ({ params } : { params  : Promise<{competitionId : 
             </div>
           </div>
         </div>
-        {/* Added Problems Section */}
-        {addedProblemsList.length > 0 && (
-          <div className={styles.participantsSection}>
-            <div className={styles.participantsHeader}>
-              <h2 className={styles.participantsTitle}>Added Problems</h2>
-            </div>
-            <div className={styles.participantsList}>
-              {addedProblemsList.map((problem, index) => (
-                <div key={problem.id} className={styles.participantCard}>
-                  <div className={styles.participantContent}>
-                    <div className={styles.participantLeft}>
-                      <div className={styles.participantRank}>{index + 1}</div>
-                      <div>
-                        <h3 className={styles.participantName}>{problem.title || 'No Title'}</h3>
-                      </div>
-                    </div>
-                    <div className={styles.participantRight}>
-                      <div className={styles.participantXp}>
-                        {problem.timer != null && problem.timer > 0 ? `${problem.timer} seconds` : <span style={{ color: 'red' }}>No timer</span>}
-                      </div>
-                      <button
-                        style={{
-                          marginLeft: 8,
-                          background: '#c0392b',
-                          color: '#fff',
-                          border: 'none',
-                          borderRadius: 4,
-                          padding: '4px 12px',
-                          cursor: 'pointer',
-                          fontWeight: 600
-                        }}
-                        onClick={() => handleRemoveProblem(problem)}
-                        title="Remove from competition"
-                      >
-                        Remove
-                      </button>
-                    </div>
-                  </div>
+
+        {/* NEW: Two Column Layout (2:3 ratio) */}
+        <div className={styles.roomContent}>
+          {/* Left Column - Problems (60% width) */}
+          <div className={styles.leftColumn}>
+            {/* Added Problems Section */}
+            {addedProblemsList.length > 0 && (
+              <div className={styles.participantsSection}>
+                <div className={styles.participantsHeader}>
+                  <h2 className={styles.participantsTitle}>Added Problems</h2>
                 </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Problems Section */}
-        <div className={styles.participantsSection}>
-          <div className={styles.participantsHeader}>
-            <h2 className={styles.participantsTitle}>
-              Problems:
-            </h2>
-          </div>
-
-          {/* Problems List */}
-          <div className={styles.participantsList}>
-            {problems.filter((problem) => !addedProblems.includes(problem.id)).map((problem, index) => {
-              const canAdd = problem.timer && problem.timer > 0;
-              return (
-                <div key={problem.id} className={styles.participantCard}>
-                  <div className={styles.participantContent}>
-                    <div className={styles.participantLeft}>
-                      <div className={styles.participantRank}>{index + 1}</div>
-                      <div>
-                        <h3 className={styles.participantName}>{problem.title || 'No Title'}</h3>
-                      </div>
-                    </div>
-                    <div className={styles.participantRight}>
-                      {/* Timer display or edit */}
-                      {editingTimerId === problem.id ? (
-                        <>
-                          <input
-                            type="number"
-                            min={1}
-                            value={timerEditValue}
-                            onChange={e => setTimerEditValue(Number(e.target.value))}
-                            style={{ width: 80, marginRight: 8 }}
-                          />
-                          <span>seconds</span>
-                          <button onClick={() => handleSaveTimer(problem)} style={{ marginLeft: 8 }}>Save</button>
-                          <button onClick={handleCancelEdit} style={{ marginLeft: 4 }}>Cancel</button>
-                        </>
-                      ) : (
-                        <>
+                <div className={styles.participantsList}>
+                  {addedProblemsList.map((problem, index) => (
+                    <div key={problem.id} className={styles.participantCard}>
+                      <div className={styles.participantContent}>
+                        <div className={styles.participantLeft}>
+                          <div className={styles.participantRank}>{index + 1}</div>
+                          <div>
+                            <h3 className={styles.participantName}>{problem.title || 'No Title'}</h3>
+                          </div>
+                        </div>
+                        <div className={styles.participantRight}>
                           <div className={styles.participantXp}>
                             {problem.timer != null && problem.timer > 0 ? `${problem.timer} seconds` : <span style={{ color: 'red' }}>No timer</span>}
                           </div>
-                          <button className={styles.editButton} onClick={() => handleEditTimer(problem)} title="Edit timer">
-                            <Edit3 className="w-5 h-5 text-gray-600" />
+                          <button
+                            className={styles.removeBtn}
+                            onClick={() => handleRemoveProblem(problem)}
+                            title="Remove from competition"
+                          >
+                            -
                           </button>
-                        </>
-                      )}
-                      {/* Add button */}
-                      <button
-                        style={{
-                          marginLeft: 8,
-                          background: canAdd ? '#2d7a2d' : '#ccc',
-                          color: '#fff',
-                          border: 'none',
-                          borderRadius: 4,
-                          padding: '4px 12px',
-                          cursor: !canAdd ? 'not-allowed' : 'pointer',
-                          fontWeight: 600
-                        }}
-                        disabled={!canAdd}
-                        onClick={() => handleAddProblem(problem)}
-                        title={!canAdd ? 'Cannot add without timer' : 'Add to competition'}
-                      >
-                        Add
-                      </button>
+                        </div>
+                      </div>
                     </div>
-                  </div>
+                  ))}
                 </div>
-              );
-            })}
-          </div>
-        </div>
+              </div>
+            )}
 
-        {/* Participants Section */}
-        <div className={styles.participantsSection}>
-          <div className={styles.participantsHeader}>
-            <h2 className={styles.participantsTitle}>
-              Participants:
-            </h2>
-            
-            {/* Sort Control */}
-            <div className={styles.sortControls}>
-              <button
-                onClick={toggleSort}
-                className={styles.sortButton}
-              >
-                <div className={styles.sortIcons}>
-                  <ChevronUp className={`w-4 h-4 ${sortOrder === 'asc' ? 'text-blue-600' : 'text-gray-400'}`} />
-                  <ChevronDown className={`w-4 h-4 ${sortOrder === 'desc' ? 'text-blue-600' : 'text-gray-400'}`} />
-                </div>
-                <span className={styles.sortText}>
-                  {sortOrder === 'desc' ? 'Descending' : 'Ascending'}
-                </span>
-              </button>
+            {/* Available Problems Section */}
+            <div className={styles.participantsSection}>
+              <div className={styles.participantsHeader}>
+                <h2 className={styles.participantsTitle}>Available Problems</h2>
+              </div>
+              <div className={styles.participantsList}>
+                {problems.filter((problem) => !addedProblems.includes(problem.id)).map((problem, index) => {
+                  const canAdd = problem.timer && problem.timer > 0;
+                  return (
+                    <div key={problem.id} className={styles.participantCard}>
+                      <div className={styles.participantContent}>
+                        <div className={styles.participantLeft}>
+                          <div className={styles.participantRank}>{index + 1}</div>
+                          <div>
+                            <h3 className={styles.participantName}>{problem.title || 'No Title'}</h3>
+                          </div>
+                        </div>
+                        <div className={styles.participantRight}>
+                          {editingTimerId === problem.id ? (
+                            <>
+                              <input
+                                type="number"
+                                min={1}
+                                value={timerEditValue}
+                                onChange={e => setTimerEditValue(Number(e.target.value))}
+                                className={styles.timerInput}
+                              />
+                              <span>sec</span>
+                              <button
+                                onClick={() => handleSaveTimer(problem)}
+                                className={styles.saveBtn}
+                                title="Save timer"
+                              >
+                                Save
+                              </button>
+                              <button
+                                onClick={handleCancelEdit}
+                                className={styles.cancelBtn}
+                                title="Cancel"
+                              >
+                                Cancel
+                              </button>
+                            </>
+                          ) : (
+                            <>
+                              <div className={styles.participantXp}>
+                                {problem.timer != null && problem.timer > 0 ? `${problem.timer} seconds` : <span style={{ color: 'red' }}>No timer</span>}
+                              </div>
+                              <button
+                                className={styles.editButton}
+                                onClick={() => handleEditTimer(problem)}
+                                title="Edit timer"
+                              >
+                                <Edit3 className="w-5 h-5" />
+                              </button>
+                              <button
+                                className={styles.addBtn}
+                                disabled={!canAdd}
+                                onClick={() => handleAddProblem(problem)}
+                                title={!canAdd ? 'Cannot add without timer' : 'Add to competition'}
+                              >
+                                +
+                              </button>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           </div>
 
-          {/* Participants List */}
-          <div className={styles.participantsList}>
-            {sortedParticipants.map((participant, index) => (
-              <div
-                key={participant.id}
-                className={styles.participantCard}
-              >
-                <div className={styles.participantContent}>
-                  <div className={styles.participantLeft}>
-                    <div className={styles.participantRank}>
-                      {index + 1}
+          {/* Right Column - Participants (40% width) */}
+          <div className={styles.rightColumn}>
+            <div className={styles.participantsSection}>
+              <div className={styles.participantsHeader}>
+                <h2 className={styles.participantsTitle}>Participants</h2>
+                <div className={styles.sortControls}>
+                  <button
+                    onClick={toggleSort}
+                    className={styles.sortButton}
+                  >
+                    <div className={styles.sortIcons}>
+                      <ChevronUp className={`w-3 h-3 ${sortOrder === 'asc' ? 'text-blue-600' : 'text-gray-400'}`} />
+                      <ChevronDown className={`w-3 h-3 ${sortOrder === 'desc' ? 'text-blue-600' : 'text-gray-400'}`} />
                     </div>
-                    <div>
-                      <h3 className={styles.participantName}>
-                        {participant.fullName}
-                      </h3>
-                    </div>
-                  </div>
-                  
-                  <div className={styles.participantRight}>
-                    <div className={styles.participantXp}>
-                      {participant.accumulated_xp} XP
-                    </div>
-                    {/* <button className={styles.editButton}>
-                      <Edit3 className="w-5 h-5 text-gray-600" />
-                    </button> */}
-                  </div>
+                    <span className={styles.sortText}>
+                      {sortOrder === 'desc' ? 'Desc' : 'Asc'}
+                    </span>
+                  </button>
                 </div>
               </div>
-            ))}
+              <div className={styles.participantsList}>
+                {sortedParticipants.map((participant, index) => (
+                  <div key={participant.id} className={styles.participantCard}>
+                    <div className={styles.participantContent}>
+                      <div className={styles.participantLeft}>
+                        <div className={styles.participantRank}>
+                          {index + 1}
+                        </div>
+                        <div>
+                          <h3 className={styles.participantName}>
+                            {participant.fullName}
+                          </h3>
+                        </div>
+                      </div>
+                      
+                      <div className={styles.participantRight}>
+                        <div className={styles.participantXp}>{participant.accumulated_xp} XP</div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
-
-
-        {/* Action Buttons */}
-        {/* <div className={styles.actionSection}>
-          <button className={styles.observeButton}>
-            <Eye className="w-5 h-5" />
-            <span>Observe</span>
-          </button>
-        </div> */}
       </div>
       
     </div>

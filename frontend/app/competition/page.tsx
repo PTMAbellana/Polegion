@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
-import { ChevronDown, ChevronUp, Edit3, Pause, Play } from 'lucide-react';
+import { ChevronDown, ChevronUp } from 'lucide-react';
 import styles from '@/styles/competition.module.css';
 import { useSearchParams } from 'next/navigation';
 import { useRouter } from 'next/navigation';
@@ -11,6 +11,7 @@ import Loader from '@/components/Loader';
 import { getRoomProblems } from '@/api/problems';
 import { getAllParticipants } from '@/api/participants';
 import { getAllCompe } from '@/api/competitions';
+import { createCompe } from "@/api/competitions";
 import { ROUTES } from '@/constants/routes';
 
 interface Participant {
@@ -51,6 +52,9 @@ const CompetitionDashboard = () => {
   const [ participants, setParticipants ] = useState<Participant[]>([])
   const [ problems, setProblems ] = useState<Problems[]>([])
 
+  const [newCompetitionTitle, setNewCompetitionTitle] = useState("");
+  const [creating, setCreating] = useState(false);
+
   const { isLoggedIn } = myAppHook()
   const { isLoading: authLoading } = AuthProtection()
   // const router = useRouter();
@@ -90,6 +94,23 @@ const CompetitionDashboard = () => {
         }
     }
 
+    const handleCreateCompetition = async () => {
+      if (!newCompetitionTitle.trim()) return;
+      setCreating(true);
+      try {
+        // Call your API and pass the required data
+        const result = await createCompe(roomId, newCompetitionTitle.trim());
+        // Optionally update your local state with the new competition
+        callMe(); // Refresh the competition list
+        // setCompetition(result.data.competitions || []);
+        setNewCompetitionTitle("");
+      } catch (error) {
+        // Handle error (show message, etc.)
+      } finally {
+        setCreating(false);
+      }
+    };
+
     if (isLoading || authLoading) {
         return (
             <div className={styles["dashboard-container"]}>
@@ -120,7 +141,6 @@ const CompetitionDashboard = () => {
 
   return (
     <div className={styles.container}>
-      {/* Main Container */}
       <div className={styles.mainContainer}>
         {/* Header Section */}
         <div className={styles.header}>
@@ -128,165 +148,170 @@ const CompetitionDashboard = () => {
             <h1 className={styles.title}>
               Competition Dashboard
             </h1>
-            <p className={styles.status}>
-              Status: <span className={styles.statusValue}>Ongoing</span>
-            </p>
             <p className={styles.description}>
               You can see the progress of the students and how much XP they have garnered already.
             </p>
           </div>
         </div>
 
-        {/* Timer Section */}
-        <div className={styles.timerSection}>
-          <div className={styles.timerContent}>
-            <div className={styles.timer}>
-              00:14
-            </div>
-            <div className={styles.timerControls}>
-              <button
-                onClick={togglePause}
-                className={styles.timerButton}
+        {/* NEW: Two Column Layout */}
+        <div className={styles.roomContent}>
+          {/* Left Column - Main Content */}
+          <div className={styles.leftColumn}>
+            {/* Create Competition Form */}
+            <div className={styles.participantsSection}>
+              <div className={styles.participantsHeader}>
+                <h2 className={styles.participantsTitle}>Create Competition</h2>
+              </div>
+              <form
+                onSubmit={e => {
+                  e.preventDefault();
+                  handleCreateCompetition();
+                }}
+                style={{ marginBottom: "2rem" }}
               >
-                {isPaused ? (
-                  <Play className="w-8 h-8 text-gray-700" />
+                <div className={styles.formGroup}>
+                  <textarea
+                    className={styles.textarea}
+                    placeholder="Enter competition title..."
+                    value={newCompetitionTitle}
+                    onChange={e => setNewCompetitionTitle(e.target.value)}
+                    rows={2}
+                    style={{ width: "100%", padding: "12px", borderRadius: "8px", fontSize: "16px" }}
+                  />
+                </div>
+                <button
+                  type="submit"
+                  className={styles.manageButton}
+                  disabled={creating}
+                  style={{ marginTop: "1rem", minWidth: 120 }}
+                >
+                  {creating ? "Creating..." : "Create Competition"}
+                </button>
+              </form>
+            </div>
+
+            {/* Room Competitions */}
+            <div className={styles.participantsSection}>
+              <h2 className={styles.participantsTitle}>Room Competitions</h2>
+              <div className={styles.roomGrid}>
+                {competition.length > 0 ? (
+                  competition.map((comp) => (
+                    <div key={comp.id} className={styles.roomCard}>
+                      <div className={styles.roomBanner}>
+                        <div className={styles.roomBannerOverlay}></div>
+                        <div className={styles.roomBannerContent}>
+                          <h3 className={styles.roomBannerTitle}>{comp.title}</h3>
+                        </div>
+                      </div>
+                      <div className={styles.roomContent}>
+                        <div className={styles.roomFooter}>
+                          <button className={styles.manageButton} onClick={() => redirectToManage(comp.id)}>
+                            Manage
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))
                 ) : (
-                  <Pause className="w-8 h-8 text-gray-700" />
+                  <div style={{ padding: '2rem', textAlign: 'center', width: '100%' }}>No competitions found.</div>
                 )}
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Problems Section */}
-        <div className={styles.participantsSection}>
-          <div className={styles.participantsHeader}>
-            <h2 className={styles.participantsTitle}>
-              Problems:
-            </h2>
-          </div>
-
-          {/* Problems List */}
-          <div className={styles.participantsList}>
-            {problems.map((problem, index) => (
-              <div key={problem.id} className={styles.participantCard}>
-                <div className={styles.participantContent}>
-                  <div className={styles.participantLeft}>
-                    <div className={styles.participantRank}>{index + 1}</div>
-                    <div>
-                      <h3 className={styles.participantName}>{problem.title || 'No Title'}</h3>
-                    </div>
-                  </div>
-                  <div className={styles.participantRight}>
-                    <div className={styles.participantXp}>
-                      {problem.timer != null ? `${problem.timer} seconds` : 'No timer'}
-                    </div>
-                    <button className={styles.editButton}>
-                      <Edit3 className="w-5 h-5 text-gray-600" />
-                    </button>
-                  </div>
-                </div>
               </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Participants Section */}
-        <div className={styles.participantsSection}>
-          <div className={styles.participantsHeader}>
-            <h2 className={styles.participantsTitle}>
-              Participants:
-            </h2>
-            
-            {/* Sort Control */}
-            <div className={styles.sortControls}>
-              <button
-                onClick={toggleSort}
-                className={styles.sortButton}
-              >
-                <div className={styles.sortIcons}>
-                  <ChevronUp className={`w-4 h-4 ${sortOrder === 'asc' ? 'text-blue-600' : 'text-gray-400'}`} />
-                  <ChevronDown className={`w-4 h-4 ${sortOrder === 'desc' ? 'text-blue-600' : 'text-gray-400'}`} />
-                </div>
-                <span className={styles.sortText}>
-                  {sortOrder === 'desc' ? 'Descending' : 'Ascending'}
-                </span>
-              </button>
             </div>
           </div>
 
-          {/* Participants List */}
-          <div className={styles.participantsList}>
-            {sortedParticipants.map((participant, index) => (
-              <div
-                key={participant.id}
-                className={styles.participantCard}
-              >
-                <div className={styles.participantContent}>
-                  <div className={styles.participantLeft}>
-                    <div className={styles.participantRank}>
-                      {index + 1}
-                    </div>
-                    <div>
-                      <h3 className={styles.participantName}>
-                        {participant.fullName}
-                      </h3>
+          {/* Right Column - Sidebar */}
+          <div className={styles.rightColumn}>
+            {/* Problems Section */}
+            <div className={styles.participantsSection}>
+              <div className={styles.participantsHeader}>
+                <h2 className={styles.participantsTitle}>Problems</h2>
+              </div>
+              {/* Problems List */}
+              <div className={styles.participantsList}>
+                {problems.map((problem, index) => (
+                  <div key={problem.id} className={styles.participantCard}>
+                    <div className={styles.participantContent}>
+                      <div className={styles.participantLeft}>
+                        <div className={styles.participantRank}>{index + 1}</div>
+                        <div className={styles.problemInfo}>
+                          <h4 className={styles.problemTitle}>{problem.title || 'No Title'}</h4>
+                          <div className={styles.problemMeta}>
+                            <span 
+                              className={styles.problemDifficulty}
+                              data-difficulty={problem.difficulty}
+                            >
+                              {problem.difficulty}
+                            </span>
+                            <span className={styles.problemXp}>{problem.expected_xp} XP</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div className={styles.participantRight}>
+                        <div className={styles.problemTimer}>
+                          {problem.timer != null && problem.timer > 0 ? 
+                            `${problem.timer}s` : 
+                            <span style={{ color: 'red' }}>No timer</span>
+                          }
+                        </div>
+                      </div>
                     </div>
                   </div>
-                  
-                  <div className={styles.participantRight}>
-                    <div className={styles.participantXp}>
-                      {participant.accumulated_xp} XP
+                ))}
+              </div>
+            </div>
+
+            {/* Participants Section */}
+            <div className={styles.participantsSection}>
+              <div className={styles.participantsHeader}>
+                <h2 className={styles.participantsTitle}>
+                  Participants
+                </h2>
+                {/* Sort Control - moved beside the title */}
+                <div className={styles.sortControls}>
+                  <button
+                    onClick={toggleSort}
+                    className={styles.sortButton}
+                  >
+                    <div className={styles.sortIcons}>
+                      <ChevronUp className={`w-3 h-3 ${sortOrder === 'asc' ? 'text-blue-600' : 'text-gray-400'}`} />
+                      <ChevronDown className={`w-3 h-3 ${sortOrder === 'desc' ? 'text-blue-600' : 'text-gray-400'}`} />
                     </div>
-                    {/* <button className={styles.editButton}>
-                      <Edit3 className="w-5 h-5 text-gray-600" />
-                    </button> */}
-                  </div>
+                    <span className={styles.sortText}>
+                      {sortOrder === 'desc' ? 'Desc' : 'Asc'}
+                    </span>
+                  </button>
                 </div>
               </div>
-            ))}
+              {/* Participants List */}
+              <div className={styles.participantsList}>
+                {sortedParticipants.map((participant, index) => (
+                  <div
+                    key={participant.id}
+                    className={styles.participantCard}
+                  >
+                    <div className={styles.participantContent}>
+                      <div className={styles.participantLeft}>
+                        <div className={styles.participantRank}>
+                          {index + 1}
+                        </div>
+                        <div>
+                          <h3 className={styles.participantName}>
+                            {participant.fullName}
+                          </h3>
+                        </div>
+                      </div>
+                      <div className={styles.participantRight}>
+                        <div className={styles.participantXp}>
+                          {participant.accumulated_xp} XP
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
-        </div>
-
-        {/* Action Buttons */}
-        {/* <div className={styles.actionSection}>
-          <button className={styles.observeButton}>
-            <Eye className="w-5 h-5" />
-            <span>Observe</span>
-          </button>
-        </div> */}
-      </div>
-
-      {/* My Room Section */}
-      <div className={styles.myRoomSection}>
-        <h2 className={styles.myRoomTitle}>Room Competitions</h2>
-        <div className={styles.roomGrid}>
-          {competition.length > 0 ? (
-            competition.map((comp) => (
-              <div key={comp.id} className={styles.roomCard}>
-                {/* Room Banner */}
-                <div className={styles.roomBanner}>
-                  <div className={styles.roomBannerOverlay}></div>
-                  <div className={styles.roomBannerContent}>
-                    <h3 className={styles.roomBannerTitle}>{comp.title}</h3>
-                  </div>
-                </div>
-                {/* Room Content (no description/mantra) */}
-                <div className={styles.roomContent}>
-                  <div className={styles.roomFooter}>
-                    <div className={styles.roomStatus}>
-                      <span className={styles.roomStatusLabel}>Status:</span> {comp.status}
-                    </div>
-                    <button className={styles.manageButton} onClick={() => redirectToManage(comp.id)}>
-                      Manage
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))
-          ) : (
-            <div style={{ padding: '2rem', textAlign: 'center', width: '100%' }}>No competitions found.</div>
-          )}
         </div>
       </div>
     </div>
