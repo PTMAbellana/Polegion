@@ -335,11 +335,35 @@ export default function CreateProblem({ params }: { params: Promise<{ roomCode: 
         const newTopLeftX = mouseX - dragOffset.x;
         const newTopLeftY = mouseY - dragOffset.y;
 
+        const snap = (value: number, step = 1) => Math.round(value / step) * step;
+
         setShapes(prev =>
           prev.map(s => {
             if (s.id !== draggingShapeId) return s;
 
-            // ✅ Handle Square and Triangle via `points`
+            if (s.type === "triangle" && s.points?.top) {
+              const referencePoint = s.points.top;
+
+              const offsetPoints = Object.entries(s.points).map(([key, pt]) => ({
+                key,
+                dx: pt.x - referencePoint.x,
+                dy: pt.y - referencePoint.y,
+              }));
+
+              const newPoints = Object.fromEntries(
+                offsetPoints.map(({ key, dx, dy }) => [
+                  key,
+                  {
+                    x: snap(newTopLeftX + dx, 1),
+                    y: snap(newTopLeftY + dy, 1),
+                  },
+                ])
+              );
+
+              return { ...s, points: newPoints };
+            }
+
+            // ✅ Handle square (uses topLeft as reference)
             if (s.points?.topLeft) {
               const offsetPoints = Object.entries(s.points).map(([key, pt]) => ({
                 key,
@@ -357,7 +381,7 @@ export default function CreateProblem({ params }: { params: Promise<{ roomCode: 
               return { ...s, points: newPoints };
             }
 
-            // ✅ Handle Circle via `x` and `y`
+            // ✅ Handle circle
             if (s.type === "circle") {
               return { ...s, x: newTopLeftX, y: newTopLeftY };
             }
@@ -425,11 +449,18 @@ export default function CreateProblem({ params }: { params: Promise<{ roomCode: 
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.key === "Delete" || e.key === "Backspace") && selectedId !== null) {
+      // Only delete shape if NOT focused on input/textarea
+      const active = document.activeElement;
+      const isInput =
+        active &&
+        (active.tagName === "INPUT" ||
+          active.tagName === "TEXTAREA" ||
+          (active as HTMLElement).isContentEditable);
+
+      if (!isInput && (e.key === "Delete" || e.key === "Backspace") && selectedId !== null) {
         setShapes(prev => {
           const newShapes = prev.filter(shape => shape.id !== selectedId);
 
-          // If deleting the only shape, reset all property-related UI toggles
           if (newShapes.length === 0) {
             setShowSides(false);
             setShowAngles(false);
@@ -475,9 +506,8 @@ export default function CreateProblem({ params }: { params: Promise<{ roomCode: 
     e.dataTransfer.setData("shape-type", type);
   };
 
-  const pxToUnits = (px: number): string => {
-    const units = px / 10;
-    return `${units.toFixed(1)} units`;
+  const pxToUnits = (px: number): number => {
+    return px / 10;
   };
 
   const renderShape = (shape) => {
@@ -538,10 +568,12 @@ export default function CreateProblem({ params }: { params: Promise<{ roomCode: 
   };
 
   const handleSave = async () => {
+    const shapesWithProps = shapes.map(getShapeProperties);
+
     const payload = {
       title,
       description: prompt,
-      expected_solution: shapes,
+      expected_solution: shapesWithProps, // <-- now includes all properties
       difficulty,
       visibility: visible ? "show" : "hide",
       max_attempts: limitAttempts,
@@ -642,6 +674,67 @@ export default function CreateProblem({ params }: { params: Promise<{ roomCode: 
     setHint(problem.hint ?? "");
     setVisible(problem.visibility === "show");
     setShowProperties(true);  
+  }
+
+  function getShapeProperties(shape) {
+    if (shape.type === "square" && shape.points) {
+      const { topLeft, topRight, bottomRight, bottomLeft } = shape.points;
+      const sideLengths = [
+        Math.sqrt((topLeft.x - topRight.x) ** 2 + (topLeft.y - topRight.y) ** 2),
+        Math.sqrt((topRight.x - bottomRight.x) ** 2 + (topRight.y - bottomRight.y) ** 2),
+        Math.sqrt((bottomRight.x - bottomLeft.x) ** 2 + (bottomRight.y - bottomLeft.y) ** 2),
+        Math.sqrt((bottomLeft.x - topLeft.x) ** 2 + (bottomLeft.y - topLeft.y) ** 2),
+      ].map(l => +(l / 10).toFixed(1)); // convert px to units
+
+      // Area (shoelace formula)
+      const area =
+        0.5 *
+        Math.abs(
+          topLeft.x * topRight.y +
+            topRight.x * bottomRight.y +
+            bottomRight.x * bottomLeft.y +
+            bottomLeft.x * topLeft.y -
+            (topRight.x * topLeft.y +
+              bottomRight.x * topRight.y +
+              bottomLeft.x * bottomRight.y +
+              topLeft.x * bottomLeft.y)
+        ) / 100;
+
+      return { ...shape, sideLengths, area: +area.toFixed(1) };
+    }
+
+    if (shape.type === "circle") {
+      const diameter = +(shape.size / 10).toFixed(1);
+      const radius = diameter / 2;
+      const area = +(Math.PI * radius * radius).toFixed(1);
+      const circumference = +(2 * Math.PI * radius).toFixed(1);
+      return { ...shape, diameter, area, circumference };
+    }
+
+    if (shape.type === "triangle" && shape.points) {
+      const pts = [shape.points.top, shape.points.left, shape.points.right];
+      const sideLengths = [
+        Math.sqrt((pts[0].x - pts[1].x) ** 2 + (pts[0].y - pts[1].y) ** 2),
+        Math.sqrt((pts[1].x - pts[2].x) ** 2 + (pts[1].y - pts[2].y) ** 2),
+        Math.sqrt((pts[2].x - pts[0].x) ** 2 + (pts[2].y - pts[0].y) ** 2),
+      ].map(l => +(l / 10).toFixed(1)); // convert px to units
+
+      // Area (shoelace formula)
+      const area =
+        Math.abs(
+          (pts[0].x * (pts[1].y - pts[2].y) +
+            pts[1].x * (pts[2].y - pts[0].y) +
+            pts[2].x * (pts[0].y - pts[1].y)) / 2
+        ) / 100;
+
+      // Height from top vertex to base
+      const baseLength = sideLengths[1];
+      const height = +(2 * area / baseLength).toFixed(1);
+
+      return { ...shape, sideLengths, area: +area.toFixed(1), height };
+    }
+
+    return shape;
   }
 
   return (

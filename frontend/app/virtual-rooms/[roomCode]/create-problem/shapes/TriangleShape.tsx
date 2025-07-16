@@ -1,5 +1,9 @@
 import React from "react";
 
+function snap(value: number, step = 1) {
+  return Math.round(value / step) * step;
+}
+
 export default function TriangleShape({
   shape,
   isSelected,
@@ -7,81 +11,167 @@ export default function TriangleShape({
   handleShapeMouseDown,
   setSelectedId,
   handleShapeDrop,
-  handleResizeMouseDown,
   fillMode,
   draggingFill,
   showSides,
   showAngles,
   showArea,
   showHeight,
+  onShapeMove,
 }: any) {
   const stroke = 6;
-  const pad = stroke;
 
   const size = shape.size;
-  const h = size * Math.sqrt(3) / 2;
+  const h = size * Math.sqrt(3) / 2; // height for equilateral triangle
 
-  const [points, setPoints] = React.useState([
-    { x: size / 2, y: 0 },             // top
-    { x: 0, y: h },                    // bottom left
-    { x: size, y: h },                 // bottom right
-  ]);
+  const [points, setPoints] = React.useState({
+    top: { x: shape.x, y: shape.y - h / 2 },
+    left: { x: shape.x - size / 2, y: shape.y + h / 2 },
+    right: { x: shape.x + size / 2, y: shape.y + h / 2 },
+  });
 
-  function getBounds(pts: { x: number; y: number }[]) {
-    const xs = pts.map(p => p.x);
-    const ys = pts.map(p => p.y);
-    const minX = Math.min(...xs);
-    const minY = Math.min(...ys);
-    const maxX = Math.max(...xs);
-    const maxY = Math.max(...ys);
+  // For calculations and rendering
+  const sidePoints = [points.top, points.left, points.right];
+
+  // Side lengths
+  const sideLengths = [
+    dist(sidePoints[0], sidePoints[1]),
+    dist(sidePoints[1], sidePoints[2]),
+    dist(sidePoints[2], sidePoints[0]),
+  ];
+
+  // Vertices
+  {isSelected &&
+    sidePoints.map((p, i) => {
+      const vertexKey = i === 0 ? "top" : i === 1 ? "left" : "right";
+      return (
+        <circle
+          key={`vertex-${i}`}
+          cx={p.x}
+          cy={p.y}
+          r={8}
+          fill="#2c514c"
+          stroke="#fff"
+          strokeWidth={2}
+          style={{ cursor: "pointer", pointerEvents: "auto" }}
+          onMouseDown={(e) => {
+            e.stopPropagation();
+            let lastX = e.clientX;
+            let lastY = e.clientY;
+
+            const handleMove = (moveEvent: MouseEvent) => {
+              const dx = moveEvent.clientX - lastX;
+              const dy = moveEvent.clientY - lastY;
+              lastX = moveEvent.clientX;
+              lastY = moveEvent.clientY;
+
+              setPoints(prev => ({
+                ...prev,
+                [vertexKey]: {
+                  x: snap(prev[vertexKey].x + dx, 1),
+                  y: snap(prev[vertexKey].y + dy, 1),
+                }
+              }));
+            };
+
+            const handleUp = () => {
+              document.removeEventListener("mousemove", handleMove);
+              document.removeEventListener("mouseup", handleUp);
+            };
+
+            document.addEventListener("mousemove", handleMove);
+            document.addEventListener("mouseup", handleUp);
+          }}
+        />
+      );
+    })}
+
+  // Area calculation
+  function getTriangleArea(pointsObj: any) {
+    // Convert object to array in the correct order: [top, left, right]
+    const p = [pointsObj.top, pointsObj.left, pointsObj.right];
+    const pUnit = p.map((pt) => ({ x: pxToUnits(pt.x), y: pxToUnits(pt.y) }));
+    return Math.abs(
+      (pUnit[0].x * (pUnit[1].y - pUnit[2].y) +
+        pUnit[1].x * (pUnit[2].y - pUnit[0].y) +
+        pUnit[2].x * (pUnit[0].y - pUnit[1].y)) / 2
+    );
+  }
+
+  // Distance in units
+  function dist(a: any, b: any) {
+    return Math.sqrt(
+      (a.x - b.x) ** 2 +
+      (a.y - b.y) ** 2
+    ) / 10; // convert the pixel distance to units
+  }
+
+  // Height in units
+  function getHeightFromTopVertex(pointsObj: any) {
+    const top = pointsObj.top;
+    const baseA = pointsObj.left;
+    const baseB = pointsObj.right;
+    const baseLength = dist(baseA, baseB);
+    const area = getTriangleArea(pointsObj);
+    return (2 * area) / baseLength;
+  }
+
+  function getHeightFoot(A, B, C) {
+    // Vector from B to C
+    const dx = C.x - B.x;
+    const dy = C.y - B.y;
+
+    // Vector from B to A
+    const dxA = A.x - B.x;
+    const dyA = A.y - B.y;
+
+    // Project BA onto BC
+    const lenBC = dx * dx + dy * dy;
+    const dot = dx * dxA + dy * dyA;
+    const t = lenBC === 0 ? 0 : dot / lenBC;
+
+    // Foot coordinates
     return {
-      left: minX - pad,
-      top: minY - pad,
-      width: (maxX - minX) + pad * 2,
-      height: (maxY - minY) + pad * 2,
-      offsetX: -minX + pad,
-      offsetY: -minY + pad,
+      x: B.x + t * dx,
+      y: B.y + t * dy,
     };
   }
 
-  const bounds = getBounds(points);
+  const area = getTriangleArea(points); // points is {top, left, right}
+  const height = getHeightFromTopVertex(points);
 
-  function dist(a: any, b: any) {
-    return Math.sqrt((a.x - b.x) ** 2 + (a.y - b.y) ** 2);
-  }
-
-  function getAngleDeg(a: any, b: any, c: any) {
-    const ab = { x: a.x - b.x, y: a.y - b.y };
-    const cb = { x: c.x - b.x, y: c.y - b.y };
-    const dot = ab.x * cb.x + ab.y * cb.y;
-    const magAB = Math.sqrt(ab.x ** 2 + ab.y ** 2);
-    const magCB = Math.sqrt(cb.x ** 2 + cb.y ** 2);
-    return Math.acos(dot / (magAB * magCB)) * (180 / Math.PI);
-  }
-
-  function handleSideDrag(e: React.MouseEvent, sideIndex: number) {
+  // Snapping for moving the whole triangle
+  const handleDrag = (e: React.MouseEvent) => {
     e.stopPropagation();
     e.preventDefault();
+
     let lastX = e.clientX;
     let lastY = e.clientY;
 
-    const p1Index = sideIndex;
-    const p2Index = (sideIndex + 1) % 3;
+    function onMouseMove(me: MouseEvent) {
+      const dx = me.clientX - lastX;
+      const dy = me.clientY - lastY;
+      lastX = me.clientX;
+      lastY = me.clientY;
 
-    function onMouseMove(moveEvent: MouseEvent) {
-      const dx = moveEvent.clientX - lastX;
-      const dy = moveEvent.clientY - lastY;
-      lastX = moveEvent.clientX;
-      lastY = moveEvent.clientY;
+      // Snap dx/dy
+      const snappedDx = snap(dx, 1);
+      const snappedDy = snap(dy, 1);
 
-      setPoints((prev) => {
-        const updated = prev.map((p) => ({ ...p }));
-        updated[p1Index].x += dx;
-        updated[p1Index].y += dy;
-        updated[p2Index].x += dx;
-        updated[p2Index].y += dy;
-        return updated;
-      });
+      setPoints(prev => ({
+        top: {
+          x: snap(prev.top.x + snappedDx, 1),
+          y: snap(prev.top.y + snappedDy, 1),
+        },
+        left: {
+          x: snap(prev.left.x + snappedDx, 1),
+          y: snap(prev.left.y + snappedDy, 1),
+        },
+        right: {
+          x: snap(prev.right.x + snappedDx, 1),
+          y: snap(prev.right.y + snappedDy, 1),
+        },
+      }));
     }
 
     function onMouseUp() {
@@ -92,240 +182,299 @@ export default function TriangleShape({
 
     document.addEventListener("mousemove", onMouseMove);
     document.addEventListener("mouseup", onMouseUp);
+  };
+
+  // Height foot
+  const foot = getHeightFoot(points.top, points.left, points.right);
+
+  // Height label
+  const heightLabel = `Height: ${height.toFixed(1)} u`;
+
+  // --- Add this helper function ---
+  function getAngle(A, B, C) {
+    // Returns angle at A in degrees
+    const a = dist(B, C);
+    const b = dist(A, C);
+    const c = dist(A, B);
+    // Law of Cosines
+    const angleRad = Math.acos((b*b + c*c - a*a) / (2*b*c));
+    return (angleRad * 180) / Math.PI;
   }
 
-  const sideLengths = [
-    dist(points[0], points[1]),
-    dist(points[1], points[2]),
-    dist(points[2], points[0]),
-  ];
-
   return (
-    <div
+    <svg
       style={{
         position: "absolute",
-        left: shape.x + bounds.left,
-        top: shape.y + bounds.top,
-        width: bounds.width,
-        height: bounds.height,
-        cursor: "move",
-        zIndex: isSelected ? 10 : 2,
+        left: 0,
+        top: 0,
+        width: "100%",
+        height: "100%",
+        pointerEvents: "none",
+        userSelect: "none",
       }}
-      onMouseDown={(e) => handleShapeMouseDown(shape.id, e)}
-      onClick={(e) => {
-        e.stopPropagation();
-        setSelectedId(shape.id);
-      }}
-      onDragOver={(e) => {
-        if (fillMode && draggingFill) {
-          e.preventDefault();
-          e.dataTransfer.dropEffect = "copy";
-        }
-      }}
-      onDrop={handleShapeDrop}
     >
-      <svg width={bounds.width} height={bounds.height}>
-        <polygon
-          points={points.map(p => `${p.x + bounds.offsetX},${p.y + bounds.offsetY}`).join(" ")}
-          fill={shape.fill || "#e3dcc2"}
-          stroke="#000"
-          strokeWidth={stroke}
-          style={{
-            filter: isSelected
-              ? "drop-shadow(0 0 0 4px #fff) drop-shadow(0 0 0 8px rgba(0,0,0,0.2))"
-              : "none",
-            transition: "filter 0.2s",
-          }}
-        />
+      {/* Triangle shape */}
+      <polygon
+        points={[points.top, points.left, points.right].map((p) => `${p.x},${p.y}`).join(" ")}
+        fill={shape.fill || "#e3dcc2"}
+        stroke="#000"
+        strokeWidth={stroke}
+        onMouseDown={(e) => {
+          handleDrag(e);
+          handleShapeMouseDown(shape.id, e);
+          setSelectedId(shape.id);
+        }}
+        style={{ cursor: "move", pointerEvents: "auto" }}
+      />
 
-        {/* Side Labels */}
-        {showSides &&
-          sideLengths.map((length, i) => {
-            const p1 = points[i];
-            const p2 = points[(i + 1) % 3];
+      {/* Resize handles */}
+      {isSelected &&
+        [points.top, points.left, points.right].map((p, i) => {
+          const vertexKey = i === 0 ? "top" : i === 1 ? "left" : "right";
+          return (
+            <circle
+              key={`vertex-${i}`}
+              cx={p.x}
+              cy={p.y}
+              r={8}
+              fill="#2c514c"
+              stroke="#fff"
+              strokeWidth={2}
+              style={{ cursor: "pointer", pointerEvents: "auto" }}
+              onMouseDown={(e) => {
+                e.stopPropagation();
+                let lastX = e.clientX;
+                let lastY = e.clientY;
 
-            const midX = (p1.x + p2.x) / 2 + bounds.offsetX;
-            const midY = (p1.y + p2.y) / 2 + bounds.offsetY;
+                const handleMove = (moveEvent: MouseEvent) => {
+                  const dx = moveEvent.clientX - lastX;
+                  const dy = moveEvent.clientY - lastY;
+                  lastX = moveEvent.clientX;
+                  lastY = moveEvent.clientY;
 
-            const dx = p2.x - p1.x;
-            const dy = p2.y - p1.y;
-            const mag = Math.sqrt(dx * dx + dy * dy);
-            const ux = -dy / mag;
-            const uy = dx / mag;
+                  setPoints(prev => ({
+                    ...prev,
+                    [vertexKey]: {
+                      x: snap(prev[vertexKey].x + dx, 1),
+                      y: snap(prev[vertexKey].y + dy, 1),
+                    }
+                  }));
+                };
 
-            const offset = 16;
-            const labelX = midX + ux * offset;
-            const labelY = midY + uy * offset;
+                const handleUp = () => {
+                  document.removeEventListener("mousemove", handleMove);
+                  document.removeEventListener("mouseup", handleUp);
+                };
 
-            const angleDeg = (Math.atan2(dy, dx) * 180) / Math.PI;
+                document.addEventListener("mousemove", handleMove);
+                document.addEventListener("mouseup", handleUp);
+              }}
+            />
+          );
+        })}
 
-            return (
+      {/* Side Labels */}
+      {showSides &&
+        sideLengths.map((length, i) => {
+          const p1 = sidePoints[i];
+          const p2 = sidePoints[(i + 1) % 3];
+          const midX = (p1.x + p2.x) / 2;
+          const midY = (p1.y + p2.y) / 2;
+          const dx = p2.x - p1.x;
+          const dy = p2.y - p1.y;
+          const mag = Math.sqrt(dx * dx + dy * dy);
+          const ux = -dy / mag;
+          const uy = dx / mag;
+          const offset = 16;
+          const labelX = midX + ux * offset;
+          const labelY = midY + uy * offset;
+
+          let angleDeg = (Math.atan2(dy, dx) * 180) / Math.PI;
+          if (angleDeg > 90 || angleDeg < -90) angleDeg += 180;
+
+          const label = `${length.toFixed(1)} u`;
+          const width = label.length * 7 + 10;
+
+          return (
+            <g
+              key={`side-${i}`}
+              transform={`rotate(${angleDeg}, ${labelX}, ${labelY})`}
+            >
+              <rect
+                x={labelX - width / 2}
+                y={labelY - 10}
+                width={width}
+                height={18}
+                rx={4}
+                ry={4}
+                fill="white"
+                stroke="#000"
+                strokeWidth={0.4}
+              />
               <text
-                key={`side-label-${i}`}
                 x={labelX}
-                y={labelY}
-                transform={`rotate(${angleDeg}, ${labelX}, ${labelY})`}
+                y={labelY + 4}
+                textAnchor="middle"
                 fontSize={12}
                 fill="#000"
-                textAnchor="middle"
-                alignmentBaseline="middle"
-                style={{
-                  paintOrder: "stroke",
-                  stroke: "#fff",
-                  strokeWidth: 4,
-                  strokeLinejoin: "round",
-                }}
               >
-                {pxToUnits(length)} u
+                {label}
               </text>
-            );
-          })}
+            </g>
+          );
+        })}
 
-        {/* Angles */}
-        {showAngles &&
-          points.map((corner, idx) => {
-            const prev = points[(idx + 2) % 3];
-            const next = points[(idx + 1) % 3];
-            const radius = 20;
+      {isSelected && showArea && (
+        <g>
+          {(() => {
+            const label = `A: ${area.toFixed(1)} u²`;
+            const width = label.length * 7 + 10;
 
-            const v1 = { x: prev.x - corner.x, y: prev.y - corner.y };
-            const v2 = { x: next.x - corner.x, y: next.y - corner.y };
+            // Use sidePoints array for consistent ordering
+            const pA = sidePoints[2]; // bottom-right
+            const pB = sidePoints[0]; // top
+            const midX = (pA.x + pB.x) / 2;
+            const midY = (pA.y + pB.y) / 2;
 
-            const mag1 = Math.sqrt(v1.x ** 2 + v1.y ** 2);
-            const mag2 = Math.sqrt(v2.x ** 2 + v2.y ** 2);
-            const v1Unit = { x: v1.x / mag1, y: v1.y / mag1 };
-            const v2Unit = { x: v2.x / mag2, y: v2.y / mag2 };
+            // Offset label to the right of the midpoint
+            const offsetX = 40;
+            const offsetY = -10;
 
-            const angleDeg = getAngleDeg(prev, corner, next);
-            const midAngle = Math.atan2(v1Unit.y + v2Unit.y, v1Unit.x + v2Unit.x);
-            const labelX = corner.x + Math.cos(midAngle) * (radius + 14) + bounds.offsetX;
-            const labelY = corner.y + Math.sin(midAngle) * (radius + 14) + bounds.offsetY;
-            const largeArcFlag = angleDeg > 180 ? 1 : 0;
-
-            const arcPath = `
-              M ${corner.x + v1Unit.x * radius + bounds.offsetX} ${corner.y + v1Unit.y * radius + bounds.offsetY}
-              A ${radius} ${radius} 0 ${largeArcFlag} 1 ${corner.x + v2Unit.x * radius + bounds.offsetX} ${corner.y + v2Unit.y * radius + bounds.offsetY}
-            `;
+            const labelX = midX + offsetX + 60;
+            const labelY = midY + offsetY;
 
             return (
-              <g key={`angle-${idx}`}>
-                {Math.round(angleDeg) === 90 ? (
-                  <>
-                    <line
-                      x1={corner.x + v1Unit.x * radius + bounds.offsetX}
-                      y1={corner.y + v1Unit.y * radius + bounds.offsetY}
-                      x2={corner.x + v1Unit.x * radius + v2Unit.x * 10 + bounds.offsetX}
-                      y2={corner.y + v1Unit.y * radius + v2Unit.y * 10 + bounds.offsetY}
-                      stroke="#1864ab"
-                      strokeWidth={1.5}
-                    />
-                    <line
-                      x1={corner.x + v2Unit.x * radius + bounds.offsetX}
-                      y1={corner.y + v2Unit.y * radius + bounds.offsetY}
-                      x2={corner.x + v2Unit.x * radius + v1Unit.x * 10 + bounds.offsetX}
-                      y2={corner.y + v2Unit.y * radius + v1Unit.y * 10 + bounds.offsetY}
-                      stroke="#1864ab"
-                      strokeWidth={1.5}
-                    />
-                  </>
-                ) : (
-                  <path d={arcPath} fill="none" stroke="#1864ab" strokeWidth={1.5} />
-                )}
+              <>
+                <rect
+                  x={labelX - width / 2}
+                  y={labelY - 14}
+                  width={width}
+                  height={26}
+                  rx={6}
+                  ry={6}
+                  fill="white"
+                  stroke="#000"
+                  strokeWidth={0.5}
+                />
                 <text
                   x={labelX}
-                  y={labelY}
-                  fontSize={12}
-                  fill="#1864ab"
+                  y={labelY + 5}
+                  fontSize={14}
+                  fill="#000"
                   textAnchor="middle"
-                  alignmentBaseline="middle"
+                  fontWeight={500}
                 >
-                  {angleDeg.toFixed(0)}°
+                  {label}
                 </text>
-              </g>
+              </>
             );
-          })}
-
-        {/* Height Line */}
-        {showHeight && (
-          <line
-            x1={points[0].x + bounds.offsetX}
-            y1={points[0].y + bounds.offsetY}
-            x2={(points[1].x + points[2].x) / 2 + bounds.offsetX}
-            y2={(points[1].y + points[2].y) / 2 + bounds.offsetY}
-            stroke="#1864ab"
-            strokeWidth={1.5}
-            strokeDasharray="5,3"
-          />
-        )}
-
-        {/* Drag Handles */}
-        {isSelected &&
-          points.map((start, i) => {
-            const end = points[(i + 1) % 3];
-            const midX = (start.x + end.x) / 2 + bounds.offsetX;
-            const midY = (start.y + end.y) / 2 + bounds.offsetY;
-
-            return (
-              <circle
-                key={`handle-${i}`}
-                cx={midX}
-                cy={midY}
-                r={8}
-                fill="#fabc60"
-                stroke="#000"
-                strokeWidth={1.5}
-                style={{ cursor: "grab" }}
-                onMouseDown={(e) => handleSideDrag(e, i)}
-              />
-            );
-          })}
-      </svg>
-
-      {/* Area */}
-      {showArea && (
-        <div
-          style={{
-            position: "absolute",
-            left: "calc(100% + 12px)",
-            top: "50%",
-            transform: "translateY(-50%)",
-            background: "#fff",
-            borderRadius: 6,
-            border: "1px solid #aaa",
-            fontSize: 14,
-            boxShadow: "0 2px 6px #0001",
-            padding: "4px 8px",
-            pointerEvents: "none",
-            zIndex: 10,
-            whiteSpace: "nowrap",
-          }}
-        >
-          A: {(0.5 * size * h).toFixed(1)} u²
-        </div>
+          })()}
+        </g>
       )}
 
-      {/* Height text */}
+      {/* Height Line & Label */}
       {showHeight && (
-        <div
-          style={{
-            position: "absolute",
-            left: (points[1].x + points[2].x) / 2 + bounds.offsetX,
-            top: points[1].y + 12 + bounds.offsetY,
-            transform: "translateX(-50%)",
-            background: "#fff",
-            borderRadius: 6,
-            border: "1px solid #aaa",
-            fontSize: 14,
-            boxShadow: "0 2px 6px #0001",
-            padding: "4px 8px",
-            pointerEvents: "none",
-            zIndex: 10,
-            whiteSpace: "nowrap",
-          }}
-        >
-          Height: {h.toFixed(1)} u
-        </div>
+        <g>
+          {(() => {
+            const A = points.top;
+            const B = points.left;
+            const C = points.right;
+            const foot = getHeightFoot(A, B, C);
+
+            // Draw the height line
+            return (
+              <>
+                <line
+                  x1={A.x}
+                  y1={A.y}
+                  x2={foot.x}
+                  y2={foot.y}
+                  stroke="#1864ab"
+                  strokeWidth={1.5}
+                  strokeDasharray="5,3"
+                />
+                {/* Height label */}
+                {(() => {
+                  const label = `Height: ${height.toFixed(1)} u`;
+                  const width = label.length * 7 + 10;
+                  const x = (A.x + foot.x) / 2;
+                  const y = (A.y + foot.y) / 2 - 18; // above the line
+
+                  return (
+                    <>
+                      <rect
+                        x={x - width / 2}
+                        y={y}
+                        width={width}
+                        height={20}
+                        rx={4}
+                        ry={4}
+                        fill="white"
+                        stroke="#1864ab"
+                        strokeWidth={0.6}
+                      />
+                      <text
+                        x={x}
+                        y={y + 14}
+                        fontSize={13}
+                        fill="#1864ab"
+                        textAnchor="middle"
+                        fontWeight={500}
+                      >
+                        {label}
+                      </text>
+                    </>
+                  );
+                })()}
+              </>
+            );
+          })()}
+        </g>
       )}
-    </div>
+
+      {/* Angle Labels */}
+      {showAngles &&
+        sidePoints.map((p, i) => {
+          // Vertices: A = p, B = sidePoints[(i+1)%3], C = sidePoints[(i+2)%3]
+          const A = p;
+          const B = sidePoints[(i + 1) % 3];
+          const C = sidePoints[(i + 2) % 3];
+          const angle = getAngle(A, B, C);
+          const label = `${angle.toFixed(1)}°`;
+          const offset = 28;
+          // Offset label away from vertex
+          const dirX = (A.x - (B.x + C.x) / 2);
+          const dirY = (A.y - (B.y + C.y) / 2);
+          const mag = Math.sqrt(dirX * dirX + dirY * dirY) || 1;
+          const labelX = A.x + (dirX / mag) * offset;
+          const labelY = A.y + (dirY / mag) * offset;
+          const width = label.length * 7 + 10;
+
+          return (
+            <g key={`angle-${i}`}>
+              <rect
+                x={labelX - width / 2}
+                y={labelY - 12}
+                width={width}
+                height={18}
+                rx={4}
+                ry={4}
+                fill="white"
+                stroke="#1864ab"
+                strokeWidth={0.4}
+              />
+              <text
+                x={labelX}
+                y={labelY + 2}
+                textAnchor="middle"
+                fontSize={12}
+                fill="#1864ab"
+              >
+                {label}
+              </text>
+            </g>
+          );
+        })}
+    </svg>
   );
 }

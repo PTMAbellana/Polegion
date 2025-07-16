@@ -160,9 +160,9 @@ const MainArea: React.FC<MainAreaProps> = ({
             {
               id: Date.now(),
               type: "triangle",
-              x: x - 45,
-              y: y - 45,
-              size: 90,
+              x: x - 40, // match square/circle offset if needed
+              y: y - 40,
+              size: 80, // <--- MATCHES SQUARE AND CIRCLE
               color: "#e3dcc2",
             },
           ]);

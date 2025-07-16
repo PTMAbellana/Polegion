@@ -1,5 +1,9 @@
 import React from "react";
 
+function snap(value: number, step = 1) {
+  return Math.round(value / step) * step;
+}
+
 export default function CircleShape({
   shape,
   isSelected,
@@ -27,6 +31,35 @@ export default function CircleShape({
   const diameter = unitDiameter;
   const circumference = 2 * Math.PI * unitRadius;
   const area = Math.PI * Math.pow(unitRadius, 2);
+
+  // Add snapping to move
+  const handleMove = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+
+    const startX = e.clientX;
+    const startY = e.clientY;
+    const startShape = { ...shape };
+
+    function onMouseMove(me: MouseEvent) {
+      const dx = me.clientX - startX;
+      const dy = me.clientY - startY;
+      // Snap to 1 pixel (0.1 unit)
+      const snappedX = snap(startShape.x + dx, 1);
+      const snappedY = snap(startShape.y + dy, 1);
+      shape.x = snappedX;
+      shape.y = snappedY;
+      // If you use setShapes, call setShapes here
+    }
+
+    function onMouseUp() {
+      document.removeEventListener("mousemove", onMouseMove);
+      document.removeEventListener("mouseup", onMouseUp);
+    }
+
+    document.addEventListener("mousemove", onMouseMove);
+    document.addEventListener("mouseup", onMouseUp);
+  };
 
   return (
     <div
