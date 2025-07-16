@@ -14,6 +14,7 @@ export const ROUTES = {
 
     //competition
     COMPETITION: '/competition',
+    PLAY: '/competition/play',
 
     // leaderboards
     LEADERBOARD: '/leaderboard',

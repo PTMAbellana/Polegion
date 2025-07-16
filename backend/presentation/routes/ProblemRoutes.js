@@ -11,19 +11,31 @@ class ProblemRoutes {
   initializeRoutes() {
     this.router.use(this.authMiddleware.protect)
 
-    this.router.route('/')
-    .post(this.problemController.createProblem)
-    
-    this.router.route('/:room_id')
-    .get(this.problemController.getRoomProblems)
-    
-    this.router.route('/:problem_id')
-    .get(this.problemController.getProblem)
-    .delete(this.problemController.deleteProblem)
-    .put(this.problemController.updateProblem)
-  
+    // More specific routes first
     this.router.route('/room-code/:room_code')
-    .get(this.problemController.getRoomProblemsByCode)
+      .get(this.problemController.getRoomProblemsByCode)
+
+    this.router.route('/update-timer/:problem_id')
+      .put(this.problemController.updateTimer)
+
+    this.router.route('/compe-problems/:competition_id')
+      .get(this.problemController.getAllCompeProblems)
+
+    // Generic routes after
+    this.router.route('/')
+      .post(this.problemController.createProblem)
+
+    this.router.route('/:room_id')
+      .get(this.problemController.getRoomProblems)
+
+    this.router.route('/:problem_id')
+      .get(this.problemController.getProblem)
+      .delete(this.problemController.deleteProblem)
+      .put(this.problemController.updateProblem)
+  
+    this.router.route('/:problem_id/:competetion_id')
+      .post(this.problemController.addCompeProblem)
+      .delete(this.problemController.removeCompeProblem)
   }
 
   getRouter() {

@@ -36,7 +36,7 @@ class ParticipantService {
             // console.log(exist)
             if (!exist) throw new Error ('Room not found or not authorized')
             const data = await this.participantRepo.getAllParticipants(room_id)
-            console.log('data: ', data)
+            // console.log('data: ', data)
             const participants = await Promise.all(
                 data.map(async (participant) => {
                     try {
@@ -81,7 +81,7 @@ class ParticipantService {
                 }
             }
         } catch (error){
-            console.log('Error in getRoomParticipantsForAdmin service: ', error)
+            // console.log('Error in getRoomParticipantsForAdmin service: ', error)
             throw error
         }
     }

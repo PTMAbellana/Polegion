@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import styles from '@/styles/competition.module.css';
 import { useSearchParams } from 'next/navigation';
@@ -29,6 +29,7 @@ interface Problems {
     max_attempts: number
     expected_xp: number
     timer: number | null
+    visibility: 'show' | 'hide'
 }
 
 interface Competition {
@@ -59,50 +60,78 @@ const CompetitionDashboard = () => {
   const { isLoading: authLoading } = AuthProtection()
   // const router = useRouter();
 
-  useEffect(() => {
-      if (isLoggedIn && !authLoading && !fetched) {
-          callMe()
-          setFetched(true)
-      } else {
-          if (authLoading || !isLoggedIn) {
-              setIsLoading(true)
-          }
-      }
-  }, [isLoggedIn, authLoading, fetched])
 
-    const callMe = async () => {
-        try {
-            setIsLoading(true)
-            // kani without xp ni sha huehue
-            const parts = await getAllParticipants(roomId, 'creator', true)
-            console.log('Attempting to get all participants: ', parts.data)
-
-            setParticipants( parts.data.participants || [] )
-            console.log('Attempting to get all participants: ', parts.data)
-            
-            const probs = await getRoomProblems(roomId)
-            console.log('Fetching all problems: ', probs)
-            setProblems(probs)
-
-            const comp = await getAllCompe(roomId)
-            console.log('Fetching all competitions: ', comp)
-            setCompetition(comp)
-        } catch (error) {
-            console.error('Error fetching room details:', error)
-        } finally {
-            setIsLoading(false)
-        }
+  // Fetch participants
+  const fetchParticipants = useCallback(async () => {
+    try {
+      const parts = await getAllParticipants(roomId, 'creator', true);
+      setParticipants(parts.data.participants || []);
+    } catch (error) {
+      console.error('Error fetching participants:', error);
     }
+  }, [roomId]);
+
+  // Fetch problems
+  const fetchProblems = useCallback(async () => {
+    try {
+      const probs = await getRoomProblems(roomId);
+      setProblems(probs);
+    } catch (error) {
+      console.error('Error fetching problems:', error);
+    }
+  }, [roomId]);
+
+  // Fetch competitions
+  const fetchCompetitions = useCallback(async () => {
+    try {
+      const comp = await getAllCompe(roomId);
+      setCompetition(comp);
+    } catch (error) {
+      console.error('Error fetching competitions:', error);
+    }
+  }, [roomId]);
+
+  // Fetch all data (for initial load)
+  const fetchAll = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      await Promise.all([
+        fetchParticipants(),
+        fetchProblems(),
+        fetchCompetitions(),
+      ]);
+    } catch (error) {
+      console.error('Error fetching room details:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [fetchParticipants, fetchProblems, fetchCompetitions]);
+
+  useEffect(() => {
+    if (isLoggedIn && !authLoading && !fetched) {
+      fetchAll();
+      setFetched(true);
+    } else {
+      if (authLoading || !isLoggedIn) {
+        setIsLoading(true);
+      }
+    }
+  }, [isLoggedIn, authLoading, fetched, fetchAll]);
+
+    // callMe is now replaced by fetchAll, fetchCompetitions, etc.
 
     const handleCreateCompetition = async () => {
       if (!newCompetitionTitle.trim()) return;
       setCreating(true);
       try {
-        // Call your API and pass the required data
         const result = await createCompe(roomId, newCompetitionTitle.trim());
-        // Optionally update your local state with the new competition
-        callMe(); // Refresh the competition list
-        // setCompetition(result.data.competitions || []);
+        // Optimistically update the competitions list if API returns the new competition
+        if (result && result.data && result.data.competition) {
+          setCompetition(prev => [result.data.competition, ...prev]);
+        } else {
+          // Fallback: refetch competitions
+          await fetchCompetitions();
+        }
         setNewCompetitionTitle("");
       } catch (error) {
         // Handle error (show message, etc.)
@@ -125,7 +154,7 @@ const CompetitionDashboard = () => {
     return sortOrder === 'desc' ? b.accumulated_xp - a.accumulated_xp : a.accumulated_xp - b.accumulated_xp;
   });
 
-  const redirectToManage = (compe_id : string) => {
+  const redirectToManage = (compe_id : number) => {
     router.push(`${ROUTES.COMPETITION}/${compe_id}?room=${roomId}`)  
   };
 
@@ -194,6 +223,7 @@ const CompetitionDashboard = () => {
             {/* Room Competitions */}
             <div className={styles.participantsSection}>
               <h2 className={styles.participantsTitle}>Room Competitions</h2>
+              <br />
               <div className={styles.roomGrid}>
                 {competition.length > 0 ? (
                   competition.map((comp) => (
@@ -206,9 +236,14 @@ const CompetitionDashboard = () => {
                       </div>
                       <div className={styles.roomContent}>
                         <div className={styles.roomFooter}>
-                          <button className={styles.manageButton} onClick={() => redirectToManage(comp.id)}>
-                            Manage
-                          </button>
+                          <div className={styles.roomStatus}>
+                            <span className={styles.roomStatusLabel}>Status:</span> {comp.status}
+                          </div>
+                          {comp.status !== 'DONE' && (
+                            <button className={styles.manageButton} onClick={() => redirectToManage(comp.id)}>
+                              Manage
+                            </button>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -229,7 +264,7 @@ const CompetitionDashboard = () => {
               </div>
               {/* Problems List */}
               <div className={styles.participantsList}>
-                {problems.map((problem, index) => (
+                {problems.filter(problem => problem.visibility === 'show').map((problem, index) => (
                   <div key={problem.id} className={styles.participantCard}>
                     <div className={styles.participantContent}>
                       <div className={styles.participantLeft}>

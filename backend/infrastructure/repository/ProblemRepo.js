@@ -93,14 +93,17 @@ class ProblemRepo {
 
   async fetchCompeProblemByProbId(prob_id) {
     try {
+      console.log('fetchCompeProblemByProbId prob_id', prob_id)
       const {
         data, error
       } = await this.supabase
       .from(this.tableCompe)
       .select('*')
       .eq('problem_id', prob_id)
+      .is('competition_id', null) // Assuming you want to fetch problems not assigned to any competition
       .single()
 
+      console.log('fetchCompeProblemByProbId', data, error)
       if (error) throw error
       if (!data) throw new Error('Competition problem not found')
       return data;
@@ -171,6 +174,87 @@ class ProblemRepo {
     }
   }
 
+  async updateProblemCompe(prob_id, compe_id) {
+    try {
+      const { 
+        data,
+        error
+       } = await this.supabase
+        .from(this.tableCompe)
+        .update({
+          competition_id: compe_id
+        })
+        .eq('problem_id', prob_id)
+        .select()
+        .single()
+  
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      throw error
+    }
+  }
+
+  async updateProbToCompe (prob_id, compe_id) {
+    try {
+      const { 
+        data,
+        error
+       } = await this.supabase
+        .from(this.tableCompe)
+        .update({
+         'added_at': new Date(),
+         'competition_id': compe_id
+        })
+        .eq('problem_id', prob_id)
+        .select()
+        .single()
+  
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      throw error
+    }
+  }
+
+  async fetchCompeProblems(compe_id) {
+    try {
+     const { 
+        data,
+        error
+       } = await this.supabase
+        .from(this.tableCompe)
+        .select('*, problem:problem_id(*)')
+        .eq('competition_id', compe_id)
+        .order('added_at', {
+          ascending: false
+        })
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      throw error
+    }
+  }
+
+  async removeCompeProblem(prob_id, compe_id) {
+    try {
+      const { 
+        data,
+        error
+       } = await this.supabase
+        .from(this.tableCompe)
+        .delete()
+        .eq('problem_id', prob_id)
+        .eq('competition_id', compe_id)
+        .select()
+        .single();
+  
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      throw error
+    }
+  }
 }
 
 module.exports = ProblemRepo;

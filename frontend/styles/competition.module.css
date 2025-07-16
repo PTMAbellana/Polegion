@@ -661,6 +661,7 @@
   justify-content: space-between;
   padding-top: 1rem;
   border-top: 2px solid #f1f5f9;
+  gap: 1rem;
 }
 
 .roomStatus {

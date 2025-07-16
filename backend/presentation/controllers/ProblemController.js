@@ -74,6 +74,51 @@ class ProblemController {
       res.status(500).json({ error: 'Server Error: Failed to update problem' });
     }
   }
+
+  updateTimer = async (req, res) => {
+    const { problem_id } = req.params
+    const { timer } = req.body
+    try {
+      const updatedTimer = await this.problemService.updateTimer(problem_id, timer)
+      res.status(200).json(updatedTimer)
+    } catch (error) {
+      console.error('Error updating timer:', error);
+      res.status(500).json({ error: 'Server Error: Failed to update timer' });
+    }
+  }
+
+  getAllCompeProblems = async (req, res) => {
+    const { competition_id } = req.params
+    try {
+      const problems = await this.problemService.fetchCompeProblems(competition_id)
+      res.status(200).json(problems)
+    } catch (error) {
+      console.error('Error fetching competition problems:', error);
+      res.status(500).json({ error: 'Server Error: Failed to fetch competition problems' });
+    }
+  }
+
+  addCompeProblem = async (req, res) => {
+    const { problem_id, competition_id } = req.params
+    try {
+      const addedProblem = await this.problemService.updateCompeProblem(problem_id, competition_id)
+      res.status(200).json(addedProblem)
+    } catch (error) {
+      console.error('Error adding competition problem:', error);
+      res.status(500).json({ error: 'Server Error: Failed to add competition problem' });
+    }
+  }
+
+  removeCompeProblem = async (req, res) => {
+    const { problem_id, competition_id } = req.params
+    try {
+      const removedProblem = await this.problemService.removeCompeProblem(problem_id, competition_id)
+      res.status(200).json(removedProblem)
+    } catch (error) {
+      console.error('Error removing competition problem:', error);
+      res.status(500).json({ error: 'Server Error: Failed to remove competition problem' });
+    }
+  }
 }
 
 module.exports = ProblemController;

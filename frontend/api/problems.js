@@ -50,3 +50,34 @@ export const updateProblem = async(problem_id, problemData) => {
     throw error
   }
 }
+
+export const updateTimer = async(problem_id, timer) => {
+  try {
+    return (await api.put(`/problems/update-timer/${problem_id}`, { timer })).data
+  } catch (error) {
+    throw error
+  }
+}
+
+export const getCompeProblems = async(competition_id) => {
+  try {
+    return (await api.get(`/problems/compe-problems/${competition_id}`)).data
+  } catch (error) {
+    throw error
+  }
+}
+
+export const addCompeProblem = async(problem_id, competition_id) => {
+  try {
+    return (await api.post(`/problems/${problem_id}/${competition_id}`)).data
+  } catch (error) {
+    throw error
+  }
+}
+export const removeCompeProblem = async(problem_id, competition_id) => {
+  try {
+    return (await api.delete(`/problems/${problem_id}/${competition_id}`)).data
+  } catch (error) {
+    throw error
+  }
+} 

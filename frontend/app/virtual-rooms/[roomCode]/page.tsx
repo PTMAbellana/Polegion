@@ -37,6 +37,7 @@ interface Problems {
     difficulty: string
     max_attempts: number
     expected_xp: number
+    visibility: 'show' | 'hide'
 }
 
 export default function RoomDetail({ params } : { params  : Promise<{roomCode : string }> }){
@@ -261,7 +262,7 @@ export default function RoomDetail({ params } : { params  : Promise<{roomCode : 
                     <h3>Problems</h3>
                     <button
                         className={styles["add-btn"]}
-                        onClick={() => router.push(`/virtual-rooms/${roomCode.roomCode}/create-problem`)}
+                        onClick={() => router.push(`${ROUTES.VIRTUAL_ROOMS}/${roomCode.roomCode}/create-problem`)}
                     >
                         + Add Problem
                     </button>
@@ -284,6 +285,11 @@ export default function RoomDetail({ params } : { params  : Promise<{roomCode : 
                                 data-difficulty={p.difficulty}
                               >
                                 {p.difficulty}
+                              </span>
+                              <span
+                                className={styles["problem-difficulty"]}
+                              >
+                                {p.visibility}
                               </span>
                             </div>
                             <div className={styles["problem-description"]}>

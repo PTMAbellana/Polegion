@@ -3,20 +3,19 @@
 import React, { use, useEffect, useState } from 'react';
 import { ChevronDown, ChevronUp, Edit3, Pause, Play } from 'lucide-react';
 import styles from '@/styles/competition.module.css';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { myAppHook } from '@/context/AppUtils';
 import { AuthProtection } from '@/context/AuthProtection';
 import Loader from '@/components/Loader';
-import { getRoomProblems } from '@/api/problems';
+import { addCompeProblem, getCompeProblems, getRoomProblems, removeCompeProblem, updateTimer } from '@/api/problems';
 import { getAllParticipants } from '@/api/participants';
-import { getCompeById } from '@/api/competitions';
+import { getAllCompe, getCompeById } from '@/api/competitions';
 
 interface Participant {
   id: number;
   fullName?: string;
   accumulated_xp: number | 0;
 }
-
 
 interface Problems {
     id: string
@@ -25,6 +24,7 @@ interface Problems {
     difficulty: string
     max_attempts: number
     expected_xp: number
+    visibility: 'show' | 'hide'
     timer: number | null
 }
 
@@ -58,7 +58,7 @@ const CompetitionDashboard = ({ params } : { params  : Promise<{competitionId : 
   
   const { isLoggedIn } = myAppHook()
   const { isLoading: authLoading } = AuthProtection()
-  const router = useRouter();
+  // const router = useRouter();
 
   useEffect(() => {
       if (isLoggedIn && !authLoading && !fetched) {
@@ -115,41 +115,39 @@ const CompetitionDashboard = ({ params } : { params  : Promise<{competitionId : 
 
 
     // Add problem to competition (persistent order)
-    const handleAddProblem = async (problem) => {
+    const handleAddProblem = async (problem: Problems) => {
       if (!problem.timer || problem.timer <= 0) {
         alert('Cannot add problem without a timer!');
         return;
       }
-      setAddedProblems((prev) => {
-        const updated = [...prev, problem.id];
-        // --- Update order in backend ---
-        // TODO: Call your API to persist the new order
-        // await updateAddedProblemsOrder(roomId, compe_id.competitionId, updated)
-        return updated;
-      });
+      console.log('Adding problem:', problem.id, 'to competition:', compe_id.competitionId)
+      await addCompeProblem(problem.id, compe_id.competitionId)
+      setAddedProblems( await getCompeProblems(compe_id.competitionId) || []);
     };
 
     // Remove problem from competition (persistent order)
-    const handleRemoveProblem = async (problem) => {
-      setAddedProblems((prev) => {
-        const updated = prev.filter((id) => id !== problem.id);
-        // --- Update order in backend ---
-        // TODO: Call your API to persist the new order
-        // await updateAddedProblemsOrder(roomId, compe_id.competitionId, updated)
-        return updated;
-      });
+    const handleRemoveProblem = async (problem: Problems) => {
+      await removeCompeProblem(problem.id, compe_id.competitionId);
+      setAddedProblems(await getCompeProblems(compe_id.competitionId) || []);
     };
 
     // Edit timer UI logic
-    const handleEditTimer = (problem) => {
+    const handleEditTimer = (problem : Problems) => {
       setEditingTimerId(problem.id);
       setTimerEditValue(problem.timer || 0);
     };
 
-    const handleSaveTimer = (problem) => {
+    const handleSaveTimer = async(problem : Problems) => {
       // TODO: Call your API to update timer for this problem
-      setProblems((prev) => prev.map((p) => p.id === problem.id ? { ...p, timer: timerEditValue } : p));
-      setEditingTimerId(null);
+      try {
+        await updateTimer(problem.id, timerEditValue);
+        setProblems((prev) => prev.map((p) => p.id === problem.id ? { ...p, timer: timerEditValue } : p));
+        setEditingTimerId(null);
+      } catch (error) {
+        console.error('Error updating timer:', error);
+        alert('Failed to update timer. Please try again.');
+        return;
+      }
     };
 
     const handleCancelEdit = () => {
@@ -172,10 +170,6 @@ const CompetitionDashboard = ({ params } : { params  : Promise<{competitionId : 
 
   const toggleSort = () => {
     setSortOrder(sortOrder === 'desc' ? 'asc' : 'desc');
-  };
-
-  const togglePause = () => {
-    setIsPaused(!isPaused);
   };
 
   return (
@@ -265,7 +259,7 @@ const CompetitionDashboard = ({ params } : { params  : Promise<{competitionId : 
                 <h2 className={styles.participantsTitle}>Available Problems</h2>
               </div>
               <div className={styles.participantsList}>
-                {problems.filter((problem) => !addedProblems.includes(problem.id)).map((problem, index) => {
+                {problems.filter((problem) => !addedProblems.includes(problem.id) && problem.visibility === 'show').map((problem, index) => {
                   const canAdd = problem.timer && problem.timer > 0;
                   return (
                     <div key={problem.id} className={styles.participantCard}>
