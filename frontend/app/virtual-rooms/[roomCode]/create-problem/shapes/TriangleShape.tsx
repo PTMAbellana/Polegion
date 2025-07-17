@@ -24,11 +24,22 @@ export default function TriangleShape({
   const size = shape.size;
   const h = size * Math.sqrt(3) / 2; // height for equilateral triangle
 
-  const [points, setPoints] = React.useState({
-    top: { x: shape.x, y: shape.y - h / 2 },
-    left: { x: shape.x - size / 2, y: shape.y + h / 2 },
-    right: { x: shape.x + size / 2, y: shape.y + h / 2 },
-  });
+  const [points, setPoints] = React.useState(
+    shape.points
+      ? { ...shape.points }
+      : {
+          top: { x: shape.x, y: shape.y - h / 2 },
+          left: { x: shape.x - size / 2, y: shape.y + h / 2 },
+          right: { x: shape.x + size / 2, y: shape.y + h / 2 },
+        }
+  );
+
+  // Sync points state with shape.points when editing or loading
+  React.useEffect(() => {
+    if (shape.points) {
+      setPoints({ ...shape.points });
+    }
+  }, [shape.points]);
 
   // For calculations and rendering
   const sidePoints = [points.top, points.left, points.right];
@@ -65,13 +76,27 @@ export default function TriangleShape({
               lastX = moveEvent.clientX;
               lastY = moveEvent.clientY;
 
-              setPoints(prev => ({
-                ...prev,
+              setPoints(prev => {
+                const newPoints = {
+                  ...prev,
+                  [vertexKey]: {
+                    x: snap(prev[vertexKey].x + dx, 1),
+                    y: snap(prev[vertexKey].y + dy, 1),
+                  }
+                };
+                // Only update local state here
+                // Do NOT call onShapeMove here
+                // We'll call it after setPoints
+                // (see below)
+                return newPoints;
+              });
+              onShapeMove && onShapeMove({ ...shape, points: {
+                ...points,
                 [vertexKey]: {
-                  x: snap(prev[vertexKey].x + dx, 1),
-                  y: snap(prev[vertexKey].y + dy, 1),
+                  x: snap(points[vertexKey].x + dx, 1),
+                  y: snap(points[vertexKey].y + dy, 1),
                 }
-              }));
+              }});
             };
 
             const handleUp = () => {
@@ -154,24 +179,27 @@ export default function TriangleShape({
       lastX = me.clientX;
       lastY = me.clientY;
 
-      // Snap dx/dy
       const snappedDx = snap(dx, 1);
       const snappedDy = snap(dy, 1);
 
-      setPoints(prev => ({
-        top: {
-          x: snap(prev.top.x + snappedDx, 1),
-          y: snap(prev.top.y + snappedDy, 1),
-        },
-        left: {
-          x: snap(prev.left.x + snappedDx, 1),
-          y: snap(prev.left.y + snappedDy, 1),
-        },
-        right: {
-          x: snap(prev.right.x + snappedDx, 1),
-          y: snap(prev.right.y + snappedDy, 1),
-        },
-      }));
+      setPoints(prev => {
+        const newPoints = {
+          top: {
+            x: snap(prev.top.x + snappedDx, 1),
+            y: snap(prev.top.y + snappedDy, 1),
+          },
+          left: {
+            x: snap(prev.left.x + snappedDx, 1),
+            y: snap(prev.left.y + snappedDy, 1),
+          },
+          right: {
+            x: snap(prev.right.x + snappedDx, 1),
+            y: snap(prev.right.y + snappedDy, 1),
+          },
+        };
+        onShapeMove && onShapeMove({ ...shape, points: newPoints });
+        return newPoints;
+      });
     }
 
     function onMouseUp() {
@@ -200,6 +228,13 @@ export default function TriangleShape({
     const angleRad = Math.acos((b*b + c*c - a*a) / (2*b*c));
     return (angleRad * 180) / Math.PI;
   }
+
+  // React.useEffect(() => {
+  //   onShapeMove && onShapeMove({
+  //     ...shape,
+  //     points: { top: points.top, left: points.left, right: points.right }
+  //   });
+  // }, [points, onShapeMove, shape]);
 
   return (
     <svg

@@ -82,20 +82,31 @@ const MainArea: React.FC<MainAreaProps> = ({
       prevShapes.map((shape) => {
         if (shape.id !== shapeId || !shape.points) return shape;
 
-        const updatedPoints = { ...shape.points, [vertexKey]: newPos };
-        const pointArray = [
-          updatedPoints.topLeft,
-          updatedPoints.topRight,
-          updatedPoints.bottomRight,
-          updatedPoints.bottomLeft,
-        ];
-
-        if (isSelfIntersecting(pointArray)) {
-          console.warn("Rejected self-intersecting update");
-          return shape;
+        // Handle triangle points
+        if (shape.type === "triangle") {
+          const updatedPoints = { ...shape.points, [vertexKey]: newPos };
+          return { ...shape, points: updatedPoints };
         }
 
-        return { ...shape, points: updatedPoints };
+        // Handle square points
+        if (shape.type === "square") {
+          const updatedPoints = { ...shape.points, [vertexKey]: newPos };
+          const pointArray = [
+            updatedPoints.topLeft,
+            updatedPoints.topRight,
+            updatedPoints.bottomRight,
+            updatedPoints.bottomLeft,
+          ];
+
+          if (isSelfIntersecting(pointArray)) {
+            console.warn("Rejected self-intersecting update");
+            return shape;
+          }
+
+          return { ...shape, points: updatedPoints };
+        }
+
+        return shape;
       })
     );
   };
@@ -155,15 +166,23 @@ const MainArea: React.FC<MainAreaProps> = ({
             },
           ]);
         } else if (type === "triangle") {
+          const size = 80;
+          const h = size * Math.sqrt(3) / 2;
+          const center = { x: x - 40, y: y - 40 };
           setShapes((prev) => [
             ...prev,
             {
               id: Date.now(),
               type: "triangle",
-              x: x - 40, // match square/circle offset if needed
-              y: y - 40,
-              size: 80, // <--- MATCHES SQUARE AND CIRCLE
+              x: center.x,
+              y: center.y,
+              size,
               color: "#e3dcc2",
+              points: {
+                top: { x: center.x, y: center.y - h / 2 },
+                left: { x: center.x - size / 2, y: center.y + h / 2 },
+                right: { x: center.x + size / 2, y: center.y + h / 2 },
+              }
             },
           ]);
         }
