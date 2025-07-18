@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef, useMemo, useCallback } from "react";
 
 function snap(value: number, step = 1) {
   return Math.round(value / step) * step;
@@ -19,8 +19,10 @@ export default function TriangleShape({
   showHeight,
   onShapeMove,
 }: any) {
+  // ✅ Add this line
+  const updateTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  
   const stroke = 6;
-
   const size = shape.size;
   const h = size * Math.sqrt(3) / 2; // height for equilateral triangle
 
@@ -42,14 +44,23 @@ export default function TriangleShape({
   }, [shape.points]);
 
   // For calculations and rendering
-  const sidePoints = [points.top, points.left, points.right];
-
-  // Side lengths
-  const sideLengths = [
-    dist(sidePoints[0], sidePoints[1]),
-    dist(sidePoints[1], sidePoints[2]),
-    dist(sidePoints[2], sidePoints[0]),
-  ];
+  const {
+    sidePoints,
+    sideLengths,
+    area,
+    height,
+  } = useMemo(() => {
+    const sp = [points.top, points.left, points.right];
+    const sl = [
+      dist(sp[0], sp[1]),
+      dist(sp[1], sp[2]),
+      dist(sp[2], sp[0]),
+    ];
+    const a = getTriangleArea(points);
+    const h = getHeightFromTopVertex(points);
+    
+    return { sidePoints: sp, sideLengths: sl, area: a, height: h };
+  }, [points.top.x, points.top.y, points.left.x, points.left.y, points.right.x, points.right.y]);
 
   // Vertices
   {isSelected &&
@@ -84,19 +95,14 @@ export default function TriangleShape({
                     y: snap(prev[vertexKey].y + dy, 1),
                   }
                 };
-                // Only update local state here
-                // Do NOT call onShapeMove here
-                // We'll call it after setPoints
-                // (see below)
+                
+                // Call onShapeMove AFTER setPoints, outside the updater
+                setTimeout(() => {
+                  onShapeMove && onShapeMove({ ...shape, points: newPoints });
+                }, 0);
+                
                 return newPoints;
               });
-              onShapeMove && onShapeMove({ ...shape, points: {
-                ...points,
-                [vertexKey]: {
-                  x: snap(points[vertexKey].x + dx, 1),
-                  y: snap(points[vertexKey].y + dy, 1),
-                }
-              }});
             };
 
             const handleUp = () => {
@@ -162,13 +168,13 @@ export default function TriangleShape({
     };
   }
 
-  const area = getTriangleArea(points); // points is {top, left, right}
-  const height = getHeightFromTopVertex(points);
-
   // Snapping for moving the whole triangle
-  const handleDrag = (e: React.MouseEvent) => {
-    e.stopPropagation();
+  const handleDrag = useCallback((e: React.MouseEvent) => {
+    // ❌ Remove this line - it's already called in polygon's onMouseDown
+    // handleShapeMouseDown(shape.id, e);
+    
     e.preventDefault();
+    setSelectedId(shape.id);
 
     let lastX = e.clientX;
     let lastY = e.clientY;
@@ -197,7 +203,15 @@ export default function TriangleShape({
             y: snap(prev.right.y + snappedDy, 1),
           },
         };
-        onShapeMove && onShapeMove({ ...shape, points: newPoints });
+        
+        // ✅ Debounce the onShapeMove calls
+        if (updateTimeoutRef.current) {
+          clearTimeout(updateTimeoutRef.current);
+        }
+        updateTimeoutRef.current = setTimeout(() => {
+          onShapeMove && onShapeMove({ ...shape, points: newPoints });
+        }, 16); // 60fps
+        
         return newPoints;
       });
     }
@@ -205,12 +219,14 @@ export default function TriangleShape({
     function onMouseUp() {
       document.removeEventListener("mousemove", onMouseMove);
       document.removeEventListener("mouseup", onMouseUp);
+      
+      // Keep this - it notifies parent that dragging ended
       handleShapeDrop?.();
     }
 
     document.addEventListener("mousemove", onMouseMove);
     document.addEventListener("mouseup", onMouseUp);
-  };
+  }, [shape, onShapeMove]);
 
   // Height foot
   const foot = getHeightFoot(points.top, points.left, points.right);
@@ -255,9 +271,9 @@ export default function TriangleShape({
         stroke="#000"
         strokeWidth={stroke}
         onMouseDown={(e) => {
-          handleDrag(e);
+          // ✅ Only call this once here
           handleShapeMouseDown(shape.id, e);
-          setSelectedId(shape.id);
+          handleDrag(e);
         }}
         style={{ cursor: "move", pointerEvents: "auto" }}
       />
