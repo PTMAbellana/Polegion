@@ -1032,57 +1032,69 @@
 
 .problemItemHeader {
   display: flex;
+  align-items: center;
   justify-content: space-between;
-  align-items: flex-start;
+  gap: 8px;
   margin-bottom: 8px;
-  gap: 8px; 
 }
 
 .problemTitle {
-  font-family: 'Poppins', sans-serif;
-  font-size: 14px;
-  font-weight: 600;
-  color: #2c514c;
-  margin: 0;
   flex: 1;
-  line-height: 1.3;
-  word-break: break-word;
-  overflow-wrap: break-word;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
+  font-weight: 600;
+  color: #2c3e50;
   overflow: hidden;
-  text-overflow: ellipsis; /* Account for delete button */
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.editButton {
+  background: linear-gradient(135deg, #3498db, #2980b9);
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(52, 152, 219, 0.2);
+  min-width: 50px;
+}
+
+.editButton:hover {
+  background: linear-gradient(135deg, #2980b9, #1f4e79);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(52, 152, 219, 0.3);
+}
+
+.editButton:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(52, 152, 219, 0.2);
 }
 
 .deleteButton {
-  background: #ff6b6b;
-  border: none;
-  border-radius: 6px;
+  background: linear-gradient(135deg, #e74c3c, #c0392b);
   color: white;
-  font-family: 'Poppins', sans-serif;
-  font-size: 11px;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.8rem;
   font-weight: 500;
-  padding: 4px 8px;
   cursor: pointer;
   transition: all 0.2s ease;
-  flex-shrink: 0; 
-  margin-left: 8px;
-  white-space: nowrap;
+  box-shadow: 0 2px 4px rgba(231, 76, 60, 0.2);
   min-width: 60px;
-  height: 24px; 
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
 .deleteButton:hover {
-  background: #ff5252;
-  transform: scale(1.05);
+  background: linear-gradient(135deg, #c0392b, #a93226);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(231, 76, 60, 0.3);
 }
 
 .deleteButton:active {
-  transform: scale(0.95);
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(231, 76, 60, 0.2);
 }
 
 .problemDetails {
@@ -1327,4 +1339,11 @@
 
 .problemsContent::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.5);
+}
+
+/* Update this class in your create-problem.module.css */
+.buttonGroup {
+  display: flex;
+  gap: 8px; /* Change from 6px to 8px for more space */
+  align-items: center;
 }

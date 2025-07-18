@@ -877,19 +877,22 @@ export default function CreateProblem({ params }: { params: Promise<{ roomCode: 
                       <div className={styles.problemTitle}>
                         {problem.title || "Untitled Problem"}
                       </div>
-                      <button 
-                        onClick={() => handleEditProblem(problem.id)} 
-                        title="Edit this problem"
-                      >
-                        Edit
-                      </button>
-                      <button 
-                        onClick={() => handleDeleteProblem(problem.id)} 
-                        className={styles.deleteButton}
-                        title="Delete this problem"
-                      >
-                        Delete
-                      </button>
+                      <div className={styles.buttonGroup}>
+                        <button 
+                          onClick={() => handleEditProblem(problem.id)} 
+                          className={styles.editButton}
+                          title="Edit this problem"
+                        >
+                          Edit
+                        </button>
+                        <button 
+                          onClick={() => handleDeleteProblem(problem.id)} 
+                          className={styles.deleteButton}
+                          title="Delete this problem"
+                        >
+                          Delete
+                        </button>
+                      </div>
                     </div>
                     <div className={styles.problemDetails}>
                       <span 
