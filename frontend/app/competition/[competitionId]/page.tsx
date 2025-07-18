@@ -1,9 +1,9 @@
 "use client";
 
 import React, { use, useEffect, useState } from 'react';
-import { ChevronDown, ChevronUp, Edit3, Pause, Play } from 'lucide-react';
+import { ArrowLeft, ChevronDown, ChevronUp, Edit3, Pause, Play } from 'lucide-react';
 import styles from '@/styles/competition.module.css';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { myAppHook } from '@/context/AppUtils';
 import { AuthProtection } from '@/context/AuthProtection';
 import Loader from '@/components/Loader';
@@ -37,6 +37,7 @@ const CompetitionDashboard = ({ params } : { params  : Promise<{competitionId : 
   const searchParams = useSearchParams();
   const roomId = searchParams.get("room");
   const compe_id = use(params)
+  const router = useRouter();
 
   // console.log('compe_id: ', compe_id.competitionId)
   // const [participants, setParticipants] = useState<Participant[]>([]);
@@ -179,14 +180,26 @@ const CompetitionDashboard = ({ params } : { params  : Promise<{competitionId : 
         {/* Header Section */}
         <div className={styles.header}>
           <div className={styles.headerContent}>
+            {/* Add Back Button */}
+            <div className={styles.headerTop}>
+              <button 
+                onClick={() => router.back()}
+                className={styles.backButton}
+                title="Go back to previous page"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                Back
+              </button>
+            </div>
+            
             <h1 className={styles.title}>
-              {competition?.title || 'Competition Dashboard'}
+              {competition?.title || 'Competition'}
             </h1>
             <p className={styles.status}>
               Status: <span className={styles.statusValue}>{competition?.status}</span>
             </p>
             <p className={styles.description}>
-              You can see the progress of the students and how much XP they have garnered already.
+              Compete with your classmates and earn XP by solving problems!
             </p>
           </div>
         </div>

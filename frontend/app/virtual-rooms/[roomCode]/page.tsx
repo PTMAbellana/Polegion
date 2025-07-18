@@ -259,7 +259,7 @@ export default function RoomDetail({ params } : { params  : Promise<{roomCode : 
                 {/* Problems Section */}
                 <div className={styles["problems-card"]}>
                   <div className={styles["section-header"]}>
-                    <h3>Problems</h3>
+                    <h3>Problems ({problems.length})</h3>
                     <button
                         className={styles["add-btn"]}
                         onClick={() => router.push(`${ROUTES.VIRTUAL_ROOMS}/${roomCode.roomCode}/create-problem`)}
@@ -267,42 +267,49 @@ export default function RoomDetail({ params } : { params  : Promise<{roomCode : 
                         + Add Problem
                     </button>
                   </div>
+                  
                   <div className={styles["problems-list"]}>
-                  {
-                   problems.length === 0 ? (
-                      <div className={styles["empty-state"]}>
-                          <div className={styles["empty-icon"]}>❓</div>
-                          <p>No problems added yet</p>
-                          <span>Start by adding your first problem to discuss</span>
+                    {
+                     problems.length === 0 ? (
+                        <div className={styles["empty-state"]}>
+                            <div className={styles["empty-icon"]}>❓</div>
+                            <p>No problems added yet</p>
+                            <span>Start by adding your first problem to discuss</span>
+                        </div>
+                     ) : (
+                        problems.map((p, idx) => (
+                            <div key={p.id || idx} className={styles["problem-card"]}>
+                              <div className={styles["problem-header"]}>
+                                <span className={styles["problem-title"]}>{p.title?.trim() ? p.title : "No Title"}</span>
+                                <span
+                                  className={styles["problem-difficulty"]}
+                                  data-difficulty={p.difficulty}
+                                >
+                                  {p.difficulty}
+                                </span>
+                                <span
+                                  className={styles["problem-difficulty"]}
+                                >
+                                  {p.visibility}
+                                </span>
+                              </div>
+                              <div className={styles["problem-description"]}>
+                                {p.description}
+                              </div>
+                              <div className={styles["problem-meta"]}>
+                                <span className={styles["problem-xp"]}>XP: {p.expected_xp}</span>
+                                <span className={styles["problem-attempts"]}>Max Attempts: {p.max_attempts}</span>
+                              </div>
+                            </div>
+                        ))
+                     )
+                    }
+                    {/* Update the scroll indicator message */}
+                    {problems.length > 5 && (
+                      <div className={styles["scroll-indicator"]}>
+                        <small>Showing all {problems.length} problems</small>
                       </div>
-                   ) : (
-                      problems.map((p, idx) => (
-                          <div key={p.id || idx} className={styles["problem-card"]}>
-                            <div className={styles["problem-header"]}>
-                              <span className={styles["problem-title"]}>{p.title?.trim() ? p.title : "No Title"}</span>
-                              <span
-                                className={styles["problem-difficulty"]}
-                                data-difficulty={p.difficulty}
-                              >
-                                {p.difficulty}
-                              </span>
-                              <span
-                                className={styles["problem-difficulty"]}
-                              >
-                                {p.visibility}
-                              </span>
-                            </div>
-                            <div className={styles["problem-description"]}>
-                              {p.description}
-                            </div>
-                            <div className={styles["problem-meta"]}>
-                              <span className={styles["problem-xp"]}>XP: {p.expected_xp}</span>
-                              <span className={styles["problem-attempts"]}>Max Attempts: {p.max_attempts}</span>
-                            </div>
-                          </div>
-                      ))
-                   )
-                  }
+                    )}
                   </div>
                 </div>
               </div>
@@ -313,44 +320,37 @@ export default function RoomDetail({ params } : { params  : Promise<{roomCode : 
                 <div className={styles["participants-card"]}>
                   <div className={styles["section-header"]}>
                     <h3>Participants</h3>
-                    <div className={styles["participants-count"]}> { participants.length } members</div>
+                    <div className={styles["participants-count"]}>{participants.length} members</div>
                   </div>
+                  
+                  {/* Scrollable participants list */}
                   <div className={styles["participants-list"]}>
                     {participants.length === 0 ? (
-                        <div className={styles["empty-state"]}>
-                            <div className={styles["empty-icon"]}>👥</div>
-                            <p>No participants yet</p>
-                            <span>Invite people to join this room</span>
-                        </div>
+                      <div className={styles["empty-state"]}>
+                        <div className={styles["empty-icon"]}>👥</div>
+                        <p>No participants yet</p>
+                        <span>Invite people to join this room</span>
+                      </div>
                     ) : (
-                        participants.map((p, idx) => (
-                            <div key={p.id || idx} className={styles["participant-item"]} style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                                <button
-                                    onClick={() => handleRemoveParticipant(p.id, p.fullName)}
-                                    style={{
-                                        background: "none",
-                                        border: "none",
-                                        color: "red",
-                                        fontWeight: "bold",
-                                        cursor: "pointer",
-                                        padding: 0,
-                                        fontSize: "1rem",
-                                        lineHeight: 1,
-                                    }}
-                                    aria-label={`Remove ${p.fullName}`}
-                                    >
+                      participants.map((p, idx) => (
+                        <div key={p.id || idx} className={styles["participant-item"]}>
+                          <button
+                            onClick={() => handleRemoveParticipant(p.id, p.fullName)}
+                            aria-label={`Remove ${p.fullName}`}
+                          >
                             ×
-                            </button>
-                            <span>{p.fullName}</span>
-                            </div>
-                        ))
-                    )
-                    }
+                          </button>
+                          <span>{p.fullName}</span>
+                        </div>
+                      ))
+                    )}
                   </div>
+                  
+                  {/* Fixed invite section at bottom */}
                   <div className={styles["invite-section"]}>
                     <button className={styles["invite-btn"]} onClick={() => setShowInviteModal(true)}>
-                        <span className={styles["invite-icon"]}>✉️</span>
-                        Invite Participants
+                      <span className={styles["invite-icon"]}>✉️</span>
+                      Invite Participants
                     </button>
                   </div>
                 </div>
