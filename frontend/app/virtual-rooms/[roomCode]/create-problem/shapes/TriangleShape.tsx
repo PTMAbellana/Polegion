@@ -287,13 +287,24 @@ export default function TriangleShape({
                   lastX = moveEvent.clientX;
                   lastY = moveEvent.clientY;
 
-                  setPoints(prev => ({
-                    ...prev,
-                    [vertexKey]: {
-                      x: snap(prev[vertexKey].x + dx, 1),
-                      y: snap(prev[vertexKey].y + dy, 1),
-                    }
-                  }));
+                  // ✅ Update local state first
+                  setPoints(prev => {
+                    const newPoints = {
+                      ...prev,
+                      [vertexKey]: {
+                        x: snap(prev[vertexKey].x + dx, 1),
+                        y: snap(prev[vertexKey].y + dy, 1),
+                      }
+                    };
+                    
+                    // ✅ Then notify parent with updated points (same pattern as square)
+                    onShapeMove && onShapeMove({ 
+                      ...shape, 
+                      points: newPoints 
+                    });
+                    
+                    return newPoints;
+                  });
                 };
 
                 const handleUp = () => {
