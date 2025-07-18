@@ -111,82 +111,67 @@ const MainArea: React.FC<MainAreaProps> = ({
     );
   };
 
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    const shapeType = e.dataTransfer.getData("shape-type");
+    
+    if (!shapeType) return;
+
+    const rect = mainAreaRef.current?.getBoundingClientRect();
+    if (!rect) return;
+
+    // Get the exact drop position
+    const dropX = e.clientX - rect.left;
+    const dropY = e.clientY - rect.top;
+
+    const newShape = {
+      id: Date.now(),
+      type: shapeType,
+      color: "#e3dcc2",
+    };
+
+    if (shapeType === "triangle") {
+      const size = 80;
+      const h = size * Math.sqrt(3) / 2;
+
+      newShape.x = dropX;
+      newShape.y = dropY;
+      newShape.size = size;
+      newShape.points = {
+        top: { x: dropX, y: dropY - h / 2 },
+        left: { x: dropX - size / 2, y: dropY + h / 2 },
+        right: { x: dropX + size / 2, y: dropY + h / 2 },
+      };
+    } else if (shapeType === "circle") {
+      // ✅ Make sure circle is centered at drop location
+      const radius = 40; // size / 2 = 80 / 2 = 40
+      
+      newShape.x = dropX; // Center X
+      newShape.y = dropY; // Center Y
+      newShape.size = 80; // Diameter
+      newShape.radius = radius; // Add radius for clarity
+    } else if (shapeType === "square") {
+      const size = 80;
+      newShape.size = size;
+      newShape.points = {
+        topLeft: { x: dropX - size / 2, y: dropY - size / 2 },
+        topRight: { x: dropX + size / 2, y: dropY - size / 2 },
+        bottomRight: { x: dropX + size / 2, y: dropY + size / 2 },
+        bottomLeft: { x: dropX - size / 2, y: dropY + size / 2 },
+      };
+    }
+
+    setShapes(prev => [...prev, newShape]);
+    setSelectedId(newShape.id);
+    setSelectedTool(null);
+  };
+
   return (
     <div
       ref={mainAreaRef}
       className={styles.mainArea}
       onDragOver={(e) => e.preventDefault()}
-      onDrop={(e) => {
-        e.preventDefault();
-        const type = e.dataTransfer.getData("shape-type");
-
-        if (shapes.length >= shapeLimit) {
-          onLimitReached?.();
-          return;
-        }
-
-        const rect = mainAreaRef.current.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-
-        if (type === "square") {
-          const size = 80;
-          const topLeft = { x: x - size / 2, y: y - size / 2 };
-          const topRight = { x: x + size / 2, y: y - size / 2 };
-          const bottomRight = { x: x + size / 2, y: y + size / 2 };
-          const bottomLeft = { x: x - size / 2, y: y + size / 2 };
-
-          setShapes((prev) => [
-            ...prev,
-            {
-              id: Date.now(),
-              type: "square",
-              x: x - 40,
-              y: y - 40,
-              size,
-              fill: "#e3dcc2",
-              points: {
-                topLeft,
-                topRight,
-                bottomRight,
-                bottomLeft,
-              },
-            },
-          ]);
-        } else if (type === "circle") {
-          setShapes((prev) => [
-            ...prev,
-            {
-              id: Date.now(),
-              type: "circle",
-              x: x - 40,
-              y: y - 40,
-              size: 80,
-              color: "#e3dcc2",
-            },
-          ]);
-        } else if (type === "triangle") {
-          const size = 80;
-          const h = size * Math.sqrt(3) / 2;
-          const center = { x: x - 40, y: y - 40 };
-          setShapes((prev) => [
-            ...prev,
-            {
-              id: Date.now(),
-              type: "triangle",
-              x: center.x,
-              y: center.y,
-              size,
-              color: "#e3dcc2",
-              points: {
-                top: { x: center.x, y: center.y - h / 2 },
-                left: { x: center.x - size / 2, y: center.y + h / 2 },
-                right: { x: center.x + size / 2, y: center.y + h / 2 },
-              }
-            },
-          ]);
-        }
-      }}
+      onDrop={handleDrop}
       style={{ overflow: "hidden", position: "relative" }}
       onMouseDown={() => {
         setSelectedId(null);

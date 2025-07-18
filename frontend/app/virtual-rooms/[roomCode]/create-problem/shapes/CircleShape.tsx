@@ -65,8 +65,8 @@ export default function CircleShape({
     <div
       style={{
         position: "absolute",
-        left: shape.x,
-        top: shape.y,
+        left: shape.x - size / 2, // ✅ Center the circle horizontally
+        top: shape.y - size / 2, // ✅ Center the circle vertically
         width: size,
         height: size,
         cursor: "move",

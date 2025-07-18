@@ -137,7 +137,7 @@ export default function CreateProblem({ params }: { params: Promise<{ roomCode: 
     const rect = mainAreaRef.current?.getBoundingClientRect();
     if (!rect) return;
 
-    // ✅ Handle circle dragging first
+    // ✅ Handle circle dragging
     if (shape.type === "circle") {
       const offsetX = e.clientX - rect.left - shape.x;
       const offsetY = e.clientY - rect.top - shape.y;
@@ -147,15 +147,26 @@ export default function CreateProblem({ params }: { params: Promise<{ roomCode: 
       return;
     }
 
-    // ✅ Now safely check for squares/triangles
-    const topLeft = shape.points?.topLeft;
-    if (!topLeft) return;
+    // ✅ Handle triangle dragging
+    if (shape.type === "triangle" && shape.points?.top) {
+      const referencePoint = shape.points.top; // Use top as reference for triangles
+      const offsetX = e.clientX - rect.left - referencePoint.x;
+      const offsetY = e.clientY - rect.top - referencePoint.y;
 
-    const offsetX = e.clientX - rect.left - topLeft.x;
-    const offsetY = e.clientY - rect.top - topLeft.y;
+      setDraggingShapeId(id);
+      setDragOffset({ x: offsetX, y: offsetY });
+      return;
+    }
 
-    setDraggingShapeId(id);
-    setDragOffset({ x: offsetX, y: offsetY });
+    // ✅ Handle square dragging
+    if (shape.type === "square" && shape.points?.topLeft) {
+      const offsetX = e.clientX - rect.left - shape.points.topLeft.x;
+      const offsetY = e.clientY - rect.top - shape.points.topLeft.y;
+
+      setDraggingShapeId(id);
+      setDragOffset({ x: offsetX, y: offsetY });
+      return;
+    }
   };
 
   const handleCircleResizeMouseDown = (id: number, e: React.MouseEvent) => {
@@ -386,14 +397,15 @@ export default function CreateProblem({ params }: { params: Promise<{ roomCode: 
         const mouseX = e.clientX;
         const mouseY = e.clientY;
 
+        // Check if mouse is outside main area
         if (
           mouseX < rect.left || mouseX > rect.right ||
           mouseY < rect.top || mouseY > rect.bottom
         ) {
+          // Remove the shape from shapes array
           setShapes(prev => prev.filter(s => s.id !== draggingShapeId));
         }
       }
-
       setDraggingShapeId(null);
     };
 
