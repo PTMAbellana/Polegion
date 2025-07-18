@@ -190,7 +190,7 @@ const SquareShape: React.FC<SquareShapeProps> = ({
       topLeft.x * bottomLeft.y)
   );
 
-  const areaValue = (area / 100).toFixed(1);
+  const areaValue = (area / 100).toFixed(2);
   const labelText = `Area: ${areaValue} u²`;
 
   const [textWidth, setTextWidth] = React.useState<number>(0);
@@ -246,7 +246,7 @@ const SquareShape: React.FC<SquareShapeProps> = ({
         const dx = side.to.x - side.from.x;
         const dy = side.to.y - side.from.y;
         const length = getDistance(side.from, side.to) / 10;
-        const label = `${length.toFixed(1)} u`; 
+        const label = `${length.toFixed(2)} u`; 
 
         const normalLength = Math.sqrt(dx * dx + dy * dy);
         if (normalLength === 0 || isNaN(normalLength)) return null;
@@ -358,7 +358,7 @@ const SquareShape: React.FC<SquareShapeProps> = ({
                 textAnchor="middle"
                 alignmentBaseline="middle"
               >
-                {angleDeg.toFixed(0)}°
+                {angleDeg.toFixed(2)}°
               </text>
             </g>
           );
@@ -519,6 +519,83 @@ const SquareShape: React.FC<SquareShapeProps> = ({
           >
             {labelText}
           </text>
+        </g>
+      )}
+
+      {/* ✅ Area Formula Display - Top Left of Main Area (like circle and triangle) */}
+      {isSelected && showArea && (
+        <g>
+          {(() => {
+            // Calculate side length (assuming it's a square/rectangle)
+            const width = getDistance(topLeft, topRight) / 10; // Convert to units
+            const height = getDistance(topLeft, bottomLeft) / 10; // Convert to units
+            const areaValue = (area / 100); // Convert to square units
+            
+            const formulaText = width === height ? 
+              `Area = side²` : // For perfect square
+              `Area = length × width`; // For rectangle
+            
+            const calculationText = width === height ?
+              `A = ${width.toFixed(2)}² = ${areaValue.toFixed(2)} u²` :
+              `A = ${width.toFixed(2)} × ${height.toFixed(2)} = ${areaValue.toFixed(2)} u²`;
+            
+            const formulaWidth = Math.max(formulaText.length * 8, calculationText.length * 7) + 20;
+            
+            // ✅ Fixed position - Top Left of Main Area
+            const formulaX = 50 + formulaWidth/2; // 50px from left edge
+            const formulaY = 95; // 70px from top + offset for centering
+
+            return (
+              <>
+                {/* Area Formula box - TOP LEFT positioning */}
+                <rect
+                  x={50} // Fixed left position
+                  y={70} // Fixed top position
+                  width={formulaWidth}
+                  height={55}
+                  rx={8}
+                  ry={8}
+                  fill="white"
+                  stroke="#2c514c"
+                  strokeWidth={2}
+                  filter="drop-shadow(2px 2px 4px rgba(0,0,0,0.1))"
+                />
+                
+                <text
+                  x={formulaX}
+                  y={85}
+                  fontSize={13}
+                  fill="#2c514c"
+                  textAnchor="middle"
+                  fontWeight={700}
+                >
+                  Area Formula
+                </text>
+                
+                <text
+                  x={formulaX}
+                  y={100}
+                  fontSize={11}
+                  fill="#666"
+                  textAnchor="middle"
+                  fontStyle="italic"
+                >
+                  {formulaText}
+                </text>
+                
+                <text
+                  x={formulaX}
+                  y={115}
+                  fontSize={10}
+                  fill="#1864ab"
+                  textAnchor="middle"
+                  fontWeight={600}
+                >
+                  {calculationText}
+                </text>
+              </>
+            );
+          })()}
         </g>
       )}
     </svg>

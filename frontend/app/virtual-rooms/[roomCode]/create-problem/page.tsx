@@ -137,7 +137,7 @@ export default function CreateProblem({ params }: { params: Promise<{ roomCode: 
     const rect = mainAreaRef.current?.getBoundingClientRect();
     if (!rect) return;
 
-    // ✅ Handle circle dragging first
+    // ✅ Handle circle dragging
     if (shape.type === "circle") {
       const offsetX = e.clientX - rect.left - shape.x;
       const offsetY = e.clientY - rect.top - shape.y;
@@ -147,15 +147,26 @@ export default function CreateProblem({ params }: { params: Promise<{ roomCode: 
       return;
     }
 
-    // ✅ Now safely check for squares/triangles
-    const topLeft = shape.points?.topLeft;
-    if (!topLeft) return;
+    // ✅ Handle triangle dragging
+    if (shape.type === "triangle" && shape.points?.top) {
+      const referencePoint = shape.points.top; // Use top as reference for triangles
+      const offsetX = e.clientX - rect.left - referencePoint.x;
+      const offsetY = e.clientY - rect.top - referencePoint.y;
 
-    const offsetX = e.clientX - rect.left - topLeft.x;
-    const offsetY = e.clientY - rect.top - topLeft.y;
+      setDraggingShapeId(id);
+      setDragOffset({ x: offsetX, y: offsetY });
+      return;
+    }
 
-    setDraggingShapeId(id);
-    setDragOffset({ x: offsetX, y: offsetY });
+    // ✅ Handle square dragging
+    if (shape.type === "square" && shape.points?.topLeft) {
+      const offsetX = e.clientX - rect.left - shape.points.topLeft.x;
+      const offsetY = e.clientY - rect.top - shape.points.topLeft.y;
+
+      setDraggingShapeId(id);
+      setDragOffset({ x: offsetX, y: offsetY });
+      return;
+    }
   };
 
   const handleCircleResizeMouseDown = (id: number, e: React.MouseEvent) => {
@@ -386,14 +397,15 @@ export default function CreateProblem({ params }: { params: Promise<{ roomCode: 
         const mouseX = e.clientX;
         const mouseY = e.clientY;
 
+        // Check if mouse is outside main area
         if (
           mouseX < rect.left || mouseX > rect.right ||
           mouseY < rect.top || mouseY > rect.bottom
         ) {
+          // Remove the shape from shapes array
           setShapes(prev => prev.filter(s => s.id !== draggingShapeId));
         }
       }
-
       setDraggingShapeId(null);
     };
 
@@ -679,7 +691,7 @@ export default function CreateProblem({ params }: { params: Promise<{ roomCode: 
         Math.sqrt((topRight.x - bottomRight.x) ** 2 + (topRight.y - bottomRight.y) ** 2),
         Math.sqrt((bottomRight.x - bottomLeft.x) ** 2 + (bottomRight.y - bottomLeft.y) ** 2),
         Math.sqrt((bottomLeft.x - topLeft.x) ** 2 + (bottomLeft.y - topLeft.y) ** 2),
-      ].map(l => +(l / 10).toFixed(1)); // convert px to units
+      ].map(l => +(l / 10).toFixed(2)); // convert px to units
 
       // Area (shoelace formula)
       const area =
@@ -695,14 +707,14 @@ export default function CreateProblem({ params }: { params: Promise<{ roomCode: 
               topLeft.x * bottomLeft.y)
         ) / 100;
 
-      return { ...shape, sideLengths, area: +area.toFixed(1) };
+      return { ...shape, sideLengths, area: +area.toFixed(2) };
     }
 
     if (shape.type === "circle") {
-      const diameter = +(shape.size / 10).toFixed(1);
+      const diameter = +(shape.size / 10).toFixed(2);
       const radius = diameter / 2;
-      const area = +(Math.PI * radius * radius).toFixed(1);
-      const circumference = +(2 * Math.PI * radius).toFixed(1);
+      const area = +(Math.PI * radius * radius).toFixed(2);
+      const circumference = +(2 * Math.PI * radius).toFixed(2);
       return { ...shape, diameter, area, circumference };
     }
 
@@ -756,6 +768,38 @@ export default function CreateProblem({ params }: { params: Promise<{ roomCode: 
 
     return shape;
   }
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    const shapeType = e.dataTransfer.getData("shape-type");
+    
+    if (!shapeType) return;
+
+    // ✅ Check if we've reached the shape limit
+    if (shapeCount >= shapeLimit) {
+      onLimitReached(); // This shows the popup
+      return; // Don't add the shape
+    }
+
+    const rect = mainAreaRef.current?.getBoundingClientRect();
+    if (!rect) return;
+
+    // Get the exact drop position
+    const dropX = e.clientX - rect.left;
+    const dropY = e.clientY - rect.top;
+
+    const newShape = {
+      id: Date.now(),
+      type: shapeType,
+      color: "#e3dcc2",
+    };
+
+    // ...rest of your shape creation logic...
+
+    setShapes(prev => [...prev, newShape]);
+    setSelectedId(newShape.id);
+    setSelectedTool(null);
+  };
 
   return (
     <div className={styles.root}>
@@ -877,19 +921,22 @@ export default function CreateProblem({ params }: { params: Promise<{ roomCode: 
                       <div className={styles.problemTitle}>
                         {problem.title || "Untitled Problem"}
                       </div>
-                      <button 
-                        onClick={() => handleEditProblem(problem.id)} 
-                        title="Edit this problem"
-                      >
-                        Edit
-                      </button>
-                      <button 
-                        onClick={() => handleDeleteProblem(problem.id)} 
-                        className={styles.deleteButton}
-                        title="Delete this problem"
-                      >
-                        Delete
-                      </button>
+                      <div className={styles.buttonGroup}>
+                        <button 
+                          onClick={() => handleEditProblem(problem.id)} 
+                          className={styles.editButton}
+                          title="Edit this problem"
+                        >
+                          Edit
+                        </button>
+                        <button 
+                          onClick={() => handleDeleteProblem(problem.id)} 
+                          className={styles.deleteButton}
+                          title="Delete this problem"
+                        >
+                          Delete
+                        </button>
+                      </div>
                     </div>
                     <div className={styles.problemDetails}>
                       <span 

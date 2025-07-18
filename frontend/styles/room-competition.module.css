@@ -448,105 +448,135 @@
   box-shadow: var(--box-shadow);
 }
 
-/* Responsive Design */
-@media (max-width: 1200px) {
-  .room-content {
-    grid-template-columns: 1fr;
-    gap: 25px;
-  }
-  
-  .room-header-content {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 20px;
-  }
-  
-  .room-actions {
-    width: 100%;
-    justify-content: flex-start;
-  }
+/* Problems List - Reverted to original scrollable approach */
+.problems-list {
+  max-height: 400px; /* Fixed height to enable scrolling */
+  overflow-y: auto; /* Enable vertical scrolling */
+  padding: 12px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  background-color: #fafafa;
 }
 
-@media (max-width: 768px) {
-  .dashboard-container {
-    margin-left: 0;
-  }
-  
-  .room-header {
-    padding: 20px;
-  }
-  
-  .room-content {
-    padding: 20px;
-    gap: 20px;
-  }
-  
-  .room-title {
-    font-size: 24px;
-  }
-  
-  .room-banner {
-    height: 200px;
-  }
-  
-  .room-info-card, .problems-card, .participants-card, .settings-card, .quick-actions-card {
-    padding: 20px;
-  }
-  
-  .section-header {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-  
-  .room-actions {
-    flex-direction: column;
-  }
-  
-  .share-btn, .edit-room-btn {
-    width: 100%;
-    justify-content: center;
-  }
-  
-  .setting-item {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
-  }
-  
-  .setting-value {
-    width: 100%;
-    justify-content: space-between;
-  }
+/* Style the scrollbar for better appearance */
+.problems-list::-webkit-scrollbar {
+  width: 8px;
 }
 
-@media (max-width: 480px) {
-  .room-header {
-    padding: 15px;
-  }
-  
-  .room-content {
-    padding: 15px;
-  }
-  
-  .room-title {
-    font-size: 20px;
-  }
-  
-  .room-banner {
-    height: 150px;
-  }
-  
-  .room-info-card, .problems-card, .participants-card, .settings-card, .quick-actions-card {
-    padding: 15px;
-  }
-  
-  .empty-state {
-    padding: 30px 15px;
-  }
-  
-  .empty-icon {
-    font-size: 36px;
-  }
+.problems-list::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.problems-list::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+}
+
+.problems-list::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* Problem cards styling */
+.problem-card {
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 12px;
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.problem-card:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+.problem-card:last-child {
+  margin-bottom: 0;
+}
+
+/* Scroll indicator styling */
+.scroll-indicator {
+  text-align: center;
+  padding: 8px;
+  background: #f8f9fa;
+  border-radius: 4px;
+  margin-top: 8px;
+  color: #6c757d;
+  font-style: italic;
+  border: 1px dashed #dee2e6;
+}
+
+/* Update problem header to be more compact */
+.problem-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.problem-title {
+  font-weight: 600;
+  color: #2c3e50;
+  flex: 1;
+  min-width: 120px;
+}
+
+.problem-difficulty {
+  background: #3498db;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.problem-difficulty[data-difficulty="easy"] {
+  background: #27ae60;
+}
+
+.problem-difficulty[data-difficulty="medium"] {
+  background: #f39c12;
+}
+
+.problem-difficulty[data-difficulty="hard"] {
+  background: #e74c3c;
+}
+
+/* Update problem description for better readability */
+.problem-description {
+  color: #666;
+  font-size: 0.9rem;
+  margin-bottom: 8px;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Update problem meta for compact display */
+.problem-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.8rem;
+  color: #7f8c8d;
+  border-top: 1px solid #ecf0f1;
+  padding-top: 8px;
+}
+
+.problem-xp {
+  font-weight: 600;
+  color: #e67e22;
+}
+
+.problem-attempts {
+  color: #95a5a6;
 }
 
 /* Print Styles */
@@ -715,11 +745,262 @@
   margin-top: 2px;
 }
 
-.problem-xp {
-  font-weight: 600;
-  color: #2d7a2d;
+/* Update Participants List to be scrollable */
+.participants-list {
+  max-height: 300px; /* Set fixed height for scrollable area */
+  overflow-y: auto;
+  padding: 8px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  background-color: #fafafa;
+  margin-bottom: 12px; /* Space before invite section */
 }
 
-.problem-attempts {
-  color: #888;
+/* Style the participants scrollbar */
+.participants-list::-webkit-scrollbar {
+  width: 6px; /* Slightly thinner than problems scrollbar */
+}
+
+.participants-list::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.participants-list::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+.participants-list::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* Update participant items for better spacing in scroll area */
+.participant-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 8px 12px;
+  margin-bottom: 6px;
+  background: white;
+  border-radius: 6px;
+  border: 1px solid #e9ecef;
+  transition: background-color 0.2s ease;
+}
+
+.participant-item:hover {
+  background-color: #f8f9fa;
+}
+
+.participant-item:last-child {
+  margin-bottom: 0;
+}
+
+/* Style the remove button better */
+.participant-item button {
+  background: none !important;
+  border: none !important;
+  color: #dc3545 !important;
+  font-weight: bold !important;
+  cursor: pointer !important;
+  padding: 2px 6px !important;
+  font-size: 1.2rem !important;
+  line-height: 1 !important;
+  border-radius: 3px !important;
+  transition: background-color 0.2s ease !important;
+}
+
+.participant-item button:hover {
+  background-color: rgba(220, 53, 69, 0.1) !important;
+}
+
+/* Update participants card to accommodate scrolling */
+.participants-card {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  height: fit-content;
+  max-height: 500px; /* Set max height for the entire card */
+}
+
+/* Ensure the invite section stays at the bottom */
+.invite-section {
+  margin-top: auto;
+  padding-top: 12px;
+  border-top: 1px solid #e9ecef;
+}
+
+/* Make Room Competitions Grid scrollable */
+.roomGrid {
+  max-height: 450px; /* Fixed height for scrollable area */
+  overflow-y: auto;
+  padding: 12px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  background-color: #fafafa;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px;
+}
+
+/* Style scrollbar for room competitions grid */
+.roomGrid::-webkit-scrollbar {
+  width: 8px;
+}
+
+.roomGrid::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.roomGrid::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+}
+
+.roomGrid::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* Update room cards for better scrollable layout */
+.roomCard {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 1.5rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+  position: relative;
+  height: fit-content;
+  min-height: 200px; /* Minimum height for consistency */
+  max-height: 320px; /* Maximum height to prevent oversized cards */
+}
+
+.roomCard:hover {
+  transform: translateY(-3px) scale(1.01);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+}
+
+/* Compact room content for scrollable grid */
+.roomContent {
+  padding: 1rem;
+}
+
+.roomBanner {
+  height: 6rem; /* Reduced height for better scrollable layout */
+  background: linear-gradient(135deg, #34d399 0%, #3b82f6 30%, #f59e0b 70%, #ef4444 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.roomTitle {
+  font-size: 1.1rem; /* Slightly smaller for better fit */
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  color: #1f2937;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.roomDescription {
+  margin-bottom: 0.75rem;
+}
+
+.roomDescriptionText {
+  font-size: 0.85rem;
+  line-height: 1.4;
+  color: #6b7280;
+  display: -webkit-box;
+  -webkit-line-clamp: 2; /* Limit to 2 lines */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.roomMantra {
+  margin-bottom: 1rem;
+}
+
+.roomMantraText {
+  font-size: 0.8rem;
+  font-style: italic;
+  color: #9ca3af;
+  display: -webkit-box;
+  -webkit-line-clamp: 2; /* Limit to 2 lines */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Update My Room Section container */
+.myRoomSection {
+  max-width: 1280px;
+  margin: 2rem auto 0;
+  animation: fadeIn 0.8s ease-out 0.3s both;
+  padding: 0 1rem;
+}
+
+.myRoomTitle {
+  font-size: 2rem;
+  font-weight: 800;
+  background: linear-gradient(45deg, #34d399, #3b82f6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 1.5rem;
+  font-family: 'Poppins', sans-serif;
+}
+
+/* Add scroll indicator for room competitions */
+.scrollIndicator {
+  text-align: center;
+  padding: 8px;
+  background: #f8f9fa;
+  border-radius: 4px;
+  margin-top: 8px;
+  color: #6c757d;
+  font-style: italic;
+  font-size: 0.8rem;
+  border: 1px dashed #dee2e6;
+}
+
+/* Responsive updates for scrollable grid */
+@media (max-width: 768px) {
+  .roomGrid {
+    grid-template-columns: 1fr; /* Single column on mobile */
+    max-height: 400px; /* Reduced height on mobile */
+    gap: 12px;
+  }
+  
+  .roomCard {
+    min-height: 180px;
+    max-height: 280px;
+  }
+  
+  .roomBanner {
+    height: 5rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .roomGrid {
+    max-height: 350px;
+    padding: 8px;
+  }
+  
+  .myRoomTitle {
+    font-size: 1.5rem;
+  }
+  
+  .roomCard {
+    min-height: 160px;
+    max-height: 250px;
+  }
 }

@@ -70,6 +70,14 @@ const Toolbox: React.FC<ToolboxProps> = ({
   setShowCircumference,
   shapes,
 }) => {
+  const handleDragStartInternal = (type: string) => (e: React.DragEvent) => {
+    if (shapes.length >= 1) { // MAX_SHAPES = 1
+      e.preventDefault(); // Prevent drag from starting
+      return;
+    }
+    e.dataTransfer.setData("shape-type", type);
+  };
+
   return (
     <div className={styles.toolbox}>
       <div className={styles.toolboxHeader}>Tool Box</div>
@@ -80,7 +88,7 @@ const Toolbox: React.FC<ToolboxProps> = ({
           <div
             className={styles.toolboxSquare}
             draggable
-            onDragStart={handleDragStart("square")}
+            onDragStart={handleDragStartInternal("square")}
             onClick={() => setSelectedTool("square")}
             style={{
               background: "#e3dcc2",
@@ -100,7 +108,7 @@ const Toolbox: React.FC<ToolboxProps> = ({
           <div
             className={styles.toolboxCircle}
             draggable
-            onDragStart={handleDragStart("circle")}
+            onDragStart={handleDragStartInternal("circle")}
             onClick={() => setSelectedTool("circle")}
             style={{
               background: "#e3dcc2",
@@ -122,7 +130,7 @@ const Toolbox: React.FC<ToolboxProps> = ({
           <div
             className={styles.toolboxTriangle}
             draggable
-            onDragStart={handleDragStart("triangle")}
+            onDragStart={handleDragStartInternal("triangle")}
             onClick={() => setSelectedTool("triangle")}
             style={{
               width: 100,
@@ -210,7 +218,7 @@ const Toolbox: React.FC<ToolboxProps> = ({
         )}
       </div>
 
-      {/* Shape Filters */}
+      {/* Enhanced Shape Filters */}
       {shapes.length > 0 && (() => {
         const hasCircle = shapes.some((s) => s.type === "circle");
         const hasSquare = shapes.some((s) => s.type === "square");
@@ -218,78 +226,136 @@ const Toolbox: React.FC<ToolboxProps> = ({
 
         return (
           <div className={styles.filterGroup} style={{ marginTop: 20 }}>
-            <h4 className={styles.filterGroupHeader}>Shape Filters</h4>
+            <h4 className={styles.filterGroupHeader}>
+              <span>📐</span> Shape Properties
+            </h4>
 
+            {/* ✅ Square Filters */}
             {hasSquare && (
-              <>
-                <ToggleSwitch
-                  checked={showAreaByShape.square}
-                  onChange={() =>
-                    setShowAreaByShape((prev) => ({ ...prev, square: !prev.square }))
-                  }
-                  label="Show Area (Square)"
-                />
-                <ToggleSwitch
-                  checked={showSides}
-                  onChange={() => setShowSides((v) => !v)}
-                  label="Show Sides"
-                />
-                <ToggleSwitch
-                  checked={showAngles}
-                  onChange={() => setShowAngles((v) => !v)}
-                  label="Show Angles"
-                />
-              </>
+              <div className={styles.shapeFilterSection}>
+                <div className={styles.shapeTypeHeader}>
+                  <div className={styles.shapeIcon}>⬜</div>
+                  <span className={styles.shapeTypeLabel}>Square/Rectangle</span>
+                </div>
+                <div className={styles.filterOptions}>
+                  <ToggleSwitch
+                    checked={showAreaByShape.square}
+                    onChange={() =>
+                      setShowAreaByShape((prev) => ({ ...prev, square: !prev.square }))
+                    }
+                    label="Area Formula"
+                    description="A = side² or length × width"
+                  />
+                  <ToggleSwitch
+                    checked={showSides}
+                    onChange={() => setShowSides((v) => !v)}
+                    label="Side Lengths"
+                    description="Display measurements"
+                  />
+                  <ToggleSwitch
+                    checked={showAngles}
+                    onChange={() => setShowAngles((v) => !v)}
+                    label="Corner Angles"
+                    description="Show 90° angles"
+                  />
+                </div>
+              </div>
             )}
 
+            {/* ✅ Triangle Filters */}
             {hasTriangle && (
-              <>
-                <ToggleSwitch
-                  checked={showAreaByShape.triangle}
-                  onChange={() =>
-                    setShowAreaByShape((prev) => ({ ...prev, triangle: !prev.triangle }))
-                  }
-                  label="Show Area (Triangle)"
-                />
-                <ToggleSwitch
-                  checked={showSides}
-                  onChange={() => setShowSides((v) => !v)}
-                  label="Show Sides"
-                />
-                <ToggleSwitch
-                  checked={showAngles}
-                  onChange={() => setShowAngles((v) => !v)}
-                  label="Show Angles"
-                />
-                <ToggleSwitch
-                  checked={showHeight}
-                  onChange={() => setShowHeight((v) => !v)}
-                  label="Show Height"
-                />
-              </>
+              <div className={styles.shapeFilterSection}>
+                <div className={styles.shapeTypeHeader}>
+                  <div className={styles.shapeIcon}>🔺</div>
+                  <span className={styles.shapeTypeLabel}>Triangle</span>
+                </div>
+                <div className={styles.filterOptions}>
+                  <ToggleSwitch
+                    checked={showAreaByShape.triangle}
+                    onChange={() =>
+                      setShowAreaByShape((prev) => ({ ...prev, triangle: !prev.triangle }))
+                    }
+                    label="Area Formula"
+                    description="A = ½ × Base × Height"
+                  />
+                  <ToggleSwitch
+                    checked={showSides}
+                    onChange={() => setShowSides((v) => !v)}
+                    label="Side Lengths"
+                    description="Display all three sides"
+                  />
+                  <ToggleSwitch
+                    checked={showAngles}
+                    onChange={() => setShowAngles((v) => !v)}
+                    label="Interior Angles"
+                    description="Show angle measurements"
+                  />
+                  <ToggleSwitch
+                    checked={showHeight}
+                    onChange={() => setShowHeight((v) => !v)}
+                    label="Height Line"
+                    description="Perpendicular to base"
+                  />
+                </div>
+              </div>
             )}
 
+            {/* ✅ Circle Filters */}
             {hasCircle && (
-              <>
-                <ToggleSwitch
-                  checked={showAreaByShape.circle}
-                  onChange={() =>
-                    setShowAreaByShape((prev) => ({ ...prev, circle: !prev.circle }))
-                  }
-                  label="Show Area (Circle)"
-                />
-                <ToggleSwitch
-                  checked={showDiameter}
-                  onChange={() => setShowDiameter((v) => !v)}
-                  label="Show Diameter"
-                />
-                <ToggleSwitch
-                  checked={showCircumference}
-                  onChange={() => setShowCircumference((v) => !v)}
-                  label="Show Circumference"
-                />
-              </>
+              <div className={styles.shapeFilterSection}>
+                <div className={styles.shapeTypeHeader}>
+                  <div className={styles.shapeIcon}>⭕</div>
+                  <span className={styles.shapeTypeLabel}>Circle</span>
+                </div>
+                <div className={styles.filterOptions}>
+                  <ToggleSwitch
+                    checked={showAreaByShape.circle}
+                    onChange={() =>
+                      setShowAreaByShape((prev) => ({ ...prev, circle: !prev.circle }))
+                    }
+                    label="Area Formula"
+                    description="A = π × r²"
+                  />
+                  <ToggleSwitch
+                    checked={showCircumference}
+                    onChange={() => setShowCircumference((v) => !v)}
+                    label="Circumference"
+                    description="C = 2 × π × r"
+                  />
+                  <ToggleSwitch
+                    checked={showDiameter}
+                    onChange={() => setShowDiameter((v) => !v)}
+                    label="Diameter"
+                    description="Distance across center"
+                  />
+                </div>
+              </div>
             )}
+
+            {/* ✅ Active Filters Summary */}
+            <div className={styles.activeFiltersSummary}>
+              <div className={styles.summaryHeader}>Active Displays:</div>
+              <div className={styles.activeTags}>
+                {(showAreaByShape.square || showAreaByShape.triangle || showAreaByShape.circle) && (
+                  <span className={styles.activeTag}>📊 Area</span>
+                )}
+                {showSides && (
+                  <span className={styles.activeTag}>📏 Sides</span>
+                )}
+                {showAngles && (
+                  <span className={styles.activeTag}>📐 Angles</span>
+                )}
+                {showHeight && (
+                  <span className={styles.activeTag}>📈 Height</span>
+                )}
+                {showDiameter && (
+                  <span className={styles.activeTag}>⚬ Diameter</span>
+                )}
+                {showCircumference && (
+                  <span className={styles.activeTag}>⭕ Circumference</span>
+                )}
+              </div>
+            </div>
           </div>
         );
       })()}

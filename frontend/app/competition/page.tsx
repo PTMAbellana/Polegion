@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState, useCallback } from 'react';
-import { ChevronDown, ChevronUp } from 'lucide-react';
+import { ChevronDown, ChevronUp, ArrowLeft } from 'lucide-react';
 import styles from '@/styles/competition.module.css';
 import { useSearchParams } from 'next/navigation';
 import { useRouter } from 'next/navigation';
@@ -174,6 +174,18 @@ const CompetitionDashboard = () => {
         {/* Header Section */}
         <div className={styles.header}>
           <div className={styles.headerContent}>
+            {/* Add Back Button */}
+            <div className={styles.headerTop}>
+              <button 
+                onClick={() => router.back()}
+                className={styles.backButton}
+                title="Go back to previous page"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                Back
+              </button>
+            </div>
+            
             <h1 className={styles.title}>
               Competition Dashboard
             </h1>
@@ -293,6 +305,12 @@ const CompetitionDashboard = () => {
                     </div>
                   </div>
                 ))}
+                {/* Add scroll indicator when there are many problems */}
+                {problems.filter(problem => problem.visibility === 'show').length > 5 && (
+                  <div className={styles.scrollIndicator}>
+                    <small>Scroll to see all {problems.filter(problem => problem.visibility === 'show').length} problems</small>
+                  </div>
+                )}
               </div>
             </div>
 
