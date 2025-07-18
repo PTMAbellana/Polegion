@@ -93,7 +93,7 @@ class ProblemRepo {
 
   async fetchCompeProblemByProbId(prob_id) {
     try {
-      console.log('fetchCompeProblemByProbId prob_id', prob_id)
+      // console.log('fetchCompeProblemByProbId prob_id', prob_id)
       const {
         data, error
       } = await this.supabase
@@ -101,9 +101,10 @@ class ProblemRepo {
       .select('*')
       .eq('problem_id', prob_id)
       .is('competition_id', null) // Assuming you want to fetch problems not assigned to any competition
+      // .maybeSingle()
       .single()
 
-      console.log('fetchCompeProblemByProbId', data, error)
+      // console.log('fetchCompeProblemByProbId', data, error)
       if (error) throw error
       if (!data) throw new Error('Competition problem not found')
       return data;
@@ -144,8 +145,9 @@ class ProblemRepo {
         .from(this.tableCompe)
         .update({ 'timer': timer })
         .eq('problem_id', prob_id)
+        .is('competition_id', null) // Assuming you want to update timer for problems not assigned to any competition
         .select()
-        .single();
+        .maybeSingle();
   
       if (error) throw error;
       return data;
@@ -219,16 +221,40 @@ class ProblemRepo {
 
   async fetchCompeProblems(compe_id) {
     try {
-     const { 
+      console.log('fetchCompeProblems compe_id', compe_id)
+      const { 
         data,
         error
-       } = await this.supabase
+      } = await this.supabase
         .from(this.tableCompe)
-        .select('*, problem:problem_id(*)')
+        .select('*, problem:problem_id(*)') // Correct join syntax
         .eq('competition_id', compe_id)
         .order('added_at', {
           ascending: false
         })
+      if (error) throw error;
+      console.log('fetchCompeProblems ', data)
+      return data;
+    } catch (error) {
+      throw error
+    }
+  }
+
+  async addProbToCompe(prob_id, compe_id, timer) {
+    try {
+      const { 
+        data,
+        error
+       } = await this.supabase
+        .from(this.tableCompe)
+        .insert({
+          problem_id: prob_id,
+          competition_id: compe_id,
+          timer: timer,
+        })
+        .select()
+        .single();
+  
       if (error) throw error;
       return data;
     } catch (error) {

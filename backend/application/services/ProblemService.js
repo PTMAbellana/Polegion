@@ -122,7 +122,7 @@ class ProblemService {
     }
   }
 
-  async fetchCompeProblems(competition_id) {
+  async fetchCompeProblems(competition_id){ //kulang prob id
     try {
       return await this.problemRepo.fetchCompeProblems(competition_id)
     } catch (error) {
@@ -138,9 +138,18 @@ class ProblemService {
     }
   }
 
+  async addCompeProblem(problem_id, competition_id) {
+    try {
+      const data = await this.problemRepo.fetchCompeProblemByProbId(problem_id)
+      return await this.problemRepo.addProbToCompe(problem_id,competition_id, data.timer)
+    } catch (error) {
+      throw error
+    }
+  }
+
   async removeCompeProblem(problem_id, competition_id) {
     try {
-      return await this.problemRepo.removeProbFromCompe(problem_id, competition_id)
+      return await this.problemRepo.removeCompeProblem(problem_id, competition_id)
     } catch (error) {
       throw error
     }

@@ -33,7 +33,7 @@ class ProblemRoutes {
       .delete(this.problemController.deleteProblem)
       .put(this.problemController.updateProblem)
   
-    this.router.route('/:problem_id/:competetion_id')
+    this.router.route('/:problem_id/:competition_id')
       .post(this.problemController.addCompeProblem)
       .delete(this.problemController.removeCompeProblem)
   }

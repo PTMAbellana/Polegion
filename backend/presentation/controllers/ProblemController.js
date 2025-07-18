@@ -100,8 +100,10 @@ class ProblemController {
 
   addCompeProblem = async (req, res) => {
     const { problem_id, competition_id } = req.params
+    // console.log('Adding competition problem:', problem_id, competition_id)
     try {
-      const addedProblem = await this.problemService.updateCompeProblem(problem_id, competition_id)
+      // const addedProblem = await this.problemService.updateCompeProblem(problem_id, competition_id)
+      const addedProblem = await this.problemService.addCompeProblem(problem_id, competition_id)
       res.status(200).json(addedProblem)
     } catch (error) {
       console.error('Error adding competition problem:', error);

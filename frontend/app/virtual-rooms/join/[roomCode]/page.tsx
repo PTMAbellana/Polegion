@@ -10,6 +10,7 @@ import { getAllParticipants, isParticipant, joinRoom, leaveRoom, totalParticipan
 import { useRouter } from "next/navigation"
 import { ROUTES } from "@/constants/routes"
 import toast from "react-hot-toast"
+import { getAllCompe } from "@/api/competitions"
 
 interface Room{
     id?: string
@@ -27,6 +28,11 @@ interface Participant {
     email?: string
 }
 
+interface Competition {
+    id: string
+    title: string
+    status: string
+}
 export default function JoinRoom({ params } : { params  : Promise<{roomCode : string }> }){
     console.log(params)
     const roomCode = use(params)
@@ -37,7 +43,7 @@ export default function JoinRoom({ params } : { params  : Promise<{roomCode : st
     const [ totalParticipants, setTotalParticipants ] = useState<number>(0)
     const [isLoading, setIsLoading] = useState(true)
     const [ isPart, setIsPart ] = useState(false)
-    
+    const [competitions, setCompetitions] = useState<Competition[]>([])
     // FIX: Track join status properly
     const [showJoinStatus, setShowJoinStatus] = useState(false) // Changed from true to false
     const [hasCheckedJoinStatus, setHasCheckedJoinStatus] = useState(false)
@@ -107,6 +113,10 @@ export default function JoinRoom({ params } : { params  : Promise<{roomCode : st
             const total = await totalParticipant(res.data.id)
             setTotalParticipants(total.data.total_participants || 0)
             console.log('Attempting to total participants: ', total.data.total_participants)
+            
+            const compe = await getAllCompe(res.data.id)
+            console.log('Competitions data: ', compe)
+            setCompetitions(compe || [])
         } catch (error) {
             console.log('Error fetching room details: ', error)
         } finally {
@@ -249,13 +259,13 @@ export default function JoinRoom({ params } : { params  : Promise<{roomCode : st
                     {/* Problems Section - Read Only */}
                     <div className={styles["problems-card"]}>
                         <div className={styles["section-header"]}>
-                            <h3>Problems</h3>
+                            <h3>Competitions</h3>
                         </div>
                         <div className={styles["problems-list"]}>
                             <div className={styles["empty-state"]}>
                                 <div className={styles["empty-icon"]}>❓</div>
-                                <p>No problems added yet</p>
-                                <span>Problems will appear here when the room owner adds them</span>
+                                <p>No competitions added yet</p>
+                                <span>Competitions will appear here when the room owner adds them</span>
                             </div>
                         </div>
                     </div>

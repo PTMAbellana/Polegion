@@ -16,6 +16,7 @@ class CompeController {
         }
     }
 
+    // admin side
     getAllCompe = async(req, res) => {
         const { room_id } = req.params
         try {
@@ -29,6 +30,19 @@ class CompeController {
         }
     }
 
+    // user side
+    getAllCompeUsers = async(req, res) => {
+        const { room_id } = req.params
+        try {
+            const data = await this.compeService.getCompeByRoomId(room_id, req.user.id, 'users')
+            res.status(200).json(data)
+        } catch (error) {
+            console.error(error)
+            res.status(400).json({
+                error: error.message
+            })
+        }
+    }
     getCompeById = async(req, res) => {
         const { compe_id } = req.params
         const { room_id } = req.params

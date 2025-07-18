@@ -9,7 +9,8 @@ import { AuthProtection } from '@/context/AuthProtection';
 import Loader from '@/components/Loader';
 import { addCompeProblem, getCompeProblems, getRoomProblems, removeCompeProblem, updateTimer } from '@/api/problems';
 import { getAllParticipants } from '@/api/participants';
-import { getAllCompe, getCompeById } from '@/api/competitions';
+import { getCompeById } from '@/api/competitions';
+import { set } from 'react-hook-form';
 
 interface Participant {
   id: number;
@@ -23,7 +24,6 @@ interface Problems {
     description: string
     difficulty: string
     max_attempts: number
-    expected_xp: number
     visibility: 'show' | 'hide'
     timer: number | null
 }
@@ -31,6 +31,13 @@ interface Problems {
 interface Competition {
   title: string;
   status: string;
+}
+
+interface CompeProblems {
+  id: string;
+  competition_id: number;
+  timer: number | null;
+  problem: Problems;
 }
 
 const CompetitionDashboard = ({ params } : { params  : Promise<{competitionId : number }> }) => {
@@ -49,7 +56,7 @@ const CompetitionDashboard = ({ params } : { params  : Promise<{competitionId : 
   const [ participants, setParticipants ] = useState<Participant[]>([])
   const [problems, setProblems] = useState<Problems[]>([])
   // Persistent addedProblems order (fetched from API)
-  const [addedProblems, setAddedProblems] = useState<string[]>([]); // store problem ids added to competition
+  const [addedProblems, setAddedProblems] = useState<CompeProblems[]>([]); // store problem ids added to competition
   // Track if addedProblems have been loaded from API
   const [addedProblemsLoaded, setAddedProblemsLoaded] = useState(false);
   const [editingTimerId, setEditingTimerId] = useState<string | null>(null);
@@ -86,8 +93,10 @@ const CompetitionDashboard = ({ params } : { params  : Promise<{competitionId : 
             // --- Fetch addedProblems order from API ---
             // TODO: Replace this with your API call to fetch the order for this competition
             // Example: const order = await getAddedProblemsOrder(roomId, compe_id.competitionId)
-            // setAddedProblems(order || [])
-            setAddedProblems([]); // Default: empty, replace with API result
+            const order = await getCompeProblems(compe_id.competitionId) || [];
+            console.log('Fetched added problems:', order);
+            setAddedProblems(order || [])
+            // setAddedProblems([]); // Default: empty, replace with API result
             setAddedProblemsLoaded(true);
         } catch (error) {
             console.error('Error fetching room details:', error)
@@ -96,8 +105,8 @@ const CompetitionDashboard = ({ params } : { params  : Promise<{competitionId : 
         }
     }
     // Calculate total timer (in seconds/minutes) for added problems
-    const addedProblemsList = problems.filter((p) => addedProblems.includes(p.id));
-    const totalTimerSeconds = addedProblemsList.reduce((acc, p) => acc + (p.timer || 0), 0);
+    // Use the timer from CompeProblems level, not from the nested problem
+    const totalTimerSeconds = addedProblems.reduce((acc, ap) => acc + (ap.timer || 0), 0);
     
     // Timer logic
     useEffect(() => {
@@ -116,19 +125,24 @@ const CompetitionDashboard = ({ params } : { params  : Promise<{competitionId : 
 
     // Add problem to competition (persistent order)
     const handleAddProblem = async (problem: Problems) => {
+      console.log('Adding problem:', problem);
       if (!problem.timer || problem.timer <= 0) {
         alert('Cannot add problem without a timer!');
         return;
       }
-      console.log('Adding problem:', problem.id, 'to competition:', compe_id.competitionId)
-      await addCompeProblem(problem.id, compe_id.competitionId)
-      setAddedProblems( await getCompeProblems(compe_id.competitionId) || []);
+      await addCompeProblem(problem.id, compe_id.competitionId);
+      const compeProblems = await getCompeProblems(compe_id.competitionId) || [];
+      console.log('Updated competition problems:', compeProblems);
+      setAddedProblems(compeProblems);
+      
     };
 
-    // Remove problem from competition (persistent order)
     const handleRemoveProblem = async (problem: Problems) => {
+      console.log('Removing problem:', problem);
+      console.log('Removing problem with ID:', problem.id, 'from competition ID:', compe_id.competitionId);
       await removeCompeProblem(problem.id, compe_id.competitionId);
-      setAddedProblems(await getCompeProblems(compe_id.competitionId) || []);
+      const compeProblems = await getCompeProblems(compe_id.competitionId) || [];
+      setAddedProblems(compeProblems);
     };
 
     // Edit timer UI logic
@@ -219,28 +233,28 @@ const CompetitionDashboard = ({ params } : { params  : Promise<{competitionId : 
           {/* Left Column - Problems (60% width) */}
           <div className={styles.leftColumn}>
             {/* Added Problems Section */}
-            {addedProblemsList.length > 0 && (
+            {addedProblems.length > 0 && (
               <div className={styles.participantsSection}>
                 <div className={styles.participantsHeader}>
                   <h2 className={styles.participantsTitle}>Added Problems</h2>
                 </div>
                 <div className={styles.participantsList}>
-                  {addedProblemsList.map((problem, index) => (
-                    <div key={problem.id} className={styles.participantCard}>
+                  {addedProblems.map((compeProblem, index) => (
+                    <div key={compeProblem.problem.id} className={styles.participantCard}>
                       <div className={styles.participantContent}>
                         <div className={styles.participantLeft}>
                           <div className={styles.participantRank}>{index + 1}</div>
                           <div>
-                            <h3 className={styles.participantName}>{problem.title || 'No Title'}</h3>
+                            <h3 className={styles.participantName}>{compeProblem.problem.title || 'No Title'}</h3>
                           </div>
                         </div>
                         <div className={styles.participantRight}>
                           <div className={styles.participantXp}>
-                            {problem.timer != null && problem.timer > 0 ? `${problem.timer} seconds` : <span style={{ color: 'red' }}>No timer</span>}
+                            {compeProblem.timer != null && compeProblem.timer > 0 ? `${compeProblem.timer} seconds` : <span style={{ color: 'red' }}>No timer</span>}
                           </div>
                           <button
                             className={styles.removeBtn}
-                            onClick={() => handleRemoveProblem(problem)}
+                            onClick={() => handleRemoveProblem(compeProblem.problem)}
                             title="Remove from competition"
                           >
                             -
@@ -259,7 +273,7 @@ const CompetitionDashboard = ({ params } : { params  : Promise<{competitionId : 
                 <h2 className={styles.participantsTitle}>Available Problems</h2>
               </div>
               <div className={styles.participantsList}>
-                {problems.filter((problem) => !addedProblems.includes(problem.id) && problem.visibility === 'show').map((problem, index) => {
+                {problems.filter((problem) => !addedProblems.some(ap => ap.problem.id === problem.id) && problem.visibility === 'show').map((problem, index) => {
                   const canAdd = problem.timer && problem.timer > 0;
                   return (
                     <div key={problem.id} className={styles.participantCard}>

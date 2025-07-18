@@ -60,6 +60,7 @@ export const updateTimer = async(problem_id, timer) => {
 }
 
 export const getCompeProblems = async(competition_id) => {
+  console.log('getCompeProblems competition_id', competition_id)
   try {
     return (await api.get(`/problems/compe-problems/${competition_id}`)).data
   } catch (error) {
@@ -80,4 +81,4 @@ export const removeCompeProblem = async(problem_id, competition_id) => {
   } catch (error) {
     throw error
   }
-} 
+}   
