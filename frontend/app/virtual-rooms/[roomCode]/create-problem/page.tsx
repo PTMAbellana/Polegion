@@ -691,7 +691,7 @@ export default function CreateProblem({ params }: { params: Promise<{ roomCode: 
         Math.sqrt((topRight.x - bottomRight.x) ** 2 + (topRight.y - bottomRight.y) ** 2),
         Math.sqrt((bottomRight.x - bottomLeft.x) ** 2 + (bottomRight.y - bottomLeft.y) ** 2),
         Math.sqrt((bottomLeft.x - topLeft.x) ** 2 + (bottomLeft.y - topLeft.y) ** 2),
-      ].map(l => +(l / 10).toFixed(1)); // convert px to units
+      ].map(l => +(l / 10).toFixed(2)); // convert px to units
 
       // Area (shoelace formula)
       const area =
@@ -707,14 +707,14 @@ export default function CreateProblem({ params }: { params: Promise<{ roomCode: 
               topLeft.x * bottomLeft.y)
         ) / 100;
 
-      return { ...shape, sideLengths, area: +area.toFixed(1) };
+      return { ...shape, sideLengths, area: +area.toFixed(2) };
     }
 
     if (shape.type === "circle") {
-      const diameter = +(shape.size / 10).toFixed(1);
+      const diameter = +(shape.size / 10).toFixed(2);
       const radius = diameter / 2;
-      const area = +(Math.PI * radius * radius).toFixed(1);
-      const circumference = +(2 * Math.PI * radius).toFixed(1);
+      const area = +(Math.PI * radius * radius).toFixed(2);
+      const circumference = +(2 * Math.PI * radius).toFixed(2);
       return { ...shape, diameter, area, circumference };
     }
 
@@ -768,6 +768,38 @@ export default function CreateProblem({ params }: { params: Promise<{ roomCode: 
 
     return shape;
   }
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    const shapeType = e.dataTransfer.getData("shape-type");
+    
+    if (!shapeType) return;
+
+    // ✅ Check if we've reached the shape limit
+    if (shapeCount >= shapeLimit) {
+      onLimitReached(); // This shows the popup
+      return; // Don't add the shape
+    }
+
+    const rect = mainAreaRef.current?.getBoundingClientRect();
+    if (!rect) return;
+
+    // Get the exact drop position
+    const dropX = e.clientX - rect.left;
+    const dropY = e.clientY - rect.top;
+
+    const newShape = {
+      id: Date.now(),
+      type: shapeType,
+      color: "#e3dcc2",
+    };
+
+    // ...rest of your shape creation logic...
+
+    setShapes(prev => [...prev, newShape]);
+    setSelectedId(newShape.id);
+    setSelectedTool(null);
+  };
 
   return (
     <div className={styles.root}>

@@ -117,6 +117,12 @@ const MainArea: React.FC<MainAreaProps> = ({
     
     if (!shapeType) return;
 
+    // ✅ Check if we've reached the shape limit
+    if (shapeCount >= shapeLimit) {
+      onLimitReached(); // This shows the popup
+      return; // Don't add the shape
+    }
+
     const rect = mainAreaRef.current?.getBoundingClientRect();
     if (!rect) return;
 

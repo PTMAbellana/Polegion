@@ -44,12 +44,10 @@ export default function CircleShape({
     function onMouseMove(me: MouseEvent) {
       const dx = me.clientX - startX;
       const dy = me.clientY - startY;
-      // Snap to 1 pixel (0.1 unit)
       const snappedX = snap(startShape.x + dx, 1);
       const snappedY = snap(startShape.y + dy, 1);
       shape.x = snappedX;
       shape.y = snappedY;
-      // If you use setShapes, call setShapes here
     }
 
     function onMouseUp() {
@@ -62,149 +60,181 @@ export default function CircleShape({
   };
 
   return (
-    <div
-      style={{
-        position: "absolute",
-        left: shape.x - size / 2, // ✅ Center the circle horizontally
-        top: shape.y - size / 2, // ✅ Center the circle vertically
-        width: size,
-        height: size,
-        cursor: "move",
-        zIndex: isSelected ? 10 : 2,
-        userSelect: "none", // 👈 disables text selection for everything inside
-      }}
-      onMouseDown={(e) => handleShapeMouseDown(shape.id, e)}
-      onClick={(e) => {
-        e.stopPropagation();
-        setSelectedId(shape.id);
-      }}
-      onDragOver={(e) => {
-        if (fillMode && draggingFill) {
-          e.preventDefault();
-          e.dataTransfer.dropEffect = "copy";
-        }
-      }}
-      onDrop={handleShapeDrop}
-    >
+    <>
+      {/* Main Circle Shape */}
       <div
         style={{
-          width: "100%",
-          height: "100%",
-          background: shape.fill || "#e3dcc2",
-          border: "6px solid #000",
-          borderRadius: "50%",
-          position: "relative",
+          position: "absolute",
+          left: shape.x - size / 2,
+          top: shape.y - size / 2,
+          width: size,
+          height: size,
+          cursor: "move",
+          zIndex: isSelected ? 10 : 2,
+          userSelect: "none",
         }}
+        onMouseDown={(e) => handleShapeMouseDown(shape.id, e)}
+        onClick={(e) => {
+          e.stopPropagation();
+          setSelectedId(shape.id);
+        }}
+        onDragOver={(e) => {
+          if (fillMode && draggingFill) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = "copy";
+          }
+        }}
+        onDrop={handleShapeDrop}
       >
-        {isSelected && (
-          <>
-            {/* Diameter line */}
-            <svg
-              width={size}
-              height={size}
-              style={{
-                position: "absolute",
-                left: 0,
-                top: 0,
-                pointerEvents: "none",
-                zIndex: 2,
-              }}
-            >
-              <line
-                x1={0}
-                y1={size / 2 - 4}
-                x2={size}
-                y2={size / 2 - 4}
-                stroke="#222"
-                strokeWidth={3}
-              />
-            </svg>
+        <div
+          style={{
+            width: "100%",
+            height: "100%",
+            background: shape.fill || "#e3dcc2",
+            border: "6px solid #000",
+            borderRadius: "50%",
+            position: "relative",
+          }}
+        >
+          {isSelected && (
+            <>
+              {/* Diameter line */}
+              <svg
+                width={size}
+                height={size}
+                style={{
+                  position: "absolute",
+                  left: 0,
+                  top: 0,
+                  pointerEvents: "none",
+                  zIndex: 2,
+                }}
+              >
+                <line
+                  x1={0}
+                  y1={size / 2 - 4}
+                  x2={size}
+                  y2={size / 2 - 4}
+                  stroke="#222"
+                  strokeWidth={3}
+                />
+              </svg>
 
-            {/* Resize handle */}
+              {/* Resize handle */}
+              <div
+                style={{
+                  position: "absolute",
+                  left: handleX,
+                  top: handleY,
+                  width: 18,
+                  height: 18,
+                  background: "#2c514c",
+                  border: "2px solid #fff",
+                  borderRadius: "50%",
+                  zIndex: 20,
+                  boxShadow: "0 0 4px #0002",
+                  cursor: "ew-resize",
+                  transition: "cursor 0.1s",
+                }}
+                onMouseDown={(e) => handleCircleResizeMouseDown(shape.id, e)}
+                title="Drag horizontally to resize"
+              />
+            </>
+          )}
+
+          {/* ✅ FIXED: Diameter Display at Center of Circle */}
+          {isSelected && showDiameter && (
             <div
               style={{
                 position: "absolute",
-                left: handleX,
-                top: handleY,
-                width: 18,
-                height: 18,
-                background: "#2c514c",
-                border: "2px solid #fff",
-                borderRadius: "50%",
-                zIndex: 20,
-                boxShadow: "0 0 4px #0002",
-                cursor: "ew-resize",
-                transition: "cursor 0.1s",
+                left: "50%",
+                top: "50%",
+                transform: "translate(-50%, -50%)",
+                background: "white",
+                border: "1px solid #1864ab",
+                borderRadius: "4px",
+                padding: "4px 8px",
+                fontSize: "12px",
+                fontWeight: "600",
+                color: "#1864ab",
+                zIndex: 15,
+                whiteSpace: "nowrap",
+                userSelect: "none",
+                pointerEvents: "none",
+                boxShadow: "1px 1px 3px rgba(0,0,0,0.2)",
               }}
-              onMouseDown={(e) => handleCircleResizeMouseDown(shape.id, e)}
-              title="Drag horizontally to resize"
-            />
-          </>
-        )}
-
-        {/* Diameter label */}
-        {showDiameter && (
-          <div
-            style={{
-              position: "absolute",
-              left: "50%",
-              top: `calc(50% + ${labelYOffset}px + 20px)`,
-              transform: "translate(-50%, -50%)",
-              background: "#fff",
-              padding: "2px 8px",
-              borderRadius: 6,
-              border: "1px solid #aaa",
-              fontSize: 14,
-              zIndex: 4,
-              whiteSpace: "nowrap",
-            }}
-          >
-            Ø: {diameter.toFixed(1)} u
-          </div>
-        )}
-
-        {/* Circumference label */}
-        {showCircumference && (
-          <div
-            style={{
-              position: "absolute",
-              left: "50%",
-              bottom: `calc(100% + 10px)`,
-              transform: "translateX(-50%)",
-              background: "#fff",
-              padding: "2px 8px",
-              borderRadius: 6,
-              border: "1px solid #aaa",
-              fontSize: 14,
-              zIndex: 4,
-              whiteSpace: "nowrap",
-            }}
-          >
-            C: {circumference.toFixed(1)} u
-          </div>
-        )}
-
-        {/* Area label */}
-        {isSelected && showArea && (
-          <div
-            style={{
-              position: "absolute",
-              left: "calc(100% + 20px)",
-              top: "50%",
-              transform: "translateY(-50%)",
-              background: "#fff",
-              padding: "2px 8px",
-              borderRadius: 6,
-              border: "1px solid #aaa",
-              fontSize: 14,
-              zIndex: 4,
-              whiteSpace: "nowrap",
-            }}
-          >
-            A: {area.toFixed(1)} u²
-          </div>
-        )}
+            >
+              Ø: {diameter.toFixed(2)} u
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+
+      {/* ✅ FIXED: Area Display - Top Left of Main Area */}
+      {isSelected && showArea && (
+        <div
+          style={{
+            position: "absolute",
+            left: "50px",
+            top: "70px", // ✅ Fixed position - always at top
+            background: "white",
+            border: "2px solid #2c514c",
+            borderRadius: "8px",
+            padding: "10px 15px",
+            fontSize: "13px",
+            fontWeight: "700",
+            color: "#2c514c",
+            zIndex: 1000,
+            boxShadow: "2px 2px 4px rgba(0,0,0,0.1)",
+            whiteSpace: "nowrap",
+            userSelect: "none",
+            pointerEvents: "none",
+          }}
+        >
+          <div style={{ marginBottom: "5px", fontSize: "11px", color: "#666" }}>
+            Area Formula
+          </div>
+          <div style={{ fontSize: "10px", color: "#666", fontStyle: "italic", marginBottom: "3px" }}>
+            A = π × r²
+          </div>
+          <div style={{ fontSize: "10px", color: "#1864ab", fontWeight: "600" }}>
+            A = π × {unitRadius.toFixed(2)}² = {area.toFixed(2)} u²
+          </div>
+        </div>
+      )}
+
+      {/* ✅ FIXED: Circumference Display - Below Area */}
+      {isSelected && showCircumference && (
+        <div
+          style={{
+            position: "absolute",
+            left: "50px",
+            top: "160px", // ✅ Fixed position - always below area
+            background: "white",
+            border: "2px solid #ff6b35",
+            borderRadius: "8px",
+            padding: "10px 15px",
+            fontSize: "13px",
+            fontWeight: "700",
+            color: "#ff6b35",
+            zIndex: 1000,
+            boxShadow: "2px 2px 4px rgba(0,0,0,0.1)",
+            whiteSpace: "nowrap",
+            userSelect: "none",
+            pointerEvents: "none",
+          }}
+        >
+          <div style={{ marginBottom: "5px", fontSize: "11px", color: "#666" }}>
+            Circumference Formula
+          </div>
+          <div style={{ fontSize: "10px", color: "#666", fontStyle: "italic", marginBottom: "3px" }}>
+            C = 2 × π × r
+          </div>
+          <div style={{ fontSize: "10px", color: "#ff6b35", fontWeight: "600" }}>
+            C = 2 × π × {unitRadius.toFixed(2)} = {circumference.toFixed(2)} u
+          </div>
+        </div>
+      )}
+    </>
   );
 }
