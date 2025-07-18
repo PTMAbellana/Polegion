@@ -297,11 +297,13 @@ export default function TriangleShape({
                       }
                     };
                     
-                    // ✅ Then notify parent with updated points (same pattern as square)
-                    onShapeMove && onShapeMove({ 
-                      ...shape, 
-                      points: newPoints 
-                    });
+                    // ✅ Call onShapeMove OUTSIDE of setPoints using setTimeout
+                    setTimeout(() => {
+                      onShapeMove && onShapeMove({ 
+                        ...shape, 
+                        points: newPoints 
+                      });
+                    }, 0);
                     
                     return newPoints;
                   });
