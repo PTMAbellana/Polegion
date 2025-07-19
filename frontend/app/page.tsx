@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
 import { ROUTES } from "@/constants/routes";
 import { refreshToken } from "@/api/auth";
-import { myAppHook } from "@/context/AppUtils";
+import { useMyApp } from "@/context/AppUtils";
 import { getUserProfile } from "@/api/users";
 import styles from "../styles/home.module.css";
 
@@ -14,7 +14,7 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
 
-  const { setIsLoggedIn, setUserProfile } = myAppHook();
+  const { setIsLoggedIn, setUserProfile } = useMyApp();
 
   useEffect(() => {
     const handleTokens = async () => {

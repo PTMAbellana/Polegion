@@ -5,7 +5,7 @@ import { ChevronDown, ChevronUp } from 'lucide-react';
 import styles from '@/styles/competition.module.css';
 import createProblemStyles from '@/styles/create-problem.module.css';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { myAppHook } from '@/context/AppUtils';
+import { useMyApp } from '@/context/AppUtils';
 import { AuthProtection } from '@/context/AuthProtection';
 import Loader from '@/components/Loader';
 import { getRoomProblems } from '@/api/problems';
@@ -54,7 +54,6 @@ interface Problem {
   title?: string | null
   description?: string | null
   visibility: string
-  expected_solution?: any[]
   difficulty: string
   max_attempts: number
   expected_xp: number
@@ -136,7 +135,7 @@ const CompetitionDashboard = ({ params } : { params  : Promise<{competitionId : 
     square: false,
   });
 
-  const { isLoggedIn } = myAppHook()
+  const { isLoggedIn } = useMyApp()
   const { isLoading: authLoading } = AuthProtection()
 
   // Competition logic
@@ -172,19 +171,19 @@ const CompetitionDashboard = ({ params } : { params  : Promise<{competitionId : 
   }
 
   // ALL Create-problem fetch logic
-  const fetchCreateProblems = useCallback(async () => {
-    if (!roomId) return;
-    try {
-      const data = await getRoomProblemsByCode(roomId);
-      setCreateProblems(data);
-    } catch (error) {
-      console.error("Error fetching problems:", error);
-    }
-  }, [roomId]);
+  // const fetchCreateProblems = useCallback(async () => {
+  //   if (!roomId) return;
+  //   try {
+  //     const data = await getRoomProblemsByCode(roomId);
+  //     setCreateProblems(data);
+  //   } catch (error) {
+  //     console.error("Error fetching problems:", error);
+  //   }
+  // }, [roomId]);
 
-  useEffect(() => {
-    fetchCreateProblems();
-  }, [fetchCreateProblems]);
+  // useEffect(() => {
+  //   fetchCreateProblems();
+  // }, [fetchCreateProblems]);
 
   // ALL Create-problem handlers (EXACTLY from original)
   const handleShapeMouseDown = (id: number, e: React.MouseEvent) => {
@@ -614,36 +613,19 @@ const CompetitionDashboard = ({ params } : { params  : Promise<{competitionId : 
         icon: "error",
         confirmButtonText: "OK",
       }
-    } else {
-      error_message = {
-        title: "Error",
-        text: "There was an error editing the problem. Please try again.",
-        icon: "error",
-        confirmButtonText: "OK",
-      }
     }
-
+     
     try {
       console.log(JSON.stringify(payload));
       if (!problemId) {
-        await createProblem(payload, roomId);
+        // await createProblem(payload, roomId);
         message = {
           title: "Problem Created",
           text: "Your problem has been successfully created!",
           icon: "success",
           confirmButtonText: "OK",
         }; 
-      } else {
-        console.log("Editing problem with ID:", problemId);
-        await updateProblem(problemId, payload);
-        message = {
-          title: "Problem Edited",
-          text: "Your problem has been successfully edited!",
-          icon: "success",
-          confirmButtonText: "OK",
-        }; 
-      }
-      await fetchCreateProblems();
+      } 
       Swal.fire(message);
     } catch (error) {
       console.error("Save error:", error);
@@ -662,16 +644,6 @@ const CompetitionDashboard = ({ params } : { params  : Promise<{competitionId : 
       setVisible(true);
       setShowProperties(false);
       setProblemId(null);
-    }
-  };
-
-  const handleDeleteProblem = async (problemId: string) => {
-    if (!confirm("Are you sure you want to delete this problem?")) return;
-    try {
-      await deleteProblem(problemId);
-      setCreateProblems(prev => prev.filter(p => p.id !== problemId));
-    } catch (error) {
-      console.error("Error deleting problem:", error);
     }
   };
 
@@ -764,50 +736,7 @@ const CompetitionDashboard = ({ params } : { params  : Promise<{competitionId : 
 
         {/* Two Column Layout */}
         <div className={styles.roomContent}>
-          {/* Left Column - Competition Problems */}
-          <div className={styles.leftColumn}>
-            <div className={styles.participantsSection}>
-              <div className={styles.participantsHeader}>
-                <h2 className={styles.participantsTitle}>Competition Problems</h2>
-              </div>
-              <div className={styles.participantsList}>
-                {activeProblemsList.length > 0 ? (
-                  activeProblemsList.map((problem, index) => (
-                    <div key={problem.id} className={styles.participantCard}>
-                      <div className={styles.participantContent}>
-                        <div className={styles.participantLeft}>
-                          <div className={styles.participantRank}>{index + 1}</div>
-                          <div>
-                            <h3 className={styles.participantName}>{problem.title || 'No Title'}</h3>
-                            <div className={styles.problemMeta}>
-                              <span className={styles.problemDifficulty} data-difficulty={problem.difficulty}>
-                                {problem.difficulty}
-                              </span>
-                              <span className={styles.problemXp}>{problem.expected_xp} XP</span>
-                            </div>
-                          </div>
-                        </div>
-                        <div className={styles.participantRight}>
-                          <div className={styles.participantXp}>
-                            {problem.timer != null && problem.timer > 0 ? `${problem.timer}s` : 'No timer'}
-                          </div>
-                          <button className={styles.solveButton} onClick={() => console.log('Solve problem:', problem.id)}>
-                            Solve
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  <div className={styles.emptyState}>
-                    <div className={styles.emptyIcon}>🎯</div>
-                    <p>No problems added yet</p>
-                    <span>Wait for the room creator to add problems to start competing!</span>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
+          {/* Left Column - Competition Problems
 
           {/* Right Column - Leaderboard */}
           <div className={styles.rightColumn}>
@@ -970,70 +899,6 @@ const CompetitionDashboard = ({ params } : { params  : Promise<{competitionId : 
               </div>
 
               {/* Right Sidebar - Existing Problems */}
-              <div className={createProblemStyles.problemsSection}>
-                <div className={createProblemStyles.problemsSectionHeader}>
-                  Existing Problems
-                </div>
-                <div className={createProblemStyles.problemsContent}>
-                  {createProblems.length > 0 ? (
-                    <ul className={createProblemStyles.problemList}>
-                      {createProblems.map(problem => (
-                        <li key={problem.id} className={createProblemStyles.problemItem}>
-                          <div className={createProblemStyles.problemItemHeader}>
-                            <div className={createProblemStyles.problemTitle}>
-                              {problem.title || "Untitled Problem"}
-                            </div>
-                            <button 
-                              onClick={() => handleEditProblem(problem.id)} 
-                              title="Edit this problem"
-                            >
-                              Edit
-                            </button>
-                            <button 
-                              onClick={() => handleDeleteProblem(problem.id)} 
-                              className={createProblemStyles.deleteButton}
-                              title="Delete this problem"
-                            >
-                              Delete
-                            </button>
-                          </div>
-                          <div className={createProblemStyles.problemDetails}>
-                            <span 
-                              className={createProblemStyles.problemDifficulty} 
-                              style={{ backgroundColor: DIFFICULTY_COLORS[problem.difficulty] }}
-                            >
-                              {problem.difficulty}
-                            </span>
-                            <span 
-                              className={`${createProblemStyles.problemVisibility} ${createProblemStyles[problem.visibility]}`}
-                            >
-                              {problem.visibility}
-                            </span>
-                            <div className={createProblemStyles.problemMeta}>
-                              <span className={createProblemStyles.problemAttempts}>
-                                {problem.max_attempts} {problem.max_attempts === 1 ? 'attempt' : 'attempts'}
-                              </span>
-                              <span className={createProblemStyles.problemXp}>
-                                {problem.expected_xp} XP
-                              </span>
-                            </div>
-                          </div>
-                        </li>
-                      ))}
-                    </ul>
-                  ) : (
-                    <div className={createProblemStyles.noProblems}>
-                      <div className={createProblemStyles.noProblemsIcon}>📝</div>
-                      <div className={createProblemStyles.noProblemsText}>
-                        No problems created yet.
-                      </div>
-                      <div className={createProblemStyles.noProblemsSubtext}>
-                        Create your first problem to get started!
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
             </div>
           </div>
         </div>

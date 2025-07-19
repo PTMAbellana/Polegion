@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { logout } from '@/api/auth'
 import { deactivateAccount, updateEmail, updatePassword, updateUserProfile, uploadImage } from '@/api/users'
-import { myAppHook } from '@/context/AppUtils'
+import { useMyApp } from '@/context/AppUtils'
 import Loader from '@/components/Loader'
 import styles from '@/styles/profile.module.css'
 import { ROUTES } from '@/constants/routes'
@@ -26,7 +26,7 @@ interface FormErrors {
 
 export default function EditProfile() {
     const router = useRouter()
-    const { isLoggedIn, userProfile, refreshUserSession, appLoading} = myAppHook()
+    const { isLoggedIn, userProfile, refreshUserSession, appLoading} = useMyApp()
 
     const [formData, setFormData] = useState<ProfileFormData>({
         fullName: '',

@@ -1,6 +1,6 @@
 "use client";
 import Loader from "@/components/Loader";
-import { myAppHook } from "@/context/AppUtils";
+import { useMyApp } from "@/context/AppUtils";
 import { login, resetPassword } from "@/api/auth";
 import { yupResolver } from "@hookform/resolvers/yup";
 import Head from "next/head";
@@ -51,7 +51,7 @@ export default function Login() {
     setUserProfile,
     refreshUserSession,
     userProfile,
-  } = myAppHook();
+  } = useMyApp();
 
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);

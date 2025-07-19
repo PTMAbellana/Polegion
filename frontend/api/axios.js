@@ -1,5 +1,4 @@
 import axios from "axios";
-import { ROUTES } from "@/constants/routes";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
 
@@ -139,7 +138,8 @@ api.interceptors.response.use(
       } catch (re) {
         processQueue(re, null);
         authUtils.clearAuthData();
-        if (typeof window !== "undefined") window.location.href = ROUTES.LOGIN;
+        // Don't automatically redirect - let the app handle logout gracefully
+        console.error("Token refresh failed:", re);
         return Promise.reject(re);
       } finally {
         isRefreshing = false;

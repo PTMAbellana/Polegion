@@ -5,7 +5,7 @@ import { ChevronDown, ChevronUp, ArrowLeft } from 'lucide-react';
 import styles from '@/styles/competition.module.css';
 import { useSearchParams } from 'next/navigation';
 import { useRouter } from 'next/navigation';
-import { myAppHook } from '@/context/AppUtils';
+import { useMyApp } from '@/context/AppUtils';
 import { AuthProtection } from '@/context/AuthProtection';
 import Loader from '@/components/Loader';
 import { getRoomProblems } from '@/api/problems';
@@ -56,7 +56,7 @@ const CompetitionDashboard = () => {
   const [newCompetitionTitle, setNewCompetitionTitle] = useState("");
   const [creating, setCreating] = useState(false);
 
-  const { isLoggedIn } = myAppHook()
+  const { isLoggedIn } = useMyApp()
   const { isLoading: authLoading } = AuthProtection()
   // const router = useRouter();
 

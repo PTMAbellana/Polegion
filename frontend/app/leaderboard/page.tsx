@@ -1,7 +1,7 @@
 'use client'
 import Loader from '@/components/Loader'
 import { ROUTES } from '@/constants/routes'
-import { myAppHook } from '@/context/AppUtils'
+import { useMyApp } from '@/context/AppUtils'
 import { AuthProtection } from '@/context/AuthProtection'
 import { getRooms } from '@/api/rooms'
 import { getJoinedRooms } from '@/api/participants'
@@ -20,7 +20,7 @@ interface RoomType {
 
 export default function LeaderboardRooms() {
     const router = useRouter()
-    const { isLoggedIn, userProfile } = myAppHook()
+    const { isLoggedIn, userProfile } = useMyApp()
     const { isLoading: authLoading } = AuthProtection()
 
     const [myRooms, setMyRooms] = useState<RoomType[]>([])

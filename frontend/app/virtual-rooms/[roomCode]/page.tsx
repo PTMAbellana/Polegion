@@ -1,7 +1,7 @@
 "use client"
 
 import Loader from '@/components/Loader'
-import { myAppHook } from '@/context/AppUtils'
+import { useMyApp } from '@/context/AppUtils'
 import { AuthProtection } from '@/context/AuthProtection'
 import { changeVisibility, getRoomByCode } from '@/api/rooms'
 import { getAllParticipants, inviteParticipant, kickParticipant } from '@/api/participants'
@@ -54,7 +54,7 @@ export default function RoomDetail({ params } : { params  : Promise<{roomCode : 
     const [fetched, setFetched] = useState(false);
 
 
-    const { isLoggedIn } = myAppHook()
+    const { isLoggedIn } = useMyApp()
     const { isLoading: authLoading } = AuthProtection()
 
     const router = useRouter();

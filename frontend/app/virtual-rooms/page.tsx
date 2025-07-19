@@ -1,7 +1,7 @@
 "use client"
 import Loader from '@/components/Loader'
 import { ROUTES } from '@/constants/routes'
-import { myAppHook } from '@/context/AppUtils'
+import { useMyApp } from '@/context/AppUtils'
 import { AuthProtection } from '@/context/AuthProtection'
 import { createRoom, updateRoom, getRooms, uploadImage, deleteRoom } from '@/api/rooms'
 import { joinRoom } from '@/api/participants'
@@ -59,7 +59,7 @@ const joinRoomSchema = yup.object().shape({
 
 export default function VirtualRooms() {
     const router = useRouter()
-    const { isLoggedIn, userProfile } = myAppHook()
+    const { isLoggedIn, userProfile } = useMyApp()
     const { isLoading: authLoading } = AuthProtection()
 
     const [ rooms, setRooms ] = useState<RoomType[]>([])

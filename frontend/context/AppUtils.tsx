@@ -5,11 +5,11 @@ import React, {
   useEffect,
   useRef,
   useState,
+  useCallback,
 } from "react";
 import Loader from "@/components/Loader";
 import { authUtils } from "@/api/axios";
 import { getUserProfile } from "@/api/users";
-import axios from "axios";
 
 // Define proper types for user profile
 interface UserProfile {
@@ -55,7 +55,7 @@ export const AppUtilsProvider = ({
   const hasInitialized = useRef(false);
 
   // Function to refresh user session data from localStorage
-const refreshUserSession = async (): Promise<boolean> => {
+const refreshUserSession = useCallback(async (): Promise<boolean> => {
   if (isRefreshing.current) return isLoggedIn;
 
   setAuthLoading(true);
@@ -63,59 +63,46 @@ const refreshUserSession = async (): Promise<boolean> => {
     isRefreshing.current = true;
     const authData = authUtils.getAuthData();
 
-    // ✅ If access token is valid, use it
-    if (authData.accessToken && authUtils.isTokenValid()) {
+    // ✅ If we have an access token, use it (don't check expiration here)
+    if (authData.accessToken) {
       setAuthToken(authData.accessToken);
-    }
-    // ✅ Else, try to refresh using refresh token
-    else if (authData.refreshToken) {
-      const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"}/auth/refresh-token`, {
-        refresh_token: authData.refreshToken,
-      });
+      setIsLoggedIn(true);
 
-      if (response.data && response.data.session) {
-        authUtils.saveAuthData(response.data);
-        setAuthToken(response.data.session.access_token);
-      } else {
-        throw new Error("Failed to refresh token");
+      // ✅ Try to fetch user profile to verify token is still valid
+      try {
+        const pr = await getUserProfile();
+        if (pr?.data) {
+          setUserProfile(pr.data);
+          const updateUser = {
+            ...authData.user,
+            ...pr.data,
+          };
+          localStorage.setItem("user", JSON.stringify(updateUser));
+        }
+        return true;
+      } catch {
+        // If getUserProfile fails, the axios interceptor will handle token refresh automatically
+        // Don't logout here, just set the basic auth state
+        console.log("Profile fetch failed, but keeping user logged in - axios interceptor will handle token refresh");
+        return true;
       }
     }
-    // ❌ If nothing works, logout
-    else {
+    // ❌ Only logout if we have no token at all
+    else if (!authData.accessToken && !authData.refreshToken) {
       logout();
       return false;
     }
 
-    setIsLoggedIn(true);
-
-    // ✅ Try to fetch user profile
-    try {
-      const pr = await getUserProfile();
-      if (pr?.data) {
-        setUserProfile(pr.data);
-        const updateUser = {
-          ...authData.user,
-          ...pr.data,
-        };
-        localStorage.setItem("user", JSON.stringify(updateUser));
-      }
-    } catch (err: any) {
-      if (err.response && err.response.status === 401) {
-        logout();
-        return false;
-      }
-    }
-
     return true;
   } catch (error) {
-    console.error(error);
-    logout();
-    return false;
+    console.error("Session refresh error:", error);
+    // Don't automatically logout on error - let axios interceptor handle it
+    return isLoggedIn;
   } finally {
     isRefreshing.current = false;
     setAuthLoading(false);
   }
-};
+}, [isLoggedIn]);
 
 
   // Function to handle logout
@@ -135,7 +122,7 @@ const refreshUserSession = async (): Promise<boolean> => {
         setAppLoading(false);
       });
     }
-  }, []);
+  }, [refreshUserSession]);
 
   // Debug logging for state changes
   useEffect(() => {
@@ -169,7 +156,7 @@ const refreshUserSession = async (): Promise<boolean> => {
   );
 };
 
-export const myAppHook = () => {
+export const useMyApp = () => {
   const context = useContext(AppUtilsContext);
   if (!context) {
     throw new Error(

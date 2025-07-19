@@ -1,7 +1,7 @@
 "use client"
 
 import { usePathname, useRouter } from "next/navigation"
-import { myAppHook } from "./AppUtils"
+import { useMyApp } from "./AppUtils"
 import { useEffect, useState } from "react"
 import { ROUTES, PUBLIC_ROUTES } from '@/constants/routes'
 
@@ -11,7 +11,7 @@ export function AuthProtection () {
         authLoading,
         appLoading,
         authToken
-    } = myAppHook()
+    } = useMyApp()
 
     const [localLoading, setLocalLoading] = useState(true)
     const router = useRouter()

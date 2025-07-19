@@ -2,7 +2,7 @@
 
 import React, { use, useEffect, useState } from "react";
 import Loader from "@/components/Loader";
-import { myAppHook } from "@/context/AppUtils";
+import { useMyApp } from "@/context/AppUtils";
 import styles from "@/styles/leaderboard.module.css";
 import { getCompetitionLeaderboards, getRoomLeaderboards } from "@/api/leaderboards";
 
@@ -71,7 +71,7 @@ const LeaderRow: React.FC<{ row: Leaderboard; rank: number }> = ({
 
 export default function LeaderboardDetail({ params }: { params: Promise<{ roomId: number }> }) {
   const roomId = use(params)
-  const { isLoggedIn, authLoading } = myAppHook()
+  const { isLoggedIn, authLoading } = useMyApp()
 
   const [ roomBoards, setRoomBoards ] = useState<Leaderboard[]>([])
   const [ compeBoards, setCompeBoards ] = useState<PerCompetition[]>([])

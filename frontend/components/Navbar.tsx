@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { myAppHook } from "@/context/AppUtils";
+import { useMyApp } from "@/context/AppUtils";
 import { logout } from "@/api/auth";
 import { useRouter, usePathname } from "next/navigation";
 import toast from "react-hot-toast";
@@ -14,7 +14,7 @@ const Navbar = () => {
     const { 
         isLoggedIn, 
         logout: contextLogout 
-    } = myAppHook();
+    } = useMyApp();
     const router = useRouter();
     const pathname = usePathname();
     const [isCollapsed, setIsCollapsed] = useState(true);

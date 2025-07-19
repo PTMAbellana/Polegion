@@ -1,6 +1,6 @@
 'use client'
 
-import { myAppHook } from "@/context/AppUtils"
+import { useMyApp } from "@/context/AppUtils"
 import { AuthProtection } from "@/context/AuthProtection"
 import { use, useEffect, useState } from "react"
 import styles from '@/styles/join-room.module.css'
@@ -49,7 +49,7 @@ export default function JoinRoom({ params } : { params  : Promise<{roomCode : st
     const [showJoinStatus, setShowJoinStatus] = useState(false) // Changed from true to false
     const [hasCheckedJoinStatus, setHasCheckedJoinStatus] = useState(false)
 
-    const { isLoggedIn } = myAppHook()
+    const { isLoggedIn } = useMyApp()
     const { isLoading: authLoading } = AuthProtection()
 
     console.log(roomCode)

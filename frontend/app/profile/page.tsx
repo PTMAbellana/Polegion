@@ -2,14 +2,14 @@
 
 import React from 'react'
 import { useRouter } from 'next/navigation'
-import { myAppHook } from '@/context/AppUtils'
+import { useMyApp } from '@/context/AppUtils'
 import Loader from '@/components/Loader'
 import styles from '@/styles/profile.module.css'
 import { ROUTES } from '@/constants/routes'
 
 export default function ProfilePage() {
     const router = useRouter()
-    const { isLoggedIn, userProfile, appLoading } = myAppHook()
+    const { isLoggedIn, userProfile, appLoading } = useMyApp()
 
     if (appLoading || !isLoggedIn) {
         return (

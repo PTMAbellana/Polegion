@@ -34,9 +34,26 @@ class AuthMiddleware {
             } catch (error) {
                 console.error('Middleware error: ',error)
                 
-                if (error.message === 'User not found or token invalid') {
+                // Check if the error is specifically about token expiration
+                if (error.message === 'Token expired') {
                     return res.status(401).json({
-                        error: 'Not authorized, invalid token'
+                        error: 'Access token expired',
+                        code: 'TOKEN_EXPIRED'
+                    })
+                }
+                
+                if (error.message === 'User not found') {
+                    return res.status(401).json({
+                        error: 'User not found',
+                        code: 'USER_NOT_FOUND'
+                    })
+                }
+                
+                if (error.message && error.message.includes('Token validation failed')) {
+                    return res.status(401).json({
+                        error: 'Token validation failed',
+                        code: 'TOKEN_INVALID',
+                        details: error.message
                     })
                 }
                 
@@ -45,8 +62,10 @@ class AuthMiddleware {
                         error: 'Authentication service temporarily unavailable'
                     })
                 }
-                res.status(401).json({
-                    error: 'Not authorized, token failed'
+                
+                return res.status(401).json({
+                    error: 'Not authorized, token failed',
+                    code: 'TOKEN_INVALID'
                 })
             }
         } else res.status(401).json({

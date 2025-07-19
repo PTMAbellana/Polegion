@@ -1,7 +1,7 @@
 "use client"
 
 import Loader from "@/components/Loader"
-import { myAppHook } from "@/context/AppUtils"
+import { useMyApp } from "@/context/AppUtils"
 import { AuthProtection } from "@/context/AuthProtection"
 import { getRooms } from "@/api/rooms"
 import { getJoinedRooms } from "@/api/participants"
@@ -24,7 +24,7 @@ export default function Dashboard() {
     const [rooms, setRooms] = useState<RoomType[]>([])
     const [isRoomsLoading, setRoomsLoading] = useState(true)
     const [joinRooms, setJoinRooms] = useState<RoomType[]>([])
-    const { userProfile, isLoggedIn } = myAppHook()
+    const { userProfile, isLoggedIn } = useMyApp()
     const { isLoading: authLoading } = AuthProtection()
     const router = useRouter()
 

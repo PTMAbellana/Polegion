@@ -13,6 +13,8 @@ class UserRepo extends BaseRepo{
 
     async refreshSession(refreshToken) {
         try {
+            console.log('Attempting to refresh session with token:', refreshToken ? 'Present' : 'Missing')
+            
             const {
                 data,
                 error
@@ -20,9 +22,15 @@ class UserRepo extends BaseRepo{
                 refresh_token: refreshToken
             })
 
-            if (error) throw error
+            if (error) {
+                console.error('Refresh session error from Supabase:', error)
+                throw error
+            }
+            
+            console.log('Refresh session successful, new session expires at:', data.session?.expires_at)
             return data
         } catch (error) {
+            console.error('Refresh session failed:', error)
             throw error
         }
     }
@@ -34,10 +42,17 @@ class UserRepo extends BaseRepo{
                 error
             } = await this.supabase.auth.getUser(token)
             
-            if (
-                error ||
-                !data.user
-            ) throw new Error ("User not found or token invalid")
+            if (error) {
+                // More specific error handling based on Supabase error
+                if (error.message && error.message.includes('expired')) {
+                    throw new Error ("Token expired")
+                }
+                throw new Error (`Token validation failed: ${error.message || 'Unknown error'}`)
+            }
+            
+            if (!data.user) {
+                throw new Error ("User not found")
+            }
             
             return userModel.fromDbUser(data.user)
         } catch (error) {
