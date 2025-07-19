@@ -11,6 +11,7 @@ import { useRouter } from "next/navigation"
 import { ROUTES } from "@/constants/routes"
 import toast from "react-hot-toast"
 import { getAllCompe } from "@/api/competitions"
+import Swal from "sweetalert2"
 
 interface Room{
     id?: string
@@ -114,30 +115,13 @@ export default function JoinRoom({ params } : { params  : Promise<{roomCode : st
             setTotalParticipants(total.data.total_participants || 0)
             console.log('Attempting to total participants: ', total.data.total_participants)
             
-            const compe = await getAllCompe(res.data.id)
+            const compe = await getAllCompe(res.data.id, 'users')
             console.log('Competitions data: ', compe)
             setCompetitions(compe || [])
         } catch (error) {
             console.log('Error fetching room details: ', error)
         } finally {
             setIsLoading(false)
-        }
-    }
-
-    const handleJoinRoom = async (roomCode: string) => {
-        try {
-            // Your existing join room API call
-            await joinRoom(roomCode)
-            
-            // Set session flag to show join success popup ONLY ONCE
-            sessionStorage.setItem(`joined_${roomCode}`, 'true')
-            
-            // Navigate to the room with joined flag
-            router.push(`/virtual-rooms/join/${roomCode}?joined=true`)
-            
-        } catch (error) {
-            console.error('Error joining room:', error)
-            toast.error('Failed to join room')
         }
     }
 
@@ -173,13 +157,43 @@ export default function JoinRoom({ params } : { params  : Promise<{roomCode : st
 
     const handleLeaveRoom = async () => {
         console.log('isCLicked leave room')
-        try {
-            await leaveRoom(roomDetails.id)
-            router.replace(ROUTES.DASHBOARD)
-        } catch (error) {
-            console.log('Error in leaving room: ', error)
-            toast.error('Error in leaving room')
+        
+        const result = await Swal.fire({
+            title: 'Are you sure?',
+            text: 'Do you want to leave this room?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, leave room!'
+        })
+        
+        if (result.isConfirmed) {
+            try {
+                await leaveRoom(roomDetails.id)
+                
+                Swal.fire({
+                    title: 'Success!',
+                    text: 'You have left the room successfully',
+                    icon: 'success'
+                })
+                
+                router.replace(ROUTES.DASHBOARD)
+            } catch (error) {
+                console.log('Error in leaving room: ', error)
+                
+                Swal.fire({
+                    title: 'Error!',
+                    text: 'Error in leaving room',
+                    icon: 'error'
+                })
+            }
         }
+    }
+
+    const handlePlayCompe = (compeId: string) => () => {
+        console.log('Clicked play competition with ID:', compeId)
+        router.push(`${ROUTES.PLAY}/${compeId}?room=${roomDetails.id}`)
     }
 
     return (
@@ -262,11 +276,25 @@ export default function JoinRoom({ params } : { params  : Promise<{roomCode : st
                             <h3>Competitions</h3>
                         </div>
                         <div className={styles["problems-list"]}>
-                            <div className={styles["empty-state"]}>
-                                <div className={styles["empty-icon"]}>❓</div>
-                                <p>No competitions added yet</p>
-                                <span>Competitions will appear here when the room owner adds them</span>
-                            </div>
+                            {
+                                competitions.length > 0 ?
+                                    competitions.map((comp, idx) => (
+                                        <div key={comp.id} className={styles["problem-item"]}>
+                                            <div className={styles["problem-title"]}>{comp.title}</div>
+                                            <div className={styles["problem-status"]}>
+                                                Status: {comp.status}
+                                            </div>
+                                            <button onClick={handlePlayCompe(comp.id)} className={styles["play-btn"]}>
+                                                PLAY
+                                            </button>
+                                        </div>
+                                    )) :
+                                        <div className={styles["empty-state"]}>
+                                            <div className={styles["empty-icon"]}>❓</div>
+                                            <p>No competitions added yet</p>
+                                            <span>Competitions will appear here when the room owner adds them</span>
+                                        </div>
+                            }
                         </div>
                     </div>
 

@@ -41,6 +41,7 @@ class CompeRepo extends BaseRepo {
             if (error) throw error
             return data
         } catch (error) {
+            console.log("Error fetching competitions by room ID:", error)
             throw error
         }
     }

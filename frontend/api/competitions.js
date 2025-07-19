@@ -12,9 +12,9 @@ export const createCompe = async (room_id, title) => {
     }
 }
 
-export const getAllCompe = async (room_id) => {
+export const getAllCompe = async (room_id, type  = 'admin') => {
     try {
-        const res = await api.get(`competitions/${room_id}`)
+        const res = await api.get(`competitions/${room_id}?type=${type}`)
         return res.data 
     } catch (error) {
         throw error
