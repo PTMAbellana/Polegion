@@ -100,8 +100,10 @@ class ParticipantController {
     // for users
     getRoomParticipantsUser = async (req, res) => {
         const { room_id } = req.params 
+        const withXp = req.query.withXp === 'true';
+        const compe_id = req.query.compe_id ? parseInt(req.query.compe_id) : -1; 
         try {
-            const participants = await this.participantService.getRoomParticipantsForUser(room_id, req.user.id)
+            const participants = await this.participantService.getRoomParticipantsForUser(room_id, req.user.id, withXp, compe_id)
             // console.log(participants)
             res.status(200).json({
                 participants

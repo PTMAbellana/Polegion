@@ -87,7 +87,7 @@ class ParticipantService {
     }
 
     //ang mu get kay ang participants
-    async getRoomParticipantsForUser(room_id, user_id){
+    async getRoomParticipantsForUser(room_id, user_id, with_xp = false, compe_id = null){
         try {
             // console.log('I am called in services')
             //verify if room exists
@@ -111,7 +111,10 @@ class ParticipantService {
                             return {}
                         }
 
-                        return userData
+                        return {
+                            ...userData,
+                            participant_id: participant.id,
+                        }
                         
                     } catch (error) {
                         // console.warn(`Error fetching user ${participant.user_id}:`, error)
@@ -120,7 +123,32 @@ class ParticipantService {
                 })
             )
             // console.log('getRoomParticipants parts: ', participants)
-            return participants
+            
+            if (!with_xp) return participants;
+            else {
+                if (compe_id === null || compe_id === -1) {
+                    return await Promise.all(
+                        participants.map(async p => {
+                            const res = await this.leaderService.getRoomBoardById(room_id, p.participant_id);
+                            return {
+                                ...p,
+                                accumulated_xp: res?.accumulated_xp ?? 0
+                            };
+                        })
+                    );
+                }
+                else {
+                    return await Promise.all(
+                        participants.map(async p => {
+                            const res = await this.leaderService.getCompeBoardById(compe_id, p.participant_id);
+                            return {
+                                ...p,
+                                accumulated_xp: res?.accumulated_xp ?? 0
+                            };
+                        })
+                    );
+                }
+            }
         } catch (error){
             // console.log('Error in getRoomParticipants service: ', error)
             throw error

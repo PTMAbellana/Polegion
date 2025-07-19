@@ -40,11 +40,15 @@ class CompeService {
         }
     }
 
-    async getCompeById(compe_id, room_id, user_id) {
+    async getCompeById(compe_id, room_id, user_id, type = 'creator') {
         try {
-            const room = await this.roomService.getRoomById(room_id, user_id)
-            if (!room) throw new Error("Room not found")
-            
+            if (type === 'user') {
+                const part = await this.partService.checkPartStatus(user_id, room_id)
+                if (!part) throw new Error("You are not a participant of this room")
+            } else {
+                const room = await this.roomService.getRoomById(room_id, user_id)
+                if (!room) throw new Error("Room not found")
+            }
             const data = await this.compeRepo.getCompeById(compe_id, room_id)
             if (!data) throw new Error("Competition not found")
             return data

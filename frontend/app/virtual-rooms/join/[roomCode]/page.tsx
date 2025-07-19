@@ -6,10 +6,9 @@ import { use, useEffect, useState } from "react"
 import styles from '@/styles/join-room.module.css'
 import Loader from "@/components/Loader"
 import { getRoomByCode } from "@/api/rooms"
-import { getAllParticipants, isParticipant, joinRoom, leaveRoom, totalParticipant } from "@/api/participants"
+import { getAllParticipants, isParticipant, leaveRoom, totalParticipant } from "@/api/participants"
 import { useRouter } from "next/navigation"
 import { ROUTES } from "@/constants/routes"
-import toast from "react-hot-toast"
 import { getAllCompe } from "@/api/competitions"
 import Swal from "sweetalert2"
 
@@ -34,6 +33,7 @@ interface Competition {
     title: string
     status: string
 }
+
 export default function JoinRoom({ params } : { params  : Promise<{roomCode : string }> }){
     console.log(params)
     const roomCode = use(params)
@@ -49,6 +49,10 @@ export default function JoinRoom({ params } : { params  : Promise<{roomCode : st
     const [showJoinStatus, setShowJoinStatus] = useState(false) // Changed from true to false
     const [hasCheckedJoinStatus, setHasCheckedJoinStatus] = useState(false)
 
+    const [showInviteModal, setShowInviteModal] = useState(false);
+    const [recipientEmail, setRecipientEmail] = useState("");
+    const [sending, setSending] = useState(false);
+    
     const { isLoggedIn } = useMyApp()
     const { isLoading: authLoading } = AuthProtection()
 
@@ -155,6 +159,22 @@ export default function JoinRoom({ params } : { params  : Promise<{roomCode : st
         )
     }
 
+    
+    const handleInvite = async () => {
+        try {
+            setSending(true);
+            await inviteParticipant({ email: recipientEmail, roomCode: roomDetails?.code });
+            alert("Invitation sent!");
+            setShowInviteModal(false);
+            setRecipientEmail("");
+        } catch (error : unknown) {
+            console.log(error)
+            alert("Failed to send invitation.");
+        } finally {
+            setSending(false);
+        }
+    };
+
     const handleLeaveRoom = async () => {
         console.log('isCLicked leave room')
         
@@ -208,10 +228,10 @@ export default function JoinRoom({ params } : { params  : Promise<{roomCode : st
                         </div>
                     </div>
                     <div className={styles["room-actions"]}>
-                        <button className={styles["share-btn"]}>
+                        {/* <button className={styles["share-btn"]}>
                             <span className={styles["share-icon"]}>📤</span>
                             Share Room
-                        </button>
+                        </button> */}
                         <button className={styles["leave-room-btn"]} onClick={handleLeaveRoom}>
                             <span className={styles["leave-icon"]}>🚶🏾</span>
                             Leave Room
@@ -278,7 +298,7 @@ export default function JoinRoom({ params } : { params  : Promise<{roomCode : st
                         <div className={styles["problems-list"]}>
                             {
                                 competitions.length > 0 ?
-                                    competitions.map((comp, idx) => (
+                                    competitions.map((comp) => (
                                         <div key={comp.id} className={styles["problem-item"]}>
                                             <div className={styles["problem-title"]}>{comp.title}</div>
                                             <div className={styles["problem-status"]}>
@@ -359,7 +379,7 @@ export default function JoinRoom({ params } : { params  : Promise<{roomCode : st
                             )}
                         </div>
                         <div className={styles["invite-section"]}>
-                            <button className={styles["invite-btn"]}>
+                            <button className={styles["invite-btn"]} onClick={() => setShowInviteModal(true)}>
                                 <span className={styles["invite-icon"]}>✉️</span>
                                 Invite Participants
                             </button>
@@ -367,6 +387,47 @@ export default function JoinRoom({ params } : { params  : Promise<{roomCode : st
                     </div>
                 </div>
             </div>
+        
+            {/* Invite Participants Modal */}
+            {showInviteModal && (
+              <div className={styles["modal-overlay"]}>
+                <div className={styles["modal-content"]}>
+                  <h3>Invite by Email</h3>
+                  <input
+                    type="email"
+                    placeholder="Recipient's email"
+                    value={recipientEmail}
+                    onChange={e => setRecipientEmail(e.target.value)}
+                    style={{
+                      width: "100%",
+                      padding: "12px",
+                      borderRadius: "8px",
+                      border: "1px solid #e0e0e0",
+                      marginBottom: "20px",
+                      fontSize: "16px"
+                    }}
+                  />
+                  <div className={styles["modal-actions"]}>
+                    <button
+                      className={styles["add-btn"]}
+                      disabled={sending}
+                      onClick={handleInvite}
+                      style={{ minWidth: 120 }}
+                    >
+                      {sending ? "Sending..." : "Send Invite"}
+                    </button>
+                    <button
+                      className={styles["edit-room-btn"]}
+                      onClick={() => setShowInviteModal(false)}
+                      type="button"
+                      style={{ minWidth: 100 }}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
         </div>
     )
 }

@@ -6,14 +6,18 @@ class AuthService {
     
     async refreshToken(refreshToken){
         try {
-            const {
-                data, 
-                error
-            } = await this.userRepo.refreshSession(refreshToken)
+            console.log('AuthService: Refreshing token...')
+            const data = await this.userRepo.refreshSession(refreshToken)
             
-            if (error) throw error
+            if (!data || !data.session) {
+                console.log('AuthService: No session data returned from UserRepo')
+                throw new Error('No session data returned')
+            }
+            
+            console.log('AuthService: Token refresh successful')
             return data
         } catch (error){
+            console.error('AuthService: Token refresh failed:', error.message)
             throw error
         }
     }

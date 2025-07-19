@@ -32,10 +32,10 @@ class CompeController {
 
     
     getCompeById = async(req, res) => {
-        const { compe_id } = req.params
-        const { room_id } = req.params
+        const { room_id, compe_id } = req.params
+        const { type } = req.query || 'creator'
         try {
-            const data = await this.compeService.getCompeById(compe_id, room_id, req.user.id)
+            const data = await this.compeService.getCompeById(compe_id, room_id, req.user.id, type)
             res.status(200).json(data)  
         } catch (error) {
             console.error(error)

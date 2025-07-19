@@ -11,7 +11,6 @@ import Loader from '@/components/Loader';
 import { getRoomProblems } from '@/api/problems';
 import { getAllParticipants } from '@/api/participants';
 import { getCompeById } from '@/api/competitions';
-import { createProblem, deleteProblem, getRoomProblemsByCode, updateProblem } from '@/api/problems';
 import Swal from "sweetalert2";
 
 // Import ALL create-problem components
@@ -153,13 +152,15 @@ const CompetitionDashboard = ({ params } : { params  : Promise<{competitionId : 
   const callMe = async () => {
     try {
         setIsLoading(true)
-        const parts = await getAllParticipants(roomId, 'creator', true, compe_id.competitionId)
+        const parts = await getAllParticipants(roomId, 'user', true, compe_id.competitionId)
+        console.log("Participants data: ", parts)
         setParticipants(parts.data.participants || [])
         
         const probs = await getRoomProblems(roomId)
         setProblems(probs)
 
-        const compe = await getCompeById(roomId, compe_id.competitionId)
+        const compe = await getCompeById(roomId, compe_id.competitionId, 'user')
+        console.log("Competition data: ", compe)
         setCompetition(compe)
 
         setActiveProblems([]);

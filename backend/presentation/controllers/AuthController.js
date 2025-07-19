@@ -10,13 +10,27 @@ class AuthController {
 
         try {
             const data = await this.authService.refreshToken(refresh_token);
+            
             // Log the data for debugging
             console.log('Refresh session data:', data);
-            if (!data || !data.session) {
-                return res.status(401).json({ error: 'No session returned from Supabase' });
+            console.log('Session exists:', !!data?.session);
+            console.log('Session access token exists:', !!data?.session?.access_token);
+            
+            // The data object contains the session directly
+            if (!data || !data.session || !data.session.access_token) {
+                console.log('Invalid session data structure:', {
+                    hasData: !!data,
+                    hasSession: !!data?.session,
+                    hasAccessToken: !!data?.session?.access_token
+                });
+                return res.status(401).json({ error: 'No valid session returned from Supabase' });
             }
+            
             // Return the session object in the expected format
-            return res.status(200).json({ session: data.session });
+            return res.status(200).json({ 
+                session: data.session,
+                user: data.user || data.session.user 
+            });
         } catch (error) {
             // Log the error for debugging
             console.error('Refresh token error:', error);
