@@ -1,6 +1,6 @@
 "use client";
 
-import React, { use, useEffect, useState, useCallback } from 'react';
+import React, { use, useEffect, useState, useCallback, useMemo } from 'react';
 import { ArrowLeft, ChevronDown, ChevronUp, Edit3 } from 'lucide-react';
 import styles from '@/styles/competition.module.css';
 import { useSearchParams, useRouter } from 'next/navigation';
@@ -13,6 +13,9 @@ import { getCompeById, startCompetition, nextProblem, pauseCompetition, resumeCo
 import { useCompetitionRealtime } from '@/hooks/useCompetitionRealtime';
 import { useCompetitionTimer } from '@/hooks/useCompetitionTimer';
 import { ConnectionStatus } from '@/components/ConnectionStatus';
+import { RealtimeDebug } from '@/components/RealtimeDebug';
+import { RealtimeTestButtons } from '@/components/RealtimeTestButtons';
+import RealtimeTestComponent from '@/components/RealtimeTestComponent';
 
 interface Participant {
   id: number;
@@ -88,7 +91,19 @@ const CompetitionDashboard = ({ params } : { params  : Promise<{competitionId : 
   } = useCompetitionTimer(compe_id.competitionId, liveCompetition || competition);
     
   // Use live competition data when available, fallback to initial API state
-  const currentCompetition: Competition = liveCompetition || competition || {} as Competition;
+  const currentCompetition: Competition = useMemo(() => {
+    return liveCompetition || competition || {} as Competition;
+  }, [liveCompetition, competition]);
+  
+  // Debug logging for competition state changes
+  useEffect(() => {
+    console.log('🎯 [Admin] Competition state changed:');
+    console.log('  - liveCompetition:', liveCompetition);
+    console.log('  - competition (initial):', competition);
+    console.log('  - currentCompetition (final):', currentCompetition);
+    console.log('  - isConnected:', isConnected);
+    console.log('  - connectionStatus:', connectionStatus);
+  }, [liveCompetition, competition, currentCompetition, isConnected, connectionStatus]);
     
   const { isLoggedIn } = useMyApp()
   const { isLoading: authLoading } = AuthProtection()
@@ -258,7 +273,6 @@ const CompetitionDashboard = ({ params } : { params  : Promise<{competitionId : 
 
   // Use live data when available, fallback to initial fetch
   const displayParticipants = liveParticipants.length > 0 ? liveParticipants : participants;
-  const displayCompetition = liveCompetition || currentCompetition;
 
   const sortedParticipants = [...displayParticipants].sort((a, b) => {
     return sortOrder === 'desc' ? b.accumulated_xp - a.accumulated_xp : a.accumulated_xp - b.accumulated_xp;
@@ -271,6 +285,40 @@ const CompetitionDashboard = ({ params } : { params  : Promise<{competitionId : 
 
 return (
   <div className={styles.container}>
+    {/* Debug Component - REMOVE AFTER TESTING */}
+    <RealtimeDebug 
+      competitionId={compe_id.competitionId} 
+      isConnected={isConnected}
+      connectionStatus={connectionStatus}
+      pollCount={pollCount}
+    />
+    
+    {/* Test Component - REMOVE AFTER TESTING */}
+    <RealtimeTestButtons 
+      competitionId={compe_id.competitionId}
+      onUpdateCompetition={() => console.log('🧪 Manual update triggered')}
+    />
+    
+    {/* Status Display - REMOVE AFTER TESTING */}
+    <div style={{
+      position: 'fixed',
+      top: '10px',
+      left: '10px',
+      background: '#333',
+      color: '#fff',
+      padding: '10px',
+      borderRadius: '5px',
+      fontFamily: 'monospace',
+      fontSize: '12px',
+      zIndex: 9999
+    }}>
+      <div><strong>📊 CURRENT STATE</strong></div>
+      <div>Status: <span style={{color: '#00ff00'}}>{currentCompetition?.status || 'NONE'}</span></div>
+      <div>Gameplay: {currentCompetition?.gameplay_indicator || 'NONE'}</div>
+      <div>Timer: {currentCompetition?.timer_started_at ? '🟢' : '🔴'}</div>
+      <div>Updates: {pollCount || 0}</div>
+    </div>
+    
     {/* Main Container */}
     <div className={styles.mainContainer}>
       {/* Header Section */}
@@ -401,7 +449,7 @@ return (
               </div>
               <div className={styles.participantsList}>
                 {addedProblems.map((compeProblem, index) => (
-                  <div key={compeProblem.problem.id} className={styles.participantCard}>
+                  <div key={`added-problem-${compeProblem.problem.id}-${index}`} className={styles.participantCard}>
                     <div className={styles.participantContent}>
                       <div className={styles.participantLeft}>
                         <div className={styles.participantRank}>{index + 1}</div>
@@ -437,7 +485,7 @@ return (
               {problems.filter((problem) => !addedProblems.some(ap => ap.problem.id === problem.id) && problem.visibility === 'show').map((problem, index) => {
                 const canAdd = problem.timer && problem.timer > 0;
                 return (
-                  <div key={problem.id} className={styles.participantCard}>
+                  <div key={`available-problem-${problem.id}-${index}`} className={styles.participantCard}>
                     <div className={styles.participantContent}>
                       <div className={styles.participantLeft}>
                         <div className={styles.participantRank}>{index + 1}</div>
@@ -547,6 +595,9 @@ return (
         </div>
       </div>
     </div>
+
+    {/* TEST COMPONENT - Remove after testing */}
+    <RealtimeTestComponent competitionId={compe_id.competitionId} />
   </div>
 );
 

@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { supabase } from '../lib/supabaseClient';
 
-export const useCompetitionRealtime = (competitionId, isLoading, roomId) => {
+export const useCompetitionRealtime = (competitionId, isLoading) => {
   const [competition, setCompetition] = useState(null);
   const [participants, setParticipants] = useState([]);
   const [isConnected, setIsConnected] = useState(false);
@@ -9,6 +9,7 @@ export const useCompetitionRealtime = (competitionId, isLoading, roomId) => {
   const channelRef = useRef(null);
   const mountedRef = useRef(true);
   const [pollCount, setPollCount] = useState(0);
+  const [shouldConnect, setShouldConnect] = useState(false);
 
   useEffect(() => {
     return () => {
@@ -16,75 +17,75 @@ export const useCompetitionRealtime = (competitionId, isLoading, roomId) => {
     };
   }, []);
 
+  // Effect to determine when we should connect
   useEffect(() => {
-    if (isLoading || !competitionId) {
+    console.log('🔄 [Realtime] Connection readiness check - isLoading:', isLoading, 'competitionId:', competitionId);
+    
+    if (!isLoading && competitionId) {
+      console.log('✅ [Realtime] Ready to connect!');
+      setShouldConnect(true);
+    } else {
       console.log('⏳ [Realtime] Not ready yet - isLoading:', isLoading, 'competitionId:', competitionId);
+      setShouldConnect(false);
+    }
+  }, [isLoading, competitionId]);
+
+  // Effect to handle the actual connection
+  useEffect(() => {
+    if (!shouldConnect || !competitionId) {
       return;
     }
 
-    console.log('🚀 [Realtime] Starting realtime for competition:', competitionId);
-    setConnectionStatus('CONNECTING');
+    console.log('🚀 [Realtime] Starting SIMPLE connection for competition:', competitionId);
+    
+    // Just set connected immediately for testing
+    setConnectionStatus('CONNECTED');
+    setIsConnected(true);
+    
+    // Simple polling every 3 seconds (less aggressive)
+    let pollInterval = null;
+    
+    const pollCompetition = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('competitions')
+          .select('*')
+          .eq('id', competitionId);
 
-    // Clean up existing channel
-    if (channelRef.current) {
-      console.log('🧹 [Realtime] Cleaning up existing channel');
-      supabase.removeChannel(channelRef.current);
-      channelRef.current = null;
-    }
-
-    // Create simple realtime channel
-    const channel = supabase
-      .channel(`competition-${competitionId}`)
-      .on('postgres_changes', {
-        event: '*',
-        schema: 'public',
-        table: 'competitions',
-        filter: `id=eq.${competitionId}`
-      }, (payload) => {
-        if (!mountedRef.current) return;
-        console.log('🔥 [Realtime] Competition update:', payload);
-        if (payload?.new) {
-          setCompetition(payload.new);
+        if (!error && data && data.length > 0) {
+          setCompetition(data[0]);
           setPollCount(prev => prev + 1);
+          console.log('✅ [Polling] Updated:', data[0].status);
         }
-      })
-      .on('postgres_changes', {
-        event: '*',
-        schema: 'public',
-        table: 'competition_leaderboards',
-        filter: `competition_id=eq.${competitionId}`
-      }, (payload) => {
-        if (!mountedRef.current) return;
-        console.log('🏆 [Realtime] Leaderboard update:', payload);
-        setPollCount(prev => prev + 1);
-        // Handle leaderboard updates
-      })
-      .subscribe((status) => {
-        console.log('📡 [Realtime] Status:', status);
-        if (status === 'SUBSCRIBED') {
-          setIsConnected(true);
-          setConnectionStatus('CONNECTED');
-          console.log('✅ [Realtime] Connected successfully');
-        } else if (status === 'CHANNEL_ERROR') {
-          setIsConnected(false);
-          setConnectionStatus('ERROR');
-          console.error('❌ [Realtime] Channel error');
-        } else if (status === 'CLOSED') {
-          setIsConnected(false);
-          setConnectionStatus('DISCONNECTED');
-          console.log('📪 [Realtime] Connection closed');
-        }
-      });
-
-    channelRef.current = channel;
-
-    return () => {
-      if (channel) {
-        console.log('🧹 [Realtime] Cleanup on unmount');
-        supabase.removeChannel(channel);
+      } catch (error) {
+        console.log('⚠️ [Polling] Skip error:', error);
       }
     };
-  }, [competitionId, isLoading, roomId]);
+
+    // Start polling after 1 second
+    setTimeout(() => {
+      pollCompetition();
+      pollInterval = setInterval(pollCompetition, 3000);
+    }, 1000);
+
+    // Also create a simple broadcast channel
+    const channel = supabase
+      .channel(`competition-${competitionId}`)
+      .on('broadcast', { event: 'competition_update' }, (payload) => {
+        if (payload?.payload) {
+          setCompetition(payload.payload);
+          setPollCount(prev => prev + 1);
+          console.log('🔥 [Broadcast] Received:', payload.payload.status);
+        }
+      })
+      .subscribe();
+
+    return () => {
+      console.log('🧹 [Realtime] Cleanup');
+      if (pollInterval) clearInterval(pollInterval);
+      if (channel) supabase.removeChannel(channel);
+    };
+  }, [shouldConnect, competitionId]);
 
   // Provide setParticipants function for external updates
   const setParticipantsWrapper = (newParticipants) => {

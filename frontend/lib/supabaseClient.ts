@@ -11,13 +11,6 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   realtime: {
     params: {
       eventsPerSecond: 10
-    },
-    heartbeatIntervalMs: 30000,
-    reconnectAfterMs: 5000
-  },
-  global: {
-    headers: {
-      'X-My-Custom-Header': 'polegion-realtime'
     }
   }
 });

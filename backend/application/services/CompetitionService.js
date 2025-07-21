@@ -1,3 +1,5 @@
+const supabase = require('../../config/supabase')
+
 class CompeService {
     constructor(compeRepo, partService, leaderService, roomService, probService) {
         this.compeRepo = compeRepo
@@ -59,17 +61,17 @@ class CompeService {
     }
 
     async startCompetition(compe_id, problems) {
+        console.log('Starting competition with problems:', problems)
         try {
             if (!problems || problems.length === 0) {
                 throw new Error("Cannot start competition without problems")
-            }
-            
+            } 
             // Start with the first problem
             const firstProblem = problems[0]
+            const compeProblems = await this.probService.fetchCompeProblems(compe_id)
             console.log("Starting competition with first problem:", firstProblem)
             
             // Get all competition problems and filter for the first one
-            const compeProblems = await this.probService.fetchCompeProblems(compe_id)
             const firstCompeProblem = compeProblems.find(cp => cp.problem.id === firstProblem.problem.id)
             console.log("Found matching competition problem:", firstCompeProblem)
             
@@ -92,12 +94,28 @@ class CompeService {
                 timer_end_at: problemEndTime
             })
             
-            return {
+            const result = {
                 ...data,
                 timer_started_at: currentTime,
                 timer_duration: timerDuration,
                 timer_end_at: problemEndTime
             }
+            
+            // 🚀 SEND BROADCAST TO NOTIFY ALL CLIENTS
+            try {
+                const channel = supabase.channel(`competition-${compe_id}`)
+                await channel.send({
+                    type: 'broadcast',
+                    event: 'competition_update',
+                    payload: result
+                })
+                console.log(`📡 Competition ${compe_id} start broadcasted successfully!`)
+            } catch (broadcastError) {
+                console.error('❌ Broadcast failed:', broadcastError)
+                // Don't throw error - continue with operation even if broadcast fails
+            }
+            
+            return result
         } catch (error) {
             throw error
         }
@@ -110,6 +128,20 @@ class CompeService {
             if (nextIndex >= problems.length) {
                 // Competition is done
                 const data = await this.compeRepo.updateCompeStatus(compe_id, 'DONE')
+                
+                // 🚀 SEND BROADCAST FOR COMPETITION FINISH
+                try {
+                    const channel = supabase.channel(`competition-${compe_id}`)
+                    await channel.send({
+                        type: 'broadcast',
+                        event: 'competition_update',
+                        payload: { ...data, competition_finished: true }
+                    })
+                    console.log(`🏁 Competition ${compe_id} finish broadcasted successfully!`)
+                } catch (broadcastError) {
+                    console.error('❌ Finish broadcast failed:', broadcastError)
+                }
+                
                 return { ...data, competition_finished: true }
             }
             
@@ -136,12 +168,27 @@ class CompeService {
                 timer_end_at: problemEndTime
             })
             
-            return {
+            const result = {
                 ...data,
                 timer_started_at: currentTime,
                 timer_duration: timerDuration,
                 timer_end_at: problemEndTime
             }
+            
+            // 🚀 SEND BROADCAST TO NOTIFY ALL CLIENTS
+            try {
+                const channel = supabase.channel(`competition-${compe_id}`)
+                await channel.send({
+                    type: 'broadcast',
+                    event: 'competition_update',
+                    payload: result
+                })
+                console.log(`➡️ Competition ${compe_id} next problem broadcasted successfully!`)
+            } catch (broadcastError) {
+                console.error('❌ Next problem broadcast failed:', broadcastError)
+            }
+            
+            return result
         } catch (error) {
             throw error
         }
@@ -149,7 +196,22 @@ class CompeService {
 
     async pauseCompetition(compe_id) {
         try {
-            return await this.compeRepo.updateGameplayIndicator(compe_id, 'PAUSE')
+            const data = await this.compeRepo.updateGameplayIndicator(compe_id, 'PAUSE')
+            
+            // 🚀 SEND BROADCAST TO NOTIFY ALL CLIENTS
+            try {
+                const channel = supabase.channel(`competition-${compe_id}`)
+                await channel.send({
+                    type: 'broadcast',
+                    event: 'competition_update',
+                    payload: data
+                })
+                console.log(`⏸️ Competition ${compe_id} pause broadcasted successfully!`)
+            } catch (broadcastError) {
+                console.error('❌ Pause broadcast failed:', broadcastError)
+            }
+            
+            return data
         } catch (error) {
             throw error
         }
@@ -157,7 +219,22 @@ class CompeService {
 
     async resumeCompetition(compe_id) {
         try {
-            return await this.compeRepo.updateGameplayIndicator(compe_id, 'PLAY')
+            const data = await this.compeRepo.updateGameplayIndicator(compe_id, 'PLAY')
+            
+            // 🚀 SEND BROADCAST TO NOTIFY ALL CLIENTS
+            try {
+                const channel = supabase.channel(`competition-${compe_id}`)
+                await channel.send({
+                    type: 'broadcast',
+                    event: 'competition_update',
+                    payload: data
+                })
+                console.log(`▶️ Competition ${compe_id} resume broadcasted successfully!`)
+            } catch (broadcastError) {
+                console.error('❌ Resume broadcast failed:', broadcastError)
+            }
+            
+            return data
         } catch (error) {
             throw error
         }
