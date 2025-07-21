@@ -44,6 +44,78 @@ class CompeController {
             })
         }
     }
+
+    startCompe = async (req, res) => {
+        const { compe_id } = req.params
+        const { problems } = req.body
+        try {
+            const data = await this.compeService.startCompetition(compe_id, problems)
+            res.status(200).json(data)
+        } catch (error) {
+            console.error(error)
+            res.status(400).json({
+                error: error.message
+            })
+        }
+    }
+
+    nextProblem = async (req, res) => {
+        const { compe_id } = req.params
+        const { problems, current_index } = req.body
+        try {
+            const data = await this.compeService.nextProblem(compe_id, problems, current_index)
+            res.status(200).json(data)
+        } catch (error) {
+            console.error(error)
+            res.status(400).json({
+                error: error.message
+            })
+        }
+    }
+
+    pauseCompe = async (req, res) => {
+        const { compe_id } = req.params
+        try {
+            const data = await this.compeService.pauseCompetition(compe_id)
+            res.status(200).json(data)
+        } catch (error) {
+            console.error(error)
+            res.status(400).json({
+                error: error.message
+            })
+        }
+    }
+
+    resumeCompe = async (req, res) => {
+        const { compe_id } = req.params
+        try {
+            const data = await this.compeService.resumeCompetition(compe_id)
+            res.status(200).json(data)
+        } catch (error) {
+            console.error(error)
+            res.status(400).json({
+                error: error.message
+            })
+        }
+    }
+
+    autoAdvanceCompe = async (req, res) => {
+        const { compe_id } = req.params
+        try {
+            const data = await this.compeService.autoAdvanceCompetition(compe_id)
+            if (!data) {
+                return res.status(400).json({
+                    error: 'Competition not active or invalid state'
+                })
+            }
+            res.status(200).json(data)
+        } catch (error) {
+            console.error(error)
+            res.status(400).json({
+                error: error.message
+            })
+        }
+    }
 }
 
 module.exports = CompeController

@@ -1,7 +1,7 @@
 "use client";
 
-import React, { use, useEffect, useState } from 'react';
-import { ArrowLeft, ChevronDown, ChevronUp, Edit3, Pause, Play } from 'lucide-react';
+import React, { use, useEffect, useState, useCallback } from 'react';
+import { ArrowLeft, ChevronDown, ChevronUp, Edit3 } from 'lucide-react';
 import styles from '@/styles/competition.module.css';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useMyApp } from '@/context/AppUtils';
@@ -9,8 +9,10 @@ import { AuthProtection } from '@/context/AuthProtection';
 import Loader from '@/components/Loader';
 import { addCompeProblem, getCompeProblems, getRoomProblems, removeCompeProblem, updateTimer } from '@/api/problems';
 import { getAllParticipants } from '@/api/participants';
-import { getCompeById } from '@/api/competitions';
-import { set } from 'react-hook-form';
+import { getCompeById, startCompetition, nextProblem, pauseCompetition, resumeCompetition } from '@/api/competitions';
+import { useCompetitionRealtime } from '@/hooks/useCompetitionRealtime';
+import { useCompetitionTimer } from '@/hooks/useCompetitionTimer';
+import { ConnectionStatus } from '@/components/ConnectionStatus';
 
 interface Participant {
   id: number;
@@ -31,6 +33,12 @@ interface Problems {
 interface Competition {
   title: string;
   status: string;
+  gameplay_indicator?: string;
+  current_problem_id?: number;
+  current_problem_index?: number;
+  timer_started_at?: string;
+  timer_duration?: number;
+  timer_end_at?: string;
 }
 
 interface CompeProblems {
@@ -49,12 +57,10 @@ const CompetitionDashboard = ({ params } : { params  : Promise<{competitionId : 
   // console.log('compe_id: ', compe_id.competitionId)
   // const [participants, setParticipants] = useState<Participant[]>([]);
   const [sortOrder, setSortOrder] = useState('desc');
-  const [isPaused, setIsPaused] = useState(true);
-  const [timer, setTimer] = useState(0); // in seconds
   const [fetched, setFetched] = useState(false);
-  const [ isLoading, setIsLoading ] = useState(true)
+  const [isLoading, setIsLoading] = useState(true)
   
-  const [ participants, setParticipants ] = useState<Participant[]>([])
+  const [participants, setParticipants] = useState<Participant[]>([])
   const [problems, setProblems] = useState<Problems[]>([])
   // Persistent addedProblems order (fetched from API)
   const [addedProblems, setAddedProblems] = useState<CompeProblems[]>([]); // store problem ids added to competition
@@ -62,24 +68,33 @@ const CompetitionDashboard = ({ params } : { params  : Promise<{competitionId : 
   const [addedProblemsLoaded, setAddedProblemsLoaded] = useState(false);
   const [editingTimerId, setEditingTimerId] = useState<string | null>(null);
   const [timerEditValue, setTimerEditValue] = useState<number>(0);
-  const [ competition, setCompetition ] = useState<Competition | undefined>(undefined)
+  const [competition, setCompetition] = useState<Competition | undefined>(undefined)
+  //  // Real-time competition state
+  const {
+    competition: liveCompetition,
+    participants: liveParticipants,
+    isConnected,
+    connectionStatus,
+    setParticipants: setLiveParticipants,
+    pollCount
+  } = useCompetitionRealtime(compe_id.competitionId, isLoading);
   
+  // Real-time timer management
+  const {
+    timeRemaining,
+    isTimerActive,
+    formattedTime,
+    isExpired
+  } = useCompetitionTimer(compe_id.competitionId, liveCompetition || competition);
+    
+  // Use live competition data when available, fallback to initial API state
+  const currentCompetition: Competition = liveCompetition || competition || {} as Competition;
+    
   const { isLoggedIn } = useMyApp()
   const { isLoading: authLoading } = AuthProtection()
   // const router = useRouter();
 
-  useEffect(() => {
-      if (isLoggedIn && !authLoading && !fetched) {
-          callMe()
-          setFetched(true)
-      } else {
-          if (authLoading || !isLoggedIn) {
-              setIsLoading(true)
-          }
-      }
-  }, [isLoggedIn, authLoading, fetched])
-
-    const callMe = async () => {
+  const callMe = useCallback(async () => {
         try {
             setIsLoading(true)
             // ...existing code...
@@ -96,7 +111,7 @@ const CompetitionDashboard = ({ params } : { params  : Promise<{competitionId : 
             // Example: const order = await getAddedProblemsOrder(roomId, compe_id.competitionId)
             const order = await getCompeProblems(compe_id.competitionId) || [];
             console.log('Fetched added problems:', order);
-            setAddedProblems(order || [])
+            setAddedProblems(order)
             // setAddedProblems([]); // Default: empty, replace with API result
             setAddedProblemsLoaded(true);
         } catch (error) {
@@ -104,25 +119,71 @@ const CompetitionDashboard = ({ params } : { params  : Promise<{competitionId : 
         } finally {
             setIsLoading(false)
         }
-    }
-    // Calculate total timer (in seconds/minutes) for added problems
-    // Use the timer from CompeProblems level, not from the nested problem
-    const totalTimerSeconds = addedProblems.reduce((acc, ap) => acc + (ap.timer || 0), 0);
-    
-    // Timer logic
-    useEffect(() => {
-      setTimer(totalTimerSeconds);
-    }, [totalTimerSeconds]);
+    }, [roomId, compe_id.competitionId]) // Dependencies: values that can change
 
-    useEffect(() => {
-      if (!isPaused && timer > 0) {
-        const interval = setInterval(() => {
-          setTimer((prev) => (prev > 0 ? prev - 1 : 0));
-        }, 1000);
-        return () => clearInterval(interval);
+  useEffect(() => {
+      if (isLoggedIn && !authLoading && !fetched) {
+          callMe()
+          setFetched(true)
+      } else {
+          if (authLoading || !isLoggedIn) {
+              setIsLoading(true)
+          }
       }
-    }, [isPaused, timer]);
+  }, [isLoggedIn, authLoading, fetched, callMe])
 
+    // Remove unnecessary sync: always use liveCompetition || competition for rendering
+
+    useEffect(() => {
+      if (liveParticipants && liveParticipants.length > 0) {
+        setParticipants(liveParticipants);
+      }
+    }, [liveParticipants]);
+
+    // Competition control functions
+    const handleStartCompetition = async () => {
+      if (addedProblems.length === 0) {
+        alert('Cannot start competition without problems!');
+        return;
+      }
+      
+      try {
+        await startCompetition(compe_id.competitionId, addedProblems);
+        // Real-time will update the state automatically
+      } catch (error) {
+        console.error('Error starting competition:', error);
+        alert('Failed to start competition');
+      }
+    };
+
+    const handleNextProblem = async () => {
+      try {
+        const currentIndex = currentCompetition?.current_problem_index || 0;
+        const result = await nextProblem(compe_id.competitionId, addedProblems, currentIndex);
+        
+        if (result.competition_finished) {
+          alert('Competition completed!');
+        }
+      } catch (error) {
+        console.error('Error moving to next problem:', error);
+        alert('Failed to move to next problem');
+      }
+    };
+
+    const handlePauseResume = async () => {
+      try {
+        // Use currentCompetition state instead of local isPaused
+        if (currentCompetition?.gameplay_indicator === 'PAUSE') {
+          await resumeCompetition(compe_id.competitionId);
+        } else {
+          await pauseCompetition(compe_id.competitionId);
+        }
+        // Real-time will update the state
+      } catch (error) {
+        console.error('Error toggling pause/resume:', error);
+        alert('Failed to toggle pause/resume');
+      }
+    };
 
     // Add problem to competition (persistent order)
     const handleAddProblem = async (problem: Problems) => {
@@ -169,6 +230,22 @@ const CompetitionDashboard = ({ params } : { params  : Promise<{competitionId : 
       setEditingTimerId(null);
     };
 
+    // Debug function to test realtime
+    const handleDebugRealtime = async () => {
+      console.log('� [Admin] Starting polling system debug...');
+      
+      alert(`🔧 POLLING DEBUG!\n\nYou're now using LIVE POLLING instead of realtime.\n\n✅ Updates every 1.5 seconds\n✅ No WebSocket issues\n✅ Works for your presentation!\n\nPoll count: ${pollCount}\nConnection: ${connectionStatus}\n\nWatch the console for polling activity...`);
+      
+      // Show current polling status
+      console.log('📊 [Admin] Polling Status:', {
+        isConnected,
+        connectionStatus,
+        pollCount,
+        participants: liveParticipants?.length || 0,
+        competition: currentCompetition?.title || 'Not loaded'
+      });
+    };
+
     if (isLoading || authLoading || !addedProblemsLoaded) {
         return (
             <div className={styles["dashboard-container"]}>
@@ -179,7 +256,11 @@ const CompetitionDashboard = ({ params } : { params  : Promise<{competitionId : 
         )
     }
 
-  const sortedParticipants = [...participants].sort((a, b) => {
+  // Use live data when available, fallback to initial fetch
+  const displayParticipants = liveParticipants.length > 0 ? liveParticipants : participants;
+  const displayCompetition = liveCompetition || currentCompetition;
+
+  const sortedParticipants = [...displayParticipants].sort((a, b) => {
     return sortOrder === 'desc' ? b.accumulated_xp - a.accumulated_xp : a.accumulated_xp - b.accumulated_xp;
   });
 
@@ -187,222 +268,289 @@ const CompetitionDashboard = ({ params } : { params  : Promise<{competitionId : 
     setSortOrder(sortOrder === 'desc' ? 'asc' : 'desc');
   };
 
-  return (
-    <div className={styles.container}>
-      {/* Main Container */}
-      <div className={styles.mainContainer}>
-        {/* Header Section */}
-        <div className={styles.header}>
-          <div className={styles.headerContent}>
-            {/* Add Back Button */}
-            <div className={styles.headerTop}>
-              <button 
-                onClick={() => router.back()}
-                className={styles.backButton}
-                title="Go back to previous page"
-              >
-                <ArrowLeft className="w-4 h-4" />
-                Back
-              </button>
-            </div>
-            
-            <h1 className={styles.title}>
-              {competition?.title || 'Competition'}
-            </h1>
-            <p className={styles.status}>
-              Status: <span className={styles.statusValue}>{competition?.status}</span>
-            </p>
-            <p className={styles.description}>
-              Compete with your classmates and earn XP by solving problems!
-            </p>
-          </div>
-        </div>
 
-        {/* Timer Section */}
-        <div className={styles.timerSection}>
-          <div className={styles.timerContent}>
-            <div className={styles.timer}>
-              {`${String(Math.floor(timer / 60)).padStart(2, '0')}:${String(timer % 60).padStart(2, '0')}`}
-            </div>
-            <div className={styles.timerControls}>
+return (
+  <div className={styles.container}>
+    {/* Main Container */}
+    <div className={styles.mainContainer}>
+      {/* Header Section */}
+      <div className={styles.header}>
+        <div className={styles.headerContent}>
+          {/* Add Back Button */}
+          <div className={styles.headerTop}>
+            <button 
+              onClick={() => router.back()}
+              className={styles.backButton}
+              title="Go back to previous page"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Back
+            </button>
+          </div>
+          
+          {/* Competition Controls */}
+          <div className={styles.competitionControls}>
+            {currentCompetition?.status === 'NEW' && (
               <button
-                onClick={() => setIsPaused((prev) => !prev)}
-                className={styles.timerButton}
-                disabled={totalTimerSeconds === 0}
-                title={totalTimerSeconds === 0 ? 'Add problems with timers to start' : isPaused ? 'Start' : 'Pause'}
+                onClick={handleStartCompetition}
+                className={`${styles.controlButton} ${styles.startButton}`}
+                disabled={addedProblems.length === 0}
               >
-                {isPaused ? (
-                  <Play className="w-8 h-8 text-gray-700" />
-                ) : (
-                  <Pause className="w-8 h-8 text-gray-700" />
-                )}
+                Start Competition
               </button>
-            </div>
-          </div>
-        </div>
-
-        {/* NEW: Two Column Layout (2:3 ratio) */}
-        <div className={styles.roomContent}>
-          {/* Left Column - Problems (60% width) */}
-          <div className={styles.leftColumn}>
-            {/* Added Problems Section */}
-            {addedProblems.length > 0 && (
-              <div className={styles.participantsSection}>
-                <div className={styles.participantsHeader}>
-                  <h2 className={styles.participantsTitle}>Added Problems</h2>
+            )}
+            
+            {currentCompetition?.status === 'ONGOING' && (
+              <>
+                <button
+                  onClick={handlePauseResume}
+                  className={`${styles.controlButton} ${styles.pauseButton}`}
+                >
+                  {currentCompetition?.gameplay_indicator === 'PAUSE' ? 'Resume' : 'Pause'}
+                </button>
+                
+                <button
+                  onClick={handleNextProblem}
+                  className={`${styles.controlButton} ${styles.nextButton}`}
+                  disabled={!currentCompetition?.current_problem_id}
+                >
+                  Next Problem
+                </button>
+                
+                <div className={styles.problemStatus}>
+                  Problem {(currentCompetition?.current_problem_index || 0) + 1} of {addedProblems.length}
                 </div>
-                <div className={styles.participantsList}>
-                  {addedProblems.map((compeProblem, index) => (
-                    <div key={compeProblem.problem.id} className={styles.participantCard}>
-                      <div className={styles.participantContent}>
-                        <div className={styles.participantLeft}>
-                          <div className={styles.participantRank}>{index + 1}</div>
-                          <div>
-                            <h3 className={styles.participantName}>{compeProblem.problem.title || 'No Title'}</h3>
-                          </div>
-                        </div>
-                        <div className={styles.participantRight}>
-                          <div className={styles.participantXp}>
-                            {compeProblem.timer != null && compeProblem.timer > 0 ? `${compeProblem.timer} seconds` : <span style={{ color: 'red' }}>No timer</span>}
-                          </div>
-                          <button
-                            className={styles.removeBtn}
-                            onClick={() => handleRemoveProblem(compeProblem.problem)}
-                            title="Remove from competition"
-                          >
-                            -
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+              </>
+            )}
+            
+            {currentCompetition?.status === 'DONE' && (
+              <div className={styles.competitionStatus}>
+                <span>✅ Competition Completed</span>
               </div>
             )}
 
-            {/* Available Problems Section */}
-            <div className={styles.participantsSection}>
-              <div className={styles.participantsHeader}>
-                <h2 className={styles.participantsTitle}>Available Problems</h2>
-              </div>
-              <div className={styles.participantsList}>
-                {problems.filter((problem) => !addedProblems.some(ap => ap.problem.id === problem.id) && problem.visibility === 'show').map((problem, index) => {
-                  const canAdd = problem.timer && problem.timer > 0;
-                  return (
-                    <div key={problem.id} className={styles.participantCard}>
-                      <div className={styles.participantContent}>
-                        <div className={styles.participantLeft}>
-                          <div className={styles.participantRank}>{index + 1}</div>
-                          <div>
-                            <h3 className={styles.participantName}>{problem.title || 'No Title'}</h3>
-                          </div>
-                        </div>
-                        <div className={styles.participantRight}>
-                          {editingTimerId === problem.id ? (
-                            <>
-                              <input
-                                type="number"
-                                min={1}
-                                value={timerEditValue}
-                                onChange={e => setTimerEditValue(Number(e.target.value))}
-                                className={styles.timerInput}
-                              />
-                              <span>sec</span>
-                              <button
-                                onClick={() => handleSaveTimer(problem)}
-                                className={styles.saveBtn}
-                                title="Save timer"
-                              >
-                                Save
-                              </button>
-                              <button
-                                onClick={handleCancelEdit}
-                                className={styles.cancelBtn}
-                                title="Cancel"
-                              >
-                                Cancel
-                              </button>
-                            </>
-                          ) : (
-                            <>
-                              <div className={styles.participantXp}>
-                                {problem.timer != null && problem.timer > 0 ? `${problem.timer} seconds` : <span style={{ color: 'red' }}>No timer</span>}
-                              </div>
-                              <button
-                                className={styles.editButton}
-                                onClick={() => handleEditTimer(problem)}
-                                title="Edit timer"
-                              >
-                                <Edit3 className="w-5 h-5" />
-                              </button>
-                              <button
-                                className={styles.addBtn}
-                                disabled={!canAdd}
-                                onClick={() => handleAddProblem(problem)}
-                                title={!canAdd ? 'Cannot add without timer' : 'Add to competition'}
-                              >
-                                +
-                              </button>
-                            </>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
+            {/* Debug Realtime Button - Always visible */}
+            <button
+              onClick={handleDebugRealtime}
+              className={`${styles.controlButton} ${styles.debugButton}`}
+              style={{
+                backgroundColor: '#ff6b35',
+                color: 'white',
+                border: '1px solid #ff6b35',
+                fontSize: '12px',
+                padding: '6px 12px'
+              }}
+              title="Test realtime connection"
+            >
+              🔧 Debug Realtime
+            </button>
           </div>
+          
+          <h1 className={styles.title}>
+            {currentCompetition?.title || 'Competition'}
+          </h1>
+          
+          <p className={styles.status}>
+            Status: <span className={styles.statusValue}>{currentCompetition?.status || 'NEW'}</span>
+          </p>
+          
+          <div className={styles.statusRow}>
+            <ConnectionStatus 
+              isConnected={isConnected}
+              connectionStatus={connectionStatus}
+            />
+            {!isConnected && (
+              <span className={styles.disconnectedText}> (Disconnected)</span>
+            )}
+            {/* Temporarily removed answers received section */}
+          </div>
+          
+          <p className={styles.description}>
+            Compete with your classmates and earn XP by solving problems!
+          </p>
+        </div>
+      </div>
 
-          {/* Right Column - Participants (40% width) */}
-          <div className={styles.rightColumn}>
+      {/* Real-time Timer Section */}
+      <div className={styles.timerSection}>
+        <div className={styles.timerContent}>
+          <div className={styles.timer}>
+            {formattedTime}
+          </div>
+          <div className={styles.timerStatus}>
+            <span className={styles.timerLabel}>
+              {currentCompetition?.status === 'NEW' ? 'Competition not started' :
+               currentCompetition?.status === 'DONE' ? 'Competition completed' :
+               !isTimerActive ? 'Paused' : 
+               isExpired ? 'Time up!' : 
+               `Problem ${(currentCompetition?.current_problem_index || 0) + 1} of ${addedProblems.length}`}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* NEW: Two Column Layout (2:3 ratio) */}
+      <div className={styles.roomContent}>
+        {/* Left Column - Problems (60% width) */}
+        <div className={styles.leftColumn}>
+          {/* Added Problems Section */}
+          {addedProblems.length > 0 && (
             <div className={styles.participantsSection}>
               <div className={styles.participantsHeader}>
-                <h2 className={styles.participantsTitle}>Participants</h2>
-                <div className={styles.sortControls}>
-                  <button
-                    onClick={toggleSort}
-                    className={styles.sortButton}
-                  >
-                    <div className={styles.sortIcons}>
-                      <ChevronUp className={`w-3 h-3 ${sortOrder === 'asc' ? 'text-blue-600' : 'text-gray-400'}`} />
-                      <ChevronDown className={`w-3 h-3 ${sortOrder === 'desc' ? 'text-blue-600' : 'text-gray-400'}`} />
-                    </div>
-                    <span className={styles.sortText}>
-                      {sortOrder === 'desc' ? 'Desc' : 'Asc'}
-                    </span>
-                  </button>
-                </div>
+                <h2 className={styles.participantsTitle}>Added Problems</h2>
               </div>
               <div className={styles.participantsList}>
-                {sortedParticipants.map((participant, index) => (
-                  <div key={participant.id} className={styles.participantCard}>
+                {addedProblems.map((compeProblem, index) => (
+                  <div key={compeProblem.problem.id} className={styles.participantCard}>
                     <div className={styles.participantContent}>
                       <div className={styles.participantLeft}>
-                        <div className={styles.participantRank}>
-                          {index + 1}
-                        </div>
+                        <div className={styles.participantRank}>{index + 1}</div>
                         <div>
-                          <h3 className={styles.participantName}>
-                            {participant.fullName}
-                          </h3>
+                          <h3 className={styles.participantName}>{compeProblem.problem.title || 'No Title'}</h3>
                         </div>
                       </div>
-                      
                       <div className={styles.participantRight}>
-                        <div className={styles.participantXp}>{participant.accumulated_xp} XP</div>
+                        <div className={styles.participantXp}>
+                          {compeProblem.timer != null && compeProblem.timer > 0 ? `${compeProblem.timer} seconds` : <span style={{ color: 'red' }}>No timer</span>}
+                        </div>
+                        <button
+                          className={styles.removeBtn}
+                          onClick={() => handleRemoveProblem(compeProblem.problem)}
+                          title="Remove from competition"
+                        >
+                          -
+                        </button>
                       </div>
                     </div>
                   </div>
                 ))}
               </div>
             </div>
+          )}
+
+          {/* Available Problems Section */}
+          <div className={styles.participantsSection}>
+            <div className={styles.participantsHeader}>
+              <h2 className={styles.participantsTitle}>Available Problems</h2>
+            </div>
+            <div className={styles.participantsList}>
+              {problems.filter((problem) => !addedProblems.some(ap => ap.problem.id === problem.id) && problem.visibility === 'show').map((problem, index) => {
+                const canAdd = problem.timer && problem.timer > 0;
+                return (
+                  <div key={problem.id} className={styles.participantCard}>
+                    <div className={styles.participantContent}>
+                      <div className={styles.participantLeft}>
+                        <div className={styles.participantRank}>{index + 1}</div>
+                        <div>
+                          <h3 className={styles.participantName}>{problem.title || 'No Title'}</h3>
+                        </div>
+                      </div>
+                      <div className={styles.participantRight}>
+                        {editingTimerId === problem.id ? (
+                          <>
+                            <input
+                              type="number"
+                              min={1}
+                              value={timerEditValue}
+                              onChange={e => setTimerEditValue(Number(e.target.value))}
+                              className={styles.timerInput}
+                            />
+                            <span>sec</span>
+                            <button
+                              onClick={() => handleSaveTimer(problem)}
+                              className={styles.saveBtn}
+                              title="Save timer"
+                            >
+                              Save
+                            </button>
+                            <button
+                              onClick={handleCancelEdit}
+                              className={styles.cancelBtn}
+                              title="Cancel"
+                            >
+                              Cancel
+                            </button>
+                          </>
+                        ) : (
+                          <>
+                            <div className={styles.participantXp}>
+                              {problem.timer != null && problem.timer > 0 ? `${problem.timer} seconds` : <span style={{ color: 'red' }}>No timer</span>}
+                            </div>
+                            <button
+                              className={styles.editButton}
+                              onClick={() => handleEditTimer(problem)}
+                              title="Edit timer"
+                            >
+                              <Edit3 className="w-5 h-5" />
+                            </button>
+                            <button
+                              className={styles.addBtn}
+                              disabled={!canAdd}
+                              onClick={() => handleAddProblem(problem)}
+                              title={!canAdd ? 'Cannot add without timer' : 'Add to competition'}
+                            >
+                              +
+                            </button>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+
+        {/* Right Column - Participants (40% width) */}
+        <div className={styles.rightColumn}>
+          <div className={styles.participantsSection}>
+            <div className={styles.participantsHeader}>
+              <h2 className={styles.participantsTitle}>Participants</h2>
+              <div className={styles.sortControls}>
+                <button
+                  onClick={toggleSort}
+                  className={styles.sortButton}
+                >
+                  <div className={styles.sortIcons}>
+                    <ChevronUp className={`w-3 h-3 ${sortOrder === 'asc' ? 'text-blue-600' : 'text-gray-400'}`} />
+                    <ChevronDown className={`w-3 h-3 ${sortOrder === 'desc' ? 'text-blue-600' : 'text-gray-400'}`} />
+                  </div>
+                  <span className={styles.sortText}>
+                    {sortOrder === 'desc' ? 'Desc' : 'Asc'}
+                  </span>
+                </button>
+              </div>
+            </div>
+            <div className={styles.participantsList}>
+              {sortedParticipants.map((participant, index) => (
+                <div key={participant.id} className={styles.participantCard}>
+                  <div className={styles.participantContent}>
+                    <div className={styles.participantLeft}>
+                      <div className={styles.participantRank}>
+                        {index + 1}
+                      </div>
+                      <div>
+                        <h3 className={styles.participantName}>
+                          {participant.fullName}
+                        </h3>
+                      </div>
+                    </div>
+                    <div className={styles.participantRight}>
+                      <div className={styles.participantXp}>{participant.accumulated_xp} XP</div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>
-      
     </div>
-  );
+  </div>
+);
+
+
 };
 
 export default CompetitionDashboard;

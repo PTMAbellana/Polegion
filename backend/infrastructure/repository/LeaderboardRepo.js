@@ -78,6 +78,12 @@ class LeaderboardRepo extends BaseRepo {
                 accumulated_xp: 0,
                 room_id: room_id
             })
+            .select()
+            .single()
+            
+            if (error) throw error
+            console.log('added room board: ', data)
+            return data
         } catch (error) {
             throw error
         }
@@ -94,6 +100,12 @@ class LeaderboardRepo extends BaseRepo {
                 accumulated_xp: 0,
                 competition_id: compe_id
             })
+            .select()
+            .single()
+
+            if (error) throw error
+            console.log('added compe board: ', data)
+            return data
         } catch (error) {
             throw error
         }
@@ -126,11 +138,11 @@ class LeaderboardRepo extends BaseRepo {
             .select('*')
             .eq('room_id', room_id)
             .eq('room_participant_id', participant_id)
-            .single()
+            .maybeSingle()
 
             if (error) throw error
-            if (!data) throw new Error('Leaderboard not found')
-            return data
+            // Return null if no leaderboard entry exists (instead of throwing error)
+            return data || null
         } catch (error) {
             throw error
         }
@@ -145,11 +157,11 @@ class LeaderboardRepo extends BaseRepo {
             .select('*')
             .eq('competition_id', compe_id)
             .eq('room_participant_id', participant_id)
-            .single()
+            .maybeSingle()
 
             if (error) throw error
-            if (!data) throw new Error('Leaderboard not found')
-            return data
+            // Return null if no leaderboard entry exists (instead of throwing error)
+            return data || null
         } catch (error) {
             throw error
         }

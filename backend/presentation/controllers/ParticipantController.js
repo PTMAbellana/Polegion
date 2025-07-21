@@ -84,7 +84,7 @@ class ParticipantController {
             })
             // console.log('getRoomParticipants called 3: ', res.data)
         } catch (error) {
-            // console.log('Error fetching participants: ', error)
+            console.log('Error fetching participants: ', error)
 
             if (error.message === 'Room not found or not authorized')
                 return res.status(404).json({

@@ -122,7 +122,7 @@ class ProblemService {
     }
   }
 
-  async fetchCompeProblems(competition_id){ //kulang prob id
+  async fetchCompeProblems(competition_id){  
     try {
       return await this.problemRepo.fetchCompeProblems(competition_id)
     } catch (error) {

@@ -11,6 +11,9 @@ import Loader from '@/components/Loader';
 import { getRoomProblems } from '@/api/problems';
 import { getAllParticipants } from '@/api/participants';
 import { getCompeById } from '@/api/competitions';
+import { useCompetitionRealtime } from '@/hooks/useCompetitionRealtime';
+import { useCompetitionTimer } from '@/hooks/useCompetitionTimer';
+import { ConnectionStatus } from '@/components/ConnectionStatus';
 import Swal from "sweetalert2";
 
 // Import ALL create-problem components
@@ -46,6 +49,12 @@ interface Problems {
 interface Competition {
   title: string;
   status: string;
+  gameplay_indicator?: string;
+  current_problem_id?: number;
+  current_problem_index?: number;
+  timer_started_at?: string;
+  timer_duration?: number;
+  timer_end_at?: string;
 }
 
 interface Problem {
@@ -83,14 +92,27 @@ const CompetitionDashboard = ({ params } : { params  : Promise<{competitionId : 
 
   // Competition states
   const [sortOrder, setSortOrder] = useState('desc');
-  const [isPaused, setIsPaused] = useState(true);
-  const [timer, setTimer] = useState(0);
+  // Remove local timer state, use liveTimer from realtime hook
   const [fetched, setFetched] = useState(false);
   const [isLoading, setIsLoading] = useState(true)
   const [participants, setParticipants] = useState<Participant[]>([])
   const [problems, setProblems] = useState<Problems[]>([])
   const [activeProblems, setActiveProblems] = useState<string[]>([]);
   const [competition, setCompetition] = useState<Competition | undefined>(undefined)
+  const [currentProblem, setCurrentProblem] = useState<Problem | null>(null);
+
+  // Real-time competition state for students
+  const {
+    competition: liveCompetition,
+    participants: liveParticipants,
+    isConnected,
+    connectionStatus,
+    setParticipants: setLiveParticipants,
+    pollCount
+  } = useCompetitionRealtime(compe_id.competitionId, isLoading);
+  
+  // Use live competition data when available, fallback to initial API state
+  const currentCompetition: Competition = liveCompetition || competition || {} as Competition;
 
   // ALL Create-problem states (EXACTLY from original)
   const [createProblems, setCreateProblems] = useState<Problem[]>([]);
@@ -137,19 +159,8 @@ const CompetitionDashboard = ({ params } : { params  : Promise<{competitionId : 
   const { isLoggedIn } = useMyApp()
   const { isLoading: authLoading } = AuthProtection()
 
-  // Competition logic
-  useEffect(() => {
-      if (isLoggedIn && !authLoading && !fetched) {
-          callMe()
-          setFetched(true)
-      } else {
-          if (authLoading || !isLoggedIn) {
-              setIsLoading(true)
-          }
-      }
-  }, [isLoggedIn, authLoading, fetched])
 
-  const callMe = async () => {
+  const callMe = useCallback( async () => {
     try {
         setIsLoading(true)
         const parts = await getAllParticipants(roomId, 'user', true, compe_id.competitionId)
@@ -169,7 +180,30 @@ const CompetitionDashboard = ({ params } : { params  : Promise<{competitionId : 
     } finally {
         setIsLoading(false)
     }
-  }
+  }, [roomId, compe_id.competitionId])
+  
+  // Competition logic
+  useEffect(() => {
+      if (isLoggedIn && !authLoading && !fetched) {
+          callMe()
+          setFetched(true)
+      } else {
+          if (authLoading || !isLoggedIn) {
+              setIsLoading(true)
+          }
+      }
+  }, [isLoggedIn, authLoading, fetched, callMe])
+
+
+  // Remove unnecessary sync: always use liveCompetition || competition for rendering
+
+  // Sync real-time participants data
+  useEffect(() => {
+    if (liveParticipants && liveParticipants.length > 0) {
+      console.log('👥 [STUDENT] Syncing participants data:', liveParticipants);
+      setParticipants(liveParticipants);
+    }
+  }, [liveParticipants]);
 
   // ALL Create-problem fetch logic
   // const fetchCreateProblems = useCallback(async () => {
@@ -668,22 +702,43 @@ const CompetitionDashboard = ({ params } : { params  : Promise<{competitionId : 
     setShowProperties(true);  
   }
 
-  // Competition timer logic
-  const activeProblemsList = problems.filter((p) => activeProblems.includes(p.id));
-  const totalTimerSeconds = activeProblemsList.reduce((acc, p) => acc + (p.timer || 0), 0);
-  
-  useEffect(() => {
-    setTimer(totalTimerSeconds);
-  }, [totalTimerSeconds]);
+  // Calculate realtime countdown from timer_end_at
+  const [displayTimer, setDisplayTimer] = useState<number>(0);
+
+  // Debug function to test polling system
+  const handleDebugRealtime = async () => {
+    console.log('� [Student] Polling system status...');
+    
+    alert(`� STUDENT POLLING STATUS!\n\n✅ Using LIVE POLLING\n✅ Updates every 1.5 seconds\n✅ No connection issues!\n\nPoll count: ${pollCount}\nConnection: ${connectionStatus}\nParticipants: ${liveParticipants?.length || 0}\n\nWatch console for activity...`);
+    
+    // Show current status
+    console.log('📊 [Student] Current Status:', {
+      isConnected,
+      connectionStatus,
+      pollCount,
+      participants: liveParticipants?.length || 0,
+      competition: currentCompetition?.title || 'Not loaded'
+    });
+  };
 
   useEffect(() => {
-    if (!isPaused && timer > 0) {
-      const interval = setInterval(() => {
-        setTimer((prev) => (prev > 0 ? prev - 1 : 0));
-      }, 1000);
-      return () => clearInterval(interval);
+    let interval: NodeJS.Timeout | null = null;
+    function updateTimer() {
+      if (currentCompetition?.timer_end_at) {
+        const end = new Date(currentCompetition.timer_end_at).getTime();
+        const now = Date.now();
+        const seconds = Math.max(0, Math.floor((end - now) / 1000));
+        setDisplayTimer(seconds);
+      } else {
+        setDisplayTimer(0);
+      }
     }
-  }, [isPaused, timer]);
+    updateTimer();
+    interval = setInterval(updateTimer, 1000);
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [currentCompetition?.timer_end_at]);
 
   if (isLoading || authLoading) {
     return (
@@ -695,7 +750,10 @@ const CompetitionDashboard = ({ params } : { params  : Promise<{competitionId : 
     )
   }
 
-  const sortedParticipants = [...participants].sort((a, b) => {
+  // Use live data when available, fallback to initial fetch
+  const displayParticipants = liveParticipants.length > 0 ? liveParticipants : participants;
+
+  const sortedParticipants = [...displayParticipants].sort((a, b) => {
     return sortOrder === 'desc' ? b.accumulated_xp - a.accumulated_xp : a.accumulated_xp - b.accumulated_xp;
   });
 
@@ -710,11 +768,35 @@ const CompetitionDashboard = ({ params } : { params  : Promise<{competitionId : 
         <div className={styles.header}>
           <div className={styles.headerContent}>
             <h1 className={styles.title}>
-              {competition?.title || 'Competition'}
+              {currentCompetition?.title || 'Competition'}
             </h1>
-            <p className={styles.status}>
-              Status: <span className={styles.statusValue}>{competition?.status}</span>
-            </p>
+            <div className={styles.statusRow}>
+              <p className={styles.status}>
+                Status: <span className={styles.statusValue}>{currentCompetition?.status}</span>
+              </p>
+              <ConnectionStatus 
+                isConnected={isConnected} 
+                connectionStatus={connectionStatus}
+                className="ml-4"
+              />
+              {/* Debug Realtime Button */}
+              <button
+                onClick={handleDebugRealtime}
+                style={{
+                  backgroundColor: '#ff6b35',
+                  color: 'white',
+                  border: '1px solid #ff6b35',
+                  borderRadius: '4px',
+                  fontSize: '12px',
+                  padding: '4px 8px',
+                  marginLeft: '8px',
+                  cursor: 'pointer'
+                }}
+                title="Test realtime connection"
+              >
+                🔧 Debug
+              </button>
+            </div>
             <p className={styles.description}>
               Compete with your classmates and earn XP by solving problems!
             </p>
@@ -725,11 +807,15 @@ const CompetitionDashboard = ({ params } : { params  : Promise<{competitionId : 
         <div className={styles.timerSection}>
           <div className={styles.timerContent}>
             <div className={styles.timer}>
-              {`${String(Math.floor(timer / 60)).padStart(2, '0')}:${String(timer % 60).padStart(2, '0')}`}
+              {`${String(Math.floor(displayTimer / 60)).padStart(2, '0')}:${String(displayTimer % 60).padStart(2, '0')}`}
             </div>
             <div className={styles.timerStatus}>
               <span className={styles.timerLabel}>
-                {timer === 0 ? 'No active problems' : isPaused ? 'Competition Paused' : 'Competition Active'}
+                {displayTimer === 0
+                  ? 'No active problems'
+                  : currentCompetition?.gameplay_indicator === 'PAUSE'
+                  ? 'Competition Paused'
+                  : 'Competition Active'}
               </span>
             </div>
           </div>

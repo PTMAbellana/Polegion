@@ -56,6 +56,7 @@ export const AppUtilsProvider = ({
 
   // Function to refresh user session data from localStorage
 const refreshUserSession = useCallback(async (): Promise<boolean> => {
+  // alert(1)
   if (isRefreshing.current) return isLoggedIn;
 
   setAuthLoading(true);
