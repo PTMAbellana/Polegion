@@ -406,7 +406,7 @@ export default function VirtualRooms() {
                             <div className={styles["modal-actions"]}>
                                 <button 
                                     type="button" 
-                                    className={styles["cancel-btn"]}
+                                    className={styles["edit-btn"]}
                                     onClick={() => setShowJoinModal(false)}
                                 >
                                     Cancel
@@ -518,7 +518,7 @@ export default function VirtualRooms() {
                             {roomId && (
                                 <button 
                                     type="button" 
-                                    className={styles["cancel-btn"]}
+                                    className={styles["edit-btn"]}
                                     onClick={handleCancelEdit}
                                 >
                                 Cancel
