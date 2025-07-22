@@ -1,0 +1,232 @@
+/* Add to your global CSS or create game.module.css */
+.gameContainer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  overflow: hidden;
+  z-index: 1000;
+}
+
+/* Full-screen game layout */
+.gameContainer .root {
+  height: 100vh;
+  width: 100vw;
+  padding: 0;
+  margin: 0;
+}
+
+/* Hide dashboard elements in game mode */
+.gameContainer .header,
+.gameContainer .leaderboard-sidebar {
+  display: none;
+}
+
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  color: #4a5568;
+}
+
+.loadingText {
+  margin-top: 1rem;
+  font-size: 1.1rem;
+  font-weight: 500;
+}
+
+.errorContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background: linear-gradient(135deg, #fc466b 0%, #3f5efb 100%);
+  color: white;
+}
+
+.errorContent {
+  text-align: center;
+  padding: 2rem;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  backdrop-filter: blur(10px);
+}
+
+.errorContent h2 {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+}
+
+.errorContent p {
+  font-size: 1.1rem;
+  margin-bottom: 2rem;
+  opacity: 0.9;
+}
+
+.errorContent button {
+  padding: 0.75rem 1.5rem;
+  background: white;
+  color: #3f5efb;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.errorContent button:hover {
+  transform: translateY(-2px);
+}
+
+.gameOverlay {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  right: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  pointer-events: none;
+  z-index: 1001;
+}
+
+.gameInfo {
+  background: rgba(255, 255, 255, 0.95);
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  backdrop-filter: blur(10px);
+}
+
+.competitionTitle {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #2d3748;
+  margin-bottom: 0.25rem;
+}
+
+.problemNumber {
+  font-size: 0.8rem;
+  color: #4a5568;
+  font-weight: 500;
+}
+
+.connectionStatus {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(0, 0, 0, 0.8);
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  color: white;
+}
+
+.connectionDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  transition: background-color 0.3s;
+}
+
+.connected {
+  background-color: #10b981;
+}
+
+.disconnected {
+  background-color: #ef4444;
+  animation: pulse 2s infinite;
+}
+
+.connectionText {
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.pauseOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  backdrop-filter: blur(5px);
+}
+
+.pauseContent {
+  background: white;
+  padding: 3rem;
+  border-radius: 20px;
+  text-align: center;
+  max-width: 500px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+
+.pauseIcon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+}
+
+.pauseContent h2 {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+  color: #2d3748;
+}
+
+.pauseContent p {
+  font-size: 1.2rem;
+  color: #4a5568;
+  margin-bottom: 2rem;
+}
+
+.pausedTimer {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #667eea;
+  font-family: 'Courier New', monospace;
+}
+
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.5; }
+  100% { opacity: 1; }
+}
+
+/* Hide dashboard elements when in full-screen game mode */
+.gameContainer :global(.header),
+.gameContainer :global(.leaderboard-sidebar),
+.gameContainer :global(.dashboard-section) {
+  display: none !important;
+}
+
+/* Make game interface fill the screen */
+.gameContainer :global(.root) {
+  height: 100vh !important;
+  width: 100vw !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+/* Game-specific responsive design */
+@media (max-width: 768px) {
+  .gameOverlay {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .gameInfo {
+    align-self: flex-start;
+  }
+  
+  .connectionStatus {
+    align-self: flex-end;
+  }
+}
