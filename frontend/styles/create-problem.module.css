@@ -2,178 +2,40 @@
   width: 100vw;
   height: 100vh;
   background: #f6f6f6;
-  overflow-x: hidden;   /* Hide horizontal scroll */
+  overflow-x: hidden;
   overflow-y: auto;
   position: relative;
   box-sizing: border-box;
   padding-left: 60px;
 }
 
-@media (max-width: 900px) {
-  .scalableWorkspace {
-    grid-template-columns: 1fr;
-    grid-template-areas:
-      "header"
-      "sidebar"
-      "prompt"
-      "main"
-      "controls";
-    gap: 16px;
-    padding: 0 4vw 8px 4vw;
-  }
-  .mainColumn, .toolbox {
-    max-width: 100%;
-    width: 100%;
-  }
-  .mainArea {
-    min-width: 0;
-    width: 100%;
-    min-height: 240px;
-    border-radius: 16px;
-  }
-  .toolbox {
-    transition: margin-top 0.3s cubic-bezier(0.4,0,0.2,1), height 0.3s cubic-bezier(0.4,0,0.2,1);
-    min-width: 0;
-    width: 100%;
-    height: auto;
-    margin-bottom: 16px;
-    border-radius: 16px;
-    padding: 12px 0;
-  }
-  .difficultyBox {
-    font-size: 18px;
-    height: 48px;
-    border-radius: 16px;
-  }
-  .saveBtn, .addTimerBtn, .addHintBtn, .limitedAttemptsBtn, .setVisibilityBtn {
-    min-width: 100px;
-    min-height: 36px;
-    font-size: 1rem;
-    padding: 0 10px;
-    border-radius: 12px;
-  }
-  .controlsRow {
-    flex-direction: column;
-    gap: 10px;
-    margin-top: 10px;
-    margin-bottom: 10px;
-  }
-  .promptBox, .promptText, .promptTextarea {
-    font-size: 18px;
-    min-height: 60px;
-    max-height: 60px;
-    height: 60px;
-  }
-}
-
-/* Even more compact for mobile */
-@media (max-width: 600px) {
-  .scalableWorkspace {
-    padding: 0 2vw 4px 2vw;
-    gap: 8px;
-  }
-  .mainAreaHeader {
-    font-size: 14px;
-    height: 32px;
-    border-radius: 12px 12px 0 0;
-  }
-  .difficultyBox {
-    font-size: 14px;
-    height: 40px;
-    border-radius: 12px;
-  }
-  .saveBtn, .addTimerBtn, .addHintBtn, .limitedAttemptsBtn, .setVisibilityBtn {
-    min-width: 70px;
-    min-height: 28px;
-    font-size: 0.9rem;
-    padding: 0 4px;
-    border-radius: 8px;
-  }
-  .toolbox {
-    border-radius: 12px;
-    padding: 6px 0;
-  }
-  .promptBox, .promptText, .promptTextarea {
-    font-size: 14px;
-    min-height: 40px;
-    max-height: 40px;
-    height: 40px;
-    border-radius: 8px;
-  }
-}
-
-/* Make sure the main area and toolbox never overflow horizontally */
-.mainArea, .toolbox {
-  max-width: 100vw;
-  box-sizing: border-box;
-}
-
-/* Make shapes scale down if needed */
-@media (max-width: 600px) {
-  .toolboxSquare,
-  .toolboxCircle,
-  .toolboxTriangle,
-  .shapeFillTool {
-    width: 40px;
-    height: 40px;
-  }
-}
-
 /* Flexible grid layout for the workspace */
 .scalableWorkspace {
   display: grid;
-  grid-template-columns: 280px 1fr;
+  grid-template-columns: 280px 1fr 320px;
   grid-template-rows: auto auto 1fr auto;
   grid-template-areas:
-    "sidebar header"
-    "sidebar prompt"
-    "sidebar main"
-    "sidebar controls";
-  gap: 24px;
+    "sidebar header rightSidebar"
+    "sidebar prompt rightSidebar"
+    "sidebar main rightSidebar"
+    "sidebar controls rightSidebar";
+  gap: 20px;
   width: 100vw;
   min-height: 100vh;
   background: #fff;
   box-sizing: border-box;
-  padding: 0px 24px 8px 24px;
+  padding: 0px 20px 8px 20px;
+  overflow-x: hidden;
 }
 
 .mainColumn {
   width: 100%;
-  max-width: 1000px; /* or 700px, adjust as you like */
-  /* margin: 0 auto; */ /* This is to put it right beside the sidebar*/
+  max-width: 1000px;
   display: flex;
   flex-direction: column;
   gap: 16px;
 }
 
-/* Top left group */
-.groupLeft {
-  position: absolute;
-  width: 73px;
-  height: 16px;
-  left: 25px;
-  top: 25px;
-}
-.iconBox {
-  position: absolute;
-  width: 16px;
-  height: 16px;
-  left: 0;
-  top: 0;
-  background: #f8f8f8;
-  border-radius: 3px;
-}
-
-/* Top right group */
-.groupRight {
-  position: absolute;
-  width: 73px;
-  height: 16px;
-  left: 1826px;
-  top: 25px;
-}
-
-/* Choose Difficulty - positioned above toolbox as in Figma */
 /* Difficulty box (header) */
 .difficultyBox {
   width: 100%;
@@ -194,7 +56,6 @@
   margin-bottom: 16px;
 }
 
-/* Difficulty text inside the box */
 .difficultyText {
   color: #2c514c;
   font-family: 'Poppins';
@@ -205,17 +66,14 @@
   text-align: center;
 }
 
-/* Dropdown menu for difficulties */
 .difficultyDropdownMenu {
   width: 100%;
   border-radius: 0 0 20px 20px;
   box-shadow: 0 4px 16px rgba(0,0,0,0.12);
   overflow: hidden;
   margin-bottom: 0;
-  /* Do NOT set position: absolute here */
 }
 
-/* Each dropdown item */
 .difficultyDropdownItem {
   padding: 14px 0;
   text-align: center;
@@ -223,6 +81,7 @@
   cursor: pointer;
   transition: background 0.15s;
 }
+
 .difficultyDropdownItem:hover {
   filter: brightness(0.95);
 }
@@ -232,22 +91,21 @@
   grid-area: main;
   width: 100%;
   min-height: 400px;
-  background: #6d8a72;
+  background: #6d8a72; /* ✅ Keep the green background */
   border-radius: 20px;
   margin: 0 auto;
   position: relative;
   overflow: hidden;
-  /* display: flex;
-  flex-wrap: wrap;
-  align-items: flex-start;
-  justify-content: flex-start; */
+  /* ✅ Remove any padding that might interfere */
+  padding: 0;
+  box-sizing: border-box;
 }
 
 .mainAreaHeader {
   user-select: none; 
   width: 100%;
-  height: 48px;
-  background: #2c514c; /* Same dark green as toolbox */
+  height: 48px; /* ✅ Exact height for calculations */
+  background: #2c514c;
   border-radius: 20px 20px 0 0;
   display: flex;
   align-items: center;
@@ -256,28 +114,13 @@
   font-family: 'Poppins', sans-serif;
   font-size: 24px;
   font-weight: 600;
-  margin-bottom: 8px;
+  /* ✅ Remove margin */
+  margin: 0;
+  /* ✅ Ensure it doesn't shrink */
+  flex-shrink: 0;
 }
 
-.solutionShape {
-  position: absolute;
-  width: 228px;
-  height: 100px;
-  left: 850px;
-  top: 588px;
-  background: #e3dcc2;
-  border: 6px solid #000;
-  border-radius: 20px;
-}
-.cornerBox {
-  position: absolute;
-  width: 17px;
-  height: 17px;
-  background: #fff;
-  /* left/top set inline */
-}
-
-/* Save, Timer, Hint Buttons */
+/* Buttons */
 .saveBtn, .addTimerBtn, .addHintBtn, .limitedAttemptsBtn, .setVisibilityBtn {
   background: #fabc60;
   border-radius: 20px;
@@ -293,14 +136,22 @@
   padding: 0 32px;
   margin: 0;
   box-sizing: border-box;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
 }
 
 .limitedAttemptsBtn,
 .addTimerBtn,
 .addHintBtn,
 .setVisibilityBtn {
-  font-size: 0.9rem;      /* Make text smaller */
-  font-weight: normal;    /* Not bold */
+  font-size: 0.9rem;
+  font-weight: normal;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
 }
 
 .saveBtn:hover,
@@ -328,25 +179,22 @@
   font-size: 0.9rem;
 }
 
-/* Toolbox (sidebar) */
+/* ✅ TOOLBOX STYLES */
 .toolbox {
   margin-top: 8px;
   grid-area: sidebar;
   background: #6d8a72;
   border-radius: 20px;
-  /* padding: 24px 16px; */
   display: flex;
   flex-direction: column;
   align-items: center;
-  /* min-width: 200px;
-  max-width: 260px; */
   width: 100%;
   height: 540px;
   transition: margin-top 0.3s cubic-bezier(0.4,0,0.2,1), height 0.3s cubic-bezier(0.4,0,0.2,1);
   box-sizing: border-box;
+  overflow: hidden; /* Hide scrollbar */
 }
 
-/* Toolbox header bar at the top */
 .toolboxHeader {
   user-select: none; 
   width: 100%;
@@ -358,127 +206,155 @@
   font-family: 'Poppins', sans-serif;
   font-size: 24px;
   font-weight: 600;
-  display: flex;                /* Add this */
-  align-items: center;          /* Vertically center */
-  justify-content: center;      /* Horizontally center */
-}
-
-.toolboxContent {
-  margin-bottom: 24px;
-  /* Add padding or adjust as needed */
-}
-
-.toolboxRow {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 24px;
-  margin-bottom: 16px;
-}
-
-.filterGroupsGrid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 16px 24px;
-  margin-top: 8px;
-  justify-content: center;      /* Center the filter groups horizontally */
-  width: 100%;
-  box-sizing: border-box;
-}
-
-.filterGroup {
-  flex: 0 1 240px;              /* Max width per group, but allow shrinking */
-  min-width: 180px;             /* Prevent too small on wrap */
-  max-width: 240px;
-  margin: 0 0 16px 0;
-  align-self: flex-start;
-  box-sizing: border-box;
-}
-
-.filterGroupHeader {
-  font-weight: bold;
-  font-size: 1rem;
-  cursor: pointer;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 4px 0;
+  justify-content: center;
 }
 
-.filterDropdown {
-  margin-top: 8px;
-  padding-left: 8px;
+/* ✅ Single Column Layout Styles */
+.toolboxSingleColumn {
   display: flex;
   flex-direction: column;
+  gap: 20px;
+  padding: 16px;
+  height: 100%;
+  overflow-y: auto;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+/* Hide scrollbar for webkit browsers (Chrome, Safari, Opera) */
+.toolboxSingleColumn::-webkit-scrollbar {
+  display: none;
+}
+
+.toolboxSection {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.sectionHeader {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #fff;
+  text-align: center;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #e3dcc2;
+  margin-bottom: 8px;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+/* ✅ Shapes Grid - 2x2 layout */
+.shapesGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
   gap: 8px;
+  aspect-ratio: 1;
+  width: 100%;
+  max-width: 200px;
+  margin: 0 auto;
 }
 
-/* Optional: Make the tool rows more compact and aligned */
-.toolboxRow {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 24px;
-  margin-bottom: 16px;
+.shapesGrid > div {
+  aspect-ratio: 1;
+  border-radius: 8px;
+  transition: all 0.2s ease;
 }
 
-.toolboxSquare {
-  /* position: absolute; */
-  width: 100px;
-  height: 100px;
-  /* left: 26px;
-  top: 84px; */
-  background: #e3dcc2;
-  border: 6px solid #000;
-  cursor: grab;
-}
-.toolboxSquare:active {
-  cursor: grabbing;
-}
-
-.toolboxCircle {
-  /* position: absolute; */
-  width: 100px;
-  height: 100px;
-  /* left: 142px;
-  top: 84px; */
-  background: #e3dcc2;
-  border: 6px solid #000;
-  border-radius: 60px;
-  cursor: grab;
-}
-.toolboxCircle:active {
-  cursor: grabbing;
-}
-
-.toolboxTriangle {
-  /* position: absolute; */
-  width: 100px;
-  height: 100px;
-  /* left: 84px;   
-  top: 208px;    */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: grab;
-}
-
-.toolboxTriangle:active {
-  cursor: grabbing;
-}
-
-.toolboxSquare,
+/* ✅ UPDATED SHAPE STYLES - Remove all box backgrounds and borders */
 .toolboxCircle,
-.toolboxTriangle,
-.shapeFillTool {
-  width: 64px;
-  height: 64px;
-  flex-shrink: 0;
-  margin: 0;
-  box-sizing: border-box;
+.toolboxSquare,
+.toolboxTriangle {
+  background: transparent; /* Remove background */
+  border: none; /* Remove border */
+  border-radius: 0; /* Remove border radius */
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: visible; /* Allow content to show outside */
+  cursor: pointer;
+  padding: 8px; /* Add some padding for better click area */
+}
+
+.toolboxCircle:hover,
+.toolboxSquare:hover,
+.toolboxTriangle:hover {
+  background: rgba(255, 255, 255, 0.1); /* Very subtle hover background */
+  border-radius: 8px; /* Only show rounded corners on hover */
+}
+
+.toolboxCircle.selected,
+.toolboxSquare.selected,
+.toolboxTriangle.selected {
+  background: rgba(255, 255, 255, 0.2); /* Subtle selected background */
+  border-radius: 8px; /* Only show rounded corners when selected */
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.3); /* White glow instead of green */
+}
+
+.toolboxCircle svg,
+.toolboxSquare svg,
+.toolboxTriangle svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* Update empty slot to be more subtle too */
+.emptyShapeSlot {
+  border: 2px dashed rgba(255, 255, 255, 0.3); /* More subtle border */
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.emptyShapeSlot:hover {
+  border-color: rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.plusIcon {
+  font-size: 1.5rem;
+  color: rgba(255, 255, 255, 0.6);
+  font-weight: bold;
+}
+
+.shapeLimitIndicator {
+  text-align: center;
+  color: #ff6b35;
+  font-size: 0.8rem;
+  padding: 6px 8px;
+  background: rgba(255, 107, 53, 0.1);
+  border-radius: 4px;
+  border: 1px solid rgba(255, 107, 53, 0.3);
+  margin-top: 8px;
+}
+
+.propertiesToggle {
+  padding: 8px 0;
+  display: flex;
+  justify-content: center;
+}
+
+.filtersContainer {
+  flex: 1;
+  overflow-y: auto;
+  max-height: 200px;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+.filtersContainer::-webkit-scrollbar {
+  display: none;
 }
 
 /* Go Back */
@@ -498,6 +374,7 @@
   font-size: 32px;
   cursor: pointer;
 }
+
 .goBackText {
   font-family: 'Poppins';
   font-style: normal;
@@ -552,7 +429,6 @@
   overflow: auto;
   resize: none;
   text-overflow: ellipsis;
-  /* Remove extra padding here */
 }
 
 .promptTextarea {
@@ -566,54 +442,8 @@
   border: none;
   outline: none;
   resize: none;
-  padding: 0; /* <-- Remove padding here */
+  padding: 0;
   box-sizing: border-box;
-}
-
-/* Solution Header */
-.solutionHeaderBox {
-  position: absolute;
-  width: 1080px;
-  height: 64px;
-  left: 591px;
-  top: 322px;
-  background: #2c514c;
-  border-radius: 20px 20px 0px 0px;
-}
-.solutionHeader {
-  position: absolute;
-  left: 32px;
-  top: 14px;
-  font-family: 'Poppins';
-  font-style: normal;
-  font-weight: 300;
-  font-size: 24px;
-  line-height: 36px;
-  text-align: center;
-  color: #fff;
-}
-
-.shapeFillTool {
-  transition: border 0.2s, box-shadow 0.2s;
-  user-select: none;
-}
-
-.fillPalette {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin: 18px auto 0 auto;
-  width: 160px;
-  justify-content: center;
-}
-
-.fillColor {
-  width: 24px;
-  height: 24px;
-  border-radius: 6px;
-  cursor: pointer;
-  box-sizing: border-box;
-  transition: border 0.15s;
 }
 
 .controlsRow {
@@ -626,236 +456,403 @@
   margin-bottom: 16px;
 }
 
-/* Remove border-radius from buttons when dropdownActive is present */
-.dropdownActive .limitedAttemptsBtn,
-.dropdownActive .addTimerBtn,
-.dropdownActive .addHintBtn,
-.dropdownActive .setVisibilityBtn {
-  border-radius: 0 !important;
-}
+/* ✅ IMPROVED FILTERS STYLING */
 
-/* Difficulty button: keep top corners, remove bottom corners when dropdown is open */
-.dropdownActive .difficultyBox {
-  border-top-left-radius: 20px !important;
-  border-top-right-radius: 20px !important;
-  border-bottom-left-radius: 0 !important;
-  border-bottom-right-radius: 0 !important;
-  margin-bottom: 0 !important;
-}
-
-/* Remove top border-radius from dropdown menu when open */
-.dropdownActive .difficultyDropdownMenu {
-  border-top-left-radius: 0 !important;
-  border-top-right-radius: 0 !important;
-}
-
-/* unya saka */
-.dropdownActive .toolbox {
-  margin-top: 64px;
-  height: 300px !important;
-}
-
-.showPropertiesBtn {
-  margin-top: 24px;
-  padding: 8px 16px;
-  border-radius: 8px;
-  font-weight: 600;
-  border: none;
-  cursor: pointer;
-}
-
-.fillToolLogo {
-  position: relative;
-  width: 150px;
-  height: 150px;
-}
-
-/* BUCKET */
-.bucket{
-  position: absolute;
-  top: 50px;
-  left: 10px;
-  width: 70px;
-  height: 50px;
-  background-color: #000;
-  transform: rotate(-30deg) skewY(-10deg);
-  border-radius: 6px;
-  box-shadow: 2px 4px 10px rgba(0, 0, 0, 0.3);
-}
-
-.bucket .label {
-  position: absolute;
-  top: 8px;
-  left: 10px;
-  font-size: 24px;
-  font-weight: bold;
-  font-family: sans-serif;
-  transform: rotate(0deg) skewY(0deg);
-  pointer-events: none;
-}
-
-/* DROPLET */
-.droplet {
-  position: absolute;
-  top: 80px;
-  left: 68px;
-  width: 24px;
-  height: 32px;
-  background-color: var(--fillColor, #1e90ff);
-  clip-path: path("M12 32 C18 32, 24 18, 12 0 C0 18, 6 32, 12 32 Z");
-  animation: drop 1.2s ease-in-out infinite;
-  opacity: 0;
-}
-
-@keyframes drop {
-  0% {
-    transform: translateY(0);
-    opacity: 0;
-  }
-  40% {
-    opacity: 1;
-  }
-  100% {
-    transform: translateY(8px);
-    opacity: 0;
-  }
-}
-
-.fillButton {
-  all: unset;
-  cursor: pointer;
-  display: inline-block;
-  padding: 0;
-}
-
-/* Highlight effect when active */
-.fillButton.active .bucket {
-  background-color: #1e90ff;
-  box-shadow: 0 0 12px #1e90ff, 2px 4px 10px rgba(0, 0, 0, 0.3);
-  transition: background-color 0.3s ease, box-shadow 0.3s ease;
-}
-
-.fillButton.active .label {
-  color: white !important;
-}
-
-.fillButton.active .droplet {
-  opacity: 1 !important;
-}
-
-.toggleButton {
-  position: relative;
-  width: 80px;
-  height: 40px;
-  background-color: #ccc;
-  border: none;
-  border-radius: 20px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-  overflow: hidden;
-  margin: 8px 0;
-}
-
-.toggleLabel {
-  position: absolute;
-  width: 100%;
+/* Empty State */
+.filtersEmptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 16px;
   text-align: center;
-  line-height: 40px;
-  font-weight: bold;
-  font-family: sans-serif;
-  color: white;
-  transition: transform 0.3s ease, opacity 0.3s ease;
+  color: rgba(255, 255, 255, 0.7);
+  min-height: 120px;
 }
 
-.toggleButtonActive {
-  background-color: #1e90ff;
+.emptyStateIcon {
+  font-size: 2.5rem;
+  margin-bottom: 12px;
+  opacity: 0.8;
 }
 
-.toggleButtonActive .toggleLabel {
-  transform: translateY(-100%);
-  opacity: 0;
-}
-
-.toggleButtonActive::after {
-  content: 'ON';
-  position: absolute;
-  width: 100%;
-  text-align: center;
-  line-height: 40px;
-  font-weight: bold;
-  font-family: sans-serif;
-  color: white;
-  animation: fadeIn 0.3s ease forwards;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(100%); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.toggleSwitch {
-  all: unset;
-  cursor: pointer;
-  display: inline-block;
-  margin: 0 8px 8px 0;
-}
-
-.switchTrack {
-  width: 60px;
-  height: 30px;
-  background-color: #ccc;
-  border-radius: 15px;
-  position: relative;
-  transition: background-color 0.3s ease;
-}
-
-.switchOrb {
-  width: 24px;
-  height: 24px;
-  background-color: white;
-  border-radius: 50%;
-  position: absolute;
-  top: 3px;
-  left: 3px;
-  transition: left 0.3s ease, background-color 0.3s ease;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-}
-
-.toggleSwitchActive .switchTrack {
-  background-color: #1e90ff;
-}
-
-.toggleSwitchActive .switchOrb {
-  left: 33px;
-}
-
-.filterGroup {
+.emptyStateText {
+  font-size: 0.9rem;
+  font-weight: 500;
   margin: 0;
-  border: 1px solid #eee;
-  border-radius: 8px;
-  background: #fafafa;
-  padding: 8px 12px;
-  min-width: 0;
 }
 
-.filterGroupHeader {
-  font-weight: bold;
-  font-size: 1rem;
-  cursor: pointer;
+/* Quick Actions Row */
+.quickActions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 16px;
+  padding: 0 4px;
+}
+
+.quickActionBtn {
+  flex: 1;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 4px 0;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-height: 36px;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
 }
 
-.filterDropdown {
-  margin-top: 8px;
-  padding-left: 8px;
+.quickActionBtn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.3);
+  transform: translateY(-1px);
+}
+
+.quickActionBtn:active {
+  transform: translateY(0);
+}
+
+.showAllBtn:hover {
+  background: rgba(76, 175, 80, 0.2);
+  border-color: rgba(76, 175, 80, 0.4);
+}
+
+.hideAllBtn:hover {
+  background: rgba(244, 67, 54, 0.2);
+  border-color: rgba(244, 67, 54, 0.4);
+}
+
+.btnIcon {
+  font-size: 1rem;
+}
+
+.btnText {
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.activeCount {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.countBadge {
+  background: #4CAF50;
+  color: white;
+  font-size: 0.7rem;
+  font-weight: bold;
+  padding: 4px 8px;
+  border-radius: 12px;
+  min-width: 20px;
+  text-align: center;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+/* Filter Sections */
+.filterSections {
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
+.filterSection {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.2s ease;
+}
+
+.filterSection:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.globalSection {
+  border-left: 3px solid #2196F3;
+}
+
+.squareSection {
+  border-left: 3px solid #FF9800;
+}
+
+.triangleSection {
+  border-left: 3px solid #9C27B0;
+}
+
+.circleSection {
+  border-left: 3px solid #E91E63;
+}
+
+/* Section Header */
+.filterSectionHeader {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background: transparent;
+  border: none;
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+}
+
+.filterSectionHeader:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.filterSectionHeader.expanded {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.sectionIcon {
+  font-size: 1.1rem;
+  width: 20px;
+  text-align: center;
+}
+
+.sectionTitle {
+  flex: 1;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.expandIcon {
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.7);
+  transition: transform 0.2s ease;
+}
+
+.filterSectionHeader.expanded .expandIcon {
+  transform: rotate(0deg);
+}
+
+/* Section Content */
+.filterSectionContent {
+  padding: 0 16px 16px 16px;
+  background: rgba(0, 0, 0, 0.1);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.filterOption {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 12px;
+  padding: 8px 0;
+}
+
+.filterOption:last-child {
+  margin-bottom: 0;
+}
+
+.optionDescription {
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.6);
+  margin-left: 24px;
+  font-style: italic;
+}
+
+/* ✅ IMPROVED TOGGLE SWITCH STYLES */
+
+.toggleSwitchContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 8px 0;
+}
+
+.toggleSwitchContainer.disabled {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.toggleSwitchMain {
+  display: flex;
+  align-items: center;
+}
+
+.toggleSwitchLabel {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.2s ease;
+  padding: 4px;
+  border-radius: 8px;
+}
+
+.toggleSwitchLabel:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.toggleSwitchInput {
+  display: none;
+}
+
+/* ✅ Toggle Slider */
+.toggleSwitchSlider {
+  position: relative;
+  display: flex;
+  align-items: center;
+  border-radius: 20px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* ✅ Toggle Orb */
+.toggleSwitchOrb {
+  position: absolute;
+  background: white;
+  border-radius: 50%;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+/* ✅ Size Variants */
+.size-small.toggleSwitchSlider {
+  width: 40px;
+  height: 20px;
+  background: #ccc;
+}
+
+.size-small .toggleSwitchOrb {
+  width: 16px;
+  height: 16px;
+  left: 2px;
+}
+
+.size-small.checked .toggleSwitchOrb {
+  left: 22px;
+}
+
+.size-medium.toggleSwitchSlider {
+  width: 50px;
+  height: 24px;
+  background: #ccc;
+}
+
+.size-medium .toggleSwitchOrb {
+  width: 20px;
+  height: 20px;
+  left: 2px;
+}
+
+.size-medium.checked .toggleSwitchOrb {
+  left: 28px;
+}
+
+.size-large.toggleSwitchSlider {
+  width: 60px;
+  height: 30px;
+  background: #ccc;
+}
+
+.size-large .toggleSwitchOrb {
+  width: 26px;
+  height: 26px;
+  left: 2px;
+}
+
+.size-large.checked .toggleSwitchOrb {
+  left: 32px;
+}
+
+/* ✅ Color Variants */
+.color-blue.toggleSwitchSlider.checked {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  box-shadow: 0 0 20px rgba(102, 126, 234, 0.3);
+}
+
+.color-green.toggleSwitchSlider.checked {
+  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+  box-shadow: 0 0 20px rgba(76, 175, 80, 0.3);
+}
+
+.color-purple.toggleSwitchSlider.checked {
+  background: linear-gradient(135deg, #9C27B0 0%, #7B1FA2 100%);
+  box-shadow: 0 0 20px rgba(156, 39, 176, 0.3);
+}
+
+.color-orange.toggleSwitchSlider.checked {
+  background: linear-gradient(135deg, #FF9800 0%, #F57C00 100%);
+  box-shadow: 0 0 20px rgba(255, 152, 0, 0.3);
+}
+
+/* ✅ Toggle Text */
+.toggleSwitchText {
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 500;
+  flex: 1;
+  transition: color 0.2s ease;
+}
+
+.toggleSwitchLabel:hover .toggleSwitchText {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* ✅ Description */
+.toggleSwitchDescription {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.6);
+  margin-left: 62px;
+  font-style: italic;
+  line-height: 1.3;
+}
+
+/* ✅ Hover Effects */
+.toggleSwitchSlider:hover {
+  transform: scale(1.02);
+}
+
+.toggleSwitchSlider:active {
+  transform: scale(0.98);
+}
+
+.toggleSwitchOrb:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* ✅ Focus States */
+.toggleSwitchLabel:focus-within {
+  outline: 2px solid rgba(255, 255, 255, 0.3);
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+
+/* ✅ Animation on State Change */
+.toggleSwitchSlider.checked .toggleSwitchOrb {
+  animation: toggleBounce 0.3s ease;
+}
+
+@keyframes toggleBounce {
+  0% { transform: translateY(-50%) scale(1); }
+  50% { transform: translateY(-50%) scale(1.1); }
+  100% { transform: translateY(-50%) scale(1); }
+}
+
+/* Popup Styles */
 .popupOverlay {
   position: fixed;
   top: 0;
@@ -887,12 +884,15 @@
   border-radius: 6px;
   cursor: pointer;
   transition: background 0.2s ease;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
 }
 
 .okButton:hover {
   background: #0e70d1;
 }
-
 
 /* Simple Title Input */
 .input {
@@ -920,41 +920,6 @@
   margin-bottom: 16px;
 }
 
-/* Mobile responsive */
-@media (max-width: 900px) {
-  .input {
-    font-size: 20px;
-    height: 50px;
-    border-radius: 14px;
-  }
-}
-
-@media (max-width: 600px) {
-  .input {
-    font-size: 18px;
-    height: 45px;
-    border-radius: 12px;
-  }
-}
-/* Update the grid layout to include a right sidebar */
-.scalableWorkspace {
-  display: grid;
-  grid-template-columns: 280px 1fr 320px; /* Left sidebar, main content, right sidebar */
-  grid-template-rows: auto auto 1fr auto;
-  grid-template-areas:
-    "sidebar header rightSidebar"
-    "sidebar prompt rightSidebar"
-    "sidebar main rightSidebar"
-    "sidebar controls rightSidebar";
-  gap: 20px;
-  width: 100vw;
-  min-height: 100vh;
-  background: #fff;
-  box-sizing: border-box;
-  padding: 0px 20px 8px 20px;
-  overflow-x: hidden; /* Prevent horizontal overflow */
-}
-
 /* Existing Problems Section - Right Sidebar */
 .problemsSection {
   grid-area: rightSidebar;
@@ -965,13 +930,13 @@
   min-width: 200px;
   max-width: 255px;
   min-height: 400px;
-  max-height: calc(100vh - 120px); /* Adjust based on your needs */
+  max-height: calc(100vh - 120px);
   overflow: hidden;
   display: flex;
   flex-direction: column;
   box-shadow: 0 2px 8px rgba(0,0,0,0.07);
   position: sticky;
-  top: 24px; /* Stick to top with some margin */
+  top: 24px;
   box-sizing: border-box;
 }
 
@@ -992,7 +957,7 @@
 
 .problemsContent {
   flex: 1;
-  padding: 16px 12px; /* Slightly reduce horizontal padding */
+  padding: 16px 12px;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
@@ -1009,7 +974,7 @@
 }
 
 .problemItem {
-   background: #fff;
+  background: #fff;
   border-radius: 12px;
   padding: 12px;
   box-shadow: 0 2px 6px rgba(0,0,0,0.08);
@@ -1018,10 +983,10 @@
   border: 2px solid transparent;
   box-sizing: border-box;
   min-width: 0;
-  min-height: 80px; /* ✅ Add minimum height to ensure button is always visible */
+  min-height: 80px;
   display: flex;
   flex-direction: column;
-  justify-content: space-between; /* ✅ Distribute content evenly */
+  justify-content: space-between;
 }
 
 .problemItem:hover {
@@ -1047,6 +1012,11 @@
   white-space: nowrap;
 }
 
+.buttonGroup {
+  display: flex;
+  gap: 4px;
+}
+
 .editButton {
   background: linear-gradient(135deg, #3498db, #2980b9);
   color: white;
@@ -1059,17 +1029,16 @@
   transition: all 0.2s ease;
   box-shadow: 0 2px 4px rgba(52, 152, 219, 0.2);
   min-width: 50px;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
 }
 
 .editButton:hover {
   background: linear-gradient(135deg, #2980b9, #1f4e79);
   transform: translateY(-1px);
   box-shadow: 0 4px 8px rgba(52, 152, 219, 0.3);
-}
-
-.editButton:active {
-  transform: translateY(0);
-  box-shadow: 0 2px 4px rgba(52, 152, 219, 0.2);
 }
 
 .deleteButton {
@@ -1090,11 +1059,6 @@
   background: linear-gradient(135deg, #c0392b, #a93226);
   transform: translateY(-1px);
   box-shadow: 0 4px 8px rgba(231, 76, 60, 0.3);
-}
-
-.deleteButton:active {
-  transform: translateY(0);
-  box-shadow: 0 2px 4px rgba(231, 76, 60, 0.2);
 }
 
 .problemDetails {
@@ -1189,159 +1153,33 @@
   opacity: 0.8;
 }
 
-/* Responsive adjustments */
-@media (max-width: 1400px) {
-  .scalableWorkspace {
-    grid-template-columns: 260px 1fr 300px; /* Slightly smaller sidebars */
-    gap: 16px;
-    padding: 0px 16px 8px 16px;
-  }
-  
-  .problemsSection {
-    max-width: 300px;
-    min-width: 280px;
-  }
+/* Dropdown States */
+.dropdownActive .limitedAttemptsBtn,
+.dropdownActive .addTimerBtn,
+.dropdownActive .addHintBtn,
+.dropdownActive .setVisibilityBtn {
+  border-radius: 0 !important;
 }
 
-@media (max-width: 1200px) {
-  .scalableWorkspace {
-    grid-template-columns: 240px 1fr 280px; /* Even smaller sidebars */
-    gap: 12px;
-    padding: 0px 12px 8px 12px;
-  }
-  
-  .problemsSection {
-    max-width: 280px;
-    min-width: 260px;
-  }
+.dropdownActive .difficultyBox {
+  border-top-left-radius: 20px !important;
+  border-top-right-radius: 20px !important;
+  border-bottom-left-radius: 0 !important;
+  border-bottom-right-radius: 0 !important;
+  margin-bottom: 0 !important;
 }
 
-@media (max-width: 900px) {
-  .scalableWorkspace {
-    grid-template-columns: 1fr;
-    grid-template-areas:
-      "header"
-      "sidebar"
-      "prompt"
-      "main"
-      "rightSidebar"
-      "controls";
-    gap: 16px;
-    padding: 0 4vw 8px 4vw;
-  }
-  
-  .problemsSection {
-    border-radius: 16px;
-    min-height: 250px;
-    max-height: 400px;
-    position: static; /* Remove sticky on mobile */
-    max-width: 100%;
-    min-width: 0;
-  }
-  
-  .problemsSectionHeader {
-    height: 48px;
-    font-size: 18px;
-    border-radius: 16px 16px 0 0;
-  }
-  
-  .problemsContent {
-    padding: 12px;
-  }
-  
-  .problemItem {
-    padding: 12px;
-    border-radius: 10px;
-  }
-  
-  .problemTitle {
-    font-size: 14px;
-    max-width: calc(100% - 70px);
-  }
+.dropdownActive .difficultyDropdownMenu {
+  border-top-left-radius: 0 !important;
+  border-top-right-radius: 0 !important;
 }
 
-@media (max-width: 600px) {
-  .problemsSection {
-    border-radius: 12px;
-    min-height: 200px;
-    max-height: 300px;
-  }
-  
-  .problemsSectionHeader {
-    height: 40px;
-    font-size: 16px;
-    border-radius: 12px 12px 0 0;
-  }
-  
-  .problemsContent {
-    padding: 8px;
-  }
-  
-  .problemItem {
-    padding: 10px;
-    border-radius: 8px;
-  }
-  
-  .problemTitle {
-    font-size: 13px;
-  }
-  
-  .deleteButton {
-    font-size: 11px;
-    padding: 4px 8px;
-  }
-  
-  .problemDifficulty,
-  .problemVisibility {
-    font-size: 11px;
-    padding: 3px 8px;
-  }
-  
-  .problemAttempts,
-  .problemXp {
-    font-size: 10px;
-    padding: 2px 4px;
-  }
-  
-  .noProblems {
-    font-size: 14px;
-    padding: 30px 15px;
-  }
-  
-  .noProblemsIcon {
-    font-size: 36px;
-    margin-bottom: 12px;
-  }
-  
-  .noProblemsText {
-    font-size: 14px;
-  }
-  
-  .noProblemsSubtext {
-    font-size: 12px;
-  }
+.dropdownActive .toolbox {
+  margin-top: 64px;
+  height: 300px !important;
 }
 
-/* Scrollbar styling for webkit browsers */
-.problemsContent::-webkit-scrollbar {
-  width: 6px;
-}
-
-.problemsContent::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 3px;
-}
-
-.problemsContent::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.3);
-  border-radius: 3px;
-}
-
-.problemsContent::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.5);
-}
-
-/* Add to your CSS */
+/* Pause Overlay */
 .pauseOverlay {
   position: fixed;
   top: 0;
@@ -1389,225 +1227,255 @@
   font-family: 'Courier New', monospace;
 }
 
-/* Add these styles to your create-problem.module.css file */
-
-.competitionHeader {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  padding: 12px 20px;
-  border-radius: 8px;
-  margin-bottom: 16px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.competitionInfo {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  flex-wrap: wrap;
-}
-
-.competitionTitle {
-  font-size: 1.1rem;
-  font-weight: 600;
-}
-
-.problemCounter {
-  background: rgba(255, 255, 255, 0.2);
-  padding: 4px 12px;
-  border-radius: 16px;
-  font-size: 0.9rem;
-  font-weight: 500;
-}
-
-.connectionStatus {
-  font-size: 0.85rem;
-  margin-left: auto;
-}
-
-.loading {
-  color: #fbbf24;
-  font-size: 0.85rem;
-  font-style: italic;
-}
-
-/* Timer Container */
-.competitionTimerContainer {
-  margin: 20px 0;
-  padding: 0;
-}
-
-.timerDisplay {
-  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-  border: 2px solid #cbd5e1;
-  border-radius: 16px;
-  padding: 20px;
-  text-align: center;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s ease;
-}
-
-.timerDisplay:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
-}
-
-.timerHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 12px;
-}
-
-.timerLabel {
-  font-size: 1rem;
-  font-weight: 600;
-  color: #374151;
-}
-
-.timerStatus {
-  display: flex;
-  gap: 8px;
-}
-
-.pausedIndicator {
-  background: #fbbf24;
-  color: #92400e;
-  padding: 4px 8px;
-  border-radius: 8px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  animation: pulse 2s infinite;
-}
-
-.expiredIndicator {
-  background: #ef4444;
-  color: white;
-  padding: 4px 8px;
-  border-radius: 8px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  animation: pulse 1s infinite;
-}
-
-.activeIndicator {
-  background: #10b981;
-  color: white;
-  padding: 4px 8px;
-  border-radius: 8px;
-  font-size: 0.75rem;
-  font-weight: 600;
-}
-
-.timerTime {
-  font-size: 3rem;
-  font-weight: bold;
-  color: #1f2937;
-  margin: 16px 0;
-  font-family: 'Courier New', monospace;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  transition: color 0.3s ease;
-}
-
-.timerTime.expired {
-  color: #ef4444;
-  animation: pulse 1s infinite;
-}
-
-.timerTime.paused {
-  color: #f59e0b;
-}
-
-.timerProgress {
-  width: 100%;
-  height: 8px;
-  background-color: #e5e7eb;
-  border-radius: 4px;
-  overflow: hidden;
-  margin: 16px 0 12px 0;
-}
-
-.progressBar {
-  height: 100%;
-  transition: width 1s ease-in-out, background-color 0.3s ease;
-  border-radius: 4px;
-}
-
-.gameplayStatus {
-  font-size: 0.9rem;
-  color: #6b7280;
-  margin-top: 8px;
-}
-
-.statusValue {
-  font-weight: 600;
-  color: #374151;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-/* Difficulty Display (for competition mode) */
-.difficultyDisplay {
-  width: 100%;
-  margin-bottom: 16px;
-}
-
-.difficultyLabel {
-  font-size: 0.85rem;
-  font-weight: 500;
-  color: #6b7280;
-  margin-bottom: 6px;
-  text-align: center;
-}
-
-.difficultyValue {
-  width: 100%;
-}
-
-/* Attempts and Timer Display (read-only) */
-.attemptsDisplay,
-.timerDisplay {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 8px 12px;
-  background: #f3f4f6;
-  border-radius: 6px;
-  border: 1px solid #d1d5db;
-}
-
-.attemptsLabel,
-.timerLabel {
-  font-size: 0.85rem;
-  color: #6b7280;
-  font-weight: 500;
-}
-
-.attemptsValue,
-.timerValue {
-  font-size: 0.85rem;
-  color: #374151;
-  font-weight: 600;
-}
-
-/* Pulse animation */
-@keyframes pulse {
-  0%, 100% {
-    opacity: 1;
+/* Responsive Design */
+@media (max-width: 1400px) {
+  .scalableWorkspace {
+    grid-template-columns: 260px 1fr 300px;
+    gap: 16px;
+    padding: 0px 16px 8px 16px;
   }
-  50% {
-    opacity: 0.5;
+  
+  .problemsSection {
+    max-width: 300px;
+    min-width: 280px;
   }
 }
 
-/* Full screen adjustments */
-.fullScreenGame .competitionTimerContainer {
-  position: sticky;
-  top: 20px;
-  z-index: 10;
+@media (max-width: 1200px) {
+  .scalableWorkspace {
+    grid-template-columns: 240px 1fr 280px;
+    gap: 12px;
+    padding: 0px 12px 8px 12px;
+  }
+  
+  .problemsSection {
+    max-width: 280px;
+    min-width: 260px;
+  }
+
+  .toolboxSingleColumn {
+    gap: 16px;
+    padding: 12px;
+  }
+  
+  .shapesGrid {
+    max-width: 180px;
+  }
 }
 
-.fullScreenGame .timerDisplay {
-  backdrop-filter: blur(10px);
-  background: rgba(248, 250, 252, 0.95);
+@media (max-width: 900px) {
+  .scalableWorkspace {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "header"
+      "sidebar"
+      "prompt"
+      "main"
+      "rightSidebar"
+      "controls";
+    gap: 16px;
+    padding: 0 4vw 8px 4vw;
+  }
+  
+  .mainColumn, .toolbox {
+    max-width: 100%;
+    width: 100%;
+  }
+  
+  .mainArea {
+    min-width: 0;
+    width: 100%;
+    min-height: 240px;
+    border-radius: 16px;
+  }
+  
+  .toolbox {
+    transition: margin-top 0.3s cubic-bezier(0.4,0,0.2,1), height 0.3s cubic-bezier(0.4,0,0.2,1);
+    min-width: 0;
+    width: 100%;
+    height: auto;
+    margin-bottom: 16px;
+    border-radius: 16px;
+    padding: 12px 0;
+  }
+  
+  .difficultyBox {
+    font-size: 18px;
+    height: 48px;
+    border-radius: 16px;
+  }
+  
+  .saveBtn, .addTimerBtn, .addHintBtn, .limitedAttemptsBtn, .setVisibilityBtn {
+    min-width: 100px;
+    min-height: 36px;
+    font-size: 1rem;
+    padding: 0 10px;
+    border-radius: 12px;
+  }
+  
+  .controlsRow {
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+  }
+  
+  .promptBox, .promptText, .promptTextarea {
+    font-size: 18px;
+    min-height: 60px;
+    max-height: 60px;
+    height: 60px;
+  }
+  
+  .problemsSection {
+    border-radius: 16px;
+    min-height: 250px;
+    max-height: 400px;
+    position: static;
+    max-width: 100%;
+    min-width: 0;
+  }
+  
+  .problemsSectionHeader {
+    height: 48px;
+    font-size: 18px;
+    border-radius: 16px 16px 0 0;
+  }
+
+  .quickActions {
+    flex-direction: column;
+    gap: 6px;
+  }
+  
+  .quickActionBtn {
+    width: 100%;
+    justify-content: center;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+  }
+  
+  .filterSectionHeader {
+    padding: 10px 12px;
+    font-size: 0.8rem;
+  }
+  
+  .filterSectionContent {
+    padding: 0 12px 12px 12px;
+  }
+  
+  .sectionTitle {
+    font-size: 0.8rem;
+  }
+  
+  .optionDescription {
+    font-size: 0.65rem;
+    margin-left: 20px;
+  }
+
+  .toggleSwitchLabel {
+    gap: 10px;
+  }
+  
+  .toggleSwitchText {
+    font-size: 0.8rem;
+  }
+  
+  .toggleSwitchDescription {
+    font-size: 0.7rem;
+    margin-left: 52px;
+  }
+}
+
+@media (max-width: 768px) {
+  .toolboxSingleColumn {
+    gap: 12px;
+    padding: 8px;
+  }
+  
+  .shapesGrid {
+    max-width: 160px;
+  }
+  
+  .sectionHeader {
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .scalableWorkspace {
+    padding: 0 2vw 4px 2vw;
+    gap: 8px;
+  }
+  
+  .mainAreaHeader {
+    font-size: 14px;
+    height: 32px;
+    border-radius: 12px 12px 0 0;
+  }
+  
+  .difficultyBox {
+    font-size: 14px;
+    height: 40px;
+    border-radius: 12px;
+  }
+  
+  .saveBtn, .addTimerBtn, .addHintBtn, .limitedAttemptsBtn, .setVisibilityBtn {
+    min-width: 70px;
+    min-height: 28px;
+    font-size: 0.9rem;
+    padding: 0 4px;
+    border-radius: 8px;
+  }
+  
+  .toolbox {
+    border-radius: 12px;
+    padding: 6px 0;
+  }
+  
+  .promptBox, .promptText, .promptTextarea {
+    font-size: 14px;
+    min-height: 40px;
+    max-height: 40px;
+    height: 40px;
+    border-radius: 8px;
+  }
+  
+  .input {
+    font-size: 18px;
+    height: 45px;
+    border-radius: 12px;
+  }
+  
+  .problemsSection {
+    border-radius: 12px;
+    min-height: 200px;
+    max-height: 300px;
+  }
+  
+  .problemsSectionHeader {
+    height: 40px;
+    font-size: 16px;
+    border-radius: 12px 12px 0 0;
+  }
+}
+
+/* Scrollbar styling for webkit browsers */
+.problemsContent::-webkit-scrollbar {
+  width: 6px;
+}
+
+.problemsContent::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+}
+
+.problemsContent::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 3px;
+}
+
+.problemsContent::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5);
 }

@@ -23,12 +23,15 @@
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.50.3",
+    "canvas": "^3.1.2",
     "googleapi": "^1.0.2",
     "googleapis": "^152.0.0",
+    "konva": "^9.3.22",
     "next": "^15.3.2",
     "nodemailer": "^7.0.5",
     "nodemailer-express-handlebars": "^7.0.0",
     "react": "^19.1.0",
-    "react-dom": "^19.1.0"
+    "react-dom": "^19.1.0",
+    "react-konva": "^19.0.7"
   }
 }

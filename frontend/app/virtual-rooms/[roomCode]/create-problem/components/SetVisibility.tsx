@@ -16,6 +16,7 @@ export default function SetVisibility({
         color: "#fff",
         fontWeight: "bold",
         transition: "background 0.2s",
+        userSelect: "none",
       }}
       onClick={() => setVisible(v => !v)}
     >

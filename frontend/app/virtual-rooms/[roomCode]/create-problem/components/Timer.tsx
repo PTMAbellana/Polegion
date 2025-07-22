@@ -13,12 +13,13 @@ export default function Timer({
         <button
           className={`${styles.addTimerBtn} ${styles.rowBtn}`}
           onClick={() => setTimerOpen(true)}
+          style={{ userSelect: "none" }}
         >
           Add Timer
         </button>
       ) : (
         <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
-          <span style={{ fontWeight: 500, fontSize: "0.85rem", marginLeft: 4, marginBottom: 2 }}>
+          <span style={{ fontWeight: 500, fontSize: "0.85rem", marginLeft: 4, marginBottom: 2, userSelect: "none" }}>
             Timer
           </span>
           <div style={{ display: "flex", alignItems: "center" }}>
@@ -36,7 +37,7 @@ export default function Timer({
                 marginRight: 8,
               }}
             />
-            <span style={{ marginRight: 8 }}>seconds</span>
+            <span style={{ marginRight: 8, userSelect: "none" }}>seconds</span>
             <button
               style={{
                 background: "#fabc60",
@@ -46,6 +47,7 @@ export default function Timer({
                 fontWeight: 600,
                 cursor: "pointer",
                 marginRight: 4,
+                userSelect: "none",
               }}
               onClick={() => setTimerOpen(false)}
               title="Close"

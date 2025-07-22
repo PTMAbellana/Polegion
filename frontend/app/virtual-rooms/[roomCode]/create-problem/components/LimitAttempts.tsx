@@ -15,12 +15,13 @@ export default function LimitAttempts({
     <button
       className={`${styles.limitedAttemptsBtn} ${styles.rowBtn}`}
       onClick={() => setEditing(true)}
+      style={{ userSelect: "none" }}
     >
       Limit Attempts
     </button>
   ) : (
     <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
-      <span style={{ fontSize: "0.85rem", fontWeight: 500, marginLeft: 4, marginBottom: 2 }}>
+      <span style={{ fontSize: "0.85rem", fontWeight: 500, marginLeft: 4, marginBottom: 2, userSelect: "none" }}>
         Attempts
       </span>
       <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -51,7 +52,8 @@ export default function LimitAttempts({
                 padding: "2px 10px",
                 fontWeight: 600,
                 cursor: "pointer",
-                marginLeft: 4
+                marginLeft: 4,
+                userSelect: "none"
             }}
             aria-label="Cancel"
             onClick={() => setEditing(false)}

@@ -17,6 +17,7 @@ export default function HintBox({
             padding: "2px 10px",
             fontWeight: 600,
             cursor: "pointer",
+            userSelect: "none",
           }}
           onClick={() => setHintOpen(true)}
         >
@@ -64,6 +65,7 @@ export default function HintBox({
               padding: "2px 10px",
               fontWeight: 600,
               cursor: "pointer",
+              userSelect: "none",
             }}
             onClick={() => setHintOpen(false)}
             title="Close"

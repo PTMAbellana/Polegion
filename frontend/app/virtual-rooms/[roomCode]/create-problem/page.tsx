@@ -7,9 +7,6 @@ import Toolbox from "./components/Toolbox";
 import DifficultyDropdown from "./components/DifficultyDropdown";
 import MainArea from "./components/MainArea";
 import PromptBox from "./components/PromptBox";
-import SquareShape from "./shapes/SquareShape";
-import CircleShape from "./shapes/CircleShape";
-import TriangleShape from "./shapes/TriangleShape";
 import Timer from "./components/Timer";
 import LimitAttempts from "./components/LimitAttempts";
 import SetVisibility from "./components/SetVisibility";
@@ -29,6 +26,7 @@ interface Problem {
   timer?: number | null
   hint?: string | null
 }
+
 const FILL_COLORS = [
   "#ffadad", "#ffd6a5", "#fdffb6", "#caffbf",
   "#9bf6ff", "#a0c4ff", "#bdb2ff", "#ffc6ff", "#E3DCC2"
@@ -55,22 +53,11 @@ export default function CreateProblem({ params }: { params: Promise<{ roomCode: 
   }, [params]);
 
   const [problems, setProblems] = useState<Problem[]>([]);
-  const [problemId, setProblemId] = useState<string | null>(null);  // para edit problem
+  const [problemId, setProblemId] = useState<string | null>(null);
   const [title, setTitle] = useState("");
 
   const [shapes, setShapes] = useState<any[]>([]);
   const [selectedId, setSelectedId] = useState<number | null>(null);
-  const [scale, setScale] = useState(1);
-
-  const [draggingVertex, setDraggingVertex] = useState<{ shapeId: number; vertex: number } | null>(null);
-  const [draggingShapeId, setDraggingShapeId] = useState<number | null>(null);
-  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
-
-  const draggingSideRef = useRef<{
-    shapeId: number;
-    points: (keyof any["shape"]["points"])[];
-    start: { x: number; y: number };
-  } | null>(null);
 
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -79,8 +66,6 @@ export default function CreateProblem({ params }: { params: Promise<{ roomCode: 
   const [prompt, setPrompt] = useState("");
   const [editingPrompt, setEditingPrompt] = useState(false);
   const promptInputRef = useRef<HTMLTextAreaElement>(null);
-
-  const mainAreaRef = useRef<HTMLDivElement>(null);
 
   const [fillMode, setFillMode] = useState(false);
   const [fillColor, setFillColor] = useState("#E3DCC2");
@@ -127,297 +112,6 @@ export default function CreateProblem({ params }: { params: Promise<{ roomCode: 
     fetchProblems();
   }, [fetchProblems]);
 
-
-  const handleShapeMouseDown = (id: number, e: React.MouseEvent) => {
-    e.stopPropagation();
-
-    const shape = shapes.find(s => s.id === id);
-    if (!shape) return;
-
-    const rect = mainAreaRef.current?.getBoundingClientRect();
-    if (!rect) return;
-
-    // ✅ Handle circle dragging
-    if (shape.type === "circle") {
-      const offsetX = e.clientX - rect.left - shape.x;
-      const offsetY = e.clientY - rect.top - shape.y;
-
-      setDraggingShapeId(id);
-      setDragOffset({ x: offsetX, y: offsetY });
-      return;
-    }
-
-    // ✅ Handle triangle dragging
-    if (shape.type === "triangle" && shape.points?.top) {
-      const referencePoint = shape.points.top; // Use top as reference for triangles
-      const offsetX = e.clientX - rect.left - referencePoint.x;
-      const offsetY = e.clientY - rect.top - referencePoint.y;
-
-      setDraggingShapeId(id);
-      setDragOffset({ x: offsetX, y: offsetY });
-      return;
-    }
-
-    // ✅ Handle square dragging
-    if (shape.type === "square" && shape.points?.topLeft) {
-      const offsetX = e.clientX - rect.left - shape.points.topLeft.x;
-      const offsetY = e.clientY - rect.top - shape.points.topLeft.y;
-
-      setDraggingShapeId(id);
-      setDragOffset({ x: offsetX, y: offsetY });
-      return;
-    }
-  };
-
-  const handleCircleResizeMouseDown = (id: number, e: React.MouseEvent) => {
-    e.stopPropagation();
-
-    const shape = shapes.find((s) => s.id === id);
-    if (!shape) return;
-
-    const startX = e.clientX;
-    const startSize = shape.size;
-    const MIN_CIRCLE_SIZE = 80; // Increased from 20 to 40
-
-    const handleMouseMove = (moveEvent: MouseEvent) => {
-      const dx = moveEvent.clientX - startX;
-      const newSize = Math.max(MIN_CIRCLE_SIZE, startSize + dx);
-
-      setShapes((prevShapes) =>
-        prevShapes.map((s) =>
-          s.id === id ? { ...s, size: newSize } : s
-        )
-      );
-    };
-
-    const handleMouseUp = () => {
-      window.removeEventListener("mousemove", handleMouseMove);
-      window.removeEventListener("mouseup", handleMouseUp);
-    };
-
-    window.addEventListener("mousemove", handleMouseMove);
-    window.addEventListener("mouseup", handleMouseUp);
-  };
-
-  const handleVertexMouseDown = (shapeId: number, vertex: number) => {
-    setDraggingVertex({ shapeId, vertex });
-  };
-
-  const handleSideMouseDown = (
-    shapeId: number,
-    points: (keyof any["points"])[],
-    e: React.MouseEvent
-  ) => {
-    e.stopPropagation();
-
-    const rect = mainAreaRef.current?.getBoundingClientRect();
-    if (!rect) return;
-
-    const mouseX = e.clientX - rect.left;
-    const mouseY = e.clientY - rect.top;
-
-    draggingSideRef.current = {
-      shapeId,
-      points,
-      start: { x: mouseX, y: mouseY },
-    };
-  };
-
-
-  const handleVertexDrag = (
-    shapeId: number,
-    vertexKey: keyof any["points"],
-    newPos: { x: number; y: number }
-  ) => {
-    setShapes((prevShapes) =>
-      prevShapes.map((shape) => {
-        if (shape.id !== shapeId || !shape.points) return shape;
-
-        // Handle triangle points
-        if (shape.type === "triangle") {
-          const updatedPoints = { ...shape.points, [vertexKey]: newPos };
-          return { ...shape, points: updatedPoints };
-        }
-
-        // Handle square points
-        if (shape.type === "square") {
-          const updatedPoints = { ...shape.points, [vertexKey]: newPos };
-          const pointArray = [
-            updatedPoints.topLeft,
-            updatedPoints.topRight,
-            updatedPoints.bottomRight,
-            updatedPoints.bottomLeft,
-          ];
-
-          // ...existing self-intersecting logic...
-
-          return { ...shape, points: updatedPoints };
-        }
-
-        return shape;
-      })
-    );
-  };
-
-  useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      const rect = mainAreaRef.current?.getBoundingClientRect();
-      if (!rect) return;
-
-      const mouseX = e.clientX - rect.left;
-      const mouseY = e.clientY - rect.top;
-
-      if (draggingVertex) {
-        setShapes(prev =>
-          prev.map(s => {
-            if (s.id === draggingVertex.shapeId) {
-              const newPoints = { ...s.points };
-              newPoints[draggingVertex.vertex] = { x: mouseX, y: mouseY };
-              return { ...s, points: newPoints };
-            }
-            return s;
-          })
-        );
-      }
-
-      const draggingSide = draggingSideRef.current;
-      if (draggingSide) {
-        const dx = mouseX - draggingSide.start.x;
-        const dy = mouseY - draggingSide.start.y;
-
-        setShapes(prev =>
-          prev.map(s => {
-            if (s.id === draggingSide.shapeId) {
-              const newPoints = { ...s.points };
-              draggingSide.points.forEach(key => {
-                newPoints[key] = {
-                  x: newPoints[key].x + dx,
-                  y: newPoints[key].y + dy
-                };
-              });
-              return { ...s, points: newPoints };
-            }
-            return s;
-          })
-        );
-
-        draggingSideRef.current = {
-          ...draggingSide,
-          start: { x: mouseX, y: mouseY },
-        };
-      }
-    };
-
-    const handleMouseUp = () => {
-      setDraggingVertex(null);
-      draggingSideRef.current = null;
-    };
-
-    window.addEventListener("mousemove", handleMouseMove);
-    window.addEventListener("mouseup", handleMouseUp);
-    return () => {
-      window.removeEventListener("mousemove", handleMouseMove);
-      window.removeEventListener("mouseup", handleMouseUp);
-    };
-  }, [draggingVertex]);
-
-  // ✅ NEW USEEFFECT FOR DRAGGING WHOLE SHAPE
-  useEffect(() => {
-    const handleMoveShape = (e: MouseEvent) => {
-      if (draggingShapeId !== null) {
-        const rect = mainAreaRef.current?.getBoundingClientRect();
-        if (!rect) return;
-
-        const mouseX = e.clientX - rect.left;
-        const mouseY = e.clientY - rect.top;
-
-        const newTopLeftX = mouseX - dragOffset.x;
-        const newTopLeftY = mouseY - dragOffset.y;
-
-        const snap = (value: number, step = 1) => Math.round(value / step) * step;
-
-        setShapes(prev =>
-          prev.map(s => {
-            if (s.id !== draggingShapeId) return s;
-
-            if (s.type === "triangle" && s.points?.top) {
-              const referencePoint = s.points.top;
-
-              const offsetPoints = Object.entries(s.points).map(([key, pt]) => ({
-                key,
-                dx: pt.x - referencePoint.x,
-                dy: pt.y - referencePoint.y,
-              }));
-
-              const newPoints = Object.fromEntries(
-                offsetPoints.map(({ key, dx, dy }) => [
-                  key,
-                  {
-                    x: snap(newTopLeftX + dx, 1),
-                    y: snap(newTopLeftY + dy, 1),
-                  },
-                ])
-              );
-
-              return { ...s, points: newPoints };
-            }
-
-            // ✅ Handle square (uses topLeft as reference)
-            if (s.points?.topLeft) {
-              const offsetPoints = Object.entries(s.points).map(([key, pt]) => ({
-                key,
-                dx: pt.x - s.points.topLeft.x,
-                dy: pt.y - s.points.topLeft.y,
-              }));
-
-              const newPoints = Object.fromEntries(
-                offsetPoints.map(({ key, dx, dy }) => [
-                  key,
-                  { x: newTopLeftX + dx, y: newTopLeftY + dy },
-                ])
-              );
-
-              return { ...s, points: newPoints };
-            }
-
-            // ✅ Handle circle
-            if (s.type === "circle") {
-              return { ...s, x: newTopLeftX, y: newTopLeftY };
-            }
-
-            return s;
-          })
-        );
-      }
-    };
-
-    const stopDragging = (e: MouseEvent) => {
-      if (draggingShapeId !== null && mainAreaRef.current) {
-        const rect = mainAreaRef.current.getBoundingClientRect();
-        const mouseX = e.clientX;
-        const mouseY = e.clientY;
-
-        // Check if mouse is outside main area
-        if (
-          mouseX < rect.left || mouseX > rect.right ||
-          mouseY < rect.top || mouseY > rect.bottom
-        ) {
-          // Remove the shape from shapes array
-          setShapes(prev => prev.filter(s => s.id !== draggingShapeId));
-        }
-      }
-      setDraggingShapeId(null);
-    };
-
-    window.addEventListener("mousemove", handleMoveShape);
-    window.addEventListener("mouseup", stopDragging);
-
-    return () => {
-      window.removeEventListener("mousemove", handleMoveShape);
-      window.removeEventListener("mouseup", stopDragging);
-    };
-  }, [draggingShapeId, dragOffset, mainAreaRef]);
-
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -429,19 +123,6 @@ export default function CreateProblem({ params }: { params: Promise<{ roomCode: 
   }, []);
 
   useEffect(() => {
-    const handleResize = () => {
-      const w = window.innerWidth;
-      const h = window.innerHeight;
-      const scaleW = w / 1920;
-      const scaleH = h / 1080;
-      setScale(Math.min(scaleW, scaleH));
-    };
-    handleResize();
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-
-  useEffect(() => {
     if (editingPrompt && promptInputRef.current) {
       promptInputRef.current.focus();
     }
@@ -449,7 +130,6 @@ export default function CreateProblem({ params }: { params: Promise<{ roomCode: 
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Only delete shape if NOT focused on input/textarea
       const active = document.activeElement;
       const isInput =
         active &&
@@ -480,96 +160,12 @@ export default function CreateProblem({ params }: { params: Promise<{ roomCode: 
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [selectedId]);
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      const rect = mainAreaRef.current?.getBoundingClientRect();
-      if (!rect) return;
-
-      setShapes((prev) =>
-        prev.filter((s) => {
-          const referencePoint = s.points?.topLeft || s.points?.center || { x: s.x, y: s.y };
-
-          return (
-            referencePoint.x > -80 &&
-            referencePoint.y > -80 &&
-            referencePoint.x < rect.width + 80 &&
-            referencePoint.y < rect.height + 80
-          );
-        })
-      );
-    }, 1000); // every second
-
-    return () => clearInterval(interval);
-  }, []);
-
   const handleDragStart = (type: string) => (e: React.DragEvent) => {
     e.dataTransfer.setData("shape-type", type);
   };
 
   const pxToUnits = (px: number): number => {
     return px / 10;
-  };
-
-  const renderShape = (shape) => {
-    const commonProps = {
-      shape,
-      isSelected: selectedId === shape.id,
-      pxToUnits,
-      handleShapeMouseDown,
-      setSelectedId,
-      fillMode,
-      draggingFill,
-      scale,
-    };
-
-    switch (shape.type) {
-      case "square":
-        return (
-          <SquareShape
-            key={shape.id}
-            {...commonProps}
-            showProperties={showProperties}
-            showAngles={showAngles}
-            showSides={showSides}
-            showArea={showAreaByShape.square}
-            onVertexMouseDown={(vertex) =>
-              setDraggingVertex({ shapeId: shape.id, vertex })
-            }
-            onSideMouseDown={handleSideMouseDown}
-            handleVertexDrag={handleVertexDrag}
-          />
-        );
-      case "circle":
-        return (
-          <CircleShape
-            key={shape.id}
-            {...commonProps}
-            handleCircleResizeMouseDown={handleCircleResizeMouseDown}
-            showDiameter={showDiameter}
-            showCircumference={showCircumference}
-            showArea={showAreaByShape.circle}
-          />
-        );
-      case "triangle":
-        return (
-          <TriangleShape
-            key={shape.id}
-            {...commonProps}
-            handleResizeMouseDown={() => { }}
-            showSides={showSides}
-            showAngles={showAngles}
-            showArea={showAreaByShape.triangle}
-            showHeight={showHeight}
-            onShapeMove={(updatedShape) => {
-              setShapes(prevShapes =>
-                prevShapes.map(s => s.id === updatedShape.id ? updatedShape : s)
-              );
-            }}
-          />
-        );
-      default:
-        return null;
-    }
   };
 
   const handleSave = async () => {
@@ -579,7 +175,7 @@ export default function CreateProblem({ params }: { params: Promise<{ roomCode: 
     const payload = {
       title,
       description: prompt,
-      expected_solution: shapesWithProps, // <-- now includes all properties
+      expected_solution: shapesWithProps,
       difficulty,
       visibility: visible ? "show" : "hide",
       max_attempts: limitAttempts,
@@ -617,7 +213,6 @@ export default function CreateProblem({ params }: { params: Promise<{ roomCode: 
           confirmButtonText: "OK",
         }; 
       } else {
-        // api for edit problem
         console.log("Editing problem with ID:", problemId);
         await updateProblem(problemId, payload);
         message = {
@@ -627,7 +222,7 @@ export default function CreateProblem({ params }: { params: Promise<{ roomCode: 
           confirmButtonText: "OK",
         }; 
       }
-      await fetchProblems(); // Refresh problems after saving
+      await fetchProblems();
       Swal.fire(message);
     } catch (error) {
       console.error("Save error:", error);
@@ -652,7 +247,6 @@ export default function CreateProblem({ params }: { params: Promise<{ roomCode: 
   const handleDeleteProblem = async (problemId: string) => {
     if (!confirm("Are you sure you want to delete this problem?")) return;
     try {
-      // Call API to delete the problem
       await deleteProblem(problemId);
       setProblems(prev => prev.filter(p => p.id !== problemId));
     } catch (error) {
@@ -671,12 +265,11 @@ export default function CreateProblem({ params }: { params: Promise<{ roomCode: 
     setShapes(problem.expected_solution || []);
     console.log("Loaded shapes for edit:", problem.expected_solution);
     setDifficulty(problem.difficulty || "Easy");
-    setShowLimitPopup(problem.max_attempts !== null && problem.max_attempts !== undefined);
+    
     setLimitAttempts(problem.max_attempts || 1);
-    // Timer: open if timer is not null/undefined (even if 0)
+    
     setTimerOpen(problem.timer !== null && problem.timer !== undefined);
     setTimerValue(typeof problem.timer === 'number' ? problem.timer : 5);
-    // Hint: open if hint is not null/undefined (even if empty string)
     setHintOpen(problem.hint !== null && problem.hint !== undefined);
     setHint(problem.hint ?? "");
     setVisible(problem.visibility === "show");
@@ -691,9 +284,8 @@ export default function CreateProblem({ params }: { params: Promise<{ roomCode: 
         Math.sqrt((topRight.x - bottomRight.x) ** 2 + (topRight.y - bottomRight.y) ** 2),
         Math.sqrt((bottomRight.x - bottomLeft.x) ** 2 + (bottomRight.y - bottomLeft.y) ** 2),
         Math.sqrt((bottomLeft.x - topLeft.x) ** 2 + (bottomLeft.y - topLeft.y) ** 2),
-      ].map(l => +(l / 10).toFixed(2)); // convert px to units
+      ].map(l => +(l / 10).toFixed(2));
 
-      // Area (shoelace formula)
       const area =
         0.5 *
         Math.abs(
@@ -720,14 +312,12 @@ export default function CreateProblem({ params }: { params: Promise<{ roomCode: 
 
     if (shape.type === "triangle" && shape.points) {
       const pts = [shape.points.top, shape.points.left, shape.points.right];
-      // Side lengths in units
       const sideLengths = [
         Math.sqrt((pts[0].x - pts[1].x) ** 2 + (pts[0].y - pts[1].y) ** 2) / 10,
         Math.sqrt((pts[1].x - pts[2].x) ** 2 + (pts[1].y - pts[2].y) ** 2) / 10,
         Math.sqrt((pts[2].x - pts[0].x) ** 2 + (pts[2].y - pts[0].y) ** 2) / 10,
       ].map(l => +l.toFixed(2));
 
-      // Area (shoelace formula, in units)
       const area =
         Math.abs(
           (pts[0].x * (pts[1].y - pts[2].y) +
@@ -735,11 +325,9 @@ export default function CreateProblem({ params }: { params: Promise<{ roomCode: 
             pts[2].x * (pts[0].y - pts[1].y)) / 2
         ) / 100;
 
-      // Height from top vertex to base (in units)
       const baseLength = sideLengths[1];
       const height = +(2 * area / baseLength).toFixed(2);
 
-      // Angles (Law of Cosines)
       function dist(a, b) {
         return Math.sqrt((a.x - b.x) ** 2 + (a.y - b.y) ** 2) / 10;
       }
@@ -769,42 +357,29 @@ export default function CreateProblem({ params }: { params: Promise<{ roomCode: 
     return shape;
   }
 
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    const shapeType = e.dataTransfer.getData("shape-type");
-    
-    if (!shapeType) return;
+  const handleAllShapesDeleted = useCallback(() => {
+    setShowSides(false);
+    setShowAngles(false);
+    setShowArea(false);
+    setShowHeight(false);
+    setShowDiameter(false);
+    setShowCircumference(false);
+    setShowAreaByShape({
+      circle: false,
+      triangle: false,
+      square: false,
+    });
+  }, []);
 
-    // ✅ Check if we've reached the shape limit
-    if (shapeCount >= shapeLimit) {
-      onLimitReached(); // This shows the popup
-      return; // Don't add the shape
+  useEffect(() => {
+    if (shapes.length === 0) {
+      handleAllShapesDeleted();
     }
-
-    const rect = mainAreaRef.current?.getBoundingClientRect();
-    if (!rect) return;
-
-    // Get the exact drop position
-    const dropX = e.clientX - rect.left;
-    const dropY = e.clientY - rect.top;
-
-    const newShape = {
-      id: Date.now(),
-      type: shapeType,
-      color: "#e3dcc2",
-    };
-
-    // ...rest of your shape creation logic...
-
-    setShapes(prev => [...prev, newShape]);
-    setSelectedId(newShape.id);
-    setSelectedTool(null);
-  };
+  }, [shapes.length, handleAllShapesDeleted]);
 
   return (
     <div className={styles.root}>
       <div className={styles.scalableWorkspace}>
-        {/* Sidebar */}
         <div style={{ gridArea: "sidebar", display: "flex", flexDirection: "column", alignItems: "center" }}>
           <div style={{ width: "100%", display: "flex", flexDirection: "row", gap: 8, marginBottom: 16 }}>
             <div className={styles.goBackGroup}>
@@ -826,11 +401,8 @@ export default function CreateProblem({ params }: { params: Promise<{ roomCode: 
             showProperties={showProperties}
             setShowProperties={setShowProperties}
             handleDragStart={handleDragStart}
-
-            // Shape-specific display filters
             showAreaByShape={showAreaByShape}
             setShowAreaByShape={setShowAreaByShape}
-
             showSides={showSides}
             setShowSides={setShowSides}
             showAngles={showAngles}
@@ -844,7 +416,6 @@ export default function CreateProblem({ params }: { params: Promise<{ roomCode: 
           />
         </div>
 
-        {/* Main Column */}
         <div className={styles.mainColumn}>
           <div style={{ height: 32 }} />
           <div className={styles.formRow}>
@@ -859,11 +430,11 @@ export default function CreateProblem({ params }: { params: Promise<{ roomCode: 
               promptInputRef={promptInputRef}
             />
           </div>
+          
           <MainArea
-            mainAreaRef={mainAreaRef}
             shapes={shapes}
-            renderShape={renderShape}
             setShapes={setShapes}
+            selectedId={selectedId}
             setSelectedId={setSelectedId}
             setSelectedTool={setSelectedTool}
             saveButton={
@@ -874,7 +445,16 @@ export default function CreateProblem({ params }: { params: Promise<{ roomCode: 
             shapeLimit={MAX_SHAPES}
             shapeCount={shapes.length}
             onLimitReached={() => setShowLimitPopup(true)}
+            onAllShapesDeleted={handleAllShapesDeleted}
+            pxToUnits={pxToUnits}
+            showAreaByShape={showAreaByShape}
+            showSides={showSides}
+            showAngles={showAngles}
+            showDiameter={showDiameter}
+            showCircumference={showCircumference}
+            showHeight={showHeight}
           />
+          
           <div className={styles.controlsRow}>
             <div style={{ display: "flex", gap: 12 }}>
               <LimitAttempts limit={limitAttempts} setLimit={setLimitAttempts} />
@@ -907,7 +487,7 @@ export default function CreateProblem({ params }: { params: Promise<{ roomCode: 
             </div>
           </div>
         </div>
-        {/* Right Sidebar - Existing Problems */}
+
         <div className={styles.problemsSection}>
           <div className={styles.problemsSectionHeader}>
             Existing Problems

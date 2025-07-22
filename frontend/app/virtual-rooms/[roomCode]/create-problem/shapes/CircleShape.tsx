@@ -1,240 +1,374 @@
 import React from "react";
+import { Circle, Line, Group, Text, Rect } from "react-konva";
 
 function snap(value: number, step = 1) {
   return Math.round(value / step) * step;
 }
 
-export default function CircleShape({
+interface CircleShapeProps {
+  shape: {
+    id: number;
+    x: number;
+    y: number;
+    size: number;
+    fill?: string;
+  };
+  isSelected: boolean;
+  onSelect: () => void;
+  onChange: (shape: any) => void;
+  onResize: (id: number, newSize: number) => void;
+  pxToUnits: (px: number) => string;
+  showDiameter: boolean;
+  showCircumference: boolean; // Add this prop
+  showAreaByShape: { circle: boolean; triangle: boolean; square: boolean };
+}
+
+const CircleShape: React.FC<CircleShapeProps> = ({
   shape,
   isSelected,
+  onSelect,
+  onChange,
+  onResize,
   pxToUnits,
-  handleShapeMouseDown,
-  setSelectedId,
-  handleShapeDrop,
-  handleCircleResizeMouseDown,
-  fillMode,
-  draggingFill,
-  scale,
   showDiameter,
   showCircumference,
-  showArea,
-}: any) {
-  const size = shape.size;
-  const labelYOffset = -size * 0.18;
-  const r = size / 2;
-  const handleX = size - 9;
-  const handleY = r - 9;
-
-  const unitLabel = typeof pxToUnits === "function" ? pxToUnits(size) : "0";
+  showAreaByShape,
+}) => {
+  const radius = shape.size / 2;
+  
+  // Size constraints for circle
+  const MIN_SIZE = 40;
+  const MAX_SIZE = 300;
+  
+  // Calculate measurements
+  const unitLabel = pxToUnits(shape.size);
   const unitDiameter = parseFloat(unitLabel.toString().match(/[\d.]+/)?.[0] || "0");
   const unitRadius = unitDiameter / 2;
-  const diameter = unitDiameter;
-  const circumference = 2 * Math.PI * unitRadius;
-  const area = Math.PI * Math.pow(unitRadius, 2);
+  const unitArea = Math.PI * unitRadius * unitRadius;
+  const unitCircumference = Math.PI * unitDiameter;
 
-  // Add snapping to move
-  const handleMove = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    e.preventDefault();
-
-    const startX = e.clientX;
-    const startY = e.clientY;
-    const startShape = { ...shape };
-
-    function onMouseMove(me: MouseEvent) {
-      const dx = me.clientX - startX;
-      const dy = me.clientY - startY;
-      const snappedX = snap(startShape.x + dx, 1);
-      const snappedY = snap(startShape.y + dy, 1);
-      shape.x = snappedX;
-      shape.y = snappedY;
-    }
-
-    function onMouseUp() {
-      document.removeEventListener("mousemove", onMouseMove);
-      document.removeEventListener("mouseup", onMouseUp);
-    }
-
-    document.addEventListener("mousemove", onMouseMove);
-    document.addEventListener("mouseup", onMouseUp);
+  const handleDragEnd = (e: any) => {
+    const node = e.target;
+    const snappedX = snap(node.x(), 1);
+    const snappedY = snap(node.y(), 1);
+    
+    // Maintain your existing snapping logic
+    onChange({
+      ...shape,
+      x: snappedX,
+      y: snappedY
+    });
   };
+
+  const handleResizeMouseDown = (e: any) => {
+    e.cancelBubble = true;
+    
+    // Keep your existing resize logic with size limits
+    const startX = e.evt.clientX;
+    const startSize = shape.size;
+
+    const handleMouseMove = (moveEvent: MouseEvent) => {
+      const dx = moveEvent.clientX - startX;
+      let newSize = startSize + dx * 2;
+      
+      // Apply size constraints
+      newSize = Math.max(MIN_SIZE, Math.min(MAX_SIZE, newSize));
+      
+      onResize(shape.id, newSize);
+    };
+
+    const handleMouseUp = () => {
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseup", handleMouseUp);
+    };
+
+    document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("mouseup", handleMouseUp);
+  };
+
+  // Check if circle is at size limits for visual feedback
+  const isAtMinSize = shape.size <= MIN_SIZE;
+  const isAtMaxSize = shape.size >= MAX_SIZE;
 
   return (
     <>
-      {/* Main Circle Shape */}
-      <div
-        style={{
-          position: "absolute",
-          left: shape.x - size / 2,
-          top: shape.y - size / 2,
-          width: size,
-          height: size,
-          cursor: "move",
-          zIndex: isSelected ? 10 : 2,
-          userSelect: "none",
-        }}
-        onMouseDown={(e) => handleShapeMouseDown(shape.id, e)}
+      {/* Main Shape Group - Only contains the shape elements */}
+      <Group
+        x={shape.x}
+        y={shape.y}
+        draggable
+        onDragEnd={handleDragEnd}
         onClick={(e) => {
-          e.stopPropagation();
-          setSelectedId(shape.id);
+          e.cancelBubble = true;
+          onSelect();
         }}
-        onDragOver={(e) => {
-          if (fillMode && draggingFill) {
-            e.preventDefault();
-            e.dataTransfer.dropEffect = "copy";
-          }
-        }}
-        onDrop={handleShapeDrop}
       >
-        <div
-          style={{
-            width: "100%",
-            height: "100%",
-            background: shape.fill || "#e3dcc2",
-            border: "6px solid #000",
-            borderRadius: "50%",
-            position: "relative",
-          }}
-        >
-          {isSelected && (
-            <>
-              {/* Diameter line */}
-              <svg
-                width={size}
-                height={size}
-                style={{
-                  position: "absolute",
-                  left: 0,
-                  top: 0,
-                  pointerEvents: "none",
-                  zIndex: 2,
-                }}
-              >
-                <line
-                  x1={0}
-                  y1={size / 2 - 4}
-                  x2={size}
-                  y2={size / 2 - 4}
-                  stroke="#222"
-                  strokeWidth={3}
+        {/* Main Circle */}
+        <Circle
+          radius={radius}
+          fill={shape.fill || "#e3dcc2"}
+          stroke="#000"
+          strokeWidth={6}
+        />
+
+        {/* Diameter line */}
+        {isSelected && (
+          <Line
+            points={[-radius, 0, radius, 0]}
+            stroke="#222"
+            strokeWidth={3}
+          />
+        )}
+
+        {/* Resize handle with visual feedback for size limits */}
+        {isSelected && (
+          <Circle
+            x={radius + 15}
+            y={0}
+            radius={9}
+            fill={isAtMaxSize ? "#e74c3c" : isAtMinSize ? "#f39c12" : "#2c514c"}
+            stroke="#fff"
+            strokeWidth={2}
+            draggable={false}
+            onMouseDown={handleResizeMouseDown}
+            onMouseEnter={(e) => {
+              const container = e.target.getStage()?.container();
+              if (container) {
+                if (isAtMaxSize || isAtMinSize) {
+                  container.style.cursor = "not-allowed";
+                } else {
+                  container.style.cursor = "ew-resize";
+                }
+              }
+            }}
+            onMouseLeave={(e) => {
+              const container = e.target.getStage()?.container();
+              if (container) container.style.cursor = "default";
+            }}
+          />
+        )}
+
+        {/* Size limit indicator */}
+        {isSelected && (isAtMinSize || isAtMaxSize) && (
+          <Group>
+            <Rect
+              x={-40}
+              y={radius + 15}
+              width={80}
+              height={18}
+              fill={isAtMaxSize ? "#e74c3c" : "#f39c12"}
+              stroke="#fff"
+              strokeWidth={1}
+              cornerRadius={9}
+            />
+            <Text
+              x={0}
+              y={radius + 20}
+              text={isAtMaxSize ? "MAX SIZE" : "MIN SIZE"}
+              fontSize={10}
+              fontFamily="Arial"
+              fill="#fff"
+              fontStyle="bold"
+              align="center"
+              offsetX={40}
+              width={80}
+            />
+          </Group>
+        )}
+
+        {/* Diameter label */}
+        {isSelected && showDiameter && (
+          <Group>
+            <Rect
+              x={-35}
+              y={-10}
+              width={70}
+              height={20}
+              fill="white"
+              stroke="#1864ab"
+              strokeWidth={1}
+              cornerRadius={4}
+            />
+            <Text
+              x={0}
+              y={-5}
+              text={`Ø: ${unitDiameter.toFixed(2)} u`}
+              fontSize={12}
+              fontFamily="Arial"
+              fill="#1864ab"
+              fontStyle="bold"
+              align="center"
+              offsetX={35}
+              width={70} 
+            />
+          </Group>
+        )}
+
+        {/* Circumference label */}
+        {isSelected && showCircumference && (
+          <Group>
+            <Rect
+              x={-45}
+              y={radius + 35}
+              width={90}
+              height={20}
+              fill="white"
+              stroke="#e67e22"
+              strokeWidth={1}
+              cornerRadius={4}
+            />
+            <Text
+              x={0}
+              y={radius + 40}
+              text={`C: ${unitCircumference.toFixed(2)} u`}
+              fontSize={12}
+              fontFamily="Arial"
+              fill="#e67e22"
+              fontStyle="bold"
+              align="center"
+              offsetX={45}
+              width={90}
+            />
+          </Group>
+        )}
+      </Group>
+
+      {/* FIXED OVERLAYS - Outside the Group, absolutely positioned */}
+      {/* Area Formula Display - FIXED POSITION */}
+      {showAreaByShape.circle && isSelected && (
+        <>
+          {(() => {
+            const formulaText = "Area = π × r²";
+            const calculationText = `A = π × ${unitRadius.toFixed(2)}² = ${unitArea.toFixed(2)} u²`;
+            const formulaWidth = Math.max(formulaText.length * 8, calculationText.length * 7) + 20;
+
+            return (
+              <>
+                {/* ABSOLUTE Position - Not affected by shape movement */}
+                <Rect
+                  x={50} // Fixed absolute position
+                  y={70} // Fixed absolute position
+                  width={formulaWidth}
+                  height={85}
+                  cornerRadius={8}
+                  fill="white"
+                  stroke="#2c514c"
+                  strokeWidth={2}
+                  shadowColor="rgba(0,0,0,0.1)"
+                  shadowBlur={4}
+                  shadowOffset={{ x: 2, y: 2 }}
+                  shadowOpacity={1}
                 />
-              </svg>
-
-              {/* Resize handle */}
-              <div
-                style={{
-                  position: "absolute",
-                  left: handleX,
-                  top: handleY,
-                  width: 18,
-                  height: 18,
-                  background: "#2c514c",
-                  border: "2px solid #fff",
-                  borderRadius: "50%",
-                  zIndex: 20,
-                  boxShadow: "0 0 4px #0002",
-                  cursor: "ew-resize",
-                  transition: "cursor 0.1s",
-                }}
-                onMouseDown={(e) => handleCircleResizeMouseDown(shape.id, e)}
-                title="Drag horizontally to resize"
-              />
-            </>
-          )}
-
-          {/* ✅ FIXED: Diameter Display at Center of Circle */}
-          {isSelected && showDiameter && (
-            <div
-              style={{
-                position: "absolute",
-                left: "50%",
-                top: "50%",
-                transform: "translate(-50%, -50%)",
-                background: "white",
-                border: "1px solid #1864ab",
-                borderRadius: "4px",
-                padding: "4px 8px",
-                fontSize: "12px",
-                fontWeight: "600",
-                color: "#1864ab",
-                zIndex: 15,
-                whiteSpace: "nowrap",
-                userSelect: "none",
-                pointerEvents: "none",
-                boxShadow: "1px 1px 3px rgba(0,0,0,0.2)",
-              }}
-            >
-              Ø: {diameter.toFixed(2)} u
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* ✅ FIXED: Area Display - Top Left of Main Area */}
-      {isSelected && showArea && (
-        <div
-          style={{
-            position: "absolute",
-            left: "50px",
-            top: "70px", // ✅ Fixed position - always at top
-            background: "white",
-            border: "2px solid #2c514c",
-            borderRadius: "8px",
-            padding: "10px 15px",
-            fontSize: "13px",
-            fontWeight: "700",
-            color: "#2c514c",
-            zIndex: 1000,
-            boxShadow: "2px 2px 4px rgba(0,0,0,0.1)",
-            whiteSpace: "nowrap",
-            userSelect: "none",
-            pointerEvents: "none",
-          }}
-        >
-          <div style={{ marginBottom: "5px", fontSize: "11px", color: "#666" }}>
-            Area Formula
-          </div>
-          <div style={{ fontSize: "10px", color: "#666", fontStyle: "italic", marginBottom: "3px" }}>
-            A = π × r²
-          </div>
-          <div style={{ fontSize: "10px", color: "#1864ab", fontWeight: "600" }}>
-            A = π × {unitRadius.toFixed(2)}² = {area.toFixed(2)} u²
-          </div>
-        </div>
+                
+                <Text
+                  x={50 + formulaWidth/2} // Absolute positioning
+                  y={85}
+                  text="Area Formula"
+                  fontSize={13}
+                  fill="#2c514c"
+                  align="center"
+                  fontStyle="bold"
+                  offsetX={formulaWidth/2}
+                  width={formulaWidth}
+                />
+                
+                <Text
+                  x={50 + formulaWidth/2}
+                  y={105}
+                  text={formulaText}
+                  fontSize={11}
+                  fill="#666"
+                  align="center"
+                  fontStyle="italic"
+                  offsetX={formulaWidth/2}
+                  width={formulaWidth}
+                />
+                
+                <Text
+                  x={50 + formulaWidth/2}
+                  y={125}
+                  text={calculationText}
+                  fontSize={10}
+                  fill="#1864ab"
+                  align="center"
+                  fontStyle="bold"
+                  offsetX={formulaWidth/2}
+                  width={formulaWidth}
+                />
+              </>
+            );
+          })()}
+        </>
       )}
 
-      {/* ✅ FIXED: Circumference Display - Below Area */}
-      {isSelected && showCircumference && (
-        <div
-          style={{
-            position: "absolute",
-            left: "50px",
-            top: "160px", // ✅ Fixed position - always below area
-            background: "white",
-            border: "2px solid #ff6b35",
-            borderRadius: "8px",
-            padding: "10px 15px",
-            fontSize: "13px",
-            fontWeight: "700",
-            color: "#ff6b35",
-            zIndex: 1000,
-            boxShadow: "2px 2px 4px rgba(0,0,0,0.1)",
-            whiteSpace: "nowrap",
-            userSelect: "none",
-            pointerEvents: "none",
-          }}
-        >
-          <div style={{ marginBottom: "5px", fontSize: "11px", color: "#666" }}>
-            Circumference Formula
-          </div>
-          <div style={{ fontSize: "10px", color: "#666", fontStyle: "italic", marginBottom: "3px" }}>
-            C = 2 × π × r
-          </div>
-          <div style={{ fontSize: "10px", color: "#ff6b35", fontWeight: "600" }}>
-            C = 2 × π × {unitRadius.toFixed(2)} = {circumference.toFixed(2)} u
-          </div>
-        </div>
+      {/* Circumference Formula Display - FIXED POSITION */}
+      {showCircumference && isSelected && (
+        <>
+          {(() => {
+            const formulaText = "Circumference = 2 × π × r";
+            const calculationText = `C = 2 × π × ${unitRadius.toFixed(2)} = ${unitCircumference.toFixed(2)} u`;
+            const formulaWidth = Math.max(formulaText.length * 8, calculationText.length * 7) + 20;
+
+            return (
+              <>
+                {/* ABSOLUTE Position - Not affected by shape movement */}
+                <Rect
+                  x={50} // Fixed absolute position
+                  y={170} // Fixed absolute position (below area box)
+                  width={formulaWidth}
+                  height={85}
+                  cornerRadius={8}
+                  fill="white"
+                  stroke="#ff6b35"
+                  strokeWidth={2}
+                  shadowColor="rgba(0,0,0,0.1)"
+                  shadowBlur={4}
+                  shadowOffset={{ x: 2, y: 2 }}
+                  shadowOpacity={1}
+                />
+                
+                <Text
+                  x={50 + formulaWidth/2} // Absolute positioning
+                  y={185}
+                  text="Circumference Formula"
+                  fontSize={13}
+                  fill="#ff6b35"
+                  align="center"
+                  fontStyle="bold"
+                  offsetX={formulaWidth/2}
+                  width={formulaWidth}
+                />
+                
+                <Text
+                  x={50 + formulaWidth/2}
+                  y={205}
+                  text="C = 2 × π × r"
+                  fontSize={11}
+                  fill="#666"
+                  align="center"
+                  fontStyle="italic"
+                  offsetX={formulaWidth/2}
+                  width={formulaWidth}
+                />
+                
+                <Text
+                  x={50 + formulaWidth/2}
+                  y={225}
+                  text={calculationText}
+                  fontSize={10}
+                  fill="#ff6b35"
+                  align="center"
+                  fontStyle="bold"
+                  offsetX={formulaWidth/2}
+                  width={formulaWidth}
+                />
+              </>
+            );
+          })()}
+        </>
       )}
     </>
   );
-}
+};
+
+export default CircleShape;
