@@ -197,47 +197,78 @@ class CompeService {
 
     async pauseCompetition(compe_id) {
         try {
-            const data = await this.compeRepo.updateGameplayIndicator(compe_id, 'PAUSE')
-            
-            // 🚀 SEND BROADCAST TO NOTIFY ALL CLIENTS
-            try {
-                const channel = supabase.channel(`competition-${compe_id}`)
-                await channel.send({
-                    type: 'broadcast',
-                    event: 'competition_update',
-                    payload: data
-                })
-                console.log(`⏸️ Competition ${compe_id} pause broadcasted successfully!`)
-            } catch (broadcastError) {
-                console.error('❌ Pause broadcast failed:', broadcastError)
+            // Get current competition to calculate remaining time
+            const competition = await this.compeRepo.getCompeByIdNoRoom(compe_id);
+            if (!competition) {
+                throw new Error("Competition not found");
             }
+
+            // Calculate time remaining when pausing
+            let timeRemaining = null;
+            if (competition.timer_started_at && competition.timer_duration) {
+                const startTime = new Date(competition.timer_started_at).getTime();
+                const now = Date.now();
+                const elapsed = Math.floor((now - startTime) / 1000); // seconds
+                timeRemaining = Math.max(0, competition.timer_duration - elapsed);
+            }
+
+            // Update to paused state with time remaining
+            const data = await this.compeRepo.updateTimeRemaining(compe_id, {
+                gameplay_indicator: 'PAUSE',
+                time_remaining: timeRemaining, // Store remaining time
+                updated_at: new Date().toISOString()
+            });
+
+            // Broadcast the pause update
+            const channel = supabase.channel(`competition-${compe_id}`);
+            await channel.send({
+                type: 'broadcast',
+                event: 'competition_update',
+                payload: data
+            });
             
-            return data
+            console.log(`⏸️ Competition ${compe_id} pause broadcasted successfully!`);
+            return data;
+            
         } catch (error) {
-            throw error
+            throw error;
         }
     }
 
     async resumeCompetition(compe_id) {
         try {
-            const data = await this.compeRepo.updateGameplayIndicator(compe_id, 'PLAY')
-            
-            // 🚀 SEND BROADCAST TO NOTIFY ALL CLIENTS
-            try {
-                const channel = supabase.channel(`competition-${compe_id}`)
-                await channel.send({
-                    type: 'broadcast',
-                    event: 'competition_update',
-                    payload: data
-                })
-                console.log(`▶️ Competition ${compe_id} resume broadcasted successfully!`)
-            } catch (broadcastError) {
-                console.error('❌ Resume broadcast failed:', broadcastError)
+            const competition = await this.compeRepo.getCompeByIdNoRoom(compe_id);
+            if (!competition) {
+                throw new Error("Competition not found");
             }
+
+            // When resuming, restart timer with remaining time
+            const now = new Date();
+            const timeRemaining = competition.time_remaining || 0;
+            const newEndTime = new Date(now.getTime() + (timeRemaining * 1000));
+
+            const data = await this.compeRepo.updateTimeRemaining(compe_id, {
+                gameplay_indicator: 'PLAY',
+                timer_started_at: now.toISOString(), // Restart timer from now
+                timer_duration: timeRemaining, // Use remaining time as duration
+                timer_end_at: newEndTime.toISOString(),
+                time_remaining: null, // Clear stored remaining time
+                updated_at: new Date().toISOString()
+            });
+
+            // Broadcast the resume update
+            const channel = supabase.channel(`competition-${compe_id}`);
+            await channel.send({
+                type: 'broadcast',
+                event: 'competition_update',
+                payload: data
+            });
             
-            return data
+            console.log(`▶️ Competition ${compe_id} resume broadcasted successfully!`);
+            return data;
+            
         } catch (error) {
-            throw error
+            throw error;
         }
     }
 

@@ -55,6 +55,7 @@ interface Competition {
   timer_started_at?: string;
   timer_duration?: number;
   timer_end_at?: string;
+  time_remaining?: number;
 }
 
 interface Problem {
@@ -702,43 +703,17 @@ const CompetitionDashboard = ({ params } : { params  : Promise<{competitionId : 
     setShowProperties(true);  
   }
 
-  // Calculate realtime countdown from timer_end_at
-  const [displayTimer, setDisplayTimer] = useState<number>(0);
+  // ✅ ADD: Use the proper timer hook (like the admin page)
+  const {
+    timeRemaining,
+    isTimerActive,
+    formattedTime,
+    isExpired
+  } = useCompetitionTimer(compe_id.competitionId, liveCompetition || competition);
 
-  // Debug function to test polling system
-  const handleDebugRealtime = async () => {
-    console.log('� [Student] Polling system status...');
-    
-    alert(`� STUDENT POLLING STATUS!\n\n✅ Using LIVE POLLING\n✅ Updates every 1.5 seconds\n✅ No connection issues!\n\nPoll count: ${pollCount}\nConnection: ${connectionStatus}\nParticipants: ${liveParticipants?.length || 0}\n\nWatch console for activity...`);
-    
-    // Show current status
-    console.log('📊 [Student] Current Status:', {
-      isConnected,
-      connectionStatus,
-      pollCount,
-      participants: liveParticipants?.length || 0,
-      competition: currentCompetition?.title || 'Not loaded'
-    });
-  };
-
-  useEffect(() => {
-    let interval: NodeJS.Timeout | null = null;
-    function updateTimer() {
-      if (currentCompetition?.timer_end_at) {
-        const end = new Date(currentCompetition.timer_end_at).getTime();
-        const now = Date.now();
-        const seconds = Math.max(0, Math.floor((end - now) / 1000));
-        setDisplayTimer(seconds);
-      } else {
-        setDisplayTimer(0);
-      }
-    }
-    updateTimer();
-    interval = setInterval(updateTimer, 1000);
-    return () => {
-      if (interval) clearInterval(interval);
-    };
-  }, [currentCompetition?.timer_end_at]);
+  // ❌ REMOVE: This manual timer state and useEffect
+  // const [displayTimer, setDisplayTimer] = useState<number>(0);
+  // useEffect(() => { ... manual timer logic ... }, [currentCompetition?.timer_end_at]);
 
   if (isLoading || authLoading) {
     return (
@@ -780,7 +755,7 @@ const CompetitionDashboard = ({ params } : { params  : Promise<{competitionId : 
                 className="ml-4"
               />
               {/* Debug Realtime Button */}
-              <button
+              {/* <button
                 onClick={handleDebugRealtime}
                 style={{
                   backgroundColor: '#ff6b35',
@@ -795,7 +770,7 @@ const CompetitionDashboard = ({ params } : { params  : Promise<{competitionId : 
                 title="Test realtime connection"
               >
                 🔧 Debug
-              </button>
+              </button> */}
             </div>
             <p className={styles.description}>
               Compete with your classmates and earn XP by solving problems!
@@ -803,19 +778,19 @@ const CompetitionDashboard = ({ params } : { params  : Promise<{competitionId : 
           </div>
         </div>
 
-        {/* Timer Section */}
+        {/* Timer Section - UPDATE to use the hook */}
         <div className={styles.timerSection}>
           <div className={styles.timerContent}>
             <div className={styles.timer}>
-              {`${String(Math.floor(displayTimer / 60)).padStart(2, '0')}:${String(displayTimer % 60).padStart(2, '0')}`}
+              {formattedTime} {/* ✅ Use formattedTime from hook instead of manual calculation */}
             </div>
             <div className={styles.timerStatus}>
               <span className={styles.timerLabel}>
-                {displayTimer === 0
+                {timeRemaining === 0 /* ✅ Use timeRemaining from hook */
                   ? 'No active problems'
                   : currentCompetition?.gameplay_indicator === 'PAUSE'
-                  ? 'Competition Paused'
-                  : 'Competition Active'}
+                  ? 'Competition Paused' 
+                  : isTimerActive ? 'Competition Active' : 'Timer Inactive'}
               </span>
             </div>
           </div>

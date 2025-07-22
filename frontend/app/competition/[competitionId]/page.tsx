@@ -42,6 +42,7 @@ interface Competition {
   timer_started_at?: string;
   timer_duration?: number;
   timer_end_at?: string;
+  time_remaining?: number;
 }
 
 interface CompeProblems {
@@ -477,77 +478,79 @@ return (
           )}
 
           {/* Available Problems Section */}
-          <div className={styles.participantsSection}>
-            <div className={styles.participantsHeader}>
-              <h2 className={styles.participantsTitle}>Available Problems</h2>
-            </div>
-            <div className={styles.participantsList}>
-              {problems.filter((problem) => !addedProblems.some(ap => ap.problem.id === problem.id) && problem.visibility === 'show').map((problem, index) => {
-                const canAdd = problem.timer && problem.timer > 0;
-                return (
-                  <div key={`available-problem-${problem.id}-${index}`} className={styles.participantCard}>
-                    <div className={styles.participantContent}>
-                      <div className={styles.participantLeft}>
-                        <div className={styles.participantRank}>{index + 1}</div>
-                        <div>
-                          <h3 className={styles.participantName}>{problem.title || 'No Title'}</h3>
+          {currentCompetition?.status !== 'ONGOING' && (
+            <div className={styles.participantsSection}>
+              <div className={styles.participantsHeader}>
+                <h2 className={styles.participantsTitle}>Available Problems</h2>
+              </div>
+              <div className={styles.participantsList}>
+                {problems.filter((problem) => !addedProblems.some(ap => ap.problem.id === problem.id) && problem.visibility === 'show').map((problem, index) => {
+                  const canAdd = problem.timer && problem.timer > 0;
+                  return (
+                    <div key={`available-problem-${problem.id}-${index}`} className={styles.participantCard}>
+                      <div className={styles.participantContent}>
+                        <div className={styles.participantLeft}>
+                          <div className={styles.participantRank}>{index + 1}</div>
+                          <div>
+                            <h3 className={styles.participantName}>{problem.title || 'No Title'}</h3>
+                          </div>
+                        </div>
+                        <div className={styles.participantRight}>
+                          {editingTimerId === problem.id ? (
+                            <>
+                              <input
+                                type="number"
+                                min={1}
+                                value={timerEditValue}
+                                onChange={e => setTimerEditValue(Number(e.target.value))}
+                                className={styles.timerInput}
+                              />
+                              <span>sec</span>
+                              <button
+                                onClick={() => handleSaveTimer(problem)}
+                                className={styles.saveBtn}
+                                title="Save timer"
+                              >
+                                Save
+                              </button>
+                              <button
+                                onClick={handleCancelEdit}
+                                className={styles.cancelBtn}
+                                title="Cancel"
+                              >
+                                Cancel
+                              </button>
+                            </>
+                          ) : (
+                            <>
+                              <div className={styles.participantXp}>
+                                {problem.timer != null && problem.timer > 0 ? `${problem.timer} seconds` : <span style={{ color: 'red' }}>No timer</span>}
+                              </div>
+                              <button
+                                className={styles.editButton}
+                                onClick={() => handleEditTimer(problem)}
+                                title="Edit timer"
+                              >
+                                <Edit3 className="w-5 h-5" />
+                              </button>
+                              <button
+                                className={styles.addBtn}
+                                disabled={!canAdd}
+                                onClick={() => handleAddProblem(problem)}
+                                title={!canAdd ? 'Cannot add without timer' : 'Add to competition'}
+                              >
+                                +
+                              </button>
+                            </>
+                          )}
                         </div>
                       </div>
-                      <div className={styles.participantRight}>
-                        {editingTimerId === problem.id ? (
-                          <>
-                            <input
-                              type="number"
-                              min={1}
-                              value={timerEditValue}
-                              onChange={e => setTimerEditValue(Number(e.target.value))}
-                              className={styles.timerInput}
-                            />
-                            <span>sec</span>
-                            <button
-                              onClick={() => handleSaveTimer(problem)}
-                              className={styles.saveBtn}
-                              title="Save timer"
-                            >
-                              Save
-                            </button>
-                            <button
-                              onClick={handleCancelEdit}
-                              className={styles.cancelBtn}
-                              title="Cancel"
-                            >
-                              Cancel
-                            </button>
-                          </>
-                        ) : (
-                          <>
-                            <div className={styles.participantXp}>
-                              {problem.timer != null && problem.timer > 0 ? `${problem.timer} seconds` : <span style={{ color: 'red' }}>No timer</span>}
-                            </div>
-                            <button
-                              className={styles.editButton}
-                              onClick={() => handleEditTimer(problem)}
-                              title="Edit timer"
-                            >
-                              <Edit3 className="w-5 h-5" />
-                            </button>
-                            <button
-                              className={styles.addBtn}
-                              disabled={!canAdd}
-                              onClick={() => handleAddProblem(problem)}
-                              title={!canAdd ? 'Cannot add without timer' : 'Add to competition'}
-                            >
-                              +
-                            </button>
-                          </>
-                        )}
-                      </div>
                     </div>
-                  </div>
-                );
-              })}
+                  );
+                })}
+              </div>
             </div>
-          </div>
+          )}
         </div>
 
         {/* Right Column - Participants (40% width) */}

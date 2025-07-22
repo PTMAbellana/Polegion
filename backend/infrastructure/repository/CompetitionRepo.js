@@ -168,6 +168,25 @@ class CompeRepo extends BaseRepo {
             throw error
         }
     }
+
+    async updateTimeRemaining(compe_id, indicator_data) {
+        try {
+            const { 
+                data,
+                error
+            } = await this.supabase
+                .from(this.tableName)
+                .update(indicator_data)
+                .eq('id', compe_id)
+                .select()
+                .single()
+
+            if (error) throw error
+            return data
+        } catch (error) {
+            throw error
+        }
+    }
 }
 
 module.exports = CompeRepo

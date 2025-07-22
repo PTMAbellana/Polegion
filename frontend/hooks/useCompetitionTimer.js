@@ -13,7 +13,15 @@ export const useCompetitionTimer = (competitionId, competition) => {
 
   // Calculate time remaining from database values
   const calculateTimeRemaining = (competition) => {
-    if (!competition?.timer_started_at || !competition?.timer_duration) {
+    if (!competition) return 0;
+
+    // If paused, use stored time_remaining
+    if (competition.gameplay_indicator === 'PAUSE' && competition.time_remaining !== null) {
+        return competition.time_remaining;
+    }
+
+    // If not paused, calculate normally
+    if (!competition.timer_started_at || !competition.timer_duration) {
       return 0;
     }
 
