@@ -19,6 +19,8 @@ import ShapeLimitPopup from '@/app/virtual-rooms/[roomCode]/create-problem/compo
 
 import { createProblem, deleteProblem, getRoomProblemsByCode, updateProblem } from '@/api/problems'
 import Swal from "sweetalert2";
+import { useCompetitionTimer } from '@/hooks/useCompetitionTimer';
+import { useCompetitionRealtime } from '@/hooks/useCompetitionRealtime';
 
 interface Problem {
   id: string
@@ -114,6 +116,27 @@ export default function Gamepage({
   const [currentProblem, setCurrentProblem] = useState(null);
   const [isLoadingProblem, setIsLoadingProblem] = useState(false);
 
+  // ✨ ADD: Timer and realtime hooks for competition mode
+  const { 
+    competition: realtimeCompetition, 
+    isConnected,
+    connectionStatus 
+  } = useCompetitionRealtime(competitionId, false);
+
+  const {
+    timeRemaining,
+    isTimerActive,
+    formattedTime,
+    isExpired,
+    isPaused
+  } = useCompetitionTimer(
+    competitionId, 
+    realtimeCompetition || currentCompetition
+  );
+
+  // Use realtime competition data if available, fallback to props
+  const activeCompetition = realtimeCompetition || currentCompetition;
+
   // Fetch problems function
   const fetchProblems = useCallback(async () => {
     if (!roomCode || competitionId) return; // Don't fetch in competition mode
@@ -129,15 +152,15 @@ export default function Gamepage({
     fetchProblems();
   }, [fetchProblems]);
 
-  // ✨ ADD: Fetch current problem details when competition updates
+  // ✨ UPDATE: Use activeCompetition instead of currentCompetition
   useEffect(() => {
     const fetchCurrentProblem = async () => {
-      if (!competitionId || !currentCompetition?.current_problem_id) return;
+      if (!competitionId || !activeCompetition?.current_problem_id) return;
       
       setIsLoadingProblem(true);
       try {
         // Fetch the current problem details from your API
-        const response = await fetch(`/api/problems/${currentCompetition.current_problem_id}`);
+        const response = await fetch(`/api/problems/${activeCompetition.current_problem_id}`);
         if (response.ok) {
           const problemData = await response.json();
           setCurrentProblem(problemData);
@@ -166,10 +189,10 @@ export default function Gamepage({
     };
     
     // Only fetch in competition mode
-    if (competitionId && currentCompetition?.current_problem_id) {
+    if (competitionId && activeCompetition?.current_problem_id) {
       fetchCurrentProblem();
     }
-  }, [currentCompetition?.current_problem_id, competitionId]);
+  }, [activeCompetition?.current_problem_id, competitionId]);
 
   // Shape interaction handlers
   const handleShapeMouseDown = (id: number, e: React.MouseEvent) => {
@@ -784,15 +807,18 @@ export default function Gamepage({
   return (
     <div className={`${styles.root} ${isFullScreenMode ? styles.fullScreenGame : ''}`}>
       <div className={styles.scalableWorkspace}>
-        {/* ✨ COMPETITION INFO HEADER (only show in competition mode)
-        {competitionId && currentCompetition && (
+        {/* ✨ COMPETITION INFO HEADER
+        {competitionId && activeCompetition && (
           <div className={styles.competitionHeader}>
             <div className={styles.competitionInfo}>
               <span className={styles.competitionTitle}>
-                🏆 {currentCompetition.title}
+                🏆 {activeCompetition.title}
               </span>
               <span className={styles.problemCounter}>
-                Problem {(currentCompetition.current_problem_index || 0) + 1}
+                Problem {(activeCompetition.current_problem_index || 0) + 1}
+              </span>
+              <span className={styles.connectionStatus}>
+                {isConnected ? '🟢 Connected' : '🔴 Disconnected'}
               </span>
               {isLoadingProblem && <span className={styles.loading}>Loading problem...</span>}
             </div>
@@ -909,6 +935,48 @@ export default function Gamepage({
             shapeCount={shapes.length}
             onLimitReached={() => setShowLimitPopup(true)}
           />
+          
+          {/* ✨ NEW: Competition Timer Display - Show below MainArea */}
+          {competitionId && activeCompetition && (
+            <div className={styles.competitionTimerContainer}>
+              <div className={styles.timerDisplay}>
+                <div className={styles.timerHeader}>
+                  <span className={styles.timerLabel}>Time Remaining</span>
+                  <div className={styles.timerStatus}>
+                    {isPaused && (
+                      <span className={styles.pausedIndicator}>⏸️ PAUSED</span>
+                    )}
+                    {isExpired && (
+                      <span className={styles.expiredIndicator}>⏰ TIME UP!</span>
+                    )}
+                    {!isPaused && !isExpired && isTimerActive && (
+                      <span className={styles.activeIndicator}>⏱️ ACTIVE</span>
+                    )}
+                  </div>
+                </div>
+                
+                <div className={`${styles.timerTime} ${isExpired ? styles.expired : ''} ${isPaused ? styles.paused : ''}`}>
+                  {formattedTime}
+                </div>
+                
+                <div className={styles.timerProgress}>
+                  <div 
+                    className={styles.progressBar}
+                    style={{
+                      width: `${Math.max(0, (timeRemaining / (timerValue * 60)) * 100)}%`,
+                      backgroundColor: timeRemaining < 60 ? '#ef4444' : timeRemaining < 180 ? '#f59e0b' : '#10b981'
+                    }}
+                  />
+                </div>
+                
+                {activeCompetition.gameplay_indicator && (
+                  <div className={styles.gameplayStatus}>
+                    Status: <span className={styles.statusValue}>{activeCompetition.gameplay_indicator}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
           
           <div className={styles.controlsRow}>
             <div style={{ display: "flex", gap: 12 }}>

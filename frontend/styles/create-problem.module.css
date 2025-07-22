@@ -1388,3 +1388,226 @@
   color: #667eea;
   font-family: 'Courier New', monospace;
 }
+
+/* Add these styles to your create-problem.module.css file */
+
+.competitionHeader {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 12px 20px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.competitionInfo {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.competitionTitle {
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.problemCounter {
+  background: rgba(255, 255, 255, 0.2);
+  padding: 4px 12px;
+  border-radius: 16px;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.connectionStatus {
+  font-size: 0.85rem;
+  margin-left: auto;
+}
+
+.loading {
+  color: #fbbf24;
+  font-size: 0.85rem;
+  font-style: italic;
+}
+
+/* Timer Container */
+.competitionTimerContainer {
+  margin: 20px 0;
+  padding: 0;
+}
+
+.timerDisplay {
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  border: 2px solid #cbd5e1;
+  border-radius: 16px;
+  padding: 20px;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.timerDisplay:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.timerHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.timerLabel {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #374151;
+}
+
+.timerStatus {
+  display: flex;
+  gap: 8px;
+}
+
+.pausedIndicator {
+  background: #fbbf24;
+  color: #92400e;
+  padding: 4px 8px;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  animation: pulse 2s infinite;
+}
+
+.expiredIndicator {
+  background: #ef4444;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  animation: pulse 1s infinite;
+}
+
+.activeIndicator {
+  background: #10b981;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.timerTime {
+  font-size: 3rem;
+  font-weight: bold;
+  color: #1f2937;
+  margin: 16px 0;
+  font-family: 'Courier New', monospace;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: color 0.3s ease;
+}
+
+.timerTime.expired {
+  color: #ef4444;
+  animation: pulse 1s infinite;
+}
+
+.timerTime.paused {
+  color: #f59e0b;
+}
+
+.timerProgress {
+  width: 100%;
+  height: 8px;
+  background-color: #e5e7eb;
+  border-radius: 4px;
+  overflow: hidden;
+  margin: 16px 0 12px 0;
+}
+
+.progressBar {
+  height: 100%;
+  transition: width 1s ease-in-out, background-color 0.3s ease;
+  border-radius: 4px;
+}
+
+.gameplayStatus {
+  font-size: 0.9rem;
+  color: #6b7280;
+  margin-top: 8px;
+}
+
+.statusValue {
+  font-weight: 600;
+  color: #374151;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Difficulty Display (for competition mode) */
+.difficultyDisplay {
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+.difficultyLabel {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #6b7280;
+  margin-bottom: 6px;
+  text-align: center;
+}
+
+.difficultyValue {
+  width: 100%;
+}
+
+/* Attempts and Timer Display (read-only) */
+.attemptsDisplay,
+.timerDisplay {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  background: #f3f4f6;
+  border-radius: 6px;
+  border: 1px solid #d1d5db;
+}
+
+.attemptsLabel,
+.timerLabel {
+  font-size: 0.85rem;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.attemptsValue,
+.timerValue {
+  font-size: 0.85rem;
+  color: #374151;
+  font-weight: 600;
+}
+
+/* Pulse animation */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* Full screen adjustments */
+.fullScreenGame .competitionTimerContainer {
+  position: sticky;
+  top: 20px;
+  z-index: 10;
+}
+
+.fullScreenGame .timerDisplay {
+  backdrop-filter: blur(10px);
+  background: rgba(248, 250, 252, 0.95);
+}
