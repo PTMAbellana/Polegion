@@ -249,10 +249,10 @@ class CompeService {
 
             const data = await this.compeRepo.updateTimeRemaining(compe_id, {
                 gameplay_indicator: 'PLAY',
-                timer_started_at: now.toISOString(), // Restart timer from now
-                timer_duration: timeRemaining, // Use remaining time as duration
+                timer_started_at: now.toISOString(), 
+                timer_duration: timeRemaining, 
                 timer_end_at: newEndTime.toISOString(),
-                time_remaining: null, // Clear stored remaining time
+                time_remaining: null, 
                 updated_at: new Date().toISOString()
             });
 
@@ -276,11 +276,11 @@ class CompeService {
     async autoAdvanceCompetition(compe_id) {
         try {
             console.log("Auto-advancing competition:", compe_id);
-            // Get current competition state
+            
             const competition = await this.compeRepo.getCompeByIdNoRoom(compe_id)
             console.log("Current competition state:", competition);
             if (!competition || competition.status !== 'ONGOING') {
-                return null // Competition not active
+                return null 
             }
 
             console.log("Auto-advancing competition:", competition.id, "Current problem index:", competition.current_problem_index);
@@ -293,7 +293,6 @@ class CompeService {
             console.log("Current index:", currentIndex, "Next index:", nextIndex);
 
             if (nextIndex >= problems.length) {
-                // Competition is done
                 const data = await this.compeRepo.updateCompeStatus(compe_id, 'DONE')
                 return { ...data, competition_finished: true }
             }

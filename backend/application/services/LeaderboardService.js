@@ -37,6 +37,8 @@ class LeaderboardService {
     async getCompeBoard (room_id) {
         try {
             const data = await this.leaderRepo.getCompeBoard(room_id)
+            console.log('from compe board services: ', data)
+            
             const compiled = await Promise.all(
                 data.map(async (row) => {
                     try {
@@ -57,6 +59,8 @@ class LeaderboardService {
                 })
             ) 
 
+            console.log('compiled: ', compiled)
+            
             const grouped = compiled.reduce((acc, r) => {
                 const comp_id = r.competition.comp_id
                 if(!acc[comp_id]) {
@@ -70,8 +74,10 @@ class LeaderboardService {
                 return acc
             }, {})
 
+            console.log('grouped: ', grouped)
             return Object.values(grouped)
         } catch (error) {
+            console.log('Error in getCompeBoard: ', error)
             throw error
         }
     }
@@ -121,6 +127,38 @@ class LeaderboardService {
             return await this.leaderRepo.getRawCompeBoard(compe_id, part_id)
         } catch (error) {
             throw error
+        }
+   }
+
+    async updateBothLeaderboards(roomParticipantId, competitionId, roomId, xpGained) {
+        await this.updateCompetitionLeaderboard(roomParticipantId, competitionId, xpGained);
+        await this.updateRoomLeaderboard(roomParticipantId, roomId, xpGained);
+    }
+
+    async updateCompetitionLeaderboard(roomParticipantId, competitionId, xpGained) {
+        const existing = await this.leaderRepo.getRawCompeBoard(competitionId, roomParticipantId);
+        
+        if (existing) {
+            await this.leaderRepo.updateCompeBoard(competitionId, roomParticipantId, existing.accumulated_xp + xpGained);
+        } else {
+            await this.leaderRepo.addCompeBoard(competitionId, roomParticipantId);
+            await this.leaderRepo.updateCompeBoard(competitionId, roomParticipantId, xpGained);
+        }
+    }
+
+    async updateRoomLeaderboard(roomParticipantId, roomId, xpGained) {
+        // ✅ Use your existing method
+        const existing = await this.leaderRepo.getRawBoard(roomId, roomParticipantId);
+        
+        if (existing) {
+            // ✅ Need to add this method to your repo
+            await this.leaderRepo.updateRoomXp(existing.id, existing.accumulated_xp + xpGained);
+        } else {
+            // ✅ Use your existing method
+            await this.leaderRepo.addRoomBoard(roomId, roomParticipantId);
+            // Update with the actual XP since addRoomBoard creates with 0 XP
+            const newEntry = await this.leaderRepo.getRawBoard(roomId, roomParticipantId);
+            await this.leaderRepo.updateRoomXp(newEntry.id, xpGained);
         }
     }
 }

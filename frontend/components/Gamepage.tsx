@@ -137,21 +137,6 @@ export default function Gamepage({
   // Use realtime competition data if available, fallback to props
   const activeCompetition = realtimeCompetition || currentCompetition;
 
-  // Fetch problems function
-  const fetchProblems = useCallback(async () => {
-    if (!roomCode || competitionId) return; // Don't fetch in competition mode
-    try {
-      const data = await getRoomProblemsByCode(roomCode);
-      setProblems(data);
-    } catch (error) {
-      console.error("Error fetching problems:", error);
-    }
-  }, [roomCode, competitionId]);
-
-  useEffect(() => {
-    fetchProblems();
-  }, [fetchProblems]);
-
   // ✨ UPDATE: Use activeCompetition instead of currentCompetition
   useEffect(() => {
     const fetchCurrentProblem = async () => {

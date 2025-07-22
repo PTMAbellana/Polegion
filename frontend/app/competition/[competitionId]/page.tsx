@@ -111,41 +111,41 @@ const CompetitionDashboard = ({ params } : { params  : Promise<{competitionId : 
   // const router = useRouter();
 
   const callMe = useCallback(async () => {
-        try {
-            setIsLoading(true)
-            // ...existing code...
-            const parts = await getAllParticipants(roomId, 'creator', true, compe_id.competitionId)
-            setParticipants(parts.data.participants || [])
-            const probs = await getRoomProblems(roomId)
-            setProblems(probs)
+    try {
+      setIsLoading(true)
+      // ...existing code...
+      const parts = await getAllParticipants(roomId, 'creator', true, compe_id.competitionId)
+      setParticipants(parts.data.participants || [])
+      const probs = await getRoomProblems(roomId)
+      setProblems(probs)
 
-            const compe = await getCompeById(roomId, compe_id.competitionId)
-            setCompetition(compe)
+      const compe = await getCompeById(roomId, compe_id.competitionId)
+      setCompetition(compe)
 
-            // --- Fetch addedProblems order from API ---
-            // TODO: Replace this with your API call to fetch the order for this competition
-            // Example: const order = await getAddedProblemsOrder(roomId, compe_id.competitionId)
-            const order = await getCompeProblems(compe_id.competitionId) || [];
-            console.log('Fetched added problems:', order);
-            setAddedProblems(order)
-            // setAddedProblems([]); // Default: empty, replace with API result
-            setAddedProblemsLoaded(true);
-        } catch (error) {
-            console.error('Error fetching room details:', error)
-        } finally {
-            setIsLoading(false)
-        }
-    }, [roomId, compe_id.competitionId]) // Dependencies: values that can change
+      // --- Fetch addedProblems order from API ---
+      // TODO: Replace this with your API call to fetch the order for this competition
+      // Example: const order = await getAddedProblemsOrder(roomId, compe_id.competitionId)
+      const order = await getCompeProblems(compe_id.competitionId) || [];
+      console.log('Fetched added problems:', order);
+      setAddedProblems(order)
+      // setAddedProblems([]); // Default: empty, replace with API result
+      setAddedProblemsLoaded(true);
+    } catch (error) {
+      console.error('Error fetching room details:', error)
+    } finally {
+      setIsLoading(false)
+    }
+  }, [roomId, compe_id.competitionId]) // Dependencies: values that can change
 
   useEffect(() => {
-      if (isLoggedIn && !authLoading && !fetched) {
-          callMe()
-          setFetched(true)
-      } else {
-          if (authLoading || !isLoggedIn) {
-              setIsLoading(true)
-          }
+    if (isLoggedIn && !authLoading && !fetched) {
+      callMe()
+      setFetched(true)
+    } else {
+      if (authLoading || !isLoggedIn) {
+        setIsLoading(true)
       }
+    }
   }, [isLoggedIn, authLoading, fetched, callMe])
 
     // Remove unnecessary sync: always use liveCompetition || competition for rendering
@@ -462,13 +462,16 @@ return (
                         <div className={styles.participantXp}>
                           {compeProblem.timer != null && compeProblem.timer > 0 ? `${compeProblem.timer} seconds` : <span style={{ color: 'red' }}>No timer</span>}
                         </div>
-                        <button
-                          className={styles.removeBtn}
-                          onClick={() => handleRemoveProblem(compeProblem.problem)}
-                          title="Remove from competition"
-                        >
-                          -
-                        </button>
+
+                        {currentCompetition?.status === 'NEW' && (
+                          <button
+                            className={styles.removeBtn}
+                            onClick={() => handleRemoveProblem(compeProblem.problem)}
+                            title="Remove from competition"
+                          >
+                            -
+                          </button>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -478,7 +481,7 @@ return (
           )}
 
           {/* Available Problems Section */}
-          {currentCompetition?.status !== 'ONGOING' && (
+          {currentCompetition?.status === 'NEW' && (
             <div className={styles.participantsSection}>
               <div className={styles.participantsHeader}>
                 <h2 className={styles.participantsTitle}>Available Problems</h2>

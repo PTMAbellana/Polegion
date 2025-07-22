@@ -39,14 +39,19 @@ class LeaderboardRepo extends BaseRepo {
                 error
             } = await this.supabase.from(this.tableCompe)
             .select(`
-                competition: competition_id (
-                    id, title, room_id
+                accumulated_xp,
+                competition: competition_id!inner (
+                    id, 
+                    title, 
+                    room_id,
+                    status,
+                    created_at
                 ),
-                participant: room_participant_id(
-                    id, user_id
-                ),
-                accumulated_xp
-                `)
+                participant: room_participant_id (
+                    id,
+                    user_id
+                )
+            `)
             .eq('competition.room_id', room_id)
             .order('id', { 
                 ascending: true,
@@ -112,17 +117,35 @@ class LeaderboardRepo extends BaseRepo {
     }
 
     // edit 
-    async updateRoomBoard (room_id, part_id){
+    async updateRoomBoard (room_id, part_id, newXp){
         try {
+            const { data, error } = await this.supabase
+                .from(this.tableRoom)
+                .update({ accumulated_xp: newXp })
+                .eq('room_id', room_id)
+                .eq('room_participant_id', part_id)
+                .select()
+                .single();
 
+            if (error) throw error;
+            return data;
         } catch (error) {
-                throw error
+            throw error;
         }
     }
 
-    async updateCompeBoard (compe_id, room_id){
+    async updateCompeBoard (compe_id, part_id, newXp){
        try {
+        const { data, error } = await this.supabase
+            .from(this.tableCompe)
+            .update({ accumulated_xp: newXp })
+            .eq('competition_id', compe_id)
+            .eq('room_participant_id', part_id)
+            .select()
+            .single();
 
+        if (error) throw error;
+        return data;
        } catch (error) {
             throw error
        }
@@ -167,6 +190,41 @@ class LeaderboardRepo extends BaseRepo {
         }
     }
 
+    // Update room leaderboard XP
+    async updateRoomXp(leaderboardId, newXpAmount) {
+        try {
+            const { data, error } = await this.supabase
+                .from(this.tableRoom)
+                .update({ accumulated_xp: newXpAmount })
+                .eq('id', leaderboardId)
+                .select()
+                .single();
+
+            if (error) throw error;
+            console.log('✅ Updated room leaderboard XP:', data);
+            return data;
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    // Update competition leaderboard XP
+    async updateCompetitionXp(leaderboardId, newXpAmount) {
+        try {
+            const { data, error } = await this.supabase
+                .from(this.tableCompe)
+                .update({ accumulated_xp: newXpAmount })
+                .eq('id', leaderboardId)
+                .select()
+                .single();
+
+            if (error) throw error;
+            console.log('✅ Updated competition leaderboard XP:', data);
+            return data;
+        } catch (error) {
+            throw error;
+        }
+    }
 }
 
 module.exports = LeaderboardRepo

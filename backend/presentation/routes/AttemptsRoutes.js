@@ -12,6 +12,10 @@ class AttemptsRoutes {
     initializeRoutes(){
         this.router.use(this.authMiddleware.protect);
     
+        this.router.post(
+            '/competitions/:competitionId/problems/:competitionProblemId/submit', 
+            this.attemptsController.submitSolution
+        );
      }
 
     getRouter() {

@@ -107,6 +107,9 @@ export default function LeaderboardDetail({ params }: { params: Promise<{ roomId
       return fullLoader();
   }
 
+
+  console.log('Competition Boards: ', compeBoards);
+
   return (
     <div className={styles["leaderboard-container"]}>
       <div className={styles["main-content"]}>

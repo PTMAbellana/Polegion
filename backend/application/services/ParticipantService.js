@@ -240,6 +240,13 @@ class ParticipantService {
             throw error
         }
     }
-}
 
+    getPartInfo = async (part_id) => {
+        try {
+            return await this.participantRepo.getParticipantById(part_id)
+        } catch (error) {
+            throw error
+        }
+    }
+}
 module.exports = ParticipantService

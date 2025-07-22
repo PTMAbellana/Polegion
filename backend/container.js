@@ -20,6 +20,7 @@ const LeaderboardService = require('./application/services/LeaderboardService');
 const AttemptsService = require('./application/services/AttemptsService');
 const CompetitionService = require('./application/services/CompetitionService');
 const XPService = require('./application/services/XPService');
+const GradingService = require('./application/services/GradingService');
 
 // Import controllers
 const AuthController = require('./presentation/controllers/AuthController');
@@ -59,10 +60,11 @@ const authService = new AuthService(userRepository);
 const userService = new UserService(userRepository);
 const roomService = new RoomService(roomRepository);
 const problemService = new ProblemService(problemRepository, roomRepository);
-const attemptsService = new AttemptsService(attemptsRepository);
+const gradingService = new GradingService();
 const xpService = new XPService(xpRepository);
 const leaderboardService = new LeaderboardService(leaderboardRepository, userService, xpService);
 const participantService = new ParticipantService(participantRepository, roomService, userService, leaderboardService);
+const attemptsService = new AttemptsService(attemptsRepository, xpService, leaderboardService, gradingService, participantService);
 const competitionService = new CompetitionService(competitionRepository, participantService, leaderboardService, roomService, problemService);
 
 // Initialize middleware
