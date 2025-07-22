@@ -8,6 +8,9 @@ export const useCompetitionTimer = (competitionId, competition) => {
   const intervalRef = useRef(null);
   const timerChannelRef = useRef(null);
 
+  // Track the current problem index to detect changes
+  const [lastProblemIndex, setLastProblemIndex] = useState(null);
+
   // Calculate time remaining from database values
   const calculateTimeRemaining = (competition) => {
     if (!competition?.timer_started_at || !competition?.timer_duration) {
@@ -18,50 +21,55 @@ export const useCompetitionTimer = (competitionId, competition) => {
     const duration = competition.timer_duration * 1000; // Convert to milliseconds
     const now = Date.now();
     const elapsed = now - startTime;
-    const remaining = Math.max(0, Math.floor((duration - elapsed) / 1000));
+    const remaining = Math.max(0, duration - elapsed);
     
-    return remaining;
+    return Math.floor(remaining / 1000); // Convert back to seconds
   };
+
+  // IMPORTANT: Restart timer when problem changes
+  useEffect(() => {
+    const currentProblemIndex = competition?.current_problem_index;
+    
+    // Check if problem changed
+    if (currentProblemIndex !== lastProblemIndex && currentProblemIndex !== null) {
+      console.log('🔄 Problem changed! Restarting timer...', {
+        oldIndex: lastProblemIndex,
+        newIndex: currentProblemIndex
+      });
+      
+      // Clear existing timer
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+      
+      // Calculate new time remaining
+      const newTimeRemaining = calculateTimeRemaining(competition);
+      setTimeRemaining(newTimeRemaining);
+      
+      // Start timer if competition is ongoing and not paused
+      const shouldStartTimer = competition?.status === 'ONGOING' && 
+                              competition?.gameplay_indicator !== 'PAUSE' &&
+                              newTimeRemaining > 0;
+      
+      setIsTimerActive(shouldStartTimer);
+      
+      // Update last problem index
+      setLastProblemIndex(currentProblemIndex);
+    }
+  }, [competition?.current_problem_index, competition?.status, competition?.gameplay_indicator]);
 
   // Start timer synchronization
   useEffect(() => {
-    if (!competitionId || !competition) return;
+    if (!competition || !competitionId) return;
 
-    console.log('🕐 Setting up timer for competition:', competitionId);
+    const timeLeft = calculateTimeRemaining(competition);
+    setTimeRemaining(timeLeft);
 
-    // Subscribe to timer updates via real-time
-    const timerChannel = supabase
-      .channel(`competition-timer-${competitionId}`)
-      .on('postgres_changes', {
-        event: 'UPDATE',
-        schema: 'public',
-        table: 'competitions',
-        filter: `id=eq.${competitionId}`
-      }, (payload) => {
-        console.log('🔄 Timer update received:', payload.new);
-        
-        if (payload.new.timer_started_at && payload.new.timer_duration) {
-          const remaining = calculateTimeRemaining(payload.new);
-          setTimeRemaining(remaining);
-          setIsTimerActive(payload.new.status === 'ONGOING' && payload.new.gameplay_indicator === 'PLAY' && remaining > 0);
-        }
-      })
-      .subscribe();
-
-    timerChannelRef.current = timerChannel;
-
-    // Initialize timer from current competition state
-    if (competition.status === 'ONGOING' && competition.timer_started_at) {
-      const remaining = calculateTimeRemaining(competition);
-      setTimeRemaining(remaining);
-      setIsTimerActive(remaining > 0 && competition.gameplay_indicator === 'PLAY');
-    }
-
-    return () => {
-      if (timerChannelRef.current) {
-        supabase.removeChannel(timerChannelRef.current);
-      }
-    };
+    const shouldStart = competition.status === 'ONGOING' && 
+                       competition.gameplay_indicator !== 'PAUSE' && 
+                       timeLeft > 0;
+    
+    setIsTimerActive(shouldStart);
   }, [competitionId, competition]);
 
   // Timer countdown logic
@@ -69,22 +77,12 @@ export const useCompetitionTimer = (competitionId, competition) => {
     if (isTimerActive && timeRemaining > 0) {
       intervalRef.current = setInterval(() => {
         setTimeRemaining(prev => {
-          const newTime = prev - 1;
-          
-          // Auto-advance when timer hits 0
-          if (newTime <= 0) {
+          if (prev <= 1) {
             setIsTimerActive(false);
-            console.log('⏰ Timer expired! Auto-advancing competition...');
-            
-            // Call auto-advance API using proper API function
-            autoAdvanceCompetition(competitionId)
-              .then(result => {
-                console.log('✅ Auto-advance successful:', result);
-              })
-              .catch(err => console.error('❌ Failed to auto-advance:', err));
+            console.log('⏰ Timer expired!');
+            return 0;
           }
-          
-          return Math.max(0, newTime);
+          return prev - 1;
         });
       }, 1000);
     } else {
@@ -105,13 +103,13 @@ export const useCompetitionTimer = (competitionId, competition) => {
   const formatTime = (seconds) => {
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;
-    return `${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`;
+    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
   };
 
   return {
     timeRemaining,
     isTimerActive,
     formattedTime: formatTime(timeRemaining),
-    isExpired: timeRemaining === 0
+    isExpired: timeRemaining === 0 && competition?.status === 'ONGOING'
   };
 };

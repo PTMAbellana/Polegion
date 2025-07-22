@@ -122,6 +122,7 @@ class CompeService {
     }
 
     async nextProblem(compe_id, problems, current_index) {
+        console.log("Advancing to next problem for competition:", compe_id, "Current index:", current_index);
         try {
             const nextIndex = current_index + 1
             
@@ -292,6 +293,27 @@ class CompeService {
                 timer_duration: timerDuration,
                 timer_end_at: problemEndTime
             })
+
+
+            // 🚀 SEND BROADCAST TO NOTIFY ALL CLIENTS
+            try {
+                const channel = supabase.channel(`competition-${compe_id}`)
+                await channel.send({
+                    type: 'broadcast',
+                    event: 'competition_update',
+                    payload: {
+                        ...data,
+                        timer_started_at: currentTime,
+                        timer_duration: timerDuration,
+                        timer_end_at: problemEndTime,
+                        current_problem_index: nextIndex,
+                        total_problems: problems.length
+                    }
+                })
+                console.log(`▶️ Competition ${compe_id} resume broadcasted successfully!`)
+            } catch (broadcastError) {
+                console.error('❌ Resume broadcast failed:', broadcastError)
+            }
 
             return {
                 ...data,

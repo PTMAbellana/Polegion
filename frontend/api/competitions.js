@@ -49,36 +49,20 @@ export const startCompetition = async (compe_id, problems) => {
 
 export const nextProblem = async (compe_id, problems, current_index) => {
     try {
-        const nextIndex = current_index + 1;
-        const isFinished = nextIndex >= problems.length;
+        console.log('🚀 Calling backend next-problem API...', { compe_id, current_index });
         
-        // Update competition with next problem or mark as done
-        const { data, error } = await supabase
-            .from('competitions')
-            .update({ 
-                current_problem_index: nextIndex,
-                current_problem_id: isFinished ? null : problems[nextIndex]?.id,
-                status: isFinished ? 'DONE' : 'ONGOING',
-                updated_at: new Date().toISOString()
-            })
-            .eq('id', compe_id)
-            .select()
-            .single();
-
-        if (error) throw error;
-        
-        // Send broadcast to notify all clients
-        const channel = supabase.channel(`competition-${compe_id}`);
-        await channel.send({
-            type: 'broadcast',
-            event: 'competition_update',
-            payload: data
+        // Call your backend API instead of direct Supabase
+        const response = await api.patch(`/competitions/${compe_id}/next`, {
+        problems: problems,
+        current_index: current_index
         });
         
-        console.log('📡 Next problem broadcasted!');
-        return { data, competition_finished: isFinished };
+        console.log('✅ Backend next-problem response:', response.data);
+        return response.data;
+        
     } catch (error) {
-        throw error
+        console.error('❌ Backend next-problem error:', error);
+        throw error;
     }
 }
 
