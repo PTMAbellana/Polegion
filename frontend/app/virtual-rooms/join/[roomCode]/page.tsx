@@ -52,6 +52,7 @@ export default function JoinRoom({ params } : { params  : Promise<{roomCode : st
     const [showInviteModal, setShowInviteModal] = useState(false);
     const [recipientEmail, setRecipientEmail] = useState("");
     const [sending, setSending] = useState(false);
+    const [playingCompetition, setPlayingCompetition] = useState<string | null>(null);
     
     const { isLoggedIn } = useMyApp()
     const { isLoading: authLoading } = AuthProtection()
@@ -211,10 +212,19 @@ export default function JoinRoom({ params } : { params  : Promise<{roomCode : st
         }
     }
 
-    const handlePlayCompe = (compeId: string) => () => {
-        console.log('Clicked play competition with ID:', compeId)
-        router.push(`${ROUTES.PLAY}/${compeId}?room=${roomDetails.id}`)
-    }
+    const handlePlayCompe = (compeId: string) => async () => {
+      console.log('Clicked play competition with ID:', compeId);
+      setPlayingCompetition(compeId);
+      
+      try {
+        // Add a small delay to show loading state
+        await new Promise(resolve => setTimeout(resolve, 500));
+        router.push(`${ROUTES.PLAY}/${compeId}?room=${roomDetails.id}`);
+      } catch (error) {
+        console.error('Error navigating to competition:', error);
+        setPlayingCompetition(null);
+      }
+    };
 
     return (
         <div className={styles["dashboard-container"]}>
@@ -300,13 +310,24 @@ export default function JoinRoom({ params } : { params  : Promise<{roomCode : st
                                 competitions.length > 0 ?
                                     competitions.map((comp) => (
                                         <div key={comp.id} className={styles["problem-item"]}>
-                                            <div className={styles["problem-title"]}>{comp.title}</div>
-                                            <div className={styles["problem-status"]}>
-                                                Status: {comp.status}
+                                            <div className={styles["problem-content"]}>
+                                                <div className={styles["problem-info"]}>
+                                                    <div className={styles["problem-title"]}>{comp.title}</div>
+                                                    <div className={styles["problem-status"]}>
+                                                        Status: {comp.status}
+                                                    </div>
+                                                </div>
+                                                <div className={styles["problem-actions"]}>
+                                                    <button 
+                                                      onClick={handlePlayCompe(comp.id)} 
+                                                      className={`${styles["play-btn"]} ${styles[`status-${comp.status.toLowerCase()}`]} ${playingCompetition === comp.id ? styles.loading : ''}`}
+                                                      disabled={comp.status === 'PAUSED' || playingCompetition === comp.id}
+                                                      aria-label={`Play ${comp.title} competition`}
+                                                    >
+                                                      {playingCompetition === comp.id ? 'Loading...' : 'Play'}
+                                                    </button>
+                                                </div>
                                             </div>
-                                            <button onClick={handlePlayCompe(comp.id)} className={styles["play-btn"]}>
-                                                PLAY
-                                            </button>
                                         </div>
                                     )) :
                                         <div className={styles["empty-state"]}>
