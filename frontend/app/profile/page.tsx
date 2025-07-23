@@ -1,4 +1,4 @@
- "use client"
+"use client"
 
 import React from 'react'
 import { useRouter } from 'next/navigation'
@@ -25,63 +25,55 @@ export default function ProfilePage() {
 
     return (
         <div className={styles['profile-page']}>
-            <div className={styles['container']}>
-             <div className={styles['left-section']}> 
-            {/* Page Title */}
-            <h1 className={styles['page-title']}>User Profile</h1>
-
-            {/* Profile Image */}
-            <div className={styles['profile-image-container']}>
-                <img 
-                className={styles['profile-image']} 
-                src={userProfile?.profile_pic}
-                />
-            </div>
-            </div>  
-            <div className={styles['right-section']}>
-            {/* Form Fields (Read-only) */}
-            <div className={styles['profile-info']}>
-                {/* Full Name Field */}
-                <div className={styles['info-group']}>
-                    <label className={styles['info-label']}>Full Name</label>
-                    <div className={styles['info-value']}>
-                        {userProfile?.fullName || 'Enter your Full Name'}
+            <div className={styles['profile-card']}>
+                {/* Animated Header */}
+                <div className={styles['profile-header']}>
+                    <div className={styles['profile-avatar-container']}>
+                        <img 
+                            className={styles['profile-avatar']} 
+                            src={userProfile?.profile_pic || "/placeholder-avatar.png"}
+                            alt="Profile"
+                        />
+                        <div className={styles['avatar-glow']}></div>
+                        {/* Fun animated ring */}
+                        <div className={styles['avatar-ring']}></div>
+                    </div>
+                    <div className={styles['profile-title-group']}>
+                        <h1 className={styles['profile-title']}>
+                            {userProfile?.fullName || 'Your Name'}
+                        </h1>
+                        <span className={styles['profile-status']}>Active User</span>
                     </div>
                 </div>
-
-                {/* Phone Field */}
-                <div className={styles['info-group']}>
-                    <label className={styles['info-label']}>Phone Number</label>
-                    <div className={styles['info-value']}>
-                        {userProfile?.phone || 'Enter your Phone Number'}
+                {/* Details */}
+                <div className={styles['profile-details']}>
+                    <div className={styles['profile-info-group']}>
+                        <label className={styles['profile-label']}>Phone Number</label>
+                        <div className={styles['profile-value']}>
+                            {userProfile?.phone || 'Enter your Phone Number'}
+                        </div>
+                    </div>
+                    <div className={styles['profile-info-group']}>
+                        <label className={styles['profile-label']}>Email</label>
+                        <div className={styles['profile-value']}>
+                            {userProfile?.email || 'Enter your Email'}
+                        </div>
+                    </div>
+                    <div className={styles['profile-info-group']}>
+                        <label className={styles['profile-label']}>Gender</label>
+                        <div className={styles['profile-value']}>
+                            {userProfile?.gender || 'Not specified'}
+                        </div>
                     </div>
                 </div>
-
-                {/* Email Field */}
-                <div className={styles['info-group']}>
-                    <label className={styles['info-label']}>Email</label>
-                    <div className={styles['info-value']}>
-                        {userProfile?.email || 'Enter your Email'}
-                    </div>
-                </div>
-
-                {/* Gender Field */}
-                <div className={styles['info-group']}>
-                    <label className={styles['info-label']}>Gender</label>
-                    <div className={styles['info-value']}>
-                        {userProfile?.gender || 'Not specified'}
-                    </div>
-                </div>
-            </div>
-
-            {/* Edit Profile Button */}
-            <button
-                onClick={handleEditProfile}
-                className={styles['edit-profile-button']}
-            >
-                Edit Profile
-            </button>
-            </div>
+                {/* Edit Profile Button */}
+                <button
+                    onClick={handleEditProfile}
+                    className={styles['edit-profile-button']}
+                >
+                    <span className={styles['edit-icon']}>✏️</span>
+                    Edit Profile
+                </button>
             </div>
         </div>
     )
