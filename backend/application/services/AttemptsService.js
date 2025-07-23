@@ -44,9 +44,7 @@ class AttemptsService {
                 xp_gained: gradingResult.xp_gained,
                 feedback: gradingResult.feedback
             });
-
-            console.log('Attempt created:', attempt);
-
+x
             // 5. Handle XP transaction (internal, no API)
             await this.xpService.createXpTransaction(part.id, attempt.id, gradingResult.xp_gained);
 
