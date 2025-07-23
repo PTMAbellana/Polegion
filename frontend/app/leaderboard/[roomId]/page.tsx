@@ -173,9 +173,20 @@ export default function LeaderboardDetail({ params }: { params: Promise<{ roomId
           {activeTab === "competition" && (
             <>
               <h1 className={styles["section-title"]}>Competition Leaderboards</h1>
+              
+              {/* Optional: Competition overview */}
+              <div className={styles["competition-overview"]}>
+                <p>{compeBoards.length} competition(s) found in this room</p>
+              </div>
+
               {compeBoards.map((comp) => (
                 <section key={comp.id} className={styles["competition-section"]}>
-                  <h2 className={styles["section-title"]}>{comp.title}</h2>
+                  <h2 className={styles["section-title"]}>
+                    {comp.title} 
+                    <span className={styles["participant-count"]}>
+                      ({comp.data.length} participants)
+                    </span>
+                  </h2>
                   <div className={styles["leaderboard-list"]}>
                     {comp.data.length === 0 ? (
                       <div className={styles["empty-state"]}>
