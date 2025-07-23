@@ -339,8 +339,8 @@ const SquareShape: React.FC<SquareShapeProps> = ({
       getAngleDeg(corner.prev, corner.corner, corner.next)
     );
     
-    const tolerance = 0.001; // 5% tolerance for measurements
-    const angleTolerance = 1; // 2 degrees tolerance for angles
+    const tolerance = 0.001; // Stricter tolerance for measurements
+    const angleTolerance = 1; // 1 degree tolerance for angles
     
     // Check if all sides are equal
     const allSidesEqual = sides.every(side => 
@@ -364,8 +364,8 @@ const SquareShape: React.FC<SquareShapeProps> = ({
       Math.abs(angles[1] - angles[3]) < angleTolerance
     );
     
-    // Check if exactly one pair of opposite sides are parallel
-    const hasOneParallelPair = () => {
+    // ✅ FIXED: Enhanced parallel sides detection
+    const getParallelSides = () => {
       // Vector for each side
       const vectors = [
         { x: topRight.x - topLeft.x, y: topRight.y - topLeft.y }, // top
@@ -374,46 +374,80 @@ const SquareShape: React.FC<SquareShapeProps> = ({
         { x: topLeft.x - bottomLeft.x, y: topLeft.y - bottomLeft.y } // left
       ];
       
-      // Check if vectors are parallel using cross product
+      // ✅ STRICTER: More precise parallel check using normalized vectors
       const isParallel = (v1: any, v2: any) => {
-        const cross = Math.abs(v1.x * v2.y - v1.y * v2.x);
+        // Normalize vectors
         const mag1 = Math.sqrt(v1.x * v1.x + v1.y * v1.y);
         const mag2 = Math.sqrt(v2.x * v2.x + v2.y * v2.y);
-        return cross / (mag1 * mag2) < 0.1; // Small tolerance for parallel check
+        
+        if (mag1 === 0 || mag2 === 0) return false;
+        
+        const n1 = { x: v1.x / mag1, y: v1.y / mag1 };
+        const n2 = { x: v2.x / mag2, y: v2.y / mag2 };
+        
+        // Check if vectors are parallel (cross product near zero)
+        const cross = Math.abs(n1.x * n2.y - n1.y * n2.x);
+        return cross < 0.05; // Stricter tolerance for parallel check
       };
       
       const topBottomParallel = isParallel(vectors[0], vectors[2]);
       const leftRightParallel = isParallel(vectors[1], vectors[3]);
       
-      return (topBottomParallel && !leftRightParallel) || (!topBottomParallel && leftRightParallel);
+      return {
+        topBottom: topBottomParallel,
+        leftRight: leftRightParallel,
+        hasExactlyOnePair: (topBottomParallel && !leftRightParallel) || (!topBottomParallel && leftRightParallel)
+      };
     };
     
-    // Classify the shape
+    const parallelInfo = getParallelSides();
+    
+    // ✅ STRICTER: Enhanced trapezoid detection
+    const isTrapezoid = () => {
+      // Must have exactly one pair of parallel sides
+      if (!parallelInfo.hasExactlyOnePair) return false;
+      
+      // ✅ STRICTER: Additional checks for valid trapezoid
+      // Non-parallel sides should NOT be equal (otherwise it's a parallelogram)
+      if (parallelInfo.topBottom) {
+        // Top and bottom are parallel, left and right should not be equal
+        const leftSide = getDistance(topLeft, bottomLeft);
+        const rightSide = getDistance(topRight, bottomRight);
+        return Math.abs(leftSide - rightSide) / Math.max(leftSide, rightSide) > tolerance;
+      } else if (parallelInfo.leftRight) {
+        // Left and right are parallel, top and bottom should not be equal
+        const topSide = getDistance(topLeft, topRight);
+        const bottomSide = getDistance(bottomLeft, bottomRight);
+        return Math.abs(topSide - bottomSide) / Math.max(topSide, bottomSide) > tolerance;
+      }
+      
+      return false;
+    };
+    
+    // Classify the shape with stricter rules
     if (allSidesEqual && allRightAngles) {
       return 'square';
     } else if (allRightAngles && oppositeSidesEqual) {
       return 'rectangle';
     } else if (allSidesEqual && oppositeAnglesEqual) {
       return 'rhombus';
-    } else if (oppositeSidesEqual && oppositeAnglesEqual) {
+    } else if (oppositeSidesEqual && oppositeAnglesEqual && parallelInfo.topBottom && parallelInfo.leftRight) {
       return 'parallelogram';
-    } else if (hasOneParallelPair()) {
+    } else if (isTrapezoid()) {
       return 'trapezoid';
     } else {
       return 'quadrilateral';
     }
   };
   
-  // Get appropriate formula and calculation for each shape type
+  // ✅ FIXED: Enhanced area formula with proper trapezoid handling
   const getAreaFormula = () => {
     const shapeType = classifyQuadrilateral();
-    const width = getDistance(topLeft, topRight) / 10;
-    const height = getDistance(topLeft, bottomLeft) / 10;
     const areaValue = (getQuadrilateralArea() / 100);
     
     switch (shapeType) {
       case 'square':
-        const side = width;
+        const side = getDistance(topLeft, topRight) / 10;
         return {
           title: "Square Area Formula",
           formula: "A = side²",
@@ -422,6 +456,8 @@ const SquareShape: React.FC<SquareShapeProps> = ({
         };
         
       case 'rectangle':
+        const width = getDistance(topLeft, topRight) / 10;
+        const height = getDistance(topLeft, bottomLeft) / 10;
         return {
           title: "Rectangle Area Formula",
           formula: "A = length × width",
@@ -430,7 +466,6 @@ const SquareShape: React.FC<SquareShapeProps> = ({
         };
         
       case 'rhombus':
-        // Calculate diagonals for rhombus
         const diagonal1 = getDistance(topLeft, bottomRight) / 10;
         const diagonal2 = getDistance(topRight, bottomLeft) / 10;
         return {
@@ -441,9 +476,8 @@ const SquareShape: React.FC<SquareShapeProps> = ({
         };
         
       case 'parallelogram':
-        // For parallelogram, use base and height
         const base = getDistance(topLeft, topRight) / 10;
-        const approxHeight = areaValue / base; // Derive height from area
+        const approxHeight = areaValue / base;
         return {
           title: "Parallelogram Area Formula",
           formula: "A = base × height",
@@ -452,16 +486,58 @@ const SquareShape: React.FC<SquareShapeProps> = ({
         };
         
       case 'trapezoid':
-        // For trapezoid, find parallel sides
-        const topSide = getDistance(topLeft, topRight) / 10;
-        const bottomSide = getDistance(bottomLeft, bottomRight) / 10;
-        const trapHeight = Math.abs(topLeft.y - bottomLeft.y) / 10;
-        return {
-          title: "Trapezoid Area Formula",
-          formula: "A = ((a + b) × h) ÷ 2",
-          calculation: `A = ((${topSide.toFixed(2)} + ${bottomSide.toFixed(2)}) × ${trapHeight.toFixed(2)}) ÷ 2 = ${areaValue.toFixed(2)} u²`,
-          color: "#27ae60"
+        // ✅ FIXED: Determine which sides are parallel and calculate accordingly
+        const vectors = [
+          { x: topRight.x - topLeft.x, y: topRight.y - topLeft.y }, // top
+          { x: bottomRight.x - topRight.x, y: bottomRight.y - topRight.y }, // right
+          { x: bottomLeft.x - bottomRight.x, y: bottomLeft.y - bottomRight.y }, // bottom
+          { x: topLeft.x - bottomLeft.x, y: topLeft.y - bottomLeft.y } // left
+        ];
+        
+        const isParallel = (v1: any, v2: any) => {
+          const mag1 = Math.sqrt(v1.x * v1.x + v1.y * v1.y);
+          const mag2 = Math.sqrt(v2.x * v2.x + v2.y * v2.y);
+          if (mag1 === 0 || mag2 === 0) return false;
+          const n1 = { x: v1.x / mag1, y: v1.y / mag1 };
+          const n2 = { x: v2.x / mag2, y: v2.y / mag2 };
+          const cross = Math.abs(n1.x * n2.y - n1.y * n2.x);
+          return cross < 0.05;
         };
+        
+        const topBottomParallel = isParallel(vectors[0], vectors[2]);
+        const leftRightParallel = isParallel(vectors[1], vectors[3]);
+        
+        if (topBottomParallel) {
+          // ✅ Top and bottom sides are parallel
+          const a = getDistance(topLeft, topRight) / 10; // top base
+          const b = getDistance(bottomLeft, bottomRight) / 10; // bottom base
+          const h = Math.abs(topLeft.y - bottomLeft.y) / 10; // height
+          return {
+            title: "Trapezoid Area Formula",
+            formula: "A = ((a + b) × h) ÷ 2",
+            calculation: `A = ((${a.toFixed(2)} + ${b.toFixed(2)}) × ${h.toFixed(2)}) ÷ 2 = ${areaValue.toFixed(2)} u²`,
+            color: "#27ae60"
+          };
+        } else if (leftRightParallel) {
+          // ✅ FIXED: Left and right sides are parallel
+          const a = getDistance(topLeft, bottomLeft) / 10; // left base
+          const b = getDistance(topRight, bottomRight) / 10; // right base
+          const h = Math.abs(topLeft.x - topRight.x) / 10; // horizontal distance (width)
+          return {
+            title: "Trapezoid Area Formula",
+            formula: "A = ((a + b) × h) ÷ 2",
+            calculation: `A = ((${a.toFixed(2)} + ${b.toFixed(2)}) × ${h.toFixed(2)}) ÷ 2 = ${areaValue.toFixed(2)} u²`,
+            color: "#27ae60"
+          };
+        } else {
+          // Fallback if parallel detection fails
+          return {
+            title: "Trapezoid Area Formula",
+            formula: "A = Shoelace Formula",
+            calculation: `A = ${areaValue.toFixed(2)} u² (using coordinate geometry)`,
+            color: "#27ae60"
+          };
+        }
         
       default: // general quadrilateral
         return {
