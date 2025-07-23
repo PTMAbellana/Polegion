@@ -71,10 +71,11 @@ const LeaderRow: React.FC<{ row: Leaderboard; rank: number }> = ({
 
 export default function LeaderboardDetail({ params }: { params: Promise<{ roomId: number }> }) {
   const roomId = use(params)
-  const { isLoggedIn, authLoading } = useMyApp()
+  const { isLoggedIn, authLoading, userProfile } = useMyApp()
 
   const [ roomBoards, setRoomBoards ] = useState<Leaderboard[]>([])
   const [ compeBoards, setCompeBoards ] = useState<PerCompetition[]>([])
+  const [activeTab, setActiveTab] = useState<"overall" | "competition">("overall");
 
   useEffect(() => {
       if (isLoggedIn && !authLoading) {
@@ -111,42 +112,88 @@ export default function LeaderboardDetail({ params }: { params: Promise<{ roomId
   console.log('Competition Boards: ', compeBoards);
 
   return (
-    <div className={styles["leaderboard-container"]}>
-      <div className={styles["main-content"]}>
-        {/* Room leaderboard */}
-        <h1 className={styles["section-title"]}>Room Leaderboard</h1>
-        <div className={styles["leaderboard-list"]}>
-          {roomBoards.length === 0 ? (
-            <div className={styles["empty-state"]}>
-              <span className={styles["empty-icon"]}>🏆</span>
-              <p>No participants yet.</p>
+    <>
+      {/* Main Leaderboard Container */}
+      <div className={styles["leaderboard-container"]}>
+        <div className={styles["main-content"]}>
+
+          {/* Header Section */}
+          <div className={styles["header-section"]}>
+            {/* <div className={styles["user-avatar"]}>
+              <span className={styles["avatar-letter"]}>
+                {userProfile?.fullName?.charAt(0)?.toUpperCase() || 'J'}
+              </span>
+            </div> */}
+            <div className={styles["welcome-text"]}>
+              <h1>Leaderboards</h1>
+              <p>How well did you do, {userProfile?.fullName || 'John Doe'} ?</p>
             </div>
-          ) : (
-            roomBoards.map((row, idx) => (
-              <LeaderRow key={idx} row={row} rank={idx} />
-            ))
+            {/* <div className={styles["search-section"]}>
+              <span>Search</span>
+              <div className={styles["search-icon"]}>🔍</div>
+            </div> */}
+          </div>
+
+          {/* Navigation Bar */}
+          <div className={styles["nav-bar"]}>
+            <button
+              className={`${styles["nav-btn"]} ${activeTab === "overall" ? styles["active"] : ""}`}
+              onClick={() => setActiveTab("overall")}
+            >
+              Overall
+            </button>
+            <button
+              className={`${styles["nav-btn"]} ${activeTab === "competition" ? styles["active"] : ""}`}
+              onClick={() => setActiveTab("competition")}
+            >
+              Competition
+            </button>
+          </div>
+
+          {/* Room leaderboard */}
+          {activeTab === "overall" && (
+            <>
+              <h1 className={styles["section-title"]}>Room Leaderboard</h1>
+              <div className={styles["leaderboard-list"]}>
+                {roomBoards.length === 0 ? (
+                  <div className={styles["empty-state"]}>
+                    <span className={styles["empty-icon"]}>🏆</span>
+                    <p>No participants yet.</p>
+                  </div>
+                ) : (
+                  roomBoards.map((row, idx) => (
+                    <LeaderRow key={idx} row={row} rank={idx} />
+                  ))
+                )}
+              </div>
+            </>
+          )}
+
+          {/* Each competition */}
+          {activeTab === "competition" && (
+            <>
+              <h1 className={styles["section-title"]}>Competition Leaderboards</h1>
+              {compeBoards.map((comp) => (
+                <section key={comp.id} className={styles["competition-section"]}>
+                  <h2 className={styles["section-title"]}>{comp.title}</h2>
+                  <div className={styles["leaderboard-list"]}>
+                    {comp.data.length === 0 ? (
+                      <div className={styles["empty-state"]}>
+                        <span className={styles["empty-icon"]}>🏅</span>
+                        <p>No participants for this competition.</p>
+                      </div>
+                    ) : (
+                      comp.data.map((row, idx) => (
+                        <LeaderRow key={`${comp.id}-${idx}`} row={row} rank={idx} />
+                      ))
+                    )}
+                  </div>
+                </section>
+              ))}
+            </>
           )}
         </div>
-
-        {/* Each competition */}
-        {compeBoards.map((comp) => (
-          <section key={comp.id} className={styles["competition-section"]}>
-            <h2 className={styles["section-title"]}>{comp.title}</h2>
-            <div className={styles["leaderboard-list"]}>
-              {comp.data.length === 0 ? (
-                <div className={styles["empty-state"]}>
-                  <span className={styles["empty-icon"]}>🏅</span>
-                  <p>No participants for this competition.</p>
-                </div>
-              ) : (
-                comp.data.map((row, idx) => (
-                  <LeaderRow key={`${comp.id}-${idx}`} row={row} rank={idx} />
-                ))
-              )}
-            </div>
-          </section>
-        ))}
       </div>
-    </div>
+    </>
   );
 }
