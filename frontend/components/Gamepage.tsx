@@ -2,7 +2,7 @@
 
 import styles from "@/styles/create-problem.module.css";
 import { useRouter } from "next/navigation";
-import React, { useState, useRef, useEffect, useCallback } from "react";
+import React, { useState, useRef, useEffect, useCallback, useMemo } from "react";
 
 // Import create-problem components (these are already Konva-based)
 import Toolbox from '@/app/virtual-rooms/[roomCode]/create-problem/components/Toolbox';
@@ -14,6 +14,8 @@ import LimitAttempts from '@/app/virtual-rooms/[roomCode]/create-problem/compone
 import SetVisibility from '@/app/virtual-rooms/[roomCode]/create-problem/components/SetVisibility';
 import ShapeLimitPopup from '@/app/virtual-rooms/[roomCode]/create-problem/components/ShapeLimitPopup';
 
+// ✅ ADD MISSING IMPORT
+import { getRoomProblemsByCode } from '@/api/problems';
 import { createProblem, deleteProblem, getCompeProblem, updateProblem } from '@/api/problems'
 import { submitSolution } from '@/api/attempt';
 import Swal from "sweetalert2";
@@ -35,6 +37,9 @@ interface Problem {
   max_attempts: number
   expected_xp: number
   hint?: string | null
+  // ✅ ADD MISSING PROPERTIES
+  expected_solution?: any[]
+  timer?: number | null
 }
 
 interface GamepageProps {
@@ -105,30 +110,35 @@ export default function Gamepage({
   const [currentProblem, setCurrentProblem] = useState<CompetitionProblem | null>(null);
   const [isLoadingProblem, setIsLoadingProblem] = useState(false);
 
-  // Timer and realtime hooks for competition mode
+  // ✅ MEMOIZE COMPETITION ID TO PREVENT UNNECESSARY HOOK CALLS
+  const memoizedCompetitionId = useMemo(() => competitionId || 0, [competitionId]);
+  
+  // ✅ CONDITIONALLY USE HOOKS TO PREVENT UNNECESSARY API CALLS
+  const shouldUseHooks = !!competitionId && competitionId > 0;
+  
   const { 
     competition: realtimeCompetition, 
     isConnected,
     connectionStatus 
-  } = useCompetitionRealtime(competitionId, false);
+  } = useCompetitionRealtime(memoizedCompetitionId, shouldUseHooks);
 
   const {
-    timeRemaining,
-    isTimerActive,
-    formattedTime,
-    isExpired,
-    isPaused
+    timeRemaining = 0,
+    isTimerActive = false,
+    formattedTime = '00:00',
+    isExpired = false,
+    isPaused = false
   } = useCompetitionTimer(
-    competitionId, 
-    realtimeCompetition || currentCompetition
+    memoizedCompetitionId, 
+    shouldUseHooks ? (realtimeCompetition || currentCompetition) : null
   );
 
   // Use realtime competition data if available, fallback to props
   const activeCompetition = realtimeCompetition || currentCompetition;
 
-  // Fetch problems for non-competition mode
+  // ✅ SAFER FETCH PROBLEMS WITH BETTER ERROR HANDLING AND DEBOUNCING
   const fetchProblems = useCallback(async () => {
-    // ✅ FIXED: Only fetch problems in non-competition mode AND when we have a valid roomCode
+    // Only fetch problems in non-competition mode AND when we have a valid roomCode
     if (!roomCode || competitionId || typeof roomCode !== 'string' || roomCode.trim() === '') {
       console.log('⏭️ Skipping fetchProblems:', { 
         roomCode: !!roomCode, 
@@ -141,42 +151,60 @@ export default function Gamepage({
     try {
       console.log('📝 Fetching problems for room:', roomCode);
       const data = await getRoomProblemsByCode(roomCode);
-      setProblems(data || []);
-      console.log('✅ Problems fetched successfully:', data?.length || 0);
+      setProblems(Array.isArray(data) ? data : []);
+      console.log('✅ Problems fetched successfully:', Array.isArray(data) ? data.length : 0);
     } catch (error) {
       console.error("❌ Error fetching problems:", error);
-      // Set empty array on error to prevent crashes
       setProblems([]);
-      
-      // Only show error alerts in non-competition mode
-      if (!competitionId) {
-        console.warn("Failed to fetch problems for room:", roomCode);
-      }
     }
   }, [roomCode, competitionId]);
 
+  // ✅ DEBOUNCED EFFECT TO PREVENT MULTIPLE CALLS
   useEffect(() => {
-    // Only fetch problems when not in competition mode
+    let timeoutId: NodeJS.Timeout;
+    
     if (!competitionId) {
-      fetchProblems();
+      timeoutId = setTimeout(() => {
+        fetchProblems();
+      }, 100); // Small delay to debounce
     }
+    
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId);
+    };
   }, [fetchProblems, competitionId]);
 
-  // Fetch current problem in competition mode
+  // ✅ SAFER FETCH CURRENT PROBLEM WITH BETTER ERROR HANDLING AND DEBOUNCING
   useEffect(() => {
+    let timeoutId: NodeJS.Timeout;
+    let isCancelled = false;
+    
     const fetchCurrentProblem = async () => {
-      console.log('iasdkjahskd')
-      if (!competitionId || !activeCompetition?.current_problem_id) return;
+      if (!competitionId || !activeCompetition?.current_problem_id || isCancelled) {
+        console.log('⏭️ Skipping fetchCurrentProblem:', {
+          competitionId: !!competitionId,
+          currentProblemId: activeCompetition?.current_problem_id,
+          isCancelled
+        });
+        return;
+      }
       
-      console.log('aksdjaksjdalsad kapoy')
       setIsLoadingProblem(true);
       try {
-        // Fetch the current problem details from your API
+        console.log('🔍 Fetching current problem:', activeCompetition.current_problem_id);
         const problemData = await getCompeProblem(activeCompetition.current_problem_id);
+        
+        if (isCancelled) return; // Cancel if component unmounted
+        
+        if (!problemData || !problemData.problem) {
+          console.error('❌ Invalid problem data received');
+          return;
+        }
+
         console.log('🔍 Current Problem Data:', problemData);
         setCurrentProblem(problemData);
         
-        // ✨ POPULATE THE FORM FIELDS WITH PROBLEM DETAILS (READ-ONLY FOR STUDENTS)
+        // ✨ SAFELY POPULATE THE FORM FIELDS
         setTitle(problemData.problem.title || "");
         setPrompt(problemData.problem.description || "");
         setDifficulty(problemData.problem.difficulty || "Easy");
@@ -190,18 +218,30 @@ export default function Gamepage({
         setShapes([]);
         setSelectedId(null);
         
-        console.log('🎯 Problem details loaded:', problemData);
+        console.log('🎯 Problem details loaded successfully');
         
       } catch (error) {
-        console.error('Error fetching current problem:', error);
+        if (!isCancelled) {
+          console.error('❌ Error fetching current problem:', error);
+          setCurrentProblem(null);
+        }
       } finally {
-        setIsLoadingProblem(false);
+        if (!isCancelled) {
+          setIsLoadingProblem(false);
+        }
       }
     };
     
     if (competitionId && activeCompetition?.current_problem_id) {
-      fetchCurrentProblem();
+      timeoutId = setTimeout(() => {
+        fetchCurrentProblem();
+      }, 200); // Debounce to prevent rapid calls
     }
+    
+    return () => {
+      isCancelled = true;
+      if (timeoutId) clearTimeout(timeoutId);
+    };
   }, [activeCompetition?.current_problem_id, competitionId]);
 
   // Keyboard deletion handler
@@ -240,139 +280,130 @@ export default function Gamepage({
     return (px / 10).toFixed(1);
   };
 
-  // Shape properties calculation
-  function getShapeProperties(shape) {
-    if (shape.type === "square" && shape.points) {
-      const { topLeft, topRight, bottomRight, bottomLeft } = shape.points;
-      const sideLengths = [
-        Math.sqrt((topLeft.x - topRight.x) ** 2 + (topLeft.y - topRight.y) ** 2),
-        Math.sqrt((topRight.x - bottomRight.x) ** 2 + (topRight.y - bottomRight.y) ** 2),
-        Math.sqrt((bottomRight.x - bottomLeft.x) ** 2 + (bottomRight.y - bottomLeft.y) ** 2),
-        Math.sqrt((bottomLeft.x - topLeft.x) ** 2 + (bottomLeft.y - topLeft.y) ** 2),
-      ].map(l => +(l / 10).toFixed(2));
+  // ✅ SAFER SHAPE PROPERTIES CALCULATION
+  function getShapeProperties(shape: any) {
+    try {
+      if (shape.type === "square" && shape.points) {
+        const { topLeft, topRight, bottomRight, bottomLeft } = shape.points;
+        const sideLengths = [
+          Math.sqrt((topLeft.x - topRight.x) ** 2 + (topLeft.y - topRight.y) ** 2),
+          Math.sqrt((topRight.x - bottomRight.x) ** 2 + (topRight.y - bottomRight.y) ** 2),
+          Math.sqrt((bottomRight.x - bottomLeft.x) ** 2 + (bottomRight.y - bottomLeft.y) ** 2),
+          Math.sqrt((bottomLeft.x - topLeft.x) ** 2 + (bottomLeft.y - topLeft.y) ** 2),
+        ].map(l => +(l / 10).toFixed(2));
 
-      const area =
-        0.5 *
-        Math.abs(
-          topLeft.x * topRight.y +
-            topRight.x * bottomRight.y +
-            bottomRight.x * bottomLeft.y +
-            bottomLeft.x * topLeft.y -
-            (topRight.x * topLeft.y +
-              bottomRight.x * topRight.y +
-              bottomLeft.x * bottomRight.y +
-              topLeft.x * bottomLeft.y)
-        ) / 100;
+        const area =
+          0.5 *
+          Math.abs(
+            topLeft.x * topRight.y +
+              topRight.x * bottomRight.y +
+              bottomRight.x * bottomLeft.y +
+              bottomLeft.x * topLeft.y -
+              (topRight.x * topLeft.y +
+                bottomRight.x * topRight.y +
+                bottomLeft.x * bottomRight.y +
+                topLeft.x * bottomLeft.y)
+          ) / 100;
 
-      return { ...shape, sideLengths, area: +area.toFixed(2) };
-    }
-
-    if (shape.type === "circle") {
-      const diameter = +(shape.size / 10).toFixed(2);
-      const radius = diameter / 2;
-      const area = +(Math.PI * radius * radius).toFixed(2);
-      const circumference = +(2 * Math.PI * radius).toFixed(2);
-      return { ...shape, diameter, area, circumference };
-    }
-
-    if (shape.type === "triangle" && shape.points) {
-      const pts = [shape.points.top, shape.points.left, shape.points.right];
-      const sideLengths = [
-        Math.sqrt((pts[0].x - pts[1].x) ** 2 + (pts[0].y - pts[1].y) ** 2) / 10,
-        Math.sqrt((pts[1].x - pts[2].x) ** 2 + (pts[1].y - pts[2].y) ** 2) / 10,
-        Math.sqrt((pts[2].x - pts[0].x) ** 2 + (pts[2].y - pts[0].y) ** 2) / 10,
-      ].map(l => +l.toFixed(2));
-
-      const area =
-        Math.abs(
-          (pts[0].x * (pts[1].y - pts[2].y) +
-            pts[1].x * (pts[2].y - pts[0].y) +
-            pts[2].x * (pts[0].y - pts[1].y)) / 2
-        ) / 100;
-
-      const baseLength = sideLengths[1];
-      const height = +(2 * area / baseLength).toFixed(2);
-
-      function dist(a, b) {
-        return Math.sqrt((a.x - b.x) ** 2 + (a.y - b.y) ** 2) / 10;
+        return { ...shape, sideLengths, area: +area.toFixed(2) };
       }
-      function getAngle(A, B, C) {
-        const a = dist(B, C);
-        const b = dist(A, C);
-        const c = dist(A, B);
-        const angleRad = Math.acos((b * b + c * c - a * a) / (2 * b * c));
-        return +(angleRad * 180 / Math.PI).toFixed(2);
+
+      if (shape.type === "circle") {
+        const diameter = +(shape.size / 10).toFixed(2);
+        const radius = diameter / 2;
+        const area = +(Math.PI * radius * radius).toFixed(2);
+        const circumference = +(2 * Math.PI * radius).toFixed(2);
+        return { ...shape, diameter, area, circumference };
       }
-      const angles = [
-        getAngle(pts[0], pts[1], pts[2]),
-        getAngle(pts[1], pts[2], pts[0]),
-        getAngle(pts[2], pts[0], pts[1]),
-      ];
 
-      return {
-        ...shape,
-        points: shape.points,
-        sideLengths,
-        area: +area.toFixed(2),
-        height,
-        angles,
-      };
+      if (shape.type === "triangle" && shape.points) {
+        const pts = [shape.points.top, shape.points.left, shape.points.right];
+        const sideLengths = [
+          Math.sqrt((pts[0].x - pts[1].x) ** 2 + (pts[0].y - pts[1].y) ** 2) / 10,
+          Math.sqrt((pts[1].x - pts[2].x) ** 2 + (pts[1].y - pts[2].y) ** 2) / 10,
+          Math.sqrt((pts[2].x - pts[0].x) ** 2 + (pts[2].y - pts[0].y) ** 2) / 10,
+        ].map(l => +l.toFixed(2));
+
+        const area =
+          Math.abs(
+            (pts[0].x * (pts[1].y - pts[2].y) +
+              pts[1].x * (pts[2].y - pts[0].y) +
+              pts[2].x * (pts[0].y - pts[1].y)) / 2
+          ) / 100;
+
+        const baseLength = sideLengths[1];
+        const height = +(2 * area / baseLength).toFixed(2);
+
+        function dist(a: any, b: any) {
+          return Math.sqrt((a.x - b.x) ** 2 + (a.y - b.y) ** 2) / 10;
+        }
+        function getAngle(A: any, B: any, C: any) {
+          const a = dist(B, C);
+          const b = dist(A, C);
+          const c = dist(A, B);
+          const angleRad = Math.acos((b * b + c * c - a * a) / (2 * b * c));
+          return +(angleRad * 180 / Math.PI).toFixed(2);
+        }
+        const angles = [
+          getAngle(pts[0], pts[1], pts[2]),
+          getAngle(pts[1], pts[2], pts[0]),
+          getAngle(pts[2], pts[0], pts[1]),
+        ];
+
+        return {
+          ...shape,
+          points: shape.points,
+          sideLengths,
+          area: +area.toFixed(2),
+          height,
+          angles,
+        };
+      }
+
+      return shape;
+    } catch (error) {
+      console.error('Error calculating shape properties:', error);
+      return shape; // Return original shape if calculation fails
     }
-
-    return shape;
   }
 
-  // Save/Submit handler
+  // ✅ SAFER SAVE/SUBMIT HANDLER
   const handleSave = async () => {
     console.log("Saving problem...");
-    if (competitionId && currentCompetition) {
+    if (competitionId && activeCompetition) {
       // ✨ COMPETITION MODE - SUBMIT SOLUTION
-      const shapesWithProps = shapes.map(getShapeProperties);
-      
-      // const solutionPayload = {
-      //   competition_id: competitionId,
-      //   problem_id: currentCompetition.current_problem_id,
-      //   participant_solution: shapesWithProps,
-      //   submitted_at: new Date().toISOString(),
-      //   room_id: roomId
-      // };    const shapesWithProps = shapes.map(getShapeProperties);
-    
-    // ✅ Calculate time taken from timer
-    // const totalTimeAllowed = timerValue * 60; // Convert minutes to seconds
-    const totalTimeAllowed = currentProblem?.timer || 0; // Use current problem's timer
-    const timeTaken = Math.abs( totalTimeAllowed - timeRemaining ); // How much time they used
-    
-    const solutionPayload = {
-      // room_participant_id: currentParticipant?.id, // ✅ Add participant ID
-      solution: shapesWithProps, // ✅ Use correct field name
-      time_taken: timeTaken, // ✅ Time they actually spent solving
-      room_id: Number(roomId), // ✅ Include room ID
-    };
-
-    console.log("📊 Submission details:", {
-      totalTimeAllowed,
-      timeRemaining, 
-      timeTaken,
-      solutionPayload
-    });
-    
-
-     console.log("Submitting solution:", solutionPayload); 
       try {
-        // Submit solution to competition API
+        const shapesWithProps = shapes.map(getShapeProperties);
+        
+        // ✅ Calculate time taken from timer
+        const totalTimeAllowed = currentProblem?.timer || 0;
+        const timeTaken = Math.abs(totalTimeAllowed - timeRemaining);
+        
+        const solutionPayload = {
+          solution: shapesWithProps,
+          time_taken: timeTaken,
+          room_id: Number(roomId),
+        };
 
+        console.log("📊 Submission details:", {
+          totalTimeAllowed,
+          timeRemaining, 
+          timeTaken,
+          solutionPayload
+        });
+
+        console.log("Submitting solution:", solutionPayload); 
+        
         const response = await submitSolution(
           competitionId,
-          currentCompetition.current_problem_id,
+          activeCompetition.current_problem_id,
           solutionPayload
         );
 
         if (response) {
-          // const result = await response.json();
-          
           Swal.fire({
             title: "Solution Submitted! 🎯",
-            text: `Your solution has been submitted successfully! `,
+            text: `Your solution has been submitted successfully!`,
             icon: "success",
             confirmButtonText: "Awesome!",
             timer: 3000,
@@ -381,13 +412,12 @@ export default function Gamepage({
           
           setShapes([]);
           setSelectedId(null);
-          
         } 
-      } catch (error) {
+      } catch (error: any) {
         console.error("Submit error:", error);
         Swal.fire({
           title: "Submission Error",
-          text: error.message || "Failed to submit solution. Please try again.",
+          text: error?.message || "Failed to submit solution. Please try again.",
           icon: "error",
           confirmButtonText: "Try Again",
         });
@@ -395,22 +425,22 @@ export default function Gamepage({
       return;
     }
 
-    // Regular mode - create/edit problem
-    const shapesWithProps = shapes.map(getShapeProperties);
-
-    const payload = {
-      title,
-      description: prompt,
-      expected_solution: shapesWithProps,
-      difficulty,
-      visibility: visible ? "show" : "hide",
-      max_attempts: limitAttempts,
-      expected_xp: XP_MAP[difficulty],
-      timer: timerOpen ? timerValue : null,
-      hint: hintOpen ? hint : null,
-    };
-
+    // ✅ SAFER REGULAR MODE - CREATE/EDIT PROBLEM
     try {
+      const shapesWithProps = shapes.map(getShapeProperties);
+
+      const payload = {
+        title,
+        description: prompt,
+        expected_solution: shapesWithProps,
+        difficulty,
+        visibility: visible ? "show" : "hide",
+        max_attempts: limitAttempts,
+        expected_xp: XP_MAP[difficulty as keyof typeof XP_MAP],
+        timer: timerOpen ? timerValue : null,
+        hint: hintOpen ? hint : null,
+      };
+
       if (!problemId) {
         await createProblem(payload, roomCode);
         Swal.fire({
@@ -428,17 +458,7 @@ export default function Gamepage({
           confirmButtonText: "OK",
         }); 
       }
-      // await fetchProblems();
-      // Swal.fire(message);
-    } catch (error) {
-      console.error("Save error:", error);
-      Swal.fire({
-        title: "Error",
-        text: "There was an error saving the problem. Please try again.",
-        icon: "error",
-        confirmButtonText: "OK",
-      });
-    } finally {
+
       // Reset form
       setTitle("");
       setPrompt("");
@@ -453,6 +473,15 @@ export default function Gamepage({
       setVisible(true);
       setShowProperties(false);
       setProblemId(null);
+
+    } catch (error: any) {
+      console.error("Save error:", error);
+      Swal.fire({
+        title: "Error",
+        text: error?.message || "There was an error saving the problem. Please try again.",
+        icon: "error",
+        confirmButtonText: "OK",
+      });
     }
   };
 
@@ -505,22 +534,29 @@ export default function Gamepage({
     }
   }, [shapes.length, handleAllShapesDeleted]);
 
-  // Add this debugging effect right before the return statement
+  // ✅ REDUCED TIMER DEBUG LOGGING TO PREVENT SPAM
   useEffect(() => {
-    if (competitionId && activeCompetition) {
-      console.log('Timer Debug:', {
-        competitionId,
-        activeCompetition: !!activeCompetition,
-        timeRemaining,
-        timerValue,
-        isTimerActive,
-        formattedTime,
-        isExpired,
-        isPaused,
-        progressPercentage: Math.max(0, (timeRemaining / (timerValue * 60)) * 100)
-      });
+    if (competitionId && activeCompetition && timeRemaining > 0) {
+      // Only log every 10 seconds to reduce console spam
+      if (timeRemaining % 10 === 0) {
+        console.log('Timer Update:', {
+          timeRemaining,
+          formattedTime,
+          isExpired,
+          isPaused
+        });
+      }
     }
-  }, [competitionId, activeCompetition, timeRemaining, timerValue, isTimerActive, formattedTime, isExpired, isPaused]);
+  }, [competitionId, activeCompetition, timeRemaining, formattedTime, isExpired, isPaused]);
+
+  // ✅ LOADING STATE FOR COMPETITION MODE
+  if (competitionId && isLoadingProblem) {
+    return (
+      <div className={styles.loadingContainer}>
+        <div className={styles.loadingSpinner}>Loading problem...</div>
+      </div>
+    );
+  }
 
   return (
     <div className={`${styles.root} ${isFullScreenMode ? styles.fullScreenGame : ''}`}>
@@ -541,7 +577,7 @@ export default function Gamepage({
               <div 
                 className={styles.difficultyValue}
                 style={{
-                  backgroundColor: DIFFICULTY_COLORS[difficulty],
+                  backgroundColor: DIFFICULTY_COLORS[difficulty as keyof typeof DIFFICULTY_COLORS],
                   padding: '8px 16px',
                   borderRadius: '6px',
                   fontWeight: '600',
@@ -625,7 +661,6 @@ export default function Gamepage({
               <button 
                 className={`${styles.saveBtn} ${styles.rowBtn} ${styles.saveBtnFloating}`} 
                 onClick={handleSave}
-                // disabled={competitionId && shapes.length === 0}
               >
                 {competitionId ? "Submit Solution 🚀" : "Save"}
               </button>
@@ -642,7 +677,7 @@ export default function Gamepage({
             showHeight={showHeight}
           />
           
-          {/* Competition Timer Display - FIXED */}
+          {/* ✅ SAFER COMPETITION TIMER DISPLAY */}
           {competitionId && activeCompetition && (
             <div className={styles.competitionTimerContainer}>
               <div className={styles.timerDisplay}>
@@ -683,11 +718,6 @@ export default function Gamepage({
                     Status: <span className={styles.statusValue}>{activeCompetition.gameplay_indicator}</span>
                   </div>
                 )}
-                
-                {/* Debug info - remove in production */}
-                <div style={{ fontSize: '12px', color: '#666', marginTop: '8px' }}>
-                  Debug: {timeRemaining}s / {timerValue * 60}s = {Math.round((timeRemaining / (timerValue * 60)) * 100)}%
-                </div>
               </div>
             </div>
           )}
@@ -756,77 +786,6 @@ export default function Gamepage({
             </div>
           </div>
         </div>
-        
-        {/* ✨ RIGHT SIDEBAR - ONLY SHOW PROBLEMS LIST IN NON-COMPETITION MODE */}
-        {/* {!competitionId && (
-          <div className={styles.problemsSection}>
-            <div className={styles.problemsSectionHeader}>
-              Existing Problems
-            </div>
-            <div className={styles.problemsContent}>
-              {problems.length > 0 ? (
-                <ul className={styles.problemList}>
-                  {problems.map(problem => (
-                    <li key={problem.id} className={styles.problemItem}>
-                      <div className={styles.problemItemHeader}>
-                        <div className={styles.problemTitle}>
-                          {problem.title || "Untitled Problem"}
-                        </div>
-                        <div className={styles.buttonGroup}>
-                          <button 
-                            onClick={() => handleEditProblem(problem.id)} 
-                            className={styles.editButton}
-                            title="Edit this problem"
-                          >
-                            Edit
-                          </button>
-                          <button 
-                            onClick={() => handleDeleteProblem(problem.id)} 
-                            className={styles.deleteButton}
-                            title="Delete this problem"
-                          >
-                            Delete
-                          </button>
-                        </div>
-                      </div>
-                      <div className={styles.problemDetails}>
-                        <span 
-                          className={styles.problemDifficulty} 
-                          style={{ backgroundColor: DIFFICULTY_COLORS[problem.difficulty] }}
-                        >
-                          {problem.difficulty}
-                        </span>
-                        <span 
-                          className={`${styles.problemVisibility} ${styles[problem.visibility]}`}
-                        >
-                          {problem.visibility}
-                        </span>
-                        <div className={styles.problemMeta}>
-                          <span className={styles.problemAttempts}>
-                            {problem.max_attempts} {problem.max_attempts === 1 ? 'attempt' : 'attempts'}
-                          </span>
-                          <span className={styles.problemXp}>
-                            {problem.expected_xp} XP
-                          </span>
-                        </div>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <div className={styles.noProblems}>
-                  <div className={styles.noProblemsIcon}>📝</div>
-                  <div className={styles.noProblemsText}>
-                    No problems created yet.
-                  </div>
-                  <div className={styles.noProblemsSubtext}>
-                    Create your first problem to get started!
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        )} */}
       </div>
       
       {showLimitPopup && (
