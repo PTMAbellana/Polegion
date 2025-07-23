@@ -46,8 +46,8 @@ interface Competition {
 const CompetitionDashboard = ({ params } : { params  : Promise<{competitionId : number }> }) => {
   const searchParams = useSearchParams();
   const roomId = searchParams.get("room");
-  const completed = searchParams.get("completed"); // Check if redirected from completed game
-  const compe_id = use(params)
+  const completed = searchParams.get("completed");
+  const compe_id = use(params);
   const router = useRouter();
 
   // ✅ ONLY Competition states - removed all create-problem states
@@ -133,62 +133,136 @@ const CompetitionDashboard = ({ params } : { params  : Promise<{competitionId : 
     }
   }, [currentCompetition?.status, isTimerActive, compe_id.competitionId, roomId, router, completed]);
 
-  // ✅ FIXED: Use correct backend endpoint
+  // ✅ CLEANED UP: Simple getRoomCodeFromId without alerts
   const getRoomCodeFromId = async (roomId: string) => {
     try {
       console.log('🔍 Fetching room details for room ID:', roomId);
       
-      // Use the correct endpoint from RoomRoutes.js: '/id/:id'
-      const response = await fetch(`/api/virtual-rooms/id/${roomId}`);
+      // ✅ MORE COMPREHENSIVE AUTH CHECK
+      const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+      const sessionToken = typeof window !== 'undefined' ? sessionStorage.getItem('token') : null;
+      const cookieToken = typeof window !== 'undefined' ? document.cookie.split(';').find(row => row.trim().startsWith('token=')) : null;
+      
+      console.log('🔐 Auth token sources:');
+      console.log('  - localStorage:', !!token);
+      console.log('  - sessionStorage:', !!sessionToken);
+      console.log('  - cookie:', !!cookieToken);
+      
+      const finalToken = token || sessionToken || (cookieToken ? cookieToken.split('=')[1] : null);
+      console.log('🔐 Final token selected:', !!finalToken);
+      
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      };
+      
+      // Add auth token if available
+      if (finalToken) {
+        headers['Authorization'] = `Bearer ${finalToken}`;
+      }
+      
+      console.log('📡 Request URL:', `/api/virtual-rooms/id/${roomId}`);
+      console.log('📡 Request headers:', headers);
+      
+      const response = await fetch(`/api/virtual-rooms/id/${roomId}`, {
+        method: 'GET',
+        headers,
+      });
+      
+      console.log('📡 Response status:', response.status);
       
       if (response.ok) {
         const roomDetails = await response.json();
-        console.log('📋 Room details received:', roomDetails);
+        console.log('📋 ===== COMPLETE API RESPONSE =====');
+        console.log('📋 Full response:', JSON.stringify(roomDetails, null, 2));
+        console.log('📋 Room ID:', roomDetails.id);
+        console.log('📋 Room Code (from .code):', roomDetails.code);
+        console.log('📋 Room Name:', roomDetails.name);
+        console.log('📋 All properties:', Object.keys(roomDetails));
+        console.log('📋 ===================================');
         
-        // The Room.toDTO() returns the code property
+        // ✅ DIRECT: Get the code property
         const roomCode = roomDetails.code;
         
-        if (roomCode && roomCode !== roomId) {
-          console.log('✅ Found room code:', roomCode);
+        if (roomCode) {
+          console.log('✅ SUCCESS: Room code extracted:', roomCode);
           return roomCode;
         } else {
-          console.warn('⚠️ No valid room code in response');
+          console.warn('⚠️ WARNING: Room code property exists but is empty/null');
+          console.log('📋 Room details structure:', roomDetails);
+          return null;
         }
       } else {
-        console.warn(`❌ API returned status:`, response.status);
+        // ✅ DETAILED ERROR ANALYSIS
+        const errorText = await response.text();
+        console.error('❌ API ERROR DETAILS:');
+        console.error('  - Status:', response.status);
+        console.error('  - Status Text:', response.statusText);
+        console.error('  - Response Body:', errorText);
+        
+        if (response.status === 401) {
+          console.error('🔐 AUTHENTICATION REQUIRED');
+          console.log('💡 The API endpoint requires authentication');
+          console.log('💡 Check if user is logged in properly');
+        } else if (response.status === 404) {
+          console.error('🔍 ROOM NOT FOUND');
+          console.log('💡 Room ID might not exist in database');
+          console.log('💡 Check if room ID 58 exists in rooms table');
+        }
+        
+        return null;
       }
     } catch (error) {
-      console.error('❌ Error fetching room details:', error);
+      console.error('❌ NETWORK ERROR:', error);
+      return null;
     }
-    
-    return null;
   };
 
-  // ✅ Enhanced handleReturnToRoom with better error handling
+  // ✅ CLEANED UP: Simple handleReturnToRoom without alerts
   const handleReturnToRoom = async () => {
-    console.log('🏠 Starting return to room process...');
+    console.log('🏠 ===== STARTING RETURN TO ROOM PROCESS =====');
+    console.log('📋 Room ID from URL params:', roomId);
+    console.log('🎯 Competition ID:', compe_id.competitionId);
     
-    if (roomId) {
-      try {
-        const roomCode = await getRoomCodeFromId(roomId);
+    if (!roomId) {
+      console.warn('⚠️ No room ID found in URL parameters');
+      console.log('🚀 Redirecting to virtual rooms list');
+      router.push('/virtual-rooms');
+      return;
+    }
+    
+    try {
+      console.log('🔄 Step 1: Attempting to get room code from room ID...');
+      const roomCode = await getRoomCodeFromId(roomId);
+      
+      if (roomCode) {
+        console.log('✅ Step 2: Room code retrieved successfully:', roomCode);
+        const targetUrl = `/virtual-rooms/${roomCode}`;
+        console.log('🚀 Step 3: Navigating to room dashboard:', targetUrl);
+        await router.push(targetUrl);
+        console.log('✅ Navigation completed successfully');
+        return;
+      } else {
+        console.warn('⚠️ Step 2 failed: Could not get room code');
+        console.log('🔄 Trying fallback navigation options...');
         
-        if (roomCode) {
-          // Navigate to the join format that works with your getRoomByCodeUsers
-          const targetUrl = `/virtual-rooms/join/${roomCode}`;
-          console.log('🚀 Navigating to:', targetUrl);
-          router.push(targetUrl);
-          return;
-        }
-      } catch (error) {
-        console.error('❌ Error getting room code:', error);
+        // ✅ FALLBACK 1: Try navigation with room ID directly (might work)
+        console.log('🚀 Fallback 1: Trying navigation with room ID');
+        const fallbackUrl1 = `/virtual-rooms/${roomId}`;
+        console.log('🚀 Fallback URL:', fallbackUrl1);
+        await router.push(fallbackUrl1);
+        console.log('✅ Fallback navigation completed');
+        return;
       }
       
-      // Fallback
-      console.warn('⚠️ Using fallback navigation');
-      router.push(`/virtual-rooms/join/${roomId}`);
-    } else {
+    } catch (error) {
+      console.error('❌ Error in room navigation process:', error);
+      console.log('🔄 Using final fallback: virtual rooms list');
+      
+      // ✅ FALLBACK 2: Go to virtual rooms list
       router.push('/virtual-rooms');
     }
+    
+    console.log('🏠 ===== RETURN TO ROOM PROCESS COMPLETED =====');
   };
 
   // Handle non-active states with simple conditional rendering
@@ -422,6 +496,136 @@ const CompetitionDashboard = ({ params } : { params  : Promise<{competitionId : 
     setSortOrder(sortOrder === 'desc' ? 'asc' : 'desc');
   };
 
+  // ✅ MOVE: Define DebugInfo INSIDE the component
+  const DebugInfo = () => {
+    const [roomCode, setRoomCode] = useState<string | null>(null);
+    const [lastError, setLastError] = useState<string | null>(null);
+    
+    // Test function to get room code
+    const testGetRoomCode = async () => {
+      setLastError(null);
+      if (roomId) {
+        try {
+          const code = await getRoomCodeFromId(roomId);
+          setRoomCode(code);
+          if (!code) {
+            setLastError('API call succeeded but no room code returned');
+          }
+        } catch (error) {
+          setLastError(`Error: ${error.message}`);
+        }
+      }
+    };
+    
+    // Test auth function
+    const testAuth = async () => {
+      const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+      console.log('🔐 Auth Test:');
+      console.log('Token exists:', !!token);
+      console.log('Token length:', token?.length || 0);
+      console.log('Token preview:', token ? `${token.substring(0, 10)}...` : 'None');
+      
+      if (!token) {
+        alert('❌ No auth token found! Please log in again.');
+      } else {
+        alert(`✅ Auth token found (${token.length} chars)`);
+      }
+    };
+    
+    return (
+      <div style={{
+        position: 'fixed',
+        bottom: '10px',
+        left: '10px',
+        background: 'rgba(0,0,0,0.8)',
+        color: 'white',
+        padding: '10px',
+        borderRadius: '5px',
+        fontSize: '12px',
+        zIndex: 9999,
+        maxWidth: '350px'
+      }}>
+        <div><strong>🔧 Debug Info:</strong></div>
+        <div>Room ID: {roomId || 'None'}</div>
+        <div>Room Code: {roomCode || 'Not fetched'}</div>
+        <div>Competition ID: {compe_id.competitionId}</div>
+        <div>Expected URL: {roomCode ? `/virtual-rooms/${roomCode}` : 'Pending...'}</div>
+        <div>Auth Token: {typeof window !== 'undefined' && localStorage.getItem('token') ? 'Present' : 'Missing'}</div>
+        {lastError && <div style={{color: '#ff6666'}}>Error: {lastError}</div>}
+        
+        {/* ✅ NEW: Test Auth button */}
+        <button 
+          onClick={testAuth}
+          style={{
+            marginTop: '5px',
+            padding: '5px',
+            background: '#ff6600',
+            color: 'white',
+            border: 'none',
+            borderRadius: '3px',
+            cursor: 'pointer',
+            width: '100%',
+            marginBottom: '3px'
+          }}
+        >
+          🔐 Test Auth Token
+        </button>
+        
+        {/* Test Room Code button */}
+        <button 
+          onClick={testGetRoomCode}
+          style={{
+            padding: '5px',
+            background: '#00ff00',
+            color: 'black',
+            border: 'none',
+            borderRadius: '3px',
+            cursor: 'pointer',
+            width: '100%',
+            marginBottom: '3px'
+          }}
+        >
+          🧪 Test Get Room Code
+        </button>
+        
+        {/* Test Navigation button */}
+        <button 
+          onClick={handleReturnToRoom}
+          style={{
+            padding: '5px',
+            background: '#0066ff',
+            color: 'white',
+            border: 'none',
+            borderRadius: '3px',
+            cursor: 'pointer',
+            width: '100%',
+            marginBottom: '3px'
+          }}
+        >
+          🚀 Test Navigation
+        </button>
+        
+        {/* ✅ NEW: Force login button */}
+        <button 
+          onClick={() => {
+            router.push('/login');
+          }}
+          style={{
+            padding: '5px',
+            background: '#cc0066',
+            color: 'white',
+            border: 'none',
+            borderRadius: '3px',
+            cursor: 'pointer',
+            width: '100%'
+          }}
+        >
+          🔑 Go to Login
+        </button>
+      </div>
+    );
+  };
+
   return (
     <div className={styles.container}>
       {/* Header Section */}
@@ -517,6 +721,9 @@ const CompetitionDashboard = ({ params } : { params  : Promise<{competitionId : 
           )}
         </div>
       </div>
+
+      {/* ✅ FIXED: Debug component now has access to all variables */}
+      {process.env.NODE_ENV === 'development' && <DebugInfo />}
     </div>
   );
 };

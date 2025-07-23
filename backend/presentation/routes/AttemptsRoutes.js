@@ -11,11 +11,15 @@ class AttemptsRoutes {
 
     initializeRoutes(){
         this.router.use(this.authMiddleware.protect);
+        
+        //  ADD: The route that frontend is calling
+        this.router.post('/submit', this.attemptsController.submitSolution);
     
-        this.router.post(
-            '/competitions/:competitionId/problems/:competitionProblemId/submit', 
-            this.attemptsController.submitSolution
-        );
+        //  KEEP: Original route as backup
+        // this.router.post(
+        //     '/competitions/:competitionId/problems/:competitionProblemId/submit', 
+        //     this.attemptsController.submitSolution
+        // );
      }
 
     getRouter() {

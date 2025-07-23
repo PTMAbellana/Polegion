@@ -174,34 +174,61 @@ export default function Gamepage({
     };
   }, [fetchProblems, competitionId]);
 
-  // ✅ SAFER FETCH CURRENT PROBLEM WITH BETTER ERROR HANDLING AND DEBOUNCING
+  // ✅ UPDATED: More comprehensive problem fetching with better logging
   useEffect(() => {
     let timeoutId: NodeJS.Timeout;
     let isCancelled = false;
     
     const fetchCurrentProblem = async () => {
-      if (!competitionId || !activeCompetition?.current_problem_id || isCancelled) {
-        console.log('⏭️ Skipping fetchCurrentProblem:', {
-          competitionId: !!competitionId,
-          currentProblemId: activeCompetition?.current_problem_id,
-          isCancelled
-        });
+      console.log('🔍 === FETCH CURRENT PROBLEM CHECK ===');
+      console.log('Competition ID:', competitionId);
+      console.log('Active competition:', activeCompetition);
+      console.log('Current problem ID:', activeCompetition?.current_problem_id);
+      console.log('Competition status:', activeCompetition?.status);
+      
+      if (!competitionId) {
+        console.log('❌ No competition ID, skipping fetch');
+        return;
+      }
+      
+      if (!activeCompetition) {
+        console.log('❌ No active competition data, skipping fetch');
+        return;
+      }
+      
+      // ✅ FIXED: Allow fetch even without current_problem_id for NEW status
+      if (activeCompetition.status === 'NEW') {
+        console.log('⏳ Competition not started yet, waiting...');
+        return;
+      }
+      
+      if (!activeCompetition.current_problem_id) {
+        console.log('❌ No current problem ID, skipping fetch');
+        return;
+      }
+      
+      if (isCancelled) {
+        console.log('🛑 Fetch cancelled');
         return;
       }
       
       setIsLoadingProblem(true);
+      console.log('🚀 Starting to fetch problem:', activeCompetition.current_problem_id);
+      
       try {
-        console.log('🔍 Fetching current problem:', activeCompetition.current_problem_id);
         const problemData = await getCompeProblem(activeCompetition.current_problem_id);
         
-        if (isCancelled) return; // Cancel if component unmounted
+        if (isCancelled) {
+          console.log('🛑 Fetch completed but cancelled');
+          return;
+        }
         
         if (!problemData || !problemData.problem) {
-          console.error('❌ Invalid problem data received');
+          console.error('❌ Invalid problem data received:', problemData);
           return;
         }
 
-        console.log('🔍 Current Problem Data:', problemData);
+        console.log('✅ Problem data loaded successfully:', problemData);
         setCurrentProblem(problemData);
         
         // ✨ SAFELY POPULATE THE FORM FIELDS
@@ -218,7 +245,10 @@ export default function Gamepage({
         setShapes([]);
         setSelectedId(null);
         
-        console.log('🎯 Problem details loaded successfully');
+        console.log('🎯 Problem details populated successfully');
+        console.log('📝 Title:', problemData.problem.title);
+        console.log('📋 Description:', problemData.problem.description);
+        console.log('⏱️ Timer:', problemData.timer);
         
       } catch (error) {
         if (!isCancelled) {
@@ -228,11 +258,14 @@ export default function Gamepage({
       } finally {
         if (!isCancelled) {
           setIsLoadingProblem(false);
+          console.log('✅ Fetch current problem completed');
         }
       }
     };
     
-    if (competitionId && activeCompetition?.current_problem_id) {
+    // ✅ ENHANCED: Trigger on multiple state changes
+    if (competitionId && activeCompetition) {
+      console.log('🔄 Competition state changed, scheduling problem fetch...');
       timeoutId = setTimeout(() => {
         fetchCurrentProblem();
       }, 200); // Debounce to prevent rapid calls
@@ -242,7 +275,51 @@ export default function Gamepage({
       isCancelled = true;
       if (timeoutId) clearTimeout(timeoutId);
     };
-  }, [activeCompetition?.current_problem_id, competitionId]);
+  }, [
+    activeCompetition?.current_problem_id, 
+    activeCompetition?.status,           // ✅ NEW: Also watch status changes
+    activeCompetition?.current_problem_index, // ✅ NEW: Also watch problem index
+    competitionId
+  ]);
+
+  // ✅ NEW: Additional effect to handle competition state transitions
+  useEffect(() => {
+    console.log('🎮 === COMPETITION STATE CHANGE ===');
+    console.log('Previous status: unknown -> Current status:', activeCompetition?.status);
+    console.log('Current problem ID:', activeCompetition?.current_problem_id);
+    console.log('Problem index:', activeCompetition?.current_problem_index);
+    console.log('Gameplay indicator:', activeCompetition?.gameplay_indicator);
+    
+    // Force refresh when competition transitions from NEW to ONGOING
+    if (activeCompetition?.status === 'ONGOING' && 
+        activeCompetition?.current_problem_id && 
+        !currentProblem) {
+      console.log('🚀 Competition just started! Force fetching current problem...');
+      
+      // Small delay to ensure the backend has set the problem
+      setTimeout(async () => {
+        try {
+          const problemData = await getCompeProblem(activeCompetition.current_problem_id);
+          if (problemData && problemData.problem) {
+            console.log('✅ Force fetch successful:', problemData);
+            setCurrentProblem(problemData);
+            setTitle(problemData.problem.title || "");
+            setPrompt(problemData.problem.description || "");
+            setDifficulty(problemData.problem.difficulty || "Easy");
+            setLimitAttempts(problemData.problem.max_attempts || 1);
+            setHint(problemData.problem.hint || "");
+            setHintOpen(!!problemData.problem.hint);
+            setTimerValue(problemData.timer || 5);
+            setTimerOpen(!!problemData.timer);
+            setShapes([]);
+            setSelectedId(null);
+          }
+        } catch (error) {
+          console.error('❌ Force fetch failed:', error);
+        }
+      }, 500); // 500ms delay
+    }
+  }, [activeCompetition?.status, activeCompetition?.current_problem_id, currentProblem]);
 
   // Keyboard deletion handler
   useEffect(() => {
@@ -375,10 +452,23 @@ export default function Gamepage({
       try {
         const shapesWithProps = shapes.map(getShapeProperties);
         
-        // ✅ Calculate time taken from timer
-        const totalTimeAllowed = currentProblem?.timer || 0;
-        const timeTaken = Math.abs(totalTimeAllowed - timeRemaining);
-        
+        // ✅ FIXED: Proper time calculation
+        // timeRemaining is in seconds, currentProblem.timer is in minutes
+        const totalTimeAllowedInSeconds = (currentProblem?.timer || 5) * 60; // Convert minutes to seconds
+        const timeSpentInSeconds = totalTimeAllowedInSeconds - timeRemaining;
+        const timeTaken = Math.max(0, timeSpentInSeconds); // Ensure non-negative
+
+        // ✅ Validate that user created a shape
+        if (shapesWithProps.length === 0) {
+          Swal.fire({
+            title: "No Solution Created",
+            text: "Please create at least one shape before submitting your solution.",
+            icon: "warning",
+            confirmButtonText: "OK",
+          });
+          return;
+        }
+
         const solutionPayload = {
           solution: shapesWithProps,
           time_taken: timeTaken,
@@ -386,13 +476,15 @@ export default function Gamepage({
         };
 
         console.log("📊 Submission details:", {
-          totalTimeAllowed,
+          totalTimeAllowedInSeconds,
           timeRemaining, 
+          timeSpentInSeconds,
           timeTaken,
+          shapesCount: shapesWithProps.length,
           solutionPayload
         });
 
-        console.log("Submitting solution:", solutionPayload); 
+        console.log("🚀 Submitting solution:", solutionPayload); 
         
         const response = await submitSolution(
           competitionId,
@@ -400,24 +492,49 @@ export default function Gamepage({
           solutionPayload
         );
 
-        if (response) {
+        console.log("✅ Submission response:", response);
+
+        if (response && response.success) {
+          // ✅ Enhanced success message with grading details
+          const xpGained = response.xp_gained || 0;
+          const feedback = response.feedback || response.attempt?.feedback || 'Solution submitted successfully!';
+          
           Swal.fire({
             title: "Solution Submitted! 🎯",
-            text: `Your solution has been submitted successfully!`,
+            html: `
+              <div style="text-align: left; margin: 10px;">
+                <p><strong>Feedback:</strong> ${feedback}</p>
+                <p><strong>XP Gained:</strong> +${xpGained} XP</p>
+                <p><strong>Time Taken:</strong> ${Math.round(timeTaken)}s</p>
+              </div>
+            `,
             icon: "success",
             confirmButtonText: "Awesome!",
-            timer: 3000,
+            timer: 5000,
             timerProgressBar: true
           });
           
+          // ✅ Clear the workspace
           setShapes([]);
           setSelectedId(null);
-        } 
+        } else {
+          throw new Error(response?.message || 'Submission failed');
+        }
       } catch (error: any) {
-        console.error("Submit error:", error);
+        console.error("❌ Submit error:", error);
+        
+        // ✅ Better error handling
+        let errorMessage = "Failed to submit solution. Please try again.";
+        
+        if (error?.message) {
+          errorMessage = error.message;
+        } else if (error?.response?.data?.message) {
+          errorMessage = error.response.data.message;
+        }
+        
         Swal.fire({
           title: "Submission Error",
-          text: error?.message || "Failed to submit solution. Please try again.",
+          text: errorMessage,
           icon: "error",
           confirmButtonText: "Try Again",
         });
@@ -684,13 +801,19 @@ export default function Gamepage({
                 <div className={styles.timerHeader}>
                   <span className={styles.timerLabel}>Time Remaining</span>
                   <div className={styles.timerStatus}>
-                    {isPaused && (
+                    {activeCompetition?.status === 'NEW' && (
+                      <span className={styles.waitingIndicator}>⏳ WAITING TO START</span>
+                    )}
+                    {activeCompetition?.status === 'DONE' && (
+                      <span className={styles.completedIndicator}>🏁 COMPLETED</span>
+                    )}
+                    {activeCompetition?.gameplay_indicator === 'PAUSE' && (
                       <span className={styles.pausedIndicator}>⏸️ PAUSED</span>
                     )}
-                    {isExpired && (
+                    {isExpired && activeCompetition?.status === 'ONGOING' && (
                       <span className={styles.expiredIndicator}>⏰ TIME UP!</span>
                     )}
-                    {!isPaused && !isExpired && isTimerActive && (
+                    {!isPaused && !isExpired && isTimerActive && activeCompetition?.status === 'ONGOING' && (
                       <span className={styles.activeIndicator}>⏱️ ACTIVE</span>
                     )}
                   </div>
@@ -700,11 +823,16 @@ export default function Gamepage({
                   {formattedTime || '00:00'}
                 </div>
                 
+                {/* ✅ ENHANCED: Better progress bar calculation */}
                 <div className={styles.timerProgress}>
                   <div 
                     className={styles.progressBar}
                     style={{
-                      width: `${Math.max(0, Math.min(100, timeRemaining && timerValue ? (timeRemaining / (timerValue * 60)) * 100 : 0))}%`,
+                      width: `${Math.max(0, Math.min(100, 
+                        timeRemaining && currentProblem?.timer 
+                          ? (timeRemaining / (currentProblem.timer * 60)) * 100 
+                          : 0
+                      ))}%`,
                       backgroundColor: timeRemaining < 60 ? '#ef4444' : timeRemaining < 180 ? '#f59e0b' : '#10b981',
                       height: '8px',
                       transition: 'width 0.3s ease',
@@ -713,11 +841,21 @@ export default function Gamepage({
                   />
                 </div>
                 
-                {activeCompetition.gameplay_indicator && (
-                  <div className={styles.gameplayStatus}>
-                    Status: <span className={styles.statusValue}>{activeCompetition.gameplay_indicator}</span>
+                {/* ✅ ENHANCED: Show current problem info */}
+                {activeCompetition.current_problem_index !== undefined && (
+                  <div className={styles.problemInfo}>
+                    Problem {activeCompetition.current_problem_index + 1}
+                    {currentProblem && (
+                      <span className={styles.problemTitle}>: {currentProblem.problem.title}</span>
+                    )}
                   </div>
                 )}
+                
+                <div className={styles.gameplayStatus}>
+                  Status: <span className={styles.statusValue}>
+                    {activeCompetition.gameplay_indicator || activeCompetition.status}
+                  </span>
+                </div>
               </div>
             </div>
           )}

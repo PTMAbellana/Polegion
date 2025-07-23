@@ -178,7 +178,7 @@ class GradingService {
         }
     }
     
-    // ✅ UPDATED: Precision-based circle analysis
+    // ✅ NEW: Analyze circle properties
     analyzeCircleProperties(userCircle, expectedCircle) {
         console.log('⭕ === ANALYZING CIRCLE PROPERTIES ===');
         console.log('👤 User circle:', { 
@@ -192,37 +192,52 @@ class GradingService {
             circumference: expectedCircle.circumference 
         });
         
-        let totalScore = 0;
-        let propertyCount = 0;
+        let matches = 0;
+        let total = 0;
+        const tolerance = 0.01
         
         // Check diameter
         if (userCircle.diameter && expectedCircle.diameter) {
-            propertyCount++;
-            const score = this.calculatePropertyScore(userCircle.diameter, expectedCircle.diameter, 'Diameter');
-            totalScore += score;
+            total++;
+            const ratio = Math.abs(userCircle.diameter - expectedCircle.diameter) / expectedCircle.diameter;
+            if (ratio <= tolerance) {
+                matches++;
+                console.log('✅ Diameter match:', userCircle.diameter, '≈', expectedCircle.diameter);
+            } else {
+                console.log('❌ Diameter mismatch:', userCircle.diameter, 'vs', expectedCircle.diameter, `(${(ratio*100).toFixed(1)}% off)`);
+            }
         }
         
         // Check area
         if (userCircle.area && expectedCircle.area) {
-            propertyCount++;
-            const score = this.calculatePropertyScore(userCircle.area, expectedCircle.area, 'Area');
-            totalScore += score;
+            total++;
+            const ratio = Math.abs(userCircle.area - expectedCircle.area) / expectedCircle.area;
+            if (ratio <= tolerance) {
+                matches++;
+                console.log('✅ Area match:', userCircle.area, '≈', expectedCircle.area);
+            } else {
+                console.log('❌ Area mismatch:', userCircle.area, 'vs', expectedCircle.area, `(${(ratio*100).toFixed(1)}% off)`);
+            }
         }
         
         // Check circumference
         if (userCircle.circumference && expectedCircle.circumference) {
-            propertyCount++;
-            const score = this.calculatePropertyScore(userCircle.circumference, expectedCircle.circumference, 'Circumference');
-            totalScore += score;
+            total++;
+            const ratio = Math.abs(userCircle.circumference - expectedCircle.circumference) / expectedCircle.circumference;
+            if (ratio <= tolerance) {
+                matches++;
+                console.log('✅ Circumference match:', userCircle.circumference, '≈', expectedCircle.circumference);
+            } else {
+                console.log('❌ Circumference mismatch:', userCircle.circumference, 'vs', expectedCircle.circumference, `(${(ratio*100).toFixed(1)}% off)`);
+            }
         }
         
-        const geometryScore = propertyCount > 0 ? totalScore / propertyCount : 0.5;
-        console.log('📊 === CIRCLE FINAL SCORE ===');
-        console.log(`📊 Circle geometry score: ${geometryScore.toFixed(3)} (average of ${propertyCount} properties)`);
+        const geometryScore = total > 0 ? matches / total : 0.5;
+        console.log('📊 Circle geometry score:', geometryScore, `(${matches}/${total} properties match)`);
         return geometryScore;
     }
     
-    // ✅ UPDATED: Precision-based triangle analysis
+    // ✅ NEW: Analyze triangle properties
     analyzeTriangleProperties(userTriangle, expectedTriangle) {
         console.log('📐 === ANALYZING TRIANGLE PROPERTIES ===');
         console.log('👤 User triangle:', { 
@@ -236,48 +251,51 @@ class GradingService {
             angles: expectedTriangle.angles 
         });
         
-        let totalScore = 0;
-        let propertyCount = 0;
+        let matches = 0;
+        let total = 0;
+        const tolerance = 0.01
         
         // Check side lengths
         if (userTriangle.sideLengths && expectedTriangle.sideLengths && 
             userTriangle.sideLengths.length === 3 && expectedTriangle.sideLengths.length === 3) {
-            propertyCount++;
+            total++;
             
             // Sort both arrays to compare similar triangles
             const userSides = [...userTriangle.sideLengths].sort((a, b) => a - b);
             const expectedSides = [...expectedTriangle.sideLengths].sort((a, b) => a - b);
             
-            console.log('📏 === TRIANGLE SIDE ANALYSIS ===');
-            console.log('👤 User sides (sorted):', userSides);
-            console.log('🎯 Expected sides (sorted):', expectedSides);
-            
-            let sideScores = [];
+            let sideMatches = 0;
             for (let i = 0; i < 3; i++) {
-                const score = this.calculatePropertyScore(userSides[i], expectedSides[i], `Side ${i+1}`);
-                sideScores.push(score);
+                const ratio = Math.abs(userSides[i] - expectedSides[i]) / expectedSides[i];
+                if (ratio <= tolerance) sideMatches++;
             }
             
-            // Average of all side scores
-            const sidesScore = sideScores.reduce((sum, score) => sum + score, 0) / sideScores.length;
-            console.log(`📏 Overall sides score: ${sidesScore.toFixed(3)} (average of individual side scores)`);
-            totalScore += sidesScore;
+            if (sideMatches >= 2) { // At least 2 out of 3 sides close
+                matches++;
+                console.log('✅ Side lengths approximately match');
+            } else {
+                console.log('❌ Side lengths differ significantly');
+            }
         }
         
         // Check area
         if (userTriangle.area && expectedTriangle.area) {
-            propertyCount++;
-            const score = this.calculatePropertyScore(userTriangle.area, expectedTriangle.area, 'Area');
-            totalScore += score;
+            total++;
+            const ratio = Math.abs(userTriangle.area - expectedTriangle.area) / expectedTriangle.area;
+            if (ratio <= tolerance) {
+                matches++;
+                console.log('✅ Area match:', userTriangle.area, '≈', expectedTriangle.area);
+            } else {
+                console.log('❌ Area mismatch:', userTriangle.area, 'vs', expectedTriangle.area);
+            }
         }
         
-        const geometryScore = propertyCount > 0 ? totalScore / propertyCount : 0.5;
-        console.log('📊 === TRIANGLE FINAL SCORE ===');
-        console.log(`📊 Triangle geometry score: ${geometryScore.toFixed(3)} (average of ${propertyCount} properties)`);
+        const geometryScore = total > 0 ? matches / total : 0.5;
+        console.log('📊 Triangle geometry score:', geometryScore, `(${matches}/${total} properties match)`);
         return geometryScore;
     }
     
-    // ✅ UPDATED: Precision-based quadrilateral analysis
+    // ✅ NEW: Analyze quadrilateral properties
     analyzeQuadrilateralProperties(userQuad, expectedQuad) {
         console.log('🔲 === ANALYZING QUADRILATERAL PROPERTIES ===');
         console.log('👤 User quad:', { 
@@ -291,215 +309,48 @@ class GradingService {
             angles: expectedQuad.angles 
         });
         
-        let totalScore = 0;
-        let propertyCount = 0;
+        let matches = 0;
+        let total = 0;
+        const tolerance = 0.01
         
         // Check side lengths
         if (userQuad.sideLengths && expectedQuad.sideLengths && 
             userQuad.sideLengths.length === 4 && expectedQuad.sideLengths.length === 4) {
-            propertyCount++;
+            total++;
             
             // Sort both arrays to compare
             const userSides = [...userQuad.sideLengths].sort((a, b) => a - b);
             const expectedSides = [...expectedQuad.sideLengths].sort((a, b) => a - b);
             
-            console.log('📏 === QUADRILATERAL SIDE ANALYSIS ===');
-            console.log('👤 User sides (sorted):', userSides);
-            console.log('🎯 Expected sides (sorted):', expectedSides);
-            
-            let sideScores = [];
+            let sideMatches = 0;
             for (let i = 0; i < 4; i++) {
-                const score = this.calculatePropertyScore(userSides[i], expectedSides[i], `Side ${i+1}`);
-                sideScores.push(score);
+                const ratio = Math.abs(userSides[i] - expectedSides[i]) / expectedSides[i];
+                if (ratio <= tolerance) sideMatches++;
             }
             
-            // Average of all side scores
-            const sidesScore = sideScores.reduce((sum, score) => sum + score, 0) / sideScores.length;
-            console.log(`📏 Overall sides score: ${sidesScore.toFixed(3)} (average of individual side scores)`);
-            totalScore += sidesScore;
+            if (sideMatches >= 3) { // At least 3 out of 4 sides close
+                matches++;
+                console.log('✅ Side lengths approximately match');
+            } else {
+                console.log('❌ Side lengths differ significantly');
+            }
         }
         
         // Check area
         if (userQuad.area && expectedQuad.area) {
-            propertyCount++;
-            const score = this.calculatePropertyScore(userQuad.area, expectedQuad.area, 'Area');
-            totalScore += score;
-        }
-        
-        const geometryScore = propertyCount > 0 ? totalScore / propertyCount : 0.5;
-        console.log('📊 === QUADRILATERAL FINAL SCORE ===');
-        console.log(`📊 Quadrilateral geometry score: ${geometryScore.toFixed(3)} (average of ${propertyCount} properties)`);
-        return geometryScore;
-    }
-    
-    // ✅ NEW: Calculate precision-based property score
-    calculatePropertyScore(userValue, expectedValue, propertyName) {
-        console.log(`🔍 Analyzing ${propertyName}: ${userValue} vs ${expectedValue}`);
-        
-        // Perfect match gets full score
-        if (userValue === expectedValue) {
-            console.log(`✅ ${propertyName}: PERFECT MATCH! Score: 1.000`);
-            return 1.0;
-        }
-        
-        // Calculate percentage difference
-        const difference = Math.abs(userValue - expectedValue);
-        const percentDiff = (difference / expectedValue) * 100;
-        
-        console.log(`📊 ${propertyName}: ${difference.toFixed(2)} difference (${percentDiff.toFixed(2)}% off)`);
-        
-        // Scoring tiers based on precision
-        let score;
-        if (percentDiff <= 1) {
-            // Within 1% - Excellent (95-100%)
-            score = 1.0 - (percentDiff * 0.05); // Linear decrease from 1.0 to 0.95
-            console.log(`🌟 ${propertyName}: EXCELLENT precision (≤1% off) - Score: ${score.toFixed(3)}`);
-        } else if (percentDiff <= 5) {
-            // Within 5% - Very Good (80-95%)
-            score = 0.95 - ((percentDiff - 1) * 0.0375); // Linear from 0.95 to 0.80
-            console.log(`⭐ ${propertyName}: VERY GOOD precision (1-5% off) - Score: ${score.toFixed(3)}`);
-        } else if (percentDiff <= 10) {
-            // Within 10% - Good (60-80%)
-            score = 0.80 - ((percentDiff - 5) * 0.04); // Linear from 0.80 to 0.60
-            console.log(`👍 ${propertyName}: GOOD precision (5-10% off) - Score: ${score.toFixed(3)}`);
-        } else if (percentDiff <= 20) {
-            // Within 20% - Fair (30-60%)
-            score = 0.60 - ((percentDiff - 10) * 0.03); // Linear from 0.60 to 0.30
-            console.log(`📝 ${propertyName}: FAIR precision (10-20% off) - Score: ${score.toFixed(3)}`);
-        } else if (percentDiff <= 40) {
-            // Within 40% - Poor (10-30%)
-            score = 0.30 - ((percentDiff - 20) * 0.01); // Linear from 0.30 to 0.10
-            console.log(`⚠️ ${propertyName}: POOR precision (20-40% off) - Score: ${score.toFixed(3)}`);
-        } else {
-            // More than 40% off - Very Poor (0-10%)
-            score = Math.max(0.05, 0.10 - ((percentDiff - 40) * 0.001)); // Asymptotic approach to 0.05
-            console.log(`❌ ${propertyName}: VERY POOR precision (>40% off) - Score: ${score.toFixed(3)}`);
-        }
-        
-        return Math.max(0.05, Math.min(1.0, score)); // Clamp between 0.05 and 1.0
-    }
-    
-    // ✅ UPDATED: More nuanced final score calculation
-    calculateFinalScore(shapeTypeAccuracy, geometryAccuracy, timeBonus, difficulty) {
-        console.log('🔍 === STEP 6: FINAL SCORE CALCULATION ===');
-        console.log('📊 Input scores:', {
-            shapeTypeAccuracy: shapeTypeAccuracy.toFixed(3),
-            geometryAccuracy: geometryAccuracy.toFixed(3),
-            timeBonus: timeBonus.toFixed(3),
-            difficulty
-        });
-        
-        // Base accuracy: 60% shape type + 40% geometry (precision-weighted)
-        const baseAccuracy = (shapeTypeAccuracy * 0.6) + (geometryAccuracy * 0.4);
-        console.log('📈 Base accuracy (60% type + 40% geometry):', baseAccuracy.toFixed(3));
-        
-        // Apply time bonus
-        const withTimeBonus = Math.min(1.0, baseAccuracy + timeBonus);
-        console.log('⏰ With time bonus:', withTimeBonus.toFixed(3));
-        
-        // More nuanced correctness threshold
-        let isCorrect;
-        let qualityLevel;
-        
-        if (withTimeBonus >= 0.95) {
-            isCorrect = true;
-            qualityLevel = 'PERFECT';
-        } else if (withTimeBonus >= 0.85) {
-            isCorrect = true;
-            qualityLevel = 'EXCELLENT';
-        } else if (withTimeBonus >= 0.75) {
-            isCorrect = true;
-            qualityLevel = 'VERY_GOOD';
-        } else if (withTimeBonus >= 0.65) {
-            isCorrect = true;
-            qualityLevel = 'GOOD';
-        } else if (withTimeBonus >= 0.50) {
-            isCorrect = false;
-            qualityLevel = 'FAIR';
-        } else if (withTimeBonus >= 0.30) {
-            isCorrect = false;
-            qualityLevel = 'POOR';
-        } else {
-            isCorrect = false;
-            qualityLevel = 'VERY_POOR';
-        }
-        
-        console.log(`✅ Quality level: ${qualityLevel} (${withTimeBonus.toFixed(3)}) - Correct: ${isCorrect}`);
-        
-        // Calculate XP with difficulty multiplier and quality bonus
-        const difficultyMultipliers = {
-            'Easy': 1.0,
-            'Intermediate': 1.5,
-            'Hard': 2.0
-        };
-        
-        const multiplier = difficultyMultipliers[difficulty] || 1.0;
-        console.log('🎯 Difficulty multiplier:', multiplier);
-        
-        // More sophisticated XP calculation
-        let baseXP = 10; // Effort points
-        
-        if (isCorrect) {
-            baseXP += 20; // Correctness bonus
-            baseXP += Math.floor(withTimeBonus * 40); // Precision bonus (0-40 points)
-        } else {
-            baseXP += Math.floor(withTimeBonus * 20); // Partial credit (0-20 points)
-        }
-        
-        // Quality bonus for exceptional work
-        if (qualityLevel === 'PERFECT') {
-            baseXP += 10; // Perfect bonus
-        } else if (qualityLevel === 'EXCELLENT') {
-            baseXP += 5; // Excellence bonus
-        }
-        
-        const finalXP = Math.floor(baseXP * multiplier);
-        console.log('💎 Final XP calculation:', `${baseXP} × ${multiplier} = ${finalXP}`);
-        
-        // Generate feedback based on quality level
-        let feedback;
-        switch (qualityLevel) {
-            case 'PERFECT':
-                feedback = `🎉 PERFECT! Absolutely flawless shape analysis! (+${finalXP} XP)`;
-                break;
-            case 'EXCELLENT':
-                feedback = `✨ EXCELLENT! Outstanding precision and accuracy! (+${finalXP} XP)`;
-                break;
-            case 'VERY_GOOD':
-                feedback = `⭐ VERY GOOD! Great shape identification with good precision! (+${finalXP} XP)`;
-                break;
-            case 'GOOD':
-                feedback = `👍 GOOD! Correct identification with decent precision! (+${finalXP} XP)`;
-                break;
-            case 'FAIR':
-                feedback = `📝 FAIR! Right idea but work on precision! (+${finalXP} XP)`;
-                break;
-            case 'POOR':
-                feedback = `⚠️ Keep practicing! Focus on shape accuracy! (+${finalXP} XP)`;
-                break;
-            case 'VERY_POOR':
-                feedback = `💪 Keep trying! Every attempt helps you learn! (+${finalXP} XP)`;
-                break;
-            default:
-                feedback = `📚 Good effort! Keep learning! (+${finalXP} XP)`;
-        }
-        
-        return {
-            isCorrect,
-            accuracy: withTimeBonus,
-            xp: finalXP,
-            feedback,
-            qualityLevel,
-            breakdown: {
-                shapeTypeAccuracy,
-                geometryAccuracy,
-                timeBonus,
-                baseAccuracy,
-                difficulty,
-                multiplier,
-                baseXP
+            total++;
+            const ratio = Math.abs(userQuad.area - expectedQuad.area) / expectedQuad.area;
+            if (ratio <= tolerance) {
+                matches++;
+                console.log('✅ Area match:', userQuad.area, '≈', expectedQuad.area);
+            } else {
+                console.log('❌ Area mismatch:', userQuad.area, 'vs', expectedQuad.area);
             }
-        };
+        }
+        
+        const geometryScore = total > 0 ? matches / total : 0.5;
+        console.log('📊 Quadrilateral geometry score:', geometryScore, `(${matches}/${total} properties match)`);
+        return geometryScore;
     }
     
     // ✅ NEW: Step 5 - Calculate time bonus
@@ -541,6 +392,81 @@ class GradingService {
         }
         
         return timeBonus;
+    }
+    
+    // ✅ NEW: Step 6 - Calculate final score with difficulty multiplier
+    calculateFinalScore(shapeTypeAccuracy, geometryAccuracy, timeBonus, difficulty) {
+        console.log('🔍 === STEP 6: FINAL SCORE CALCULATION ===');
+        console.log('📊 Input scores:', {
+            shapeTypeAccuracy,
+            geometryAccuracy,
+            timeBonus,
+            difficulty
+        });
+        
+        // Base accuracy: 60% shape type + 40% geometry
+        const baseAccuracy = (shapeTypeAccuracy * 0.6) + (geometryAccuracy * 0.4);
+        console.log('📈 Base accuracy (60% type + 40% geometry):', baseAccuracy.toFixed(3));
+        
+        // Apply time bonus
+        const withTimeBonus = Math.min(1.0, baseAccuracy + timeBonus);
+        console.log('⏰ With time bonus:', withTimeBonus.toFixed(3));
+        
+        // Determine if correct
+        const isCorrect = withTimeBonus >= 0.7;
+        console.log('✅ Is correct (≥0.7)?', isCorrect);
+        
+        // Calculate XP with difficulty multiplier
+        const difficultyMultipliers = {
+            'Easy': 1.0,
+            'Intermediate': 1.5,
+            'Hard': 2.0
+        };
+        
+        const multiplier = difficultyMultipliers[difficulty] || 1.0;
+        console.log('🎯 Difficulty multiplier:', multiplier);
+        
+        // Base XP calculation
+        let baseXP = 10; // Effort points
+        if (isCorrect) {
+            baseXP += 20; // Correctness bonus
+            baseXP += Math.floor(withTimeBonus * 30); // Accuracy bonus (0-30 points)
+        } else {
+            baseXP += Math.floor(withTimeBonus * 15); // Partial credit (0-15 points)
+        }
+        
+        const finalXP = Math.floor(baseXP * multiplier);
+        console.log('💎 Final XP calculation:', `${baseXP} × ${multiplier} = ${finalXP}`);
+        
+        // Generate feedback
+        let feedback;
+        if (isCorrect && withTimeBonus >= 0.95) {
+            feedback = `🎉 Perfect! Excellent shape analysis and timing! (+${finalXP} XP)`;
+        } else if (isCorrect && withTimeBonus >= 0.8) {
+            feedback = `✨ Great work! Very accurate shape identification! (+${finalXP} XP)`;
+        } else if (isCorrect) {
+            feedback = `👍 Good job! Correct shape identification! (+${finalXP} XP)`;
+        } else if (withTimeBonus >= 0.5) {
+            feedback = `📝 Good effort! Keep practicing shape properties! (+${finalXP} XP)`;
+        } else {
+            feedback = `💪 Keep trying! Every attempt helps you learn! (+${finalXP} XP)`;
+        }
+        
+        return {
+            isCorrect,
+            accuracy: withTimeBonus,
+            xp: finalXP,
+            feedback,
+            breakdown: {
+                shapeTypeAccuracy,
+                geometryAccuracy,
+                timeBonus,
+                baseAccuracy,
+                difficulty,
+                multiplier,
+                baseXP
+            }
+        };
     }
     
     // ✅ NEW: Create standardized grading result
