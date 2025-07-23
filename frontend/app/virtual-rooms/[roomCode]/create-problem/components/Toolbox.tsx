@@ -78,7 +78,7 @@ const Toolbox: React.FC<ToolboxProps> = ({
     <div className={`${styles.toolbox} ${isCompact ? styles.toolboxCompact : ''}`}>
       {/* Toolbox Header */}
       <div className={styles.toolboxHeader}>
-        {isCompact ? "🧰 Tools" : "Tool Box"}
+        {isCompact ? "Tools" : "Tool Box"}
       </div>
 
       {/* Single Column Layout - Shapes above Properties */}

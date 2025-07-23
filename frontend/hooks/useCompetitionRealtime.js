@@ -36,13 +36,11 @@ export const useCompetitionRealtime = (competitionId, isLoading) => {
       return;
     }
 
-    console.log('🚀 [Realtime] Starting SIMPLE connection for competition:', competitionId);
+    console.log('🚀 [Realtime] Starting connection for competition:', competitionId);
     
-    // Just set connected immediately for testing
     setConnectionStatus('CONNECTED');
     setIsConnected(true);
     
-    // Simple polling every 3 seconds (less aggressive)
     let pollInterval = null;
     
     const pollCompetition = async () => {
@@ -53,51 +51,78 @@ export const useCompetitionRealtime = (competitionId, isLoading) => {
           .eq('id', competitionId);
 
         if (!error && data && data.length > 0) {
-          setCompetition(data[0]);
-          setPollCount(prev => prev + 1);
-          console.log('✅ [Polling] Updated:', data[0].status);
+          const newCompetition = data[0];
+          
+          // ✅ Better change detection with logging
+          setCompetition(prevCompetition => {
+            const statusChanged = prevCompetition?.status !== newCompetition?.status;
+            const timerStartChanged = prevCompetition?.timer_started_at !== newCompetition?.timer_started_at;
+            const problemChanged = prevCompetition?.current_problem_index !== newCompetition?.current_problem_index;
+            const gameplayChanged = prevCompetition?.gameplay_indicator !== newCompetition?.gameplay_indicator;
+            
+            if (statusChanged || timerStartChanged || problemChanged || gameplayChanged) {
+              console.log('🔥 [Polling] Competition update detected:', {
+                changes: {
+                  status: statusChanged ? `${prevCompetition?.status} → ${newCompetition?.status}` : 'no change',
+                  timer_started: timerStartChanged ? `${prevCompetition?.timer_started_at} → ${newCompetition?.timer_started_at}` : 'no change',
+                  problem: problemChanged ? `${prevCompetition?.current_problem_index} → ${newCompetition?.current_problem_index}` : 'no change',
+                  gameplay: gameplayChanged ? `${prevCompetition?.gameplay_indicator} → ${newCompetition?.gameplay_indicator}` : 'no change'
+                },
+                newData: {
+                  status: newCompetition.status,
+                  timer_started_at: newCompetition.timer_started_at,
+                  timer_duration: newCompetition.timer_duration,
+                  current_problem_index: newCompetition.current_problem_index,
+                  gameplay_indicator: newCompetition.gameplay_indicator
+                }
+              });
+              
+              setPollCount(prev => prev + 1);
+              return newCompetition;
+            }
+            
+            return prevCompetition;
+          });
         }
       } catch (error) {
-        console.log('⚠️ [Polling] Skip error:', error);
+        console.log('⚠️ [Polling] Error (ignoring):', error.message);
       }
     };
 
-    // Start polling after 1 second
-    setTimeout(() => {
-      pollCompetition();
-      pollInterval = setInterval(pollCompetition, 3000);
-    }, 1000);
+    // ✅ More frequent polling during competition start
+    const startPolling = () => {
+      pollCompetition(); // Initial poll
+      pollInterval = setInterval(pollCompetition, 1500); // Poll every 1.5 seconds
+    };
 
-    // Also create a simple broadcast channel
+    // Start polling immediately
+    startPolling();
+
+    // Also create a broadcast channel for real-time updates
     const channel = supabase
       .channel(`competition-${competitionId}`)
       .on('broadcast', { event: 'competition_update' }, (payload) => {
         if (payload?.payload) {
+          console.log('🔥 [Broadcast] Received update:', payload.payload);
           setCompetition(payload.payload);
           setPollCount(prev => prev + 1);
-          console.log('🔥 [Broadcast] Received:', payload.payload.status);
         }
       })
       .subscribe();
 
     return () => {
-      console.log('🧹 [Realtime] Cleanup');
+      console.log('🧹 [Realtime] Cleanup for competition:', competitionId);
       if (pollInterval) clearInterval(pollInterval);
       if (channel) supabase.removeChannel(channel);
     };
   }, [shouldConnect, competitionId]);
-
-  // Provide setParticipants function for external updates
-  const setParticipantsWrapper = (newParticipants) => {
-    setParticipants(newParticipants);
-  };
 
   return {
     competition,
     participants,
     isConnected,
     connectionStatus,
-    setParticipants: setParticipantsWrapper,
+    setParticipants: (newParticipants) => setParticipants(newParticipants),
     pollCount
   };
 };

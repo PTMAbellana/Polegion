@@ -462,6 +462,114 @@
 }
 
 /* Action Buttons */
+.actionButtons {
+  display: flex;
+  gap: 16px;
+  margin-top: 32px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.returnToRoomButton {
+  background: linear-gradient(135deg, #059669 0%, #065f46 100%);
+  color: white;
+  border: none;
+  padding: 14px 28px;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);
+}
+
+.returnToRoomButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(5, 150, 105, 0.4);
+  background: linear-gradient(135deg, #047857 0%, #064e3b 100%);
+}
+
+.refreshButton {
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  color: white;
+  border: none;
+  padding: 14px 28px;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.refreshButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
+  background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+}
+
+.shareButton {
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.shareButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(139, 92, 246, 0.4);
+  background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+}
+
+.buttonIcon {
+  font-size: 16px;
+}
+
+/* Podium styling for top 3 */
+.podium1 {
+  background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+  border: 2px solid #f59e0b;
+}
+
+.podium2 {
+  background: linear-gradient(135deg, #c0c0c0 0%, #e5e5e5 100%);
+  border: 2px solid #9ca3af;
+}
+
+.podium3 {
+  background: linear-gradient(135deg, #cd7f32 0%, #d97706 100%);
+  border: 2px solid #b45309;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .actionButtons {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .returnToRoomButton,
+  .refreshButton {
+    width: 100%;
+    max-width: 280px;
+    justify-content: center;
+  }
+}
+
 .actionSection {
   background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
   padding: 2rem;
@@ -1283,4 +1391,85 @@
   0% { opacity: 0.6; transform: scale(1); }
   50% { opacity: 1; transform: scale(1.05); }
   100% { opacity: 0.6; transform: scale(1); }
+}
+
+/* Add this to your competition.module.css */
+.finishButton {
+  background-color: #dc2626 !important; /* Red background */
+  border-color: #dc2626 !important;
+  font-weight: 600;
+}
+
+.finishButton:hover {
+  background-color: #b91c1c !important;
+  border-color: #b91c1c !important;
+}
+
+.finishButton:disabled {
+  background-color: #6b7280 !important;
+  border-color: #6b7280 !important;
+  cursor: not-allowed;
+}
+
+/* Header Back Button */
+.titleRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.headerBackButton {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #f3f4f6;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 14px;
+  color: #374151;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.headerBackButton:hover {
+  background: #e5e7eb;
+  border-color: #9ca3af;
+}
+
+.backIcon {
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.backText {
+  font-weight: 500;
+}
+
+/* Competition Summary */
+.competitionSummary {
+  background: #f8f9fa;
+  border-radius: 12px;
+  padding: 20px;
+  margin: 20px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.summaryItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.summaryLabel {
+  font-weight: 500;
+  color: #666;
+}
+
+.summaryValue {
+  font-weight: 600;
+  color: #333;
 }

@@ -360,10 +360,16 @@ return (
                 
                 <button
                   onClick={handleNextProblem}
-                  className={`${styles.controlButton} ${styles.nextButton}`}
+                  className={`${styles.controlButton} ${
+                    (currentCompetition?.current_problem_index || 0) + 1 >= addedProblems.length 
+                      ? styles.finishButton 
+                      : styles.nextButton
+                  }`}
                   disabled={!currentCompetition?.current_problem_id}
                 >
-                  Next Problem
+                  {(currentCompetition?.current_problem_index || 0) + 1 >= addedProblems.length 
+                    ? 'Finish Competition' 
+                    : 'Next Problem'}
                 </button>
                 
                 <div className={styles.problemStatus}>

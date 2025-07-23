@@ -4,14 +4,11 @@ import styles from "@/styles/create-problem.module.css";
 import { useRouter } from "next/navigation";
 import React, { useState, useRef, useEffect, useCallback } from "react";
 
-// Import ALL create-problem components
+// Import create-problem components (these are already Konva-based)
 import Toolbox from '@/app/virtual-rooms/[roomCode]/create-problem/components/Toolbox';
 import DifficultyDropdown from '@/app/virtual-rooms/[roomCode]/create-problem/components/DifficultyDropdown';
 import MainArea from '@/app/virtual-rooms/[roomCode]/create-problem/components/MainArea';
 import PromptBox from '@/app/virtual-rooms/[roomCode]/create-problem/components/PromptBox';
-import SquareShape from '@/app/virtual-rooms/[roomCode]/create-problem/shapes/SquareShape';
-import CircleShape from '@/app/virtual-rooms/[roomCode]/create-problem/shapes/CircleShape';
-import TriangleShape from '@/app/virtual-rooms/[roomCode]/create-problem/shapes/TriangleShape';
 import Timer from '@/app/virtual-rooms/[roomCode]/create-problem/components/Timer';
 import LimitAttempts from '@/app/virtual-rooms/[roomCode]/create-problem/components/LimitAttempts';
 import SetVisibility from '@/app/virtual-rooms/[roomCode]/create-problem/components/SetVisibility';
@@ -66,31 +63,18 @@ export default function Gamepage({
 }: GamepageProps) {
   const router = useRouter();
 
-  // Basic state management
+  // Basic state management (removed old drag/resize states)
   const [problems, setProblems] = useState<Problem[]>([]);
   const [problemId, setProblemId] = useState<string | null>(null);
   const [title, setTitle] = useState("");
   const [shapes, setShapes] = useState<any[]>([]);
   const [selectedId, setSelectedId] = useState<number | null>(null);
-  const [scale, setScale] = useState(1);
-  const [draggingVertex, setDraggingVertex] = useState<{ shapeId: number; vertex: number } | null>(null);
-  const [draggingShapeId, setDraggingShapeId] = useState<number | null>(null);
-  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
-  const draggingSideRef = useRef<{
-    shapeId: number;
-    points: (keyof any["shape"]["points"])[];
-    start: { x: number; y: number };
-  } | null>(null);
-  const [dropdownOpen, setDropdownOpen] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
   const [difficulty, setDifficulty] = useState("Easy");
   const [prompt, setPrompt] = useState("");
   const [editingPrompt, setEditingPrompt] = useState(false);
   const promptInputRef = useRef<HTMLTextAreaElement>(null);
-  const mainAreaRef = useRef<HTMLDivElement>(null);
   const [fillMode, setFillMode] = useState(false);
   const [fillColor, setFillColor] = useState("#E3DCC2");
-  const [draggingFill, setDraggingFill] = useState(false);
   const [selectedTool, setSelectedTool] = useState<string | null>(null);
   const [timerOpen, setTimerOpen] = useState(false);
   const [timerValue, setTimerValue] = useState(5);
@@ -112,11 +96,11 @@ export default function Gamepage({
     square: false,
   });
 
-  // ✨ ADD: Current problem state for competition mode
+  // Competition-specific state
   const [currentProblem, setCurrentProblem] = useState(null);
   const [isLoadingProblem, setIsLoadingProblem] = useState(false);
 
-  // ✨ ADD: Timer and realtime hooks for competition mode
+  // Timer and realtime hooks for competition mode
   const { 
     competition: realtimeCompetition, 
     isConnected,
@@ -137,20 +121,55 @@ export default function Gamepage({
   // Use realtime competition data if available, fallback to props
   const activeCompetition = realtimeCompetition || currentCompetition;
 
-  // ✨ UPDATE: Use activeCompetition instead of currentCompetition
+  // Fetch problems for non-competition mode
+  const fetchProblems = useCallback(async () => {
+    // ✅ FIXED: Only fetch problems in non-competition mode AND when we have a valid roomCode
+    if (!roomCode || competitionId || typeof roomCode !== 'string' || roomCode.trim() === '') {
+      console.log('⏭️ Skipping fetchProblems:', { 
+        roomCode: !!roomCode, 
+        competitionId: !!competitionId,
+        reason: competitionId ? 'Competition mode' : 'Invalid roomCode'
+      });
+      return;
+    }
+    
+    try {
+      console.log('📝 Fetching problems for room:', roomCode);
+      const data = await getRoomProblemsByCode(roomCode);
+      setProblems(data || []);
+      console.log('✅ Problems fetched successfully:', data?.length || 0);
+    } catch (error) {
+      console.error("❌ Error fetching problems:", error);
+      // Set empty array on error to prevent crashes
+      setProblems([]);
+      
+      // Only show error alerts in non-competition mode
+      if (!competitionId) {
+        console.warn("Failed to fetch problems for room:", roomCode);
+      }
+    }
+  }, [roomCode, competitionId]);
+
+  useEffect(() => {
+    // Only fetch problems when not in competition mode
+    if (!competitionId) {
+      fetchProblems();
+    }
+  }, [fetchProblems, competitionId]);
+
+  // Fetch current problem in competition mode
   useEffect(() => {
     const fetchCurrentProblem = async () => {
       if (!competitionId || !activeCompetition?.current_problem_id) return;
       
       setIsLoadingProblem(true);
       try {
-        // Fetch the current problem details from your API
         const response = await fetch(`/api/problems/${activeCompetition.current_problem_id}`);
         if (response.ok) {
           const problemData = await response.json();
           setCurrentProblem(problemData);
           
-          // ✨ POPULATE THE FORM FIELDS WITH PROBLEM DETAILS (READ-ONLY FOR STUDENTS)
+          // Populate form fields with problem details (read-only for students)
           setTitle(problemData.title || "");
           setPrompt(problemData.description || "");
           setDifficulty(problemData.difficulty || "Easy");
@@ -160,11 +179,11 @@ export default function Gamepage({
           setTimerValue(problemData.timer || 5);
           setTimerOpen(!!problemData.timer);
           
-          // ✨ CLEAR STUDENT'S SHAPES - THEY CREATE THEIR OWN SOLUTION
+          // Clear student's shapes - they create their own solution
           setShapes([]);
           setSelectedId(null);
           
-          console.log('🎯 Problem details loaded:', problemData);
+          console.log('Problem details loaded:', problemData);
         }
       } catch (error) {
         console.error('Error fetching current problem:', error);
@@ -173,272 +192,48 @@ export default function Gamepage({
       }
     };
     
-    // Only fetch in competition mode
     if (competitionId && activeCompetition?.current_problem_id) {
       fetchCurrentProblem();
     }
   }, [activeCompetition?.current_problem_id, competitionId]);
 
-  // Shape interaction handlers
-  const handleShapeMouseDown = (id: number, e: React.MouseEvent) => {
-    e.stopPropagation();
-    const shape = shapes.find(s => s.id === id);
-    if (!shape) return;
+  // Keyboard deletion handler
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const active = document.activeElement;
+      const isInput =
+        active &&
+        (active.tagName === "INPUT" ||
+          active.tagName === "TEXTAREA" ||
+          (active as HTMLElement).isContentEditable);
 
-    const rect = mainAreaRef.current?.getBoundingClientRect();
-    if (!rect) return;
-
-    if (shape.type === "circle") {
-      const offsetX = e.clientX - rect.left - shape.x;
-      const offsetY = e.clientY - rect.top - shape.y;
-      setDraggingShapeId(id);
-      setDragOffset({ x: offsetX, y: offsetY });
-      return;
-    }
-
-    if (shape.type === "triangle" && shape.points?.top) {
-      const referencePoint = shape.points.top;
-      const offsetX = e.clientX - rect.left - referencePoint.x;
-      const offsetY = e.clientY - rect.top - referencePoint.y;
-      setDraggingShapeId(id);
-      setDragOffset({ x: offsetX, y: offsetY });
-      return;
-    }
-
-    if (shape.type === "square" && shape.points?.topLeft) {
-      const offsetX = e.clientX - rect.left - shape.points.topLeft.x;
-      const offsetY = e.clientY - rect.top - shape.points.topLeft.y;
-      setDraggingShapeId(id);
-      setDragOffset({ x: offsetX, y: offsetY });
-      return;
-    }
-  };
-
-  const handleCircleResizeMouseDown = (id: number, e: React.MouseEvent) => {
-    e.stopPropagation();
-    const shape = shapes.find((s) => s.id === id);
-    if (!shape) return;
-
-    const startX = e.clientX;
-    const startSize = shape.size;
-    const MIN_CIRCLE_SIZE = 80;
-
-    const handleMouseMove = (moveEvent: MouseEvent) => {
-      const dx = moveEvent.clientX - startX;
-      const newSize = Math.max(MIN_CIRCLE_SIZE, startSize + dx);
-
-      setShapes((prevShapes) =>
-        prevShapes.map((s) =>
-          s.id === id ? { ...s, size: newSize } : s
-        )
-      );
+      if (!isInput && (e.key === "Delete" || e.key === "Backspace") && selectedId !== null) {
+        setShapes(prev => {
+          const newShapes = prev.filter(shape => shape.id !== selectedId);
+          if (newShapes.length === 0) {
+            handleAllShapesDeleted();
+          }
+          return newShapes;
+        });
+        setSelectedId(null);
+      }
     };
 
-    const handleMouseUp = () => {
-      window.removeEventListener("mousemove", handleMouseMove);
-      window.removeEventListener("mouseup", handleMouseUp);
-    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [selectedId]);
 
-    window.addEventListener("mousemove", handleMouseMove);
-    window.addEventListener("mouseup", handleMouseUp);
-  };
-
-  const handleVertexMouseDown = (shapeId: number, vertex: number) => {
-    setDraggingVertex({ shapeId, vertex });
-  };
-
-  const handleSideMouseDown = (
-    shapeId: number,
-    points: (keyof any["points"])[],
-    e: React.MouseEvent
-  ) => {
-    e.stopPropagation();
-
-    const rect = mainAreaRef.current?.getBoundingClientRect();
-    if (!rect) return;
-
-    const mouseX = e.clientX - rect.left;
-    const mouseY = e.clientY - rect.top;
-
-    draggingSideRef.current = {
-      shapeId,
-      points,
-      start: { x: mouseX, y: mouseY },
-    };
-  };
-
-  const handleVertexDrag = (
-    shapeId: number,
-    vertexKey: keyof any["points"],
-    newPos: { x: number; y: number }
-  ) => {
-    setShapes((prevShapes) =>
-      prevShapes.map((shape) => {
-        if (shape.id !== shapeId || !shape.points) return shape;
-
-        if (shape.type === "triangle") {
-          const updatedPoints = { ...shape.points, [vertexKey]: newPos };
-          return { ...shape, points: updatedPoints };
-        }
-
-        if (shape.type === "square") {
-          const updatedPoints = { ...shape.points, [vertexKey]: newPos };
-          return { ...shape, points: updatedPoints };
-        }
-
-        return shape;
-      })
-    );
-  };
-
+  // Drag start handler
   const handleDragStart = (type: string) => (e: React.DragEvent) => {
     e.dataTransfer.setData("shape-type", type);
   };
 
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    const shapeType = e.dataTransfer.getData("shape-type");
-    
-    if (!shapeType) return;
-
-    if (shapes.length >= MAX_SHAPES) {
-      setShowLimitPopup(true);
-      return;
-    }
-
-    const rect = mainAreaRef.current?.getBoundingClientRect();
-    if (!rect) return;
-
-    const dropX = e.clientX - rect.left;
-    const dropY = e.clientY - rect.top;
-
-    const newShape = {
-      id: Date.now(),
-      type: shapeType,
-      color: fillColor,
-    };
-
-    if (shapeType === "circle") {
-      newShape.x = dropX;
-      newShape.y = dropY;
-      newShape.size = 100;
-    } else if (shapeType === "square") {
-      const size = 100;
-      newShape.points = {
-        topLeft: { x: dropX, y: dropY },
-        topRight: { x: dropX + size, y: dropY },
-        bottomRight: { x: dropX + size, y: dropY + size },
-        bottomLeft: { x: dropX, y: dropY + size },
-      };
-    } else if (shapeType === "triangle") {
-      const size = 100;
-      newShape.points = {
-        top: { x: dropX, y: dropY },
-        left: { x: dropX - size/2, y: dropY + size },
-        right: { x: dropX + size/2, y: dropY + size },
-      };
-    }
-
-    setShapes(prev => [...prev, newShape]);
-    setSelectedId(newShape.id);
-    setSelectedTool(null);
+  // Pixel to units conversion
+  const pxToUnits = (px: number): string => {
+    return (px / 10).toFixed(1);
   };
 
-  const pxToUnits = (px: number): number => {
-    return px / 10;
-  };
-
-  const renderShape = (shape) => {
-    const commonProps = {
-      shape,
-      isSelected: selectedId === shape.id,
-      pxToUnits,
-      handleShapeMouseDown,
-      setSelectedId,
-      fillMode,
-      draggingFill,
-      scale,
-    };
-
-    switch (shape.type) {
-      case "square":
-        return (
-          <SquareShape
-            key={shape.id}
-            {...commonProps}
-            showProperties={showProperties}
-            showAngles={showAngles}
-            showSides={showSides}
-            showArea={showAreaByShape.square}
-            onVertexMouseDown={(vertex) =>
-              setDraggingVertex({ shapeId: shape.id, vertex })
-            }
-            onSideMouseDown={handleSideMouseDown}
-            handleVertexDrag={handleVertexDrag}
-          />
-        );
-      case "circle":
-        return (
-          <CircleShape
-            key={shape.id}
-            {...commonProps}
-            handleCircleResizeMouseDown={handleCircleResizeMouseDown}
-            showDiameter={showDiameter}
-            showCircumference={showCircumference}
-            showArea={showAreaByShape.circle}
-          />
-        );
-      case "triangle":
-        return (
-          <TriangleShape
-            key={shape.id}
-            {...commonProps}
-            handleResizeMouseDown={() => { }}
-            showSides={showSides}
-            showAngles={showAngles}
-            showArea={showAreaByShape.triangle}
-            showHeight={showHeight}
-            onShapeMove={(updatedShape) => {
-              setShapes(prevShapes =>
-                prevShapes.map(s => s.id === updatedShape.id ? updatedShape : s)
-              );
-            }}
-          />
-        );
-      default:
-        return null;
-    }
-  };
-
-  const handleDeleteProblem = async (problemId: string) => {
-    if (!confirm("Are you sure you want to delete this problem?")) return;
-    try {
-      await deleteProblem(problemId);
-      setProblems(prev => prev.filter(p => p.id !== problemId));
-    } catch (error) {
-      console.error("Error deleting problem:", error);
-    }
-  };
-
-  const handleEditProblem = async (problemId: string) => { 
-    const problem = problems.find(p => p.id === problemId);
-    if (!problem) return;
-    
-    setProblemId(problemId);
-    setTitle(problem.title || "");
-    setPrompt(problem.description || "");
-    setShapes(problem.expected_solution || []);
-    setDifficulty(problem.difficulty || "Easy");
-    setShowLimitPopup(problem.max_attempts !== null && problem.max_attempts !== undefined);
-    setLimitAttempts(problem.max_attempts || 1);
-    setTimerOpen(problem.timer !== null && problem.timer !== undefined);
-    setTimerValue(typeof problem.timer === 'number' ? problem.timer : 5);
-    setHintOpen(problem.hint !== null && problem.hint !== undefined);
-    setHint(problem.hint ?? "");
-    setVisible(problem.visibility === "show");
-    setShowProperties(true);  
-  };
-
+  // Shape properties calculation
   function getShapeProperties(shape) {
     if (shape.type === "square" && shape.points) {
       const { topLeft, topRight, bottomRight, bottomLeft } = shape.points;
@@ -491,34 +286,50 @@ export default function Gamepage({
       const baseLength = sideLengths[1];
       const height = +(2 * area / baseLength).toFixed(2);
 
+      function dist(a, b) {
+        return Math.sqrt((a.x - b.x) ** 2 + (a.y - b.y) ** 2) / 10;
+      }
+      function getAngle(A, B, C) {
+        const a = dist(B, C);
+        const b = dist(A, C);
+        const c = dist(A, B);
+        const angleRad = Math.acos((b * b + c * c - a * a) / (2 * b * c));
+        return +(angleRad * 180 / Math.PI).toFixed(2);
+      }
+      const angles = [
+        getAngle(pts[0], pts[1], pts[2]),
+        getAngle(pts[1], pts[2], pts[0]),
+        getAngle(pts[2], pts[0], pts[1]),
+      ];
+
       return {
         ...shape,
         points: shape.points,
         sideLengths,
         area: +area.toFixed(2),
         height,
+        angles,
       };
     }
 
     return shape;
   }
 
-  // Save handler
+  // Save/Submit handler
   const handleSave = async () => {
-    if (competitionId && currentCompetition) {
-      // ✨ COMPETITION MODE - SUBMIT SOLUTION
+    if (competitionId && activeCompetition) {
+      // Competition mode - submit solution
       const shapesWithProps = shapes.map(getShapeProperties);
       
       const solutionPayload = {
         competition_id: competitionId,
-        problem_id: currentCompetition.current_problem_id,
+        problem_id: activeCompetition.current_problem_id,
         participant_solution: shapesWithProps,
         submitted_at: new Date().toISOString(),
         room_id: roomId
       };
       
       try {
-        // Submit solution to competition API
         const response = await fetch('/api/competition/submit-solution', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -529,7 +340,7 @@ export default function Gamepage({
           const result = await response.json();
           
           Swal.fire({
-            title: "Solution Submitted! 🎯",
+            title: "Solution Submitted!",
             text: `Your solution has been submitted successfully! You earned ${result.xp_earned || 0} XP!`,
             icon: "success",
             confirmButtonText: "Awesome!",
@@ -537,7 +348,6 @@ export default function Gamepage({
             timerProgressBar: true
           });
           
-          // Clear shapes after submission
           setShapes([]);
           setSelectedId(null);
           
@@ -548,7 +358,7 @@ export default function Gamepage({
       } catch (error) {
         console.error("Submit error:", error);
         Swal.fire({
-          title: "Submission Error 😞",
+          title: "Submission Error",
           text: error.message || "Failed to submit solution. Please try again.",
           icon: "error",
           confirmButtonText: "Try Again",
@@ -557,9 +367,8 @@ export default function Gamepage({
       return;
     }
 
-    // ✨ REGULAR MODE - CREATE/EDIT PROBLEM (existing logic stays the same)
+    // Regular mode - create/edit problem
     const shapesWithProps = shapes.map(getShapeProperties);
-    console.log("Saving shapes:", shapesWithProps);
 
     const payload = {
       title,
@@ -573,50 +382,35 @@ export default function Gamepage({
       hint: hintOpen ? hint : null,
     };
 
-    let message = {}
-    let error_message = {}
-    if (!problemId) {
-      error_message = {
-        title: "Error",
-        text: "There was an error creating the problem. Please try again.",
-        icon: "error",
-        confirmButtonText: "OK",
-      }
-    } else {
-      error_message = {
-        title: "Error",
-        text: "There was an error editing the problem. Please try again.",
-        icon: "error",
-        confirmButtonText: "OK",
-      }
-    }
-
     try {
-      console.log(JSON.stringify(payload));
       if (!problemId) {
         await createProblem(payload, roomCode);
-        message = {
+        Swal.fire({
           title: "Problem Created",
           text: "Your problem has been successfully created!",
           icon: "success",
           confirmButtonText: "OK",
-        }; 
+        }); 
       } else {
-        console.log("Editing problem with ID:", problemId);
         await updateProblem(problemId, payload);
-        message = {
+        Swal.fire({
           title: "Problem Edited",
           text: "Your problem has been successfully edited!",
           icon: "success",
           confirmButtonText: "OK",
-        }; 
+        }); 
       }
       await fetchProblems();
-      Swal.fire(message);
     } catch (error) {
       console.error("Save error:", error);
-      Swal.fire(error_message);
+      Swal.fire({
+        title: "Error",
+        text: "There was an error saving the problem. Please try again.",
+        icon: "error",
+        confirmButtonText: "OK",
+      });
     } finally {
+      // Reset form
       setTitle("");
       setPrompt("");
       setShapes([]);
@@ -633,183 +427,75 @@ export default function Gamepage({
     }
   };
 
-  // Mouse event handlers
+  // Problem management handlers
+  const handleDeleteProblem = async (problemId: string) => {
+    if (!confirm("Are you sure you want to delete this problem?")) return;
+    try {
+      await deleteProblem(problemId);
+      setProblems(prev => prev.filter(p => p.id !== problemId));
+    } catch (error) {
+      console.error("Error deleting problem:", error);
+    }
+  };
+
+  const handleEditProblem = async (problemId: string) => { 
+    const problem = problems.find(p => p.id === problemId);
+    if (!problem) return;
+    
+    setProblemId(problemId);
+    setTitle(problem.title || "");
+    setPrompt(problem.description || "");
+    setShapes(problem.expected_solution || []);
+    setDifficulty(problem.difficulty || "Easy");
+    setLimitAttempts(problem.max_attempts || 1);
+    setTimerOpen(problem.timer !== null && problem.timer !== undefined);
+    setTimerValue(typeof problem.timer === 'number' ? problem.timer : 5);
+    setHintOpen(problem.hint !== null && problem.hint !== undefined);
+    setHint(problem.hint ?? "");
+    setVisible(problem.visibility === "show");
+    setShowProperties(true);  
+  };
+
+  const handleAllShapesDeleted = useCallback(() => {
+    setShowSides(false);
+    setShowAngles(false);
+    setShowArea(false);
+    setShowHeight(false);
+    setShowDiameter(false);
+    setShowCircumference(false);
+    setShowAreaByShape({
+      circle: false,
+      triangle: false,
+      square: false,
+    });
+  }, []);
+
   useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      const rect = mainAreaRef.current?.getBoundingClientRect();
-      if (!rect) return;
+    if (shapes.length === 0) {
+      handleAllShapesDeleted();
+    }
+  }, [shapes.length, handleAllShapesDeleted]);
 
-      const mouseX = e.clientX - rect.left;
-      const mouseY = e.clientY - rect.top;
-
-      if (draggingVertex) {
-        setShapes(prev =>
-          prev.map(s => {
-            if (s.id === draggingVertex.shapeId) {
-              const newPoints = { ...s.points };
-              newPoints[draggingVertex.vertex] = { x: mouseX, y: mouseY };
-              return { ...s, points: newPoints };
-            }
-            return s;
-          })
-        );
-      }
-
-      const draggingSide = draggingSideRef.current;
-      if (draggingSide) {
-        const dx = mouseX - draggingSide.start.x;
-        const dy = mouseY - draggingSide.start.y;
-
-        setShapes(prev =>
-          prev.map(s => {
-            if (s.id === draggingSide.shapeId) {
-              const newPoints = { ...s.points };
-              draggingSide.points.forEach(key => {
-                newPoints[key] = {
-                  x: newPoints[key].x + dx,
-                  y: newPoints[key].y + dy
-                };
-              });
-              return { ...s, points: newPoints };
-            }
-            return s;
-          })
-        );
-
-        draggingSideRef.current = {
-          ...draggingSide,
-          start: { x: mouseX, y: mouseY },
-        };
-      }
-    };
-
-    const handleMouseUp = () => {
-      setDraggingVertex(null);
-      draggingSideRef.current = null;
-    };
-
-    window.addEventListener("mousemove", handleMouseMove);
-    window.addEventListener("mouseup", handleMouseUp);
-    return () => {
-      window.removeEventListener("mousemove", handleMouseMove);
-      window.removeEventListener("mouseup", handleMouseUp);
-    };
-  }, [draggingVertex]);
-
-  // Shape dragging handler
+  // Add this debugging effect right before the return statement
   useEffect(() => {
-    const handleMoveShape = (e: MouseEvent) => {
-      if (draggingShapeId !== null) {
-        const rect = mainAreaRef.current?.getBoundingClientRect();
-        if (!rect) return;
-
-        const mouseX = e.clientX - rect.left;
-        const mouseY = e.clientY - rect.top;
-
-        const newTopLeftX = mouseX - dragOffset.x;
-        const newTopLeftY = mouseY - dragOffset.y;
-
-        const snap = (value: number, step = 1) => Math.round(value / step) * step;
-
-        setShapes(prev =>
-          prev.map(s => {
-            if (s.id !== draggingShapeId) return s;
-
-            if (s.type === "triangle" && s.points?.top) {
-              const referencePoint = s.points.top;
-
-              const offsetPoints = Object.entries(s.points).map(([key, pt]) => ({
-                key,
-                dx: pt.x - referencePoint.x,
-                dy: pt.y - referencePoint.y,
-              }));
-
-              const newPoints = Object.fromEntries(
-                offsetPoints.map(({ key, dx, dy }) => [
-                  key,
-                  {
-                    x: snap(newTopLeftX + dx, 1),
-                    y: snap(newTopLeftY + dy, 1),
-                  },
-                ])
-              );
-
-              return { ...s, points: newPoints };
-            }
-
-            if (s.points?.topLeft) {
-              const offsetPoints = Object.entries(s.points).map(([key, pt]) => ({
-                key,
-                dx: pt.x - s.points.topLeft.x,
-                dy: pt.y - s.points.topLeft.y,
-              }));
-
-              const newPoints = Object.fromEntries(
-                offsetPoints.map(({ key, dx, dy }) => [
-                  key,
-                  { x: newTopLeftX + dx, y: newTopLeftY + dy },
-                ])
-              );
-
-              return { ...s, points: newPoints };
-            }
-
-            if (s.type === "circle") {
-              return { ...s, x: newTopLeftX, y: newTopLeftY };
-            }
-
-            return s;
-          })
-        );
-      }
-    };
-
-    const stopDragging = (e: MouseEvent) => {
-      if (draggingShapeId !== null && mainAreaRef.current) {
-        const rect = mainAreaRef.current.getBoundingClientRect();
-        const mouseX = e.clientX;
-        const mouseY = e.clientY;
-
-        if (
-          mouseX < rect.left || mouseX > rect.right ||
-          mouseY < rect.top || mouseY > rect.bottom
-        ) {
-          setShapes(prev => prev.filter(s => s.id !== draggingShapeId));
-        }
-      }
-      setDraggingShapeId(null);
-    };
-
-    window.addEventListener("mousemove", handleMoveShape);
-    window.addEventListener("mouseup", stopDragging);
-
-    return () => {
-      window.removeEventListener("mousemove", handleMoveShape);
-      window.removeEventListener("mouseup", stopDragging);
-    };
-  }, [draggingShapeId, dragOffset, mainAreaRef]);
+    if (competitionId && activeCompetition) {
+      console.log('Timer Debug:', {
+        competitionId,
+        activeCompetition: !!activeCompetition,
+        timeRemaining,
+        timerValue,
+        isTimerActive,
+        formattedTime,
+        isExpired,
+        isPaused,
+        progressPercentage: Math.max(0, (timeRemaining / (timerValue * 60)) * 100)
+      });
+    }
+  }, [competitionId, activeCompetition, timeRemaining, timerValue, isTimerActive, formattedTime, isExpired, isPaused]);
 
   return (
     <div className={`${styles.root} ${isFullScreenMode ? styles.fullScreenGame : ''}`}>
       <div className={styles.scalableWorkspace}>
-        {/* ✨ COMPETITION INFO HEADER
-        {competitionId && activeCompetition && (
-          <div className={styles.competitionHeader}>
-            <div className={styles.competitionInfo}>
-              <span className={styles.competitionTitle}>
-                🏆 {activeCompetition.title}
-              </span>
-              <span className={styles.problemCounter}>
-                Problem {(activeCompetition.current_problem_index || 0) + 1}
-              </span>
-              <span className={styles.connectionStatus}>
-                {isConnected ? '🟢 Connected' : '🔴 Disconnected'}
-              </span>
-              {isLoadingProblem && <span className={styles.loading}>Loading problem...</span>}
-            </div>
-          </div>
-        )} */}
-
         {/* Sidebar */}
         <div style={{ gridArea: "sidebar", display: "flex", flexDirection: "column", alignItems: "center" }}>
           <div style={{ width: "100%", display: "flex", flexDirection: "row", gap: 8, marginBottom: 16 }}>
@@ -819,7 +505,7 @@ export default function Gamepage({
             </div>
           </div>
           
-          {/* ✨ SHOW DIFFICULTY AS READ-ONLY IN COMPETITION MODE */}
+          {/* Difficulty - read-only in competition mode */}
           {competitionId ? (
             <div className={styles.difficultyDisplay}>
               <div className={styles.difficultyLabel}>Problem Difficulty</div>
@@ -872,7 +558,7 @@ export default function Gamepage({
         <div className={styles.mainColumn}>
           <div style={{ height: 32 }} />
           
-          {/* ✨ TITLE - READ-ONLY IN COMPETITION MODE */}
+          {/* Title - read-only in competition mode */}
           <div className={styles.formRow}>
             <input 
               className={styles.input} 
@@ -887,7 +573,7 @@ export default function Gamepage({
             />
           </div>
           
-          {/* ✨ PROMPT - READ-ONLY IN COMPETITION MODE */}
+          {/* Prompt - read-only in competition mode */}
           <div className={styles.promptGroup}>
             <PromptBox
               prompt={prompt}
@@ -899,14 +585,13 @@ export default function Gamepage({
             />
           </div>
           
+          {/* Main Area with Konva */}
           <MainArea
-            mainAreaRef={mainAreaRef}
             shapes={shapes}
-            renderShape={renderShape}
             setShapes={setShapes}
+            selectedId={selectedId}
             setSelectedId={setSelectedId}
             setSelectedTool={setSelectedTool}
-            onDrop={handleDrop}
             saveButton={
               <button 
                 className={`${styles.saveBtn} ${styles.rowBtn} ${styles.saveBtnFloating}`} 
@@ -919,9 +604,16 @@ export default function Gamepage({
             shapeLimit={MAX_SHAPES}
             shapeCount={shapes.length}
             onLimitReached={() => setShowLimitPopup(true)}
+            pxToUnits={pxToUnits}
+            showAreaByShape={showAreaByShape}
+            showSides={showSides}
+            showAngles={showAngles}
+            showDiameter={showDiameter}
+            showCircumference={showCircumference}
+            showHeight={showHeight}
           />
           
-          {/* ✨ NEW: Competition Timer Display - Show below MainArea */}
+          {/* Competition Timer Display - FIXED */}
           {competitionId && activeCompetition && (
             <div className={styles.competitionTimerContainer}>
               <div className={styles.timerDisplay}>
@@ -941,15 +633,18 @@ export default function Gamepage({
                 </div>
                 
                 <div className={`${styles.timerTime} ${isExpired ? styles.expired : ''} ${isPaused ? styles.paused : ''}`}>
-                  {formattedTime}
+                  {formattedTime || '00:00'}
                 </div>
                 
                 <div className={styles.timerProgress}>
                   <div 
                     className={styles.progressBar}
                     style={{
-                      width: `${Math.max(0, (timeRemaining / (timerValue * 60)) * 100)}%`,
-                      backgroundColor: timeRemaining < 60 ? '#ef4444' : timeRemaining < 180 ? '#f59e0b' : '#10b981'
+                      width: `${Math.max(0, Math.min(100, timeRemaining && timerValue ? (timeRemaining / (timerValue * 60)) * 100 : 0))}%`,
+                      backgroundColor: timeRemaining < 60 ? '#ef4444' : timeRemaining < 180 ? '#f59e0b' : '#10b981',
+                      height: '8px',
+                      transition: 'width 0.3s ease',
+                      borderRadius: '4px'
                     }}
                   />
                 </div>
@@ -959,13 +654,18 @@ export default function Gamepage({
                     Status: <span className={styles.statusValue}>{activeCompetition.gameplay_indicator}</span>
                   </div>
                 )}
+                
+                {/* Debug info - remove in production */}
+                <div style={{ fontSize: '12px', color: '#666', marginTop: '8px' }}>
+                  Debug: {timeRemaining}s / {timerValue * 60}s = {Math.round((timeRemaining / (timerValue * 60)) * 100)}%
+                </div>
               </div>
             </div>
           )}
           
           <div className={styles.controlsRow}>
             <div style={{ display: "flex", gap: 12 }}>
-              {/* ✨ ATTEMPTS - READ-ONLY IN COMPETITION MODE */}
+              {/* Attempts - read-only in competition mode */}
               {competitionId ? (
                 <div className={styles.attemptsDisplay}>
                   <span className={styles.attemptsLabel}>Max Attempts:</span>
@@ -975,9 +675,9 @@ export default function Gamepage({
                 <LimitAttempts limit={limitAttempts} setLimit={setLimitAttempts} />
               )}
               
-              {/* ✨ TIMER - READ-ONLY IN COMPETITION MODE */}
+              {/* Timer - read-only in competition mode */}
               {competitionId ? (
-                <div className={styles.timerDisplay}>
+                <div className={styles.timerDisplayControl}>
                   <span className={styles.timerLabel}>Timer:</span>
                   <span className={styles.timerValue}>{timerValue} min</span>
                 </div>
@@ -991,11 +691,11 @@ export default function Gamepage({
                 )
               )}
               
-              {/* ✨ HINT - READ-ONLY IN COMPETITION MODE */}
+              {/* Hint - read-only in competition mode */}
               {(hintOpen || hint) ? (
                 <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
                   <span style={{ fontSize: "0.85rem", fontWeight: 500, marginLeft: 4, marginBottom: 2 }}>
-                    {competitionId ? 'Hint' : 'Hint'}
+                    Hint
                   </span>
                   <input
                     className={styles.hintInput}
@@ -1020,7 +720,7 @@ export default function Gamepage({
                 )
               )}
               
-              {/* ✨ VISIBILITY - ONLY SHOW IN NON-COMPETITION MODE */}
+              {/* Visibility - only show in non-competition mode */}
               {!competitionId && (
                 <SetVisibility visible={visible} setVisible={setVisible} />
               )}
@@ -1028,7 +728,7 @@ export default function Gamepage({
           </div>
         </div>
         
-        {/* ✨ RIGHT SIDEBAR - ONLY SHOW PROBLEMS LIST IN NON-COMPETITION MODE */}
+        {/* Right sidebar - only show problems list in non-competition mode */}
         {!competitionId && (
           <div className={styles.problemsSection}>
             <div className={styles.problemsSectionHeader}>

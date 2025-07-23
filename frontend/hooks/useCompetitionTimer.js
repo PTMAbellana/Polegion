@@ -8,12 +8,17 @@ export const useCompetitionTimer = (competitionId, competition) => {
   const intervalRef = useRef(null);
   const timerChannelRef = useRef(null);
 
-  // Track the current problem index to detect changes
+  // Track the current problem index AND timer_started_at to detect changes
   const [lastProblemIndex, setLastProblemIndex] = useState(null);
+  const [lastTimerStartedAt, setLastTimerStartedAt] = useState(null);
 
   // Calculate time remaining from database values
   const calculateTimeRemaining = (competition) => {
     if (!competition?.timer_started_at || !competition?.timer_duration) {
+      console.log('⏰ Missing timer data:', {
+        timer_started_at: competition?.timer_started_at,
+        timer_duration: competition?.timer_duration
+      });
       return 0;
     }
 
@@ -23,23 +28,42 @@ export const useCompetitionTimer = (competitionId, competition) => {
     const elapsed = now - startTime;
     const remaining = Math.max(0, duration - elapsed);
     
+    console.log('⏰ Timer calculation:', {
+      startTime: new Date(startTime).toISOString(),
+      duration: competition.timer_duration,
+      elapsed: Math.floor(elapsed / 1000),
+      remaining: Math.floor(remaining / 1000)
+    });
+    
     return Math.floor(remaining / 1000); // Convert back to seconds
   };
 
-  // IMPORTANT: Restart timer when problem changes
+  // ✅ FIXED: Detect both problem changes AND initial timer start
   useEffect(() => {
     const currentProblemIndex = competition?.current_problem_index;
+    const currentTimerStartedAt = competition?.timer_started_at;
     
-    // Check if problem changed
-    if (currentProblemIndex !== lastProblemIndex && currentProblemIndex !== null) {
-      console.log('🔄 Problem changed! Restarting timer...', {
+    // Check if problem changed OR timer started for the first time
+    const problemChanged = currentProblemIndex !== lastProblemIndex && currentProblemIndex !== null;
+    const timerStarted = currentTimerStartedAt !== lastTimerStartedAt && currentTimerStartedAt !== null;
+    
+    if (problemChanged || timerStarted) {
+      console.log('🔄 Timer restart triggered!', {
+        reason: problemChanged ? 'Problem changed' : 'Timer started',
         oldIndex: lastProblemIndex,
-        newIndex: currentProblemIndex
+        newIndex: currentProblemIndex,
+        oldTimerStart: lastTimerStartedAt,
+        newTimerStart: currentTimerStartedAt,
+        competition: {
+          status: competition?.status,
+          gameplay_indicator: competition?.gameplay_indicator
+        }
       });
       
       // Clear existing timer
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
+        intervalRef.current = null;
       }
       
       // Calculate new time remaining
@@ -51,35 +75,65 @@ export const useCompetitionTimer = (competitionId, competition) => {
                               competition?.gameplay_indicator !== 'PAUSE' &&
                               newTimeRemaining > 0;
       
+      console.log('⏰ Timer decision:', {
+        shouldStartTimer,
+        status: competition?.status,
+        gameplay_indicator: competition?.gameplay_indicator,
+        timeRemaining: newTimeRemaining
+      });
+      
       setIsTimerActive(shouldStartTimer);
       
-      // Update last problem index
+      // Update tracking variables
       setLastProblemIndex(currentProblemIndex);
+      setLastTimerStartedAt(currentTimerStartedAt);
     }
-  }, [competition?.current_problem_index, competition?.status, competition?.gameplay_indicator]);
+  }, [
+    competition?.current_problem_index, 
+    competition?.timer_started_at,
+    competition?.status, 
+    competition?.gameplay_indicator,
+    lastProblemIndex,
+    lastTimerStartedAt
+  ]);
 
-  // Start timer synchronization
+  // ✅ FIXED: Initial timer synchronization (fallback)
   useEffect(() => {
     if (!competition || !competitionId) return;
 
-    const timeLeft = calculateTimeRemaining(competition);
-    setTimeRemaining(timeLeft);
+    // Only do initial sync if we haven't tracked this timer yet
+    if (!lastTimerStartedAt && competition.timer_started_at) {
+      console.log('🎬 Initial timer sync for competition:', competitionId);
+      
+      const timeLeft = calculateTimeRemaining(competition);
+      setTimeRemaining(timeLeft);
 
-    const shouldStart = competition.status === 'ONGOING' && 
-                       competition.gameplay_indicator !== 'PAUSE' && 
-                       timeLeft > 0;
-    
-    setIsTimerActive(shouldStart);
-  }, [competitionId, competition]);
+      const shouldStart = competition.status === 'ONGOING' && 
+                         competition.gameplay_indicator !== 'PAUSE' && 
+                         timeLeft > 0;
+      
+      console.log('🎬 Initial timer state:', {
+        timeLeft,
+        shouldStart,
+        status: competition.status,
+        gameplay_indicator: competition.gameplay_indicator
+      });
+      
+      setIsTimerActive(shouldStart);
+      setLastTimerStartedAt(competition.timer_started_at);
+      setLastProblemIndex(competition.current_problem_index);
+    }
+  }, [competitionId, competition, lastTimerStartedAt]);
 
   // Timer countdown logic
   useEffect(() => {
     if (isTimerActive && timeRemaining > 0) {
+      console.log('⏰ Starting countdown interval');
       intervalRef.current = setInterval(() => {
         setTimeRemaining(prev => {
           if (prev <= 1) {
-            setIsTimerActive(false);
             console.log('⏰ Timer expired!');
+            setIsTimerActive(false);
             return 0;
           }
           return prev - 1;
@@ -87,6 +141,7 @@ export const useCompetitionTimer = (competitionId, competition) => {
       }, 1000);
     } else {
       if (intervalRef.current) {
+        console.log('⏰ Clearing countdown interval');
         clearInterval(intervalRef.current);
         intervalRef.current = null;
       }
