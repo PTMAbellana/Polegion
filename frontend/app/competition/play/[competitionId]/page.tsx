@@ -46,6 +46,7 @@ interface Competition {
 const CompetitionDashboard = ({ params } : { params  : Promise<{competitionId : number }> }) => {
   const searchParams = useSearchParams();
   const roomId = searchParams.get("room");
+  const completed = searchParams.get("completed"); // Check if redirected from completed game
   const compe_id = use(params)
   const router = useRouter();
 
@@ -124,13 +125,71 @@ const CompetitionDashboard = ({ params } : { params  : Promise<{competitionId : 
     isExpired
   } = useCompetitionTimer(compe_id.competitionId, liveCompetition || competition);
 
-  // 🚀 REDIRECT to game page when competition starts
+  // 🚀 REDIRECT to game page when competition starts (but not if coming from completed)
   useEffect(() => {
-    if (currentCompetition?.status === 'ONGOING' && isTimerActive) {
+    if (currentCompetition?.status === 'ONGOING' && isTimerActive && !completed) {
       const gameUrl = `/competition/play/${compe_id.competitionId}/game?room=${roomId}`;
       router.push(gameUrl);
     }
-  }, [currentCompetition?.status, isTimerActive, compe_id.competitionId, roomId, router]);
+  }, [currentCompetition?.status, isTimerActive, compe_id.competitionId, roomId, router, completed]);
+
+  // ✅ FIXED: Use correct backend endpoint
+  const getRoomCodeFromId = async (roomId: string) => {
+    try {
+      console.log('🔍 Fetching room details for room ID:', roomId);
+      
+      // Use the correct endpoint from RoomRoutes.js: '/id/:id'
+      const response = await fetch(`/api/virtual-rooms/id/${roomId}`);
+      
+      if (response.ok) {
+        const roomDetails = await response.json();
+        console.log('📋 Room details received:', roomDetails);
+        
+        // The Room.toDTO() returns the code property
+        const roomCode = roomDetails.code;
+        
+        if (roomCode && roomCode !== roomId) {
+          console.log('✅ Found room code:', roomCode);
+          return roomCode;
+        } else {
+          console.warn('⚠️ No valid room code in response');
+        }
+      } else {
+        console.warn(`❌ API returned status:`, response.status);
+      }
+    } catch (error) {
+      console.error('❌ Error fetching room details:', error);
+    }
+    
+    return null;
+  };
+
+  // ✅ Enhanced handleReturnToRoom with better error handling
+  const handleReturnToRoom = async () => {
+    console.log('🏠 Starting return to room process...');
+    
+    if (roomId) {
+      try {
+        const roomCode = await getRoomCodeFromId(roomId);
+        
+        if (roomCode) {
+          // Navigate to the join format that works with your getRoomByCodeUsers
+          const targetUrl = `/virtual-rooms/join/${roomCode}`;
+          console.log('🚀 Navigating to:', targetUrl);
+          router.push(targetUrl);
+          return;
+        }
+      } catch (error) {
+        console.error('❌ Error getting room code:', error);
+      }
+      
+      // Fallback
+      console.warn('⚠️ Using fallback navigation');
+      router.push(`/virtual-rooms/join/${roomId}`);
+    } else {
+      router.push('/virtual-rooms');
+    }
+  };
 
   // Handle non-active states with simple conditional rendering
   const renderDashboardState = () => {
@@ -154,6 +213,17 @@ const CompetitionDashboard = ({ params } : { params  : Promise<{competitionId : 
                 {sortedParticipants.length} participant{sortedParticipants.length !== 1 ? 's' : ''} joined
               </div>
             </div>
+            
+            {/* ✅ Return button for waiting state too */}
+            <div className={styles.actionButtons}>
+              <button 
+                onClick={handleReturnToRoom}
+                className={styles.returnToRoomButton}
+              >
+                <span className={styles.buttonIcon}>🏠</span>
+                Return to Room
+              </button>
+            </div>
           </div>
         </div>
       );
@@ -163,19 +233,40 @@ const CompetitionDashboard = ({ params } : { params  : Promise<{competitionId : 
       return (
         <div className={styles.completedSection}>
           <div className={styles.completedContent}>
-            <div className={styles.completedIcon}>🎉</div>
+            <div className={styles.completedIcon}>🏆</div>
             <h2 className={styles.completedTitle}>Competition Completed!</h2>
             <p className={styles.completedDescription}>
               This competition has been completed. Check the final results below!
             </p>
             
+            {/* Competition Summary */}
+            <div className={styles.competitionSummary}>
+              <div className={styles.summaryItem}>
+                <span className={styles.summaryLabel}>Competition:</span>
+                <span className={styles.summaryValue}>{currentCompetition?.title}</span>
+              </div>
+              <div className={styles.summaryItem}>
+                <span className={styles.summaryLabel}>Final Time:</span>
+                <span className={styles.summaryValue}>{formattedTime}</span>
+              </div>
+              <div className={styles.summaryItem}>
+                <span className={styles.summaryLabel}>Participants:</span>
+                <span className={styles.summaryValue}>{sortedParticipants.length}</span>
+              </div>
+            </div>
+            
             {/* Final Leaderboard */}
             <div className={styles.finalLeaderboard}>
-              <h3>Final Results</h3>
+              <h3>🏆 Final Results</h3>
               <div className={styles.leaderboardList}>
                 {sortedParticipants.slice(0, 10).map((participant, index) => (
-                  <div key={participant.id} className={styles.leaderboardItem}>
-                    <span className={styles.rank}>#{index + 1}</span>
+                  <div 
+                    key={participant.id} 
+                    className={`${styles.leaderboardItem} ${index < 3 ? styles[`podium${index + 1}`] : ''}`}
+                  >
+                    <span className={styles.rank}>
+                      {index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `#${index + 1}`}
+                    </span>
                     <span className={styles.name}>
                       {participant.fullName || 'Unknown'}
                     </span>
@@ -183,6 +274,38 @@ const CompetitionDashboard = ({ params } : { params  : Promise<{competitionId : 
                   </div>
                 ))}
               </div>
+            </div>
+
+            {/* ✅ Enhanced Action Buttons */}
+            <div className={styles.actionButtons}>
+              <button 
+                onClick={handleReturnToRoom}
+                className={styles.returnToRoomButton}
+              >
+                <span className={styles.buttonIcon}>🏠</span>
+                Return to Room
+              </button>
+              
+              <button 
+                onClick={() => window.location.reload()}
+                className={styles.refreshButton}
+              >
+                <span className={styles.buttonIcon}>🔄</span>
+                Refresh Results
+              </button>
+              
+              {/* Optional: Share results button */}
+              <button 
+                onClick={() => {
+                  const url = window.location.href;
+                  navigator.clipboard.writeText(url);
+                  alert('Results link copied to clipboard!');
+                }}
+                className={styles.shareButton}
+              >
+                <span className={styles.buttonIcon}>📋</span>
+                Copy Results Link
+              </button>
             </div>
           </div>
         </div>
@@ -223,6 +346,17 @@ const CompetitionDashboard = ({ params } : { params  : Promise<{competitionId : 
                 ))}
               </div>
             </div>
+
+            {/* ✅ Return button for paused state */}
+            <div className={styles.actionButtons}>
+              <button 
+                onClick={handleReturnToRoom}
+                className={styles.returnToRoomButton}
+              >
+                <span className={styles.buttonIcon}>🏠</span>
+                Return to Room
+              </button>
+            </div>
           </div>
         </div>
       );
@@ -250,6 +384,17 @@ const CompetitionDashboard = ({ params } : { params  : Promise<{competitionId : 
               isConnected={isConnected} 
               connectionStatus={connectionStatus}
             />
+          </div>
+
+          {/* ✅ Return button for default state */}
+          <div className={styles.actionButtons}>
+            <button 
+              onClick={handleReturnToRoom}
+              className={styles.returnToRoomButton}
+            >
+              <span className={styles.buttonIcon}>🏠</span>
+              Return to Room
+            </button>
           </div>
         </div>
       </div>
@@ -282,9 +427,22 @@ const CompetitionDashboard = ({ params } : { params  : Promise<{competitionId : 
       {/* Header Section */}
       <div className={styles.header}>
         <div className={styles.headerContent}>
-          <h1 className={styles.title}>
-            {currentCompetition?.title || 'Competition'}
-          </h1>
+          <div className={styles.titleRow}>
+            <h1 className={styles.title}>
+              {currentCompetition?.title || 'Competition'}
+            </h1>
+            
+            {/* ✅ Add Go Back button in header */}
+            <button 
+              onClick={handleReturnToRoom}
+              className={styles.headerBackButton}
+              title="Return to Room"
+            >
+              <span className={styles.backIcon}>←</span>
+              <span className={styles.backText}>Back to Room</span>
+            </button>
+          </div>
+          
           <div className={styles.statusRow}>
             <p className={styles.status}>
               Status: <span className={styles.statusValue}>{currentCompetition?.status}</span>
