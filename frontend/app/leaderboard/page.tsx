@@ -147,6 +147,7 @@ export default function LeaderboardRooms() {
                     <div className={styles["loading-indicator"]}><Loader /></div>
                 ) : (
                         <div className={styles["room-cards-section"]}>
+                            <br/>
                             <h2>Your Joined Rooms</h2>
                                 <div className={styles["room-cards"] }>
                                     {joinRooms.length > 0 ? (
