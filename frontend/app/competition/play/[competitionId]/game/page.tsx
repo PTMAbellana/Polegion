@@ -112,12 +112,36 @@ const CompetitionGamePage = ({ params }: { params: Promise<{ competitionId: stri
 
   // Competition completion redirect
   useEffect(() => {
-    if (competitionId && currentCompetition?.status === 'DONE' && !redirecting) {
+    // ✅ Add more specific conditions to prevent looping
+    if (competitionId && 
+        currentCompetition?.status === 'DONE' && 
+        !redirecting && 
+        !isLoading) { // Add isLoading check
+    
       console.log('🏁 Competition finished! Redirecting participants...');
+      console.log('Current status:', currentCompetition.status);
+      console.log('Competition ID:', competitionId);
+      console.log('Room ID:', roomId);
+      
       setRedirecting(true);
-      router.push(`/competition/play/${competitionId}?room=${roomId}`);
+      
+      // ✅ Add a small delay to prevent rapid redirects
+      setTimeout(() => {
+        router.push(`/competition/play/${competitionId}?room=${roomId}`);
+      }, 1000); // 1 second delay
     }
-  }, [currentCompetition?.status, competitionId, roomId, router, redirecting]);
+  }, [currentCompetition?.status, competitionId, roomId, router, redirecting, isLoading]); // Add isLoading to dependencies
+
+  // ✅ Add cleanup effect to reset redirecting state if needed
+  useEffect(() => {
+    // Reset redirecting state if competition status changes back to active
+    if (currentCompetition?.status && 
+        currentCompetition.status !== 'DONE' && 
+        redirecting) {
+      console.log('Competition status changed, resetting redirect state');
+      setRedirecting(false);
+    }
+  }, [currentCompetition?.status, redirecting]);
 
   // Show error if no room ID
   if (!roomId) {
