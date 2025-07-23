@@ -53,6 +53,17 @@ class ProblemController {
     }
   }
 
+  getCurrCompeProblem = async (req, res) => {
+    const { compe_prob_id } = req.params
+    try {
+      const problem = await this.problemService.fetchCurrCompeProblem(compe_prob_id)
+      res.status(200).json(problem)
+    } catch (error) {
+      console.error('Error fetching competition problems:', error);
+      res.status(500).json({ error: 'Server Error: Failed to fetch competition problems' });
+    } 
+  }
+
   deleteProblem = async (req, res) => {
     const { problem_id } = req.params
     try {

@@ -14,21 +14,26 @@ import LimitAttempts from '@/app/virtual-rooms/[roomCode]/create-problem/compone
 import SetVisibility from '@/app/virtual-rooms/[roomCode]/create-problem/components/SetVisibility';
 import ShapeLimitPopup from '@/app/virtual-rooms/[roomCode]/create-problem/components/ShapeLimitPopup';
 
-import { createProblem, deleteProblem, getRoomProblemsByCode, updateProblem } from '@/api/problems'
+import { createProblem, deleteProblem, getCompeProblem, updateProblem } from '@/api/problems'
+import { submitSolution } from '@/api/attempt';
 import Swal from "sweetalert2";
 import { useCompetitionTimer } from '@/hooks/useCompetitionTimer';
 import { useCompetitionRealtime } from '@/hooks/useCompetitionRealtime';
+
+interface CompetitionProblem {
+  id: number
+  timer: number | 0 
+  problem: Problem
+}
 
 interface Problem {
   id: string
   title?: string | null
   description?: string | null
   visibility: string
-  expected_solution?: any[]
   difficulty: string
   max_attempts: number
   expected_xp: number
-  timer?: number | null
   hint?: string | null
 }
 
@@ -96,8 +101,8 @@ export default function Gamepage({
     square: false,
   });
 
-  // Competition-specific state
-  const [currentProblem, setCurrentProblem] = useState(null);
+  // ✨ ADD: Current problem state for competition mode
+  const [currentProblem, setCurrentProblem] = useState<CompetitionProblem | null>(null);
   const [isLoadingProblem, setIsLoadingProblem] = useState(false);
 
   // Timer and realtime hooks for competition mode
@@ -160,31 +165,33 @@ export default function Gamepage({
   // Fetch current problem in competition mode
   useEffect(() => {
     const fetchCurrentProblem = async () => {
+      console.log('iasdkjahskd')
       if (!competitionId || !activeCompetition?.current_problem_id) return;
       
+      console.log('aksdjaksjdalsad kapoy')
       setIsLoadingProblem(true);
       try {
-        const response = await fetch(`/api/problems/${activeCompetition.current_problem_id}`);
-        if (response.ok) {
-          const problemData = await response.json();
-          setCurrentProblem(problemData);
-          
-          // Populate form fields with problem details (read-only for students)
-          setTitle(problemData.title || "");
-          setPrompt(problemData.description || "");
-          setDifficulty(problemData.difficulty || "Easy");
-          setLimitAttempts(problemData.max_attempts || 1);
-          setHint(problemData.hint || "");
-          setHintOpen(!!problemData.hint);
-          setTimerValue(problemData.timer || 5);
-          setTimerOpen(!!problemData.timer);
-          
-          // Clear student's shapes - they create their own solution
-          setShapes([]);
-          setSelectedId(null);
-          
-          console.log('Problem details loaded:', problemData);
-        }
+        // Fetch the current problem details from your API
+        const problemData = await getCompeProblem(activeCompetition.current_problem_id);
+        console.log('🔍 Current Problem Data:', problemData);
+        setCurrentProblem(problemData);
+        
+        // ✨ POPULATE THE FORM FIELDS WITH PROBLEM DETAILS (READ-ONLY FOR STUDENTS)
+        setTitle(problemData.problem.title || "");
+        setPrompt(problemData.problem.description || "");
+        setDifficulty(problemData.problem.difficulty || "Easy");
+        setLimitAttempts(problemData.problem.max_attempts || 1);
+        setHint(problemData.problem.hint || "");
+        setHintOpen(!!problemData.problem.hint);
+        setTimerValue(problemData.timer || 5); 
+        setTimerOpen(!!problemData.timer);
+        
+        // ✨ CLEAR STUDENT'S SHAPES - THEY CREATE THEIR OWN SOLUTION
+        setShapes([]);
+        setSelectedId(null);
+        
+        console.log('🎯 Problem details loaded:', problemData);
+        
       } catch (error) {
         console.error('Error fetching current problem:', error);
       } finally {
@@ -317,31 +324,55 @@ export default function Gamepage({
 
   // Save/Submit handler
   const handleSave = async () => {
-    if (competitionId && activeCompetition) {
-      // Competition mode - submit solution
+    console.log("Saving problem...");
+    if (competitionId && currentCompetition) {
+      // ✨ COMPETITION MODE - SUBMIT SOLUTION
       const shapesWithProps = shapes.map(getShapeProperties);
       
-      const solutionPayload = {
-        competition_id: competitionId,
-        problem_id: activeCompetition.current_problem_id,
-        participant_solution: shapesWithProps,
-        submitted_at: new Date().toISOString(),
-        room_id: roomId
-      };
-      
+      // const solutionPayload = {
+      //   competition_id: competitionId,
+      //   problem_id: currentCompetition.current_problem_id,
+      //   participant_solution: shapesWithProps,
+      //   submitted_at: new Date().toISOString(),
+      //   room_id: roomId
+      // };    const shapesWithProps = shapes.map(getShapeProperties);
+    
+    // ✅ Calculate time taken from timer
+    // const totalTimeAllowed = timerValue * 60; // Convert minutes to seconds
+    const totalTimeAllowed = currentProblem?.timer || 0; // Use current problem's timer
+    const timeTaken = Math.abs( totalTimeAllowed - timeRemaining ); // How much time they used
+    
+    const solutionPayload = {
+      // room_participant_id: currentParticipant?.id, // ✅ Add participant ID
+      solution: shapesWithProps, // ✅ Use correct field name
+      time_taken: timeTaken, // ✅ Time they actually spent solving
+      room_id: Number(roomId), // ✅ Include room ID
+    };
+
+    console.log("📊 Submission details:", {
+      totalTimeAllowed,
+      timeRemaining, 
+      timeTaken,
+      solutionPayload
+    });
+    
+
+     console.log("Submitting solution:", solutionPayload); 
       try {
-        const response = await fetch('/api/competition/submit-solution', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(solutionPayload)
-        });
-        
-        if (response.ok) {
-          const result = await response.json();
+        // Submit solution to competition API
+
+        const response = await submitSolution(
+          competitionId,
+          currentCompetition.current_problem_id,
+          solutionPayload
+        );
+
+        if (response) {
+          // const result = await response.json();
           
           Swal.fire({
-            title: "Solution Submitted!",
-            text: `Your solution has been submitted successfully! You earned ${result.xp_earned || 0} XP!`,
+            title: "Solution Submitted! 🎯",
+            text: `Your solution has been submitted successfully! `,
             icon: "success",
             confirmButtonText: "Awesome!",
             timer: 3000,
@@ -351,10 +382,7 @@ export default function Gamepage({
           setShapes([]);
           setSelectedId(null);
           
-        } else {
-          const errorData = await response.json();
-          throw new Error(errorData.message || 'Failed to submit solution');
-        }
+        } 
       } catch (error) {
         console.error("Submit error:", error);
         Swal.fire({
@@ -400,7 +428,8 @@ export default function Gamepage({
           confirmButtonText: "OK",
         }); 
       }
-      await fetchProblems();
+      // await fetchProblems();
+      // Swal.fire(message);
     } catch (error) {
       console.error("Save error:", error);
       Swal.fire({
@@ -596,7 +625,7 @@ export default function Gamepage({
               <button 
                 className={`${styles.saveBtn} ${styles.rowBtn} ${styles.saveBtnFloating}`} 
                 onClick={handleSave}
-                disabled={competitionId && shapes.length === 0}
+                // disabled={competitionId && shapes.length === 0}
               >
                 {competitionId ? "Submit Solution 🚀" : "Save"}
               </button>
@@ -728,8 +757,8 @@ export default function Gamepage({
           </div>
         </div>
         
-        {/* Right sidebar - only show problems list in non-competition mode */}
-        {!competitionId && (
+        {/* ✨ RIGHT SIDEBAR - ONLY SHOW PROBLEMS LIST IN NON-COMPETITION MODE */}
+        {/* {!competitionId && (
           <div className={styles.problemsSection}>
             <div className={styles.problemsSectionHeader}>
               Existing Problems
@@ -797,7 +826,7 @@ export default function Gamepage({
               )}
             </div>
           </div>
-        )}
+        )} */}
       </div>
       
       {showLimitPopup && (

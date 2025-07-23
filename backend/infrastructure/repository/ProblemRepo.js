@@ -91,6 +91,37 @@ class ProblemRepo {
     }
   }
 
+  async fetchCompeById(compe_prob_id) {
+    try {
+      console.log('fetchCompeById prob_id', compe_prob_id)
+      const {
+        data, error
+      } = await this.supabase
+      .from(this.tableCompe)
+      .select(`
+        id,
+        timer, 
+        problem:problem_id(
+          id,
+          title, 
+          description,
+          difficulty,
+          max_attempts,
+          expected_xp,
+          hint
+        )`)
+      .eq('id', compe_prob_id)
+      .single()
+
+      console.log('fetchCompeById', data, error)
+      if (error) throw error
+      if (!data) throw new Error('Competition problem not found')
+      return data;
+    } catch (error) {
+      throw error
+    }
+  }
+  
   async fetchCompeProblemByProbId(prob_id) {
     try {
       // console.log('fetchCompeProblemByProbId prob_id', prob_id)

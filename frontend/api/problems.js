@@ -35,6 +35,14 @@ export const getProblem = async(problem_id) => {
   }
 }
 
+export const getCompeProblem = async(compe_prob_id) => {
+  try {
+    return (await api.get(`/problems/compe-problem/${compe_prob_id}`)).data
+  } catch (error) {
+    throw error
+  }
+}
+
 export const deleteProblem = async(problem_id) => {
   try {
     return (await api.delete(`/problems/${problem_id}`)).data

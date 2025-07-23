@@ -36,6 +36,9 @@ class ProblemRoutes {
     this.router.route('/:problem_id/:competition_id')
       .post(this.problemController.addCompeProblem)
       .delete(this.problemController.removeCompeProblem)
+
+    this.router.route('/compe-problem/:compe_prob_id')
+      .get(this.problemController.getCurrCompeProblem)
   }
 
   getRouter() {

@@ -1,5 +1,4 @@
 import api from './axios'
-import { supabase } from '../lib/supabaseClient'
 
 export const createCompe = async (room_id, title) => {
     try {

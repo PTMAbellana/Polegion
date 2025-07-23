@@ -9,8 +9,11 @@ class AttemptsService {
         this.participantService = participantService;
     }
 
-    async submitSolution(competitionId, competitionProblemId, roomParticipantId, solution, timeTaken) {
+    async submitSolution(competitionId, competitionProblemId, user_id, solution, timeTaken, room_id) {
         try {
+            
+            const part_id = await this.participantService.getPartInfoByUserId(user_id, room_id);
+
             // 1. Set submitted_at to now
             const submittedAt = new Date();
             
@@ -20,7 +23,7 @@ class AttemptsService {
             console.log('Attempting to submit solution:', {
                 competitionId,
                 competitionProblemId,
-                roomParticipantId,
+                part,
                 solution,
                 timeTaken
             });

@@ -47,34 +47,55 @@ class LeaderboardService {
                     return {
                         competition: row.competition,
                         accumulated_xp: row.accumulated_xp,
-                        participants: {
-                            ...userData,
-                            ...profile_pic
-                        } 
+                        participant: { // ✅ Changed from 'participants' to 'participant'
+                            id: row.participant.id,
+                            fullName: userData.fullName || userData.full_name, // Adjust based on your user data structure
+                            email: userData.email,
+                            profile_pic: profile_pic.profile_pic || profile_pic.profilePic // Adjust based on your structure
+                        }
                     };
                     } catch (err) {
-                    // console.error("lookup failed:", err);
-                    return { accumulated_xp: row.accumulated_xp };
+                    console.error("User lookup failed:", err);
+                    return { 
+                        competition: row.competition,
+                        accumulated_xp: row.accumulated_xp,
+                        participant: {
+                            id: row.participant.id,
+                            fullName: 'Unknown User',
+                            email: 'unknown@email.com',
+                            profile_pic: null
+                        }
+                    };
                     }
                 })
             ) 
 
             console.log('compiled: ', compiled)
             
+            // ✅ Fix the grouping logic
             const grouped = compiled.reduce((acc, r) => {
-                const comp_id = r.competition.comp_id
+                const comp_id = r.competition.id // ✅ Use .id instead of .comp_id
+                
                 if(!acc[comp_id]) {
                     acc[comp_id] = {
                         id: comp_id,
                         title: r.competition.title,
-                        data: [],
+                        data: [], // This will contain the participant entries
                     }
                 }
-                acc[comp_id].data.push(r)
+                
+                // ✅ Push the participant data (not the whole record)
+                acc[comp_id].data.push({
+                    accumulated_xp: r.accumulated_xp,
+                    participants: r.participant
+                })
+                
                 return acc
             }, {})
 
             console.log('grouped: ', grouped)
+
+            console.log('grouped data: ', grouped.data)
             return Object.values(grouped)
         } catch (error) {
             console.log('Error in getCompeBoard: ', error)

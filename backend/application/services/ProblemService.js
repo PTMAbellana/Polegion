@@ -84,6 +84,14 @@ class ProblemService {
     }
   }
 
+  async fetchCurrCompeProblem(compe_prob_id) {
+    try {
+      return await this.problemRepo.fetchCompeById(compe_prob_id)
+    } catch (error) {
+      throw error
+    }
+  }
+
   async updateTimer(problem_id, timer) {
     try {
       const ok = await this.problemRepo.fetchCompeProblemByProbId(problem_id)
