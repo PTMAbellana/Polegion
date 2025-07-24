@@ -261,13 +261,113 @@ const CompetitionGamePage = ({ params }: { params: Promise<{ competitionId: stri
   }
 
   // Show loading while resolving params or fetching initial data
+  // if (isLoading || !competitionId || !initialDataFetched) {
+  //   return (
+  //     <div className={styles.loadingContainer}>
+  //       <div className={styles.loadingContent}>
+  //         <div className={styles.spinner}></div>
+  //         <p>Loading competition...</p>
+  //         <div style={{ fontSize: '12px', marginTop: '10px', opacity: 0.7 }}>
+  //           Competition ID: {competitionId || 'Resolving...'}
+  //           <br />
+  //           Room ID: {roomId}
+  //           <br />
+  //           Status: {currentCompetition?.status || 'Loading...'}
+  //         </div>
+  //       </div>
+  //     </div>
+  //   );
+  // }
+  // Show loading while resolving params or fetching initial data
   if (isLoading || !competitionId || !initialDataFetched) {
     return (
       <div className={styles.loadingContainer}>
         <div className={styles.loadingContent}>
-          <div className={styles.spinner}></div>
-          <p>Loading competition...</p>
-          <div style={{ fontSize: '12px', marginTop: '10px', opacity: 0.7 }}>
+          {/* ✅ NEW: Rubik's Cube Loading Animation */}
+          <div className={styles.rubiksCube}>
+            <div className={`${styles.face} ${styles.front}`}>
+              <div className={`${styles.square} ${styles.red}`}></div>
+              <div className={`${styles.square} ${styles.white}`}></div>
+              <div className={`${styles.square} ${styles.blue}`}></div>
+              <div className={`${styles.square} ${styles.yellow}`}></div>
+              <div className={`${styles.square} ${styles.green}`}></div>
+              <div className={`${styles.square} ${styles.orange}`}></div>
+              <div className={`${styles.square} ${styles.red}`}></div>
+              <div className={`${styles.square} ${styles.white}`}></div>
+              <div className={`${styles.square} ${styles.blue}`}></div>
+            </div>
+            <div className={`${styles.face} ${styles.back}`}>
+              <div className={`${styles.square} ${styles.orange}`}></div>
+              <div className={`${styles.square} ${styles.green}`}></div>
+              <div className={`${styles.square} ${styles.yellow}`}></div>
+              <div className={`${styles.square} ${styles.blue}`}></div>
+              <div className={`${styles.square} ${styles.white}`}></div>
+              <div className={`${styles.square} ${styles.red}`}></div>
+              <div className={`${styles.square} ${styles.orange}`}></div>
+              <div className={`${styles.square} ${styles.green}`}></div>
+              <div className={`${styles.square} ${styles.yellow}`}></div>
+            </div>
+            <div className={`${styles.face} ${styles.right}`}>
+              <div className={`${styles.square} ${styles.blue}`}></div>
+              <div className={`${styles.square} ${styles.blue}`}></div>
+              <div className={`${styles.square} ${styles.blue}`}></div>
+              <div className={`${styles.square} ${styles.blue}`}></div>
+              <div className={`${styles.square} ${styles.blue}`}></div>
+              <div className={`${styles.square} ${styles.blue}`}></div>
+              <div className={`${styles.square} ${styles.blue}`}></div>
+              <div className={`${styles.square} ${styles.blue}`}></div>
+              <div className={`${styles.square} ${styles.blue}`}></div>
+            </div>
+            <div className={`${styles.face} ${styles.left}`}>
+              <div className={`${styles.square} ${styles.green}`}></div>
+              <div className={`${styles.square} ${styles.green}`}></div>
+              <div className={`${styles.square} ${styles.green}`}></div>
+              <div className={`${styles.square} ${styles.green}`}></div>
+              <div className={`${styles.square} ${styles.green}`}></div>
+              <div className={`${styles.square} ${styles.green}`}></div>
+              <div className={`${styles.square} ${styles.green}`}></div>
+              <div className={`${styles.square} ${styles.green}`}></div>
+              <div className={`${styles.square} ${styles.green}`}></div>
+            </div>
+            <div className={`${styles.face} ${styles.top}`}>
+              <div className={`${styles.square} ${styles.white}`}></div>
+              <div className={`${styles.square} ${styles.white}`}></div>
+              <div className={`${styles.square} ${styles.white}`}></div>
+              <div className={`${styles.square} ${styles.white}`}></div>
+              <div className={`${styles.square} ${styles.white}`}></div>
+              <div className={`${styles.square} ${styles.white}`}></div>
+              <div className={`${styles.square} ${styles.white}`}></div>
+              <div className={`${styles.square} ${styles.white}`}></div>
+              <div className={`${styles.square} ${styles.white}`}></div>
+            </div>
+            <div className={`${styles.face} ${styles.bottom}`}>
+              <div className={`${styles.square} ${styles.yellow}`}></div>
+              <div className={`${styles.square} ${styles.yellow}`}></div>
+              <div className={`${styles.square} ${styles.yellow}`}></div>
+              <div className={`${styles.square} ${styles.yellow}`}></div>
+              <div className={`${styles.square} ${styles.yellow}`}></div>
+              <div className={`${styles.square} ${styles.yellow}`}></div>
+              <div className={`${styles.square} ${styles.yellow}`}></div>
+              <div className={`${styles.square} ${styles.yellow}`}></div>
+              <div className={`${styles.square} ${styles.yellow}`}></div>
+            </div>
+          </div>
+          
+          <p style={{ 
+            marginTop: '20px', 
+            fontSize: '18px', 
+            fontWeight: '600',
+            color: '#374151'
+          }}>
+            Loading competition...
+          </p>
+          
+          <div style={{ 
+            fontSize: '12px', 
+            marginTop: '10px', 
+            opacity: 0.7,
+            color: '#6b7280' 
+          }}>
             Competition ID: {competitionId || 'Resolving...'}
             <br />
             Room ID: {roomId}
@@ -370,38 +470,6 @@ const CompetitionGamePage = ({ params }: { params: Promise<{ competitionId: stri
         roomId={roomId}
         isFullScreenMode={true}
       />
-      
-      {/* Game overlay info */}
-      <div className={styles.gameOverlay}>
-        <div className={styles.gameInfo}>
-          <div className={styles.competitionTitle}>
-            {currentCompetition?.title || 'Loading...'}
-          </div>
-          <div className={styles.problemNumber}>
-            Problem {(currentCompetition?.current_problem_index || 0) + 1}
-          </div>
-          <div className={styles.competitionStatus}>
-            Status: {currentCompetition?.status}
-            {currentCompetition?.gameplay_indicator && ` (${currentCompetition.gameplay_indicator})`}
-          </div>
-        </div>
-        
-        <div className={styles.timerInfo}>
-          <div className={styles.timerDisplay}>
-            {formattedTime}
-          </div>
-          <div className={styles.timerStatus}>
-            {isTimerActive ? '⏱️ Active' : '⏸️ Paused'}
-          </div>
-        </div>
-        
-        <div className={styles.connectionStatus}>
-          <div className={`${styles.connectionDot} ${isConnected ? styles.connected : styles.disconnected}`}></div>
-          <span className={styles.connectionText}>
-            {isConnected ? 'Connected' : 'Reconnecting...'}
-          </span>
-        </div>
-      </div>
 
       {/* PAUSE OVERLAY */}
       {currentCompetition?.gameplay_indicator === 'PAUSE' && (
@@ -427,7 +495,7 @@ const CompetitionGamePage = ({ params }: { params: Promise<{ competitionId: stri
       )}
       
       {/* ✅ DEBUG: Show current data in development */}
-      {process.env.NODE_ENV === 'development' && (
+      {/* {process.env.NODE_ENV === 'development' && (
         <div style={{
           position: 'fixed',
           bottom: '10px',
@@ -452,7 +520,7 @@ const CompetitionGamePage = ({ params }: { params: Promise<{ competitionId: stri
           <div>Real-time: {liveCompetition ? 'Connected' : 'Using initial'}</div>
           <div>Initial Fetched: {initialDataFetched ? 'Yes' : 'No'}</div>
         </div>
-      )}
+      )} */}
     </div>
   );
 };

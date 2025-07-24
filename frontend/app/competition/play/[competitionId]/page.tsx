@@ -551,134 +551,134 @@ const CompetitionDashboard = ({ params } : { params  : Promise<{competitionId : 
   };
 
   // ✅ MOVE: Define DebugInfo INSIDE the component
-  const DebugInfo = () => {
-    const [roomCode, setRoomCode] = useState<string | null>(null);
-    const [lastError, setLastError] = useState<string | null>(null);
+  // const DebugInfo = () => {
+  //   const [roomCode, setRoomCode] = useState<string | null>(null);
+  //   const [lastError, setLastError] = useState<string | null>(null);
     
-    // Test function to get room code
-    const testGetRoomCode = async () => {
-      setLastError(null);
-      if (roomId) {
-        try {
-          const code = await getRoomCodeFromId(roomId);
-          setRoomCode(code);
-          if (!code) {
-            setLastError('API call succeeded but no room code returned');
-          }
-        } catch (error) {
-          setLastError(`Error: ${error.message}`);
-        }
-      }
-    };
+  //   // Test function to get room code
+  //   const testGetRoomCode = async () => {
+  //     setLastError(null);
+  //     if (roomId) {
+  //       try {
+  //         const code = await getRoomCodeFromId(roomId);
+  //         setRoomCode(code);
+  //         if (!code) {
+  //           setLastError('API call succeeded but no room code returned');
+  //         }
+  //       } catch (error) {
+  //         setLastError(`Error: ${error.message}`);
+  //       }
+  //     }
+  //   };
     
-    // Test auth function
-    const testAuth = async () => {
-      const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
-      console.log('🔐 Auth Test:');
-      console.log('Token exists:', !!token);
-      console.log('Token length:', token?.length || 0);
-      console.log('Token preview:', token ? `${token.substring(0, 10)}...` : 'None');
+  //   // Test auth function
+  //   const testAuth = async () => {
+  //     const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+  //     console.log('🔐 Auth Test:');
+  //     console.log('Token exists:', !!token);
+  //     console.log('Token length:', token?.length || 0);
+  //     console.log('Token preview:', token ? `${token.substring(0, 10)}...` : 'None');
       
-      if (!token) {
-        alert('❌ No auth token found! Please log in again.');
-      } else {
-        alert(`✅ Auth token found (${token.length} chars)`);
-      }
-    };
+  //     if (!token) {
+  //       alert('❌ No auth token found! Please log in again.');
+  //     } else {
+  //       alert(`✅ Auth token found (${token.length} chars)`);
+  //     }
+  //   };
     
-    return (
-      <div style={{
-        position: 'fixed',
-        bottom: '10px',
-        left: '10px',
-        background: 'rgba(0,0,0,0.8)',
-        color: 'white',
-        padding: '10px',
-        borderRadius: '5px',
-        fontSize: '12px',
-        zIndex: 9999,
-        maxWidth: '350px'
-      }}>
-        <div><strong>🔧 Debug Info:</strong></div>
-        <div>Room ID: {roomId || 'None'}</div>
-        <div>Room Code: {roomCode || 'Not fetched'}</div>
-        <div>Competition ID: {compe_id.competitionId}</div>
-        <div>Expected URL: {roomCode ? `/virtual-rooms/${roomCode}` : 'Pending...'}</div>
-        <div>Auth Token: {typeof window !== 'undefined' && localStorage.getItem('token') ? 'Present' : 'Missing'}</div>
-        {lastError && <div style={{color: '#ff6666'}}>Error: {lastError}</div>}
+  //   return (
+  //     <div style={{
+  //       position: 'fixed',
+  //       bottom: '10px',
+  //       left: '10px',
+  //       background: 'rgba(0,0,0,0.8)',
+  //       color: 'white',
+  //       padding: '10px',
+  //       borderRadius: '5px',
+  //       fontSize: '12px',
+  //       zIndex: 9999,
+  //       maxWidth: '350px'
+  //     }}>
+  //       <div><strong>🔧 Debug Info:</strong></div>
+  //       <div>Room ID: {roomId || 'None'}</div>
+  //       <div>Room Code: {roomCode || 'Not fetched'}</div>
+  //       <div>Competition ID: {compe_id.competitionId}</div>
+  //       <div>Expected URL: {roomCode ? `/virtual-rooms/${roomCode}` : 'Pending...'}</div>
+  //       <div>Auth Token: {typeof window !== 'undefined' && localStorage.getItem('token') ? 'Present' : 'Missing'}</div>
+  //       {lastError && <div style={{color: '#ff6666'}}>Error: {lastError}</div>}
         
-        {/* ✅ NEW: Test Auth button */}
-        <button 
-          onClick={testAuth}
-          style={{
-            marginTop: '5px',
-            padding: '5px',
-            background: '#ff6600',
-            color: 'white',
-            border: 'none',
-            borderRadius: '3px',
-            cursor: 'pointer',
-            width: '100%',
-            marginBottom: '3px'
-          }}
-        >
-          🔐 Test Auth Token
-        </button>
+  //       {/* ✅ NEW: Test Auth button */}
+  //       <button 
+  //         onClick={testAuth}
+  //         style={{
+  //           marginTop: '5px',
+  //           padding: '5px',
+  //           background: '#ff6600',
+  //           color: 'white',
+  //           border: 'none',
+  //           borderRadius: '3px',
+  //           cursor: 'pointer',
+  //           width: '100%',
+  //           marginBottom: '3px'
+  //         }}
+  //       >
+  //         🔐 Test Auth Token
+  //       </button>
         
-        {/* Test Room Code button */}
-        <button 
-          onClick={testGetRoomCode}
-          style={{
-            padding: '5px',
-            background: '#00ff00',
-            color: 'black',
-            border: 'none',
-            borderRadius: '3px',
-            cursor: 'pointer',
-            width: '100%',
-            marginBottom: '3px'
-          }}
-        >
-          🧪 Test Get Room Code
-        </button>
+  //       {/* Test Room Code button */}
+  //       <button 
+  //         onClick={testGetRoomCode}
+  //         style={{
+  //           padding: '5px',
+  //           background: '#00ff00',
+  //           color: 'black',
+  //           border: 'none',
+  //           borderRadius: '3px',
+  //           cursor: 'pointer',
+  //           width: '100%',
+  //           marginBottom: '3px'
+  //         }}
+  //       >
+  //         🧪 Test Get Room Code
+  //       </button>
         
-        {/* Test Navigation button */}
-        <button 
-          onClick={handleReturnToRoom}
-          style={{
-            padding: '5px',
-            background: '#0066ff',
-            color: 'white',
-            border: 'none',
-            borderRadius: '3px',
-            cursor: 'pointer',
-            width: '100%',
-            marginBottom: '3px'
-          }}
-        >
-          🚀 Test Navigation
-        </button>
+  //       {/* Test Navigation button */}
+  //       <button 
+  //         onClick={handleReturnToRoom}
+  //         style={{
+  //           padding: '5px',
+  //           background: '#0066ff',
+  //           color: 'white',
+  //           border: 'none',
+  //           borderRadius: '3px',
+  //           cursor: 'pointer',
+  //           width: '100%',
+  //           marginBottom: '3px'
+  //         }}
+  //       >
+  //         🚀 Test Navigation
+  //       </button>
         
-        {/* ✅ NEW: Force login button */}
-        <button 
-          onClick={() => {
-            router.push('/login');
-          }}
-          style={{
-            padding: '5px',
-            background: '#cc0066',
-            color: 'white',
-            border: 'none',
-            borderRadius: '3px',
-            cursor: 'pointer',
-            width: '100%'
-          }}
-        >
-          🔑 Go to Login
-        </button>
-      </div>
-    );
-  };
+  //       {/* ✅ NEW: Force login button */}
+  //       <button 
+  //         onClick={() => {
+  //           router.push('/login');
+  //         }}
+  //         style={{
+  //           padding: '5px',
+  //           background: '#cc0066',
+  //           color: 'white',
+  //           border: 'none',
+  //           borderRadius: '3px',
+  //           cursor: 'pointer',
+  //           width: '100%'
+  //         }}
+  //       >
+  //         🔑 Go to Login
+  //       </button>
+  //     </div>
+  //   );
+  // };
 
   return (
     <div className={styles.container}>
@@ -777,7 +777,7 @@ const CompetitionDashboard = ({ params } : { params  : Promise<{competitionId : 
       </div>
 
       {/* ✅ FIXED: Debug component now has access to all variables */}
-      {process.env.NODE_ENV === 'development' && <DebugInfo />}
+      {/* {process.env.NODE_ENV === 'development' && <DebugInfo />} */}
     </div>
   );
 };

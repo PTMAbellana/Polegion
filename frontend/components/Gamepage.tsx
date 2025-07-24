@@ -721,13 +721,13 @@ export default function Gamepage({
   }, [competitionId, activeCompetition, timeRemaining, formattedTime, isExpired, isPaused]);
 
   // ✅ LOADING STATE FOR COMPETITION MODE
-  if (competitionId && isLoadingProblem) {
-    return (
-      <div className={styles.loadingContainer}>
-        <div className={styles.loadingSpinner}>Loading problem...</div>
-      </div>
-    );
-  }
+  // if (competitionId && isLoadingProblem) {
+  //   return (
+  //     <div className={styles.loadingContainer}>
+  //       <div className={styles.loadingSpinner}>Loading problem...</div>
+  //     </div>
+  //   );
+  // }
 
   return (
     <div className={`${styles.root} ${isFullScreenMode ? styles.fullScreenGame : ''}`}>
@@ -848,68 +848,136 @@ export default function Gamepage({
             showHeight={showHeight}
           />
           
-          {/* ✅ SAFER COMPETITION TIMER DISPLAY */}
-          {competitionId && activeCompetition && (
-            <div className={styles.competitionTimerContainer}>
-              <div className={styles.timerDisplay}>
-                <div className={styles.timerHeader}>
-                  <span className={styles.timerLabel}>Time Remaining</span>
-                  <div className={styles.timerStatus}>
-                    {activeCompetition?.status === 'NEW' && (
-                      <span className={styles.waitingIndicator}>⏳ WAITING TO START</span>
-                    )}
-                    {activeCompetition?.status === 'DONE' && (
-                      <span className={styles.completedIndicator}>🏁 COMPLETED</span>
-                    )}
-                    {activeCompetition?.gameplay_indicator === 'PAUSE' && (
-                      <span className={styles.pausedIndicator}>⏸️ PAUSED</span>
-                    )}
-                    {isExpired && activeCompetition?.status === 'ONGOING' && (
-                      <span className={styles.expiredIndicator}>⏰ TIME UP!</span>
-                    )}
-                    {!isPaused && !isExpired && isTimerActive && activeCompetition?.status === 'ONGOING' && (
-                      <span className={styles.activeIndicator}>⏱️ ACTIVE</span>
-                    )}
-                  </div>
-                </div>
+          {/* ✅ FIXED: Progress bar with correct logic */}
+          {competitionId && activeCompetition && currentProblem?.timer && (
+            <div className={styles.timerProgress} style={{ position: 'relative', width: '100%', marginTop: '16px' }}>
+              {/* Progress bar container */}
+              <div style={{ position: 'relative', height: '8px' }}>
+                {/* Background track */}
+                <div 
+                  className={styles.progressTrack}
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    height: '8px',
+                    backgroundColor: '#e5e7eb',
+                    borderRadius: '4px',
+                    zIndex: 1
+                  }}
+                />
                 
-                <div className={`${styles.timerTime} ${isExpired ? styles.expired : ''} ${isPaused ? styles.paused : ''}`}>
-                  {formattedTime || '00:00'}
-                </div>
-                
-                {/* ✅ ENHANCED: Better progress bar calculation */}
-                <div className={styles.timerProgress}>
-                  <div 
-                    className={styles.progressBar}
-                    style={{
-                      width: `${Math.max(0, Math.min(100, 
-                        timeRemaining && currentProblem?.timer 
-                          ? (timeRemaining / (currentProblem.timer * 60)) * 100 
-                          : 0
-                      ))}%`,
-                      backgroundColor: timeRemaining < 60 ? '#ef4444' : timeRemaining < 180 ? '#f59e0b' : '#10b981',
-                      height: '8px',
-                      transition: 'width 0.3s ease',
-                      borderRadius: '4px'
-                    }}
-                  />
-                </div>
-                
-                {/* ✅ ENHANCED: Show current problem info */}
-                {activeCompetition.current_problem_index !== undefined && (
-                  <div className={styles.problemInfo}>
-                    Problem {activeCompetition.current_problem_index + 1}
-                    {currentProblem && (
-                      <span className={styles.problemTitle}>: {currentProblem.problem.title}</span>
-                    )}
-                  </div>
-                )}
-                
-                <div className={styles.gameplayStatus}>
-                  Status: <span className={styles.statusValue}>
-                    {activeCompetition.gameplay_indicator || activeCompetition.status}
-                  </span>
-                </div>
+                {/* Progress bar */}
+                <div 
+                  className={styles.progressBar}
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    height: '8px',
+                    borderRadius: '4px',
+                    zIndex: 2,
+                    transition: 'width 0.5s ease-out',
+                    width: `${(() => {
+                      // ✅ FIXED: Remove * 60 multiplication - timer is already in seconds
+                      if (!currentProblem?.timer) return 0;
+                      
+                      const totalSeconds = currentProblem.timer; // Already in seconds, don't multiply by 60!
+                      
+                      // Handle initial state when timer hasn't started yet
+                      if (timeRemaining === 0 || timeRemaining === undefined || timeRemaining === null) {
+                        if (activeCompetition?.status === 'ONGOING' && isTimerActive) {
+                          return 0; // Timer expired
+                        } else if (activeCompetition?.status === 'NEW') {
+                          return 100; // Competition not started, show full bar
+                        } else {
+                          return 0; // Other states
+                        }
+                      }
+                      
+                      // Normal calculation for active timer
+                      const percentage = (timeRemaining / totalSeconds) * 100;
+                      return Math.max(0, Math.min(100, percentage));
+                    })()}%`,
+                    backgroundColor: (() => {
+                      // ✅ FIXED: Remove * 60 multiplication
+                      if (!currentProblem?.timer) return '#6b7280';
+                      
+                      const totalSeconds = currentProblem.timer; // Already in seconds
+                      
+                      // Handle initial states
+                      if (timeRemaining === 0 || timeRemaining === undefined || timeRemaining === null) {
+                        if (activeCompetition?.status === 'NEW') {
+                          return '#10b981'; // Green for not started
+                        } else if (isExpired) {
+                          return '#dc2626'; // Red for expired
+                        } else {
+                          return '#6b7280'; // Gray for other states
+                        }
+                      }
+                      
+                      // Normal color calculation
+                      const percentage = (timeRemaining / totalSeconds) * 100;
+                      
+                      if (percentage <= 10) return '#dc2626'; // Red - Critical (10% or less)
+                      if (percentage <= 25) return '#ef4444'; // Light Red - Urgent (25% or less) 
+                      if (percentage <= 50) return '#f59e0b'; // Orange - Warning (50% or less)
+                      return '#10b981'; // Green - Safe (more than 50%)
+                    })(),
+                    boxShadow: timeRemaining < 60 && timeRemaining > 0 ? '0 0 8px rgba(239, 68, 68, 0.5)' : 'none',
+                    animation: timeRemaining < 30 && timeRemaining > 0 ? 'pulse 1s infinite' : 'none'
+                  }}
+                />
+              </div>
+              
+              {/* ✅ NEW: Countdown timer display */}
+              <div style={{
+                marginTop: '12px',
+                textAlign: 'center',
+                fontSize: '24px',
+                fontWeight: '700',
+                fontFamily: 'monospace',
+                color: (() => {
+                  if (!timeRemaining || timeRemaining <= 0) {
+                    return isExpired ? '#dc2626' : '#6b7280';
+                  }
+                  if (timeRemaining < 30) return '#dc2626'; // Red when critical
+                  if (timeRemaining < 60) return '#f59e0b'; // Orange when low
+                  return '#10b981'; // Green when safe
+                })(),
+                textShadow: timeRemaining < 30 && timeRemaining > 0 ? '0 0 10px rgba(239, 68, 68, 0.5)' : 'none'
+              }}>
+                {(() => {
+                  if (!timeRemaining || timeRemaining <= 0) {
+                    if (activeCompetition?.status === 'NEW') return 'Waiting to start...';
+                    if (isExpired) return 'Time up!';
+                    return '00:00';
+                  }
+                  
+                  const minutes = Math.floor(timeRemaining / 60);
+                  const seconds = timeRemaining % 60;
+                  return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                })()}
+              </div>
+              
+              {/* ✅ OPTIONAL: Percentage display */}
+              <div style={{
+                marginTop: '4px',
+                textAlign: 'center',
+                fontSize: '12px',
+                color: '#6b7280',
+                fontWeight: '500'
+              }}>
+                {(() => {
+                  if (timeRemaining === 0 || timeRemaining === undefined || timeRemaining === null) {
+                    if (activeCompetition?.status === 'NEW') return '100%';
+                    if (isExpired) return '0%';
+                    return '0%';
+                  }
+                  // ✅ FIXED: Remove * 60 multiplication
+                  return `${Math.round((timeRemaining / currentProblem.timer) * 100)}%`;
+                })()}
               </div>
             </div>
           )}
@@ -930,7 +998,7 @@ export default function Gamepage({
               {competitionId ? (
                 <div className={styles.timerDisplayControl}>
                   <span className={styles.timerLabel}>Timer:</span>
-                  <span className={styles.timerValue}>{timerValue} min</span>
+                  <span className={styles.timerValue}>{timerValue} sec</span>
                 </div>
               ) : (
                 !timerOpen ? (

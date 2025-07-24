@@ -403,21 +403,21 @@ const CompetitionDashboard = ({ params } : { params  : Promise<{competitionId : 
 return (
   <div className={styles.container}>
     {/* Debug Component - REMOVE AFTER TESTING */}
-    <RealtimeDebug 
+    {/* <RealtimeDebug 
       competitionId={compe_id.competitionId} 
       isConnected={isConnected}
       connectionStatus={connectionStatus}
       pollCount={pollCount}
-    />
+    /> */}
     
     {/* Test Component - REMOVE AFTER TESTING */}
-    <RealtimeTestButtons 
+    {/* <RealtimeTestButtons 
       competitionId={compe_id.competitionId}
       onUpdateCompetition={() => console.log('🧪 Manual update triggered')}
-    />
+    /> */}
     
     {/* Status Display - REMOVE AFTER TESTING */}
-    <div style={{
+    {/* <div style={{
       position: 'fixed',
       top: '10px',
       left: '10px',
@@ -434,7 +434,7 @@ return (
       <div>Gameplay: {currentCompetition?.gameplay_indicator || 'NONE'}</div>
       <div>Timer: {currentCompetition?.timer_started_at ? '🟢' : '🔴'}</div>
       <div>Updates: {pollCount || 0}</div>
-    </div>
+    </div> */}
     
     {/* Main Container */}
     <div className={styles.mainContainer}>
@@ -501,7 +501,7 @@ return (
             )}
 
             {/* Debug Realtime Button - Always visible */}
-            <button
+            {/* <button
               onClick={handleDebugRealtime}
               className={`${styles.controlButton} ${styles.debugButton}`}
               style={{
@@ -514,7 +514,7 @@ return (
               title="Test realtime connection"
             >
               🔧 Debug Realtime
-            </button>
+            </button> */}
           </div>
           
           <h1 className={styles.title}>
@@ -725,7 +725,7 @@ return (
     </div>
 
     {/* TEST COMPONENT - Remove after testing */}
-    <RealtimeTestComponent competitionId={compe_id.competitionId} />
+    {/* <RealtimeTestComponent competitionId={compe_id.competitionId} /> */}
   </div>
 );
 

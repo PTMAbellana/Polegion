@@ -394,3 +394,121 @@
     flex-direction: column;
   }
 }
+
+/* ✅ Rubik's Cube Loading Animation */
+.rubiksCube {
+  position: relative;
+  width: 80px;
+  height: 80px;
+  margin: 0 auto;
+  transform-style: preserve-3d;
+  animation: rotateCube 3s infinite linear;
+}
+
+@keyframes rotateCube {
+  0% {
+    transform: rotateX(0deg) rotateY(0deg);
+  }
+  25% {
+    transform: rotateX(90deg) rotateY(0deg);
+  }
+  50% {
+    transform: rotateX(90deg) rotateY(90deg);
+  }
+  75% {
+    transform: rotateX(0deg) rotateY(90deg);
+  }
+  100% {
+    transform: rotateX(0deg) rotateY(0deg);
+  }
+}
+
+.face {
+  position: absolute;
+  width: 80px;
+  height: 80px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  gap: 2px;
+  padding: 4px;
+  box-sizing: border-box;
+}
+
+.face.front {
+  transform: translateZ(40px);
+}
+
+.face.back {
+  transform: translateZ(-40px) rotateY(180deg);
+}
+
+.face.right {
+  transform: rotateY(90deg) translateZ(40px);
+}
+
+.face.left {
+  transform: rotateY(-90deg) translateZ(40px);
+}
+
+.face.top {
+  transform: rotateX(90deg) translateZ(40px);
+}
+
+.face.bottom {
+  transform: rotateX(-90deg) translateZ(40px);
+}
+
+.square {
+  border-radius: 2px;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+}
+
+.square.red {
+  background-color: #dc2626;
+}
+
+.square.orange {
+  background-color: #ea580c;
+}
+
+.square.yellow {
+  background-color: #facc15;
+}
+
+.square.green {
+  background-color: #16a34a;
+}
+
+.square.blue {
+  background-color: #2563eb;
+}
+
+.square.white {
+  background-color: #f8fafc;
+}
+
+/* Loading Container */
+.loadingContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  font-family: 'Inter', sans-serif;
+}
+
+.loadingContent {
+  text-align: center;
+  background: white;
+  padding: 40px;
+  border-radius: 16px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  max-width: 400px;
+  width: 90%;
+}
+
+/* Remove old spinner styles if they exist */
+.spinner {
+  display: none;
+}

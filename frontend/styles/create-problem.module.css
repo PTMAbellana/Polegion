@@ -1512,9 +1512,10 @@
 }
 
 .timerProgress {
+  position: relative;
   width: 100%;
   height: 8px;
-  background-color: #e0e0e0;
+  background-color: #e5e7eb;
   border-radius: 4px;
   overflow: hidden;
   margin: 8px 0;
@@ -1522,12 +1523,20 @@
 
 .progressBar {
   height: 100%;
-  transition: width 0.3s ease;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+  position: relative;
+  z-index: 1;
 }
 
-.pausedIndicator {
-  color: #f59e0b;
-  font-size: 12px;
+/* ✅ NEW: Progress percentage display */
+.progressPercentage {
+  position: absolute;
+  top: -20px;
+  right: 0;
+  font-size: 11px;
+  font-weight: 600;
+  color: #6b7280;
 }
 
 .expiredIndicator {
@@ -1595,4 +1604,66 @@
 .difficultyValue {
   font-size: 14px;
   font-weight: 600;
+}
+
+/* ✅ ADD: Pulse animation for critical time */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.02);
+  }
+}
+
+/* ✅ Enhanced timer progress container */
+.timerProgress {
+  position: relative;
+  width: 100%;
+  height: 8px;
+  background-color: #e5e7eb;
+  border-radius: 4px;
+  overflow: hidden;
+  margin: 8px 0;
+}
+
+/* ✅ Progress bar with better styling */
+.progressBar {
+  height: 100%;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+  position: relative;
+  z-index: 1;
+}
+
+/* ✅ NEW: Progress percentage display */
+.progressPercentage {
+  position: absolute;
+  top: -20px;
+  right: 0;
+  font-size: 11px;
+  font-weight: 600;
+  color: #6b7280;
+}
+
+/* ✅ Enhanced timer container */
+.competitionTimerContainer {
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 16px;
+  margin: 16px 0;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+/* ✅ Timer states */
+.timerTime.expired {
+  color: #dc2626;
+  animation: pulse 1s infinite;
+}
+
+.timerTime.paused {
+  color: #f59e0b;
 }
