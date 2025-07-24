@@ -110,6 +110,10 @@ export default function Gamepage({
   const [currentProblem, setCurrentProblem] = useState<CompetitionProblem | null>(null);
   const [isLoadingProblem, setIsLoadingProblem] = useState(false);
 
+  // ✅ NEW: Track submission state for competition mode
+  const [hasSubmitted, setHasSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   // ✅ MEMOIZE COMPETITION ID TO PREVENT UNNECESSARY HOOK CALLS
   const memoizedCompetitionId = useMemo(() => competitionId || 0, [competitionId]);
   
@@ -498,30 +502,77 @@ export default function Gamepage({
     }
   }
 
-  // ✅ SAFER SAVE/SUBMIT HANDLER
+  // ✅ ENHANCED: Save/Submit handler with confirmation popup and submission limits
   const handleSave = async () => {
     console.log("Saving problem...");
+    
     if (competitionId && activeCompetition) {
+      // ✅ NEW: Check if already submitted
+      if (hasSubmitted) {
+        Swal.fire({
+          title: "Already Submitted",
+          text: "You have already submitted your solution for this problem.",
+          icon: "info",
+          confirmButtonText: "OK",
+        });
+        return;
+      }
+
+      // ✅ NEW: Check if currently submitting
+      if (isSubmitting) {
+        return;
+      }
+
+      // ✅ NEW: Validate that user created a shape BEFORE confirmation
+      const shapesWithProps = shapes.map(getShapeProperties);
+      if (shapesWithProps.length === 0) {
+        Swal.fire({
+          title: "No Solution Created",
+          text: "Please create at least one shape before submitting your solution.",
+          icon: "warning",
+          confirmButtonText: "OK",
+        });
+        return;
+      }
+
+      // ✅ NEW: Confirmation popup
+      const confirmResult = await Swal.fire({
+        title: "Submit Solution?",
+        html: `
+          <div style="text-align: left; margin: 15px 0;">
+            <p><strong>⚠️ Important:</strong> You can only submit <strong>once</strong> per problem!</p>
+            <br>
+            <p><strong>Your Solution:</strong></p>
+            <ul style="margin: 10px 0; padding-left: 20px;">
+              <li>${shapesWithProps.length} shape(s) created</li>
+              <li>Time spent: ${Math.round((currentProblem?.timer || 0) - timeRemaining)}s</li>
+            </ul>
+            <br>
+            <p>Are you sure you want to submit this solution?</p>
+          </div>
+        `,
+        icon: "question",
+        showCancelButton: true,
+        confirmButtonText: "Yes, Submit Solution",
+        cancelButtonText: "Cancel",
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        focusCancel: true, // Focus on cancel by default for safety
+      });
+
+      // ✅ NEW: If user cancels, return early
+      if (!confirmResult.isConfirmed) {
+        return;
+      }
+
       // ✨ COMPETITION MODE - SUBMIT SOLUTION
       try {
-        const shapesWithProps = shapes.map(getShapeProperties);
+        setIsSubmitting(true); // ✅ NEW: Set submitting state
         
-        // ✅ FIXED: Proper time calculation
-        // timeRemaining is in seconds, currentProblem.timer is in minutes
+        // ✅ KEEP ORIGINAL: Don't change calculation logic
         const totalTimeAllowedInSeconds = (currentProblem?.timer || 5) * 60; // Convert minutes to seconds
         const timeSpentInSeconds = totalTimeAllowedInSeconds - timeRemaining;
         const timeTaken = Math.max(0, timeSpentInSeconds); // Ensure non-negative
-
-        // ✅ Validate that user created a shape
-        if (shapesWithProps.length === 0) {
-          Swal.fire({
-            title: "No Solution Created",
-            text: "Please create at least one shape before submitting your solution.",
-            icon: "warning",
-            confirmButtonText: "OK",
-          });
-          return;
-        }
 
         const solutionPayload = {
           solution: shapesWithProps,
@@ -549,6 +600,10 @@ export default function Gamepage({
         console.log("✅ Submission response:", response);
 
         if (response && response.success) {
+          // ✅ NEW: Mark as submitted and save to localStorage
+          setHasSubmitted(true);
+          localStorage.setItem(`submitted_${competitionId}_${activeCompetition.current_problem_id}`, 'true');
+          
           // ✅ Enhanced success message with grading details
           const xpGained = response.xp_gained || 0;
           const feedback = response.feedback || response.attempt?.feedback || 'Solution submitted successfully!';
@@ -557,25 +612,31 @@ export default function Gamepage({
             title: "Solution Submitted! 🎯",
             html: `
               <div style="text-align: left; margin: 10px;">
-                <p><strong>Feedback:</strong> ${feedback}</p>
-                <p><strong>XP Gained:</strong> +${xpGained} XP</p>
-                <p><strong>Time Taken:</strong> ${Math.round(timeTaken)}s</p>
+                <p><strong>✅ Submission Status:</strong> Successfully submitted!</p>
+                <p><strong>📝 Feedback:</strong> ${feedback}</p>
+                <p><strong>🏆 XP Gained:</strong> +${xpGained} XP</p>
+                <p><strong>⏱️ Time Taken:</strong> ${Math.round(timeTaken)}s</p>
+                <br>
+                <p style="color: #10b981; font-weight: 600;">Your solution has been recorded and cannot be changed.</p>
               </div>
             `,
             icon: "success",
             confirmButtonText: "Awesome!",
-            timer: 5000,
-            timerProgressBar: true
+            timer: 8000,
+            timerProgressBar: true,
+            allowOutsideClick: false
           });
           
-          // ✅ Clear the workspace
-          setShapes([]);
+          // ✅ Don't clear shapes so student can see their submitted solution
           setSelectedId(null);
         } else {
           throw new Error(response?.message || 'Submission failed');
         }
       } catch (error: any) {
         console.error("❌ Submit error:", error);
+        
+        // ✅ NEW: Reset submitting state on error
+        setIsSubmitting(false);
         
         // ✅ Better error handling
         let errorMessage = "Failed to submit solution. Please try again.";
@@ -592,11 +653,13 @@ export default function Gamepage({
           icon: "error",
           confirmButtonText: "Try Again",
         });
+      } finally {
+        setIsSubmitting(false); // ✅ NEW: Always reset submitting state
       }
       return;
     }
 
-    // ✅ SAFER REGULAR MODE - CREATE/EDIT PROBLEM
+    // ✅ KEEP ORIGINAL: Regular mode - create/edit problem (unchanged)
     try {
       const shapesWithProps = shapes.map(getShapeProperties);
 
@@ -729,6 +792,35 @@ export default function Gamepage({
   //   );
   // }
 
+  // ✅ NEW: Check submission status from localStorage (fixes refresh bug)
+  useEffect(() => {
+    if (competitionId && activeCompetition?.current_problem_id) {
+      const submissionKey = `submitted_${competitionId}_${activeCompetition.current_problem_id}`;
+      const wasSubmitted = localStorage.getItem(submissionKey) === 'true';
+      setHasSubmitted(wasSubmitted);
+      setIsSubmitting(false);
+      
+      console.log('🔍 Checking submission status:', {
+        submissionKey,
+        wasSubmitted,
+        competitionId,
+        problemId: activeCompetition.current_problem_id
+      });
+    }
+  }, [competitionId, activeCompetition?.current_problem_id]);
+
+  // ✅ NEW: Reset submission state when problem changes (but keep localStorage)
+  useEffect(() => {
+    if (competitionId && activeCompetition?.current_problem_id) {
+      // Check if this is a different problem
+      const currentProblemKey = `submitted_${competitionId}_${activeCompetition.current_problem_id}`;
+      const wasSubmitted = localStorage.getItem(currentProblemKey) === 'true';
+      
+      setHasSubmitted(wasSubmitted);
+      setIsSubmitting(false);
+    }
+  }, [competitionId, activeCompetition?.current_problem_id]);
+
   return (
     <div className={`${styles.root} ${isFullScreenMode ? styles.fullScreenGame : ''}`}>
       <div className={styles.scalableWorkspace}>
@@ -832,8 +924,21 @@ export default function Gamepage({
               <button 
                 className={`${styles.saveBtn} ${styles.rowBtn} ${styles.saveBtnFloating}`} 
                 onClick={handleSave}
+                disabled={competitionId && (hasSubmitted || isSubmitting)} // ✅ NEW: Disable after submission
+                style={{
+                  opacity: competitionId && (hasSubmitted || isSubmitting) ? 0.5 : 1,
+                  cursor: competitionId && (hasSubmitted || isSubmitting) ? 'not-allowed' : 'pointer',
+                  backgroundColor: competitionId && hasSubmitted ? '#10b981' : undefined // Green when submitted
+                }}
               >
-                {competitionId ? "Submit Solution 🚀" : "Save"}
+                {(() => {
+                  if (competitionId) {
+                    if (isSubmitting) return "Submitting...";
+                    if (hasSubmitted) return "✅ Submitted";
+                    return "Submit Solution";
+                  }
+                  return "Save";
+                })()}
               </button>
             }
             shapeLimit={MAX_SHAPES}
@@ -1050,6 +1155,23 @@ export default function Gamepage({
       
       {showLimitPopup && (
         <ShapeLimitPopup onClose={() => setShowLimitPopup(false)} />
+      )}
+
+      {/* ✅ NEW: Submission status indicator */}
+      {competitionId && hasSubmitted && (
+        <div style={{
+          marginTop: '12px',
+          textAlign: 'center',
+          padding: '8px 16px',
+          backgroundColor: '#10b981',
+          color: 'white',
+          borderRadius: '6px',
+          fontSize: '14px',
+          fontWeight: '600',
+          boxShadow: '0 2px 4px rgba(16, 185, 129, 0.3)'
+        }}>
+          ✅ Solution Submitted Successfully
+        </div>
       )}
     </div>
   );
