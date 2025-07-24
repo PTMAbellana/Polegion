@@ -185,20 +185,21 @@ export default function Gamepage({
       console.log('Active competition:', activeCompetition);
       console.log('Current problem ID:', activeCompetition?.current_problem_id);
       console.log('Competition status:', activeCompetition?.status);
+      console.log('Is page reload?', !currentProblem && activeCompetition?.current_problem_id);
       
-      if (!competitionId) {
-        console.log('❌ No competition ID, skipping fetch');
+      if (!competitionId || !activeCompetition) {
+        console.log('❌ No competition data, skipping fetch');
         return;
       }
       
-      if (!activeCompetition) {
-        console.log('❌ No active competition data, skipping fetch');
-        return;
-      }
-      
-      // ✅ FIXED: Allow fetch even without current_problem_id for NEW status
+      // ✅ ENHANCED: Handle different competition states
       if (activeCompetition.status === 'NEW') {
         console.log('⏳ Competition not started yet, waiting...');
+        return;
+      }
+      
+      if (activeCompetition.status === 'DONE') {
+        console.log('🏁 Competition completed, no need to fetch problem');
         return;
       }
       
@@ -231,7 +232,7 @@ export default function Gamepage({
         console.log('✅ Problem data loaded successfully:', problemData);
         setCurrentProblem(problemData);
         
-        // ✨ SAFELY POPULATE THE FORM FIELDS
+        // ✅ SAFELY POPULATE THE FORM FIELDS
         setTitle(problemData.problem.title || "");
         setPrompt(problemData.problem.description || "");
         setDifficulty(problemData.problem.difficulty || "Easy");
@@ -241,7 +242,7 @@ export default function Gamepage({
         setTimerValue(problemData.timer || 5); 
         setTimerOpen(!!problemData.timer);
         
-        // ✨ CLEAR STUDENT'S SHAPES - THEY CREATE THEIR OWN SOLUTION
+        // ✅ CLEAR STUDENT'S SHAPES - THEY CREATE THEIR OWN SOLUTION
         setShapes([]);
         setSelectedId(null);
         
@@ -263,7 +264,7 @@ export default function Gamepage({
       }
     };
     
-    // ✅ ENHANCED: Trigger on multiple state changes
+    // ✅ ENHANCED: Better trigger conditions
     if (competitionId && activeCompetition) {
       console.log('🔄 Competition state changed, scheduling problem fetch...');
       timeoutId = setTimeout(() => {
@@ -277,31 +278,31 @@ export default function Gamepage({
     };
   }, [
     activeCompetition?.current_problem_id, 
-    activeCompetition?.status,           // ✅ NEW: Also watch status changes
-    activeCompetition?.current_problem_index, // ✅ NEW: Also watch problem index
+    activeCompetition?.status,
+    activeCompetition?.current_problem_index,
+    activeCompetition?.gameplay_indicator, // ✅ NEW: Also watch gameplay changes
     competitionId
   ]);
 
-  // ✅ NEW: Additional effect to handle competition state transitions
+  // ✅ NEW: Force fetch on component mount for page reloads
   useEffect(() => {
-    console.log('🎮 === COMPETITION STATE CHANGE ===');
-    console.log('Previous status: unknown -> Current status:', activeCompetition?.status);
-    console.log('Current problem ID:', activeCompetition?.current_problem_id);
-    console.log('Problem index:', activeCompetition?.current_problem_index);
-    console.log('Gameplay indicator:', activeCompetition?.gameplay_indicator);
-    
-    // Force refresh when competition transitions from NEW to ONGOING
-    if (activeCompetition?.status === 'ONGOING' && 
+    // Force fetch current problem if we have competition data but no current problem
+    // This handles page reloads where the user lands directly on the game page
+    if (competitionId && 
+        activeCompetition?.status === 'ONGOING' && 
         activeCompetition?.current_problem_id && 
-        !currentProblem) {
-      console.log('🚀 Competition just started! Force fetching current problem...');
+        !currentProblem && 
+        !isLoadingProblem) {
       
-      // Small delay to ensure the backend has set the problem
+      console.log('🔄 [Reload] Force fetching current problem on component mount...');
+      
       setTimeout(async () => {
         try {
+          setIsLoadingProblem(true);
           const problemData = await getCompeProblem(activeCompetition.current_problem_id);
+          
           if (problemData && problemData.problem) {
-            console.log('✅ Force fetch successful:', problemData);
+            console.log('✅ [Reload] Problem data fetched successfully:', problemData);
             setCurrentProblem(problemData);
             setTitle(problemData.problem.title || "");
             setPrompt(problemData.problem.description || "");
@@ -315,11 +316,64 @@ export default function Gamepage({
             setSelectedId(null);
           }
         } catch (error) {
-          console.error('❌ Force fetch failed:', error);
+          console.error('❌ [Reload] Error fetching problem on mount:', error);
+        } finally {
+          setIsLoadingProblem(false);
         }
-      }, 500); // 500ms delay
+      }, 500);
     }
-  }, [activeCompetition?.status, activeCompetition?.current_problem_id, currentProblem]);
+  }, [competitionId, activeCompetition?.status, activeCompetition?.current_problem_id, currentProblem, isLoadingProblem]);
+
+  // ✅ ENHANCED: Better competition state transition handling
+  useEffect(() => {
+    console.log('🎮 === COMPETITION STATE CHANGE ===');
+    console.log('Status:', activeCompetition?.status);
+    console.log('Gameplay:', activeCompetition?.gameplay_indicator);
+    console.log('Current problem ID:', activeCompetition?.current_problem_id);
+    console.log('Problem index:', activeCompetition?.current_problem_index);
+    console.log('Has current problem?', !!currentProblem);
+    
+    // ✅ ENHANCED: Handle different state transitions
+    if (activeCompetition?.status === 'ONGOING') {
+      if (activeCompetition?.current_problem_id && !currentProblem) {
+        console.log('🚀 Competition started or new problem! Force fetching...');
+        
+        setTimeout(async () => {
+          try {
+            setIsLoadingProblem(true);
+            const problemData = await getCompeProblem(activeCompetition.current_problem_id);
+            if (problemData && problemData.problem) {
+              console.log('✅ Force fetch successful:', problemData);
+              setCurrentProblem(problemData);
+              setTitle(problemData.problem.title || "");
+              setPrompt(problemData.problem.description || "");
+              setDifficulty(problemData.problem.difficulty || "Easy");
+              setLimitAttempts(problemData.problem.max_attempts || 1);
+              setHint(problemData.problem.hint || "");
+              setHintOpen(!!problemData.problem.hint);
+              setTimerValue(problemData.timer || 5);
+              setTimerOpen(!!problemData.timer);
+              setShapes([]);
+              setSelectedId(null);
+            }
+          } catch (error) {
+            console.error('❌ Force fetch failed:', error);
+          } finally {
+            setIsLoadingProblem(false);
+          }
+        }, 300);
+      }
+    }
+    
+    // ✅ CLEAR PROBLEM: When competition ends
+    if (activeCompetition?.status === 'DONE') {
+      console.log('🏁 Competition completed, clearing current problem');
+      setCurrentProblem(null);
+      setShapes([]);
+      setSelectedId(null);
+    }
+    
+  }, [activeCompetition?.status, activeCompetition?.current_problem_id, activeCompetition?.gameplay_indicator, currentProblem]);
 
   // Keyboard deletion handler
   useEffect(() => {

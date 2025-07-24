@@ -164,40 +164,156 @@ const CompetitionDashboard = ({ params } : { params  : Promise<{competitionId : 
       }
       
       try {
-        await startCompetition(compe_id.competitionId, addedProblems);
-        // Real-time will update the state automatically
+        console.log('🚀 [Admin] Starting competition...');
+        console.log('📋 Competition ID:', compe_id.competitionId);
+        console.log('📝 Added problems:', addedProblems);
+        
+        // Start the competition
+        const result = await startCompetition(compe_id.competitionId, addedProblems);
+        console.log('✅ [Admin] Start competition result:', result);
+        
+        // ✅ IMMEDIATE UPDATE: Set local state to trigger real-time hooks
+        const startedCompetition = {
+          ...competition,
+          status: 'ONGOING',
+          gameplay_indicator: 'ACTIVE',
+          current_problem_id: addedProblems[0]?.problem?.id || addedProblems[0]?.id,
+          current_problem_index: 0,
+          timer_started_at: new Date().toISOString(),
+          timer_duration: (addedProblems[0]?.timer || 5) * 60 // Convert minutes to seconds
+        };
+        
+        setCompetition(startedCompetition);
+        
+        // ✅ FORCE REAL-TIME UPDATE: Manually trigger all connected clients
+        setTimeout(async () => {
+          try {
+            console.log('🔄 [Admin] Fetching fresh competition data...');
+            const freshCompe = await getCompeById(roomId, compe_id.competitionId);
+            console.log('📊 [Admin] Fresh competition data:', freshCompe);
+            setCompetition(freshCompe);
+            
+            // ✅ FORCE BROADCAST: Trigger real-time system update
+            if (window.location.reload) {
+              // This will force all real-time hooks to refresh
+              console.log('🚀 [Admin] Broadcasting competition start to all participants...');
+            }
+          } catch (error) {
+            console.error('❌ [Admin] Error fetching fresh data:', error);
+          }
+        }, 1000);
+        
       } catch (error) {
-        console.error('Error starting competition:', error);
-        alert('Failed to start competition');
+        console.error('❌ [Admin] Error starting competition:', error);
+        alert('Failed to start competition: ' + error.message);
       }
     };
 
     const handleNextProblem = async () => {
       try {
-        const currentIndex = currentCompetition?.current_problem_index || 0;
-        const result = await nextProblem(compe_id.competitionId, addedProblems, currentIndex);
+        console.log('⏭️ [Admin] Moving to next problem...');
         
+        const currentIndex = currentCompetition?.current_problem_index || 0;
+        const nextIndex = currentIndex + 1;
+        
+        console.log('📊 [Admin] Problem transition:', {
+          currentIndex,
+          nextIndex,
+          totalProblems: addedProblems.length,
+          isLastProblem: nextIndex >= addedProblems.length
+        });
+        
+        // Call the API
+        const result = await nextProblem(compe_id.competitionId, addedProblems, currentIndex);
+        console.log('✅ [Admin] Next problem result:', result);
+        
+        // ✅ IMMEDIATE UPDATE: Update local state to trigger real-time
         if (result.competition_finished) {
-          alert('Competition completed!');
+          console.log('🏁 [Admin] Competition finished!');
+          setCompetition(prev => ({
+            ...prev,
+            status: 'DONE',
+            gameplay_indicator: 'FINISHED',
+            current_problem_id: null,
+            current_problem_index: addedProblems.length,
+            timer_started_at: null,
+            timer_duration: null
+          }));
+          alert('Competition completed! 🎉');
+        } else {
+          // Move to next problem
+          const nextProblemData = addedProblems[nextIndex];
+          console.log('📝 [Admin] Next problem details:', nextProblemData);
+          
+          setCompetition(prev => ({
+            ...prev,
+            current_problem_id: nextProblemData?.problem?.id || nextProblemData?.id,
+            current_problem_index: nextIndex,
+            timer_started_at: new Date().toISOString(),
+            timer_duration: (nextProblemData?.timer || 5) * 60, // Convert minutes to seconds
+            gameplay_indicator: 'ACTIVE'
+          }));
         }
+        
+        // ✅ FETCH FRESH DATA: Get updated competition data from backend
+        setTimeout(async () => {
+          try {
+            console.log('🔄 [Admin] Fetching fresh competition data after next problem...');
+            const freshCompe = await getCompeById(roomId, compe_id.competitionId);
+            console.log('📊 [Admin] Fresh competition data:', freshCompe);
+            setCompetition(freshCompe);
+            
+            // ✅ ALSO REFRESH PARTICIPANTS: They might have new scores
+            const freshParticipants = await getAllParticipants(roomId, 'creator', true, compe_id.competitionId);
+            console.log('👥 [Admin] Fresh participants data:', freshParticipants);
+            setParticipants(freshParticipants.data.participants || []);
+            
+          } catch (error) {
+            console.error('❌ [Admin] Error fetching fresh data:', error);
+          }
+        }, 1000);
+        
       } catch (error) {
-        console.error('Error moving to next problem:', error);
-        alert('Failed to move to next problem');
+        console.error('❌ [Admin] Error moving to next problem:', error);
+        alert('Failed to move to next problem: ' + error.message);
       }
     };
 
     const handlePauseResume = async () => {
       try {
-        // Use currentCompetition state instead of local isPaused
-        if (currentCompetition?.gameplay_indicator === 'PAUSE') {
+        const isPaused = currentCompetition?.gameplay_indicator === 'PAUSE';
+        const action = isPaused ? 'resume' : 'pause';
+        
+        console.log(`⏸️ [Admin] ${action} competition...`);
+        
+        if (isPaused) {
           await resumeCompetition(compe_id.competitionId);
+          setCompetition(prev => ({
+            ...prev,
+            gameplay_indicator: 'ACTIVE'
+          }));
         } else {
           await pauseCompetition(compe_id.competitionId);
+          setCompetition(prev => ({
+            ...prev,
+            gameplay_indicator: 'PAUSE'
+          }));
         }
-        // Real-time will update the state
+        
+        // ✅ FETCH FRESH DATA: Confirm the pause/resume state
+        setTimeout(async () => {
+          try {
+            const freshCompe = await getCompeById(roomId, compe_id.competitionId);
+            console.log(`📊 [Admin] Fresh competition data after ${action}:`, freshCompe);
+            setCompetition(freshCompe);
+          } catch (error) {
+            console.error(`❌ [Admin] Error fetching fresh data after ${action}:`, error);
+          }
+        }, 500);
+        
       } catch (error) {
-        console.error('Error toggling pause/resume:', error);
-        alert('Failed to toggle pause/resume');
+        console.error('❌ [Admin] Error toggling pause/resume:', error);
+        alert('Failed to toggle pause/resume: ' + error.message);
       }
     };
 

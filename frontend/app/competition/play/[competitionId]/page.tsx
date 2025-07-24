@@ -59,7 +59,7 @@ const CompetitionDashboard = ({ params } : { params  : Promise<{competitionId : 
   const [activeProblems, setActiveProblems] = useState<string[]>([]);
   const [competition, setCompetition] = useState<Competition | undefined>(undefined)
 
-  // Real-time competition state for students
+  // ✅ ENHANCED: Better real-time hook with more responsive polling
   const {
     competition: liveCompetition,
     participants: liveParticipants,
@@ -69,34 +69,54 @@ const CompetitionDashboard = ({ params } : { params  : Promise<{competitionId : 
     pollCount
   } = useCompetitionRealtime(compe_id.competitionId, isLoading);
   
+  // ✅ ENHANCED: Better timer hook with immediate updates
+  const {
+    timeRemaining,
+    isTimerActive,
+    formattedTime,
+    isExpired
+  } = useCompetitionTimer(compe_id.competitionId, liveCompetition || competition);
+
   // Use live competition data when available, fallback to initial API state
   const currentCompetition: Competition = liveCompetition || competition || {} as Competition;
 
   const { isLoggedIn } = useMyApp()
   const { isLoading: authLoading } = AuthProtection()
 
+  // ✅ ENHANCED: Better initial data fetching with competition state handling
   const callMe = useCallback( async () => {
     try {
         setIsLoading(true)
+        console.log('🔄 [Participant] Loading competition data...');
+        
         const parts = await getAllParticipants(roomId, 'user', true, compe_id.competitionId)
-        console.log("Participants data: ", parts)
+        console.log("👥 [Participant] Participants data: ", parts)
         setParticipants(parts.data.participants || [])
         
         const probs = await getRoomProblems(roomId)
         setProblems(probs)
 
         const compe = await getCompeById(roomId, compe_id.competitionId, 'user')
-        console.log("Competition data: ", compe)
+        console.log("🏁 [Participant] Competition data: ", compe)
         setCompetition(compe)
+
+        // ✅ IMMEDIATE REDIRECT: If competition is ongoing and we're not coming from completed page
+        if (compe?.status === 'ONGOING' && !completed) {
+          console.log('🚀 [Participant] Competition is ongoing, redirecting to game...');
+          const gameUrl = `/competition/play/${compe_id.competitionId}/game?room=${roomId}`;
+          setTimeout(() => {
+            router.push(gameUrl);
+          }, 1000); // Small delay to show loading state
+        }
 
         setActiveProblems([]);
     } catch (error) {
-        console.error('Error fetching competition details:', error)
+        console.error('❌ [Participant] Error fetching competition details:', error)
     } finally {
         setIsLoading(false)
     }
-  }, [roomId, compe_id.competitionId])
-  
+  }, [roomId, compe_id.competitionId, completed, router])
+
   // Competition logic
   useEffect(() => {
       if (isLoggedIn && !authLoading && !fetched) {
@@ -117,21 +137,55 @@ const CompetitionDashboard = ({ params } : { params  : Promise<{competitionId : 
     }
   }, [liveParticipants]);
 
-  // ✅ Competition timer hook
-  const {
-    timeRemaining,
-    isTimerActive,
-    formattedTime,
-    isExpired
-  } = useCompetitionTimer(compe_id.competitionId, liveCompetition || competition);
-
-  // 🚀 REDIRECT to game page when competition starts (but not if coming from completed)
+  // ✅ ENHANCED: Better competition state change detection
   useEffect(() => {
-    if (currentCompetition?.status === 'ONGOING' && isTimerActive && !completed) {
+    console.log('🎯 [Participant] Competition state change detected:');
+    console.log('  - Status:', currentCompetition?.status);
+    console.log('  - Gameplay:', currentCompetition?.gameplay_indicator);
+    console.log('  - Timer Active:', isTimerActive);
+    console.log('  - Current Problem ID:', currentCompetition?.current_problem_id);
+    console.log('  - Current Problem Index:', currentCompetition?.current_problem_index);
+    console.log('  - Completed param:', completed);
+  }, [currentCompetition, isTimerActive, completed]);
+
+  // ✅ ENHANCED: Better redirect logic with more conditions
+  useEffect(() => {
+    // Only redirect if:
+    // 1. Competition is ONGOING
+    // 2. Timer is active (meaning it actually started)
+    // 3. We're not coming from a completed competition
+    // 4. We have a current problem ID (meaning a problem is active)
+    if (currentCompetition?.status === 'ONGOING' && 
+        isTimerActive && 
+        !completed && 
+        currentCompetition?.current_problem_id) {
+      
+      console.log('🚀 [Participant] All conditions met for game redirect:');
+      console.log('  - Status: ONGOING ✅');
+      console.log('  - Timer Active: ✅');
+      console.log('  - Not from completed: ✅');
+      console.log('  - Has problem ID: ✅');
+      
       const gameUrl = `/competition/play/${compe_id.competitionId}/game?room=${roomId}`;
+      console.log('🎯 [Participant] Redirecting to:', gameUrl);
+      
       router.push(gameUrl);
+    } else {
+      console.log('⏳ [Participant] Redirect conditions not met:');
+      console.log('  - Status:', currentCompetition?.status);
+      console.log('  - Timer Active:', isTimerActive);
+      console.log('  - From completed:', !!completed);
+      console.log('  - Problem ID:', currentCompetition?.current_problem_id);
     }
-  }, [currentCompetition?.status, isTimerActive, compe_id.competitionId, roomId, router, completed]);
+  }, [
+    currentCompetition?.status, 
+    currentCompetition?.current_problem_id,
+    isTimerActive, 
+    compe_id.competitionId, 
+    roomId, 
+    router, 
+    completed
+  ]);
 
   // ✅ CLEANED UP: Simple getRoomCodeFromId without alerts
   const getRoomCodeFromId = async (roomId: string) => {

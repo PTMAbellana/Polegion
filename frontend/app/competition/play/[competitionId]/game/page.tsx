@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Gamepage from '@/components/Gamepage';
 import { useCompetitionRealtime } from '@/hooks/useCompetitionRealtime';
 import { useCompetitionTimer } from '@/hooks/useCompetitionTimer';
+import { getCompeById } from '@/api/competitions';
 import styles from '@/styles/game.module.css';
 
 interface Competition {
@@ -26,119 +27,219 @@ const CompetitionGamePage = ({ params }: { params: Promise<{ competitionId: stri
   const [competition, setCompetition] = useState<Competition | undefined>(undefined);
   const [isLoading, setIsLoading] = useState(true);
   const [redirecting, setRedirecting] = useState(false);
+  const [initialDataFetched, setInitialDataFetched] = useState(false);
 
   // Resolve params Promise
   useEffect(() => {
     params.then(resolvedParams => {
+      console.log('🎮 [Game] Competition ID resolved:', resolvedParams.competitionId);
       setCompetitionId(resolvedParams.competitionId);
-      setIsLoading(false);
     });
   }, [params]);
 
-  // Real-time competition state
+  // ✅ ENHANCED: Fetch initial competition data when competitionId is available
+  const fetchInitialCompetitionData = useCallback(async () => {
+    if (!competitionId || !roomId || initialDataFetched) return;
+    
+    try {
+      console.log('🔄 [Game] Fetching initial competition data...');
+      console.log('🔄 [Game] Competition ID:', competitionId);
+      console.log('🔄 [Game] Room ID:', roomId);
+      
+      setIsLoading(true);
+      
+      // ✅ FETCH: Get competition data using the same API as dashboard
+      const competitionData = await getCompeById(roomId, Number(competitionId), 'user');
+      console.log('📊 [Game] Initial competition data loaded:', competitionData);
+      
+      if (competitionData) {
+        setCompetition(competitionData);
+        console.log('✅ [Game] Competition state set:', {
+          title: competitionData.title,
+          status: competitionData.status,
+          gameplay_indicator: competitionData.gameplay_indicator,
+          current_problem_id: competitionData.current_problem_id,
+          current_problem_index: competitionData.current_problem_index,
+          timer_started_at: competitionData.timer_started_at,
+          timer_duration: competitionData.timer_duration
+        });
+        
+        // ✅ CHECK: If competition is not ongoing, redirect back
+        if (competitionData.status === 'DONE') {
+          console.log('🏁 [Game] Competition is finished, redirecting...');
+          setRedirecting(true);
+          setTimeout(() => {
+            router.push(`/competition/play/${competitionId}?room=${roomId}&completed=true`);
+          }, 1000);
+          return;
+        }
+        
+        if (competitionData.status === 'NEW') {
+          console.log('⏳ [Game] Competition not started, redirecting to dashboard...');
+          router.push(`/competition/play/${competitionId}?room=${roomId}`);
+          return;
+        }
+      }
+      
+      setInitialDataFetched(true);
+    } catch (error) {
+      console.error('❌ [Game] Error fetching initial competition data:', error);
+      // ✅ FALLBACK: Redirect to dashboard on error
+      router.push(`/competition/play/${competitionId}?room=${roomId}`);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [competitionId, roomId, initialDataFetched, router]);
+
+  // ✅ TRIGGER: Fetch initial data when competitionId is available
+  useEffect(() => {
+    if (competitionId && roomId) {
+      fetchInitialCompetitionData();
+    }
+  }, [competitionId, roomId, fetchInitialCompetitionData]);
+
+  // ✅ ENHANCED: Real-time competition state with better conditions
   const {
     competition: liveCompetition,
     participants: liveParticipants,
     isConnected,
     connectionStatus,
-  } = useCompetitionRealtime(competitionId ? Number(competitionId) : null, !competitionId);
+  } = useCompetitionRealtime(
+    competitionId ? Number(competitionId) : null, 
+    !competitionId || isLoading // Don't start realtime until we have basic data
+  );
   
+  // ✅ ENHANCED: Use live data when available, fallback to initial fetch
   const currentCompetition: Competition = liveCompetition || competition || {} as Competition;
 
-  // Competition timer hook
+  // ✅ ENHANCED: Competition timer hook with better data passing
   const {
     timeRemaining,
     isTimerActive,
     formattedTime,
     isExpired
-  } = useCompetitionTimer(competitionId ? Number(competitionId) : null, currentCompetition);
+  } = useCompetitionTimer(
+    competitionId ? Number(competitionId) : null, 
+    currentCompetition
+  );
+
+  // ✅ ENHANCED: Real-time state change logging
+  useEffect(() => {
+    if (currentCompetition && Object.keys(currentCompetition).length > 0) {
+      console.log('🎮 [Game] Competition state update:', {
+        source: liveCompetition ? 'Real-time' : 'Initial fetch',
+        title: currentCompetition.title,
+        status: currentCompetition.status,
+        gameplay_indicator: currentCompetition.gameplay_indicator,
+        current_problem_id: currentCompetition.current_problem_id,
+        current_problem_index: currentCompetition.current_problem_index,
+        timer_started_at: currentCompetition.timer_started_at,
+        timer_duration: currentCompetition.timer_duration,
+        isTimerActive,
+        formattedTime
+      });
+    }
+  }, [currentCompetition, liveCompetition, isTimerActive, formattedTime]);
 
   // ✅ FIXED: Get room code from room ID using proper API endpoint
   const getRoomCodeFromId = async (roomId: string) => {
     try {
-      console.log('🔍 Fetching room code for room ID:', roomId);
+      console.log('🔍 [Game] Fetching room code for room ID:', roomId);
       
-      // ✅ FIXED: Use correct backend endpoint
       const response = await fetch(`/api/virtual-rooms/id/${roomId}`);
       
       if (response.ok) {
         const roomData = await response.json();
-        console.log('📋 Room data received:', roomData);
+        console.log('📋 [Game] Room data received:', roomData);
         
-        // Extract the room code from the API response
         const roomCode = roomData.code;
         
         if (roomCode && roomCode !== roomId) {
-          console.log('✅ Found room code:', roomCode);
+          console.log('✅ [Game] Found room code:', roomCode);
           return roomCode;
         } else {
-          console.warn('⚠️ No valid room code found:', roomData);
+          console.warn('⚠️ [Game] No valid room code found:', roomData);
         }
       } else {
-        console.warn(`❌ API returned status:`, response.status);
+        console.warn(`❌ [Game] API returned status:`, response.status);
       }
     } catch (error) {
-      console.error('❌ Error fetching room data:', error);
+      console.error('❌ [Game] Error fetching room data:', error);
     }
     
     return null;
   };
 
-  // ✅ FIXED: Update the handleReturnToRoom function to use join format
+  // ✅ ENHANCED: Better return to room with room code
   const handleReturnToRoom = async () => {
-    console.log('🏠 Starting return to room process...');
+    console.log('🏠 [Game] Starting return to room process...');
     
     if (roomId) {
       try {
         const roomCode = await getRoomCodeFromId(roomId);
         
         if (roomCode) {
-          const targetUrl = `/virtual-rooms/join/${roomCode}`;
-          console.log('🚀 Navigating to:', targetUrl);
+          const targetUrl = `/virtual-rooms/${roomCode}`;
+          console.log('🚀 [Game] Navigating to:', targetUrl);
           router.push(targetUrl);
           return;
         }
       } catch (error) {
-        console.error('❌ Error getting room code:', error);
+        console.error('❌ [Game] Error getting room code:', error);
       }
       
-      // Fallback
-      console.warn('⚠️ Using fallback navigation');
-      router.push(`/virtual-rooms/join/${roomId}`);
+      // ✅ FALLBACK: Try with room ID directly
+      console.warn('⚠️ [Game] Using fallback navigation');
+      router.push(`/virtual-rooms/${roomId}`);
     } else {
       router.push('/virtual-rooms');
     }
   };
 
-  // Competition completion redirect
+  // ✅ ENHANCED: Competition completion redirect with better conditions
   useEffect(() => {
-    // ✅ Add more specific conditions to prevent looping
     if (competitionId && 
         currentCompetition?.status === 'DONE' && 
         !redirecting && 
-        !isLoading) { // Add isLoading check
+        !isLoading &&
+        initialDataFetched) {
     
-      console.log('🏁 Competition finished! Redirecting participants...');
-      console.log('Current status:', currentCompetition.status);
-      console.log('Competition ID:', competitionId);
-      console.log('Room ID:', roomId);
+      console.log('🏁 [Game] Competition finished! Redirecting participants...');
+      console.log('🏁 [Game] Current status:', currentCompetition.status);
+      console.log('🏁 [Game] Competition ID:', competitionId);
+      console.log('🏁 [Game] Room ID:', roomId);
       
       setRedirecting(true);
       
-      // ✅ Add a small delay to prevent rapid redirects
       setTimeout(() => {
-        router.push(`/competition/play/${competitionId}?room=${roomId}`);
-      }, 1000); // 1 second delay
+        router.push(`/competition/play/${competitionId}?room=${roomId}&completed=true`);
+      }, 1000);
     }
-  }, [currentCompetition?.status, competitionId, roomId, router, redirecting, isLoading]); // Add isLoading to dependencies
+  }, [currentCompetition?.status, competitionId, roomId, router, redirecting, isLoading, initialDataFetched]);
 
-  // ✅ Add cleanup effect to reset redirecting state if needed
+  // ✅ ENHANCED: Handle competition state changes that require redirect
   useEffect(() => {
-    // Reset redirecting state if competition status changes back to active
+    if (!initialDataFetched || isLoading || redirecting) return;
+    
+    // ✅ REDIRECT: If competition becomes NEW (reset) or invalid state
+    if (currentCompetition?.status === 'NEW') {
+      console.log('⏳ [Game] Competition reset to NEW, redirecting to dashboard...');
+      router.push(`/competition/play/${competitionId}?room=${roomId}`);
+      return;
+    }
+    
+    // ✅ STAY: Only stay on game page if competition is ONGOING
+    if (currentCompetition?.status === 'ONGOING' && !currentCompetition?.current_problem_id) {
+      console.log('⚠️ [Game] Competition ONGOING but no current problem, might be starting...');
+    }
+  }, [currentCompetition?.status, currentCompetition?.current_problem_id, initialDataFetched, isLoading, redirecting, router, competitionId, roomId]);
+
+  // ✅ CLEANUP: Reset redirecting state if needed
+  useEffect(() => {
     if (currentCompetition?.status && 
         currentCompetition.status !== 'DONE' && 
         redirecting) {
-      console.log('Competition status changed, resetting redirect state');
+      console.log('🔄 [Game] Competition status changed, resetting redirect state');
       setRedirecting(false);
     }
   }, [currentCompetition?.status, redirecting]);
@@ -159,13 +260,20 @@ const CompetitionGamePage = ({ params }: { params: Promise<{ competitionId: stri
     );
   }
 
-  // Show loading while resolving params
-  if (isLoading || !competitionId) {
+  // Show loading while resolving params or fetching initial data
+  if (isLoading || !competitionId || !initialDataFetched) {
     return (
       <div className={styles.loadingContainer}>
         <div className={styles.loadingContent}>
           <div className={styles.spinner}></div>
           <p>Loading competition...</p>
+          <div style={{ fontSize: '12px', marginTop: '10px', opacity: 0.7 }}>
+            Competition ID: {competitionId || 'Resolving...'}
+            <br />
+            Room ID: {roomId}
+            <br />
+            Status: {currentCompetition?.status || 'Loading...'}
+          </div>
         </div>
       </div>
     );
@@ -196,7 +304,7 @@ const CompetitionGamePage = ({ params }: { params: Promise<{ competitionId: stri
             
             <div className={styles.completionActions}>
               <button 
-                onClick={() => router.push(`/competition/play/${competitionId}?room=${roomId}`)}
+                onClick={() => router.push(`/competition/play/${competitionId}?room=${roomId}&completed=true`)}
                 className={styles.viewResultsButton}
               >
                 📊 View Results Now
@@ -215,6 +323,32 @@ const CompetitionGamePage = ({ params }: { params: Promise<{ competitionId: stri
     );
   }
 
+  // ✅ ENHANCED: Only render Gamepage when we have valid competition data
+  if (!currentCompetition || !currentCompetition.status) {
+    return (
+      <div className={styles.loadingContainer}>
+        <div className={styles.loadingContent}>
+          <div className={styles.spinner}></div>
+          <p>Waiting for competition data...</p>
+        </div>
+      </div>
+    );
+  }
+
+  console.log('🎮 [Game] Rendering Gamepage with data:', {
+    roomCode: roomId,
+    competitionId: Number(competitionId),
+    currentCompetition: {
+      title: currentCompetition.title,
+      status: currentCompetition.status,
+      current_problem_id: currentCompetition.current_problem_id,
+      current_problem_index: currentCompetition.current_problem_index
+    },
+    roomId,
+    isTimerActive,
+    formattedTime
+  });
+
   return (
     <div className={styles.gameContainer}>
       {/* Floating return button */}
@@ -228,6 +362,7 @@ const CompetitionGamePage = ({ params }: { params: Promise<{ competitionId: stri
         </button>
       </div>
 
+      {/* ✅ ENHANCED: Pass all necessary props with proper data */}
       <Gamepage 
         roomCode={roomId}
         competitionId={Number(competitionId)}
@@ -240,10 +375,23 @@ const CompetitionGamePage = ({ params }: { params: Promise<{ competitionId: stri
       <div className={styles.gameOverlay}>
         <div className={styles.gameInfo}>
           <div className={styles.competitionTitle}>
-            {currentCompetition?.title}
+            {currentCompetition?.title || 'Loading...'}
           </div>
           <div className={styles.problemNumber}>
             Problem {(currentCompetition?.current_problem_index || 0) + 1}
+          </div>
+          <div className={styles.competitionStatus}>
+            Status: {currentCompetition?.status}
+            {currentCompetition?.gameplay_indicator && ` (${currentCompetition.gameplay_indicator})`}
+          </div>
+        </div>
+        
+        <div className={styles.timerInfo}>
+          <div className={styles.timerDisplay}>
+            {formattedTime}
+          </div>
+          <div className={styles.timerStatus}>
+            {isTimerActive ? '⏱️ Active' : '⏸️ Paused'}
           </div>
         </div>
         
@@ -275,6 +423,34 @@ const CompetitionGamePage = ({ params }: { params: Promise<{ competitionId: stri
               </button>
             </div>
           </div>
+        </div>
+      )}
+      
+      {/* ✅ DEBUG: Show current data in development */}
+      {process.env.NODE_ENV === 'development' && (
+        <div style={{
+          position: 'fixed',
+          bottom: '10px',
+          right: '10px',
+          background: 'rgba(0,0,0,0.8)',
+          color: 'white',
+          padding: '10px',
+          borderRadius: '5px',
+          fontSize: '11px',
+          maxWidth: '300px',
+          zIndex: 9999
+        }}>
+          <div><strong>🎮 Game Debug:</strong></div>
+          <div>Competition ID: {competitionId}</div>
+          <div>Room ID: {roomId}</div>
+          <div>Status: {currentCompetition?.status}</div>
+          <div>Gameplay: {currentCompetition?.gameplay_indicator}</div>
+          <div>Problem ID: {currentCompetition?.current_problem_id}</div>
+          <div>Problem Index: {currentCompetition?.current_problem_index}</div>
+          <div>Timer Active: {isTimerActive ? 'Yes' : 'No'}</div>
+          <div>Time: {formattedTime}</div>
+          <div>Real-time: {liveCompetition ? 'Connected' : 'Using initial'}</div>
+          <div>Initial Fetched: {initialDataFetched ? 'Yes' : 'No'}</div>
         </div>
       )}
     </div>
