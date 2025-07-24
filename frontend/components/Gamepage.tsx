@@ -913,6 +913,7 @@ export default function Gamepage({
             />
           </div>
           
+          {/* Timer - read-only in competition mode */}
           {/* Main Area with Konva */}
           <MainArea
             shapes={shapes}
