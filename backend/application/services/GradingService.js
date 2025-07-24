@@ -389,12 +389,12 @@ class GradingService {
             difficulty
         });
         
-        // Base accuracy: 60% shape type + 40% geometry (precision-weighted)
-        const baseAccuracy = (shapeTypeAccuracy * 0.6) + (geometryAccuracy * 0.4);
-        console.log('📈 Base accuracy (60% type + 40% geometry):', baseAccuracy.toFixed(3));
+        // Base accuracy: 40% shape type + 60% geometry (precision-weighted)
+        const baseAccuracy = (shapeTypeAccuracy * 0.4) + (geometryAccuracy * 0.6);
+        console.log('📈 Base accuracy (40% type + 60% geometry):', baseAccuracy.toFixed(3));
         
         // Apply time bonus
-        const withTimeBonus = Math.min(1.0, baseAccuracy + timeBonus);
+        const withTimeBonus = Math.min(1.0, baseAccuracy * (1 + timeBonus * 0.5)); // Max 12.5% boost
         console.log('⏰ With time bonus:', withTimeBonus.toFixed(3));
         
         // More nuanced correctness threshold
@@ -403,25 +403,19 @@ class GradingService {
         
         if (withTimeBonus >= 0.95) {
             isCorrect = true;
-            qualityLevel = 'PERFECT';
+            qualityLevel = 'EXCELLENT';
         } else if (withTimeBonus >= 0.85) {
             isCorrect = true;
-            qualityLevel = 'EXCELLENT';
+            qualityLevel = 'VERY_GOOD';
         } else if (withTimeBonus >= 0.75) {
             isCorrect = true;
-            qualityLevel = 'VERY_GOOD';
-        } else if (withTimeBonus >= 0.65) {
-            isCorrect = true;
             qualityLevel = 'GOOD';
-        } else if (withTimeBonus >= 0.50) {
+        } else if (withTimeBonus >= 0.65) {
             isCorrect = false;
             qualityLevel = 'FAIR';
-        } else if (withTimeBonus >= 0.30) {
-            isCorrect = false;
-            qualityLevel = 'POOR';
         } else {
             isCorrect = false;
-            qualityLevel = 'VERY_POOR';
+            qualityLevel = 'POOR';
         }
         
         console.log(`✅ Quality level: ${qualityLevel} (${withTimeBonus.toFixed(3)}) - Correct: ${isCorrect}`);
