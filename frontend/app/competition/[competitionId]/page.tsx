@@ -525,7 +525,7 @@ return (
             Status: <span className={styles.statusValue}>{currentCompetition?.status || 'NEW'}</span>
           </p>
           
-          <div className={styles.statusRow}>
+          {/* <div className={styles.statusRow}>
             <ConnectionStatus 
               isConnected={isConnected}
               connectionStatus={connectionStatus}
@@ -533,8 +533,7 @@ return (
             {!isConnected && (
               <span className={styles.disconnectedText}> (Disconnected)</span>
             )}
-            {/* Temporarily removed answers received section */}
-          </div>
+          </div> */}
           
           <p className={styles.description}>
             Compete with your classmates and earn XP by solving problems!
