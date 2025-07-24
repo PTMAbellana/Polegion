@@ -691,14 +691,14 @@ const CompetitionDashboard = ({ params } : { params  : Promise<{competitionId : 
             </h1>
             
             {/* ✅ Add Go Back button in header */}
-            <button 
+            {/* <button 
               onClick={handleReturnToRoom}
               className={styles.headerBackButton}
               title="Return to Room"
             >
               <span className={styles.backIcon}>←</span>
               <span className={styles.backText}>Back to Room</span>
-            </button>
+            </button> */}
           </div>
           
           <div className={styles.statusRow}>
@@ -736,7 +736,7 @@ const CompetitionDashboard = ({ params } : { params  : Promise<{competitionId : 
       {renderDashboardState()}
 
       {/* Leaderboard Section */}
-      <div className={styles.leaderboardSection}>
+      {/* <div className={styles.leaderboardSection}>
         <div className={styles.leaderboardHeader}>
           <h2 className={styles.leaderboardTitle}>🏆 Leaderboard</h2>
           <button 
@@ -774,7 +774,7 @@ const CompetitionDashboard = ({ params } : { params  : Promise<{competitionId : 
             </div>
           )}
         </div>
-      </div>
+      </div> */}
 
       {/* ✅ FIXED: Debug component now has access to all variables */}
       {/* {process.env.NODE_ENV === 'development' && <DebugInfo />} */}
