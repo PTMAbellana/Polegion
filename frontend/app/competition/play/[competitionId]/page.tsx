@@ -343,7 +343,7 @@ const CompetitionDashboard = ({ params } : { params  : Promise<{competitionId : 
             </div>
             
             {/* ✅ Return button for waiting state too */}
-            <div className={styles.actionButtons}>
+            {/* <div className={styles.actionButtons}>
               <button 
                 onClick={handleReturnToRoom}
                 className={styles.returnToRoomButton}
@@ -351,7 +351,7 @@ const CompetitionDashboard = ({ params } : { params  : Promise<{competitionId : 
                 <span className={styles.buttonIcon}>🏠</span>
                 Return to Room
               </button>
-            </div>
+            </div> */}
           </div>
         </div>
       );
@@ -406,13 +406,13 @@ const CompetitionDashboard = ({ params } : { params  : Promise<{competitionId : 
 
             {/* ✅ Enhanced Action Buttons */}
             <div className={styles.actionButtons}>
-              <button 
+              {/* <button 
                 onClick={handleReturnToRoom}
                 className={styles.returnToRoomButton}
               >
                 <span className={styles.buttonIcon}>🏠</span>
                 Return to Room
-              </button>
+              </button> */}
               
               <button 
                 onClick={() => window.location.reload()}
@@ -476,7 +476,7 @@ const CompetitionDashboard = ({ params } : { params  : Promise<{competitionId : 
             </div>
 
             {/* ✅ Return button for paused state */}
-            <div className={styles.actionButtons}>
+            {/* <div className={styles.actionButtons}>
               <button 
                 onClick={handleReturnToRoom}
                 className={styles.returnToRoomButton}
@@ -484,7 +484,7 @@ const CompetitionDashboard = ({ params } : { params  : Promise<{competitionId : 
                 <span className={styles.buttonIcon}>🏠</span>
                 Return to Room
               </button>
-            </div>
+            </div> */}
           </div>
         </div>
       );
@@ -515,7 +515,7 @@ const CompetitionDashboard = ({ params } : { params  : Promise<{competitionId : 
           </div>
 
           {/* ✅ Return button for default state */}
-          <div className={styles.actionButtons}>
+          {/* <div className={styles.actionButtons}>
             <button 
               onClick={handleReturnToRoom}
               className={styles.returnToRoomButton}
@@ -523,7 +523,7 @@ const CompetitionDashboard = ({ params } : { params  : Promise<{competitionId : 
               <span className={styles.buttonIcon}>🏠</span>
               Return to Room
             </button>
-          </div>
+          </div> */}
         </div>
       </div>
     );
@@ -681,11 +681,11 @@ const CompetitionDashboard = ({ params } : { params  : Promise<{competitionId : 
   // };
 
   return (
-    <div className={styles.container}>
+    <div className={styles.mainContainer}>
       {/* Header Section */}
       <div className={styles.header}>
         <div className={styles.headerContent}>
-          <div className={styles.titleRow}>
+          {/* <div className={styles.titleRow}> */}
             <h1 className={styles.title}>
               {currentCompetition?.title || 'Competition'}
             </h1>
@@ -699,18 +699,18 @@ const CompetitionDashboard = ({ params } : { params  : Promise<{competitionId : 
               <span className={styles.backIcon}>←</span>
               <span className={styles.backText}>Back to Room</span>
             </button> */}
-          </div>
+          {/* </div> */}
           
-          <div className={styles.statusRow}>
+          {/* <div className={styles.statusRow}> */}
             <p className={styles.status}>
               Status: <span className={styles.statusValue}>{currentCompetition?.status}</span>
             </p>
-            <ConnectionStatus 
+            {/* <ConnectionStatus 
               isConnected={isConnected} 
               connectionStatus={connectionStatus}
               className="ml-4"
-            />
-          </div>
+            /> */}
+          {/* </div> */}
         </div>
       </div>
 
