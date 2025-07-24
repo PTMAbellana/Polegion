@@ -14,7 +14,7 @@ import LimitAttempts from '@/app/virtual-rooms/[roomCode]/create-problem/compone
 import SetVisibility from '@/app/virtual-rooms/[roomCode]/create-problem/components/SetVisibility';
 import ShapeLimitPopup from '@/app/virtual-rooms/[roomCode]/create-problem/components/ShapeLimitPopup';
 
-// ✅ ADD MISSING IMPORT
+// ADD MISSING IMPORT
 import { getRoomProblemsByCode } from '@/api/problems';
 import { createProblem, deleteProblem, getCompeProblem, updateProblem } from '@/api/problems'
 import { submitSolution } from '@/api/attempt';
@@ -37,7 +37,7 @@ interface Problem {
   max_attempts: number
   expected_xp: number
   hint?: string | null
-  // ✅ ADD MISSING PROPERTIES
+  // ADD MISSING PROPERTIES
   expected_solution?: any[]
   timer?: number | null
 }
@@ -110,14 +110,14 @@ export default function Gamepage({
   const [currentProblem, setCurrentProblem] = useState<CompetitionProblem | null>(null);
   const [isLoadingProblem, setIsLoadingProblem] = useState(false);
 
-  // ✅ NEW: Track submission state for competition mode
+  // NEW: Track submission state for competition mode
   const [hasSubmitted, setHasSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // ✅ MEMOIZE COMPETITION ID TO PREVENT UNNECESSARY HOOK CALLS
+  // MEMOIZE COMPETITION ID TO PREVENT UNNECESSARY HOOK CALLS
   const memoizedCompetitionId = useMemo(() => competitionId || 0, [competitionId]);
   
-  // ✅ CONDITIONALLY USE HOOKS TO PREVENT UNNECESSARY API CALLS
+  // CONDITIONALLY USE HOOKS TO PREVENT UNNECESSARY API CALLS
   const shouldUseHooks = !!competitionId && competitionId > 0;
   
   const { 
@@ -140,7 +140,7 @@ export default function Gamepage({
   // Use realtime competition data if available, fallback to props
   const activeCompetition = realtimeCompetition || currentCompetition;
 
-  // ✅ SAFER FETCH PROBLEMS WITH BETTER ERROR HANDLING AND DEBOUNCING
+  // SAFER FETCH PROBLEMS WITH BETTER ERROR HANDLING AND DEBOUNCING
   const fetchProblems = useCallback(async () => {
     // Only fetch problems in non-competition mode AND when we have a valid roomCode
     if (!roomCode || competitionId || typeof roomCode !== 'string' || roomCode.trim() === '') {
@@ -156,14 +156,14 @@ export default function Gamepage({
       console.log('📝 Fetching problems for room:', roomCode);
       const data = await getRoomProblemsByCode(roomCode);
       setProblems(Array.isArray(data) ? data : []);
-      console.log('✅ Problems fetched successfully:', Array.isArray(data) ? data.length : 0);
+      console.log('Problems fetched successfully:', Array.isArray(data) ? data.length : 0);
     } catch (error) {
       console.error("❌ Error fetching problems:", error);
       setProblems([]);
     }
   }, [roomCode, competitionId]);
 
-  // ✅ DEBOUNCED EFFECT TO PREVENT MULTIPLE CALLS
+  // DEBOUNCED EFFECT TO PREVENT MULTIPLE CALLS
   useEffect(() => {
     let timeoutId: NodeJS.Timeout;
     
@@ -178,7 +178,7 @@ export default function Gamepage({
     };
   }, [fetchProblems, competitionId]);
 
-  // ✅ UPDATED: More comprehensive problem fetching with better logging
+  // UPDATED: More comprehensive problem fetching with better logging
   useEffect(() => {
     let timeoutId: NodeJS.Timeout;
     let isCancelled = false;
@@ -196,7 +196,7 @@ export default function Gamepage({
         return;
       }
       
-      // ✅ ENHANCED: Handle different competition states
+      // ENHANCED: Handle different competition states
       if (activeCompetition.status === 'NEW') {
         console.log('⏳ Competition not started yet, waiting...');
         return;
@@ -233,10 +233,10 @@ export default function Gamepage({
           return;
         }
 
-        console.log('✅ Problem data loaded successfully:', problemData);
+        console.log('Problem data loaded successfully:', problemData);
         setCurrentProblem(problemData);
         
-        // ✅ SAFELY POPULATE THE FORM FIELDS
+        // SAFELY POPULATE THE FORM FIELDS
         setTitle(problemData.problem.title || "");
         setPrompt(problemData.problem.description || "");
         setDifficulty(problemData.problem.difficulty || "Easy");
@@ -246,7 +246,7 @@ export default function Gamepage({
         setTimerValue(problemData.timer || 5); 
         setTimerOpen(!!problemData.timer);
         
-        // ✅ CLEAR STUDENT'S SHAPES - THEY CREATE THEIR OWN SOLUTION
+        // CLEAR STUDENT'S SHAPES - THEY CREATE THEIR OWN SOLUTION
         setShapes([]);
         setSelectedId(null);
         
@@ -263,12 +263,12 @@ export default function Gamepage({
       } finally {
         if (!isCancelled) {
           setIsLoadingProblem(false);
-          console.log('✅ Fetch current problem completed');
+          console.log('Fetch current problem completed');
         }
       }
     };
     
-    // ✅ ENHANCED: Better trigger conditions
+    // ENHANCED: Better trigger conditions
     if (competitionId && activeCompetition) {
       console.log('🔄 Competition state changed, scheduling problem fetch...');
       timeoutId = setTimeout(() => {
@@ -284,11 +284,11 @@ export default function Gamepage({
     activeCompetition?.current_problem_id, 
     activeCompetition?.status,
     activeCompetition?.current_problem_index,
-    activeCompetition?.gameplay_indicator, // ✅ NEW: Also watch gameplay changes
+    activeCompetition?.gameplay_indicator, // NEW: Also watch gameplay changes
     competitionId
   ]);
 
-  // ✅ NEW: Force fetch on component mount for page reloads
+  // NEW: Force fetch on component mount for page reloads
   useEffect(() => {
     // Force fetch current problem if we have competition data but no current problem
     // This handles page reloads where the user lands directly on the game page
@@ -306,7 +306,7 @@ export default function Gamepage({
           const problemData = await getCompeProblem(activeCompetition.current_problem_id);
           
           if (problemData && problemData.problem) {
-            console.log('✅ [Reload] Problem data fetched successfully:', problemData);
+            console.log('[Reload] Problem data fetched successfully:', problemData);
             setCurrentProblem(problemData);
             setTitle(problemData.problem.title || "");
             setPrompt(problemData.problem.description || "");
@@ -328,7 +328,7 @@ export default function Gamepage({
     }
   }, [competitionId, activeCompetition?.status, activeCompetition?.current_problem_id, currentProblem, isLoadingProblem]);
 
-  // ✅ ENHANCED: Better competition state transition handling
+  // ENHANCED: Better competition state transition handling
   useEffect(() => {
     console.log('🎮 === COMPETITION STATE CHANGE ===');
     console.log('Status:', activeCompetition?.status);
@@ -337,7 +337,7 @@ export default function Gamepage({
     console.log('Problem index:', activeCompetition?.current_problem_index);
     console.log('Has current problem?', !!currentProblem);
     
-    // ✅ ENHANCED: Handle different state transitions
+    // ENHANCED: Handle different state transitions
     if (activeCompetition?.status === 'ONGOING') {
       if (activeCompetition?.current_problem_id && !currentProblem) {
         console.log('🚀 Competition started or new problem! Force fetching...');
@@ -347,7 +347,7 @@ export default function Gamepage({
             setIsLoadingProblem(true);
             const problemData = await getCompeProblem(activeCompetition.current_problem_id);
             if (problemData && problemData.problem) {
-              console.log('✅ Force fetch successful:', problemData);
+              console.log('Force fetch successful:', problemData);
               setCurrentProblem(problemData);
               setTitle(problemData.problem.title || "");
               setPrompt(problemData.problem.description || "");
@@ -369,7 +369,7 @@ export default function Gamepage({
       }
     }
     
-    // ✅ CLEAR PROBLEM: When competition ends
+    // CLEAR PROBLEM: When competition ends
     if (activeCompetition?.status === 'DONE') {
       console.log('🏁 Competition completed, clearing current problem');
       setCurrentProblem(null);
@@ -415,7 +415,7 @@ export default function Gamepage({
     return (px / 10).toFixed(1);
   };
 
-  // ✅ SAFER SHAPE PROPERTIES CALCULATION
+  // SAFER SHAPE PROPERTIES CALCULATION
   function getShapeProperties(shape: any) {
     try {
       if (shape.type === "square" && shape.points) {
@@ -502,12 +502,12 @@ export default function Gamepage({
     }
   }
 
-  // ✅ ENHANCED: Save/Submit handler with confirmation popup and submission limits
+  // ENHANCED: Save/Submit handler with confirmation popup and submission limits
   const handleSave = async () => {
     console.log("Saving problem...");
     
     if (competitionId && activeCompetition) {
-      // ✅ NEW: Check if already submitted
+      // NEW: Check if already submitted
       if (hasSubmitted) {
         Swal.fire({
           title: "Already Submitted",
@@ -518,12 +518,12 @@ export default function Gamepage({
         return;
       }
 
-      // ✅ NEW: Check if currently submitting
+      // NEW: Check if currently submitting
       if (isSubmitting) {
         return;
       }
 
-      // ✅ NEW: Validate that user created a shape BEFORE confirmation
+      // NEW: Validate that user created a shape BEFORE confirmation
       const shapesWithProps = shapes.map(getShapeProperties);
       if (shapesWithProps.length === 0) {
         Swal.fire({
@@ -535,7 +535,7 @@ export default function Gamepage({
         return;
       }
 
-      // ✅ NEW: Confirmation popup
+      // NEW: Confirmation popup
       const confirmResult = await Swal.fire({
         title: "Submit Solution?",
         html: `
@@ -560,17 +560,17 @@ export default function Gamepage({
         focusCancel: true, // Focus on cancel by default for safety
       });
 
-      // ✅ NEW: If user cancels, return early
+      // NEW: If user cancels, return early
       if (!confirmResult.isConfirmed) {
         return;
       }
 
       // ✨ COMPETITION MODE - SUBMIT SOLUTION
       try {
-        setIsSubmitting(true); // ✅ NEW: Set submitting state
+        setIsSubmitting(true); // NEW: Set submitting state
         
-        // ✅ KEEP ORIGINAL: Don't change calculation logic
-        const totalTimeAllowedInSeconds = (currentProblem?.timer || 5) * 60; // Convert minutes to seconds
+        // KEEP ORIGINAL: Don't change calculation logic
+        const totalTimeAllowedInSeconds = currentProblem?.timer
         const timeSpentInSeconds = totalTimeAllowedInSeconds - timeRemaining;
         const timeTaken = Math.max(0, timeSpentInSeconds); // Ensure non-negative
 
@@ -597,14 +597,14 @@ export default function Gamepage({
           solutionPayload
         );
 
-        console.log("✅ Submission response:", response);
+        console.log("Submission response:", response);
 
         if (response && response.success) {
-          // ✅ NEW: Mark as submitted and save to localStorage
+          // NEW: Mark as submitted and save to localStorage
           setHasSubmitted(true);
           localStorage.setItem(`submitted_${competitionId}_${activeCompetition.current_problem_id}`, 'true');
           
-          // ✅ Enhanced success message with grading details
+          // Enhanced success message with grading details
           const xpGained = response.xp_gained || 0;
           const feedback = response.feedback || response.attempt?.feedback || 'Solution submitted successfully!';
           
@@ -612,7 +612,7 @@ export default function Gamepage({
             title: "Solution Submitted! 🎯",
             html: `
               <div style="text-align: left; margin: 10px;">
-                <p><strong>✅ Submission Status:</strong> Successfully submitted!</p>
+                <p><strong>Submission Status:</strong> Successfully submitted!</p>
                 <p><strong>📝 Feedback:</strong> ${feedback}</p>
                 <p><strong>🏆 XP Gained:</strong> +${xpGained} XP</p>
                 <p><strong>⏱️ Time Taken:</strong> ${Math.round(timeTaken)}s</p>
@@ -627,7 +627,7 @@ export default function Gamepage({
             allowOutsideClick: false
           });
           
-          // ✅ Don't clear shapes so student can see their submitted solution
+          // Don't clear shapes so student can see their submitted solution
           setSelectedId(null);
         } else {
           throw new Error(response?.message || 'Submission failed');
@@ -635,10 +635,10 @@ export default function Gamepage({
       } catch (error: any) {
         console.error("❌ Submit error:", error);
         
-        // ✅ NEW: Reset submitting state on error
+        // NEW: Reset submitting state on error
         setIsSubmitting(false);
         
-        // ✅ Better error handling
+        // Better error handling
         let errorMessage = "Failed to submit solution. Please try again.";
         
         if (error?.message) {
@@ -654,12 +654,12 @@ export default function Gamepage({
           confirmButtonText: "Try Again",
         });
       } finally {
-        setIsSubmitting(false); // ✅ NEW: Always reset submitting state
+        setIsSubmitting(false); // NEW: Always reset submitting state
       }
       return;
     }
 
-    // ✅ KEEP ORIGINAL: Regular mode - create/edit problem (unchanged)
+    // KEEP ORIGINAL: Regular mode - create/edit problem (unchanged)
     try {
       const shapesWithProps = shapes.map(getShapeProperties);
 
@@ -768,7 +768,7 @@ export default function Gamepage({
     }
   }, [shapes.length, handleAllShapesDeleted]);
 
-  // ✅ REDUCED TIMER DEBUG LOGGING TO PREVENT SPAM
+  // REDUCED TIMER DEBUG LOGGING TO PREVENT SPAM
   useEffect(() => {
     if (competitionId && activeCompetition && timeRemaining > 0) {
       // Only log every 10 seconds to reduce console spam
@@ -783,7 +783,7 @@ export default function Gamepage({
     }
   }, [competitionId, activeCompetition, timeRemaining, formattedTime, isExpired, isPaused]);
 
-  // ✅ LOADING STATE FOR COMPETITION MODE
+  // LOADING STATE FOR COMPETITION MODE
   // if (competitionId && isLoadingProblem) {
   //   return (
   //     <div className={styles.loadingContainer}>
@@ -792,7 +792,7 @@ export default function Gamepage({
   //   );
   // }
 
-  // ✅ NEW: Check submission status from localStorage (fixes refresh bug)
+  // NEW: Check submission status from localStorage (fixes refresh bug)
   useEffect(() => {
     if (competitionId && activeCompetition?.current_problem_id) {
       const submissionKey = `submitted_${competitionId}_${activeCompetition.current_problem_id}`;
@@ -809,7 +809,7 @@ export default function Gamepage({
     }
   }, [competitionId, activeCompetition?.current_problem_id]);
 
-  // ✅ NEW: Reset submission state when problem changes (but keep localStorage)
+  // NEW: Reset submission state when problem changes (but keep localStorage)
   useEffect(() => {
     if (competitionId && activeCompetition?.current_problem_id) {
       // Check if this is a different problem
@@ -925,7 +925,7 @@ export default function Gamepage({
               <button 
                 className={`${styles.saveBtn} ${styles.rowBtn} ${styles.saveBtnFloating}`} 
                 onClick={handleSave}
-                disabled={competitionId && (hasSubmitted || isSubmitting)} // ✅ NEW: Disable after submission
+                disabled={competitionId && (hasSubmitted || isSubmitting)} // NEW: Disable after submission
                 style={{
                   opacity: competitionId && (hasSubmitted || isSubmitting) ? 0.5 : 1,
                   cursor: competitionId && (hasSubmitted || isSubmitting) ? 'not-allowed' : 'pointer',
@@ -935,7 +935,7 @@ export default function Gamepage({
                 {(() => {
                   if (competitionId) {
                     if (isSubmitting) return "Submitting...";
-                    if (hasSubmitted) return "✅ Submitted";
+                    if (hasSubmitted) return "Submitted";
                     return "Submit Solution";
                   }
                   return "Save";
@@ -954,7 +954,7 @@ export default function Gamepage({
             showHeight={showHeight}
           />
           
-          {/* ✅ FIXED: Progress bar with correct logic */}
+          {/* FIXED: Progress bar with correct logic */}
           {competitionId && activeCompetition && currentProblem?.timer && (
             <div className={styles.timerProgress} style={{ position: 'relative', width: '100%', marginTop: '16px' }}>
               {/* Progress bar container */}
@@ -986,7 +986,7 @@ export default function Gamepage({
                     zIndex: 2,
                     transition: 'width 0.5s ease-out',
                     width: `${(() => {
-                      // ✅ FIXED: Remove * 60 multiplication - timer is already in seconds
+                      // FIXED: Remove * 60 multiplication - timer is already in seconds
                       if (!currentProblem?.timer) return 0;
                       
                       const totalSeconds = currentProblem.timer; // Already in seconds, don't multiply by 60!
@@ -1007,7 +1007,7 @@ export default function Gamepage({
                       return Math.max(0, Math.min(100, percentage));
                     })()}%`,
                     backgroundColor: (() => {
-                      // ✅ FIXED: Remove * 60 multiplication
+                      // FIXED: Remove * 60 multiplication
                       if (!currentProblem?.timer) return '#6b7280';
                       
                       const totalSeconds = currentProblem.timer; // Already in seconds
@@ -1037,7 +1037,7 @@ export default function Gamepage({
                 />
               </div>
               
-              {/* ✅ NEW: Countdown timer display */}
+              {/* NEW: Countdown timer display */}
               <div style={{
                 marginTop: '12px',
                 textAlign: 'center',
@@ -1067,7 +1067,7 @@ export default function Gamepage({
                 })()}
               </div>
               
-              {/* ✅ OPTIONAL: Percentage display */}
+              {/* OPTIONAL: Percentage display */}
               <div style={{
                 marginTop: '4px',
                 textAlign: 'center',
@@ -1081,7 +1081,7 @@ export default function Gamepage({
                     if (isExpired) return '0%';
                     return '0%';
                   }
-                  // ✅ FIXED: Remove * 60 multiplication
+                  // FIXED: Remove * 60 multiplication
                   return `${Math.round((timeRemaining / currentProblem.timer) * 100)}%`;
                 })()}
               </div>
@@ -1158,7 +1158,7 @@ export default function Gamepage({
         <ShapeLimitPopup onClose={() => setShowLimitPopup(false)} />
       )}
 
-      {/* ✅ NEW: Submission status indicator */}
+      {/* NEW: Submission status indicator */}
       {competitionId && hasSubmitted && (
         <div style={{
           marginTop: '12px',
@@ -1171,7 +1171,7 @@ export default function Gamepage({
           fontWeight: '600',
           boxShadow: '0 2px 4px rgba(16, 185, 129, 0.3)'
         }}>
-          ✅ Solution Submitted Successfully
+          Solution Submitted Successfully
         </div>
       )}
     </div>

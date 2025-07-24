@@ -508,36 +508,58 @@ class GradingService {
         console.log('⏰ Time spent:', timeSpent, 'seconds');
         console.log('⏱️ Time limit:', timeLimit, 'seconds');
         
+        // ✅ VALIDATE: Check for invalid time data
         if (timeSpent <= 0 || timeLimit <= 0) {
             console.log('⚠️ Invalid time data, no time bonus');
             return 0;
         }
         
+        // ✅ VALIDATE: Check for impossible values
+        if (timeSpent < 0) {
+            console.log('❌ Negative time spent, no time bonus');
+            return 0;
+        }
+        
+        if (timeSpent > timeLimit * 2) {
+            console.log('❌ Time spent is way over limit, suspicious data');
+            return 0;
+        }
+        
         const timeRatio = timeSpent / timeLimit;
-        console.log('📊 Time ratio:', timeRatio.toFixed(2));
+        console.log('📊 Time ratio (timeSpent/timeLimit):', timeRatio.toFixed(3));
         
         let timeBonus = 0;
         
-        if (timeRatio <= 0.5) {
-            // Completed in 50% or less of time limit
-            timeBonus = 0.3;
-            console.log('🚀 Excellent time! 30% bonus');
-        } else if (timeRatio <= 0.7) {
-            // Completed in 70% or less of time limit
-            timeBonus = 0.2;
-            console.log('⚡ Great time! 20% bonus');
-        } else if (timeRatio <= 0.85) {
-            // Completed in 85% or less of time limit
-            timeBonus = 0.1;
-            console.log('👍 Good time! 10% bonus');
+        if (timeRatio <= 0.25) {
+            // Completed in 25% or less of time limit - AMAZING!
+            timeBonus = 0.25;
+            console.log('🚀 LIGHTNING FAST! 25% time bonus (completed in ≤25% of time)');
+        } else if (timeRatio <= 0.40) {
+            // Completed in 40% or less of time limit - EXCELLENT!
+            timeBonus = 0.20;
+            console.log('⚡ EXCELLENT speed! 20% time bonus (completed in ≤40% of time)');
+        } else if (timeRatio <= 0.60) {
+            // Completed in 60% or less of time limit - VERY GOOD!
+            timeBonus = 0.15;
+            console.log('🏃 VERY GOOD speed! 15% time bonus (completed in ≤60% of time)');
+        } else if (timeRatio <= 0.80) {
+            // Completed in 80% or less of time limit - GOOD!
+            timeBonus = 0.10;
+            console.log('👍 GOOD speed! 10% time bonus (completed in ≤80% of time)');
         } else if (timeRatio <= 1.0) {
-            // Completed within time limit
+            // Completed within time limit but slower
             timeBonus = 0.05;
-            console.log('✅ Within time limit! 5% bonus');
+            console.log('✅ Within time limit! 5% time bonus (completed in 80-100% of time)');
         } else {
-            // Overtime
+            // Overtime - NO BONUS, might even penalize
             timeBonus = 0;
-            console.log('⏳ Overtime, no time bonus');
+            console.log('⏳ OVERTIME! No time bonus (took longer than time limit)');
+            
+            // ✅ OPTIONAL: Add time penalty for going way over
+            if (timeRatio > 1.5) {
+                timeBonus = -0.1; // 10% penalty for taking 50% longer than allowed
+                console.log('⚠️ MAJOR OVERTIME! -10% time penalty');
+            }
         }
         
         return timeBonus;
