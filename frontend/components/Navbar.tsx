@@ -133,6 +133,12 @@ const Navbar = () => {
                                         <span className={styles["nav-text"]}>Virtual Rooms</span>
                                     </Link>
                                 </li>
+                                <li className={isActive(ROUTES.WORLD_MAP) ? styles.active : ""}>
+                                    <Link href={ROUTES.WORLD_MAP} title="World Map">
+                                        <FaDoorOpen className={styles["nav-icon"]} />
+                                        <span className={styles["nav-text"]}>World Map</span>
+                                    </Link>
+                                </li>
                                 <li className={isActive(ROUTES.LEADERBOARD) ? styles.active : ""}>
                                     <Link href={ROUTES.LEADERBOARD} title="Leaderboard">
                                         <FaTrophy className={styles["nav-icon"]} />

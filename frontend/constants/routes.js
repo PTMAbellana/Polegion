@@ -12,6 +12,9 @@ export const ROUTES = {
     VIRTUAL_ROOMS: '/virtual-rooms',
     JOINED_ROOMS: '/virtual-rooms/join',
 
+    //world map
+    WORLD_MAP: '/world-map',
+
     //competition
     COMPETITION: '/competition',
     PLAY: '/competition/play',
