@@ -5,7 +5,7 @@ import { useMyApp } from "@/context/AppUtils";
 import { logout } from "@/api/auth";
 import { useRouter, usePathname } from "next/navigation";
 import toast from "react-hot-toast";
-import { FaHome, FaDoorOpen, FaTrophy, FaUser, FaSignOutAlt, FaBars, FaTimes } from 'react-icons/fa';
+import { FaHome, FaDoorOpen, FaTrophy, FaUser, FaSignOutAlt, FaBars, FaTimes, FaGlobeAmericas } from 'react-icons/fa';
 import styles from '@/styles/navbar.module.css';
 
 import { ROUTES } from '@/constants/routes'
@@ -135,7 +135,7 @@ const Navbar = () => {
                                 </li>
                                 <li className={isActive(ROUTES.WORLD_MAP) ? styles.active : ""}>
                                     <Link href={ROUTES.WORLD_MAP} title="World Map">
-                                        <FaDoorOpen className={styles["nav-icon"]} />
+                                        <FaGlobeAmericas className={styles["nav-icon"]} />
                                         <span className={styles["nav-text"]}>World Map</span>
                                     </Link>
                                 </li>
