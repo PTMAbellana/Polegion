@@ -9,6 +9,7 @@ import { FaHome, FaDoorOpen, FaTrophy, FaUser, FaSignOutAlt, FaBars, FaTimes } f
 import styles from '@/styles/navbar.module.css';
 
 import { ROUTES } from '@/constants/routes'
+import Swal from "sweetalert2";
 
 const Navbar = () => {
     const { 
@@ -38,19 +39,87 @@ const Navbar = () => {
     }, []);
 
     const handleLogout = async () => {
-        console.log('clicked 0')
-        try{
-            await logout()
-            contextLogout()
-            
-            toast.success("Logged out successfully")
-            router.push(ROUTES.HOME)
-            
-        } catch (error){
-            console.log('Logout error: ', error)
-            contextLogout()
-            toast.error('Error during logout, session cleared')
-            router.push(ROUTES.HOME)
+        // Show SweetAlert confirmation dialog
+        const result = await Swal.fire({
+            title: 'Are you sure?',
+            text: 'Do you want to logout from your account?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#ef4444',
+            cancelButtonColor: '#6b7280',
+            confirmButtonText: 'Yes, logout!',
+            cancelButtonText: 'Cancel',
+            reverseButtons: true,
+            customClass: {
+                popup: 'swal-popup',
+                title: 'swal-title',
+                content: 'swal-content',
+                confirmButton: 'swal-confirm-btn',
+                cancelButton: 'swal-cancel-btn'
+            },
+            showClass: {
+                popup: 'animate__animated animate__fadeInDown animate__faster'
+            },
+            hideClass: {
+                popup: 'animate__animated animate__fadeOutUp animate__faster'
+            }
+        });
+
+        // If user confirmed logout
+        if (result.isConfirmed) {
+            // Show loading indicator
+            Swal.fire({
+                title: 'Logging out...',
+                text: 'Please wait while we sign you out.',
+                icon: 'info',
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                showConfirmButton: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            try {
+                await logout();
+                contextLogout();
+                
+                // Close loading and show success
+                Swal.fire({
+                    title: 'Logged out!',
+                    text: 'You have been successfully logged out.',
+                    icon: 'success',
+                    confirmButtonColor: '#10b981',
+                    confirmButtonText: 'OK',
+                    timer: 2000,
+                    timerProgressBar: true,
+                    showClass: {
+                        popup: 'animate__animated animate__fadeInDown animate__faster'
+                    },
+                    hideClass: {
+                        popup: 'animate__animated animate__fadeOutUp animate__faster'
+                    }
+                });
+                
+                toast.success("Logged out successfully");
+                router.push(ROUTES.HOME);
+                
+            } catch (error) {
+                console.log('Logout error: ', error);
+                contextLogout();
+                
+                // Show error alert
+                Swal.fire({
+                    title: 'Logout Error',
+                    text: 'There was an error during logout, but your session has been cleared.',
+                    icon: 'warning',
+                    confirmButtonColor: '#f59e0b',
+                    confirmButtonText: 'OK'
+                });
+                
+                toast.error('Error during logout, session cleared');
+                router.push(ROUTES.HOME);
+            }
         }
     };
 

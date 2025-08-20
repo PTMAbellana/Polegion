@@ -5,6 +5,8 @@ import { AppUtilsProvider } from "@/context/AppUtils";
 import { Toaster } from "react-hot-toast";
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
+import AppProvider from '@/components/providers/AppProvider';
+
 export const metadata: Metadata = {
   title: "Polegion",
   description: "Your geometry visualizer!",
@@ -12,9 +14,9 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
     <html lang="en">
       <head>
@@ -23,12 +25,14 @@ export default function RootLayout({
       </head>
       <body>
       <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;700&display=swap" rel="stylesheet" />
-        <AppUtilsProvider>
-          <Navbar/>
-          <Toaster/>
-          {children}
-        </AppUtilsProvider>
-        <Footer />
+        <AppProvider>
+          <AppUtilsProvider>
+            <Navbar/>
+            <Toaster/>
+            {children}
+          </AppUtilsProvider>
+          <Footer />
+        </AppProvider>
       </body>
     </html>
   );

@@ -12,10 +12,10 @@ import { getAllParticipants } from '@/api/participants';
 import { getCompeById, startCompetition, nextProblem, pauseCompetition, resumeCompetition } from '@/api/competitions';
 import { useCompetitionRealtime } from '@/hooks/useCompetitionRealtime';
 import { useCompetitionTimer } from '@/hooks/useCompetitionTimer';
-import { ConnectionStatus } from '@/components/ConnectionStatus';
-import { RealtimeDebug } from '@/components/RealtimeDebug';
-import { RealtimeTestButtons } from '@/components/RealtimeTestButtons';
-import RealtimeTestComponent from '@/components/RealtimeTestComponent';
+import { ConnectionStatus } from '@/components/debug/ConnectionStatus';
+import { RealtimeDebug } from '@/components/debug/RealtimeDebug';
+import { RealtimeTestButtons } from '@/components/debug/RealtimeTestButtons';
+import RealtimeTestComponent from '@/components/debug/RealtimeTestComponent';
 
 interface Participant {
   id: number;

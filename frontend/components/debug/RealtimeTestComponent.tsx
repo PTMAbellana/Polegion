@@ -1,8 +1,8 @@
 // TEST COMPONENT - Add this to your admin page temporarily to test real-time updates
 import React from 'react';
-import { supabase } from '../lib/supabaseClient';
-import { startCompetition, pauseCompetition, resumeCompetition } from '../api/competitions';
-import { useMyApp } from '../context/AppUtils';
+import { supabase } from '../../lib/supabaseClient';
+import { startCompetition, pauseCompetition, resumeCompetition } from '../../api/competitions';
+import { useMyApp } from '../../context/AppUtils';
 import { getCompeProblems } from '@/api/problems';
 
 const RealtimeTestComponent = ({ competitionId }: { competitionId: string }) => {

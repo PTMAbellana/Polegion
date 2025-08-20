@@ -41,7 +41,8 @@ export function AuthProtection () {
                 // Redirect to dashboard if authenticated and on login or register page
                 if (
                     isLoggedIn &&
-                    (pathname === ROUTES.LOGIN || pathname === ROUTES.REGISTER)
+                    PUBLIC_ROUTES.includes(pathname)
+                    // (pathname === ROUTES.LOGIN || pathname === ROUTES.REGISTER)
                 ) {
                     console.log("Redirecting to dashboard: User is logged in and on login/register page")
                     router.replace(ROUTES.DASHBOARD)
