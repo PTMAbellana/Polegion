@@ -1,4 +1,4 @@
-import { supabase } from './supabaseClient';
+import { supabase } from '../supabaseClient';
 
 // Debug utility to test realtime connection
 export const debugRealtimeConnection = async () => {

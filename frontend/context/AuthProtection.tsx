@@ -1,9 +1,9 @@
 "use client"
 
 import { usePathname, useRouter } from "next/navigation"
-import { useMyApp } from "./AppUtils"
 import { useEffect, useState } from "react"
 import { ROUTES, PUBLIC_ROUTES } from '@/constants/routes'
+import { useAuthStore } from "@/store/authStore"
 
 export function AuthProtection () {
     const {
@@ -11,7 +11,7 @@ export function AuthProtection () {
         authLoading,
         appLoading,
         authToken
-    } = useMyApp()
+    } = useAuthStore()
 
     const [localLoading, setLocalLoading] = useState(true)
     const router = useRouter()

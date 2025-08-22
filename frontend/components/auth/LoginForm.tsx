@@ -6,7 +6,6 @@ import * as yup from 'yup';
 import toast from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
-import { login } from '@/api/auth';
 import { useAuthStore } from '@/store/authStore';
 import { ROUTES } from '@/constants/routes';
 import styles from '@/styles/login.module.css';
@@ -30,7 +29,7 @@ interface LoginFormProps {
 
 export default function LoginForm({ onForgotPassword }: LoginFormProps) {
   const router = useRouter();
-  const { setAuthToken, setUserProfile, setIsLoggedIn } = useAuthStore();
+  const { login } = useAuthStore(); 
   
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
@@ -44,38 +43,16 @@ export default function LoginForm({ onForgotPassword }: LoginFormProps) {
   });
 
   const onSubmit = async (formdata: LoginFormData) => {
-    try {
-      const { email, password } = formdata;
-      const response = await login(email, password);
-
-      if (response?.data?.session?.access_token) {
-        setAuthToken(response.data.session.access_token);
-
-        if (rememberMe) {
-          localStorage.setItem("remember_user", "true");
-        }
-
-        if (response.data.user) {
-          setUserProfile({
-            id: response.data.user.id,
-            email: response.data.user.email,
-            fullName: response.data.user.user_metadata?.fullName,
-            gender: response.data.user.user_metadata?.gender,
-            phone: response.data.user.user_metadata?.phone,
-          });
-        }
-
-        setIsLoggedIn(true);
-        toast.success("Login successful!");
-        router.replace(ROUTES.DASHBOARD);
-      } else {
-        toast.error("Invalid login response");
-      }
-    } catch (error: any) {
-      console.error("Login error: ", error);
-      toast.error(
-        error?.response?.data?.error || "An error occurred during login"
-      );
+    const { email, password } = formdata;
+    
+    // ✨ Use the Zustand login action
+    const result = await login(email, password, rememberMe);
+    
+    if (result.success) {
+      toast.success("Login successful!");
+      router.replace(ROUTES.DASHBOARD);
+    } else {
+      toast.error(result.error || "Login failed");
     }
   };
 

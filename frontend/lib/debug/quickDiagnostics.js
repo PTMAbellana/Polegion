@@ -1,4 +1,4 @@
-import { supabase } from '../lib/supabaseClient';
+import { supabase } from '../supabaseClient';
 
 // Simple test to see if basic Supabase connection works
 export const testBasicConnection = async () => {

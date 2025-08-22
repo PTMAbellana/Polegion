@@ -2,7 +2,6 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Head from "next/head";
-import Loader from "@/components/Loader";
 import LoginForm from "@/components/auth/LoginForm";
 import SocialAuth from "@/components/auth/SocialAuth";
 import ForgotPasswordModal from "@/components/auth/ForgotPasswordModal";

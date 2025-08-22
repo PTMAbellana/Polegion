@@ -1,7 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { useMyApp } from "@/context/AppUtils";
 import { logout } from "@/api/auth";
 import { useRouter, usePathname } from "next/navigation";
 import toast from "react-hot-toast";
@@ -10,12 +9,14 @@ import styles from '@/styles/navbar.module.css';
 
 import { ROUTES } from '@/constants/routes'
 import Swal from "sweetalert2";
+import { useAuthStore } from "@/store/authStore";
 
 const Navbar = () => {
-    const { 
-        isLoggedIn, 
-        logout: contextLogout 
-    } = useMyApp();
+    // const { 
+    //     isLoggedIn, 
+    //     logout: contextLogout 
+    // } = useMyApp();
+    const {isLoggedIn, logout: contextLogout} = useAuthStore();
     const router = useRouter();
     const pathname = usePathname();
     const [isCollapsed, setIsCollapsed] = useState(true);
@@ -81,7 +82,7 @@ const Navbar = () => {
             });
 
             try {
-                await logout();
+                logout();
                 contextLogout();
                 
                 // Close loading and show success

@@ -1,4 +1,4 @@
-import { supabase } from '../lib/supabaseClient';
+import { supabase } from '../supabaseClient';
 
 // Test realtime by making actual database changes
 export const testRealtimeWithActualChanges = async (competitionId) => {
