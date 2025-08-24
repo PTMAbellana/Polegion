@@ -1,5 +1,7 @@
 import { UserProfileDTO } from '../dto';
 
+import { RegisterFormData } from '../auth';
+
 export interface AuthState {
     // Data
     isLoggedIn: boolean;
@@ -23,6 +25,8 @@ export interface AuthState {
     login: (email: string, password: string, rememberMe?: boolean) => Promise<AuthActionResult>;
     refreshUserSession: () => Promise<boolean>;
     logout: () => void;
+    register: (data: RegisterFormData) => Promise<AuthActionResult>;
+    resetPassword: (token: string, password: string) => Promise<AuthActionResult>;
     initialize: () => Promise<void>;
 }
 

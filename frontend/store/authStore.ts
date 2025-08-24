@@ -2,8 +2,9 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { authUtils } from '@/api/axios';
 import { getUserProfile } from '@/api/users';
-import { login as apiLogin } from '@/api/auth';
-import { AuthState, UserProfileDTO } from '@/types'; 
+import { login as apiLogin, register as apiRegister, resetPassword as apiResetPassword } from '@/api/auth';
+import { AuthState, UserProfileDTO, RegisterFormData } from '@/types'; 
+import api from '@/api/axios';
 
 export const useAuthStore = create<AuthState>()(
     persist(
@@ -62,6 +63,50 @@ export const useAuthStore = create<AuthState>()(
                     return { 
                         success: false, 
                         error: error?.response?.data?.error || "An error occurred during login" 
+                    };
+                } finally {
+                    set({ loginLoading: false });
+                }
+            },
+
+            register: async (formData: RegisterFormData) => {
+                set({ loginLoading: true });
+                try {
+                    const response = await apiRegister(formData);
+                    if (response) {
+                        return { success: true };
+                    } else {
+                        return { success: false, error: "Failed to register user" };
+                    }
+                } catch (error: any) {
+                    console.error('Register Error: ', error);
+                    return {
+                        success: false,
+                        error: error?.response?.data?.error || "An error occurred during registration"
+                    };
+                } finally {
+                    set({ loginLoading: false });
+                }
+            },
+
+            resetPassword: async (token: string, password: string) => {
+                set({ loginLoading: true });
+                try {
+                    const response = await api.post('/auth/reset-password/confirm', {
+                        token,
+                        password
+                    });
+                    
+                    if (response.status === 200) {
+                        return { success: true };
+                    } else {
+                        return { success: false, error: "Failed to reset password" };
+                    }
+                } catch (error: any) {
+                    console.error('Error resetting password:', error);
+                    return {
+                        success: false,
+                        error: error?.response?.data?.error || 'An error occurred while resetting your password'
                     };
                 } finally {
                     set({ loginLoading: false });
