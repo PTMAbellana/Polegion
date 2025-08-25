@@ -20,24 +20,3 @@ export interface ResetPasswordFormData {
 export interface ForgotPasswordFormData {
   email: string;
 }
-
-// Component Props
-export interface AuthFormProps {
-  onSubmit: (data: any) => void;
-  isSubmitting: boolean;
-}
-
-export interface PasswordInputProps {
-  name: string;
-  placeholder: string;
-  register: any;
-  error?: string;
-  showPassword: boolean;
-  onToggleVisibility: () => void;
-}
-
-export interface EmailInputProps {
-  register: any;
-  error?: string;
-  placeholder?: string;
-}

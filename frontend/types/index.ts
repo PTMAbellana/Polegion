@@ -12,3 +12,6 @@ export * from './api';
 
 // Common Types
 export * from './common';
+
+// Props Types
+export * from './props';

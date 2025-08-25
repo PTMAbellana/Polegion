@@ -3,9 +3,14 @@ import { FaGithub } from 'react-icons/fa';
 import { FcGoogle } from 'react-icons/fc';
 import { supabase } from '@/lib/supabaseClient';
 import styles from '@/styles/login.module.css';
+import { SocialAuthProps } from '@/types';
 
-export default function SocialAuth() {
-  const handleSocialOauth = async (provider: "google" | "github") => {
+export default function SocialAuth( { type} : SocialAuthProps) {
+    const text = type === "login" ? "OR LOGIN WITH" 
+                : type === 'register' ? "OR REGISTER WITH" 
+                : "OR";
+    
+    const handleSocialOauth = async (provider: "google" | "github") => {
     try {
       await supabase.auth.signInWithOAuth({
         provider,
@@ -19,7 +24,9 @@ export default function SocialAuth() {
     <>
       <div className={styles.socialDivider}>
         <div className={styles.dividerLine}></div>
-        <span className={styles.dividerText}>OR</span>
+        <span className={styles.dividerText}>
+          {text}
+        </span>
         <div className={styles.dividerLine}></div>
       </div>
 

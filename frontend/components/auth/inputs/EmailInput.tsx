@@ -1,5 +1,5 @@
-import { EmailInputProps } from '@/types/auth';
 import styles from '@/styles/login.module.css';
+import { EmailInputProps } from '@/types';
 
 export default function EmailInput({ register, error, placeholder = "Enter your email" }: EmailInputProps) {
   return (

@@ -68,7 +68,7 @@ export default function Login() {
 
             <LoginForm onForgotPassword={handleForgotPassword} />
 
-            <SocialAuth />
+            <SocialAuth type="login" />
 
             <p className={styles.registerPrompt}>
               Don&lsquo;t have an Account?{" "}

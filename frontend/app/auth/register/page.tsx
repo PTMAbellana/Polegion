@@ -38,13 +38,7 @@ export default function Register() {
 
             <RegisterForm />
 
-            <div className={styles.socialDivider}>
-              <div className={styles.dividerLine}></div>
-              <span className={styles.dividerText}>OR REGISTER WITH</span>
-              <div className={styles.dividerLine}></div>
-            </div>
-
-            <SocialAuth />
+            <SocialAuth type="register" />
 
             <p className={styles.loginPrompt}>
               Already have an account?{" "}
