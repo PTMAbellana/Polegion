@@ -1,0 +1,611 @@
+/* Main container */
+.castleContainer {
+  min-height: 100vh;
+  background: linear-gradient(to bottom, #fffbeb, #fed7aa);
+  padding: 1.5rem;
+  box-sizing: border-box;
+}
+
+/* Header section */
+.castleHeader {
+  max-width: 72rem;
+  margin: 0 auto 1.5rem;
+}
+
+.castleHeaderContent {
+  background: linear-gradient(to right, #92400e, #ea580c);
+  color: white;
+  padding: 1.5rem;
+  border-radius: 1rem 1rem 0 0;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+.castleHeaderFlex {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.castleHeaderLeft {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.castleEmoji {
+  font-size: 2.25rem;
+  line-height: 2.5rem;
+}
+
+.castleTitle {
+  font-size: 1.875rem;
+  line-height: 2.25rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.castleSubtitle {
+  color: #fde68a;
+  margin: 0;
+}
+
+.castleProgressInfo {
+  text-align: right;
+}
+
+.castleProgressLabel {
+  color: #fde68a;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+}
+
+.castleProgressNumbers {
+  font-size: 1.5rem;
+  line-height: 2rem;
+  font-weight: 700;
+}
+
+/* Progress bar */
+.castleProgressContainer {
+  background: white;
+  padding: 1rem;
+  border-left: 4px solid #92400e;
+  border-right: 4px solid #92400e;
+}
+
+.castleProgressBar {
+  width: 100%;
+  background: #fde68a;
+  border-radius: 9999px;
+  height: 0.75rem;
+}
+
+.castleProgressFill {
+  background: linear-gradient(to right, #d97706, #ea580c);
+  height: 0.75rem;
+  border-radius: 9999px;
+  transition: all 0.5s ease;
+}
+
+/* Main content */
+.castleMain {
+  max-width: 72rem;
+  margin: 0 auto;
+}
+
+.castleContentWrapper {
+  background: white;
+  border-radius: 1rem;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  border: 4px solid #92400e;
+  overflow: hidden;
+}
+
+/* Tutorial area */
+.castleTutorialArea {
+  display: flex;
+  flex-direction: column;
+  min-height: 600px;
+}
+
+@media (min-width: 1024px) {
+  .castleTutorialArea {
+    flex-direction: row;
+  }
+}
+
+/* Character dialogue */
+.castleCharacterSection {
+  background: linear-gradient(to bottom, #fef3c7, #fed7aa);
+  padding: 1.5rem;
+  border-right: 4px solid #92400e;
+}
+
+@media (min-width: 1024px) {
+  .castleCharacterSection {
+    width: 33.333333%;
+  }
+  
+  .castleCharacterSection.right {
+    order: 2;
+  }
+  
+  .castleCharacterSection.left {
+    order: 1;
+  }
+}
+
+.castleCharacterContent {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Character avatar */
+.castleCharacterAvatarSection {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.castleCharacterAvatar {
+  width: 8rem;
+  height: 8rem;
+  margin: 0 auto;
+  background: linear-gradient(to bottom right, #d97706, #ea580c);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 3.75rem;
+  line-height: 1;
+  color: white;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  border: 4px solid #92400e;
+}
+
+.castleCharacterName {
+  font-size: 1.5rem;
+  line-height: 2rem;
+  font-weight: 700;
+  color: #92400e;
+  margin-top: 0.75rem;
+  margin-bottom: 0;
+}
+
+.castleCharacterRole {
+  color: #d97706;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  margin: 0;
+}
+
+/* Dialogue box */
+.castleDialogueBox {
+  flex: 1;
+  background: white;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  border: 2px solid #b45309;
+  position: relative;
+}
+
+.castleDialogueArrowLeft {
+  position: absolute;
+  left: -5px;
+  top: 2rem;
+  width: 0;
+  height: 0;
+  border-left: 20px solid transparent;
+  border-right: 20px solid transparent;
+  border-bottom: 20px solid white;
+}
+
+.castleDialogueArrowRight {
+  position: absolute;
+  right: -5px;
+  top: 2rem;
+  width: 0;
+  height: 0;
+  border-left: 20px solid transparent;
+  border-right: 20px solid transparent;
+  border-bottom: 20px solid white;
+}
+
+.castleDialogueTitle {
+  font-size: 1.25rem;
+  line-height: 1.75rem;
+  font-weight: 700;
+  color: #92400e;
+  margin-bottom: 0.75rem;
+  margin-top: 0;
+}
+
+.castleDialogueText {
+  color: #374151;
+  line-height: 1.625;
+  font-size: 1.125rem;
+  margin: 0;
+}
+
+.castleInstructionBox {
+  margin-top: 1rem;
+  padding: 0.75rem;
+  background: #eff6ff;
+  border-left: 4px solid #3b82f6;
+  border-radius: 0.25rem;
+}
+
+.castleInstructionText {
+  color: #1d4ed8;
+  font-weight: 600;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  margin: 0;
+}
+
+/* Interactive canvas area */
+.castleCanvasSection {
+  background: linear-gradient(to bottom right, #f5f5f4, #fef3c7);
+}
+
+@media (min-width: 1024px) {
+  .castleCanvasSection {
+    width: 66.666667%;
+  }
+  
+  .castleCanvasSection.left {
+    order: 1;
+  }
+  
+  .castleCanvasSection.right {
+    order: 2;
+  }
+}
+
+.castleCanvasContent {
+  padding: 1.5rem;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.castleCanvasHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.castleCanvasTitle {
+  font-size: 1.25rem;
+  line-height: 1.75rem;
+  font-weight: 700;
+  color: #1c1917;
+}
+
+.castleResetButton {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  background: #d97706;
+  color: white;
+  border-radius: 0.5rem;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.castleResetButton:hover {
+  background: #b45309;
+}
+
+.castleCanvasWrapper {
+  flex: 1;
+  background: white;
+  border-radius: 0.75rem;
+  box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);
+  border: 2px solid #d6d3d1;
+  overflow: hidden;
+}
+
+.castleCanvas {
+  width: 100%;
+  height: 100%;
+  border-radius: 0.75rem;
+  cursor: pointer;
+}
+
+/* Completion section */
+.castleCompletionSection {
+  margin-top: 1.5rem;
+  text-align: center;
+}
+
+.castleCompletionEmoji {
+  font-size: 3.75rem;
+  line-height: 1;
+  margin-bottom: 1rem;
+}
+
+.castleCompletionTitle {
+  font-size: 1.5rem;
+  line-height: 2rem;
+  font-weight: 700;
+  color: #92400e;
+  margin-bottom: 0.5rem;
+  margin-top: 0;
+}
+
+.castleCompletionText {
+  color: #4b5563;
+  margin: 0;
+}
+
+.castleCompletionBadges {
+  margin-top: 1rem;
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+}
+
+.castleBadgeGreen {
+  padding: 0.25rem 0.75rem;
+  background: #dcfce7;
+  color: #166534;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  font-weight: 600;
+}
+
+.castleBadgeBlue {
+  padding: 0.25rem 0.75rem;
+  background: #dbeafe;
+  color: #1e40af;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  font-weight: 600;
+}
+
+/* Navigation controls */
+.castleNavigation {
+  background: #92400e;
+  padding: 1rem;
+}
+
+.castleNavigationFlex {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.castleNavButton {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background: #d97706;
+  color: white;
+  border-radius: 0.5rem;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background-color 0.2s ease;
+}
+
+.castleNavButton:hover:not(:disabled) {
+  background: #b45309;
+}
+
+.castleNavButton:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+}
+
+.castleNavCenter {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.castleMapButton {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: #57534e;
+  color: white;
+  border-radius: 0.5rem;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.castleMapButton:hover {
+  background: #44403c;
+}
+
+.castleStepText {
+  color: white;
+  font-weight: 600;
+}
+
+/* Achievement popup */
+.castleAchievementOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+}
+
+.castleAchievementModal {
+  background: white;
+  border-radius: 1rem;
+  padding: 2rem;
+  max-width: 28rem;
+  width: 100%;
+  margin: 0 1rem;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  border: 4px solid #92400e;
+}
+
+.castleAchievementContent {
+  text-align: center;
+}
+
+.castleAchievementEmoji {
+  font-size: 6rem;
+  line-height: 1;
+  margin-bottom: 1rem;
+}
+
+.castleAchievementTitle {
+  font-size: 1.875rem;
+  line-height: 2.25rem;
+  font-weight: 700;
+  color: #92400e;
+  margin-bottom: 0.5rem;
+  margin-top: 0;
+}
+
+.castleAchievementSubtitle {
+  color: #4b5563;
+  margin-bottom: 1.5rem;
+  margin-top: 0;
+}
+
+.castleRewardsSection {
+  background: linear-gradient(to right, #fef3c7, #fed7aa);
+  border-radius: 0.5rem;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.castleRewardsTitle {
+  font-weight: 700;
+  color: #92400e;
+  margin-bottom: 0.75rem;
+  margin-top: 0;
+}
+
+.castleRewardsList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.castleRewardItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.castleRewardLabel {
+  color: #374151;
+}
+
+.castleRewardValueGreen {
+  font-weight: 700;
+  color: #059669;
+}
+
+.castleRewardValueBlue {
+  font-weight: 700;
+  color: #2563eb;
+}
+
+.castleRewardValuePurple {
+  font-weight: 700;
+  color: #7c3aed;
+}
+
+.castleAchievementButtons {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: center;
+}
+
+.castleAchievementButtonAmber {
+  padding: 0.75rem 1.5rem;
+  background: #d97706;
+  color: white;
+  border-radius: 0.5rem;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background-color 0.2s ease;
+}
+
+.castleAchievementButtonAmber:hover {
+  background: #b45309;
+}
+
+.castleAchievementButtonGreen {
+  padding: 0.75rem 1.5rem;
+  background: #059669;
+  color: white;
+  border-radius: 0.5rem;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background-color 0.2s ease;
+}
+
+.castleAchievementButtonGreen:hover {
+  background: #047857;
+}
+
+/* Icon classes */
+.icon16 {
+  width: 1rem;
+  height: 1rem;
+}
+
+.icon20 {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+/* Position classes for character */
+.right {
+  order: 2;
+}
+
+.left {
+  order: 1;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .castleHeaderFlex {
+    flex-direction: column;
+    text-align: center;
+    gap: 1rem;
+  }
+  
+  .castleProgressInfo {
+    text-align: center;
+  }
+  
+  .castleNavigationFlex {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .castleNavCenter {
+    order: -1;
+  }
+  
+  .castleAchievementButtons {
+    flex-direction: column;
+  }
+}

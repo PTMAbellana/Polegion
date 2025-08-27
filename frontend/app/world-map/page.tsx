@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useMyApp } from '@/context/AppUtils';
 import Loader from '@/components/Loader';
 import styles from '@/styles/world-map.module.css';
@@ -17,6 +18,7 @@ interface Castle {
   unlocked: boolean;
   completed: boolean;
   terrain: 'mountain' | 'forest' | 'desert' | 'coastal' | 'highland' | 'mystical';
+  route: string; // Added route property
 }
 
 const CASTLES: Castle[] = [
@@ -31,7 +33,8 @@ const CASTLES: Castle[] = [
     position: { x: 75, y: 15 },
     unlocked: true,
     completed: false,
-    terrain: 'mountain'
+    terrain: 'mountain',
+    route: '/world-map/castle1' // Route to castle1
   },
   {
     id: 'polygon-palace',
@@ -44,7 +47,8 @@ const CASTLES: Castle[] = [
     position: { x: 85, y: 35 },
     unlocked: true,
     completed: true,
-    terrain: 'forest'
+    terrain: 'forest',
+    route: '/world-map/castle2' // Route to castle2
   },
   {
     id: 'circle-keep',
@@ -57,7 +61,8 @@ const CASTLES: Castle[] = [
     position: { x: 20, y: 45 },
     unlocked: true,
     completed: false,
-    terrain: 'coastal'
+    terrain: 'coastal',
+    route: '/world-map/castle3' // Route to castle3
   },
   {
     id: 'triangle-stronghold',
@@ -70,7 +75,8 @@ const CASTLES: Castle[] = [
     position: { x: 45, y: 70 },
     unlocked: false,
     completed: false,
-    terrain: 'desert'
+    terrain: 'desert',
+    route: '/world-map/castle4' // Route to castle4
   },
   {
     id: 'fractal-fortress',
@@ -83,7 +89,8 @@ const CASTLES: Castle[] = [
     position: { x: 55, y: 25 },
     unlocked: false,
     completed: false,
-    terrain: 'highland'
+    terrain: 'highland',
+    route: '/world-map/castle5' // Route to castle5
   },
   {
     id: 'dimensional-domain',
@@ -96,7 +103,8 @@ const CASTLES: Castle[] = [
     position: { x: 65, y: 50 },
     unlocked: false,
     completed: false,
-    terrain: 'mystical'
+    terrain: 'mystical',
+    route: '/world-map/castle6' // Route to castle6
   },
   {
     id: 'infinity-keep',
@@ -109,7 +117,8 @@ const CASTLES: Castle[] = [
     position: { x: 35, y: 55 },
     unlocked: false,
     completed: false,
-    terrain: 'mystical'
+    terrain: 'mystical',
+    route: '/world-map/castle7' // Route to castle7
   }
 ];
 
@@ -117,6 +126,7 @@ export default function WorldMapPage() {
   const { isLoggedIn, authLoading, userProfile } = useMyApp();
   const [selectedCastle, setSelectedCastle] = useState<Castle | null>(null);
   const [hoveredCastle, setHoveredCastle] = useState<Castle | null>(null);
+  const router = useRouter();
 
   if (authLoading) {
     return (
@@ -139,6 +149,12 @@ export default function WorldMapPage() {
   const handleCastleClick = (castle: Castle) => {
     if (!castle.unlocked) return;
     setSelectedCastle(castle);
+  };
+
+  const handleEnterCastle = (castle: Castle) => {
+    if (!castle.unlocked) return;
+    // Navigate to the specific castle route
+    router.push(castle.route);
   };
 
   const getDifficultyColor = (difficulty: string) => {
@@ -352,7 +368,10 @@ export default function WorldMapPage() {
                 </div>
                 
                 <div className={styles.quest_actions}>
-                  <button className={styles.enter_castle_btn}>
+                  <button 
+                    className={styles.enter_castle_btn}
+                    onClick={() => handleEnterCastle(selectedCastle)}
+                  >
                     <span className={styles.btn_text}>
                       {selectedCastle.completed ? '🏰 Return to Castle' : '⚔️ Begin Quest'}
                     </span>
