@@ -1,9 +1,11 @@
 "use client"
 import React, { useState, useEffect, useRef } from 'react';
 import { ChevronRight, ChevronLeft, Home, RotateCcw } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import styles from '@/styles/castle.module.css';
 
 const GeometryTutorial = () => {
+  const router = useRouter();
   const [currentStep, setCurrentStep] = useState(0);
   const [showCharacter, setShowCharacter] = useState(true);
   const [characterSide, setCharacterSide] = useState('right');
