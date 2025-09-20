@@ -1,0 +1,657 @@
+@import url('https://fonts.googleapis.com/css2?family=UnifrakturMaguntia&family=Cinzel:wght@400;600&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap');
+
+/* ========================================
+   CASTLE 3 - CIRCLE SANCTUARY ADVENTURE
+   ======================================== */
+
+.adventure_container {
+  min-height: 100vh;
+  position: relative;
+  font-family: 'Cinzel', serif;
+  overflow-x: hidden;
+  background: linear-gradient(135deg, #1a0f2e 0%, #2d1b3d 50%, #0f0a1a 100%);
+}
+
+/* Background */
+.sanctuary_background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+.background_image {
+  object-fit: cover;
+  object-position: center;
+  filter: sepia(0.4) brightness(0.7) contrast(1.2) hue-rotate(240deg);
+}
+
+.sanctuary_overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: 
+    radial-gradient(circle at 30% 40%, rgba(138, 43, 226, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 70% 60%, rgba(75, 0, 130, 0.08) 0%, transparent 40%),
+    linear-gradient(135deg, rgba(25, 25, 112, 0.3) 0%, rgba(72, 61, 139, 0.2) 100%);
+  z-index: 2;
+}
+
+/* Content Wrapper - Add left margin for sidebar */
+.content_wrapper {
+  position: relative;
+  z-index: 10;
+  margin-left: 80px; /* Space for collapsed sidebar */
+  min-height: 100vh;
+  transition: margin-left 0.3s ease;
+}
+
+/* Header */
+.adventure_header {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 20px 30px;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.castle_title {
+  background: rgba(25, 25, 112, 0.9);
+  border: 3px solid #9370DB;
+  border-radius: 15px;
+  padding: 20px 30px;
+  box-shadow: 
+    0 8px 25px rgba(0, 0, 0, 0.5),
+    inset 0 2px 10px rgba(255, 255, 255, 0.1),
+    0 0 30px rgba(147, 112, 219, 0.3);
+  flex: 1;
+  min-width: 300px;
+}
+
+.castle_title h1 {
+  font-family: 'UnifrakturMaguntia', serif;
+  font-size: 2.5rem;
+  color: #E6E6FA;
+  margin: 0 0 10px 0;
+  text-shadow: 
+    2px 2px 4px rgba(0, 0, 0, 0.7),
+    0 0 15px rgba(147, 112, 219, 0.5);
+  letter-spacing: 2px;
+}
+
+.castle_title p {
+  font-family: 'Crimson Text', serif;
+  font-size: 1.1rem;
+  color: #DDA0DD;
+  margin: 0;
+  font-style: italic;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+/* Progress Tracker */
+.progress_tracker {
+  background: rgba(25, 25, 112, 0.9);
+  border: 3px solid #9370DB;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 
+    0 6px 20px rgba(0, 0, 0, 0.4),
+    0 0 25px rgba(147, 112, 219, 0.2);
+  min-width: 280px;
+  flex: 0 0 auto;
+}
+
+.progress_scroll h3 {
+  font-family: 'Cinzel', serif;
+  color: #E6E6FA;
+  margin: 0 0 15px 0;
+  text-align: center;
+  font-size: 1.2rem;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.progress_bar {
+  background: rgba(0, 0, 0, 0.3);
+  border: 2px solid #9370DB;
+  border-radius: 10px;
+  height: 20px;
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+
+.progress_fill {
+  background: linear-gradient(90deg, #9370DB 0%, #DDA0DD 100%);
+  height: 100%;
+  border-radius: 8px;
+  transition: width 0.5s ease;
+  box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.3);
+}
+
+.progress_scroll p {
+  color: #DDA0DD;
+  text-align: center;
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+/* Main Adventure Area */
+.adventure_main {
+  display: flex;
+  justify-content: space-between;
+  padding: 20px 30px;
+  gap: 30px;
+  min-height: calc(100vh - 200px);
+  align-items: flex-start;
+}
+
+/* Interactive Circle */
+.circle_area {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-width: 450px;
+}
+
+.mystical_circle_container {
+  position: relative;
+  background: radial-gradient(circle, rgba(25, 25, 112, 0.3) 0%, rgba(72, 61, 139, 0.1) 70%);
+  border: 3px solid #9370DB;
+  border-radius: 50%;
+  padding: 25px;
+  box-shadow: 
+    0 0 50px rgba(147, 112, 219, 0.4),
+    inset 0 0 30px rgba(255, 255, 255, 0.05);
+  animation: mysticalGlow 4s ease-in-out infinite alternate;
+}
+
+@keyframes mysticalGlow {
+  0% {
+    box-shadow: 
+      0 0 50px rgba(147, 112, 219, 0.4),
+      inset 0 0 30px rgba(255, 255, 255, 0.05);
+  }
+  100% {
+    box-shadow: 
+      0 0 70px rgba(147, 112, 219, 0.6),
+      inset 0 0 40px rgba(255, 255, 255, 0.1);
+  }
+}
+
+.interactive_circle {
+  filter: drop-shadow(0 0 20px rgba(147, 112, 219, 0.3));
+  display: block;
+}
+
+.main_circle {
+  animation: circleGlow 3s ease-in-out infinite alternate;
+}
+
+@keyframes circleGlow {
+  0% { stroke: rgba(255, 215, 0, 0.6); }
+  100% { stroke: rgba(255, 215, 0, 0.9); }
+}
+
+/* Circle Parts - Enhanced Interaction */
+.circle_part {
+  cursor: pointer;
+  transition: all 0.3s ease;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
+
+.circle_part:hover {
+  filter: drop-shadow(0 4px 8px rgba(255, 255, 255, 0.6));
+  transform: scale(1.05);
+}
+
+.center_point {
+  transition: all 0.3s ease;
+}
+
+.center_point:hover {
+  r: 16;
+}
+
+.radius_line:hover,
+.diameter_line:hover,
+.chord_line:hover {
+  stroke-width: 12;
+}
+
+.arc_path:hover {
+  stroke-width: 14;
+}
+
+.sector_area:hover {
+  fill-opacity: 0.6;
+  stroke-width: 5;
+}
+
+.circumference_area:hover {
+  stroke: rgba(150, 206, 180, 0.3);
+  stroke-width: 25;
+}
+
+.part_label {
+  font-family: 'Cinzel', serif;
+  font-weight: 600;
+  font-size: 14px;
+  text-shadow: 
+    1px 1px 2px rgba(0, 0, 0, 0.8),
+    0 0 4px rgba(255, 255, 255, 0.3);
+  pointer-events: none;
+}
+
+/* Quest Panel */
+.quest_panel {
+  flex: 0 0 350px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.quest_scroll {
+  background: rgba(25, 25, 112, 0.9);
+  border: 3px solid #9370DB;
+  border-radius: 15px;
+  padding: 25px;
+  box-shadow: 
+    0 8px 25px rgba(0, 0, 0, 0.4),
+    0 0 30px rgba(147, 112, 219, 0.2);
+}
+
+.quest_scroll h2 {
+  font-family: 'UnifrakturMaguntia', serif;
+  color: #E6E6FA;
+  margin: 0 0 20px 0;
+  text-align: center;
+  font-size: 1.5rem;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.quest_details h3 {
+  color: #DDA0DD;
+  margin: 0 0 10px 0;
+  font-size: 1.2rem;
+}
+
+.quest_details p {
+  color: #E6E6FA;
+  line-height: 1.5;
+  margin-bottom: 20px;
+}
+
+.hint_button {
+  background: linear-gradient(135deg, #9370DB 0%, #8A2BE2 100%);
+  border: 2px solid #DDA0DD;
+  border-radius: 20px;
+  padding: 12px 24px;
+  color: #E6E6FA;
+  font-family: 'Cinzel', serif;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  width: 100%;
+}
+
+.hint_button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(147, 112, 219, 0.4);
+  background: linear-gradient(135deg, #8A2BE2 0%, #9370DB 100%);
+}
+
+.completion_message {
+  text-align: center;
+  padding: 20px;
+  background: rgba(255, 215, 0, 0.1);
+  border: 2px solid #FFD700;
+  border-radius: 10px;
+  margin-top: 10px;
+}
+
+.completion_message h3 {
+  color: #FFD700;
+  margin: 0 0 10px 0;
+}
+
+.completion_message p {
+  color: #E6E6FA;
+  margin: 0;
+}
+
+/* Parts Reference */
+.parts_reference {
+  background: rgba(25, 25, 112, 0.9);
+  border: 3px solid #9370DB;
+  border-radius: 15px;
+  padding: 20px;
+  box-shadow: 
+    0 8px 25px rgba(0, 0, 0, 0.4),
+    0 0 30px rgba(147, 112, 219, 0.2);
+}
+
+.parts_reference h3 {
+  font-family: 'Cinzel', serif;
+  color: #E6E6FA;
+  margin: 0 0 15px 0;
+  text-align: center;
+  font-size: 1.1rem;
+}
+
+.parts_grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.part_item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.part_item.discovered {
+  background: rgba(147, 112, 219, 0.2);
+  border: 1px solid #9370DB;
+  animation: discoveredGlow 2s ease-in-out infinite alternate;
+}
+
+@keyframes discoveredGlow {
+  0% { box-shadow: 0 0 5px rgba(147, 112, 219, 0.3); }
+  100% { box-shadow: 0 0 10px rgba(147, 112, 219, 0.5); }
+}
+
+.part_item.undiscovered {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(147, 112, 219, 0.3);
+  opacity: 0.6;
+}
+
+.part_color {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.part_item span {
+  color: #E6E6FA;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+/* Wizard Character - Repositioned */
+.wizard_character {
+  position: fixed;
+  left: 90px; /* Adjusted for sidebar space */
+  bottom: 30px;
+  z-index: 100;
+  animation: wizardFloat 3s ease-in-out infinite;
+}
+
+@keyframes wizardFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+.wizard_image {
+  filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.5));
+}
+
+.wizard_dialogue {
+  position: absolute;
+  top: -120px;
+  left: 200px;
+  background: rgba(25, 25, 112, 0.95);
+  border: 3px solid #9370DB;
+  border-radius: 20px;
+  padding: 20px 35px 20px 20px;
+  max-width: 320px;
+  box-shadow: 
+    0 8px 25px rgba(0, 0, 0, 0.4),
+    0 0 30px rgba(147, 112, 219, 0.3);
+  animation: dialogueAppear 0.5s ease-out;
+}
+
+@keyframes dialogueAppear {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.wizard_dialogue::after {
+  content: '';
+  position: absolute;
+  bottom: 20px;
+  left: -15px;
+  width: 0;
+  height: 0;
+  border-top: 15px solid transparent;
+  border-bottom: 15px solid transparent;
+  border-right: 15px solid #9370DB;
+}
+
+.wizard_dialogue::before {
+  content: '';
+  position: absolute;
+  bottom: 22px;
+  left: -12px;
+  width: 0;
+  height: 0;
+  border-top: 13px solid transparent;
+  border-bottom: 13px solid transparent;
+  border-right: 13px solid rgba(25, 25, 112, 0.95);
+  z-index: 1;
+}
+
+.dialogue_close {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: #8B0000;
+  border: 2px solid #DDA0DD;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  color: #E6E6FA;
+  font-size: 0.9rem;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.dialogue_close:hover {
+  background: #660000;
+  transform: scale(1.1);
+}
+
+.dialogue_content p {
+  color: #E6E6FA;
+  line-height: 1.5;
+  margin: 0;
+  font-family: 'Crimson Text', serif;
+  font-size: 1rem;
+}
+
+/* Navigation Controls */
+.navigation_controls {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  z-index: 50;
+  display: flex;
+  gap: 15px;
+}
+
+.nav_button {
+  background: linear-gradient(135deg, #9370DB 0%, #8A2BE2 100%);
+  border: 3px solid #DDA0DD;
+  border-radius: 25px;
+  padding: 12px 25px;
+  color: #E6E6FA;
+  font-family: 'Cinzel', serif;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 
+    0 6px 15px rgba(0, 0, 0, 0.3),
+    0 0 20px rgba(147, 112, 219, 0.2);
+}
+
+.nav_button:hover {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 8px 20px rgba(0, 0, 0, 0.4),
+    0 0 30px rgba(147, 112, 219, 0.4);
+  background: linear-gradient(135deg, #8A2BE2 0%, #9370DB 100%);
+}
+
+/* Responsive Design */
+@media (max-width: 1400px) {
+  .content_wrapper {
+    margin-left: 60px;
+  }
+  
+  .wizard_character {
+    left: 70px;
+  }
+  
+  .wizard_dialogue {
+    left: 170px;
+    max-width: 280px;
+  }
+}
+
+@media (max-width: 1200px) {
+  .adventure_main {
+    flex-direction: column;
+    align-items: center;
+    gap: 30px;
+  }
+  
+  .quest_panel {
+    flex: none;
+    max-width: 500px;
+    width: 100%;
+  }
+  
+  .circle_area {
+    min-width: auto;
+  }
+}
+
+@media (max-width: 900px) {
+  .content_wrapper {
+    margin-left: 20px;
+  }
+  
+  .wizard_character {
+    left: 30px;
+  }
+  
+  .wizard_dialogue {
+    left: 140px;
+    max-width: 250px;
+  }
+  
+  .adventure_header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .castle_title,
+  .progress_tracker {
+    min-width: auto;
+  }
+}
+
+@media (max-width: 768px) {
+  .content_wrapper {
+    margin-left: 10px;
+  }
+  
+  .adventure_main {
+    padding: 15px;
+  }
+  
+  .castle_title h1 {
+    font-size: 2rem;
+  }
+  
+  .mystical_circle_container {
+    padding: 15px;
+  }
+  
+  .interactive_circle {
+    width: 350px;
+    height: 350px;
+  }
+  
+  .wizard_character {
+    left: 15px;
+    bottom: 15px;
+  }
+  
+  .wizard_image {
+    width: 150px;
+    height: 225px;
+  }
+  
+  .wizard_dialogue {
+    left: 120px;
+    max-width: 200px;
+    font-size: 0.9rem;
+  }
+  
+  .navigation_controls {
+    bottom: 15px;
+    right: 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .content_wrapper {
+    margin-left: 0;
+  }
+  
+  .interactive_circle {
+    width: 300px;
+    height: 300px;
+  }
+  
+  .wizard_character {
+    display: none;
+  }
+  
+  .castle_title {
+    padding: 15px 20px;
+  }
+  
+  .castle_title h1 {
+    font-size: 1.5rem;
+  }
+  
+  .parts_grid {
+    grid-template-columns: 1fr;
+  }
+}
