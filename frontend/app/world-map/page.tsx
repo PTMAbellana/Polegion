@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMyApp } from '@/context/AppUtils';
 import Loader from '@/components/Loader';
 import styles from '@/styles/world-map.module.css';
+import Image from 'next/image';
 
 interface Castle {
   id: string;
@@ -18,7 +19,8 @@ interface Castle {
   unlocked: boolean;
   completed: boolean;
   terrain: 'mountain' | 'forest' | 'desert' | 'coastal' | 'highland' | 'mystical';
-  route: string; // Added route property
+  route: string;
+  imageNumber: number; // Added for castle image mapping
 }
 
 const CASTLES: Castle[] = [
@@ -34,7 +36,8 @@ const CASTLES: Castle[] = [
     unlocked: true,
     completed: false,
     terrain: 'mountain',
-    route: '/world-map/castle1' // Route to castle1
+    route: '/world-map/castle1',
+    imageNumber: 1
   },
   {
     id: 'polygon-palace',
@@ -48,7 +51,8 @@ const CASTLES: Castle[] = [
     unlocked: true,
     completed: true,
     terrain: 'forest',
-    route: '/world-map/castle2' // Route to castle2
+    route: '/world-map/castle2',
+    imageNumber: 2
   },
   {
     id: 'circle-keep',
@@ -58,11 +62,12 @@ const CASTLES: Castle[] = [
     difficulty: 'Intermediate',
     problems: 18,
     xp: 300,
-    position: { x: 20, y: 45 },
+    position: { x: 20, y: 25 }, // Moved higher - was y: 45, now y: 25 (above wizard)
     unlocked: true,
     completed: false,
     terrain: 'coastal',
-    route: '/world-map/castle3' // Route to castle3
+    route: '/world-map/castle3',
+    imageNumber: 3
   },
   {
     id: 'triangle-stronghold',
@@ -76,7 +81,8 @@ const CASTLES: Castle[] = [
     unlocked: false,
     completed: false,
     terrain: 'desert',
-    route: '/world-map/castle4' // Route to castle4
+    route: '/world-map/castle4',
+    imageNumber: 4
   },
   {
     id: 'fractal-fortress',
@@ -86,11 +92,12 @@ const CASTLES: Castle[] = [
     difficulty: 'Hard',
     problems: 25,
     xp: 500,
-    position: { x: 55, y: 25 },
+    position: { x: 55, y: 35 }, // Moved lower - was y: 25, now y: 35 (below title)
     unlocked: false,
     completed: false,
     terrain: 'highland',
-    route: '/world-map/castle5' // Route to castle5
+    route: '/world-map/castle5',
+    imageNumber: 5
   },
   {
     id: 'dimensional-domain',
@@ -100,11 +107,12 @@ const CASTLES: Castle[] = [
     difficulty: 'Hard',
     problems: 30,
     xp: 600,
-    position: { x: 65, y: 50 },
+    position: { x: 65, y: 60 }, // Moved lower - was y: 50, now y: 60 (adjusted down with Fractal Bastion)
     unlocked: false,
     completed: false,
     terrain: 'mystical',
-    route: '/world-map/castle6' // Route to castle6
+    route: '/world-map/castle6',
+    imageNumber: 6
   },
   {
     id: 'infinity-keep',
@@ -118,7 +126,8 @@ const CASTLES: Castle[] = [
     unlocked: false,
     completed: false,
     terrain: 'mystical',
-    route: '/world-map/castle7' // Route to castle7
+    route: '/world-map/castle7',
+    imageNumber: 7
   }
 ];
 
@@ -126,7 +135,17 @@ export default function WorldMapPage() {
   const { isLoggedIn, authLoading, userProfile } = useMyApp();
   const [selectedCastle, setSelectedCastle] = useState<Castle | null>(null);
   const [hoveredCastle, setHoveredCastle] = useState<Castle | null>(null);
+  const [showWizardDialogue, setShowWizardDialogue] = useState(true);
   const router = useRouter();
+
+  // Auto-hide wizard dialogue after 8 seconds
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowWizardDialogue(false);
+    }, 8000); // 8 seconds
+
+    return () => clearTimeout(timer);
+  }, []);
 
   if (authLoading) {
     return (
@@ -153,7 +172,6 @@ export default function WorldMapPage() {
 
   const handleEnterCastle = (castle: Castle) => {
     if (!castle.unlocked) return;
-    // Navigate to the specific castle route
     router.push(castle.route);
   };
 
@@ -166,246 +184,211 @@ export default function WorldMapPage() {
     }
   };
 
-  const getCastleIcon = (castle: Castle) => {
-    if (castle.completed) return '👑';
-    if (!castle.unlocked) return '🔒';
-    
-    switch (castle.terrain) {
-      case 'mountain': return '🏔️';
-      case 'forest': return '🌲';
-      case 'desert': return '🏜️';
-      case 'coastal': return '🏖️';
-      case 'highland': return '⛰️';
-      case 'mystical': return '✨';
-      default: return '🏰';
-    }
-  };
-
   return (
     <div className={styles.world_map_container}>
-      <header className={styles.header}>
-        <h1 className={styles.title}>⚔️ Realm of Geometry ⚔️</h1>
-        <p className={styles.subtitle}>
-          Embark upon an epic quest through mathematical kingdoms, brave {userProfile?.fullName}!
-        </p>
-        <div className={styles.progress_scroll}>
-          <div className={styles.scroll_text}>
-            🏆 Quest Progress: {CASTLES.filter(c => c.completed).length}/{CASTLES.length} Realms Conquered
+      {/* Wizard Character */}
+      <div className={styles.wizard_character}>
+        <Image
+          src="/images/wizard.png"
+          alt="Royal Cartographer"
+          width={250}
+          height={375}
+          className={styles.wizard_image}
+        />
+        {showWizardDialogue && (
+          <div className={styles.wizard_speech_bubble}>
+            <button 
+              className={styles.wizard_close_button}
+              onClick={() => setShowWizardDialogue(false)}
+            >
+              ✕
+            </button>
+            <p>Welcome to Polegion, brave mathematician! Choose your quest wisely.</p>
           </div>
-          <div className={styles.progress_bar_medieval}>
-            <div 
-              className={styles.progress_fill_medieval} 
-              style={{ width: `${(CASTLES.filter(c => c.completed).length / CASTLES.length) * 100}%` }}
-            />
+        )}
+      </div>
+
+      {/* Main Map Container */}
+      <div className={styles.main_map_container}>
+        {/* World Map Background */}
+        <div className={styles.world_map_background}>
+          <Image
+            src="/images/world-map.png"
+            alt="World Map of Polegion"
+            fill
+            className={styles.map_background_image}
+            priority
+          />
+        </div>
+
+        {/* Map Title Scroll */}
+        <div className={styles.map_title_scroll}>
+          <h1>Polegion</h1>
+          <p>The Sacred Lands of Mathematics</p>
+        </div>
+
+        {/* Castle Markers */}
+        {CASTLES.map((castle) => (
+          <div
+            key={castle.id}
+            className={`${styles.castle_marker} ${
+              castle.unlocked ? styles.unlocked : styles.locked
+            } ${castle.completed ? styles.completed : ''} ${
+              selectedCastle?.id === castle.id ? styles.selected : ''
+            } ${hoveredCastle?.id === castle.id ? styles.hovered : ''}`}
+            style={{
+              left: `${castle.position.x}%`,
+              top: `${castle.position.y}%`,
+            }}
+            onClick={() => handleCastleClick(castle)}
+            onMouseEnter={() => setHoveredCastle(castle)}
+            onMouseLeave={() => setHoveredCastle(null)}
+          >
+            {/* Castle Image */}
+            <div className={styles.castle_image_container}>
+              <Image
+                src={`/images/${castle.imageNumber}.png`}
+                alt={castle.name}
+                width={120}
+                height={120}
+                className={`${styles.castle_image} ${
+                  !castle.unlocked ? styles.locked_filter : ''
+                }`}
+              />
+              
+              {/* Castle Status Overlays */}
+              {castle.completed && (
+                <div className={styles.completion_crown}>
+                  <span>👑</span>
+                </div>
+              )}
+              
+              {!castle.unlocked && (
+                <div className={styles.lock_overlay}>
+                  <span>🔒</span>
+                </div>
+              )}
+              
+              {castle.unlocked && !castle.completed && (
+                <div className={styles.available_glow}></div>
+              )}
+            </div>
+
+            {/* Castle Name Label */}
+            <div className={styles.castle_nameplate}>
+              <div className={styles.nameplate_scroll}>
+                {castle.name}
+              </div>
+            </div>
+          </div>
+        ))}
+
+        {/* Progress Indicator */}
+        <div className={styles.progress_indicator}>
+          <div className={styles.progress_scroll}>
+            <h3>Quest Progress</h3>
+            <div className={styles.progress_stats}>
+              <span>🏆 Conquered: {CASTLES.filter(c => c.completed).length}/{CASTLES.length}</span>
+              <span>⚔️ Available: {CASTLES.filter(c => c.unlocked && !c.completed).length}</span>
+              <span>🔒 Sealed: {CASTLES.filter(c => !c.unlocked).length}</span>
+            </div>
+            <div className={styles.progress_bar}>
+              <div 
+                className={styles.progress_fill}
+                style={{ width: `${(CASTLES.filter(c => c.completed).length / CASTLES.length) * 100}%` }}
+              />
+            </div>
           </div>
         </div>
-      </header>
 
-      <main className={styles.main_content}>
-        <div className={styles.map_container}>
-          {/* Fantasy Medieval Map */}
-          <div className={styles.fantasy_map}>
-            {/* Parchment background with aging effects */}
-            <div className={styles.parchment_overlay} />
-            
-            {/* Terrain Features */}
-            <div className={styles.mountain_range} style={{ left: '70%', top: '10%' }} />
-            <div className={styles.mountain_range_2} style={{ left: '50%', top: '20%' }} />
-            <div className={styles.forest_area} style={{ left: '80%', top: '30%' }} />
-            <div className={styles.forest_area_2} style={{ left: '15%', top: '60%' }} />
-            <div className={styles.desert_dunes} style={{ left: '40%', top: '65%' }} />
-            <div className={styles.coastal_area} style={{ left: '10%', top: '40%' }} />
-            
-            {/* Rivers and Roads */}
-            <div className={styles.ancient_river} />
-            <div className={styles.kingdom_road} />
-            
-            {/* Decorative compass */}
-            <div className={styles.compass_rose}>
-              <div className={styles.compass_inner}>
-                <div className={styles.compass_point}>N</div>
-              </div>
-            </div>
-            
-            {/* Map title cartouche */}
-            <div className={styles.map_cartouche}>
-              <h3>GEOMETRIA</h3>
-              <p>The Sacred Lands</p>
-            </div>
-            
-            {/* Castle Markers with Realistic Medieval Style */}
-            {CASTLES.map((castle) => (
-              <div
-                key={castle.id}
-                className={`${styles.medieval_castle} ${
-                  castle.unlocked ? styles.unlocked : styles.locked
-                } ${castle.completed ? styles.conquered : ''} ${
-                  selectedCastle?.id === castle.id ? styles.selected : ''
-                } ${hoveredCastle?.id === castle.id ? styles.hovered : ''}`}
-                style={{
-                  left: `${castle.position.x}%`,
-                  top: `${castle.position.y}%`,
-                }}
-                onClick={() => handleCastleClick(castle)}
-                onMouseEnter={() => setHoveredCastle(castle)}
-                onMouseLeave={() => setHoveredCastle(null)}
-                title={castle.unlocked ? castle.name : '🔒 Sealed by Ancient Magic'}
-              >
-                <div className={`${styles.castle_structure} ${styles[castle.terrain]}`}>
-                  <div className={styles.castle_towers}>
-                    <div className={styles.main_keep} />
-                    <div className={styles.tower_left} />
-                    <div className={styles.tower_right} />
-                  </div>
-                  <div className={styles.castle_walls} />
-                  <div className={styles.castle_gate} />
-                  
-                  {castle.completed && <div className={styles.victory_banner} />}
-                  {!castle.unlocked && <div className={styles.magic_seal} />}
-                  {castle.unlocked && !castle.completed && <div className={styles.entrance_glow} />}
-                </div>
-                
-                <div className={styles.medieval_nameplate}>
-                  <div className={styles.nameplate_scroll}>
-                    {castle.name}
-                  </div>
-                </div>
-              </div>
-            ))}
-            
-            {/* Ancient Paths connecting castles */}
-            <svg className={styles.ancient_paths} viewBox="0 0 100 100" preserveAspectRatio="none">
-              <defs>
-                <filter id="aged-path" x="-50%" y="-50%" width="200%" height="200%">
-                  <feTurbulence baseFrequency="0.3" numOctaves="4" result="noise" />
-                  <feDisplacementMap in="SourceGraphic" in2="noise" scale="2" />
-                </filter>
-              </defs>
-              
-              {/* Connecting roads between castles */}
-              <path 
-                d="M 75 15 Q 80 25 85 35" 
-                stroke="#8B4513" 
-                strokeWidth="0.5" 
-                fill="none"
-                strokeDasharray="2,1"
-                filter="url(#aged-path)"
-                className={styles.royal_road}
-              />
-              <path 
-                d="M 85 35 Q 75 40 65 50" 
-                stroke="#8B4513" 
-                strokeWidth="0.5" 
-                fill="none"
-                strokeDasharray="2,1"
-                filter="url(#aged-path)"
-                className={styles.royal_road}
-              />
-              <path 
-                d="M 20 45 Q 30 50 35 55" 
-                stroke="#654321" 
-                strokeWidth="0.3" 
-                fill="none"
-                strokeDasharray="1,1"
-                opacity="0.7"
-              />
-            </svg>
+        {/* Compass Rose */}
+        <div className={styles.compass_rose}>
+          <div className={styles.compass_inner}>
+            <div className={styles.compass_needle}>N</div>
           </div>
+        </div>
 
-          {/* Medieval Castle Details Panel */}
-          {selectedCastle && (
-            <div className={styles.medieval_details_panel}>
-              <div className={styles.panel_header}>
-                <div className={styles.heraldic_border}>
-                  <h2>{selectedCastle.name}</h2>
-                  <button 
-                    className={styles.close_seal}
-                    onClick={() => setSelectedCastle(null)}
-                  >
-                    ✕
-                  </button>
-                </div>
+        {/* Castle Details Panel */}
+        {selectedCastle && (
+          <div className={styles.castle_details_panel}>
+            <div className={styles.panel_header}>
+              <div className={styles.heraldic_banner}>
+                <h2>{selectedCastle.name}</h2>
+                <button 
+                  className={styles.close_button}
+                  onClick={() => setSelectedCastle(null)}
+                >
+                  ✕
+                </button>
+              </div>
+            </div>
+            
+            <div className={styles.panel_content}>
+              {/* Castle Preview */}
+              <div className={styles.castle_preview}>
+                <Image
+                  src={`/images/${selectedCastle.imageNumber}.png`}
+                  alt={selectedCastle.name}
+                  width={150}
+                  height={150}
+                  className={styles.preview_image}
+                />
               </div>
               
-              <div className={styles.panel_content}>
-                <div className={styles.castle_heraldry}>
-                  <div className={styles.coat_of_arms}>
-                    <div className={styles.shield}>
-                      {getCastleIcon(selectedCastle)}
-                    </div>
-                  </div>
-                  
-                  <div className={styles.castle_info}>
-                    <span className={styles.realm_name}>🏛️ {selectedCastle.region}</span>
-                    <span 
-                      className={styles.difficulty_banner}
-                      style={{ backgroundColor: getDifficultyColor(selectedCastle.difficulty) }}
-                    >
-                      {selectedCastle.difficulty}
-                    </span>
-                  </div>
+              {/* Castle Information */}
+              <div className={styles.castle_info_section}>
+                <div className={styles.region_banner}>
+                  <span>🏛️ {selectedCastle.region}</span>
                 </div>
                 
-                <div className={styles.quest_description}>
-                  <p>{selectedCastle.description}</p>
+                <div 
+                  className={styles.difficulty_badge}
+                  style={{ backgroundColor: getDifficultyColor(selectedCastle.difficulty) }}
+                >
+                  {selectedCastle.difficulty}
                 </div>
                 
-                <div className={styles.quest_statistics}>
-                  <div className={styles.stat_scroll}>
-                    <span className={styles.stat_title}>Trials</span>
-                    <span className={styles.stat_number}>{selectedCastle.problems}</span>
+                <p className={styles.castle_description}>
+                  {selectedCastle.description}
+                </p>
+                
+                <div className={styles.quest_stats}>
+                  <div className={styles.stat_item}>
+                    <span className={styles.stat_label}>Trials:</span>
+                    <span className={styles.stat_value}>{selectedCastle.problems}</span>
                   </div>
-                  <div className={styles.stat_scroll}>
-                    <span className={styles.stat_title}>Glory Points</span>
-                    <span className={styles.stat_number}>{selectedCastle.xp}</span>
+                  <div className={styles.stat_item}>
+                    <span className={styles.stat_label}>Glory Points:</span>
+                    <span className={styles.stat_value}>{selectedCastle.xp}</span>
                   </div>
-                  <div className={styles.stat_scroll}>
-                    <span className={styles.stat_title}>Status</span>
-                    <span className={styles.stat_number}>
+                  <div className={styles.stat_item}>
+                    <span className={styles.stat_label}>Status:</span>
+                    <span className={styles.stat_value}>
                       {selectedCastle.completed ? '⚔️ Conquered' : '🗡️ Awaiting'}
                     </span>
                   </div>
                 </div>
+              </div>
+              
+              {/* Action Buttons */}
+              <div className={styles.action_buttons}>
+                <button 
+                  className={styles.enter_quest_button}
+                  onClick={() => handleEnterCastle(selectedCastle)}
+                >
+                  <span className={styles.button_text}>
+                    {selectedCastle.completed ? '🏰 Return to Castle' : '⚔️ Begin Quest'}
+                  </span>
+                </button>
                 
-                <div className={styles.quest_actions}>
-                  <button 
-                    className={styles.enter_castle_btn}
-                    onClick={() => handleEnterCastle(selectedCastle)}
-                  >
-                    <span className={styles.btn_text}>
-                      {selectedCastle.completed ? '🏰 Return to Castle' : '⚔️ Begin Quest'}
-                    </span>
-                  </button>
-                  <button className={styles.scout_btn}>
-                    <span className={styles.btn_text}>🔍 Scout Ahead</span>
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Medieval Legend */}
-        <div className={styles.ancient_legend}>
-          <div className={styles.legend_scroll}>
-            <h3>⚜️ Legend of Symbols ⚜️</h3>
-            <div className={styles.legend_entries}>
-              <div className={styles.legend_entry}>
-                <span className={styles.legend_symbol}>🏰</span>
-                <span>Available Quest</span>
-              </div>
-              <div className={styles.legend_entry}>
-                <span className={styles.legend_symbol}>👑</span>
-                <span>Conquered Realm</span>
-              </div>
-              <div className={styles.legend_entry}>
-                <span className={styles.legend_symbol}>🔒</span>
-                <span>Sealed by Magic</span>
+                <button className={styles.scout_button}>
+                  <span className={styles.button_text}>🔍 Scout Ahead</span>
+                </button>
               </div>
             </div>
           </div>
-        </div>
-      </main>
+        )}
+      </div>
     </div>
   );
 }

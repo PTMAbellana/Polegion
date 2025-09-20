@@ -475,7 +475,7 @@ const AngleMasteryTutorial = () => {
     ];
   };
 
-  // Game logic functions
+  // Angle naming dialog - enhanced with animations and sounds
   const showAngleNamingDialog = (angle) => {
     const options = [
       formatAngleName('A', 'B', 'C'),
@@ -1964,7 +1964,7 @@ const AngleMasteryTutorial = () => {
           ctx.beginPath();
           ctx.arc(x, y, 25, 0, angleRad, false);
           ctx.strokeStyle = taskColor;
-          ctx.lineWidth = 2;
+          ctx.lineWidth = 3;
           ctx.stroke();
 
           // Draw vertex
@@ -2332,86 +2332,132 @@ const AngleMasteryTutorial = () => {
     };
   }, [currentTutorial, draggedPoint]);
 
-  // Main component render
+  // Main component render using Castle 1 layout structure
   return (
-    <div className={styles.tutorialContainer}>
-      {/* Score and Progress Header */}
-      <div className={styles.headerStats}>
-        <div className={styles.scoreDisplay}>
-          <Award className={styles.icon} />
-          <span>Score: {gameState.score}</span>
-        </div>
-        <div className={styles.progressDisplay}>
-          <Target className={styles.icon} />
-          <span>Step {currentStep + 1} of {tutorialSteps.length}</span>
-        </div>
-        <div className={styles.accuracyDisplay}>
-          <Zap className={styles.icon} />
-          <span>
-            Accuracy: {gameState.attempts > 0 ? Math.round((gameState.correctAnswers / gameState.attempts) * 100) : 0}%
-          </span>
+    <div className={styles.castleContainer}>
+      {/* Header - same as Castle 1 */}
+      <div className={styles.castleHeader}>
+        <h1 className={styles.castleTitle}>
+          🏰 Castle 2: Tower of Angles
+        </h1>
+        <div className={styles.castleProgressInfo}>
+          <div className={styles.castleProgressLabel}>Step</div>
+          <div className={styles.castleProgressNumbers}>
+            {currentStep + 1}/{tutorialSteps.length}
+          </div>
         </div>
       </div>
 
-      {/* Main Canvas Area */}
-      <div className={styles.canvasWrapper}>
-        <canvas 
-          ref={canvasRef} 
-          className={styles.tutorialCanvas}
-          width={500}
-          height={400}
-        />
+      {/* Progress bar - same as Castle 1 */}
+      <div className={styles.castleProgressContainer}>
+        <div className={styles.castleProgressBar}>
+          <div 
+            className={styles.castleProgressFill} 
+            style={{ width: `${((currentStep + 1) / tutorialSteps.length) * 100}%` }}
+          ></div>
+        </div>
+        <div className={styles.castleProgressText}>
+          Progress: {Math.round(((currentStep + 1) / tutorialSteps.length) * 100)}%
+        </div>
       </div>
 
-      {/* Character and Dialogue Section */}
-      <div className={styles.dialogueSection}>
-        {showCharacter && (
-          <div className={`${styles.characterContainer} ${styles[characterSide]}`}>
-            <div className={styles.character}>
-              <div className={styles.characterImage}>
+      {/* Main content area - same layout as Castle 1 */}
+      <div className={styles.castleMainContent}>
+        
+        {/* Left side - Character and info */}
+        <div className={styles.castleLeftPanel}>
+          {showCharacter && (
+            <div className={styles.castleCharacter}>
+              <div className={styles.castleCharacterAvatar}>
                 🧙‍♂️
               </div>
-              <div className={styles.characterName}>Master Protractor</div>
+              <div className={styles.castleCharacterName}>
+                Master Protractor
+              </div>
+              <div className={styles.castleCharacterTitle}>
+                Guardian of Angular Wisdom
+              </div>
+            </div>
+          )}
+
+          {/* Lesson info */}
+          <div className={styles.castleLessonInfo}>
+            <h2 className={styles.castleLessonTitle}>
+              {currentTutorial.title}
+              {currentTutorial.interactive && (
+                <span className={styles.castleInteractiveBadge}>
+                  <Zap size={14} />
+                  Interactive
+                </span>
+              )}
+            </h2>
+            
+            <div className={styles.castleLessonContent}>
+              <p className={styles.castleDialogue}>
+                {currentTutorial.dialogue}
+              </p>
+              
+              {currentTutorial.instruction && (
+                <div className={styles.castleInstruction}>
+                  <Target className={styles.castleInstructionIcon} />
+                  <div>
+                    <strong>Your Quest:</strong>
+                    <p>{currentTutorial.instruction}</p>
+                  </div>
+                </div>
+              )}
+              
+              {currentTutorial.hint && showHint && (
+                <div className={styles.castleHint}>
+                  <span className={styles.castleHintIcon}>💡</span>
+                  <div>
+                    <strong>Hint:</strong>
+                    <p>{currentTutorial.hint}</p>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
-        )}
-        
-        <div className={styles.dialogueBox}>
-          <div className={styles.dialogueHeader}>
-            <h2 className={styles.stepTitle}>{currentTutorial.title}</h2>
-            {currentTutorial.interactive && (
-              <div className={styles.interactiveBadge}>
-                <Zap size={16} />
-                Interactive
+
+          {/* Score display */}
+          <div className={styles.castleScorePanel}>
+            <div className={styles.castleScoreItem}>
+              <Award className={styles.castleScoreIcon} />
+              <div>
+                <div className={styles.castleScoreLabel}>Score</div>
+                <div className={styles.castleScoreValue}>{gameState.score}</div>
               </div>
-            )}
+            </div>
+            <div className={styles.castleScoreItem}>
+              <Target className={styles.castleScoreIcon} />
+              <div>
+                <div className={styles.castleScoreLabel}>Accuracy</div>
+                <div className={styles.castleScoreValue}>
+                  {gameState.attempts > 0 ? Math.round((gameState.correctAnswers / gameState.attempts) * 100) : 0}%
+                </div>
+              </div>
+            </div>
           </div>
-          
-          <div className={styles.dialogueContent}>
-            <p className={styles.dialogue}>{currentTutorial.dialogue}</p>
-            
-            {currentTutorial.instruction && (
-              <div className={styles.instruction}>
-                <Target className={styles.instructionIcon} />
-                <p>{currentTutorial.instruction}</p>
-              </div>
-            )}
-            
-            {currentTutorial.hint && showHint && (
-              <div className={styles.hint}>
-                <span className={styles.hintIcon}>💡</span>
-                <p>{currentTutorial.hint}</p>
-              </div>
-            )}
+        </div>
+
+        {/* Right side - Canvas area */}
+        <div className={styles.castleRightPanel}>
+          <div className={styles.castleCanvasContainer}>
+            <canvas 
+              ref={canvasRef} 
+              className={styles.castleCanvas}
+              width={500}
+              height={400}
+            />
           </div>
         </div>
       </div>
 
-      {/* Control Panel */}
-      <div className={styles.controlPanel}>
-        <div className={styles.navigationControls}>
+      {/* Bottom controls - same as Castle 1 */}
+      <div className={styles.castleControls}>
+        <div className={styles.castleNavigationButtons}>
           <button 
-            className={`${styles.controlButton} ${styles.prevButton}`}
+            className={`${styles.castleButton} ${styles.castleButtonSecondary}`}
             onClick={prevStep}
             disabled={currentStep === 0}
           >
@@ -2419,20 +2465,21 @@ const AngleMasteryTutorial = () => {
             Previous
           </button>
           
-          <div className={styles.stepIndicator}>
-            <div className={styles.stepDots}>
-              {tutorialSteps.map((_, index) => (
-                <div 
-                  key={index}
-                  className={`${styles.stepDot} ${index === currentStep ? styles.active : ''} ${index < currentStep ? styles.completed : ''}`}
-                  onClick={() => setCurrentStep(index)}
-                />
-              ))}
-            </div>
+          <div className={styles.castleStepIndicator}>
+            {tutorialSteps.map((_, index) => (
+              <button
+                key={index}
+                className={`${styles.castleStepDot} ${
+                  index === currentStep ? styles.castleStepDotActive : ''
+                } ${index < currentStep ? styles.castleStepDotCompleted : ''}`}
+                onClick={() => setCurrentStep(index)}
+                aria-label={`Go to step ${index + 1}`}
+              />
+            ))}
           </div>
           
           <button 
-            className={`${styles.controlButton} ${styles.nextButton}`}
+            className={`${styles.castleButton} ${styles.castleButtonPrimary}`}
             onClick={nextStep}
             disabled={currentStep === tutorialSteps.length - 1}
           >
@@ -2441,16 +2488,16 @@ const AngleMasteryTutorial = () => {
           </button>
         </div>
         
-        <div className={styles.actionControls}>
+        <div className={styles.castleActionButtons}>
           <button 
-            className={`${styles.controlButton} ${styles.hintButton}`}
+            className={`${styles.castleButton} ${styles.castleButtonSecondary}`}
             onClick={toggleHint}
           >
             💡 {showHint ? 'Hide' : 'Show'} Hint
           </button>
           
           <button 
-            className={`${styles.controlButton} ${styles.resetButton}`}
+            className={`${styles.castleButton} ${styles.castleButtonSecondary}`}
             onClick={resetTutorial}
           >
             <RotateCcw size={16} />
@@ -2458,7 +2505,7 @@ const AngleMasteryTutorial = () => {
           </button>
           
           <button 
-            className={`${styles.controlButton} ${styles.homeButton}`}
+            className={`${styles.castleButton} ${styles.castleButtonSecondary}`}
             onClick={() => window.location.href = '/world-map'}
           >
             <Home size={16} />
@@ -2467,22 +2514,12 @@ const AngleMasteryTutorial = () => {
         </div>
       </div>
 
-      {/* Feedback Toast */}
+      {/* Feedback toast - same as Castle 1 */}
       {showFeedback && (
-        <div className={`${styles.feedbackToast} ${styles.slideIn}`}>
-          <div className={styles.feedbackContent}>
-            {feedbackMessage}
-          </div>
+        <div className={styles.castleFeedback}>
+          {feedbackMessage}
         </div>
       )}
-
-      {/* Loading/Transition Overlay */}
-      <div className={styles.transitionOverlay} style={{ opacity: 0 }}>
-        <div className={styles.loadingSpinner}>
-          <div className={styles.spinner}></div>
-          <p>Loading next challenge...</p>
-        </div>
-      </div>
     </div>
   );
 };
