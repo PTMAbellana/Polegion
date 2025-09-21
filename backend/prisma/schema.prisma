@@ -1,0 +1,185 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  username      String    @unique
+  firstName     String?
+  lastName      String?
+  avatar        String?
+  isActive      Boolean   @default(true)
+  role          Role      @default(STUDENT)
+  xp            Int       @default(0)
+  level         Int       @default(1)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  lastLoginAt   DateTime?
+  
+  // Supabase Auth ID (if using Supabase auth)
+  supabaseId    String?   @unique
+  
+  // Relationships
+  rooms         Room[]
+  participants  Participant[]
+  attempts      Attempt[]
+  competitions  Competition[]
+  xpHistory     XPHistory[]
+  
+  @@map("users")
+}
+
+model Room {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  code        String   @unique
+  isActive    Boolean  @default(true)
+  maxUsers    Int      @default(50)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relationships
+  creatorId     String
+  creator       User          @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+  participants  Participant[]
+  competitions  Competition[]
+  problems      Problem[]
+  
+  @@map("rooms")
+}
+
+model Participant {
+  id       String @id @default(cuid())
+  joinedAt DateTime @default(now())
+  
+  // Relationships
+  userId String
+  roomId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  room   Room   @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, roomId])
+  @@map("participants")
+}
+
+model Problem {
+  id          String     @id @default(cuid())
+  title       String
+  description String
+  difficulty  Difficulty @default(EASY)
+  points      Int        @default(10)
+  timeLimit   Int        @default(300) // seconds
+  isActive    Boolean    @default(true)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  
+  // Relationships
+  roomId      String?
+  room        Room?        @relation(fields: [roomId], references: [id], onDelete: SetNull)
+  attempts    Attempt[]
+  competitions Competition[]
+  testCases   TestCase[]
+  
+  @@map("problems")
+}
+
+model TestCase {
+  id        String  @id @default(cuid())
+  input     String
+  output    String
+  isHidden  Boolean @default(false)
+  
+  // Relationships
+  problemId String
+  problem   Problem @relation(fields: [problemId], references: [id], onDelete: Cascade)
+  
+  @@map("test_cases")
+}
+
+model Attempt {
+  id          String       @id @default(cuid())
+  code        String
+  language    String
+  status      AttemptStatus @default(PENDING)
+  score       Int          @default(0)
+  executionTime Float?
+  memory      Int?
+  createdAt   DateTime     @default(now())
+  
+  // Relationships
+  userId    String
+  problemId String
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  problem   Problem @relation(fields: [problemId], references: [id], onDelete: Cascade)
+  
+  @@map("attempts")
+}
+
+model Competition {
+  id          String            @id @default(cuid())
+  name        String
+  description String?
+  startTime   DateTime
+  endTime     DateTime
+  status      CompetitionStatus @default(UPCOMING)
+  maxPoints   Int               @default(0)
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  
+  // Relationships
+  creatorId String
+  roomId    String?
+  creator   User    @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+  room      Room?   @relation(fields: [roomId], references: [id], onDelete: SetNull)
+  problems  Problem[]
+  
+  @@map("competitions")
+}
+
+model XPHistory {
+  id          String   @id @default(cuid())
+  amount      Int
+  reason      String
+  createdAt   DateTime @default(now())
+  
+  // Relationships
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("xp_history")
+}
+
+enum Role {
+  STUDENT
+  INSTRUCTOR
+  ADMIN
+}
+
+enum Difficulty {
+  EASY
+  MEDIUM
+  HARD
+}
+
+enum AttemptStatus {
+  PENDING
+  ACCEPTED
+  WRONG_ANSWER
+  TIME_LIMIT_EXCEEDED
+  RUNTIME_ERROR
+  COMPILATION_ERROR
+}
+
+enum CompetitionStatus {
+  UPCOMING
+  ONGOING
+  COMPLETED
+  CANCELLED
+}

@@ -45,7 +45,7 @@ const CompetitionDashboard = () => {
 
   // const [participants, setParticipants] = useState<Participant[]>([]);
   const [sortOrder, setSortOrder] = useState('desc');
-  const [isPaused, setIsPaused] = useState(false);
+  // const [isPaused, setIsPaused] = useState(false);
   const [fetched, setFetched] = useState(false);
   const [ isLoading, setIsLoading ] = useState(true)
   const [ competition, setCompetition ] = useState<Competition[]>([])
@@ -135,6 +135,7 @@ const CompetitionDashboard = () => {
         setNewCompetitionTitle("");
       } catch (error) {
         // Handle error (show message, etc.)
+        console.error('Error creating competition:', error);
       } finally {
         setCreating(false);
       }
@@ -162,9 +163,9 @@ const CompetitionDashboard = () => {
     setSortOrder(sortOrder === 'desc' ? 'asc' : 'desc');
   };
 
-  const togglePause = () => {
-    setIsPaused(!isPaused);
-  };
+  // const togglePause = () => {
+  //   setIsPaused(!isPaused);
+  // };
 
   console.log('competion: ', competition)
 

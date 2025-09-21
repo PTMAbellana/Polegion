@@ -11,7 +11,7 @@ const CompetitionRepository = require('./infrastructure/repository/CompetitionRe
 const XPRepository = require('./infrastructure/repository/XPRepo');
 
 // Import services
-const AuthService = require('./application/services/AuthService');
+const AuthService = require('./application/services/AuthServiceNew');
 const UserService = require('./application/services/UserService');
 const RoomService = require('./application/services/RoomService');
 const ParticipantService = require('./application/services/ParticipantService');
@@ -56,7 +56,7 @@ const competitionRepository = new CompetitionRepository(supabase);
 const xpRepository = new XPRepository(supabase);
 
 // Initialize services
-const authService = new AuthService(userRepository);
+const authService = new AuthService();
 const userService = new UserService(userRepository);
 const roomService = new RoomService(roomRepository);
 const problemService = new ProblemService(problemRepository, roomRepository);
@@ -91,12 +91,38 @@ const attemptsRoutes = new AttemptsRoutes(attemptsController, authMiddleware);
 const competitionRoutes = new CompetitionRoutes(competitionController, authMiddleware);
 
 module.exports = {
-  authRoutes: authRoutes.getRouter(),
-  userRoutes: userRoutes.getRouter(),
-  roomRoutes: roomRoutes.getRouter(),
-  participantRoutes: participantRoutes.getRouter(),
-  problemRoutes: problemRoutes.getRouter(),
-  leaderboardRoutes: leaderboardRoutes.getRouter(),
-  attemptsRoutes: attemptsRoutes.getRouter(),
-  competitionRoutes: competitionRoutes.getRouter()
-}
+  // Routes
+  authRoutes,
+  userRoutes,
+  roomRoutes,
+  participantRoutes,
+  problemRoutes,
+  leaderboardRoutes,
+  attemptsRoutes,
+  competitionRoutes,
+  
+  // Controllers
+  authController,
+  userController,
+  roomController,
+  participantController,
+  problemController,
+  leaderboardController,
+  attemptsController,
+  competitionController,
+  
+  // Services
+  authService,
+  userService,
+  roomService,
+  participantService,
+  problemService,
+  leaderboardService,
+  attemptsService,
+  competitionService,
+  gradingService,
+  xpService,
+  
+  // Middleware
+  authMiddleware
+};
