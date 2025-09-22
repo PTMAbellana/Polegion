@@ -1,9 +1,15 @@
-const BaseRepository = require('./BaseRepo');
+const BaseRepo = require('./BaseRepo')
+const userModel = require('../../domain/models/User')
+const jwt = require('jsonwebtoken')
+const { data } = require('autoprefixer')
 
-class UserRepository extends BaseRepository {
-  constructor() {
-    super('user');
-  }
+class UserRepo extends BaseRepo{
+    constructor(supabase){
+        super(supabase)
+        this.tableName = 'user_profiles'
+        this.storageBucket = 'profile-images'
+        this.defaultLink = 'https://uwllqanzveqanfpfnndu.supabase.co/storage/v1/object/public/profile-images/1751777126476.png'
+    }
 
     async refreshSession(refreshToken) {
         try {
@@ -371,4 +377,4 @@ class UserRepository extends BaseRepository {
     // }
 }
 
-module.exports = UserRepository
+module.exports = UserRepo

@@ -1,17 +1,17 @@
 const supabase = require('./config/supabase')
 
 // Import repositories
-const UserRepository = require('./infrastructure/repository/UserRepoNew');
-const RoomRepository = require('./infrastructure/repository/RoomRepoNew');
-const ParticipantRepository = require('./infrastructure/repository/ParticipantRepoNew');
-const ProblemRepository = require('./infrastructure/repository/ProblemRepoNew');
-const LeaderboardRepository = require('./infrastructure/repository/LeaderboardRepoNew');
-const AttemptsRepository = require('./infrastructure/repository/AttemptsRepoNew');
-const CompetitionRepository = require('./infrastructure/repository/CompetitionRepoNew');
-const XPRepository = require('./infrastructure/repository/XPRepoNew');
+const UserRepository = require('./infrastructure/repository/UserRepo');
+const RoomRepository = require('./infrastructure/repository/RoomRepo');
+const ParticipantRepository = require('./infrastructure/repository/ParticipantRepo');
+const ProblemRepository = require('./infrastructure/repository/ProblemRepo');
+const LeaderboardRepository = require('./infrastructure/repository/LeaderboardRepo');
+const AttemptsRepository = require('./infrastructure/repository/AttemptsRepo');
+const CompetitionRepository = require('./infrastructure/repository/CompetitionRepo');
+const XPRepository = require('./infrastructure/repository/XPRepo');
 
 // Import services
-const AuthService = require('./application/services/AuthServiceNew');
+const AuthService = require('./application/services/AuthService');
 const UserService = require('./application/services/UserService');
 const RoomService = require('./application/services/RoomService');
 const ParticipantService = require('./application/services/ParticipantService');
@@ -46,17 +46,17 @@ const AttemptsRoutes = require('./presentation/routes/AttemptsRoutes');
 const CompetitionRoutes = require('./presentation/routes/CompetitionRoutes');
 
 // Initialize repositories
-const userRepository = new UserRepository();
-const roomRepository = new RoomRepository();
-const participantRepository = new ParticipantRepository();
-const problemRepository = new ProblemRepository();
-const leaderboardRepository = new LeaderboardRepository();
-const attemptsRepository = new AttemptsRepository();
-const competitionRepository = new CompetitionRepository();
-const xpRepository = new XPRepository();
+const userRepository = new UserRepository(supabase);
+const roomRepository = new RoomRepository(supabase);
+const participantRepository = new ParticipantRepository(supabase);
+const problemRepository = new ProblemRepository(supabase);
+const leaderboardRepository = new LeaderboardRepository(supabase);
+const attemptsRepository = new AttemptsRepository(supabase);
+const competitionRepository = new CompetitionRepository(supabase);
+const xpRepository = new XPRepository(supabase);
 
 // Initialize services
-const authService = new AuthService();
+const authService = new AuthService(userRepository);
 const userService = new UserService(userRepository);
 const roomService = new RoomService(roomRepository);
 const problemService = new ProblemService(problemRepository, roomRepository);
@@ -91,38 +91,12 @@ const attemptsRoutes = new AttemptsRoutes(attemptsController, authMiddleware);
 const competitionRoutes = new CompetitionRoutes(competitionController, authMiddleware);
 
 module.exports = {
-  // Routes
-  authRoutes,
-  userRoutes,
-  roomRoutes,
-  participantRoutes,
-  problemRoutes,
-  leaderboardRoutes,
-  attemptsRoutes,
-  competitionRoutes,
-  
-  // Controllers
-  authController,
-  userController,
-  roomController,
-  participantController,
-  problemController,
-  leaderboardController,
-  attemptsController,
-  competitionController,
-  
-  // Services
-  authService,
-  userService,
-  roomService,
-  participantService,
-  problemService,
-  leaderboardService,
-  attemptsService,
-  competitionService,
-  gradingService,
-  xpService,
-  
-  // Middleware
-  authMiddleware
-};
+  authRoutes: authRoutes.getRouter(),
+  userRoutes: userRoutes.getRouter(),
+  roomRoutes: roomRoutes.getRouter(),
+  participantRoutes: participantRoutes.getRouter(),
+  problemRoutes: problemRoutes.getRouter(),
+  leaderboardRoutes: leaderboardRoutes.getRouter(),
+  attemptsRoutes: attemptsRoutes.getRouter(),
+  competitionRoutes: competitionRoutes.getRouter()
+}
