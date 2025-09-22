@@ -1,6 +1,8 @@
 const express = require('express')
 const cors = require('cors')
 const bodyParser = require('body-parser')
+const swaggerUi = require('swagger-ui-express')
+const swaggerSpecs = require('./config/swagger')
 require('dotenv').config()
 
 const {
@@ -34,9 +36,22 @@ app.use('/api/leaderboards', leaderboardRoutes)
 app.use('/api/attempts', attemptsRoutes)
 app.use('/api/competitions', competitionRoutes)
 
+//swagger documentation
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpecs))
+
+//docs.json for postman integration
+app.get('/docs.json', (req, res) => {
+    res.setHeader('Content-Type', 'application/json')
+    res.send(swaggerSpecs)
+})
+
 //basic route
 app.get('/', (req, res) => {
-    res.send('API is running')
+    res.json({
+        message: 'Polegion API is running',
+        documentation: `http://localhost:${PORT}/api-docs`,
+        openapi: `http://localhost:${PORT}/docs.json`
+    })
 })
 
 //start server
