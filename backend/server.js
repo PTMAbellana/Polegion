@@ -1,8 +1,7 @@
 const express = require('express')
 const cors = require('cors')
 const bodyParser = require('body-parser')
-const swaggerUi = require('swagger-ui-express')
-const swaggerSpecs = require('./config/swagger')
+const { swaggerSpec, swaggerServe, swaggerSetup } = require('./config/swagger')
 require('dotenv').config()
 
 const {
@@ -37,12 +36,12 @@ app.use('/api/attempts', attemptsRoutes)
 app.use('/api/competitions', competitionRoutes)
 
 //swagger documentation
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpecs))
+app.use('/api-docs', swaggerServe, swaggerSetup)
 
 //docs.json for postman integration
 app.get('/docs.json', (req, res) => {
     res.setHeader('Content-Type', 'application/json')
-    res.send(swaggerSpecs)
+    res.send(swaggerSpec)
 })
 
 //basic route
