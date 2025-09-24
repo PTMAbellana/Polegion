@@ -1,5 +1,6 @@
 // const userModel = require('../../domain/models/User')
 const Mailer = require('../../utils/Mailer'); // Adjust path as needed
+const cache = require('./cache');
 
 class ParticipantService {
     constructor(participantRepo, roomService, userService, leaderService){
@@ -7,6 +8,20 @@ class ParticipantService {
         this.roomService = roomService
         this.userService = userService
         this.leaderService = leaderService
+        this.CACHE_TTL = 10 * 60 * 1000; // 10 minutes for participant data
+    }
+
+    // Cache invalidation helper methods
+    _invalidateParticipantCache(roomId, userId = null) {
+        const roomParticipantsKey = cache.generateKey('room_participants', roomId);
+        cache.delete(roomParticipantsKey);
+        
+        if (userId) {
+            const userRoomsKey = cache.generateKey('user_joined_rooms', userId);
+            cache.delete(userRoomsKey);
+        }
+        
+        console.log('Invalidated participant cache for room:', roomId, 'user:', userId);
     }
 
     async joinRoom(user_id, room_code){
@@ -14,6 +29,10 @@ class ParticipantService {
             const data = await this.participantRepo.addParticipant(user_id, room_code)
             // console.log('join room service ', data)
             await this.leaderService.addRoomBoard(data.room_id, data.id)
+            
+            // Invalidate participant cache
+            this._invalidateParticipantCache(data.room_id, user_id);
+            
             return data
         } catch (error) {
             throw error
@@ -22,7 +41,12 @@ class ParticipantService {
     
     async leaveRoom(user_id, room_id){
         try {
-            return await this.participantRepo.removeParticipant(user_id, room_id)
+            const result = await this.participantRepo.removeParticipant(user_id, room_id)
+            
+            // Invalidate participant cache
+            this._invalidateParticipantCache(room_id, user_id);
+            
+            return result
         } catch (error) {
             throw error
         }
@@ -31,6 +55,15 @@ class ParticipantService {
     //ang mu get kay ang owner or ang admin
     async getRoomParticipantsForAdmin(room_id, creator_id, with_xp = false, compe_id = null ){
         try {
+            const cacheKey = cache.generateKey('room_participants_admin', room_id, creator_id, with_xp, compe_id);
+            
+            // Check cache first
+            const cached = cache.get(cacheKey);
+            if (cached) {
+                console.log('Cache hit: getRoomParticipantsForAdmin', room_id);
+                return cached;
+            }
+            
             //verify if room exists
             const exist = await this.roomService.getRoomById(room_id, creator_id)
             // console.log(exist)
@@ -54,11 +87,13 @@ class ParticipantService {
                     }
                 })
             )
-            // console.log('participants: ', participants)
-            if (!with_xp) return participants;
-            else {
+                        // console.log('participants: ', participants)
+            let result;
+            if (!with_xp) {
+                result = participants;
+            } else {
                 if (compe_id === null || compe_id === -1) {
-                    return await Promise.all(
+                    result = await Promise.all(
                         participants.map(async p => {
                             const res = await this.leaderService.getRoomBoardById(room_id, p.participant_id);
                             return {
@@ -69,7 +104,7 @@ class ParticipantService {
                     );
                 }
                 else {
-                    return await Promise.all(
+                    result = await Promise.all(
                         participants.map(async p => {
                             const res = await this.leaderService.getCompeBoardById(compe_id, p.participant_id);
                             return {
@@ -80,6 +115,12 @@ class ParticipantService {
                     );
                 }
             }
+            
+            // Cache the result
+            cache.set(cacheKey, result);
+            console.log('Cache miss: getRoomParticipantsForAdmin', room_id);
+            
+            return result
         } catch (error){
             // console.log('Error in getRoomParticipantsForAdmin service: ', error)
             throw error

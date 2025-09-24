@@ -1,13 +1,33 @@
-const roomModel = require('../../domain/models/Room')
+const roomModel = require('../../domain/models/Room');
+const cache = require('./cache');
 
 class RoomService {
     constructor(roomRepo){
         this.roomRepo = roomRepo
+        this.CACHE_TTL = 15 * 60 * 1000; // 15 minutes for rooms
     }
 
     async getRooms (user_id){
         try {
-            return await this.roomRepo.getAllRooms(user_id)
+            const cacheKey = cache.generateKey('user_rooms', user_id);
+            
+            // Check cache first
+            const cached = cache.get(cacheKey);
+            if (cached) {
+                console.log('Cache hit: getRooms', user_id);
+                return cached;
+            }
+            
+            // Fetch from database
+            const result = await this.roomRepo.getAllRooms(user_id);
+            
+            // Cache the result
+            if (result) {
+                cache.set(cacheKey, result, this.CACHE_TTL);
+                console.log('Cached: getRooms', user_id);
+            }
+            
+            return result;
         } catch (error) {
             throw error
         }
@@ -15,7 +35,25 @@ class RoomService {
 
     async getRoomsById (room_id){
         try {
-            return await this.roomRepo.getRoomsById(room_id)
+            const cacheKey = cache.generateKey('room_by_id', room_id);
+            
+            // Check cache first
+            const cached = cache.get(cacheKey);
+            if (cached) {
+                console.log('Cache hit: getRoomsById', room_id);
+                return cached;
+            }
+            
+            // Fetch from database
+            const result = await this.roomRepo.getRoomsById(room_id);
+            
+            // Cache the result
+            if (result) {
+                cache.set(cacheKey, result, this.CACHE_TTL);
+                console.log('Cached: getRoomsById', room_id);
+            }
+            
+            return result;
         } catch (error) {
             throw error
         }
@@ -23,7 +61,25 @@ class RoomService {
 
     async getRoomById (roomId, user_id){
         try {
-            return await this.roomRepo.getRoomById(roomId, user_id)
+            const cacheKey = cache.generateKey('room_by_id_user', roomId, user_id);
+            
+            // Check cache first
+            const cached = cache.get(cacheKey);
+            if (cached) {
+                console.log('Cache hit: getRoomById', roomId, user_id);
+                return cached;
+            }
+            
+            // Fetch from database
+            const result = await this.roomRepo.getRoomById(roomId, user_id);
+            
+            // Cache the result
+            if (result) {
+                cache.set(cacheKey, result, this.CACHE_TTL);
+                console.log('Cached: getRoomById', roomId, user_id);
+            }
+            
+            return result;
         } catch (error) {
             throw error
         }
@@ -31,12 +87,26 @@ class RoomService {
 
     // for admin
     async getRoomByCode (roomCode, user_id){
-        // console.log(roomCode)
         try {
-            // console.log('natawag ko')
-            const res = await this.roomRepo.getRoomByCode(roomCode, user_id)
-            // console.log(res)
-            return res
+            const cacheKey = cache.generateKey('room_by_code_admin', roomCode, user_id);
+            
+            // Check cache first
+            const cached = cache.get(cacheKey);
+            if (cached) {
+                console.log('Cache hit: getRoomByCode', roomCode, user_id);
+                return cached;
+            }
+            
+            // Fetch from database
+            const result = await this.roomRepo.getRoomByCode(roomCode, user_id);
+            
+            // Cache the result
+            if (result) {
+                cache.set(cacheKey, result, this.CACHE_TTL);
+                console.log('Cached: getRoomByCode', roomCode, user_id);
+            }
+            
+            return result;
         } catch (error) {
             throw error
         }
@@ -44,10 +114,26 @@ class RoomService {
     
     // for participants
     async getRoomByCodeUsers (roomCode){
-        // console.log(roomCode)
         try {
-            // console.log('natawag ko')
-            return await this.roomRepo.getRoomByCodeUsers(roomCode)
+            const cacheKey = cache.generateKey('room_by_code_users', roomCode);
+            
+            // Check cache first
+            const cached = cache.get(cacheKey);
+            if (cached) {
+                console.log('Cache hit: getRoomByCodeUsers', roomCode);
+                return cached;
+            }
+            
+            // Fetch from database
+            const result = await this.roomRepo.getRoomByCodeUsers(roomCode);
+            
+            // Cache the result
+            if (result) {
+                cache.set(cacheKey, result, this.CACHE_TTL);
+                console.log('Cached: getRoomByCodeUsers', roomCode);
+            }
+            
+            return result;
         } catch (error) {
             throw error
         }
@@ -65,7 +151,13 @@ class RoomService {
                 new Date(),
                 code
             )
-            return await this.roomRepo.createRoom(newRoom)
+            const result = await this.roomRepo.createRoom(newRoom);
+            
+            // Invalidate user rooms cache
+            cache.delete(cache.generateKey('user_rooms', user_id));
+            console.log('Cache invalidated: createRoom');
+            
+            return result;
         } catch (error) {
             throw error
         }
@@ -82,7 +174,12 @@ class RoomService {
                 user_id,
                 null
             )
-            return await this.roomRepo.updateRoom(roomId, user_id, ur)
+            const result = await this.roomRepo.updateRoom(roomId, user_id, ur);
+            
+            // Invalidate room-related cache entries
+            this._invalidateRoomCache(roomId, user_id);
+            
+            return result;
         } catch (error) {
             throw error
         }
@@ -90,7 +187,12 @@ class RoomService {
     
     async deleteRoom (roomId, user_id) {
         try {
-            return await this.roomRepo.deleteRoom(roomId, user_id)
+            const result = await this.roomRepo.deleteRoom(roomId, user_id);
+            
+            // Invalidate room-related cache entries
+            this._invalidateRoomCache(roomId, user_id);
+            
+            return result;
         } catch (error) {
             throw error
         }
@@ -114,10 +216,32 @@ class RoomService {
 
     async updateVisibility(room_id, user_id, visibility){
         try {
-            return await this.roomRepo.updateVisibility(room_id, user_id, visibility)
+            const result = await this.roomRepo.updateVisibility(room_id, user_id, visibility);
+            
+            // Invalidate room-related cache entries
+            this._invalidateRoomCache(room_id, user_id);
+            
+            return result;
         } catch (error){
             throw error
         }
+    }
+    
+    /**
+     * Helper method to invalidate room-related cache entries
+     * @param {string} roomId - Room ID
+     * @param {string} userId - User ID
+     */
+    _invalidateRoomCache(roomId, userId) {
+        // Invalidate specific room caches
+        cache.delete(cache.generateKey('room_by_id', roomId));
+        cache.delete(cache.generateKey('room_by_id_user', roomId, userId));
+        cache.delete(cache.generateKey('user_rooms', userId));
+        
+        // Note: We can't easily invalidate room_by_code caches without knowing the code
+        // This is a trade-off for performance vs consistency
+        
+        console.log('Cache invalidated: room-related entries for room', roomId);
     }
 }
 

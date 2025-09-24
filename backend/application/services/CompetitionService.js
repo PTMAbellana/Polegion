@@ -1,4 +1,5 @@
 const supabase = require('../../config/supabase')
+const cache = require('./cache');
 
 class CompeService {
     constructor(compeRepo, partService, leaderService, roomService, probService) {
@@ -7,6 +8,20 @@ class CompeService {
         this.leaderService = leaderService
         this.roomService = roomService
         this.probService = probService
+        this.CACHE_TTL = 15 * 60 * 1000; // 15 minutes for competitions (moderately stable)
+    }
+
+    // Cache invalidation helper methods
+    _invalidateCompetitionCache(roomId, competitionId = null) {
+        const roomCompeKey = cache.generateKey('competition_by_room', roomId);
+        cache.delete(roomCompeKey);
+        
+        if (competitionId) {
+            const compeKey = cache.generateKey('competition', competitionId);
+            cache.delete(compeKey);
+        }
+        
+        console.log('Invalidated competition cache for room:', roomId, 'competition:', competitionId);
     }
 
     async addCompe(room_id, title) {
@@ -18,6 +33,10 @@ class CompeService {
                     return await this.leaderService.addCompeBoard(data.id, part.id)
                 })
             ) 
+            
+            // Invalidate competition cache for this room
+            this._invalidateCompetitionCache(room_id, data.id);
+            
             return data
         }  catch (error) {
             throw error
@@ -26,6 +45,15 @@ class CompeService {
 
     async getCompeByRoomId(room_id, user_id, type = 'admin') {
         try {
+            const cacheKey = cache.generateKey('competition_by_room', room_id, user_id, type);
+            
+            // Check cache first
+            const cached = cache.get(cacheKey);
+            if (cached) {
+                console.log('Cache hit: getCompeByRoomId', room_id, type);
+                return cached;
+            }
+            
             console.log("Fetching competitions for room:", room_id, "User ID:", user_id, "Type:", type)
             if (type === 'admin') {
                 const room = await this.roomService.getRoomById(room_id, user_id)
@@ -37,6 +65,11 @@ class CompeService {
             }
             const data = await this.compeRepo.getCompeByRoomId(room_id)
             if (!data || data.length === 0) return []
+            
+            // Cache the result
+            cache.set(cacheKey, data);
+            console.log('Cache miss: getCompeByRoomId', room_id, type);
+            
             return data
         } catch (error) {
             throw error
@@ -45,6 +78,15 @@ class CompeService {
 
     async getCompeById(compe_id, room_id, user_id, type = 'creator') {
         try {
+            const cacheKey = cache.generateKey('competition', compe_id, room_id, user_id, type);
+            
+            // Check cache first
+            const cached = cache.get(cacheKey);
+            if (cached) {
+                console.log('Cache hit: getCompeById', compe_id);
+                return cached;
+            }
+            
             if (type === 'user') {
                 const part = await this.partService.checkPartStatus(user_id, room_id)
                 if (!part) throw new Error("You are not a participant of this room")
@@ -54,6 +96,11 @@ class CompeService {
             }
             const data = await this.compeRepo.getCompeById(compe_id, room_id)
             if (!data) throw new Error("Competition not found")
+            
+            // Cache the result
+            cache.set(cacheKey, data);
+            console.log('Cache miss: getCompeById', compe_id);
+            
             return data
         } catch (error) {
             throw error
@@ -100,6 +147,9 @@ class CompeService {
                 timer_duration: timerDuration,
                 timer_end_at: problemEndTime
             }
+            
+            // Invalidate competition cache since status changed
+            this._invalidateCompetitionCache(data.room_id, compe_id);
             
             // 🚀 SEND BROADCAST TO NOTIFY ALL CLIENTS
             try {
