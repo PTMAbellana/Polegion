@@ -8,7 +8,7 @@ const swaggerOptions = {
     info: {
       title: 'Polegion API',
       version: '1.0.0',
-      description: 'A comprehensive competitive programming platform API with Supabase authentication',
+      description: 'A comprehensive competitive learning platform API with Supabase authentication',
       contact: {
         name: 'Polegion Development Team',
         email: 'dev@polegion.com',
