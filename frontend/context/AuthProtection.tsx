@@ -5,7 +5,7 @@ import { useEffect, useState } from "react"
 import { ROUTES, PUBLIC_ROUTES } from '@/constants/routes'
 import { useAuthStore } from "@/store/authStore"
 
-export function AuthProtection () {
+export function AuthProtection() {
     const {
         isLoggedIn,
         authLoading,
@@ -17,7 +17,6 @@ export function AuthProtection () {
     const router = useRouter()
     const pathname = usePathname()
 
-    // Combine loading states for convenience
     const globalLoading = authLoading || appLoading;
 
     useEffect(() => {
@@ -26,30 +25,21 @@ export function AuthProtection () {
             return;
         }
 
-        async function handleRouteProtection() {
+        const handleRouteProtection = () => {
             setLocalLoading(true)
+            
             try {
-                console.log("Auth protection check - Path:", pathname, "IsLoggedIn:", isLoggedIn, "HasToken:", !!authToken)
-
-                // Redirect to login if not authenticated and route is protected
+                // Redirect to home if not authenticated and route is protected
                 if (!isLoggedIn && !PUBLIC_ROUTES.includes(pathname)) {
-                    console.log("Redirecting to login: User not logged in and route is protected")
                     router.replace(ROUTES.HOME)
                     return;
                 }
 
-                // Redirect to dashboard if authenticated and on login or register page
-                if (
-                    isLoggedIn &&
-                    PUBLIC_ROUTES.includes(pathname)
-                    // (pathname === ROUTES.LOGIN || pathname === ROUTES.REGISTER)
-                ) {
-                    console.log("Redirecting to dashboard: User is logged in and on login/register page")
+                // Redirect to dashboard if authenticated and on public routes
+                if (isLoggedIn && PUBLIC_ROUTES.includes(pathname)) {
                     router.replace(ROUTES.DASHBOARD)
                     return;
                 }
-
-                console.log('Route protection check completed')
             } catch (error) {
                 console.error('Auth protection error:', error)
             } finally {

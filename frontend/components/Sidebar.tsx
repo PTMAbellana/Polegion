@@ -11,28 +11,19 @@ import { ROUTES } from '@/constants/routes'
 import Swal from "sweetalert2";
 import { useAuthStore } from "@/store/authStore";
 
-const Sidebar = () => {
-    const {isLoggedIn, logout: contextLogout, userProfile} = useAuthStore();
+const Sidebar = (
+    {
+        userRole
+    } : {
+        userRole: 'teacher' | 'student' | null
+    }
+) => {
+    const {isLoggedIn, logout: contextLogout } = useAuthStore();
     const router = useRouter();
     const pathname = usePathname();
     const [isCollapsed, setIsCollapsed] = useState(true);
     const [isMobile, setIsMobile] = useState(false);
     const [isHovering, setIsHovering] = useState(false);
-
-    // Get user role - could be from userProfile or route-based detection
-    const getUserRole = () => {
-        // Check if we're on a teacher or student route
-        if (pathname.includes('/teacher/')) return 'teacher';
-        if (pathname.includes('/student/')) return 'student';
-        
-        // Check user profile for role
-        if (userProfile?.role) return userProfile.role;
-        
-        // Default to student if no clear indication
-        return 'student';
-    };
-
-    const userRole = getUserRole();
 
     // temporary paths
     // Navigation items for teachers
