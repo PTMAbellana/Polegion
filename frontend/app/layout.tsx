@@ -4,6 +4,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import { Toaster } from "react-hot-toast";
 import Footer from "@/components/Footer";
 import AuthInitializer from "@/context/AuthInitializer";
+import { AppUtilsProvider } from "@/context/AppUtils";
 
 export const metadata: Metadata = {
   title: "Polegion",
@@ -22,11 +23,14 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;700&display=swap" rel="stylesheet" />
       </head>
       <body>
-        <Toaster />
-        <AuthInitializer>
-          {children}
-        </AuthInitializer>
-        <Footer />
+        {/* temporary pa ni sha, since kapoy ilis tagsa tagsaon nako kada page hmmp TTOTT */}
+        <AppUtilsProvider> 
+          <Toaster />
+          <AuthInitializer>
+            {children}
+          </AuthInitializer>
+          <Footer />
+        </AppUtilsProvider>
       </body>
     </html>
   );

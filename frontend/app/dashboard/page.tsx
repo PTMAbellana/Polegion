@@ -33,7 +33,6 @@ export default function Dashboard() {
         if (isLoggedIn && !authLoading) {
             fetchRooms()
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isLoggedIn, authLoading])
 
     const fetchRooms = async () => {

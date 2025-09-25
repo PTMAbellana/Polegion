@@ -1,4 +1,5 @@
 import Sidebar from "@/components/Sidebar";
+import styles from '@/styles/navbar.module.css';
 
 export default function TeacherLayout({
   children,
@@ -6,10 +7,12 @@ export default function TeacherLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="teacher-layout">
+    <div className={styles['page-layout']}>
       <Sidebar userRole="teacher" />
-      <main className="main-content">
-        {children}
+      <main className={styles['main-content']}>
+        <div className={styles['content-area']}>
+          {children}
+        </div>
       </main>
     </div>
   );

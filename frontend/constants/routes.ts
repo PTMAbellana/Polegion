@@ -25,13 +25,6 @@ export const ROUTES = {
     EDIT_PROFILE: '/profile/edit'
 }
 
-export const PUBLIC_ROUTES = [
-    ROUTES.HOME,
-    ROUTES.LOGIN,
-    ROUTES.REGISTER,
-    ROUTES.RESET_PASSWORD
-]
-
 export const STUDENT_ROUTES = {
     // auth
     LOGIN: `/student${ROUTES.LOGIN}`,
@@ -78,3 +71,11 @@ export const TEACHER_ROUTES = {
     // competition
     COMPETITION: `/teacher${ROUTES.COMPETITION}`,
 }
+export const PUBLIC_ROUTES = [
+    ROUTES.HOME,
+    ROUTES.RESET_PASSWORD,
+    STUDENT_ROUTES.LOGIN,
+    STUDENT_ROUTES.REGISTER,
+    TEACHER_ROUTES.LOGIN,
+    TEACHER_ROUTES.REGISTER
+]

@@ -4,10 +4,10 @@ import Link from "next/link";
 import { logout } from "@/api/auth";
 import { useRouter, usePathname } from "next/navigation";
 import toast from "react-hot-toast";
-import { FaHome, FaTrophy, FaUser, FaSignOutAlt, FaBars, FaTimes, FaUsers, FaChalkboardTeacher } from 'react-icons/fa';
+import { FaHome, FaTrophy, FaUser, FaSignOutAlt, FaBars, FaTimes, FaChalkboardTeacher, FaMapSigns, FaDungeon, FaMedal, FaUserAstronaut } from 'react-icons/fa';
 import styles from '@/styles/navbar.module.css';
 
-import { ROUTES } from '@/constants/routes'
+import { ROUTES, STUDENT_ROUTES } from '@/constants/routes'
 import Swal from "sweetalert2";
 import { useAuthStore } from "@/store/authStore";
 
@@ -37,9 +37,10 @@ const Sidebar = (
     // Navigation items for students
     const studentNavItems = [
         { path: ROUTES.DASHBOARD, icon: FaHome, label: 'Dashboard', title: 'Home' },
-        { path: ROUTES.JOINED_ROOMS, icon: FaUsers, label: 'Joined Rooms', title: 'Joined Rooms' },
-        { path: ROUTES.LEADERBOARD, icon: FaTrophy, label: 'Leaderboard', title: 'Leaderboard' },
-        { path: ROUTES.PROFILE, icon: FaUser, label: 'Profile', title: 'Profile' },
+        { path: ROUTES.JOINED_ROOMS, icon: FaDungeon, label: 'Dungeons', title: 'Joined Rooms' },
+        { path: STUDENT_ROUTES.WORLD_MAP, icon: FaMapSigns, label: 'World Map', title: 'World Map' },
+        { path: ROUTES.LEADERBOARD, icon: FaMedal, label: 'Wall of Fame', title: 'Leaderboard' },
+        { path: ROUTES.PROFILE, icon: FaUserAstronaut, label: 'Profile', title: 'Profile' },
     ];
 
     const navItems = userRole === 'teacher' ? teacherNavItems : studentNavItems;
