@@ -2,11 +2,15 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { authUtils } from '@/api/axios';
 import { getUserProfile } from '@/api/users';
-import { login as apiLogin, register as apiRegister, resetPassword as apiResetPassword } from '@/api/auth';
+import { 
+    login as apiLogin, 
+    register as apiRegister, 
+    // resetPassword as apiResetPassword 
+} from '@/api/auth';
 import { AuthState, UserProfileDTO, RegisterFormData } from '@/types'; 
 import api from '@/api/axios';
 
-export const useAuthStore = create<AuthState>()(
+export const useAuthStore = create<AuthState>()( //see AuthState for the abstract of the store
     persist(
         (set, get) => ({
             // Initial state
@@ -69,10 +73,10 @@ export const useAuthStore = create<AuthState>()(
                 }
             },
 
-            register: async (formData: RegisterFormData) => {
+            register: async (formData: RegisterFormData, userType: 'student' | 'teacher') => {
                 set({ loginLoading: true });
                 try {
-                    const response = await apiRegister(formData);
+                    const response = await apiRegister(formData, userType);
                     if (response) {
                         return { success: true };
                     } else {

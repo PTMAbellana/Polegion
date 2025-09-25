@@ -4,7 +4,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import { AppUtilsProvider } from "@/context/AppUtils"; 
 import { Toaster } from "react-hot-toast";
 import Footer from "@/components/Footer";
-import Navbar from "@/components/Navbar";
+import Sidebar from "@/components/Sidebar";
 import AppProvider from '@/components/providers/AppProvider';
 
 export const metadata: Metadata = {
@@ -27,7 +27,7 @@ export default function RootLayout({
       <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;700&display=swap" rel="stylesheet" />
         <AppProvider>
           <AppUtilsProvider>
-            <Navbar/>
+            <Sidebar/>
             <Toaster/>
             {children}
           </AppUtilsProvider>

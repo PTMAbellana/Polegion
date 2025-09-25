@@ -1,23 +1,23 @@
 "use client";
 import Head from "next/head";
 import { useRouter } from "next/navigation";
-import { ROUTES } from "@/constants/routes";
-import { supabase } from "@/lib/supabaseClient";
 import RegisterForm from "@/components/auth/RegisterForm";
 import styles from "@/styles/register.module.css";
-import SocialAuth from "@/components/auth/SocialAuth";
+import { TEACHER_ROUTES } from "@/constants/routes";
 
-export default function Register() {
+export default function TeacherRegister() {
   const router = useRouter();
 
   const handleLoginRedirect = () => {
-    router.push(ROUTES.LOGIN);
+    router.push(TEACHER_ROUTES.LOGIN);
   };
+
+
 
   return (
     <>
       <Head>
-        <title>Register | Polegion</title>
+        <title>Teacher Registration | Polegion</title>
       </Head>
 
       <div className={styles.registerPage}>
@@ -31,19 +31,17 @@ export default function Register() {
               />
             </div>
 
-            <h1 className={styles.welcomeTitle}>Create Account</h1>
+            <h1 className={styles.welcomeTitle}>Create Teacher Account</h1>
             <p className={styles.welcomeSubtitle}>
-              Join us and unleash your potential!
+              Join our educator community and inspire students!
             </p>
 
-            <RegisterForm />
-
-            <SocialAuth type="register" />
+            <RegisterForm userType="teacher" />
 
             <p className={styles.loginPrompt}>
               Already have an account?{" "}
               <span onClick={handleLoginRedirect} className={styles.loginLink}>
-                Login
+                Login 
               </span>
             </p>
           </div>
@@ -52,4 +50,3 @@ export default function Register() {
     </>
   );
 }
-

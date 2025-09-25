@@ -23,8 +23,8 @@ export const login = async (email, password) => {
   }
 };
 
-export const register = async (userData) => {
-  return await api.post("/auth/register", userData);
+export const register = async (userData, userType) => {
+  return await api.post("/auth/register", { ...userData, userType });
 };
 
 export const resetPassword = async (email) => {

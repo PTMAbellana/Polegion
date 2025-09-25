@@ -12,7 +12,14 @@ import PasswordInput from '@/components/auth/inputs/PasswordInput';
 import EmailInput from '@/components/auth/inputs/EmailInput';
 import styles from '@/styles/register.module.css';
 
-export default function RegisterForm() {
+export default function RegisterForm(
+  { 
+    userType 
+
+  }: { 
+    userType: 'student' | 'teacher' 
+  }
+) {
   const router = useRouter();
   const { register: registerUser, loginLoading } = useAuthStore();
   
@@ -28,7 +35,7 @@ export default function RegisterForm() {
   });
 
   const onSubmit = async (formData: RegisterFormData) => {
-    const result = await registerUser(formData);
+    const result = await registerUser(formData, userType);
     
     if (result.success) {
       toast.success("User registered successfully");

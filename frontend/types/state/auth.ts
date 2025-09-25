@@ -25,7 +25,7 @@ export interface AuthState {
     login: (email: string, password: string, rememberMe?: boolean) => Promise<AuthActionResult>;
     refreshUserSession: () => Promise<boolean>;
     logout: () => void;
-    register: (data: RegisterFormData) => Promise<AuthActionResult>;
+    register: (data: RegisterFormData , userType: 'student' | 'teacher') => Promise<AuthActionResult>;
     resetPassword: (token: string, password: string) => Promise<AuthActionResult>;
     initialize: () => Promise<void>;
 }

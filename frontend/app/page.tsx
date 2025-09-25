@@ -2,11 +2,6 @@
 import Head from "next/head";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { supabase } from "@/lib/supabaseClient";
-import { ROUTES } from "@/constants/routes";
-import { refreshToken } from "@/api/auth";
-import { useMyApp } from "@/context/AppUtils";
-import { getUserProfile } from "@/api/users";
 import styles from "../styles/home.module.css";
 
 export default function Home() {
@@ -14,62 +9,28 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
 
-  const { setIsLoggedIn, setUserProfile } = useMyApp();
-
   useEffect(() => {
-    const handleTokens = async () => {
-      const hash = window.location.hash.substring(1);
-      const params = new URLSearchParams(hash);
-      const access_token = params.get("access_token");
-      const refresh_token = params.get("refresh_token");
-      const expiresAt = params.get("expires_at");
-
-      if (access_token && refresh_token) {
-        localStorage.setItem("access_token", access_token);
-        localStorage.setItem("refresh_token", refresh_token);
-
-        const expiresAtMs = parseInt(expiresAt!) * 1000;
-        localStorage.setItem("expires_at", expiresAtMs.toString());
-
-        const { data, error } = await supabase.auth.setSession({
-          access_token,
-          refresh_token,
-        });
-
-        if (error) {
-          console.error("Failed to set session:", error.message);
-        } else {
-          refreshToken();
-          setIsLoggedIn(true);
-
-          const pr = await getUserProfile();
-          if (pr?.data) {
-            console.log("Fresh profile data received: ", pr.data);
-            setUserProfile(pr.data);
-            const updateUser = {
-              ...pr.data,
-            };
-            localStorage.setItem("user", JSON.stringify(updateUser));
-            router.push(ROUTES.DASHBOARD);
-          }
-        }
-      }
-    };
-
-    const handleMouseMove = (e) => {
+    const handleMouseMove = (e: MouseEvent) => {
       setMousePosition({ x: e.clientX, y: e.clientY });
     };
 
-    handleTokens();
     window.addEventListener('mousemove', handleMouseMove);
     return () => window.removeEventListener('mousemove', handleMouseMove);
   }, []);
 
-  const handleRegisterRedirect = () => {
+  const handleStudentRedirect = () => {
     setIsLoading(true);
     setTimeout(() => {
       setIsLoading(false);
-      router.push("/auth/login");
+      router.push("/student/auth/login");
+    }, 1000);
+  };
+
+  const handleTeacherRedirect = () => {
+    setIsLoading(true);
+    setTimeout(() => {
+      setIsLoading(false);
+      router.push("/teacher/auth/login");
     }, 1000);
   };
 
@@ -128,23 +89,44 @@ export default function Home() {
             perfectly aligned with your curriculum and designed to make learning addictive.
           </p>
           
-          <button
-            className={styles.headerButton}
-            onClick={handleRegisterRedirect}
-            disabled={isLoading}
-          >
-            {isLoading ? (
-              <>
-                <div className={styles.spinner} />
-                Loading...
-              </>
-            ) : (
-              <>
-                Start Exploring
-                <span className={styles.arrow}>→</span>
-              </>
-            )}
-          </button>
+          <div className={styles.buttonGroup}>
+            <button
+              className={`${styles.headerButton} ${styles.studentButton}`}
+              onClick={handleStudentRedirect}
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <>
+                  <div className={styles.spinner} />
+                  Loading...
+                </>
+              ) : (
+                <>
+                  <span className={styles.buttonIcon}>🎓</span>
+                  I&apos;m a Student
+                  <span className={styles.arrow}>→</span>
+                </>
+              )}
+            </button>
+            <button
+              className={`${styles.headerButton} ${styles.teacherButton}`}
+              onClick={handleTeacherRedirect}
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <>
+                  <div className={styles.spinner} />
+                  Loading...
+                </>
+              ) : (
+                <>
+                  <span className={styles.buttonIcon}>👩‍🏫</span>
+                  I&apos;m a Teacher
+                  <span className={styles.arrow}>→</span>
+                </>
+              )}
+            </button>
+          </div>
         </header>
 
         <section className={styles.customRow}>
@@ -188,23 +170,42 @@ export default function Home() {
 
         {/* CTA Section */}
         <section className={styles.ctaSection}>
-          <button
-            className={styles.ctaButton}
-            onClick={handleRegisterRedirect}
-            disabled={isLoading}
-          >
-            {isLoading ? (
-              <>
-                <div className={styles.spinner} />
-                Loading...
-              </>
-            ) : (
-              <>
-                Get Started Now
-                <span className={styles.arrow}>→</span>
-              </>
-            )}
-          </button>
+          <div className={styles.ctaButtonGroup}>
+            <button
+              className={`${styles.ctaButton} ${styles.studentCta}`}
+              onClick={handleStudentRedirect}
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <>
+                  <div className={styles.spinner} />
+                  Loading...
+                </>
+              ) : (
+                <>
+                  Student Login
+                  <span className={styles.arrow}>→</span>
+                </>
+              )}
+            </button>
+            <button
+              className={`${styles.ctaButton} ${styles.teacherCta}`}
+              onClick={handleTeacherRedirect}
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <>
+                  <div className={styles.spinner} />
+                  Loading...
+                </>
+              ) : (
+                <>
+                  Teacher Login
+                  <span className={styles.arrow}>→</span>
+                </>
+              )}
+            </button>
+          </div>
         </section>
 
         

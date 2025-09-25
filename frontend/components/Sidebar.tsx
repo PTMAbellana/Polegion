@@ -4,24 +4,54 @@ import Link from "next/link";
 import { logout } from "@/api/auth";
 import { useRouter, usePathname } from "next/navigation";
 import toast from "react-hot-toast";
-import { FaHome, FaDoorOpen, FaTrophy, FaUser, FaSignOutAlt, FaBars, FaTimes } from 'react-icons/fa';
+import { FaHome, FaTrophy, FaUser, FaSignOutAlt, FaBars, FaTimes, FaUsers, FaChalkboardTeacher } from 'react-icons/fa';
 import styles from '@/styles/navbar.module.css';
 
 import { ROUTES } from '@/constants/routes'
 import Swal from "sweetalert2";
 import { useAuthStore } from "@/store/authStore";
 
-const Navbar = () => {
-    // const { 
-    //     isLoggedIn, 
-    //     logout: contextLogout 
-    // } = useMyApp();
-    const {isLoggedIn, logout: contextLogout} = useAuthStore();
+const Sidebar = () => {
+    const {isLoggedIn, logout: contextLogout, userProfile} = useAuthStore();
     const router = useRouter();
     const pathname = usePathname();
     const [isCollapsed, setIsCollapsed] = useState(true);
     const [isMobile, setIsMobile] = useState(false);
     const [isHovering, setIsHovering] = useState(false);
+
+    // Get user role - could be from userProfile or route-based detection
+    const getUserRole = () => {
+        // Check if we're on a teacher or student route
+        if (pathname.includes('/teacher/')) return 'teacher';
+        if (pathname.includes('/student/')) return 'student';
+        
+        // Check user profile for role
+        if (userProfile?.role) return userProfile.role;
+        
+        // Default to student if no clear indication
+        return 'student';
+    };
+
+    const userRole = getUserRole();
+
+    // temporary paths
+    // Navigation items for teachers
+    const teacherNavItems = [
+        { path: ROUTES.DASHBOARD, icon: FaHome, label: 'Dashboard', title: 'Home' },
+        { path: ROUTES.VIRTUAL_ROOMS, icon: FaChalkboardTeacher, label: 'Virtual Rooms', title: 'Virtual Rooms' },
+        { path: ROUTES.LEADERBOARD, icon: FaTrophy, label: 'Leaderboards', title: 'Leaderboard' },
+        { path: ROUTES.PROFILE, icon: FaUser, label: 'Profile', title: 'Profile' },
+    ];
+
+    // Navigation items for students
+    const studentNavItems = [
+        { path: ROUTES.DASHBOARD, icon: FaHome, label: 'Dashboard', title: 'Home' },
+        { path: ROUTES.JOINED_ROOMS, icon: FaUsers, label: 'Joined Rooms', title: 'Joined Rooms' },
+        { path: ROUTES.LEADERBOARD, icon: FaTrophy, label: 'Leaderboard', title: 'Leaderboard' },
+        { path: ROUTES.PROFILE, icon: FaUser, label: 'Profile', title: 'Profile' },
+    ];
+
+    const navItems = userRole === 'teacher' ? teacherNavItems : studentNavItems;
 
     useEffect(() => {
         const checkMobile = () => {
@@ -191,30 +221,17 @@ const Navbar = () => {
                         </div>
                         <nav className={styles["sidebar-nav"]}>
                             <ul>
-                                <li className={isActive(ROUTES.DASHBOARD) ? styles.active : ""}>
-                                    <Link href={ROUTES.DASHBOARD} title="Home">
-                                        <FaHome className={styles["nav-icon"]} />
-                                        <span className={styles["nav-text"]}>Home</span>
-                                    </Link>
-                                </li>
-                                <li className={isActive(ROUTES.VIRTUAL_ROOMS) ? styles.active : ""}>
-                                    <Link href={ROUTES.VIRTUAL_ROOMS} title="Virtual Rooms">
-                                        <FaDoorOpen className={styles["nav-icon"]} />
-                                        <span className={styles["nav-text"]}>Virtual Rooms</span>
-                                    </Link>
-                                </li>
-                                <li className={isActive(ROUTES.LEADERBOARD) ? styles.active : ""}>
-                                    <Link href={ROUTES.LEADERBOARD} title="Leaderboard">
-                                        <FaTrophy className={styles["nav-icon"]} />
-                                        <span className={styles["nav-text"]}>Leaderboard</span>
-                                    </Link>
-                                </li>
-                                <li className={isActive(ROUTES.PROFILE) ? styles.active : ""}>
-                                    <Link href={ROUTES.PROFILE} title="Profile">
-                                        <FaUser className={styles["nav-icon"]} />
-                                        <span className={styles["nav-text"]}>Profile</span>
-                                    </Link>
-                                </li>
+                                {navItems.map((item) => {
+                                    const IconComponent = item.icon;
+                                    return (
+                                        <li key={item.path} className={isActive(item.path) ? styles.active : ""}>
+                                            <Link href={item.path} title={item.title}>
+                                                <IconComponent className={styles["nav-icon"]} />
+                                                <span className={styles["nav-text"]}>{item.label}</span>
+                                            </Link>
+                                        </li>
+                                    );
+                                })}
                             </ul>
                         </nav>
                         <div className={styles["logout-container"]}>
@@ -230,4 +247,4 @@ const Navbar = () => {
     );
 };
 
-export default Navbar;
+export default Sidebar;

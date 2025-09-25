@@ -3,13 +3,12 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Head from "next/head";
 import LoginForm from "@/components/auth/LoginForm";
-import SocialAuth from "@/components/auth/SocialAuth";
 import ForgotPasswordModal from "@/components/auth/ForgotPasswordModal";
 import { useAuthStore } from "@/store/authStore";
-import { ROUTES } from "@/constants/routes";
+import { ROUTES, TEACHER_ROUTES } from "@/constants/routes";
 import styles from "@/styles/login.module.css";
 
-export default function Login() {
+export default function TeacherLogin() {
   const router = useRouter();
   const { isLoggedIn, refreshUserSession } = useAuthStore();
   const [showForgotPasswordModal, setShowForgotPasswordModal] = useState(false);
@@ -34,7 +33,7 @@ export default function Login() {
   }, [showForgotPasswordModal]);
 
   const handleRegisterRedirect = () => {
-    router.push(ROUTES.REGISTER);
+    router.push(TEACHER_ROUTES.REGISTER);
   };
 
   const handleForgotPassword = () => {
@@ -45,10 +44,12 @@ export default function Login() {
     setShowForgotPasswordModal(false);
   };
 
+
+
   return (
     <>
       <Head>
-        <title>Login | Polegion</title>
+        <title>Teacher Login | Polegion</title>
       </Head>
 
       <div className={styles.loginPage}>
@@ -63,20 +64,18 @@ export default function Login() {
               />
             </div>
 
-            <h1 className={styles.welcomeTitle}>Welcome Back!</h1>
-            <p className={styles.welcomeSubtitle}>Unleash your Inner Legend!</p>
+            <h1 className={styles.welcomeTitle}>Welcome Back, Teacher!</h1>
+            <p className={styles.welcomeSubtitle}>Shape the future with interactive geometry</p>
 
             <LoginForm onForgotPassword={handleForgotPassword} />
 
-            <SocialAuth type="login" />
-
             <p className={styles.registerPrompt}>
-              Don&lsquo;t have an Account?{" "}
+              Don&apos;t have an Account?{" "}
               <span
                 onClick={handleRegisterRedirect}
                 className={styles.registerLink}
               >
-                Register
+                Register 
               </span>
             </p>
           </div>
