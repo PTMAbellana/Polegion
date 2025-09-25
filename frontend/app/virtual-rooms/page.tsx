@@ -13,16 +13,8 @@ import { useForm } from 'react-hook-form'
 import toast from 'react-hot-toast'
 import Swal from 'sweetalert2'
 import * as yup from 'yup'
-
-interface RoomType {
-    id?: number
-    title: string
-    description: string
-    mantra: string
-    banner_image: string | File | null
-    code: string
-    created_at: string
-}
+import { RoomType } from '@/types/common/room'
+import RoomCardsList from '@/components/RoomCardsList'
 
 interface EditCreateFormData {
     title: string
@@ -536,58 +528,18 @@ export default function VirtualRooms() {
                         </div>
                         
                         {/* Room Cards Section */}
-                        <div className={styles["room-cards-section"]}>
-                        <h2>Your Virtual Rooms</h2>
-                        {rooms && rooms.length > 0 ? (
-                            <div className={styles["room-cards"]}>
-                            {rooms.map((room, index) => (
-                                <div className={styles["room-card"]} key={index}>
-                                <div className={styles["room-card-banner"]}>
-                                    {room.banner_image ? (
-                                    <img src={room.banner_image} alt={room.title} />
-                                    ) : (
-                                    <div className={styles["room-card-banner-placeholder"]}>
-                                        No Image
-                                    </div>
-                                    )}
-                                </div>
-                                <div className={styles["room-card-content"]}>
-                                    <h3 className={styles["room-card-title"]}>{room.title}</h3>
-                                    <p className={styles["room-card-description"]}>{room.description}</p>
-                                    <p className={styles["room-card-mantra"]}>{room.mantra}</p>
-                                    <div className={styles["room-code"]}>
-                                        <strong>Room Code: {room.code}</strong>
-                                    </div>
-                                    <div className={styles["room-card-actions"]}>
-                                    <button
-                                        className={styles["view-btn"]}
-                                        onClick={() => handleViewRoom(room.code, room.id)}
-                                    >
-                                        View
-                                    </button>
-                                    <button
-                                        className={styles["edit-btn"]}
-                                        onClick={() => handleEditData(room)}
-                                    >
-                                        Edit
-                                    </button>
-                                    <button
-                                        className={styles["delete-btn"]}
-                                        onClick={() => handleDeleteData(room.id)}
-                                    >
-                                        Delete
-                                    </button>
-                                    </div>
-                                </div>
-                                </div>
-                            ))}
-                            </div>
-                        ) : (
-                            <div className={styles["no-data"]}>
-                            No rooms found. Create your first virtual room!
-                            </div>
-                        )}
-                        </div>
+                        <RoomCardsList
+                            title="Your Virtual Rooms"
+                            rooms={rooms}
+                            onViewRoom={(roomCode, roomId) => handleViewRoom(String(roomCode), roomId)}
+                            useRoomCode={true}
+                            showEditButton={true}
+                            showDeleteButton={true}
+                            showRoomCode={true}
+                            onEditRoom={handleEditData}
+                            onDeleteRoom={handleDeleteData}
+                            emptyMessage="No rooms found. Create your first virtual room!"
+                        />
                     </div>
                     )}
                 

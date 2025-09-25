@@ -1,22 +1,15 @@
 'use client'
-import Loader from '@/components/Loader'
 import { ROUTES } from '@/constants/routes'
 import { useMyApp } from '@/context/AppUtils'
 import { AuthProtection } from '@/context/AuthProtection'
 import { getRooms } from '@/api/rooms'
 import { getJoinedRooms } from '@/api/participants'
-import styles from '@/styles/room.module.css'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
-
-
-interface RoomType {
-    id?: number
-    title?: string
-    description?: string
-    mantra?: string
-    banner_image?: string | null
-}
+import { RoomType } from '@/types/common/room'
+import PageHeader from '@/components/PageHeader'
+import RoomCardsList from '@/components/RoomCardsList'
+import Loader from '@/components/Loader'
 
 export default function LeaderboardRooms() {
     const router = useRouter()
@@ -42,7 +35,7 @@ export default function LeaderboardRooms() {
     const fullLoader = () => {
         console.log('Leaderboard Rooms: Auth is still loading')
         return (
-            <div className={styles["loading-container"]}>
+            <div style={{ padding: '20px', textAlign: 'center' }}>
                 <Loader/>
             </div>
         )
@@ -76,114 +69,42 @@ export default function LeaderboardRooms() {
         }
     }
 
-    const handleViewRoom = (roomId: number) => {
+    const handleViewRoom = (roomId: string | number) => {
         console.log('Viewing room with ID: ', roomId)
         router.push(`${ROUTES.LEADERBOARD}/${roomId}`)
     }
 
     return (
-        <div className={styles['dashboard-container']}>
-             <div className={styles["header-section"]}>
-                <div className={styles["user-avatar"]}>
-                    <span className={styles["avatar-letter"]}>
-                        {userProfile?.fullName?.charAt(0)?.toUpperCase() || 'J'}
-                    </span>
-                </div>
-                <div className={styles["welcome-text"]}>
-                    <h1>Leaderboards</h1>
-                    <p>How well did you do, {userProfile?.fullName || 'John Doe'} ?</p>
-                </div>
-                {/* <div className={styles["search-section"]}>
-                    <span>Search</span>
-                    <div className={styles["search-icon"]}>🔍</div>
-                </div> */}
-            </div>
-            <div className={styles["main-content"]}>
-                {/* <h1>Leaderboard is coming soon!</h1> */}
-                {/* My Room Section - Updated with consistent UI */}
-                <div className={styles["room-cards-section"]}>
-                    <h2>My Room</h2>
-                    <div className={styles["room-cards"]}>
-                        {myRooms.length > 0 ? (
-                            myRooms.map((room, index) => (
-                                <div 
-                                    className={styles["room-card"]} 
-                                    key={index}
-                                    onClick={() => handleViewRoom(room.id || 0)}    // unsa niii?
-                                >
-                                    <div className={styles["room-card-banner"]}>
-                                        {room.banner_image ? (
-                                            <img src={room.banner_image} alt={room.title} />
-                                        ) : (
-                                            <div className={styles["room-card-banner-placeholder"]}>
-                                                No Image
-                                            </div>
-                                        )}
-                                    </div>
-                                    <div className={styles["room-card-content"]}>
-                                        <h3 className={styles["room-card-title"]}>{room.title}</h3>
-                                        <p className={styles["room-card-description"]}>{room.description}</p>
-                                        <p className={styles["room-card-mantra"]}>{room.mantra || 'No mantra'}</p>
-                                        <div className={styles["room-card-actions"]}>
-                                            <button
-                                                className={styles["view-btn"]}
-                                                onClick={(e) => {
-                                                    e.stopPropagation(); // Prevent double click from card onClick
-                                                    handleViewRoom(room.id || 0);
-                                                }}
-                                            >
-                                                View
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            ))
-                        ) : (
-                            <p>No rooms created yet.</p>
-                        )}
-                    </div>
-                </div>
+        <div>
+            <PageHeader 
+                title="Leaderboards"
+                userName={userProfile?.fullName || 'John Doe'}
+                subtitle="How well did you do?"
+            />
+            
+            <div>
+                <RoomCardsList
+                    title="My Room"
+                    rooms={myRooms}
+                    onViewRoom={handleViewRoom}
+                    useRoomCode={false} // Use ID instead of code
+                    showClickableCard={true} // Entire card is clickable
+                    emptyMessage="No rooms created yet."
+                />
+                
                 {isRoomsLoading ? (
-                    <div className={styles["loading-indicator"]}><Loader /></div>
+                    <div style={{ padding: '20px', textAlign: 'center' }}>
+                        <Loader />
+                    </div>
                 ) : (
-                        <div className={styles["room-cards-section"]}>
-                            <br/>
-                            <h2>Your Joined Rooms</h2>
-                                <div className={styles["room-cards"] }>
-                                    {joinRooms.length > 0 ? (
-                                        joinRooms.map((room, index) => (
-                                             <div className={styles["room-card"]} key={index}>
-                                                <div className={styles["room-card-banner"]}>
-                                                    {room.banner_image ? (
-                                                        <img src={room.banner_image} alt={room.title} />
-                                                    ) : (
-                                                        <div className={styles["room-card-banner-placeholder"]}>
-                                                            No Image
-                                                        </div>
-                                                    )}
-                                                </div>
-                                                <div className={styles["room-card-content"]}>
-                                                    <h3 className={styles["room-card-title"]}>{room.title}</h3>
-                                                    <p className={styles["room-card-description"]}>{room.description}</p>
-                                                    <p className={styles["room-card-mantra"]}>{room.mantra || 'No mantra'}</p>
-                                                    <div className={styles["room-card-actions"]}>
-                                                        <button
-                                                            className={styles["view-btn"]}
-                                                            onClick={() => handleViewRoom(room.id || 0)}
-                                                        >
-                                                            View
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        ))
-                                    ) : (
-                                        <p>No rooms joined yet.</p>
-                                    )}
-                                </div>
-                            </div>
-                    )
-                }
+                    <RoomCardsList
+                        title="Your Joined Rooms"
+                        rooms={joinRooms}
+                        onViewRoom={handleViewRoom}
+                        useRoomCode={false} // Use ID instead of code
+                        emptyMessage="No rooms joined yet."
+                    />
+                )}
             </div>
         </div>
     )
