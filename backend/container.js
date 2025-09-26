@@ -56,7 +56,7 @@ const competitionRepository = new CompetitionRepository(supabase);
 const xpRepository = new XPRepository(supabase);
 
 // Initialize services
-const authService = new AuthService(userRepository);
+const authService = new AuthService(userRepository, supabase);
 const userService = new UserService(userRepository);
 const roomService = new RoomService(roomRepository);
 const problemService = new ProblemService(problemRepository, roomRepository);

@@ -1,5 +1,5 @@
 const roomModel = require('../../domain/models/Room');
-const cache = require('./cache');
+const cache = require('../cache');
 
 class RoomService {
     constructor(roomRepo){

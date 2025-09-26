@@ -1,6 +1,6 @@
 // const userModel = require('../../domain/models/User')
 const Mailer = require('../../utils/Mailer'); // Adjust path as needed
-const cache = require('./cache');
+const cache = require('../cache');
 
 class ParticipantService {
     constructor(participantRepo, roomService, userService, leaderService){

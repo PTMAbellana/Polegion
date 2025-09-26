@@ -1,6 +1,7 @@
 class AuthService {
-    constructor(userRepo){
+    constructor(userRepo, supabase){
         this.userRepo = userRepo
+        this.supabase = supabase
     }
 
     
@@ -24,21 +25,76 @@ class AuthService {
 
     async login(email, password){
         try {
-            return await this.userRepo.signInWithPassword(email, password)
+            const {
+                data,
+                error
+            } = await this.supabase.auth.signInWithPassword({
+                email,
+                password
+            })
+
+            if (error) {
+                console.error('AuthService: Login error from Supabase:', error.message)
+                throw error
+            }
+
+            if (!data || !data.session) {
+                console.log('AuthService: No session data returned from Supabase')
+                throw new Error('No session data returned')
+            }
+
+            return {
+                user: {
+                    id: data.user.id,
+                    email: data.user.email
+                },
+                session: {
+                    access_token: data.session.access_token,
+                    refresh_token: data.session.refresh_token,
+                    expires_at: data.session.expires_at
+                }
+            }
         } catch (error) { 
             throw error
         }
     }
     
-    async register (email, password, fullName, gender, phone){
+    async register (email, password, inputData){
         try {
-            return await this.userRepo.signUp(email, password, {
-                data: {
-                    fullName,
-                    gender,
-                    phone
-                }
+            const { 
+                data, 
+                error 
+            } = await this.supabase.auth.signUp({
+                email,
+                password
             })
+
+            if (error) {
+                console.error('AuthService: Registration error from Supabase:', error.message)
+                throw error
+            }
+
+            if (!data || !data.user) {
+                console.log('AuthService: No user data returned from Supabase during registration')
+                throw new Error('No user data returned')
+            }
+
+            const userId = data.user.id
+            // Save additional user info in the database
+            const userData = await this.userRepo.createUserProfile(userId, inputData)
+            return {
+                user: {
+                    id: data.user.id,
+                    email: data.user.email
+                },
+                // in case mag change ang mind na mu direct to dashboard
+                // session: {
+                //     access_token: data.session.access_token,
+                //     refresh_token: data.session.refresh_token,
+                //     expires_at: data.session.expires_at
+                // },
+                profile: userData
+            }
         } catch (error) { 
             throw error
         }

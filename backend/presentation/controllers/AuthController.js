@@ -39,32 +39,30 @@ class AuthController {
     }
 
     loginUser = async (req, res) => {
-        // console.log('auth controller')
-        // console.log(req.body)
         const { email, password } = req.body
-    
         try {
             const data = await this.authService.login(email, password)
     
-            if (!data) res.status(400).json({
-                error: error.message
-            })
+            if (!data) 
+                return res.status(400).json({
+                    message: 'Login failed',
+                    error: 'No data returned'
+                })
 
-            console.log(data)
-    
-            res.status(200).json(data)
-        } catch (error) {
-            // console.log(error.code)
-            // res.status(error.status).json({
-            //     error: error.code
-            // })
-            if (error.status === 400)
-            res.status(400).json({
-                error: 'Invalid credentials'
+            res.status(200).json({
+                message: 'Login successful',
+                data: data
             })
-            else
-            res.status(500).json({
-                error: 'Server error during login'
+        } catch (error) {
+            if (error.status === 400)
+                return res.status(400).json({
+                    message: 'Invalid credentials',
+                    error: 'Email or password is incorrect'
+                })
+            
+            return res.status(500).json({
+                message: 'Server error during login',
+                error: error.message // as is ka jan kay internal server error ka rar
             })
         }
     }
@@ -74,32 +72,49 @@ class AuthController {
         const { 
             email, 
             password, 
-            fullName, 
+            firstName, 
+            lastName,
             gender, 
-            phone 
+            phone,
+            role 
         } = req.body
     
         try {
             const data = await this.authService.register(
                 email,
                 password,
-                fullName, 
-                gender,
-                phone
+                {
+                    firstName,
+                    lastName,
+                    gender,
+                    phone,
+                    role
+                }
             )
     
             if (!data) return res.status(400).json({
-                error: error.message
+                message: 'Registration failed',
+                error: 'No data returned'
             })
-            return res.status(201).json(data)
+
+            return res.status(201).json({
+                message: 'Registration successful',
+                data: data
+            })
         } catch (error) {
-            if (error.status === 422) 
-            res.status(422).json({
-                error: 'Email already exist'
-            })
-            else 
-            res.status(500).json({
-                error: 'Server error during registration'
+            if (error.status === 422)  //unprocessed man ni sha, so tanawn nato nganu
+                return res.status(422).json({
+                    message: 'Registration failed', 
+                    error: error.message
+                });
+            if (error.status === 409)
+                return res.status(409).json({
+                    message: 'User already exists',
+                    error: 'Email already exist'
+                })
+            return res.status(500).json({
+                message: 'Server error during registration',
+                error: error.message
             })
         }
     }

@@ -1,5 +1,5 @@
 const supabase = require('../../config/supabase')
-const cache = require('./cache');
+const cache = require('../cache');
 
 class CompeService {
     constructor(compeRepo, partService, leaderService, roomService, probService) {

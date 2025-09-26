@@ -1,4 +1,4 @@
-const cache = require('./cache');
+const cache = require('../cache');
 
 class ProblemService {
   constructor(problemRepo, roomService) {

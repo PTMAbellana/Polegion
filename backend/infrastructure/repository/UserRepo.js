@@ -11,6 +11,28 @@ class UserRepo extends BaseRepo{
         this.defaultLink = 'https://uwllqanzveqanfpfnndu.supabase.co/storage/v1/object/public/profile-images/1751777126476.png'
     }
 
+    // for getProfile na route /profile
+    async getUserByUid(userId) {
+        try {
+            const {
+                data,
+                error
+            } = await this.supabase.from(this.tableName)
+            .select('*')
+            .eq('user_id', userId)
+            .single()
+
+            if (error) throw error
+
+            console.log('User profile data:', data)
+
+            return userModel.fromDbUser(data).toDTO()
+        } catch (error) {
+            console.error('Error in getUserByUid:', error)
+            throw error
+        }
+    }
+
     async refreshSession(refreshToken) {
         try {
             console.log('Attempting to refresh session with token:', refreshToken ? 'Present' : 'Missing')
@@ -177,33 +199,23 @@ class UserRepo extends BaseRepo{
         }
     }
 
-    async signUp (email, password, options){
+    async createUserProfile (userId, userData){
+        const newUser = userModel.fromInputUser(userData, userId).toJSON()
         try {
             const { 
                 data, 
                 error 
-            } = await this.supabase.auth.signUp({
-                email,
-                password,
-                options
-            })
-    
-            if (error) throw error 
-
-            const userId = data?.user?.id;
-
-            const { 
-                data: user, 
-                error: userError 
             } = await this.supabase.from(this.tableName)
             .insert({
                 user_id: userId,
-                profile_pic: this.defaultLink
+                ...newUser
             })
-            if (userError) {
-                throw new Error('Failed to update user profile image: ' + userError.message)    
+            .select()
+            .single()
+            if (error) {
+                throw new Error('Failed to create user profile: ' + error.message)
             }
-
+            console.log('User profile created:', data)
             return data
         } catch (error) {
             throw error
