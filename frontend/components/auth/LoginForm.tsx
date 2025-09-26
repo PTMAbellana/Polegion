@@ -7,7 +7,7 @@ import toast from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import { useAuthStore } from '@/store/authStore';
-import { ROUTES } from '@/constants/routes';
+import { ROUTES, STUDENT_ROUTES, TEACHER_ROUTES } from '@/constants/routes';
 import styles from '@/styles/login.module.css';
 
 interface LoginFormData {
@@ -25,9 +25,13 @@ const formSchema = yup.object().shape({
 
 interface LoginFormProps {
   onForgotPassword: () => void;
+  userType: "student" | "teacher";
 }
 
-export default function LoginForm({ onForgotPassword }: LoginFormProps) {
+export default function LoginForm({ 
+  onForgotPassword,
+  userType 
+} : LoginFormProps) {
   const router = useRouter();
   const { login } = useAuthStore(); 
   
@@ -46,13 +50,23 @@ export default function LoginForm({ onForgotPassword }: LoginFormProps) {
     const { email, password } = formdata;
     
     // ✨ Use the Zustand login action
-    const result = await login(email, password, rememberMe);
+    const result = await login(email, password);
     
     if (result.success) {
-      toast.success("Login successful!");
-      router.replace(ROUTES.DASHBOARD);
+      toast.success(result.message || "Login successful");
+      switch(userType) {
+        case "student":
+          router.push(STUDENT_ROUTES.DASHBOARD);
+          break;
+        case "teacher":
+          router.push(TEACHER_ROUTES.DASHBOARD);
+          break;
+        default:
+          router.push(ROUTES.DASHBOARD);
+      }
     } else {
-      toast.error(result.error || "Login failed");
+      toast.error(result.message || "Login failed");
+      console.log(result.error)
     }
   };
 

@@ -4,10 +4,10 @@ import Link from "next/link";
 import { logout } from "@/api/auth";
 import { useRouter, usePathname } from "next/navigation";
 import toast from "react-hot-toast";
-import { FaHome, FaTrophy, FaUser, FaSignOutAlt, FaBars, FaTimes, FaChalkboardTeacher, FaMapSigns, FaDungeon, FaMedal, FaUserAstronaut } from 'react-icons/fa';
+import { FaHome, FaTrophy, FaUser, FaSignOutAlt, FaBars, FaTimes, FaChalkboardTeacher, FaDungeon, FaMedal, FaUserAstronaut, FaFortAwesome, FaShapes } from 'react-icons/fa';
 import styles from '@/styles/navbar.module.css';
 
-import { ROUTES, STUDENT_ROUTES } from '@/constants/routes'
+import { ROUTES, STUDENT_ROUTES, TEACHER_ROUTES } from '@/constants/routes'
 import Swal from "sweetalert2";
 import { useAuthStore } from "@/store/authStore";
 
@@ -28,19 +28,20 @@ const Sidebar = (
     // temporary paths
     // Navigation items for teachers
     const teacherNavItems = [
-        { path: ROUTES.DASHBOARD, icon: FaHome, label: 'Dashboard', title: 'Home' },
+        { path: TEACHER_ROUTES.DASHBOARD, icon: FaHome, label: 'Dashboard', title: 'Home' },
         { path: ROUTES.VIRTUAL_ROOMS, icon: FaChalkboardTeacher, label: 'Virtual Rooms', title: 'Virtual Rooms' },
         { path: ROUTES.LEADERBOARD, icon: FaTrophy, label: 'Leaderboards', title: 'Leaderboard' },
-        { path: ROUTES.PROFILE, icon: FaUser, label: 'Profile', title: 'Profile' },
+        { path: TEACHER_ROUTES.PROFILE, icon: FaUser, label: 'Profile', title: 'Profile' },
     ];
 
     // Navigation items for students
     const studentNavItems = [
-        { path: ROUTES.DASHBOARD, icon: FaHome, label: 'Dashboard', title: 'Home' },
+        { path: STUDENT_ROUTES.DASHBOARD, icon: FaHome, label: 'Dashboard', title: 'Home' },
         { path: ROUTES.JOINED_ROOMS, icon: FaDungeon, label: 'Dungeons', title: 'Joined Rooms' },
-        { path: STUDENT_ROUTES.WORLD_MAP, icon: FaMapSigns, label: 'World Map', title: 'World Map' },
+        { path: STUDENT_ROUTES.WORLD_MAP, icon: FaFortAwesome, label: 'World Map', title: 'World Map' },
+        { path: STUDENT_ROUTES.PLAYGROUND, icon: FaShapes, label: 'Playground', title: 'Playground' },
         { path: ROUTES.LEADERBOARD, icon: FaMedal, label: 'Wall of Fame', title: 'Leaderboard' },
-        { path: ROUTES.PROFILE, icon: FaUserAstronaut, label: 'Profile', title: 'Profile' },
+        { path: STUDENT_ROUTES.PROFILE, icon: FaUserAstronaut, label: 'Profile', title: 'Profile' },
     ];
 
     const navItems = userRole === 'teacher' ? teacherNavItems : studentNavItems;

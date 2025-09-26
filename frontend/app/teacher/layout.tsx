@@ -10,9 +10,9 @@ export default function TeacherLayout({
     <div className={styles['page-layout']}>
       <Sidebar userRole="teacher" />
       <main className={styles['main-content']}>
-        <div className={styles['content-area']}>
+        {/* <div className={styles['content-area']}> */}
           {children}
-        </div>
+        {/* </div> */}
       </main>
     </div>
   );

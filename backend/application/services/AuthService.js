@@ -43,10 +43,12 @@ class AuthService {
                 throw new Error('No session data returned')
             }
 
+            const userData = await this.userRepo.getUserByUid(data.user.id)
             return {
                 user: {
                     id: data.user.id,
-                    email: data.user.email
+                    email: data.user.email,
+                    ...userData.toJSON() // include full profile data
                 },
                 session: {
                     access_token: data.session.access_token,

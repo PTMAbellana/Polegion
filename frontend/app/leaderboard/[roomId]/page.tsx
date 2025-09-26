@@ -7,6 +7,7 @@ import { useMyApp } from "@/context/AppUtils";
 import styles from "@/styles/leaderboard.module.css";
 import { getCompetitionLeaderboards, getRoomLeaderboards } from "@/api/leaderboards";
 import { Trophy, Medal, Crown, Star, Users, Target, ArrowLeft } from "lucide-react";
+import { useAuthStore } from "@/store/authStore";
 
 interface Participant {
   id?: string;
@@ -94,7 +95,7 @@ const LeaderRow: React.FC<{ row: Leaderboard; rank: number }> = ({
 export default function LeaderboardDetail({ params }: { params: Promise<{ roomId: number }> }) {
   const router = useRouter();
   const roomId = use(params);
-  const { isLoggedIn, authLoading, userProfile } = useMyApp();
+  const { isLoggedIn, authLoading, userProfile } = useAuthStore();
 
   const [roomBoards, setRoomBoards] = useState<Leaderboard[]>([]);
   const [compeBoards, setCompeBoards] = useState<PerCompetition[]>([]);

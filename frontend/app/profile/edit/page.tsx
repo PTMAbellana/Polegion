@@ -9,6 +9,7 @@ import Loader from '@/components/Loader'
 import styles from '@/styles/profile.module.css'
 import { ROUTES } from '@/constants/routes'
 import toast from 'react-hot-toast'
+import { useAuthStore } from '@/store/authStore'
 
 // Define the form data interface
 interface ProfileFormData {
@@ -26,7 +27,7 @@ interface FormErrors {
 
 export default function EditProfile() {
     const router = useRouter()
-    const { isLoggedIn, userProfile, refreshUserSession, appLoading} = useMyApp()
+    const { isLoggedIn, userProfile, refreshUserSession, appLoading} = useAuthStore()
 
     const [formData, setFormData] = useState<ProfileFormData>({
         fullName: '',

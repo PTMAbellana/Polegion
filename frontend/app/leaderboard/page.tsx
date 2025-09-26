@@ -10,10 +10,11 @@ import { RoomType } from '@/types/common/room'
 import PageHeader from '@/components/PageHeader'
 import RoomCardsList from '@/components/RoomCardsList'
 import Loader from '@/components/Loader'
+import { useAuthStore } from '@/store/authStore'
 
 export default function LeaderboardRooms() {
     const router = useRouter()
-    const { isLoggedIn, userProfile } = useMyApp()
+    const { isLoggedIn, userProfile } = useAuthStore()
     const { isLoading: authLoading } = AuthProtection()
 
     const [myRooms, setMyRooms] = useState<RoomType[]>([])

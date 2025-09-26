@@ -1,6 +1,5 @@
 "use client"
 
-import { useMyApp } from "@/context/AppUtils"
 import { AuthProtection } from "@/context/AuthProtection"
 import { getRooms } from "@/api/rooms"
 import { getJoinedRooms } from "@/api/participants"
@@ -11,15 +10,15 @@ import { RoomType } from "@/types/common/room"
 import LoadingOverlay from "@/components/LoadingOverlay"
 import PageHeader from "@/components/PageHeader"
 import RoomCardsList from "@/components/RoomCardsList"
+import { useAuthStore } from "@/store/authStore"
 
 export default function Dashboard() { 
     const [rooms, setRooms] = useState<RoomType[]>([])
     const [isRoomsLoading, setRoomsLoading] = useState(true)
     const [joinRooms, setJoinRooms] = useState<RoomType[]>([])
-    const { userProfile, isLoggedIn } = useMyApp()
     const { isLoading: authLoading } = AuthProtection()
     const router = useRouter()
-
+    const {userProfile, isLoggedIn} = useAuthStore()
     // Only fetch rooms when authentication is confirmed
     useEffect(() => {
         if (isLoggedIn && !authLoading) {

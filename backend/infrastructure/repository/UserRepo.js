@@ -26,7 +26,7 @@ class UserRepo extends BaseRepo{
 
             console.log('User profile data:', data)
 
-            return userModel.fromDbUser(data).toDTO()
+            return userModel.fromDbUser(data)
         } catch (error) {
             console.error('Error in getUserByUid:', error)
             throw error
@@ -215,7 +215,6 @@ class UserRepo extends BaseRepo{
             if (error) {
                 throw new Error('Failed to create user profile: ' + error.message)
             }
-            console.log('User profile created:', data)
             return data
         } catch (error) {
             throw error

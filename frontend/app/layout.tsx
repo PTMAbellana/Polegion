@@ -24,13 +24,13 @@ export default function RootLayout({
       </head>
       <body>
         {/* temporary pa ni sha, since kapoy ilis tagsa tagsaon nako kada page hmmp TTOTT */}
-        <AppUtilsProvider> 
+        {/* <AppUtilsProvider>  */}
           <Toaster />
           <AuthInitializer>
             {children}
           </AuthInitializer>
           <Footer />
-        </AppUtilsProvider>
+        {/* </AppUtilsProvider> */}
       </body>
     </html>
   );

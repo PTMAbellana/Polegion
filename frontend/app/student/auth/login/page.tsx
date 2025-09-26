@@ -67,7 +67,7 @@ export default function StudentLogin() {
             <h1 className={styles.welcomeTitle}>Welcome Back, Student!</h1>
             <p className={styles.welcomeSubtitle}>Ready to explore geometry?</p>
 
-            <LoginForm onForgotPassword={handleForgotPassword} />
+            <LoginForm onForgotPassword={handleForgotPassword} userType="student" />
 
             <p className={styles.registerPrompt}>
               Don&apos;t have an Account?{" "}

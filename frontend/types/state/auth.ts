@@ -1,6 +1,6 @@
 import { UserProfileDTO } from '../dto';
 
-import { RegisterFormData } from '../auth';
+import { RegisterFormData } from '../forms/auth';
 
 export interface AuthState {
     // Data
@@ -22,10 +22,10 @@ export interface AuthState {
     setLoginLoading: (loading: boolean) => void;
     
     // Async Actions
-    login: (email: string, password: string, rememberMe?: boolean) => Promise<AuthActionResult>;
+    login: (email: string, password: string) => Promise<AuthActionResult>;
     refreshUserSession: () => Promise<boolean>;
     logout: () => void;
-    register: (data: RegisterFormData , userType: 'student' | 'teacher') => Promise<AuthActionResult>;
+    register: (data: RegisterFormData, userType: 'student' | 'teacher') => Promise<AuthActionResult>;
     resetPassword: (token: string, password: string) => Promise<AuthActionResult>;
     initialize: () => Promise<void>;
 }
@@ -33,5 +33,6 @@ export interface AuthState {
 export interface AuthActionResult {
     success: boolean;
     error?: string;
-    data?: any;
+    data?: object;
+    message?: string;
 }

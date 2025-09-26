@@ -14,8 +14,11 @@ const api = axios.create({
 // Simplified auth utilities
 export const authUtils = {
 	saveAuthData: (authData) => {
+		console.log("Saving auth data:", authData);
 		if (authData?.session) {
 			const { session, user } = authData;
+			console.log("Session data:", session);
+			console.log("User data:", user);
 			localStorage.setItem("access_token", session.access_token);
 			localStorage.setItem("refresh_token", session.refresh_token);
 			localStorage.setItem("user", JSON.stringify(user));
@@ -120,7 +123,14 @@ api.interceptors.response.use(
 				});
 
 				if (response.data?.session) {
-					authUtils.saveAuthData(response.data);
+
+					const existingAuthData = authUtils.getAuthData();
+					
+					const updatedAuthData = {
+						session: response.data.session,
+						user: existingAuthData.user
+					};
+					authUtils.saveAuthData(updatedAuthData);
 					const newToken = response.data.session.access_token;
 					originalRequest.headers.Authorization = `Bearer ${newToken}`;
 					processQueue(null, newToken);

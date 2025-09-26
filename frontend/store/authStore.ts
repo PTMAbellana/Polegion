@@ -7,7 +7,8 @@ import {
     register as apiRegister, 
     // resetPassword as apiResetPassword 
 } from '@/api/auth';
-import { AuthState, UserProfileDTO, RegisterFormData } from '@/types'; 
+import { AuthState, UserProfileDTO, AuthActionResult } from '@/types';
+import { RegisterFormData } from '@/types/forms/auth'; 
 import api from '@/api/axios';
 
 export const useAuthStore = create<AuthState>()( //see AuthState for the abstract of the store
@@ -29,71 +30,98 @@ export const useAuthStore = create<AuthState>()( //see AuthState for the abstrac
             setAppLoading: (loading) => set({ appLoading: loading }),
             setLoginLoading: (loading) => set({ loginLoading: loading }),
 
-            login: async (email: string, password: string, rememberMe = false) => {
+            login: async (email: string, password: string): Promise<AuthActionResult> => {
                 set({ loginLoading: true });
                 try {
                     const response = await apiLogin(email, password);
-
-                    if (response?.data?.session?.access_token) {
-                        set({
-                            authToken: response.data.session.access_token,
-                            isLoggedIn: true,
-                        });
-
-                        if (rememberMe) {
-                            localStorage.setItem("remember_user", "true");
+                    
+                    if (!response.success) {
+                        return {
+                            success: false, 
+                            error: response.message || response.error || "Login failed",
                         }
-
-                        if (response.data.user) {
-                            const userProfile: UserProfileDTO = {
-                                id: response.data.user.id,
-                                email: response.data.user.email,
-                                fullName: response.data.user.user_metadata?.fullName,
-                                gender: response.data.user.user_metadata?.gender,
-                                phone: response.data.user.user_metadata?.phone,
-                                profile_pic: response.data.user.user_metadata?.avatar_url,
-                                created_at: response.data.user.created_at,
-                                updated_at: response.data.user.updated_at,
-                            };
-                            set({ userProfile });
-                        }
-
-                        return { success: true };
-                    } else {
-                        return { success: false, error: "Invalid login response" };
+                    }   
+                    const data = response.data;
+                    
+                    if (!data.user) {
+                        console.warn("Login successful but user data is missing in response");
+                        return {
+                            success: false,
+                            error: "Login successful but user profile data is missing. Please try again."
+                        };
                     }
-                } catch (error: any) {
+                    const user = data.user;
+                    console.log('Logged in user data:', user.role);
+                    const profile: UserProfileDTO = {
+                        id: user.id,
+                        email: user.email,
+                        first_name: user.first_name,
+                        last_name: user.last_name,
+                        gender: user.gender,
+                        phone: user.phone,
+                        profile_pic: user.profile_pic,
+                        role: user.role,
+                    };
+
+                    // 🎯 SAVE CONSISTENT DATA TO LOCALSTORAGE
+                    const authDataForStorage = {
+                        session: data.session,
+                        user: profile  // ← Save the SAME format you use in store
+                    };
+                    authUtils.saveAuthData(authDataForStorage);
+
+                    set({
+                        authToken: data.session.access_token,
+                        isLoggedIn: true,
+                        userProfile: profile,
+                    });
+
+                    return { 
+                        success: true,
+                        message: response.message 
+                    };
+                    
+                } catch (error: unknown) {
                     console.error("Login error: ", error);
+                    const errorMessage = error instanceof Error ? error.message : "An error occurred during login";
                     return { 
                         success: false, 
-                        error: error?.response?.data?.error || "An error occurred during login" 
+                        error: errorMessage 
                     };
                 } finally {
                     set({ loginLoading: false });
                 }
             },
 
-            register: async (formData: RegisterFormData, userType: 'student' | 'teacher') => {
+            register: async (formData: RegisterFormData, userType: 'student' | 'teacher'): Promise<AuthActionResult> => {
                 set({ loginLoading: true });
                 try {
                     const response = await apiRegister(formData, userType);
-                    if (response) {
-                        return { success: true };
+                    if (response.success) {
+                        return { 
+                            success: true,
+                            message: response.message,
+                            data: response.data 
+                        };
                     } else {
-                        return { success: false, error: "Failed to register user" };
+                        return { 
+                            success: false, 
+                            message: response.message || response.error || "Registration failed",
+                        };
                     }
-                } catch (error: any) {
+                } catch (error: unknown) {
                     console.error('Register Error: ', error);
+                    const errorMessage = error instanceof Error ? error.message : "An error occurred during registration";
                     return {
                         success: false,
-                        error: error?.response?.data?.error || "An error occurred during registration"
+                        error: errorMessage
                     };
                 } finally {
                     set({ loginLoading: false });
                 }
             },
 
-            resetPassword: async (token: string, password: string) => {
+            resetPassword: async (token: string, password: string): Promise<AuthActionResult> => {
                 set({ loginLoading: true });
                 try {
                     const response = await api.post('/auth/reset-password/confirm', {
@@ -106,11 +134,16 @@ export const useAuthStore = create<AuthState>()( //see AuthState for the abstrac
                     } else {
                         return { success: false, error: "Failed to reset password" };
                     }
-                } catch (error: any) {
+                } catch (error: unknown) {
                     console.error('Error resetting password:', error);
+                    let errorMessage = 'An error occurred while resetting your password';
+                    if (error && typeof error === 'object' && 'response' in error) {
+                        const axiosError = error as { response?: { data?: { error?: string } } };
+                        errorMessage = axiosError?.response?.data?.error || errorMessage;
+                    }
                     return {
                         success: false,
-                        error: error?.response?.data?.error || 'An error occurred while resetting your password'
+                        error: errorMessage
                     };
                 } finally {
                     set({ loginLoading: false });
@@ -118,37 +151,30 @@ export const useAuthStore = create<AuthState>()( //see AuthState for the abstrac
             },
 
             refreshUserSession: async (): Promise<boolean> => {
+                console.log('refreshUserSession called');
                 const { setAuthLoading, setAuthToken, setIsLoggedIn, setUserProfile, logout } = get();
                 
                 setAuthLoading(true);
                 try {
                     const authData = authUtils.getAuthData();
+                    console.log('Auth data from storage:', authData);
 
-                if (authData.accessToken) {
-                    setAuthToken(authData.accessToken);
-                    setIsLoggedIn(true);
+                    if (authData.accessToken) {
+                        setAuthToken(authData.accessToken);
+                        setIsLoggedIn(true);
 
-                    try {
-                        const profileResponse = await getUserProfile();
-                        if (profileResponse?.data) {
-                            setUserProfile(profileResponse.data);
-                            const updatedUser = {
-                                ...authData.user,
-                                ...profileResponse.data,
-                            };
-                            localStorage.setItem("user", JSON.stringify(updatedUser));
+                        if (authData.user && Object.keys(authData.user).length > 0) {
+                            console.log('Loading existing user profile from localStorage');
+                            setUserProfile(authData.user); // ← Use your formatted data
                         }
-                        return true;
-                    } catch {
-                    console.log("Profile fetch failed, but keeping user logged in - axios interceptor will handle token refresh");
-                        return true;
-                    }
-                } else if (!authData.accessToken && !authData.refreshToken) {
-                    logout();
-                    return false;
-                }
 
-                return true;
+                        return true;
+                    } else if (!authData.accessToken && !authData.refreshToken) {
+                        logout();
+                        return false;
+                    }
+
+                    return true;
                 } catch (error) {
                     console.error("Session refresh error:", error);
                     return get().isLoggedIn;
