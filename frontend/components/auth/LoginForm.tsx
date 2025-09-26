@@ -54,16 +54,18 @@ export default function LoginForm({
     
     if (result.success) {
       toast.success(result.message || "Login successful");
+      let route;
       switch(userType) {
         case "student":
-          router.push(STUDENT_ROUTES.DASHBOARD);
+          route = STUDENT_ROUTES.DASHBOARD;
           break;
         case "teacher":
-          router.push(TEACHER_ROUTES.DASHBOARD);
+          route = TEACHER_ROUTES.DASHBOARD;
           break;
         default:
-          router.push(ROUTES.DASHBOARD);
+          route = ROUTES.DASHBOARD;
       }
+      router.push(route);
     } else {
       toast.error(result.message || "Login failed");
       console.log(result.error)

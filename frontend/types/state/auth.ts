@@ -28,6 +28,12 @@ export interface AuthState {
     register: (data: RegisterFormData, userType: 'student' | 'teacher') => Promise<AuthActionResult>;
     resetPassword: (token: string, password: string) => Promise<AuthActionResult>;
     initialize: () => Promise<void>;
+    
+    // Profile Actions
+    updateProfile: (data: Partial<UserProfileDTO>) => Promise<AuthActionResult>;
+    updateEmail: (email: string) => Promise<AuthActionResult>;
+    updatePassword: (oldPassword: string, newPassword: string) => Promise<AuthActionResult>;
+    uploadProfileImage: (file: File) => Promise<AuthActionResult>;
 }
 
 export interface AuthActionResult {

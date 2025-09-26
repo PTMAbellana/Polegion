@@ -1,7 +1,6 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { authUtils } from '@/api/axios';
-import { getUserProfile } from '@/api/users';
 import { 
     login as apiLogin, 
     register as apiRegister, 
@@ -199,6 +198,178 @@ export const useAuthStore = create<AuthState>()( //see AuthState for the abstrac
                     await refreshUserSession();
                 } finally {
                     setAppLoading(false);
+                }
+            },
+
+            // Profile management methods
+            updateProfile: async (data: Partial<UserProfileDTO>): Promise<AuthActionResult> => {
+                set({ authLoading: true });
+                try {
+                    const response = await api.put('/users/profile', data);
+                    
+                    if (response.status === 200 && response.data) {
+                        // Update user profile in store
+                        const currentProfile = get().userProfile;
+                        const updatedProfile = { ...currentProfile, ...response.data.user };
+                        set({ userProfile: updatedProfile as UserProfileDTO });
+                        
+                        // Update localStorage as well
+                        authUtils.updateUserProfile(updatedProfile);
+                        
+                        return { 
+                            success: true, 
+                            message: 'Profile updated successfully',
+                            data: response.data 
+                        };
+                    } else {
+                        return { 
+                            success: false, 
+                            error: response.data?.message || 'Failed to update profile' 
+                        };
+                    }
+                } catch (error: unknown) {
+                    console.error('Profile update error:', error);
+                    let errorMessage = 'An error occurred while updating your profile';
+                    
+                    if (error && typeof error === 'object' && 'response' in error) {
+                        const axiosError = error as { response?: { data?: { message?: string; error?: string } } };
+                        errorMessage = axiosError?.response?.data?.message || 
+                                     axiosError?.response?.data?.error || 
+                                     errorMessage;
+                    }
+                    
+                    return { success: false, error: errorMessage };
+                } finally {
+                    set({ authLoading: false });
+                }
+            },
+
+            updateEmail: async (email: string): Promise<AuthActionResult> => {
+                set({ authLoading: true });
+                try {
+                    const response = await api.put('/users/email', { email });
+                    
+                    if (response.status === 200) {
+                        // Update email in store
+                        const currentProfile = get().userProfile;
+                        if (currentProfile) {
+                            const updatedProfile = { ...currentProfile, email };
+                            set({ userProfile: updatedProfile });
+                            authUtils.updateUserProfile(updatedProfile);
+                        }
+                        
+                        return { 
+                            success: true, 
+                            message: 'Email updated successfully' 
+                        };
+                    } else {
+                        return { 
+                            success: false, 
+                            error: response.data?.message || 'Failed to update email' 
+                        };
+                    }
+                } catch (error: unknown) {
+                    console.error('Email update error:', error);
+                    let errorMessage = 'An error occurred while updating your email';
+                    
+                    if (error && typeof error === 'object' && 'response' in error) {
+                        const axiosError = error as { response?: { data?: { message?: string; error?: string } } };
+                        errorMessage = axiosError?.response?.data?.message || 
+                                     axiosError?.response?.data?.error || 
+                                     errorMessage;
+                    }
+                    
+                    return { success: false, error: errorMessage };
+                } finally {
+                    set({ authLoading: false });
+                }
+            },
+
+            updatePassword: async (oldPassword: string, newPassword: string): Promise<AuthActionResult> => {
+                set({ authLoading: true });
+                try {
+                    const response = await api.put('/users/password', { 
+                        oldPassword, 
+                        newPassword 
+                    });
+                    
+                    if (response.status === 200) {
+                        return { 
+                            success: true, 
+                            message: 'Password updated successfully' 
+                        };
+                    } else {
+                        return { 
+                            success: false, 
+                            error: response.data?.message || 'Failed to update password' 
+                        };
+                    }
+                } catch (error: unknown) {
+                    console.error('Password update error:', error);
+                    let errorMessage = 'An error occurred while updating your password';
+                    
+                    if (error && typeof error === 'object' && 'response' in error) {
+                        const axiosError = error as { response?: { data?: { message?: string; error?: string } } };
+                        errorMessage = axiosError?.response?.data?.message || 
+                                     axiosError?.response?.data?.error || 
+                                     errorMessage;
+                    }
+                    
+                    return { success: false, error: errorMessage };
+                } finally {
+                    set({ authLoading: false });
+                }
+            },
+
+            uploadProfileImage: async (file: File): Promise<AuthActionResult> => {
+                set({ authLoading: true });
+                try {
+                    const formData = new FormData();
+                    formData.append('profileImage', file);
+                    
+                    const response = await api.post('/users/profile-image', formData, {
+                        headers: {
+                            'Content-Type': 'multipart/form-data',
+                        },
+                    });
+                    
+                    if (response.status === 200 && response.data) {
+                        // Update profile image URL in store
+                        const currentProfile = get().userProfile;
+                        if (currentProfile) {
+                            const updatedProfile = { 
+                                ...currentProfile, 
+                                profile_pic: response.data.profileImageUrl 
+                            };
+                            set({ userProfile: updatedProfile });
+                            authUtils.updateUserProfile(updatedProfile);
+                        }
+                        
+                        return { 
+                            success: true, 
+                            message: 'Profile image updated successfully',
+                            data: { profileImageUrl: response.data.profileImageUrl }
+                        };
+                    } else {
+                        return { 
+                            success: false, 
+                            error: response.data?.message || 'Failed to upload profile image' 
+                        };
+                    }
+                } catch (error: unknown) {
+                    console.error('Profile image upload error:', error);
+                    let errorMessage = 'An error occurred while uploading your profile image';
+                    
+                    if (error && typeof error === 'object' && 'response' in error) {
+                        const axiosError = error as { response?: { data?: { message?: string; error?: string } } };
+                        errorMessage = axiosError?.response?.data?.message || 
+                                     axiosError?.response?.data?.error || 
+                                     errorMessage;
+                    }
+                    
+                    return { success: false, error: errorMessage };
+                } finally {
+                    set({ authLoading: false });
                 }
             },
         }),

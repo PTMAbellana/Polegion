@@ -4,14 +4,16 @@ import React from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuthStore } from '@/store/authStore'
 import Loader from '@/components/Loader'
+import ProfileInfoItem from '@/components/profile/ProfileInfoItem'
+import AnimatedAvatar from '@/components/profile/AnimatedAvatar'
 import styles from '@/styles/profile.module.css'
-import { ROUTES } from '@/constants/routes'
+import { ROUTES, STUDENT_ROUTES, TEACHER_ROUTES } from '@/constants/routes'
+import { ProfileCardProps } from '@/types/props/profile'
 
-interface ProfileCardProps {
-    userType?: 'student' | 'teacher'
-}
 
-export default function ProfileCard({ userType }: ProfileCardProps) {
+export default function ProfileCard({ 
+    userType 
+}: ProfileCardProps) {
     const router = useRouter()
     const { isLoggedIn, userProfile, appLoading } = useAuthStore()
 
@@ -25,10 +27,18 @@ export default function ProfileCard({ userType }: ProfileCardProps) {
     }
 
     const handleEditProfile = () => {
-        const editRoute = userType 
-            ? `/${userType}/profile/edit` 
-            : `${ROUTES.PROFILE}/edit`
-        router.push(editRoute)
+        let route;
+        switch(userType) {
+            case "student":
+                route = STUDENT_ROUTES.EDIT_PROFILE;
+                break;
+            case "teacher":
+                route = TEACHER_ROUTES.EDIT_PROFILE;
+                break;
+            default:
+                route = ROUTES.EDIT_PROFILE;
+        }
+        router.push(route)
     }
 
     const getDisplayName = () => {
@@ -61,16 +71,10 @@ export default function ProfileCard({ userType }: ProfileCardProps) {
             <div className={styles['profile-card']}>
                 {/* Animated Header */}
                 <div className={styles['profile-header']}>
-                    <div className={styles['profile-avatar-container']}>
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img 
-                            className={styles['profile-avatar']} 
-                            src={userProfile?.profile_pic || "/placeholder-avatar.png"}
-                            alt="Profile"
-                        />
-                        <div className={styles['avatar-glow']}></div>
-                        <div className={styles['avatar-ring']}></div>
-                    </div>
+                    <AnimatedAvatar
+                        src={userProfile?.profile_pic}
+                        alt="Profile"
+                    />
                     <div className={styles['profile-title-group']}>
                         <h1 className={styles['profile-title']}>
                             {getDisplayName()}
@@ -83,24 +87,19 @@ export default function ProfileCard({ userType }: ProfileCardProps) {
 
                 {/* Details */}
                 <div className={styles['profile-details']}>
-                    <div className={styles['profile-info-group']}>
-                        <label className={styles['profile-label']}>Phone Number</label>
-                        <div className={styles['profile-value']}>
-                            {userProfile?.phone || 'Enter your Phone Number'}
-                        </div>
-                    </div>
-                    <div className={styles['profile-info-group']}>
-                        <label className={styles['profile-label']}>Email</label>
-                        <div className={styles['profile-value']}>
-                            {userProfile?.email || 'Enter your Email'}
-                        </div>
-                    </div>
-                    <div className={styles['profile-info-group']}>
-                        <label className={styles['profile-label']}>Gender</label>
-                        <div className={styles['profile-value']}>
-                            {userProfile?.gender || 'Not specified'}
-                        </div>
-                    </div>
+                    <ProfileInfoItem 
+                        label="Email" 
+                        value={userProfile?.email} 
+                    />
+                    <ProfileInfoItem 
+                        label="Phone Number" 
+                        value={userProfile?.phone} 
+                    />
+                    <ProfileInfoItem 
+                        label="Gender" 
+                        value={userProfile?.gender} 
+                        fallback="Not specified"
+                    />
                 </div>
 
                 {/* Edit Profile Button */}
@@ -108,7 +107,6 @@ export default function ProfileCard({ userType }: ProfileCardProps) {
                     onClick={handleEditProfile}
                     className={styles['edit-profile-button']}
                 >
-                    <span className={styles['edit-icon']}>✏️</span>
                     Edit Profile
                 </button>
             </div>

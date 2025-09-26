@@ -55,6 +55,14 @@ export const authUtils = {
 			(key) => localStorage.removeItem(key)
 		);
 	},
+
+	updateUserProfile: (updatedProfile) => {
+		try {
+			localStorage.setItem("user", JSON.stringify(updatedProfile));
+		} catch (error) {
+			console.error("Error updating user profile in localStorage", error);
+		}
+	},
 };
 
 // Request interceptor
