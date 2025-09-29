@@ -89,21 +89,49 @@ export const uploadImage = async (formData) => {
     });
 
     console.log("Image upload response:", response.data);
-    return response.data;
+    return {
+      success: true,
+      imageUrl: response.data.imageUrl
+    };
   } catch (error) {
     console.error("Error uploading banner image:", error);
 
     // Enhanced error handling for file uploads
     if (error.response?.data?.error) {
-      throw new Error(error.response.data.error);
+      return {
+        success: false,
+        error: error.response.data.error,
+        message: error.response.data.message || 'Image upload failed',
+        status: error.response.status
+      }
     } else if (error.code === "ECONNABORTED") {
-      throw new Error("Upload timeout - file may be too large");
+      return {
+        success: false,
+        error: 'Upload timeout - please try again with a smaller file or check your connection',
+        message: 'The upload took too long and was aborted.',
+        status: 408 // Request Timeout
+      }
     } else if (error.message === "Network Error") {
-      throw new Error("Network error - please check your connection");
+      return {
+        success: false,
+        error: 'Network error - please check your internet connection',
+        message: 'A network error occurred while trying to upload the image.',
+        status: 503 // Service Unavailable
+      }
     } else if (error.response?.status === 404) {
-      throw new Error("Upload endpoint not found - check server configuration");
+      return {
+        success: false,
+        error: 'Endpoint not found - please contact support',
+        message: 'The upload endpoint could not be found.',
+        status: 404
+      }
     } else {
-      throw new Error(`Failed to upload image: ${error.message}`);
+      return {
+        success: false,
+        error: 'An unknown error occurred during image upload',
+        message: 'Please try again later.',
+        status: error.response?.status || 500
+      }
     }
   } 
 }

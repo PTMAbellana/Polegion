@@ -333,16 +333,16 @@ export const useAuthStore = create<AuthState>()(
                 set({ authLoading: true });
                 try {
                     const formData = new FormData();
-                    formData.append('profileImage', file);
+                    formData.append('image', file);
                     
                     const response = await uploadImage(formData);
-                    if (response.status === 200 && response.data) {
+                    if (response.success) {
                         // Update profile image URL in store
                         const currentProfile = get().userProfile;
                         if (currentProfile) {
                             const updatedProfile = { 
                                 ...currentProfile, 
-                                profile_pic: response.data.profileImageUrl 
+                                profile_pic: response.imageUrl 
                             };
                             set({ userProfile: updatedProfile });
                             authUtils.updateUserProfile(updatedProfile);
@@ -351,18 +351,21 @@ export const useAuthStore = create<AuthState>()(
                         return { 
                             success: true, 
                             message: 'Profile image updated successfully',
-                            data: { profileImageUrl: response.data.profileImageUrl }
+                            data: { profileImageUrl: response.imageUrl }
                         };
                     } else {
                         return { 
                             success: false, 
-                            error: response.data?.message || 'Failed to upload profile image' 
+                            error: response.message || 'Failed to upload profile image' 
                         };
                     }
                 } catch (error: unknown) {
                     console.error('Profile image upload error:', error);
                     const errorMessage = error instanceof Error ? error.message : "An error occurred while uploading your profile image";
-                    return { success: false, error: errorMessage };
+                    return { 
+                        success: false, 
+                        error: errorMessage 
+                    };
                 } finally {
                     set({ authLoading: false });
                 }
