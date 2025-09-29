@@ -1,3 +1,5 @@
+import api from './axios';
+
 export const getUserProfile = async () => {
   return await api.get("/users/profile");
 };
@@ -30,6 +32,7 @@ export const updateEmail = async (newEmail) => {
       message: response.data.message
     };
   } catch (error) {
+    console.error('Error updating email:', error);
     return {
       success: false,
       error: error.response?.data?.error || 'Email update failed',

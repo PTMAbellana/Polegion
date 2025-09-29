@@ -1,4 +1,3 @@
-import { logout } from '@/api/auth';
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { authUtils } from '@/api/axios';
@@ -14,11 +13,12 @@ import api from '@/api/axios';
 import { 
     updateEmail as apiUpdateEmail, 
     updatePassword as apiUpdatePassword, 
+    deactivateAccount, 
     updateUserProfile, 
     uploadImage 
 } from '@/api/users';
 
-export const useAuthStore = create<AuthState>()( //see AuthState for the abstract of the store
+export const useAuthStore = create<AuthState>()(
     persist(
         (set, get) => ({
             // Initial state
@@ -192,6 +192,7 @@ export const useAuthStore = create<AuthState>()( //see AuthState for the abstrac
             logout: async () => {
                 await apiLogout();
                 authUtils.clearAuthData();
+                localStorage.removeItem('auth-storage');
                 set({
                     authToken: null,
                     userProfile: null,
@@ -250,13 +251,15 @@ export const useAuthStore = create<AuthState>()( //see AuthState for the abstrac
                     const response = await apiUpdateEmail(email);
 
                     if (!response.success) {
+                        console.log('Email update failed response:', response);
+                        alert(response || 'Failed to update email');
                         return { 
                             success: false, 
                             error: response.message || 'Failed to update email' 
                         };
                     }
                    const { logout } = get();
-                   logout(); // Log out the user after email change
+                   await logout(); // Log out the user after email change
                     return { 
                         success: true, 
                         message: 'Email updated successfully' 
@@ -282,7 +285,7 @@ export const useAuthStore = create<AuthState>()( //see AuthState for the abstrac
                         };
                     }
                     const { logout } = get();
-                    logout(); // Log out the user after password change
+                    await logout(); // Log out the user after password change
                     return { 
                         success: true, 
                         message: 'Password updated successfully' 
@@ -294,6 +297,33 @@ export const useAuthStore = create<AuthState>()( //see AuthState for the abstrac
                         success: false, 
                         error: errorMessage 
                     };
+                } finally {
+                    set({ authLoading: false });
+                }
+            },
+
+            deactivate: async (): Promise<AuthActionResult> => {
+                set({ authLoading: true });
+                try {
+                    const response = await deactivateAccount();
+                    if (!response.success) {
+                        console.log('Account deactivation failed response:', response);
+                        alert(response || 'Failed to deactivate account');
+                        return {
+                            success: false,
+                            error: response.message || 'Failed to deactivate account'
+                        };
+                    }
+                    const { logout } = get();
+                    await logout(); // Log out the user after account deactivation
+                    return {
+                        success: true,
+                        message: 'Account deactivated successfully'
+                    };
+                } catch (error: unknown) {
+                    console.error('Account deactivation error:', error);
+                    const errorMessage = error instanceof Error ? error.message : "An error occurred while deactivating your account";
+                    return { success: false, error: errorMessage };
                 } finally {
                     set({ authLoading: false });
                 }

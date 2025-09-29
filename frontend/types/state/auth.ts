@@ -34,6 +34,7 @@ export interface AuthState {
     updateEmail: (email: string) => Promise<AuthActionResult>;
     updatePassword: (newPassword: string) => Promise<AuthActionResult>;
     uploadProfileImage: (file: File) => Promise<AuthActionResult>;
+    deactivate: () => Promise<AuthActionResult>;
 }
 
 export interface AuthActionResult {
