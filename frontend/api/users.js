@@ -91,7 +91,8 @@ export const uploadImage = async (formData) => {
     console.log("Image upload response:", response.data);
     return {
       success: true,
-      imageUrl: response.data.imageUrl
+      imageUrl: response.data.data.imageUrl,
+      message: response.data.message || 'Image uploaded successfully'
     };
   } catch (error) {
     console.error("Error uploading banner image:", error);
