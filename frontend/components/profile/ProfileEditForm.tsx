@@ -1,5 +1,6 @@
 import React from 'react'
 import { useProfileForm } from '@/hooks/profile/useProfileForm'
+import { GENDER_OPTIONS } from '@/constants/dropdown'
 import styles from '@/styles/profile.module.css'
 import { ProfileEditFormProps } from '@/types/props/profile'
 
@@ -44,22 +45,41 @@ export default function ProfileEditForm({
             <div className={styles['form-section']}>
                 <h3 className={styles['section-title']}>Personal Information</h3>
                 
-                {/* Full Name Field */}
+                {/* First Name Field */}
                 <div className={styles['form-group']}>
-                    <label htmlFor="fullName" className={styles['form-label']}>
-                        Full Name *
+                    <label htmlFor="firstName" className={styles['form-label']}>
+                        First Name *
                     </label>
                     <input
-                        id="fullName"
+                        id="firstName"
                         type="text"
-                        value={formData.fullName}
-                        onChange={(e) => updateField('fullName', e.target.value)}
-                        className={`${styles['form-input']} ${errors.fullName ? styles['error'] : ''}`}
-                        placeholder="Enter your full name"
+                        value={formData.firstName}
+                        onChange={(e) => updateField('firstName', e.target.value)}
+                        className={`${styles['form-input']} ${errors.firstName ? styles['error'] : ''}`}
+                        placeholder="Enter your first name"
                         disabled={isSubmitting}
                     />
-                    {errors.fullName && (
-                        <span className={styles['error-message']}>{errors.fullName}</span>
+                    {errors.firstName && (
+                        <span className={styles['error-message']}>{errors.firstName}</span>
+                    )}
+                </div>
+
+                {/* Last Name Field */}
+                <div className={styles['form-group']}>
+                    <label htmlFor="lastName" className={styles['form-label']}>
+                        Last Name *
+                    </label>
+                    <input
+                        id="lastName"
+                        type="text"
+                        value={formData.lastName}
+                        onChange={(e) => updateField('lastName', e.target.value)}
+                        className={`${styles['form-input']} ${errors.lastName ? styles['error'] : ''}`}
+                        placeholder="Enter your last name"
+                        disabled={isSubmitting}
+                    />
+                    {errors.lastName && (
+                        <span className={styles['error-message']}>{errors.lastName}</span>
                     )}
                 </div>
 
@@ -76,10 +96,11 @@ export default function ProfileEditForm({
                         disabled={isSubmitting}
                     >
                         <option value="">Select gender</option>
-                        <option value="male">Male</option>
-                        <option value="female">Female</option>
-                        <option value="other">Other</option>
-                        <option value="prefer_not_to_say">Prefer not to say</option>
+                        {GENDER_OPTIONS.map((option) => (
+                            <option key={option.value} value={option.value}>
+                                {option.label}
+                            </option>
+                        ))}
                     </select>
                     {errors.gender && (
                         <span className={styles['error-message']}>{errors.gender}</span>

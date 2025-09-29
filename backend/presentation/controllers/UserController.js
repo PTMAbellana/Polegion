@@ -22,17 +22,18 @@ class UserController {
     }
     
     updateUserProfile = async (req, res) => {
+        console.log('Update profile endpoint hit', req.body);
         const { 
-            firstName, 
-            lastName, 
+            first_name, 
+            last_name, 
             gender, 
             phone 
         } = req.body
     
         try {
             const data = await this.userService.updateUserProfile({
-                firstName,
-                lastName,
+                first_name,
+                last_name,
                 gender,
                 phone,
                 token: req.token

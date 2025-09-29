@@ -78,7 +78,8 @@ class UserRepo extends BaseRepo{
                 data,
                 error
             } = await this.supabase
-            .from(this.tableName).update({
+            .from(this.tableName)
+            .update({
                 first_name: userData.first_name,
                 last_name: userData.last_name,
                 gender: userData.gender,

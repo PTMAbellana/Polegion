@@ -216,11 +216,14 @@ export const useAuthStore = create<AuthState>()(
                 try {
                     const response = await updateUserProfile(data); 
                     
-                    if (response.status === 200 && response.data) {
+                    if (response.success) {
                         // Update user profile in store
                         const currentProfile = get().userProfile;
-                        const updatedProfile = { ...currentProfile, ...response.data.user };
-                        set({ userProfile: updatedProfile as UserProfileDTO });
+                        const updatedProfile = { 
+                            ...currentProfile, 
+                            ...response.data 
+                        };
+                        set({ userProfile: updatedProfile });
                         
                         // Update localStorage as well
                         authUtils.updateUserProfile(updatedProfile);
@@ -233,7 +236,7 @@ export const useAuthStore = create<AuthState>()(
                     } else {
                         return { 
                             success: false, 
-                            error: response.data?.message || 'Failed to update profile' 
+                            error: response.message || 'Failed to update profile' 
                         };
                     }
                 } catch (error: unknown) {

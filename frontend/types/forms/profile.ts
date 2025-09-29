@@ -16,13 +16,15 @@ export interface SecurityErrors {
 }
 
 export interface ProfileFormData {
-    fullName: string
+    firstName: string
+    lastName: string
     gender: string
     phone: string
 }
 
 export interface ProfileFormErrors {
-    fullName?: string
+    firstName?: string
+    lastName?: string
     gender?: string
     phone?: string
 }

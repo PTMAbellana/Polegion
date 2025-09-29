@@ -10,7 +10,8 @@ export function useProfileForm() {
     const { userProfile, updateProfile } = useAuthStore()
     
     const [formData, setFormData] = useState<ProfileFormData>({
-        fullName: userProfile ? `${userProfile.first_name || ''} ${userProfile.last_name || ''}`.trim() : '',
+        firstName: userProfile?.first_name || '',
+        lastName: userProfile?.last_name || '',
         gender: userProfile?.gender || '',
         phone: userProfile?.phone || ''
     })
@@ -60,15 +61,10 @@ export function useProfileForm() {
                 return false
             }
 
-            // Split full name into first and last name
-            const nameParts = formData.fullName.trim().split(' ')
-            const firstName = nameParts[0] || ''
-            const lastName = nameParts.slice(1).join(' ') || ''
-
             // Submit to store
             const result = await updateProfile({
-                first_name: firstName,
-                last_name: lastName,
+                first_name: formData.firstName,
+                last_name: formData.lastName,
                 gender: formData.gender,
                 phone: formData.phone
             })
@@ -91,7 +87,8 @@ export function useProfileForm() {
 
     const resetForm = () => {
         setFormData({
-            fullName: userProfile ? `${userProfile.first_name || ''} ${userProfile.last_name || ''}`.trim() : '',
+            firstName: userProfile?.first_name || '',
+            lastName: userProfile?.last_name || '',
             gender: userProfile?.gender || '',
             phone: userProfile?.phone || ''
         })
