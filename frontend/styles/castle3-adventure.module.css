@@ -45,7 +45,7 @@
 .content_wrapper {
   position: relative;
   z-index: 10;
-  margin-left: 80px; /* Space for collapsed sidebar */
+  margin-left: 100px; /* ✅ FIXED: Space for collapsed sidebar */
   min-height: 100vh;
   transition: margin-left 0.3s ease;
 }
@@ -56,7 +56,7 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  padding: 20px 30px;
+  padding: 20px 30px; /* ✅ FIXED: Reduced left padding */
   flex-wrap: wrap;
   gap: 20px;
 }
@@ -186,7 +186,8 @@
 }
 
 .interactive_circle {
-  filter: drop-shadow(0 0 20px rgba(147, 112, 219, 0.3));
+  filter: drop-shadow(0 0 15px rgba(255, 215, 0, 0.3));
+  user-select: none;
   display: block;
   pointer-events: auto !important;
 }
@@ -204,13 +205,11 @@
 .circle_part {
   cursor: pointer !important;
   transition: all 0.3s ease;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
-  pointer-events: auto !important;
 }
 
 .circle_part:hover {
-  opacity: 0.8 !important;
-  filter: brightness(1.3) !important;
+  filter: brightness(1.5) drop-shadow(0 0 8px currentColor);
+  transform: scale(1.05);
 }
 
 .center_point {
@@ -253,20 +252,18 @@
 
 /* Quest Panel */
 .quest_panel {
-  flex: 0 0 350px;
+  width: 350px;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 1.5rem;
 }
 
 .quest_scroll {
-  background: rgba(25, 25, 112, 0.9);
-  border: 3px solid #9370DB;
+  background: rgba(255, 255, 255, 0.15);
+  padding: 2rem;
   border-radius: 15px;
-  padding: 25px;
-  box-shadow: 
-    0 8px 25px rgba(0, 0, 0, 0.4),
-    0 0 30px rgba(147, 112, 219, 0.2);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 215, 0, 0.3);
 }
 
 .quest_scroll h2 {
@@ -278,255 +275,239 @@
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
 }
 
+.quest_target {
+  position: absolute;
+  top: -40px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(25, 25, 112, 0.9);
+  color: #E6E6FA;
+  padding: 8px 16px;
+  border-radius: 15px;
+  border: 2px solid #9370DB;
+  font-size: 0.9rem;
+  text-align: center;
+  white-space: nowrap;
+  z-index: 5;
+}
+
+.quest_details {
+  text-align: left;
+}
+
 .quest_details h3 {
-  color: #DDA0DD;
-  margin: 0 0 10px 0;
-  font-size: 1.2rem;
+  color: #FFA500;
+  margin: 0 0 1rem 0;
+  font-size: 1.3rem;
 }
 
 .quest_details p {
-  color: #E6E6FA;
-  line-height: 1.5;
-  margin-bottom: 20px;
+  color: rgba(255, 255, 255, 0.9);
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
 }
 
 .hint_button {
-  background: linear-gradient(135deg, #9370DB 0%, #8A2BE2 100%);
-  border: 2px solid #DDA0DD;
-  border-radius: 20px;
-  padding: 12px 24px;
-  color: #E6E6FA;
-  font-family: 'Cinzel', serif;
+  background: linear-gradient(135deg, #4ECDC4, #44A08D);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 25px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
   width: 100%;
 }
 
-.hint_button:hover {
+.hint_button:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 6px 15px rgba(147, 112, 219, 0.4);
-  background: linear-gradient(135deg, #8A2BE2 0%, #9370DB 100%);
+  box-shadow: 0 5px 15px rgba(78, 205, 196, 0.4);
 }
 
-.completion_message {
-  text-align: center;
-  padding: 20px;
-  background: rgba(255, 215, 0, 0.1);
-  border: 2px solid #FFD700;
-  border-radius: 10px;
-  margin-top: 10px;
-}
-
-.completion_message h3 {
-  color: #FFD700;
-  margin: 0 0 10px 0;
-}
-
-.completion_message p {
-  color: #E6E6FA;
-  margin: 0;
+.hint_button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 /* Parts Reference */
 .parts_reference {
-  background: rgba(25, 25, 112, 0.9);
-  border: 3px solid #9370DB;
+  background: rgba(255, 255, 255, 0.15);
+  padding: 1.5rem;
   border-radius: 15px;
-  padding: 20px;
-  box-shadow: 
-    0 8px 25px rgba(0, 0, 0, 0.4),
-    0 0 30px rgba(147, 112, 219, 0.2);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 215, 0, 0.3);
 }
 
 .parts_reference h3 {
-  font-family: 'Cinzel', serif;
-  color: #E6E6FA;
-  margin: 0 0 15px 0;
-  text-align: center;
+  color: #FFD700;
+  margin: 0 0 1rem 0;
   font-size: 1.1rem;
+  text-align: center;
 }
 
 .parts_grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 10px;
+  gap: 0.75rem;
 }
 
 .part_item {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 8px;
+  gap: 0.5rem;
+  padding: 0.5rem;
   border-radius: 8px;
   transition: all 0.3s ease;
 }
 
 .part_item.discovered {
-  background: rgba(147, 112, 219, 0.2);
-  border: 1px solid #9370DB;
-  animation: discoveredGlow 2s ease-in-out infinite alternate;
-}
-
-@keyframes discoveredGlow {
-  0% { box-shadow: 0 0 5px rgba(147, 112, 219, 0.3); }
-  100% { box-shadow: 0 0 10px rgba(147, 112, 219, 0.5); }
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
 }
 
 .part_item.undiscovered {
-  background: rgba(0, 0, 0, 0.3);
-  border: 1px solid rgba(147, 112, 219, 0.3);
-  opacity: 0.6;
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.5);
 }
 
 .part_color {
-  width: 16px;
-  height: 16px;
+  width: 12px;
+  height: 12px;
   border-radius: 50%;
   border: 2px solid rgba(255, 255, 255, 0.3);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
-.part_item span {
-  color: #E6E6FA;
-  font-size: 0.9rem;
-  font-weight: 500;
-}
-
-/* Wizard Character - Repositioned */
+/* Wizard Character - Positioned on left with wizard.png */
 .wizard_character {
   position: fixed;
-  left: 90px; /* Adjusted for sidebar space */
-  bottom: 30px;
-  z-index: 100;
+  bottom: 2rem;
+  left: 10rem;
+  z-index: 20;
   animation: wizardFloat 3s ease-in-out infinite;
 }
 
 @keyframes wizardFloat {
   0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-8px); }
+  50% { transform: translateY(-10px); }
 }
 
+/* Updated to use wizard.png image without circular styling */
 .wizard_image {
-  filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.5));
+  width: 120px; /* ✅ Fixed width */
+  height: 150px;
+  background-image: url('/images/wizard.png');
+  background-size: cover;
+  background-position: center;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.5));
+  cursor: pointer;
+  transition: all 0.3s ease;
 }
 
+.wizard_image:hover {
+  transform: scale(1.05);
+  filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.7));
+}
+
+/* Remove the old wizard_emoji style */
+.wizard_emoji {
+  display: none;
+}
+
+/* Wizard Dialogue - Positioned like Castle 3 (to the right of wizard) */
 .wizard_dialogue {
   position: absolute;
-  top: -120px;
-  left: 200px;
-  background: rgba(25, 25, 112, 0.95);
-  border: 3px solid #9370DB;
-  border-radius: 20px;
-  padding: 20px 35px 20px 20px;
+  top: -150px;
+  left: 100px;
+  background: rgba(112, 66, 20, 0.95);
+  color: white;
+  padding: 1.5rem;
+  border-radius: 15px;
+  border: 3px solid #D4AF37;
+  min-width:200px;
   max-width: 320px;
-  box-shadow: 
-    0 8px 25px rgba(0, 0, 0, 0.4),
-    0 0 30px rgba(147, 112, 219, 0.3);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
   animation: dialogueAppear 0.5s ease-out;
+  backdrop-filter: blur(10px);
 }
 
 @keyframes dialogueAppear {
   from {
     opacity: 0;
-    transform: translateY(10px) scale(0.9);
+    transform: translateX(-20px) scale(0.9);
   }
   to {
     opacity: 1;
-    transform: translateY(0) scale(1);
+    transform: translateX(0) scale(1);
   }
 }
 
+/* Speech bubble arrow pointing down to wizard */
 .wizard_dialogue::after {
   content: '';
   position: absolute;
-  bottom: 20px;
-  left: -15px;
+  bottom: -20px;
+  left: 30px;
   width: 0;
   height: 0;
-  border-top: 15px solid transparent;
-  border-bottom: 15px solid transparent;
-  border-right: 15px solid #9370DB;
-}
-
-.wizard_dialogue::before {
-  content: '';
-  position: absolute;
-  bottom: 22px;
-  left: -12px;
-  width: 0;
-  height: 0;
-  border-top: 13px solid transparent;
-  border-bottom: 13px solid transparent;
-  border-right: 13px solid rgba(25, 25, 112, 0.95);
-  z-index: 1;
+  border-left: 20px solid transparent;
+  border-right: 20px solid transparent;
+  border-top: 20px solid rgba(112, 66, 20, 0.95);
 }
 
 .dialogue_close {
   position: absolute;
-  top: 8px;
-  right: 8px;
+  top: -10px;
+  right: -10px;
   background: #8B0000;
-  border: 2px solid #DDA0DD;
+  color: white;
+  border: none;
   border-radius: 50%;
-  width: 28px;
-  height: 28px;
-  color: #E6E6FA;
-  font-size: 0.9rem;
-  font-weight: bold;
+  width: 25px;
+  height: 25px;
   cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  font-size: 12px;
+  font-weight: bold;
   transition: all 0.3s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
 }
 
 .dialogue_close:hover {
-  background: #660000;
+  background: #B22222;
   transform: scale(1.1);
 }
 
 .dialogue_content p {
-  color: #E6E6FA;
-  line-height: 1.5;
   margin: 0;
+  line-height: 1.6;
+  font-size: 0.95rem;
   font-family: 'Crimson Text', serif;
-  font-size: 1rem;
 }
 
-/* Navigation Controls */
+/* Navigation Controls - Moved to right since wizard is on left */
 .navigation_controls {
   position: fixed;
-  bottom: 30px;
-  right: 30px;
-  z-index: 50;
+  bottom: 2rem;
+  right: 2rem;
+  z-index: 20;
   display: flex;
-  gap: 15px;
+  gap: 1rem;
 }
 
 .nav_button {
-  background: linear-gradient(135deg, #9370DB 0%, #8A2BE2 100%);
-  border: 3px solid #DDA0DD;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  padding: 1rem 2rem;
   border-radius: 25px;
-  padding: 12px 25px;
-  color: #E6E6FA;
-  font-family: 'Cinzel', serif;
   font-weight: 600;
-  font-size: 1rem;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 
-    0 6px 15px rgba(0, 0, 0, 0.3),
-    0 0 20px rgba(147, 112, 219, 0.2);
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
 }
 
 .nav_button:hover {
-  transform: translateY(-2px);
-  box-shadow: 
-    0 8px 20px rgba(0, 0, 0, 0.4),
-    0 0 30px rgba(147, 112, 219, 0.4);
-  background: linear-gradient(135deg, #8A2BE2 0%, #9370DB 100%);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
 }
 
 /* Responsive Design */
@@ -536,11 +517,11 @@
   }
   
   .wizard_character {
-    left: 70px;
+    left: 10rem;
   }
   
   .wizard_dialogue {
-    left: 170px;
+    left: 110px;
     max-width: 280px;
   }
 }
@@ -569,11 +550,11 @@
   }
   
   .wizard_character {
-    left: 30px;
+    left: 10rem;
   }
   
   .wizard_dialogue {
-    left: 140px;
+    left: 100px;
     max-width: 250px;
   }
   
@@ -590,45 +571,51 @@
 
 @media (max-width: 768px) {
   .content_wrapper {
-    margin-left: 10px;
+    margin-left: 0; /* Remove sidebar margin on mobile */
+  }
+  
+  .adventure_header {
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1rem;
   }
   
   .adventure_main {
-    padding: 15px;
+    flex-direction: column;
+    padding: 1rem;
   }
   
-  .castle_title h1 {
-    font-size: 2rem;
-  }
-  
-  .mystical_circle_container {
-    padding: 15px;
-  }
-  
-  .interactive_circle {
-    width: 350px;
-    height: 350px;
+  .quest_panel {
+    width: 100%;
   }
   
   .wizard_character {
-    left: 15px;
-    bottom: 15px;
-  }
-  
-  .wizard_image {
-    width: 150px;
-    height: 225px;
+    position: relative;
+    bottom: auto;
+    left: auto;
+    margin: 2rem auto;
+    display: flex;
+    justify-content: center;
   }
   
   .wizard_dialogue {
-    left: 120px;
-    max-width: 200px;
-    font-size: 0.9rem;
+    position: relative;
+    top: auto;
+    left: auto;
+    margin-top: 1rem;
+    max-width: 100%;
+  }
+  
+  .wizard_dialogue::after {
+    display: none;
   }
   
   .navigation_controls {
-    bottom: 15px;
-    right: 15px;
+    position: relative;
+    bottom: auto;
+    right: auto;
+    justify-content: center;
+    margin: 2rem 0;
   }
 }
 
@@ -642,8 +629,9 @@
     height: 300px;
   }
   
-  .wizard_character {
-    display: none;
+  .wizard_image {
+    width: 80px;
+    height: 80px;
   }
   
   .castle_title {
