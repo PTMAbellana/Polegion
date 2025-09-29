@@ -1,3 +1,5 @@
+const cache = require('../cache');
+
 class AuthService {
     constructor(userRepo, supabase){
         this.userRepo = userRepo
@@ -6,17 +8,56 @@ class AuthService {
 
     
     async refreshToken(refreshToken){
-        try {
-            console.log('AuthService: Refreshing token...')
-            const data = await this.userRepo.refreshSession(refreshToken)
-            
+        try {   
+            const {
+                data, error
+            } = await this.supabase.auth.refreshSession({
+                refresh_token: refreshToken
+            })
+            if (error) {
+                console.error('AuthService: Token refresh error from Supabase:', error.message)
+                throw error
+            }
             if (!data || !data.session) {
                 console.log('AuthService: No session data returned from UserRepo')
                 throw new Error('No session data returned')
             }
             
             console.log('AuthService: Token refresh successful')
-            return data
+
+            // get user profile from database
+            const cacheKey = cache.generateKey('user_profile', data.user.id);
+            const cached = cache.get(cacheKey);
+            if (cached) {
+                console.log('Cache hit: getUserByUid', data.user.id);
+                return {
+                    user: cached,
+                    session: {
+                        access_token: data.session.access_token,
+                        refresh_token: data.session.refresh_token,
+                        expires_at: data.session.expires_at
+                    }
+                }
+            }
+
+            const userData = await this.userRepo.getUserByUid(data.user.id)
+           
+            const userProfile = {
+                id: data.user.id,
+                email: data.user.email,
+                ...userData.toJSON() // include full profile data
+            }
+            if (userData) 
+                cache.set(cacheKey, userProfile, this.CACHE_TTL);
+            
+            return {
+                user: userProfile,
+                session: {
+                    access_token: data.session.access_token,
+                    refresh_token: data.session.refresh_token,
+                    expires_at: data.session.expires_at
+                }
+            }
         } catch (error){
             console.error('AuthService: Token refresh failed:', error.message)
             throw error
@@ -43,13 +84,32 @@ class AuthService {
                 throw new Error('No session data returned')
             }
 
+            const cacheKey = cache.generateKey('user_profile', data.user.id);
+            const cached = cache.get(cacheKey);
+            if (cached) {
+                console.log('Cache hit: getUserByUid', data.user.id);
+                return {
+                    user: cached,
+                    session: {
+                        access_token: data.session.access_token,
+                        refresh_token: data.session.refresh_token,
+                        expires_at: data.session.expires_at
+                    }
+                }
+            }
+
             const userData = await this.userRepo.getUserByUid(data.user.id)
+           
+            const userProfile = {
+                id: data.user.id,
+                email: data.user.email,
+                ...userData.toJSON() // include full profile data
+            }
+            if (userData) 
+                cache.set(cacheKey, userProfile, this.CACHE_TTL);
+            
             return {
-                user: {
-                    id: data.user.id,
-                    email: data.user.email,
-                    ...userData.toJSON() // include full profile data
-                },
+                user: userProfile,
                 session: {
                     access_token: data.session.access_token,
                     refresh_token: data.session.refresh_token,
@@ -110,9 +170,15 @@ class AuthService {
         }
     }
     
-    async logout () {
+    async logout (userId) {
         try {
-            return await this.userRepo.signOut()
+            const { error } = await this.supabase.auth.signOut()
+            if (error) throw error
+            
+            // Clear user cache
+            cache.clearUserCache(userId)
+            
+            return true
         } catch (error) { 
             throw error
         }
@@ -120,7 +186,7 @@ class AuthService {
     
     async validateToken (token){
         try {
-            return await this.userRepo.getUserById(token)
+            return await this.userRepo.getUserByToken(token)
         } catch (error) { 
             throw error
         }

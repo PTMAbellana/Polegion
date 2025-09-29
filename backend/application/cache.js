@@ -78,6 +78,27 @@ class InMemoryCache {
     }
 
     /**
+     * Delete all cache entries for a specific user
+     * @param {string} userId - User ID to clear cache for
+     */
+    clearUserCache(userId) {
+        const keysToDelete = [];
+        
+        // Find all keys that contain this userId
+        for (const key of this.cache.keys()) {
+            if (key.includes(`:${userId}`)) {
+                keysToDelete.push(key);
+            }
+        }
+        
+        // Delete all matching keys
+        keysToDelete.forEach(key => this.delete(key));
+        
+        console.log(`Cleared ${keysToDelete.length} cache entries for user: ${userId}`);
+        return keysToDelete.length;
+    }
+
+    /**
      * Get cache statistics
      */
     getStats() {

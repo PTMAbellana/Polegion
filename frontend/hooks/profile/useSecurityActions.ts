@@ -1,56 +1,10 @@
 import { useState } from 'react'
 import { useAuthStore } from '@/store/authStore'
 import * as yup from 'yup'
-
-export interface EmailChangeData {
-    newEmail: string
-    password: string
-}
-
-export interface PasswordChangeData {
-    currentPassword: string
-    newPassword: string
-    confirmPassword: string
-}
-
-export interface SecurityErrors {
-    newEmail?: string
-    password?: string
-    currentPassword?: string
-    newPassword?: string
-    confirmPassword?: string
-}
+import { emailChangeSchema, passwordChangeSchema } from '@/schemas/profileSchemas'
+import { EmailChangeData, PasswordChangeData, SecurityErrors } from '@/types'
 
 // Validation schemas
-const emailChangeSchema = yup.object().shape({
-    newEmail: yup
-        .string()
-        .required('New email is required')
-        .email('Please enter a valid email address'),
-    password: yup
-        .string()
-        .required('Current password is required')
-        .min(6, 'Password must be at least 6 characters')
-})
-
-const passwordChangeSchema = yup.object().shape({
-    currentPassword: yup
-        .string()
-        .required('Current password is required')
-        .min(6, 'Password must be at least 6 characters'),
-    newPassword: yup
-        .string()
-        .required('New password is required')
-        .min(6, 'Password must be at least 6 characters')
-        .matches(
-            /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
-            'Password must contain uppercase, lowercase, and number'
-        ),
-    confirmPassword: yup
-        .string()
-        .required('Please confirm your new password')
-        .oneOf([yup.ref('newPassword')], 'Passwords must match')
-})
 
 export function useSecurityActions() {
     const { updateEmail, updatePassword } = useAuthStore()

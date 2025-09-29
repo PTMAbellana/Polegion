@@ -4,7 +4,6 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import { Toaster } from "react-hot-toast";
 import Footer from "@/components/Footer";
 import AuthInitializer from "@/context/AuthInitializer";
-import { AppUtilsProvider } from "@/context/AppUtils";
 
 export const metadata: Metadata = {
   title: "Polegion",

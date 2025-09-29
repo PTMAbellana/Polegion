@@ -1,35 +1,10 @@
 import { useState } from 'react'
 import { useAuthStore } from '@/store/authStore'
+import { profileSchema } from '@/schemas/profileSchemas'
 import * as yup from 'yup'
-
-export interface ProfileFormData {
-    fullName: string
-    gender: string
-    phone: string
-}
-
-export interface ProfileFormErrors {
-    fullName?: string
-    gender?: string
-    phone?: string
-}
+import { ProfileFormData, ProfileFormErrors } from '@/types'
 
 // Validation schema
-const profileSchema = yup.object().shape({
-    fullName: yup
-        .string()
-        .required('Full name is required')
-        .min(2, 'Full name must be at least 2 characters')
-        .max(100, 'Full name must be less than 100 characters'),
-    gender: yup
-        .string()
-        .oneOf(['male', 'female', 'other', 'prefer_not_to_say'], 'Please select a valid gender'),
-    phone: yup
-        .string()
-        .matches(/^[\d\s\-\+\(\)]+$/, 'Please enter a valid phone number')
-        .min(10, 'Phone number must be at least 10 digits')
-        .max(20, 'Phone number must be less than 20 characters')
-})
 
 export function useProfileForm() {
     const { userProfile, updateProfile } = useAuthStore()

@@ -41,3 +41,8 @@ export interface SecuritySettingsProps {
 export interface ProfileImageUploadProps {
     onSuccess?: () => void
 }
+
+export interface ProfileEditFormProps {
+    onSuccess?: () => void
+    onCancel?: () => void
+}

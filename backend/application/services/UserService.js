@@ -3,7 +3,7 @@ const cache = require('../cache');
 class UserService {
     constructor(userRepo) {
         this.userRepo = userRepo
-        this.CACHE_TTL = 10 * 60 * 1000; // 10 minutes
+        this.CACHE_TTL = 10 * 60 * 1000; 
     }
 
     async getUserProfile(token){
@@ -60,18 +60,16 @@ class UserService {
     
     async updateUserProfile(userData) {
         try {
-            await this.userRepo.getUserById(userData.token)
-            const result = await this.userRepo.updateUser(userData);
+            const token = await this.userRepo.getUserByToken(userData.token)
+            const result = await this.userRepo.updateUser(userData, token.id);
             
-            // Invalidate related cache entries
             cache.delete(cache.generateKey('user_profile', userData.token));
-            if (userData.userId) {
-                cache.delete(cache.generateKey('user_by_id', userData.userId));
-            }
+            cache.delete(cache.generateKey('user_by_id', token.id));
             console.log('Cache invalidated: updateUserProfile');
             
-            return result;
+            return result.toJSON();
         } catch (error) {
+            console.log(error);
             throw error
         }
     }

@@ -1,13 +1,12 @@
 import React from 'react'
 import { useProfileForm } from '@/hooks/profile/useProfileForm'
 import styles from '@/styles/profile.module.css'
+import { ProfileEditFormProps } from '@/types/props/profile'
 
-interface ProfileEditFormProps {
-    onSuccess?: () => void
-    onCancel?: () => void
-}
-
-export default function ProfileEditForm({ onSuccess, onCancel }: ProfileEditFormProps) {
+export default function ProfileEditForm({ 
+    onSuccess, 
+    onCancel 
+}: ProfileEditFormProps) {
     const {
         formData,
         errors,

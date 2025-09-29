@@ -115,7 +115,6 @@ export default function ResetPassword() {
                 // console.log('type ', type)
 
                 // if (
-                //     !accessToken || 
                 //     type !== "recovery"
                 // ) {
                 //     console.log('twag')

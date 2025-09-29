@@ -32,7 +32,7 @@ class UserRoutes {
          *                 user: { type: object }
          *       401:
          *         $ref: '#/components/responses/UnauthorizedError'
-         *   put:
+         *   patch:
          *     tags: [Users]
          *     summary: Update user profile
          *     description: Update the current user's profile information
@@ -45,15 +45,18 @@ class UserRoutes {
          *           schema:
          *             type: object
          *             properties:
-         *               username:
-         *                 type: string
-         *                 example: new_username
          *               firstName:
          *                 type: string
          *                 example: John
          *               lastName:
          *                 type: string
          *                 example: Doe
+         *               gender:
+         *                 type: string
+         *                 example: Male
+         *               phone:
+         *                 type: string
+         *                 example: 123-456-7890
          *     responses:
          *       200:
          *         description: Profile updated successfully
@@ -71,12 +74,12 @@ class UserRoutes {
          */
         this.router.route('/profile')
         .get(this.userController.getUserProfile)
-        .put(this.userController.updateUserProfile)
+        .patch(this.userController.updateUserProfile)
         
         /**
          * @swagger
          * /users/change-email:
-         *   put:
+         *   patch:
          *     tags: [Users]
          *     summary: Change user email
          *     description: Update the user's email address
@@ -94,9 +97,6 @@ class UserRoutes {
          *                 type: string
          *                 format: email
          *                 example: newemail@example.com
-         *               password:
-         *                 type: string
-         *                 example: currentPassword123
          *     responses:
          *       200:
          *         description: Email updated successfully
@@ -112,12 +112,12 @@ class UserRoutes {
          *         $ref: '#/components/responses/UnauthorizedError'
          */
         this.router.route('/change-email')
-        .put(this.userController.updateEmail)
+        .patch(this.userController.updateEmail)
         
         /**
          * @swagger
          * /users/change-password:
-         *   put:
+         *   patch:
          *     tags: [Users]
          *     summary: Change user password
          *     description: Update the user's password
@@ -131,9 +131,6 @@ class UserRoutes {
          *             type: object
          *             required: [currentPassword, newPassword]
          *             properties:
-         *               currentPassword:
-         *                 type: string
-         *                 example: currentPassword123
          *               newPassword:
          *                 type: string
          *                 minLength: 6
@@ -153,12 +150,12 @@ class UserRoutes {
          *         $ref: '#/components/responses/UnauthorizedError'
          */
         this.router.route('/change-password')
-        .put(this.userController.updatePassword)
+        .patch(this.userController.updatePassword)
 
         /**
          * @swagger
          * /users/deactivate:
-         *   put:
+         *   patch:
          *     tags: [Users]
          *     summary: Deactivate user account
          *     description: Deactivate the current user's account
@@ -177,7 +174,7 @@ class UserRoutes {
          *         $ref: '#/components/responses/UnauthorizedError'
          */
         this.router.route('/deactivate')
-        .put(this.authMiddleware.protect, this.userController.deactivateAccount)
+        .patch(this.authMiddleware.protect, this.userController.deactivateAccount)
 
         /**
          * @swagger
@@ -210,6 +207,7 @@ class UserRoutes {
          *               properties:
          *                 message: { type: string, example: "Profile image uploaded successfully" }
          *                 imageUrl: { type: string, example: "https://example.com/image.jpg" }
+         *                 fileName: { type: string, example: "image.jpg" }
          *       400:
          *         $ref: '#/components/responses/BadRequestError'
          *       401:
