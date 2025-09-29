@@ -14,7 +14,6 @@ const api = axios.create({
 // Simplified auth utilities
 export const authUtils = {
 	saveAuthData: (authData) => {
-		console.log("Saving auth data:", authData);
 		if (authData?.session) {
 			const { session, user } = authData;
 			console.log("Session data:", session);
@@ -51,7 +50,12 @@ export const authUtils = {
 	},
 
 	clearAuthData: () => {
-		["access_token", "refresh_token", "user", "expires_at", "remember_user"].forEach(
+		[
+			"access_token", 
+			"refresh_token", 
+			"user", 
+			"expires_at", 
+		].forEach(
 			(key) => localStorage.removeItem(key)
 		);
 	},

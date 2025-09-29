@@ -4,27 +4,19 @@ import * as yup from 'yup'
 import { emailChangeSchema, passwordChangeSchema } from '@/schemas/profileSchemas'
 import { EmailChangeData, PasswordChangeData, SecurityErrors } from '@/types'
 
-// Validation schemas
-
 export function useSecurityActions() {
     const { updateEmail, updatePassword } = useAuthStore()
     
     // Email change state
     const [emailData, setEmailData] = useState<EmailChangeData>({
         newEmail: '',
-        password: ''
     })
     const [emailErrors, setEmailErrors] = useState<SecurityErrors>({})
     const [isEmailSubmitting, setIsEmailSubmitting] = useState(false)
     const [emailSuccess, setEmailSuccess] = useState(false)
     const [emailError, setEmailError] = useState('')
 
-    // Password change state
-    const [passwordData, setPasswordData] = useState<PasswordChangeData>({
-        currentPassword: '',
-        newPassword: '',
-        confirmPassword: ''
-    })
+    // Password change state - NO PASSWORD DATA STORED
     const [passwordErrors, setPasswordErrors] = useState<SecurityErrors>({})
     const [isPasswordSubmitting, setIsPasswordSubmitting] = useState(false)
     const [passwordSuccess, setPasswordSuccess] = useState(false)
@@ -72,7 +64,7 @@ export function useSecurityActions() {
             
             if (result.success) {
                 setEmailSuccess(true)
-                setEmailData({ newEmail: '', password: '' })
+                setEmailData({ newEmail: ''})
                 return true
             } else {
                 setEmailError(result.error || 'Failed to update email')
@@ -87,15 +79,8 @@ export function useSecurityActions() {
         }
     }
 
-    // Password change methods
-    const updatePasswordField = (field: keyof PasswordChangeData, value: string) => {
-        setPasswordData(prev => ({ ...prev, [field]: value }))
-        if (passwordErrors[field]) {
-            setPasswordErrors(prev => ({ ...prev, [field]: undefined }))
-        }
-    }
-
-    const validatePasswordForm = async (): Promise<boolean> => {
+    // Password validation (without storing password)
+    const validatePasswordForm = async (passwordData: PasswordChangeData): Promise<boolean> => {
         try {
             await passwordChangeSchema.validate(passwordData, { abortEarly: false })
             setPasswordErrors({})
@@ -114,29 +99,21 @@ export function useSecurityActions() {
         }
     }
 
-    const submitPasswordChange = async (): Promise<boolean> => {
+    const submitPasswordChange = async (passwordData: PasswordChangeData): Promise<boolean> => {
         setIsPasswordSubmitting(true)
         setPasswordError('')
         setPasswordSuccess(false)
 
         try {
-            const isValid = await validatePasswordForm()
+            const isValid = await validatePasswordForm(passwordData)
             if (!isValid) {
                 return false
             }
 
-            const result = await updatePassword(
-                passwordData.currentPassword, 
-                passwordData.newPassword
-            )
+            const result = await updatePassword(passwordData.newPassword)
             
             if (result.success) {
                 setPasswordSuccess(true)
-                setPasswordData({
-                    currentPassword: '',
-                    newPassword: '',
-                    confirmPassword: ''
-                })
                 return true
             } else {
                 setPasswordError(result.error || 'Failed to update password')
@@ -151,20 +128,22 @@ export function useSecurityActions() {
         }
     }
 
+    // Clear password errors only
+    const clearPasswordErrors = () => {
+        setPasswordErrors({})
+        setPasswordError('')
+        setPasswordSuccess(false)
+    }
+
     // Reset methods
     const resetEmailForm = () => {
-        setEmailData({ newEmail: '', password: '' })
+        setEmailData({ newEmail: '' })
         setEmailErrors({})
         setEmailError('')
         setEmailSuccess(false)
     }
 
     const resetPasswordForm = () => {
-        setPasswordData({
-            currentPassword: '',
-            newPassword: '',
-            confirmPassword: ''
-        })
         setPasswordErrors({})
         setPasswordError('')
         setPasswordSuccess(false)
@@ -181,14 +160,14 @@ export function useSecurityActions() {
         submitEmailChange,
         resetEmailForm,
         
-        // Password change
-        passwordData,
+        // Password change (no password data exposed)
         passwordErrors,
         isPasswordSubmitting,
         passwordSuccess,
         passwordError,
-        updatePasswordField,
         submitPasswordChange,
+        validatePasswordForm,
+        clearPasswordErrors,
         resetPasswordForm
     }
 }

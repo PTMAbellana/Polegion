@@ -67,7 +67,7 @@ class UserService {
             cache.delete(cache.generateKey('user_by_id', token.id));
             console.log('Cache invalidated: updateUserProfile');
             
-            return result.toJSON();
+            return result.toDTO();
         } catch (error) {
             console.log(error);
             throw error

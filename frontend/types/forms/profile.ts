@@ -1,10 +1,8 @@
 export interface EmailChangeData {
     newEmail: string
-    password: string
 }
 
 export interface PasswordChangeData {
-    currentPassword: string
     newPassword: string
     confirmPassword: string
 }

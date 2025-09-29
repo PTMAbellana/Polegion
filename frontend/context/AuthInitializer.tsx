@@ -11,7 +11,7 @@ export default function AuthInitializer({
   children: React.ReactNode;
 }) {
 
-    const { initialize, appLoading } = useAuthStore();
+  const { initialize, appLoading } = useAuthStore();
   const { isLoading } = AuthProtection();
 
   useEffect(() => {

@@ -2,11 +2,21 @@ import api, { authUtils } from './axios';
 
 export const refreshToken = async () => {
   try {
-    return await api.post(`auth/refresh-token`, {
+    const response = await api.post(`auth/refresh-token`, {
       refresh_token: localStorage.getItem("refresh_token"),
     });
+    return {
+      success: true,
+      message: response.data.message,
+      data: response.data.data
+    }
   } catch (error) {
-    throw error;
+    return {
+      success: false,
+      error: error.response?.data?.error || 'Token refresh failed',
+      message: error.response?.data?.message || 'An error occurred',
+      status: error.response?.status
+    }
   }
 };
 
@@ -37,7 +47,10 @@ export const login = async (email, password) => {
 
 export const register = async (userData, userType) => {
   try {
-    const response = await api.post("/auth/register", { ...userData, userType });
+    const response = await api.post("/auth/register", { 
+      ...userData, 
+      userType 
+    });
     return {
       success: true,
       message: response.data.message,
@@ -63,10 +76,15 @@ export const logout = async () => {
   try {
     const response = await api.post("/auth/logout");
     authUtils.clearAuthData();
-    return response;
+    return response.data;
   } catch (error) {
     authUtils.clearAuthData();
-    throw error;
+    return {
+      success: false,
+      error: error.response?.data?.error || 'Logout failed',
+      message: error.response?.data?.message || 'An error occurred',
+      status: error.response?.status
+    }
   }
 };
 

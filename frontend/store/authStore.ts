@@ -1,14 +1,22 @@
+import { logout } from '@/api/auth';
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { authUtils } from '@/api/axios';
 import { 
     login as apiLogin, 
-    register as apiRegister, 
+    register as apiRegister,
+    logout as apiLogout, 
     // resetPassword as apiResetPassword 
 } from '@/api/auth';
 import { AuthState, UserProfileDTO, AuthActionResult } from '@/types';
 import { RegisterFormData } from '@/types/forms/auth'; 
 import api from '@/api/axios';
+import { 
+    updateEmail as apiUpdateEmail, 
+    updatePassword as apiUpdatePassword, 
+    updateUserProfile, 
+    uploadImage 
+} from '@/api/users';
 
 export const useAuthStore = create<AuthState>()( //see AuthState for the abstract of the store
     persist(
@@ -150,7 +158,6 @@ export const useAuthStore = create<AuthState>()( //see AuthState for the abstrac
             },
 
             refreshUserSession: async (): Promise<boolean> => {
-                console.log('refreshUserSession called');
                 const { setAuthLoading, setAuthToken, setIsLoggedIn, setUserProfile, logout } = get();
                 
                 setAuthLoading(true);
@@ -166,7 +173,7 @@ export const useAuthStore = create<AuthState>()( //see AuthState for the abstrac
                             console.log('Loading existing user profile from localStorage');
                             setUserProfile(authData.user); // ← Use your formatted data
                         }
-
+                        
                         return true;
                     } else if (!authData.accessToken && !authData.refreshToken) {
                         logout();
@@ -182,7 +189,8 @@ export const useAuthStore = create<AuthState>()( //see AuthState for the abstrac
                 }
             },
 
-            logout: () => {
+            logout: async () => {
+                await apiLogout();
                 authUtils.clearAuthData();
                 set({
                     authToken: null,
@@ -205,7 +213,7 @@ export const useAuthStore = create<AuthState>()( //see AuthState for the abstrac
             updateProfile: async (data: Partial<UserProfileDTO>): Promise<AuthActionResult> => {
                 set({ authLoading: true });
                 try {
-                    const response = await api.put('/users/profile', data);
+                    const response = await updateUserProfile(data); 
                     
                     if (response.status === 200 && response.data) {
                         // Update user profile in store
@@ -229,15 +237,7 @@ export const useAuthStore = create<AuthState>()( //see AuthState for the abstrac
                     }
                 } catch (error: unknown) {
                     console.error('Profile update error:', error);
-                    let errorMessage = 'An error occurred while updating your profile';
-                    
-                    if (error && typeof error === 'object' && 'response' in error) {
-                        const axiosError = error as { response?: { data?: { message?: string; error?: string } } };
-                        errorMessage = axiosError?.response?.data?.message || 
-                                     axiosError?.response?.data?.error || 
-                                     errorMessage;
-                    }
-                    
+                    const errorMessage = error instanceof Error ? error.message : "An error occurred while updating your profile";
                     return { success: false, error: errorMessage };
                 } finally {
                     set({ authLoading: false });
@@ -247,75 +247,53 @@ export const useAuthStore = create<AuthState>()( //see AuthState for the abstrac
             updateEmail: async (email: string): Promise<AuthActionResult> => {
                 set({ authLoading: true });
                 try {
-                    const response = await api.put('/users/email', { email });
-                    
-                    if (response.status === 200) {
-                        // Update email in store
-                        const currentProfile = get().userProfile;
-                        if (currentProfile) {
-                            const updatedProfile = { ...currentProfile, email };
-                            set({ userProfile: updatedProfile });
-                            authUtils.updateUserProfile(updatedProfile);
-                        }
-                        
-                        return { 
-                            success: true, 
-                            message: 'Email updated successfully' 
-                        };
-                    } else {
+                    const response = await apiUpdateEmail(email);
+
+                    if (!response.success) {
                         return { 
                             success: false, 
-                            error: response.data?.message || 'Failed to update email' 
+                            error: response.message || 'Failed to update email' 
                         };
                     }
+                   const { logout } = get();
+                   logout(); // Log out the user after email change
+                    return { 
+                        success: true, 
+                        message: 'Email updated successfully' 
+                    };
                 } catch (error: unknown) {
                     console.error('Email update error:', error);
-                    let errorMessage = 'An error occurred while updating your email';
-                    
-                    if (error && typeof error === 'object' && 'response' in error) {
-                        const axiosError = error as { response?: { data?: { message?: string; error?: string } } };
-                        errorMessage = axiosError?.response?.data?.message || 
-                                     axiosError?.response?.data?.error || 
-                                     errorMessage;
-                    }
-                    
+                    const errorMessage = error instanceof Error ? error.message : "An error occurred while updating your email";
                     return { success: false, error: errorMessage };
                 } finally {
                     set({ authLoading: false });
                 }
             },
 
-            updatePassword: async (oldPassword: string, newPassword: string): Promise<AuthActionResult> => {
+            updatePassword: async (newPassword: string): Promise<AuthActionResult> => {
                 set({ authLoading: true });
                 try {
-                    const response = await api.put('/users/password', { 
-                        oldPassword, 
-                        newPassword 
-                    });
+                    const response = await apiUpdatePassword( newPassword );
                     
-                    if (response.status === 200) {
-                        return { 
-                            success: true, 
-                            message: 'Password updated successfully' 
-                        };
-                    } else {
+                    if (!response.success) {
                         return { 
                             success: false, 
-                            error: response.data?.message || 'Failed to update password' 
+                            error: response.message || 'Failed to update password' 
                         };
                     }
+                    const { logout } = get();
+                    logout(); // Log out the user after password change
+                    return { 
+                        success: true, 
+                        message: 'Password updated successfully' 
+                    };
                 } catch (error: unknown) {
                     console.error('Password update error:', error);
-                    let errorMessage = 'An error occurred while updating your password';
-                    
-                    if (error && typeof error === 'object' && 'response' in error) {
-                        const axiosError = error as { response?: { data?: { message?: string; error?: string } } };
-                        errorMessage = axiosError?.response?.data?.message || 
-                                     axiosError?.response?.data?.error || 
-                                     errorMessage;
-                    }
-                    
-                    return { success: false, error: errorMessage };
+                    const errorMessage = error instanceof Error ? error.message : "An error occurred while updating your password";
+                    return { 
+                        success: false, 
+                        error: errorMessage 
+                    };
                 } finally {
                     set({ authLoading: false });
                 }
@@ -327,12 +305,7 @@ export const useAuthStore = create<AuthState>()( //see AuthState for the abstrac
                     const formData = new FormData();
                     formData.append('profileImage', file);
                     
-                    const response = await api.post('/users/profile-image', formData, {
-                        headers: {
-                            'Content-Type': 'multipart/form-data',
-                        },
-                    });
-                    
+                    const response = await uploadImage(formData);
                     if (response.status === 200 && response.data) {
                         // Update profile image URL in store
                         const currentProfile = get().userProfile;
@@ -358,15 +331,7 @@ export const useAuthStore = create<AuthState>()( //see AuthState for the abstrac
                     }
                 } catch (error: unknown) {
                     console.error('Profile image upload error:', error);
-                    let errorMessage = 'An error occurred while uploading your profile image';
-                    
-                    if (error && typeof error === 'object' && 'response' in error) {
-                        const axiosError = error as { response?: { data?: { message?: string; error?: string } } };
-                        errorMessage = axiosError?.response?.data?.message || 
-                                     axiosError?.response?.data?.error || 
-                                     errorMessage;
-                    }
-                    
+                    const errorMessage = error instanceof Error ? error.message : "An error occurred while uploading your profile image";
                     return { success: false, error: errorMessage };
                 } finally {
                     set({ authLoading: false });

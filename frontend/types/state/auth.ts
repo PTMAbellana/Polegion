@@ -32,7 +32,7 @@ export interface AuthState {
     // Profile Actions
     updateProfile: (data: Partial<UserProfileDTO>) => Promise<AuthActionResult>;
     updateEmail: (email: string) => Promise<AuthActionResult>;
-    updatePassword: (oldPassword: string, newPassword: string) => Promise<AuthActionResult>;
+    updatePassword: (newPassword: string) => Promise<AuthActionResult>;
     uploadProfileImage: (file: File) => Promise<AuthActionResult>;
 }
 

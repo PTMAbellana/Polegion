@@ -1,7 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { logout } from "@/api/auth";
 import { useRouter, usePathname } from "next/navigation";
 import toast from "react-hot-toast";
 import { FaHome, FaTrophy, FaUser, FaSignOutAlt, FaBars, FaTimes, FaChalkboardTeacher, FaDungeon, FaMedal, FaUserAstronaut, FaFortAwesome, FaShapes } from 'react-icons/fa';
@@ -18,8 +17,7 @@ const Sidebar = (
         userRole: 'teacher' | 'student' | null
     }
 ) => {
-    const {isLoggedIn, logout: contextLogout } = useAuthStore();
-    const router = useRouter();
+    const {isLoggedIn, logout } = useAuthStore();
     const pathname = usePathname();
     const [isCollapsed, setIsCollapsed] = useState(true);
     const [isMobile, setIsMobile] = useState(false);
@@ -106,7 +104,6 @@ const Sidebar = (
 
             try {
                 logout();
-                contextLogout();
                 
                 // Close loading and show success
                 Swal.fire({
@@ -126,11 +123,9 @@ const Sidebar = (
                 });
                 
                 toast.success("Logged out successfully");
-                router.push(ROUTES.HOME);
                 
             } catch (error) {
                 console.log('Logout error: ', error);
-                contextLogout();
                 
                 // Show error alert
                 Swal.fire({
@@ -142,7 +137,6 @@ const Sidebar = (
                 });
                 
                 toast.error('Error during logout, session cleared');
-                router.push(ROUTES.HOME);
             }
         }
     };

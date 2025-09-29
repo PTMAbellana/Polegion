@@ -1,3 +1,4 @@
+import { GENDERS } from '@/constants/dropdown';
 import * as yup from 'yup';
 
 export const loginSchema = yup.object().shape({
@@ -18,7 +19,7 @@ export const registerSchema = yup.object().shape({
   gender: yup
     .string()
     .required("Gender is required")
-    .oneOf(["Male", "Female", "Other"], "Gender is not allowed"),
+    .oneOf([...GENDERS], "Gender is not allowed"),
   password: yup
     .string()
     .required("Password is required")

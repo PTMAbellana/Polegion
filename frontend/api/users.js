@@ -1,73 +1,75 @@
-import api, { authUtils } from './axios';
-
 export const getUserProfile = async () => {
   return await api.get("/users/profile");
 };
 
 export const updateUserProfile = async (profileData) => {
   try {
-    const response = await api.put("/users/profile", profileData);
-    const curr = authUtils.getAuthData();
-    if (response.data) {
-      localStorage.setItem(
-        "user",
-        JSON.stringify({
-          ...curr.user,
-          ...response.data,
-        }),
-      );
+    const response = await api.patch("/users/profile", profileData);
+    return {
+      success: true,
+      message: response.data.message,
+      data: response.data.data
     }
-    return response;
   } catch (error) {
-    throw error;
+    return {
+      success: false,
+      error: error.response?.data?.error || 'Profile update failed',
+      message: error.response?.data?.message || 'An error occurred',
+      status: error.response?.status
+    };
   }
 };
 
 export const updateEmail = async (newEmail) => {
   console.log(newEmail);
   try {
-    const response = await api.put('/users/change-email', { newEmail });
-    const curr = authUtils.getAuthData();
-    if (response.data) {
-      localStorage.setItem(
-        'user',
-        JSON.stringify({
-          ...curr.user,
-          ...response.data
-        })
-      );
-    }
-    return response;
+    const response = await api.patch('/users/change-email', { newEmail });
+    console.log('Email update response:', response);
+    return {
+      success: true,
+      message: response.data.message
+    };
   } catch (error) {
-    throw error;
+    return {
+      success: false,
+      error: error.response?.data?.error || 'Email update failed',
+      message: error.response?.data?.message || 'An error occurred',
+      status: error.response?.status
+    };
   }
 };
 
 export const updatePassword = async (newPassword) => {
   try {
-    const response = await api.put('/users/change-password', { newPassword });
-    const curr = authUtils.getAuthData();
-    if (response.data) {
-      localStorage.setItem(
-        'user',
-        JSON.stringify({
-          ...curr.user,
-          ...response.data
-        })
-      );
-    }
-    return response;
+    const response = await api.patch('/users/change-password', { newPassword });
+    return {
+      success: true,
+      message: response.data.message
+    };
   } catch (error) {
-    throw error;
+    return {
+      success: false,
+      error: error.response?.data?.error || 'Password update failed',
+      message: error.response?.data?.message || 'An error occurred',
+      status: error.response?.status
+    }
   }
 };
 
 export const deactivateAccount = async () => {
   try {
-    const response = await api.put('/users/deactivate');
-    return response;
+    const response = await api.patch('/users/deactivate');
+    return {
+      success: true,
+      message: response.data.message
+    };
   } catch (error) {
-    throw error;
+    return {
+      success: false,
+      error: error.response?.data?.error || 'Account deactivation failed',
+      message: error.response?.data?.message || 'An error occurred',
+      status: error.response?.status
+    };
   }
 };
 
@@ -84,7 +86,7 @@ export const uploadImage = async (formData) => {
     });
 
     console.log("Image upload response:", response.data);
-    return response;
+    return response.data;
   } catch (error) {
     console.error("Error uploading banner image:", error);
 

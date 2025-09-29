@@ -1,3 +1,4 @@
+import { GENDERS } from '@/constants/dropdown'
 import * as yup from 'yup'
 
 export const profileSchema = yup.object().shape({
@@ -8,7 +9,7 @@ export const profileSchema = yup.object().shape({
         .max(100, 'Full name must be less than 100 characters'),
     gender: yup
         .string()
-        .oneOf(['male', 'female', 'other', 'prefer_not_to_say'], 'Please select a valid gender'),
+        .oneOf([...GENDERS], 'Please select a valid gender'),
     phone: yup
         .string()
         .matches(/^[\d\s\-\+\(\)]+$/, 'Please enter a valid phone number')
@@ -21,17 +22,9 @@ export const emailChangeSchema = yup.object().shape({
         .string()
         .required('New email is required')
         .email('Please enter a valid email address'),
-    password: yup
-        .string()
-        .required('Current password is required')
-        .min(6, 'Password must be at least 6 characters')
 })
 
 export const passwordChangeSchema = yup.object().shape({
-    currentPassword: yup
-        .string()
-        .required('Current password is required')
-        .min(6, 'Password must be at least 6 characters'),
     newPassword: yup
         .string()
         .required('New password is required')

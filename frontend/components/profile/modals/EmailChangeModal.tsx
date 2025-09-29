@@ -79,24 +79,6 @@ export default function EmailChangeModal({
                         )}
                     </div>
 
-                    <div className={styles['form-group']}>
-                        <label htmlFor="currentPassword" className={styles['form-label']}>
-                            Current Password *
-                        </label>
-                        <input
-                            id="currentPassword"
-                            type="password"
-                            value={emailData.password}
-                            onChange={(e) => updateEmailField('password', e.target.value)}
-                            className={`${styles['form-input']} ${emailErrors.password ? styles['error'] : ''}`}
-                            placeholder="Enter your current password"
-                            disabled={isEmailSubmitting}
-                        />
-                        {emailErrors.password && (
-                            <span className={styles['error-message']}>{emailErrors.password}</span>
-                        )}
-                    </div>
-
                     {/* Success/Error Messages */}
                     {emailSuccess && (
                         <div className={styles['success-message']}>

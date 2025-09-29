@@ -2,7 +2,7 @@
 
 import { usePathname, useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
-import { ROUTES, PUBLIC_ROUTES } from '@/constants/routes'
+import { ROUTES, PUBLIC_ROUTES, STUDENT_ROUTES } from '@/constants/routes'
 import { useAuthStore } from "@/store/authStore"
 
 export function AuthProtection() {
@@ -37,7 +37,7 @@ export function AuthProtection() {
 
                 // Redirect to dashboard if authenticated and on public routes
                 if (isLoggedIn && PUBLIC_ROUTES.includes(pathname)) {
-                    router.replace(ROUTES.DASHBOARD)
+                    router.replace(STUDENT_ROUTES.DASHBOARD) // TEMPORARY
                     return;
                 }
             } catch (error) {
@@ -47,7 +47,8 @@ export function AuthProtection() {
             }
         }
 
-        handleRouteProtection();
+        const timer = setTimeout(handleRouteProtection, 100);
+        return () => clearTimeout(timer);
     }, [pathname, router, isLoggedIn, globalLoading, authToken])
 
     return { 

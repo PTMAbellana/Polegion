@@ -71,10 +71,12 @@ class UserController {
 
         try {
             await this.userService.updateEmail(newEmail, req.user.id)
+            console.log('success')
             return res.status(200).json({
                 message: 'Email updated successfully'
             })
         } catch (error) {
+            console.log('akdjhasd', error);
             if (error.status === 400)
                 return res.status(400).json({
                     message: 'Update email failed',

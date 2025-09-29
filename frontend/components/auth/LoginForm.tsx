@@ -53,18 +53,18 @@ export default function LoginForm({
     const result = await login(email, password);
     
     if (result.success) {
-      toast.success(result.message || "Login successful");
       let route;
       switch(userType) {
         case "student":
           route = STUDENT_ROUTES.DASHBOARD;
           break;
-        case "teacher":
-          route = TEACHER_ROUTES.DASHBOARD;
+          case "teacher":
+            route = TEACHER_ROUTES.DASHBOARD;
           break;
         default:
           route = ROUTES.DASHBOARD;
-      }
+        }
+      toast.success(result.message || "Login successful");
       router.push(route);
     } else {
       toast.error(result.message || "Login failed");
