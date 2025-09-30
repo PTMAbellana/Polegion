@@ -32,8 +32,8 @@ class User {
     static fromInputUser(input, id){
         return new User (
             id,
-            input.firstName || 'John',
-            input.lastName || 'Doe',
+            input.firstName || input.first_name || 'John',
+            input.lastName || input.last_name || 'Doe',
             input.gender || 'Others',
             input.phone,
             input.profile_pic || 'https://uwllqanzveqanfpfnndu.supabase.co/storage/v1/object/public/profile-images/1751777126476.png',
