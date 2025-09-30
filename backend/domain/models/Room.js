@@ -37,6 +37,15 @@ class Room {
         }
     }
 
+    toDbObjectUpdate (){
+        return {
+            title: this.title,
+            description: this.description,
+            mantra: this.mantra, 
+            banner_image: this.banner_image,
+        }
+    }
+
     toDTO(){
         return {
             id: this.id,

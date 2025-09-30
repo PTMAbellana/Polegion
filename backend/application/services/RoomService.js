@@ -7,6 +7,17 @@ class RoomService {
         this.CACHE_TTL = 15 * 60 * 1000; // 15 minutes for rooms
     }
 
+    generateCode(length = 6) {
+        const characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ123456789';
+        let result = '';
+        
+        for (let i = 0; i < length; i++) {
+            result += characters.charAt(Math.floor(Math.random() * characters.length));
+        }
+        
+        return result;
+    }
+
     async getRooms (user_id){
         try {
             const cacheKey = cache.generateKey('user_rooms', user_id);
@@ -139,8 +150,9 @@ class RoomService {
         }
     }
     
-    async createRoom (title, description, mantra, bannerImage, user_id, code){
+    async createRoom (title, description, mantra, bannerImage, user_id, visibility){
         try {
+            const code = this.generateCode(6);
             const newRoom = new roomModel (
                 null,
                 title,
@@ -149,7 +161,8 @@ class RoomService {
                 bannerImage,
                 user_id,
                 new Date(),
-                code
+                code,
+                visibility
             )
             const result = await this.roomRepo.createRoom(newRoom);
             
@@ -172,6 +185,8 @@ class RoomService {
                 mantra,
                 bannerImage,
                 user_id,
+                null,
+                null,
                 null
             )
             const result = await this.roomRepo.updateRoom(roomId, user_id, ur);

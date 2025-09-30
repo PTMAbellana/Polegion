@@ -88,17 +88,21 @@ class RoomRoutes {
      *             type: object
      *             required: [name]
      *             properties:
-     *               name:
+     *               title:
      *                 type: string
      *                 example: Algorithm Practice Room
      *               description:
      *                 type: string
      *                 example: A room for practicing data structures and algorithms
-     *               maxUsers:
-     *                 type: integer
-     *                 example: 50
-     *                 minimum: 1
-     *                 maximum: 1000
+     *               mantra:
+     *                 type: string
+     *                 example: "Practice makes perfect"
+     *               bannerImage:
+     *                 type: string
+     *                 example: https://example.com/banner.jpg
+     *               visibility:
+     *                 type: string
+     *                 example: private
      *     responses:
      *       201:
      *         description: Room created successfully
@@ -169,15 +173,18 @@ class RoomRoutes {
      *           schema:
      *             type: object
      *             properties:
-     *               name:
+     *               title:
      *                 type: string
-     *                 example: Updated Room Name
+     *                 example: Algorithm Practice Room
      *               description:
      *                 type: string
-     *                 example: Updated description
-     *               maxUsers:
-     *                 type: integer
-     *                 example: 100
+     *                 example: A room for practicing data structures and algorithms
+     *               mantra:
+     *                 type: string
+     *                 example: "Practice makes perfect"
+     *               bannerImage:
+     *                 type: string
+     *                 example: https://example.com/banner.jpg
      *     responses:
      *       200:
      *         description: Room updated successfully
@@ -205,7 +212,7 @@ class RoomRoutes {
      *         name: id
      *         required: true
      *         schema:
-     *           type: string
+     *           type: integer 
      *         description: Room ID
      *     responses:
      *       200:

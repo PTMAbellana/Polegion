@@ -12,16 +12,32 @@ class RoomController {
         try {
             const rooms = await this.roomService.getRooms(req.user.id)
             
-            if (!rooms) return res.status(400).json({ error: error.message })
+            if (!rooms) 
+                return res.status(400).json({ 
+                    message: 'No rooms found',
+                    error: error.message 
+            })
             
-            // console.log('getRooms 1: ', rooms)
-            // console.log('getRooms 2: ', rooms.map( room => room.toDTO() ))
-
-            res.status(200).json(
-                rooms.map( room => room.toDTO() )
-            );
+            return res.status(200).json({
+                message: 'Rooms fetched successfully',
+                data: rooms.map( room => room.toDTO() )
+            });
         } catch (error) {
-            res.status(500).json({ error: 'Server error fetching rooms' })
+            if (error.status === 400)
+                return res.status(400).json({ 
+                    message: 'No rooms found',
+                    error: error.message 
+            })
+              
+            if (error.status === 401)
+                return res.status(401).json({
+                    message: 'Unauthorized',
+                    error: 'Unauthorized'
+            })
+            return res.status(500).json({ 
+                message: 'Server error fetching rooms',
+                error: error.message
+            })
         }
     };
     
@@ -76,7 +92,6 @@ class RoomController {
             description, 
             mantra, 
             banner_image, 
-            code,
             visibility
         } = req.body
         
@@ -87,15 +102,35 @@ class RoomController {
                 mantra, 
                 banner_image, //url from the previous upload
                 req.user.id,
-                code,
-                visibility
+                visibility,
             )
             
-            if (!room) return res.status(400).json({ error: error.message })
+            if (!room) 
+                return res.status(400).json({ 
+                    message: 'Room creation failed',
+                    error: error.message 
+                })
             
-            res.status(201).json(room.toDTO());
+            return res.status(201).json({
+                message: 'Room created successfully',
+                data: room.toDTO()
+            });
         } catch (error) {
-            res.status(500).json({ error: 'Server error creating room' })
+            if (error.status === 400)
+                return res.status(400).json({ 
+                    message: 'Room creation failed',
+                    error: error.message 
+                })
+              
+            if (error.status === 401)
+                return res.status(401).json({
+                    message: 'Unauthorized',
+                    error: 'Unauthorized'
+            })
+            return res.status(500).json({
+                message: 'Server error creating room',
+                error: error.message
+            });
         }
     };
     
@@ -105,8 +140,7 @@ class RoomController {
             title, 
             description, 
             mantra, 
-            banner_image,
-            visibility
+            banner_image
         } = req.body
         
         try {
@@ -116,27 +150,64 @@ class RoomController {
                 description, 
                 mantra, 
                 banner_image,
-                visibility,
                 req.user.id
             )
             
-            if (!room) return res.status(400).json({ error: error.message })
-            res.status(200).json(room.toDTO())
+            if (!room) 
+                return res.status(400).json({ 
+                    message: 'Room update failed',
+                    error: error.message 
+                })
+            return res.status(200).json({
+                message: 'Room updated successfully',
+                data: room.toDTO()
+            })
         } catch (error) {
             // console.error('Error updating room:', error)
-            if (error.message === 'Room not found or not authorized') return res.status(404).json({ error: 'Room not found or not authorized' })
-            res.status(500).json({ error: 'Server error updating room' })
+            if (error.message === 'Room not found or not authorized') 
+                return res.status(404).json({ 
+                    message: 'Room update failed',
+                    error: 'Room not found or not authorized'
+                })
+
+            if (error.status === 401)
+                return res.status(401).json({
+                    message: 'Unauthorized',
+                    error: 'Unauthorized'
+                })
+
+            return res.status(500).json({
+                message: 'Server error updating room',
+                error: error.message 
+            })
         }
     };
     
     // Delete a room
     deleteRoom = async (req, res) => {
         try {
+            console.log('Deleting room with ID:', req.params.id);
             await this.roomService.deleteRoom(req.params.id, req.user.id)
             
-            res.status(200).json({ message: 'Room deleted successfully' })
+            return res.status(200).json({ 
+                message: 'Room deleted successfully' 
+            })
         } catch (error) {
-            res.status(500).json({ error: 'Server error deleting room' })
+            if (error.message === 'Room not found') 
+                return res.status(404).json({ 
+                    message: 'Room deletion failed',
+                    error: 'Room not found or not authorized' 
+            })
+
+            if (error.status === 401)
+                return res.status(401).json({ 
+                    message: 'Unauthorized',
+                    error: 'Unauthorized' 
+            })
+            return res.status(500).json({ 
+                message: 'Server error deleting room',
+                error: error.message 
+            })
         }
     };
     

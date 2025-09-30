@@ -153,6 +153,7 @@ class RoomRepo extends BaseRepo {
             } = await this.supabase.from(this.tableName)
             .insert(room.toDbObject())
             .select()
+            .single()
     
             if (error) {
                 console.error('Database error:', error);
@@ -161,7 +162,7 @@ class RoomRepo extends BaseRepo {
             if (!data || data.length === 0) {
                 throw new Error('Failed to create room - no data returned');
             }
-            return roomModel.fromDbRoom(data[0])
+            return roomModel.fromDbRoom(data)
         } catch (error) {
             throw error
         }    
@@ -173,14 +174,15 @@ class RoomRepo extends BaseRepo {
                 data,
                 error
             } = await this.supabase.from(this.tableName)
-            .update(room.toDbObject())
+            .update(room.toDbObjectUpdate())
             .eq('id', roomId)
             .eq('user_id', user_id)
             .select()
+            .single()
     
             if (error) throw error
-            if (data.length === 0) throw new Error ('Room not found or not authoriized')
-            return roomModel.fromDbRoom(data[0])
+            if (!data) throw new Error ('Room not found')
+            return roomModel.fromDbRoom(data)
         } catch (error) {
             throw error
         }    
@@ -199,8 +201,11 @@ class RoomRepo extends BaseRepo {
             .delete()
             .eq('id', roomId)
             .eq('user_id', user_id)
-    
+            .select()
+            .single()
+            
             if (error) throw error
+            if (!data) throw new Error('Room not found')
             return true
         } catch (error) {
             throw error
