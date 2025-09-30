@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMyApp } from '@/context/AppUtils';
 import Loader from '@/components/Loader';
@@ -136,9 +136,6 @@ export default function WorldMapPage() {
   const [selectedCastle, setSelectedCastle] = useState<Castle | null>(null);
   const [hoveredCastle, setHoveredCastle] = useState<Castle | null>(null);
   const [showWizardDialogue, setShowWizardDialogue] = useState(true);
-  const [currentWorldIndex, setCurrentWorldIndex] = useState(0);
-  const pointerStartXRef = useRef<number | null>(null);
-  const pointerDeltaXRef = useRef<number>(0);
   const router = useRouter();
 
   // Auto-hide wizard dialogue after 8 seconds
@@ -178,52 +175,6 @@ export default function WorldMapPage() {
     router.push(castle.route);
   };
 
-  // One castle per world/slide
-  const WORLDS: Castle[][] = CASTLES.map((c) => [c]);
-
-  const goToWorld = (index: number) => {
-    const nextIndex = Math.max(0, Math.min(WORLDS.length - 1, index));
-    setCurrentWorldIndex(nextIndex);
-    setSelectedCastle(null);
-  };
-
-  const goPrev = () => goToWorld(currentWorldIndex - 1);
-  const goNext = () => goToWorld(currentWorldIndex + 1);
-
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'ArrowLeft') {
-        goPrev();
-      } else if (e.key === 'ArrowRight') {
-        goNext();
-      }
-    };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [currentWorldIndex, WORLDS.length]);
-
-  const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
-    pointerStartXRef.current = e.clientX;
-    pointerDeltaXRef.current = 0;
-  };
-
-  const onPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (pointerStartXRef.current == null) return;
-    pointerDeltaXRef.current = e.clientX - pointerStartXRef.current;
-  };
-
-  const onPointerUp = () => {
-    const delta = pointerDeltaXRef.current;
-    pointerStartXRef.current = null;
-    pointerDeltaXRef.current = 0;
-    const threshold = 60; // px
-    if (delta > threshold) {
-      goPrev();
-    } else if (delta < -threshold) {
-      goNext();
-    }
-  };
-
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
       case 'Easy': return '#228B22';
@@ -258,145 +209,103 @@ export default function WorldMapPage() {
       </div>
 
       {/* Main Map Container */}
-      <div
-        className={styles.main_map_container}
-        onPointerDown={onPointerDown}
-        onPointerMove={onPointerMove}
-        onPointerUp={onPointerUp}
-        onPointerCancel={onPointerUp}
-      >
-        <div
-          className={styles.carousel_track}
-          style={{ transform: `translateX(-${currentWorldIndex * 100}vw)` }}
-        >
-          {WORLDS.map((worldCastles, idx) => (
-            <div key={idx} className={`${styles.carousel_slide} ${idx === currentWorldIndex ? styles.active_slide : ''}`}>
-              {/* World Map Background */}
-              <div className={styles.world_map_background}>
-                <Image
-                  src="/images/world-map.png"
-                  alt="World Map of Polegion"
-                  fill
-                  className={styles.map_background_image}
-                  priority={idx === 0}
-                />
-              </div>
-
-              {/* Map Title Scroll */}
-              <div className={styles.map_title_scroll}>
-                <h1>Polegion</h1>
-                <p>The Sacred Lands of Mathematics</p>
-              </div>
-
-              {/* Single centered Castle */}
-              {worldCastles.map((castle) => (
-                <div key={castle.id} className={styles.castle_center_wrapper}>
-                  <div
-                    className={`${styles.castle_marker} ${styles.centered_marker} ${
-                      castle.unlocked ? styles.unlocked : styles.locked
-                    } ${castle.completed ? styles.completed : ''} ${
-                      selectedCastle?.id === castle.id ? styles.selected : ''
-                    } ${hoveredCastle?.id === castle.id ? styles.hovered : ''}`}
-                    onClick={() => handleCastleClick(castle)}
-                    onMouseEnter={() => setHoveredCastle(castle)}
-                    onMouseLeave={() => setHoveredCastle(null)}
-                  >
-                    {/* Castle Image */}
-                    <div className={`${styles.castle_image_container} ${styles.castle_large}`}>
-                      <Image
-                        src={`/images/${castle.imageNumber}.png`}
-                        alt={castle.name}
-                        width={220}
-                        height={220}
-                        className={`${styles.castle_image} ${
-                          !castle.unlocked ? styles.locked_filter : ''
-                        }`}
-                      />
-                      
-                      {/* Castle Status Overlays */}
-                      {castle.completed && (
-                        <div className={styles.completion_crown}>
-                          <span>👑</span>
-                        </div>
-                      )}
-                      
-                      {!castle.unlocked && (
-                        <div className={styles.lock_overlay}>
-                          <span>🔒</span>
-                        </div>
-                      )}
-                      
-                      {castle.unlocked && !castle.completed && (
-                        <div className={styles.available_glow}></div>
-                      )}
-                    </div>
-
-                    {/* Castle Name Label */}
-                    <div className={styles.castle_nameplate}>
-                      <div className={styles.nameplate_scroll}>
-                        {castle.name}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-
-              {/* Slide Progress Indicator */}
-              <div className={styles.progress_indicator}>
-                <div className={styles.progress_scroll}>
-                  <h3>Quest Progress</h3>
-                  <div className={styles.progress_stats}>
-                    <span>🏆 Conquered: {CASTLES.filter(c => c.completed).length}/{CASTLES.length}</span>
-                    <span>⚔️ Available: {CASTLES.filter(c => c.unlocked && !c.completed).length}</span>
-                    <span>🔒 Sealed: {CASTLES.filter(c => !c.unlocked).length}</span>
-                  </div>
-                  <div className={styles.progress_bar}>
-                    <div 
-                      className={styles.progress_fill}
-                      style={{ width: `${(CASTLES.filter(c => c.completed).length / CASTLES.length) * 100}%` }}
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Compass Rose */}
-              <div className={styles.compass_rose}>
-                <div className={styles.compass_inner}>
-                  <div className={styles.compass_needle}>N</div>
-                </div>
-              </div>
-            </div>
-          ))}
+      <div className={styles.main_map_container}>
+        {/* World Map Background */}
+        <div className={styles.world_map_background}>
+          <Image
+            src="/images/world-map.png"
+            alt="World Map of Polegion"
+            fill
+            className={styles.map_background_image}
+            priority
+          />
         </div>
 
-        {/* Carousel Controls */}
-        <button
-          className={styles.carousel_nav_left}
-          onClick={goPrev}
-          disabled={currentWorldIndex === 0}
-          aria-label="Previous world"
-        >
-          ‹
-        </button>
-        <button
-          className={styles.carousel_nav_right}
-          onClick={goNext}
-          disabled={currentWorldIndex === WORLDS.length - 1}
-          aria-label="Next world"
-        >
-          ›
-        </button>
+        {/* Map Title Scroll */}
+        <div className={styles.map_title_scroll}>
+          <h1>Polegion</h1>
+          <p>The Sacred Lands of Mathematics</p>
+        </div>
 
-        {/* Dots */}
-        <div className={styles.carousel_dots}>
-          {WORLDS.map((_, i) => (
-            <button
-              key={i}
-              className={`${styles.carousel_dot} ${i === currentWorldIndex ? styles.active : ''}`}
-              onClick={() => goToWorld(i)}
-              aria-label={`Go to world ${i + 1}`}
-            />
-          ))}
+        {/* Castle Markers */}
+        {CASTLES.map((castle) => (
+          <div
+            key={castle.id}
+            className={`${styles.castle_marker} ${
+              castle.unlocked ? styles.unlocked : styles.locked
+            } ${castle.completed ? styles.completed : ''} ${
+              selectedCastle?.id === castle.id ? styles.selected : ''
+            } ${hoveredCastle?.id === castle.id ? styles.hovered : ''}`}
+            style={{
+              left: `${castle.position.x}%`,
+              top: `${castle.position.y}%`,
+            }}
+            onClick={() => handleCastleClick(castle)}
+            onMouseEnter={() => setHoveredCastle(castle)}
+            onMouseLeave={() => setHoveredCastle(null)}
+          >
+            {/* Castle Image */}
+            <div className={styles.castle_image_container}>
+              <Image
+                src={`/images/${castle.imageNumber}.png`}
+                alt={castle.name}
+                width={120}
+                height={120}
+                className={`${styles.castle_image} ${
+                  !castle.unlocked ? styles.locked_filter : ''
+                }`}
+              />
+              
+              {/* Castle Status Overlays */}
+              {castle.completed && (
+                <div className={styles.completion_crown}>
+                  <span>👑</span>
+                </div>
+              )}
+              
+              {!castle.unlocked && (
+                <div className={styles.lock_overlay}>
+                  <span>🔒</span>
+                </div>
+              )}
+              
+              {castle.unlocked && !castle.completed && (
+                <div className={styles.available_glow}></div>
+              )}
+            </div>
+
+            {/* Castle Name Label */}
+            <div className={styles.castle_nameplate}>
+              <div className={styles.nameplate_scroll}>
+                {castle.name}
+              </div>
+            </div>
+          </div>
+        ))}
+
+        {/* Progress Indicator */}
+        <div className={styles.progress_indicator}>
+          <div className={styles.progress_scroll}>
+            <h3>Quest Progress</h3>
+            <div className={styles.progress_stats}>
+              <span>🏆 Conquered: {CASTLES.filter(c => c.completed).length}/{CASTLES.length}</span>
+              <span>⚔️ Available: {CASTLES.filter(c => c.unlocked && !c.completed).length}</span>
+              <span>🔒 Sealed: {CASTLES.filter(c => !c.unlocked).length}</span>
+            </div>
+            <div className={styles.progress_bar}>
+              <div 
+                className={styles.progress_fill}
+                style={{ width: `${(CASTLES.filter(c => c.completed).length / CASTLES.length) * 100}%` }}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Compass Rose */}
+        <div className={styles.compass_rose}>
+          <div className={styles.compass_inner}>
+            <div className={styles.compass_needle}>N</div>
+          </div>
         </div>
 
         {/* Castle Details Panel */}

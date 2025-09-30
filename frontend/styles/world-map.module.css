@@ -172,6 +172,82 @@
   overflow: hidden;
 }
 
+/* Carousel layout */
+.carousel_track {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  display: flex;
+  transition: transform 450ms ease;
+  will-change: transform;
+}
+
+.carousel_slide {
+  position: relative;
+  min-width: 100vw;
+  height: 100vh;
+}
+
+.carousel_nav_left,
+.carousel_nav_right {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 60;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 3px solid #B8860B;
+  background: rgba(251, 245, 229, 0.9);
+  color: #704214;
+  font-size: 2rem;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.carousel_nav_left { left: 18px; }
+.carousel_nav_right { right: 18px; }
+
+.carousel_nav_left:disabled,
+.carousel_nav_right:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.carousel_nav_left:hover:not(:disabled),
+.carousel_nav_right:hover:not(:disabled) {
+  transform: translateY(-50%) scale(1.06);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.35);
+}
+
+.carousel_dots {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 10px;
+  z-index: 60;
+}
+
+.carousel_dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 2px solid #B8860B;
+  background: rgba(251, 245, 229, 0.8);
+  cursor: pointer;
+}
+
+.carousel_dot.active {
+  background: #DAA520;
+}
+
 /* World Map Background */
 .world_map_background {
   position: absolute;
@@ -186,6 +262,22 @@
   object-fit: cover;
   object-position: center;
   filter: sepia(0.2) contrast(1.1) brightness(1.05);
+}
+
+/* Center and scale active world's background */
+.carousel_slide .world_map_background {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.carousel_slide .map_background_image {
+  transition: transform 450ms ease, filter 300ms ease;
+}
+
+.active_slide .map_background_image {
+  transform: scale(1.1);
+  filter: sepia(0.15) contrast(1.15) brightness(1.08);
 }
 
 /* Map Title Scroll - Using Textura Font */
@@ -230,6 +322,32 @@
   z-index: 10;
   transition: all 0.3s ease;
   transform: translate(-50%, -50%);
+}
+
+/* For centered single-castle slides */
+.castle_center_wrapper {
+  position: absolute;
+  top: 62%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 20;
+}
+
+.centered_marker {
+  position: relative;
+  left: 50%;
+  top: 50%;
+}
+
+.castle_large {
+  width: 340px;
+  height: 340px;
+  transition: transform 300ms ease;
+}
+
+/* Adjust nameplate position when centered and larger */
+.centered_marker .castle_nameplate {
+  top: 360px;
 }
 
 .castle_marker.unlocked:hover {
