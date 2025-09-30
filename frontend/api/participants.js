@@ -5,17 +5,35 @@ export const joinRoom = async (room_code) => {
     const response = await api.post("/participants/join", {
       room_code,
     });
-    return response;
+    return {
+      success: true,
+      message: response.data.message || 'Successfully joined room',
+      data: response.data.data
+    };
   } catch (error) {
-    throw error;
+    return {
+      success: false,
+      message: error.response?.data?.error || 'Error joining room',
+      error: error.response?.data?.error || error.message,
+      status: error.response?.status
+    };
   }
 };
 
 export const leaveRoom = async (room_id) => {
   try {
-    return await api.delete(`/participants/leave/${room_id}`);
+    const res = await api.delete(`/participants/leave/${room_id}`);
+    return {
+      success: true,
+      message: res.data.message || 'Successfully left room',
+    };
   } catch (error) {
-    throw error;
+    return {
+      success: false,
+      message: error.response?.data?.error || 'Error leaving room',
+      error: error.response?.data?.error || error.message,
+      status: error.response?.status
+    };
   }
 };
 
@@ -62,10 +80,20 @@ export const kickParticipant = async (room_id, part_id) => {
 
 export const getJoinedRooms = async () => {
   try {
-    return await api.get('/participants/joined');
+    const res = await api.get('/participants/joined');
+    return {
+      success: true,
+      data: res.data.data,
+      message: 'Joined rooms fetched successfully'
+    }
   } catch (error) {
     console.error('Error fetching joined rooms:', error);
-    throw error;
+    return {
+      success: false,
+      message: error.response?.data?.error || 'Error fetching joined rooms',
+      error: error.response?.data?.error || error.message,
+      status: error.response?.status
+    };
   }
 };
 

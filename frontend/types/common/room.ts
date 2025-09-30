@@ -21,7 +21,7 @@ export interface RoomCardProps {
 }
 
 export interface RoomCardsListProps {
-  title: string;
+  title?: string;
   rooms: RoomType[];
   onViewRoom: (roomCode: string | number, roomId?: number) => void;
   useRoomCode?: boolean;

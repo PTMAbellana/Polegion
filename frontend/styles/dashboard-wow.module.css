@@ -26,7 +26,6 @@
   position: relative;
   composes: variables;
   background: var(--background-gradient);
-  margin-left: var(--sidebar-width);
   transition: margin-left 0.3s ease;
   overflow-x: hidden;
 }
@@ -176,6 +175,13 @@
   line-height: 1.5;
   color: var(--text-secondary);
   margin: 0;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-shrink: 0;
 }
 
 .search-section {
@@ -706,6 +712,33 @@ textarea.form-control {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
   gap: 2rem;
+}
+
+/* Center the no-data message within room cards */
+.room-cards .no-data {
+  grid-column: 1 / -1; /* Span across all columns */
+  max-width: 700px; /* Make it wider */
+  margin: 3rem auto; /* Center horizontally with more spacing */
+  padding: 4rem 3rem;
+  font-size: 1.25rem;
+  font-weight: 500;
+  color: #4b5563;
+  line-height: 1.6;
+}
+
+/* Enhance the room-cards-section when it only contains no-data */
+.room-cards-section-empty .room-cards {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 300px;
+  width: 100%;
+}
+
+.room-cards-section-empty .no-data {
+  margin: 0;
+  max-width: 800px;
+  width: 100%;
 }
 
 .room-card {

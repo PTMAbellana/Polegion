@@ -22,7 +22,7 @@ const RoomCardsList: React.FC<RoomCardsListProps> = ({
   if (isLoading) {
     return (
       <div className={`${styles["room-cards-section"]} ${className}`}>
-        <h2>{title}</h2>
+        {title && <h2>{title}</h2>}
         <div className={styles["loading-indicator"]}>
           <Loader />
         </div>
@@ -30,9 +30,14 @@ const RoomCardsList: React.FC<RoomCardsListProps> = ({
     );
   }
 
+  const isEmpty = !rooms || rooms.length === 0;
+  const sectionClass = isEmpty 
+    ? `${styles["room-cards-section"]} ${styles["room-cards-section-empty"]} ${className}`
+    : `${styles["room-cards-section"]} ${className}`;
+
   return (
-    <div className={`${styles["room-cards-section"]} ${className}`}>
-      <h2>{title}</h2>
+    <div className={sectionClass}>
+      {title && <h2>{title}</h2>}
       <div className={styles["room-cards"]}>
         {rooms && rooms.length > 0 ? (
           rooms.map((room, index) => (

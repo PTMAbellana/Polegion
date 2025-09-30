@@ -8,6 +8,7 @@ interface PageHeaderProps {
   showAvatar?: boolean;
   avatarText?: string;
   className?: string;
+  actionButton?: React.ReactNode;
 }
 
 const PageHeader: React.FC<PageHeaderProps> = ({
@@ -16,7 +17,8 @@ const PageHeader: React.FC<PageHeaderProps> = ({
   subtitle,
   showAvatar = true,
   avatarText,
-  className = ""
+  className = "",
+  actionButton
 }) => {
   const getAvatarLetter = () => {
     if (avatarText) return avatarText;
@@ -40,6 +42,11 @@ const PageHeader: React.FC<PageHeaderProps> = ({
         )}
         {subtitle && <p>{subtitle}</p>}
       </div>
+      {actionButton && (
+        <div className={styles["header-actions"]}>
+          {actionButton}
+        </div>
+      )}
     </div>
   );
 };

@@ -4,11 +4,19 @@ import api from './axios';
 export const getRooms = async () => {
   try {
     const res = await api.get("/rooms");
-    console.log("from api getrooms: ", res);
-    return res;
+    return {
+      success: true,
+      data: res.data.data,
+      message: 'Rooms fetched successfully'
+    }
   } catch (error) {
     console.error("Error fetching rooms:", error);
-    throw error;
+    return {
+      success: false,
+      message: error.response?.data?.error || 'Error fetching rooms',
+      error: error.response?.data?.error || error.message,
+      status: error.response?.status 
+    };
   }
 };
 
@@ -34,27 +42,49 @@ export const getRoomByCode = async (code, type='join') => {
 
 export const createRoom = async (roomData) => {
   try {
-    console.log("Creating room with data:", roomData);
-    return await api.post("/rooms", roomData);
+    const res = await api.post("/rooms", roomData);
+    return {
+      success: true,
+      data: res.data.data,
+      message: 'Room created successfully'
+    }
   } catch (error) {
     console.error("Error creating room:", error);
-    throw error;
+    return {
+      success: false,
+      message: error.response?.data?.error || 'Error creating room',
+      error: error.response?.data?.error || error.message,
+      status: error.response?.status 
+    }
   }
 };
 
 export const updateRoom = async (id, roomData) => {
   try {
-    console.log("Updating room with data:", roomData);
-    return await api.put(`/rooms/id/${id}`, roomData);
+    const res = await api.put(`/rooms/id/${id}`, roomData);
+    return {
+      success: true,
+      data: res.data.data,
+      message: 'Room updated successfully'
+    }
   } catch (error) {
     console.error("Error updating room:", error);
-    throw error;
+    return {
+      success: false,
+      message: error.response?.data?.error || 'Error updating room',
+      error: error.response?.data?.error || error.message,
+      status: error.response?.status
+    };
   }
 };
 
 export const deleteRoom = async (id) => {
   try {
-    return await api.delete(`/rooms/id/${id}`);
+    const res =  await api.delete(`/rooms/id/${id}`);
+    return {
+      success: true,
+      message: res.data.message || 'Room deleted successfully'
+    }
   } catch (error) {
     console.error("Error deleting room:", error);
     throw error;
