@@ -10,28 +10,28 @@ class UserRoutes {
     
     initializeRoutes(){
         this.router.use(this.authMiddleware.protect)
+        //  *   get:
+        //  *     tags: [Users]
+        //  *     summary: Get user profile
+        //  *     description: Retrieve the current user's profile information
+        //  *     security:
+        //  *       - bearerAuth: []
+        //  *     responses:
+        //  *       200:
+        //  *         description: Profile retrieved successfully
+        //  *         content:
+        //  *           application/json:
+        //  *             schema:
+        //  *               type: object
+        //  *               properties:
+        //  *                 message: { type: string, example: "Profile retrieved successfully" }
+        //  *                 user: { type: object }
+        //  *       401:
+        //  *         $ref: '#/components/responses/UnauthorizedError'
         
         /**
          * @swagger
          * /users/profile:
-         *   get:
-         *     tags: [Users]
-         *     summary: Get user profile
-         *     description: Retrieve the current user's profile information
-         *     security:
-         *       - bearerAuth: []
-         *     responses:
-         *       200:
-         *         description: Profile retrieved successfully
-         *         content:
-         *           application/json:
-         *             schema:
-         *               type: object
-         *               properties:
-         *                 message: { type: string, example: "Profile retrieved successfully" }
-         *                 user: { type: object }
-         *       401:
-         *         $ref: '#/components/responses/UnauthorizedError'
          *   patch:
          *     tags: [Users]
          *     summary: Update user profile

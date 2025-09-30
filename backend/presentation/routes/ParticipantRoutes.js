@@ -107,9 +107,9 @@ class ParticipantRoutes {
          *         name: room_id
          *         required: true
          *         schema:
-         *           type: string
+         *           type: integer 
          *         description: Room ID
-         *         example: room-uuid-123
+         *         example: 123
          *     responses:
          *       200:
          *         description: Successfully left room

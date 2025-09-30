@@ -1,6 +1,7 @@
 // const userModel = require('../../domain/models/User')
 const Mailer = require('../../utils/Mailer'); // Adjust path as needed
 const cache = require('../cache');
+const roomModel = require('../../domain/models/Room');
 
 class ParticipantService {
     constructor(participantRepo, roomService, userService, leaderService){
@@ -26,14 +27,31 @@ class ParticipantService {
 
     async joinRoom(user_id, room_code){
         try {
-            const data = await this.participantRepo.addParticipant(user_id, room_code)
-            // console.log('join room service ', data)
+
+            const room = await this.roomService.getRoomByCodeUsers(room_code);
+            if (!room) {
+                throw new Error('Room not found');
+            }
+            if (room.user_id === user_id) {
+                throw new Error('Already an admin');
+            }
+            
+            const isAlreadyParticipant = await this.checkPartStatus(user_id, room.id);
+            if (isAlreadyParticipant) {
+                throw new Error('Already a participant in this room');
+            }
+
+            const data = await this.participantRepo.addParticipant(user_id, room.id)
             await this.leaderService.addRoomBoard(data.room_id, data.id)
             
+            console.log('Participant added:', data)
             // Invalidate participant cache
             this._invalidateParticipantCache(data.room_id, user_id);
             
-            return data
+            return {
+                participant_id: data.id,
+                room: roomModel.fromDbRoom(room).toDTO()
+            }
         } catch (error) {
             throw error
         }
@@ -228,29 +246,8 @@ class ParticipantService {
     async getJoinedRooms(user_id) {
         try {
             const data = await this.participantRepo.getJoinedRooms(user_id)
-            
-            const rooms = await Promise.all(
-                data.map(async (room) => {
-                    try {
-                        // Fetch user data from users table using user_id
-                        const roomData = await this.roomService.getRoomsById(room.room_id)
-                        
-                        // console.log('getRoomParticipants userData: ', roomData)
-                        if (!roomData) {
-                            console.warn(`User not found for ID: ${room.room_id}`)
-                            return null
-                        }
-
-                        return roomData
-                        
-                    } catch (error) {
-                        console.warn(`Error fetching user ${room.room_id}:`, error)
-                        return null
-                    }
-                })
-            )
-            
-            return rooms
+            console.log('joined rooms service: ', data)
+            return data
         } catch (error) {
             throw error
         }
