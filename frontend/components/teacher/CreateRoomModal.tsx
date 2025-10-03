@@ -23,6 +23,7 @@ export default function CreateRoomModal({ isOpen, onClose }: CreateRoomModalProp
     const [submitError, setSubmitError] = useState<string>('')
     const [bannerPreview, setBannerPreview] = useState<string | null>(null)
     const [selectedFile, setSelectedFile] = useState<File | null>(null)
+    const [isFilePickerOpen, setIsFilePickerOpen] = useState<boolean>(false)
     const fileInputRef = useRef<HTMLInputElement>(null)
 
     const {
@@ -41,13 +42,43 @@ export default function CreateRoomModal({ isOpen, onClose }: CreateRoomModalProp
             const reader = new FileReader()
             reader.onload = (e) => {
                 setBannerPreview(e.target?.result as string)
+                setIsFilePickerOpen(false)
             }
             reader.readAsDataURL(file)
+        } else {
+            setIsFilePickerOpen(false)
+        }
+        // Prevent the click event from firing again
+        event.stopPropagation()
+    }
+
+    const handleBannerClick = (event: React.MouseEvent<HTMLDivElement>) => {
+        // Only open file picker if no image is currently selected and file picker is not already open
+        if (!bannerPreview && !isFilePickerOpen) {
+            event.preventDefault()
+            event.stopPropagation()
+            setIsFilePickerOpen(true)
+            fileInputRef.current?.click()
         }
     }
 
-    const handleBannerClick = () => {
-        fileInputRef.current?.click()
+    const handleChangeBanner = (event: React.MouseEvent<HTMLButtonElement>) => {
+        event.preventDefault()
+        event.stopPropagation()
+        if (!isFilePickerOpen) {
+            setIsFilePickerOpen(true)
+            fileInputRef.current?.click()
+        }
+    }
+
+    const handleRemoveBanner = (event: React.MouseEvent<HTMLButtonElement>) => {
+        event.preventDefault()
+        event.stopPropagation()
+        setBannerPreview(null)
+        setSelectedFile(null)
+        if (fileInputRef.current) {
+            fileInputRef.current.value = ''
+        }
     }
 
     const onSubmit = async (data: CreateRoomData) => {
@@ -79,6 +110,10 @@ export default function CreateRoomModal({ isOpen, onClose }: CreateRoomModalProp
         setSubmitError('')
         setBannerPreview(null)
         setSelectedFile(null)
+        setIsFilePickerOpen(false)
+        if (fileInputRef.current) {
+            fileInputRef.current.value = ''
+        }
         onClose()
     }
 
@@ -108,7 +143,27 @@ export default function CreateRoomModal({ isOpen, onClose }: CreateRoomModalProp
                                 </label>
                                 <div className={styles['banner-preview']} onClick={handleBannerClick}>
                                     {bannerPreview ? (
-                                        <Image src={bannerPreview} alt="Banner preview" fill style={{ objectFit: 'cover' }} />
+                                        <>
+                                            <Image src={bannerPreview} alt="Banner preview" fill style={{ objectFit: 'cover' }} />
+                                            <div className={styles['banner-overlay']}>
+                                                <button
+                                                    type="button"
+                                                    className={styles['banner-change-btn']}
+                                                    onClick={handleChangeBanner}
+                                                    disabled={loading}
+                                                >
+                                                    Change
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    className={styles['banner-remove-btn']}
+                                                    onClick={handleRemoveBanner}
+                                                    disabled={loading}
+                                                >
+                                                    Remove
+                                                </button>
+                                            </div>
+                                        </>
                                     ) : (
                                         <div className={styles['banner-upload-placeholder']}>
                                             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -124,7 +179,16 @@ export default function CreateRoomModal({ isOpen, onClose }: CreateRoomModalProp
                                         className={styles['file-input']}
                                         accept="image/*"
                                         onChange={handleFileChange}
+                                        onFocus={() => setIsFilePickerOpen(true)}
+                                        onBlur={() => {
+                                            // Add a small delay to check if file was actually selected
+                                            setTimeout(() => setIsFilePickerOpen(false), 300)
+                                        }}
                                         disabled={loading}
+                                        style={{ 
+                                            pointerEvents: bannerPreview ? 'none' : 'auto',
+                                            display: bannerPreview ? 'none' : 'block'
+                                        }}
                                     />
                                 </div>
                             </div>

@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { useRouter, usePathname } from "next/navigation";
+import { usePathname } from "next/navigation";
 import toast from "react-hot-toast";
 import { FaHome, FaTrophy, FaUser, FaSignOutAlt, FaBars, FaTimes, FaChalkboardTeacher, FaDungeon, FaMedal, FaUserAstronaut, FaFortAwesome, FaShapes } from 'react-icons/fa';
 import styles from '@/styles/navbar.module.css';
@@ -35,7 +35,7 @@ const Sidebar = (
     // Navigation items for students
     const studentNavItems = [
         { path: STUDENT_ROUTES.DASHBOARD, icon: FaHome, label: 'Dashboard', title: 'Home' },
-        { path: STUDENT_ROUTES.JOINED_ROOMS, icon: FaDungeon, label: 'Dungeons', title: 'Joined Rooms' },
+        { path: STUDENT_ROUTES.JOINED_ROOMS, icon: FaDungeon, label: 'Joined Rooms', title: 'Joined Rooms' },
         { path: STUDENT_ROUTES.WORLD_MAP, icon: FaFortAwesome, label: 'World Map', title: 'World Map' },
         { path: STUDENT_ROUTES.PLAYGROUND, icon: FaShapes, label: 'Playground', title: 'Playground' },
         { path: ROUTES.LEADERBOARD, icon: FaMedal, label: 'Wall of Fame', title: 'Leaderboard' },

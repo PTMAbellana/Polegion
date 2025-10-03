@@ -1,6 +1,6 @@
 import React from 'react';
-import { RoomCardProps } from '@/types/common/room';
 import styles from '@/styles/dashboard-wow.module.css';
+import { RoomCardProps } from '@/types';
 
 const RoomCard: React.FC<RoomCardProps> = ({ 
   room, 
@@ -11,7 +11,9 @@ const RoomCard: React.FC<RoomCardProps> = ({
   showDeleteButton = false,
   showRoomCode = false,
   onEditRoom,
-  onDeleteRoom
+  onDeleteRoom,
+  viewButtonText = "View",
+  deleteButtonText = "Delete"
 }) => {
   const handleCardClick = () => {
     if (showClickableCard) {
@@ -87,7 +89,7 @@ const RoomCard: React.FC<RoomCardProps> = ({
             className={styles["view-btn"]}
             onClick={handleViewButtonClick}
           >
-            View
+            {viewButtonText}
           </button>
           {showEditButton && onEditRoom && (
             <button
@@ -102,7 +104,7 @@ const RoomCard: React.FC<RoomCardProps> = ({
               className={styles["delete-btn"]}
               onClick={handleDeleteButtonClick}
             >
-              Delete
+              {deleteButtonText}
             </button>
           )}
         </div>

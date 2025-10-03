@@ -67,15 +67,22 @@ export default function ProfileCard({
 
     return (
         <div className={styles['profile-page']}>
-
             <div className={styles['profile-card']}>
-                {/* Animated Header */}
-                <div className={styles['profile-header']}>
-                    <AnimatedAvatar
-                        src={userProfile?.profile_pic}
-                        alt="Profile"
-                    />
-                    <div className={styles['profile-title-group']}>
+                {/* Left Side - Large Profile Picture */}
+                <div className={styles['profile-left']}>
+                    <div className={styles['profile-avatar-large']}>
+                        <AnimatedAvatar
+                            src={userProfile?.profile_pic}
+                            alt="Profile"
+                            className={styles['avatar-large']}
+                        />
+                    </div>
+                </div>
+
+                {/* Right Side - Profile Information */}
+                <div className={styles['profile-right']}>
+                    {/* Profile Header */}
+                    <div className={styles['profile-header']}>
                         <h1 className={styles['profile-title']}>
                             {getDisplayName()}
                         </h1>
@@ -83,32 +90,32 @@ export default function ProfileCard({
                             {getUserStatus()}
                         </span>
                     </div>
-                </div>
 
-                {/* Details */}
-                <div className={styles['profile-details']}>
-                    <ProfileInfoItem 
-                        label="Email" 
-                        value={userProfile?.email} 
-                    />
-                    <ProfileInfoItem 
-                        label="Phone Number" 
-                        value={userProfile?.phone} 
-                    />
-                    <ProfileInfoItem 
-                        label="Gender" 
-                        value={userProfile?.gender} 
-                        fallback="Not specified"
-                    />
-                </div>
+                    {/* Profile Details */}
+                    <div className={styles['profile-details']}>
+                        <ProfileInfoItem 
+                            label="Email" 
+                            value={userProfile?.email} 
+                        />
+                        <ProfileInfoItem 
+                            label="Phone Number" 
+                            value={userProfile?.phone} 
+                        />
+                        <ProfileInfoItem 
+                            label="Gender" 
+                            value={userProfile?.gender} 
+                            fallback="Not specified"
+                        />
+                    </div>
 
-                {/* Edit Profile Button */}
-                <button
-                    onClick={handleEditProfile}
-                    className={styles['edit-profile-button']}
-                >
-                    Edit Profile
-                </button>
+                    {/* Edit Profile Button */}
+                    <button
+                        onClick={handleEditProfile}
+                        className={styles['edit-profile-button']}
+                    >
+                        Edit Profile
+                    </button>
+                </div>
             </div>
         </div>
     )

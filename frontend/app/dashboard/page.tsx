@@ -62,6 +62,7 @@ export default function Dashboard() {
                     onViewRoom={handleViewJoinedRoom}
                     useRoomCode={true}
                     emptyMessage="No rooms joined yet."
+                    viewButtonText="Enter"
                 />
                 
                 <RoomCardsList

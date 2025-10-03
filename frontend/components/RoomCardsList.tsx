@@ -1,8 +1,8 @@
 import React from 'react';
-import { RoomCardsListProps } from '@/types/common/room';
 import RoomCard from './RoomCard';
 import Loader from './Loader';
 import styles from '@/styles/dashboard-wow.module.css';
+import { RoomCardsListProps } from '@/types';
 
 const RoomCardsList: React.FC<RoomCardsListProps> = ({
   title,
@@ -17,7 +17,9 @@ const RoomCardsList: React.FC<RoomCardsListProps> = ({
   onDeleteRoom,
   emptyMessage = "No rooms found.",
   isLoading = false,
-  className = ""
+  className = "",
+  viewButtonText = "View",
+  deleteButtonText = "Delete"
 }) => {
   if (isLoading) {
     return (
@@ -52,6 +54,8 @@ const RoomCardsList: React.FC<RoomCardsListProps> = ({
               showRoomCode={showRoomCode}
               onEditRoom={onEditRoom}
               onDeleteRoom={onDeleteRoom}
+              viewButtonText={viewButtonText}
+              deleteButtonText={deleteButtonText}
             />
           ))
         ) : (

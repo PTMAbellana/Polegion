@@ -83,6 +83,8 @@ export default function JoinedRoomsPage() {
                     onDeleteRoom={handleLeaveRoom}
                     emptyMessage="No rooms joined yet. Join your first room to get started!"
                     isLoading={loading}
+                    viewButtonText="Enter"
+                    deleteButtonText="Leave"
                 />
             </div>
 

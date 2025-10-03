@@ -5,7 +5,8 @@ import {
     getRooms, 
     createRoom as apiCreateRoom, 
     updateRoom as apiUpdateRoom, 
-    deleteRoom as apiDeleteRoom 
+    deleteRoom as apiDeleteRoom,
+    uploadImage
 } from '@/api/rooms'
 
 export const useTeacherRoomStore = create<TeacherRoomState>()(
@@ -44,7 +45,44 @@ export const useTeacherRoomStore = create<TeacherRoomState>()(
             createRoom: async (roomData: CreateRoomData) => {
                 set({ loading: true, error: null });
                 try {
-                    const response = await apiCreateRoom(roomData);
+                    let bannerImageUrl: string | null = null;
+                    
+                    // First, handle image upload if there's a file
+                    if (roomData.banner_image instanceof File) {
+                        try {
+                            console.log('Uploading banner image...');
+                            const formData = new FormData();
+                            formData.append('banner', roomData.banner_image);
+                            
+                            const uploadResponse = await uploadImage(formData);
+                            if (uploadResponse.data && uploadResponse.data.data && uploadResponse.data.data.imageUrl) {
+                                bannerImageUrl = uploadResponse.data.data.imageUrl;
+                                console.log('Banner uploaded successfully:', bannerImageUrl);
+                            } else {
+                                throw new Error('Failed to get image URL from upload response');
+                            }
+                        } catch (uploadError: unknown) {
+                            const uploadErrorMessage = uploadError instanceof Error ? uploadError.message : 'Failed to upload banner image';
+                            console.error('Banner upload failed:', uploadError);
+                            set({ 
+                                error: `Failed to upload banner image: ${uploadErrorMessage}`,
+                                loading: false 
+                            });
+                            return { success: false, error: `Failed to upload banner image: ${uploadErrorMessage}` };
+                        }
+                    } else if (typeof roomData.banner_image === 'string') {
+                        // If banner_image is already a URL string, use it as is
+                        bannerImageUrl = roomData.banner_image;
+                    }
+
+                    // Prepare room data with the uploaded image URL
+                    const roomDataWithImage = {
+                        ...roomData,
+                        banner_image: bannerImageUrl
+                    };
+
+                    // Now create the room with the image URL
+                    const response = await apiCreateRoom(roomDataWithImage);
                     if (response.success && response.data) {
                         const newRoom = response.data;
                         set(state => ({ 
@@ -72,7 +110,44 @@ export const useTeacherRoomStore = create<TeacherRoomState>()(
             updateRoom: async (roomId: string, roomData: UpdateRoomData) => {
                 set({ loading: true, error: null });
                 try {
-                    const response = await apiUpdateRoom(roomId, roomData);
+                    let bannerImageUrl: string | null = null;
+                    
+                    // First, handle image upload if there's a new file
+                    if (roomData.banner_image instanceof File) {
+                        try {
+                            console.log('Uploading updated banner image...');
+                            const formData = new FormData();
+                            formData.append('banner', roomData.banner_image);
+                            
+                            const uploadResponse = await uploadImage(formData);
+                            if (uploadResponse.data && uploadResponse.data.data && uploadResponse.data.data.imageUrl) {
+                                bannerImageUrl = uploadResponse.data.data.imageUrl;
+                                console.log('Updated banner uploaded successfully:', bannerImageUrl);
+                            } else {
+                                throw new Error('Failed to get image URL from upload response');
+                            }
+                        } catch (uploadError: unknown) {
+                            const uploadErrorMessage = uploadError instanceof Error ? uploadError.message : 'Failed to upload banner image';
+                            console.error('Banner upload failed:', uploadError);
+                            set({ 
+                                error: `Failed to upload banner image: ${uploadErrorMessage}`,
+                                loading: false 
+                            });
+                            return { success: false, error: `Failed to upload banner image: ${uploadErrorMessage}` };
+                        }
+                    } else if (typeof roomData.banner_image === 'string') {
+                        // If banner_image is already a URL string, use it as is
+                        bannerImageUrl = roomData.banner_image;
+                    }
+
+                    // Prepare room data with the uploaded/existing image URL
+                    const roomDataWithImage = {
+                        ...roomData,
+                        banner_image: bannerImageUrl
+                    };
+
+                    // Now update the room with the image URL
+                    const response = await apiUpdateRoom(roomId, roomDataWithImage);
                     if (response.success && response.data) {
                         const updatedRoom = response.data;
                         set(state => ({ 

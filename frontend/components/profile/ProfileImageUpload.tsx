@@ -38,20 +38,20 @@ export default function ProfileImageUpload({ onSuccess }: ProfileImageUploadProp
 
     return (
         <div className={styles['image-upload-section']}>
-            <h3 className={styles['section-title']}>Profile Picture</h3>
+            <h3 className={styles['section-title-left']}>Profile Picture</h3>
             
-            <div className={styles['image-upload-container']}>
-                {/* Current/Preview Image */}
-                <div className={styles['image-preview']}>
+            <div className={styles['image-upload-container-two-column']}>
+                {/* Left Side - Bigger Image Preview */}
+                <div className={styles['image-preview-large']}>
                     <AnimatedAvatar
                         src={displayImage}
                         alt="Profile preview"
-                        className={styles['upload-avatar']}
+                        className={styles['upload-avatar-large']}
                     />
                     
-                    {/* Upload overlay */}
+                    {/* Upload overlay - Same as before but larger */}
                     <div 
-                        className={styles['upload-overlay']}
+                        className={styles['upload-overlay-large']}
                         onClick={triggerFileSelect}
                     >
                         <div className={styles['upload-icon']}>📷</div>
@@ -59,6 +59,74 @@ export default function ProfileImageUpload({ onSuccess }: ProfileImageUploadProp
                             {displayImage ? 'Change Photo' : 'Add Photo'}
                         </span>
                     </div>
+                </div>
+
+                {/* Right Side - Info and Controls */}
+                <div className={styles['upload-controls']}>
+                    {/* Upload info */}
+                    <div className={styles['upload-info']}>
+                        <div className={styles['info-item']}>
+                            <p className={styles['upload-hint']}>
+                                <strong>Supported formats:</strong> JPEG, PNG, WebP
+                            </p>
+                        </div>
+                        
+                        <div className={styles['info-item']}>
+                            <p className={styles['upload-hint']}>
+                                <strong>Maximum size:</strong> 5MB
+                            </p>
+                        </div>
+                        
+                        {file && (
+                            <div className={styles['file-info']}>
+                                <p className={styles['file-name']}>📄 {file.name}</p>
+                                <p className={styles['file-size']}>
+                                    📏 Size: {(file.size / 1024 / 1024).toFixed(2)} MB
+                                </p>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Action buttons - Only show when file is selected */}
+                    {file && (
+                        <div className={styles['upload-actions']}>
+                            <button
+                                type="button"
+                                onClick={clearImage}
+                                className={styles['clear-button']}
+                                disabled={isUploading}
+                            >
+                                Clear
+                            </button>
+                            <button
+                                type="button"
+                                onClick={handleUpload}
+                                className={styles['upload-button']}
+                                disabled={isUploading || !file}
+                            >
+                                {isUploading ? (
+                                    <>
+                                        <span className={styles['spinner']}></span>
+                                        Uploading...
+                                    </>
+                                ) : (
+                                    'Upload Photo'
+                                )}
+                            </button>
+                        </div>
+                    )}
+
+                    {/* Status messages */}
+                    {success && (
+                        <div className={styles['success-message']}>
+                            ✅ Profile picture updated successfully!
+                        </div>
+                    )}
+                    {error && (
+                        <div className={styles['error-message']}>
+                            ❌ {error}
+                        </div>
+                    )}
                 </div>
 
                 {/* Hidden file input */}
@@ -70,63 +138,6 @@ export default function ProfileImageUpload({ onSuccess }: ProfileImageUploadProp
                     className={styles['hidden-input']}
                     disabled={isUploading}
                 />
-
-                {/* Upload info */}
-                <div className={styles['upload-info']}>
-                    <p className={styles['upload-hint']}>
-                        Supported formats: JPEG, PNG, WebP (Max 5MB)
-                    </p>
-                    
-                    {file && (
-                        <div className={styles['file-info']}>
-                            <span className={styles['file-name']}>{file.name}</span>
-                            <span className={styles['file-size']}>
-                                ({(file.size / 1024 / 1024).toFixed(2)} MB)
-                            </span>
-                        </div>
-                    )}
-                </div>
-
-                {/* Action buttons */}
-                {file && (
-                    <div className={styles['upload-actions']}>
-                        <button
-                            type="button"
-                            onClick={clearImage}
-                            className={styles['clear-button']}
-                            disabled={isUploading}
-                        >
-                            Clear
-                        </button>
-                        <button
-                            type="button"
-                            onClick={handleUpload}
-                            className={styles['upload-button']}
-                            disabled={isUploading || !file}
-                        >
-                            {isUploading ? (
-                                <>
-                                    <span className={styles['spinner']}></span>
-                                    Uploading...
-                                </>
-                            ) : (
-                                'Upload Photo'
-                            )}
-                        </button>
-                    </div>
-                )}
-
-                {/* Status messages */}
-                {success && (
-                    <div className={styles['success-message']}>
-                        ✅ Profile picture updated successfully!
-                    </div>
-                )}
-                {error && (
-                    <div className={styles['error-message']}>
-                        ❌ {error}
-                    </div>
-                )}
             </div>
         </div>
     )

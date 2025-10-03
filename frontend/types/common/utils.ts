@@ -4,12 +4,6 @@ export interface SelectOption<T = string> {
     disabled?: boolean;
 }
 
-export interface ModalProps {
-    isOpen: boolean;
-    onClose: () => void;
-    title?: string;
-}
-
 export type Status = 'idle' | 'loading' | 'success' | 'error';
 
 export type Theme = 'light' | 'dark' | 'system';

@@ -104,6 +104,7 @@ export default function LeaderboardRooms() {
                         onViewRoom={handleViewRoom}
                         useRoomCode={false} // Use ID instead of code
                         emptyMessage="No rooms joined yet."
+                        viewButtonText="View Leaderboard"
                     />
                 )}
             </div>

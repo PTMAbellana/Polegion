@@ -316,6 +316,23 @@
   flex: 1;
   display: flex;
   flex-direction: column;
+  background: linear-gradient(135deg, #f0fdf4 0%, #fefce8 50%, #fffbeb 100%);
+  position: relative;
+}
+
+.page-layout .main-content::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: 
+    radial-gradient(circle at 20% 20%, rgba(34, 197, 94, 0.08) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(234, 179, 8, 0.08) 0%, transparent 50%),
+    radial-gradient(circle at 40% 60%, rgba(132, 204, 22, 0.06) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 0;
 }
 
 .page-layout .content-area {
