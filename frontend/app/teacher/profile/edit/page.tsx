@@ -40,11 +40,22 @@ export default function TeacherEditProfilePage() {
         // Image uploaded successfully, could show notification
     }
 
+    const backButton = (
+        <button
+            type="button"
+            onClick={handleCancel}
+            className={styles['back-button']}
+        >
+            ← Back to Profile
+        </button>
+    )
+
     return (
         <div className={styles['edit-profile-page']}>
             <PageHeader 
                 title="Edit Profile"
                 subtitle="Update your personal information and settings"
+                actionButton={backButton}
             />
 
             <div className={styles['edit-profile-container']}>
@@ -92,16 +103,6 @@ export default function TeacherEditProfilePage() {
                     )}
                 </div>
 
-                {/* Quick Actions */}
-                <div className={styles['quick-actions']}>
-                    <button
-                        type="button"
-                        onClick={handleCancel}
-                        className={styles['back-button']}
-                    >
-                        ← Back to Profile
-                    </button>
-                </div>
             </div>
         </div>
     )

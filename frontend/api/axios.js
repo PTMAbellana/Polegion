@@ -100,7 +100,7 @@ api.interceptors.response.use(
 	(response) => response,
 	async (error) => {
 		const originalRequest = error.config;
-
+		
 		// Don't retry for certain errors
 		if (
 			error.code === "ECONNABORTED" ||
@@ -112,60 +112,52 @@ api.interceptors.response.use(
 
 		if (error.response?.status === 401 && !originalRequest._retry) {
 			originalRequest._retry = true;
-
-			if (isRefreshing) {
-				return new Promise((resolve, reject) => {
-					failedQueue.push({ resolve, reject });
-				})
-				.then((token) => {
-					originalRequest.headers.Authorization = `Bearer ${token}`;
-					return axios(originalRequest);
-				})
-				.catch((err) => Promise.reject(err));
-			}
-
-			isRefreshing = true;
-
-			try {
-				const refreshToken = localStorage.getItem("refresh_token");
-				if (!refreshToken) throw new Error("No refresh token available");
-
-				const response = await axios.post(`${API_URL}/auth/refresh-token`, {
-					refresh_token: refreshToken,
-				});
-
-				if (response.data?.session) {
-
-					const existingAuthData = authUtils.getAuthData();
+			
+			const authData = authUtils.getAuthData();
+			if (authData.refreshToken && !isRefreshing) {
+				isRefreshing = true;
+				
+				try {
+					const refreshResponse = await axios.post(`${API_URL}/auth/refresh`, {
+						refresh_token: authData.refreshToken
+					});
 					
-					const updatedAuthData = {
-						session: response.data.session,
-						user: existingAuthData.user
-					};
-					authUtils.saveAuthData(updatedAuthData);
-					const newToken = response.data.session.access_token;
-					originalRequest.headers.Authorization = `Bearer ${newToken}`;
-					processQueue(null, newToken);
-					return axios(originalRequest);
-				} else {
-					throw new Error("Invalid refresh response");
+					if (refreshResponse.data.success) {
+						const newSession = refreshResponse.data.data.session;
+						const userData = refreshResponse.data.data.user;
+						
+						// Update localStorage
+						authUtils.saveAuthData({
+							session: newSession,
+							user: userData
+						});
+						
+						// Update the authorization header
+						api.defaults.headers.common['Authorization'] = `Bearer ${newSession.access_token}`;
+						originalRequest.headers['Authorization'] = `Bearer ${newSession.access_token}`;
+						
+						processQueue(null, newSession.access_token);
+						return api(originalRequest);
+					} else {
+						processQueue(error, null);
+						authUtils.clearAuthData();
+						window.location.href = '/auth/login';
+						return Promise.reject(error);
+					}
+				} catch (refreshError) {
+					processQueue(refreshError, null);
+					authUtils.clearAuthData();
+					window.location.href = '/auth/login';
+					return Promise.reject(refreshError);
+				} finally {
+					isRefreshing = false;
 				}
-			} catch (refreshError) {
-				processQueue(refreshError, null);
+			} else {
 				authUtils.clearAuthData();
-
-				// Import and use the auth store to logout
-				if (typeof window !== "undefined") {
-					const { useAuthStore } = await import("@/store/authStore");
-					useAuthStore.getState().logout();
-				}
-
-				return Promise.reject(refreshError);
-			} finally {
-				isRefreshing = false;
+				window.location.href = '/auth/login';
 			}
 		}
-
+		
 		return Promise.reject(error);
 	}
 );
