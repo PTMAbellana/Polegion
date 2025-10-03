@@ -8,6 +8,10 @@ export interface RoomType {
   created_at?: string;
 }
 
+export interface JoinedRoomType extends RoomType {
+  participant_id: string | number;
+}
+
 export interface RoomCardProps {
   room: RoomType;
   onViewRoom: (roomCode: string | number, roomId?: number) => void;

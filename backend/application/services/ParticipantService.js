@@ -245,8 +245,22 @@ class ParticipantService {
 
     async getJoinedRooms(user_id) {
         try {
+            const cacheKey = cache.generateKey('user_joined_rooms', user_id);
+            
+            // Check cache first
+            const cached = cache.get(cacheKey);
+            if (cached) {
+                console.log('Cache hit: getJoinedRooms', user_id);
+                return cached;
+            }
+            
             const data = await this.participantRepo.getJoinedRooms(user_id)
             console.log('joined rooms service: ', data)
+            
+            // Cache the result
+            cache.set(cacheKey, data, this.CACHE_TTL);
+            console.log('Cache miss: getJoinedRooms', user_id);
+            
             return data
         } catch (error) {
             throw error

@@ -16,7 +16,10 @@ export default function TeacherLayout({
 
   useEffect(() => {
     // Auto-fetch created rooms when user is logged in as teacher
-    if (isLoggedIn && userProfile?.role === 'teacher') {
+    if (
+      isLoggedIn 
+      // && userProfile?.role === 'teacher'
+    ) {
       fetchCreatedRooms();
     }
   }, [isLoggedIn, userProfile?.role, fetchCreatedRooms]);

@@ -26,9 +26,15 @@ export default function JoinedRoomsPage() {
 
     const handleLeaveRoom = async (roomId: string | number) => {
         if (window.confirm('Are you sure you want to leave this room?')) {
-            const result = await leaveRoom(roomId.toString())
-            if (!result.success) {
-                alert(result.error || 'Failed to leave room')
+            // Find the room to get the participant_id
+            const room = joinedRooms.find(r => r.id?.toString() === roomId.toString());
+            if (room && room.id) {
+                const result = await leaveRoom(room.id.toString())
+                if (!result.success) {
+                    alert(result.error || 'Failed to leave room')
+                }
+            } else {
+                alert('Room not found or invalid participant data')
             }
         }
     }

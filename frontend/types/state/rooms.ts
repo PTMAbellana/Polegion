@@ -1,4 +1,4 @@
-import { RoomType } from '../common/room'
+import { RoomType, JoinedRoomType } from '../common/room'
 
 export interface TeacherRoomState {
     createdRooms: RoomType[]
@@ -16,7 +16,7 @@ export interface TeacherRoomState {
 }
 
 export interface StudentRoomState {
-    joinedRooms: RoomType[]
+    joinedRooms: JoinedRoomType[]
     loading: boolean
     error: string | null
     joinLoading: boolean

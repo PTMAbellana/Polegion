@@ -16,7 +16,10 @@ export default function StudentLayout({
 
   useEffect(() => {
     // Auto-fetch joined rooms when user is logged in as student
-    if (isLoggedIn && userProfile?.role === 'student') {
+    if (
+      isLoggedIn 
+      // && userProfile?.role === 'student'
+    ) {
       fetchJoinedRooms();
     }
   }, [isLoggedIn, userProfile?.role, fetchJoinedRooms]);
