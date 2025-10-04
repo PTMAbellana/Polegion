@@ -3,3 +3,8 @@ export interface ModalProps {
     onClose: () => void;
     title?: string;
 }
+
+export interface ForgotPasswordModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+}

@@ -3,7 +3,7 @@ const upload = require('../middleware/ImageMiddleware')
 class RoomController {
     constructor(roomService){
         this.roomService = roomService
-        this.uploadMiddleware = upload.single('image') // single file upload
+        this.uploadMiddleware = upload.single('banner') // single file upload
     }
     
     // Get all rooms for a user
@@ -218,15 +218,16 @@ class RoomController {
             // console.log('File received:', req.file ? req.file.originalname : 'No file')
 
             if (!req.file) {
-                return res.status(400).json({ error: 'No file uploaded' })
+                return res.status(400).json({ 
+                    message: 'Please upload an image file',
+                    error: 'No file uploaded'
+                })
             }
             
             const file = req.file
             const fileExtension = file.originalname.split('.').pop()
             const fileName = `${Date.now()}.${fileExtension}`
 
-            // console.log('Uploading file:', fileName)
-        
             // This implementation will depend on how you handle file uploads
             // You might need to use multer or another library
             const url = await this.roomService.uploadBannerImage(
@@ -235,20 +236,44 @@ class RoomController {
                 file.mimetype
             )
 
-            // console.log('Image uploaded successfully:', url)
             
-            if (!url) return res.status(400).json({ error: error.message })
+            if (!url) 
+                return res.status(400).json({ 
+                    message: 'Image upload failed',
+                    error: error.message 
+                })
                         
-            res.status(200).json({ 
+            return res.status(200).json({ 
                 data: {
-                        imageUrl: url,
-                        fileName: fileName
+                    imageUrl: url,
+                    fileName: fileName
                 },
                 message: 'Image uploaded successfully'
              })
         } catch (error) {
             console.error('Error uploading image:', error)
-            res.status(500).json({ error: 'Server error uploading image' })
+            if (error.message === 'Invalid file type') {
+                return res.status(400).json({ 
+                    message: 'Invalid file type. Only images are allowed.',
+                    error: 'Invalid file type'
+                })
+            }
+            if (error.message === 'File too large') {
+                return res.status(400).json({ 
+                    message: 'File too large. Maximum size is 5MB.',
+                    error: 'File too large'
+                })
+            }
+            if (error.status === 401) {
+                return res.status(401).json({ 
+                    message: 'Unauthorized',
+                    error: 'Unauthorized'
+                })
+            }
+            return res.status(500).json({ 
+                message: 'Server error uploading image',
+                error: error.message 
+            })
         }
     };
 

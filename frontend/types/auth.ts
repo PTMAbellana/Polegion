@@ -1,13 +1,16 @@
+import { Gender } from '@/constants/dropdown';
+
 export interface LoginFormData {
   email: string;
   password: string;
 }
 
 export interface RegisterFormData {
-  fullName: string;
+  firstName: string;
+  lastName: string;
   email: string;
   phone: string;
-  gender: string;
+  gender: Gender;
   password: string;
   confirm_password: string;
 }

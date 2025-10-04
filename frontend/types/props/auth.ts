@@ -1,4 +1,3 @@
-
 export interface AuthFormProps {
   onSubmit: (data: any) => void;
   isSubmitting: boolean;
@@ -21,17 +20,9 @@ export interface EmailInputProps {
 
 export interface LoginFormProps {
   onForgotPassword: () => void;
-}
-
-export interface ForgotPasswordModalProps {
-  isOpen: boolean;
-  onClose: () => void;
+  userType: "student" | "teacher";
 }
 
 export interface ResetPasswordFormProps {
   token: string;
-}
-
-export interface SocialAuthProps {
-  type: "login" | "register";
 }

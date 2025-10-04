@@ -12,17 +12,17 @@
   .registerCard {
     position: relative;
     width: 100%;
-    max-width: 604px;
+    max-width: 700px;
     background: #FFFFFF;
     border: 0.5px solid #000000;
     border-radius: 10px;
-    padding: 40px 20px;
+    padding: 40px 30px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   }
   
   .cardContent {
     width: 100%;
-    max-width: 480px;
+    max-width: 580px;
     margin: 0 auto;
   }
   
@@ -48,7 +48,7 @@
   
   .formGroup {
     position: relative;
-    margin-bottom: 20px;
+    margin-bottom: 12px;
   }
   
   .inputField, .selectField {
@@ -209,11 +209,12 @@
   .formGrid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 16px;
+    gap: 12px;
   }
   
   .fullWidth {
     grid-column: span 2;
+    margin-bottom: 8px;
   }
   
   /* Responsive adjustments */

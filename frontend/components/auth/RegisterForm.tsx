@@ -5,9 +5,9 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 import { useAuthStore } from '@/store/authStore';
-import { RegisterFormData } from '@/types/auth';
+import { RegisterFormData } from '@/types/forms/auth';
 import { registerSchema } from '@/schemas/authSchemas';
-import { ROUTES } from '@/constants/routes';
+import { ROUTES, STUDENT_ROUTES, TEACHER_ROUTES } from '@/constants/routes';
 import PasswordInput from '@/components/auth/inputs/PasswordInput';
 import EmailInput from '@/components/auth/inputs/EmailInput';
 import styles from '@/styles/register.module.css';
@@ -38,8 +38,19 @@ export default function RegisterForm(
     const result = await registerUser(formData, userType);
     
     if (result.success) {
+      let route;
+      switch(userType) {
+        case "student":
+          route = STUDENT_ROUTES.LOGIN;
+          break;
+          case "teacher":
+            route = TEACHER_ROUTES.LOGIN;
+          break;
+        default:
+          route = ROUTES.LOGIN;
+        }
       toast.success("User registered successfully");
-      router.push(ROUTES.LOGIN);
+      router.push(route);
     } else {
       toast.error(result.error || "Failed to register user");
     }
@@ -48,20 +59,36 @@ export default function RegisterForm(
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
       <div className={styles.formGrid}>
+        {/* Row 1: First Name, Last Name */}
         <div className={styles.formGroup}>
           <input
             type="text"
             className={styles.inputField}
-            placeholder="Full Name"
-            {...register("fullName")}
+            placeholder="First Name"
+            {...register("firstName")}
           />
-          {errors.fullName && (
+          {errors.firstName && (
             <p className={styles.error}>
-              {errors.fullName.message?.toString()}
+              {errors.firstName.message?.toString()}
             </p>
           )}
         </div>
 
+        <div className={styles.formGroup}>
+          <input
+            type="text"
+            className={styles.inputField}
+            placeholder="Last Name"
+            {...register("lastName")}
+          />
+          {errors.lastName && (
+            <p className={styles.error}>
+              {errors.lastName.message?.toString()}
+            </p>
+          )}
+        </div>
+
+        {/* Row 2: Phone, Gender */}
         <div className={styles.formGroup}>
           <input
             type="text"
@@ -76,15 +103,7 @@ export default function RegisterForm(
           )}
         </div>
 
-        <div className={`${styles.formGroup} ${styles.fullWidth}`}>
-          <EmailInput 
-            register={register}
-            error={errors.email?.message?.toString()}
-            placeholder="Email Address"
-          />
-        </div>
-
-        <div className={`${styles.formGroup} ${styles.fullWidth}`}>
+        <div className={styles.formGroup}>
           <select
             className={styles.selectField}
             {...register("gender")}
@@ -103,7 +122,17 @@ export default function RegisterForm(
           )}
         </div>
 
-        <div className={styles.formGroup}>
+        {/* Row 3: Email (full width) */}
+        <div className={`${styles.formGroup} ${styles.fullWidth}`}>
+          <EmailInput 
+            register={register}
+            error={errors.email?.message?.toString()}
+            placeholder="Email Address"
+          />
+        </div>
+
+        {/* Row 4: Password (full width) */}
+        <div className={`${styles.formGroup} ${styles.fullWidth}`}>
           <PasswordInput
             name="password"
             placeholder="Password"
@@ -114,7 +143,8 @@ export default function RegisterForm(
           />
         </div>
 
-        <div className={styles.formGroup}>
+        {/* Row 5: Confirm Password (full width) */}
+        <div className={`${styles.formGroup} ${styles.fullWidth}`}>
           <PasswordInput
             name="confirm_password"
             placeholder="Confirm Password"

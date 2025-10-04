@@ -215,7 +215,9 @@ class RoomService {
     
     async uploadBannerImage(fileBuffer, fileName, mimeType){
         try {
-            return await this.roomRepo.uploadBannerImage(fileBuffer, fileName, mimeType)
+            const res = await this.roomRepo.uploadBannerImage(fileBuffer, fileName, mimeType)
+
+            return res;
         } catch (error) {
             throw error
         }

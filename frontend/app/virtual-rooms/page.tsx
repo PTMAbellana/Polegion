@@ -15,6 +15,7 @@ import Swal from 'sweetalert2'
 import * as yup from 'yup'
 import { RoomType } from '@/types/common/room'
 import RoomCardsList from '@/components/RoomCardsList'
+import EditRoomModal from '@/components/EditRoomModal'
 
 interface EditCreateFormData {
     title: string
@@ -60,6 +61,8 @@ export default function VirtualRooms() {
     const [ previewUrl, setPreviewUrl ] = useState<string | null>(null)
     const [ isLocalLoading, setLocalLoading ] = useState(false)
     const [ showJoinModal, setShowJoinModal ] = useState(false)
+    const [ showEditModal, setShowEditModal ] = useState(false)
+    const [ editingRoom, setEditingRoom ] = useState<RoomType | null>(null)
 
     useEffect(() => {
         console.log('isLoggedin ', isLoggedIn)
@@ -294,18 +297,68 @@ export default function VirtualRooms() {
     }
 
     const handleEditData = (room: RoomType) => {
-        setValue("title", room.title);
-        setValue("description", room.description);
-        setValue("mantra", room.mantra);
-        setValue("banner_image", room?.banner_image);
-        setPreviewImage(room.banner_image);
-        setRoomId(room.id);
+        setEditingRoom(room)
+        setShowEditModal(true)
+    }
+
+    // New edit submit handler for the modal
+    const handleEditSubmit = async (formData: { title: string; description: string; mantra: string; banner_image: File | null }, roomId: number) => {
+        setLocalLoading(true)
         
-        // Scroll to form
-        window.scrollTo({
-            top: 0,
-            behavior: 'smooth'
-        });
+        try {
+            let bannerImageUrl: string | File | null = null
+
+            // Handle image upload if a new file was selected
+            if (formData.banner_image instanceof File) {
+                const formDataForUpload = new FormData()
+                formDataForUpload.append('image', formData.banner_image)
+                
+                const uploadResponse = await uploadImage(formDataForUpload)
+                console.log('Upload response received:', uploadResponse)
+
+                if (uploadResponse.success && uploadResponse.imageUrl) {
+                    bannerImageUrl = uploadResponse.imageUrl
+                } else {
+                    console.error('Image upload failed:', uploadResponse.message)
+                    toast.error('Failed to upload image. Please try again.')
+                    return
+                }
+            } else {
+                // Keep current room's image if no new image provided
+                const currentRoom = rooms.find(r => r.id === roomId)
+                if (currentRoom?.banner_image) {
+                    bannerImageUrl = currentRoom.banner_image
+                }
+            }
+
+            const roomPayload = {
+                title: formData.title,
+                description: formData.description,
+                mantra: formData.mantra,
+                banner_image: bannerImageUrl,
+            }
+
+            const response = await updateRoom(roomId, roomPayload)
+            
+            if (response.success) {
+                toast.success('Room updated successfully!')
+                
+                // Refresh rooms list
+                await fetchRoomsFromTable(userProfile?.id)
+                
+                // Close modal
+                setShowEditModal(false)
+                setEditingRoom(null)
+            } else {
+                toast.error(response.message || 'Failed to update room')
+            }
+            
+        } catch (error) {
+            console.error('Error updating room:', error)
+            toast.error('Failed to update room. Please try again.')
+        } finally {
+            setLocalLoading(false)
+        }
     }
 
     const handleCancelEdit = () => {
@@ -415,7 +468,7 @@ export default function VirtualRooms() {
                 </div>
             )}
 
-            <div className={styles["main-content"]}>
+            <div className={styles["scrollable-content"]}>
                 {isLocalLoading ? (
                     <div className={styles["loading-indicator"]}>Loading...</div>
                     ) : (
@@ -544,6 +597,18 @@ export default function VirtualRooms() {
                     )}
                 
             </div>
+
+            {/* Edit Room Modal */}
+            <EditRoomModal
+                room={editingRoom}
+                isOpen={showEditModal}
+                onClose={() => {
+                    setShowEditModal(false)
+                    setEditingRoom(null)
+                }}
+                onSubmit={handleEditSubmit}
+                isLoading={isLocalLoading}
+            />
         </div>
     )
 }

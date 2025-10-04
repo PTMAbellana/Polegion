@@ -4,7 +4,8 @@ export interface LoginFormData {
 }
 
 export interface RegisterFormData {
-    fullName: string;
+    firstName: string;
+    lastName: string;
     email: string;
     phone: string;
     gender: 'Male' | 'Female' | 'Other';

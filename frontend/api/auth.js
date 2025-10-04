@@ -47,9 +47,9 @@ export const login = async (email, password) => {
 
 export const register = async (userData, userType) => {
   try {
-    const response = await api.post("/auth/register", { 
-      ...userData, 
-      userType 
+    const response = await api.post("/auth/register", {
+      ...userData,
+      userType,
     });
     return {
       success: true,
@@ -66,6 +66,8 @@ export const register = async (userData, userType) => {
   }
 };
 
+// babalik ako sayo, sa kanang return nimo
+// tarongon nya tika
 export const resetPassword = async (email) => {
   return await api.post("/auth/reset-password", {
     email,

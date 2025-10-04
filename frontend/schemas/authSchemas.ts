@@ -10,7 +10,8 @@ export const loginSchema = yup.object().shape({
 });
 
 export const registerSchema = yup.object().shape({
-  fullName: yup.string().required("Full name is required"),
+  firstName: yup.string().required("First name is required"),
+  lastName: yup.string().required("Last name is required"),
   email: yup
     .string()
     .email("Invalid Email Value")
@@ -23,11 +24,15 @@ export const registerSchema = yup.object().shape({
   password: yup
     .string()
     .required("Password is required")
-    .min(6, "Password is of minimum 6 characters"),
+    .min(6, "Password must be at least 6 characters")
+    .matches(
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
+      'Password must contain uppercase, lowercase, and number'
+    ),
   confirm_password: yup
     .string()
-    .required("Password is required")
-    .oneOf([yup.ref("password")], "Password didn't match"),
+    .required("Please confirm your password")
+    .oneOf([yup.ref("password")], "Passwords must match"),
 });
 
 export const resetPasswordSchema = yup.object().shape({

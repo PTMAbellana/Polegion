@@ -2,30 +2,18 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
-import * as yup from 'yup';
 import toast from 'react-hot-toast';
 import { FaTimes } from 'react-icons/fa';
 import { resetPassword } from '@/api/auth';
 import Loader from '@/components/Loader';
 import styles from '@/styles/login.module.css';
+import { forgotPasswordSchema } from '@/schemas/authSchemas';
+import { ForgotPasswordFormData, ForgotPasswordModalProps } from '@/types';
 
-interface ForgotPasswordFormData {
-  email: string;
-}
-
-const forgotPasswordSchema = yup.object().shape({
-  email: yup
-    .string()
-    .required("Email is required")
-    .email("Invalid email address"),
-});
-
-interface ForgotPasswordModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-}
-
-export default function ForgotPasswordModal({ isOpen, onClose }: ForgotPasswordModalProps) {
+export default function ForgotPasswordModal({ 
+  isOpen, 
+  onClose 
+}: ForgotPasswordModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const {

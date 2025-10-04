@@ -2,36 +2,19 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
-import * as yup from 'yup';
 import toast from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import { useAuthStore } from '@/store/authStore';
 import { ROUTES, STUDENT_ROUTES, TEACHER_ROUTES } from '@/constants/routes';
 import styles from '@/styles/login.module.css';
-
-interface LoginFormData {
-  email: string;
-  password: string;
-}
-
-const formSchema = yup.object().shape({
-  email: yup
-    .string()
-    .required("Email is required")
-    .email("Invalid email address"),
-  password: yup.string().required("Password is required"),
-});
-
-interface LoginFormProps {
-  onForgotPassword: () => void;
-  userType: "student" | "teacher";
-}
+import { LoginFormData, LoginFormProps } from '@/types';
+import { loginSchema } from '@/schemas/authSchemas';
 
 export default function LoginForm({ 
   onForgotPassword,
-  userType 
-} : LoginFormProps) {
+  userType
+}: LoginFormProps) {
   const router = useRouter();
   const { login } = useAuthStore(); 
   
@@ -43,7 +26,7 @@ export default function LoginForm({
     handleSubmit,
     formState: { isSubmitting, errors },
   } = useForm<LoginFormData>({
-    resolver: yupResolver(formSchema),
+    resolver: yupResolver(loginSchema),
   });
 
   const onSubmit = async (formdata: LoginFormData) => {
@@ -116,18 +99,6 @@ export default function LoginForm({
       </div>
 
       <div className={styles.rememberForgot}>
-        <div className={styles.rememberMe}>
-          <input
-            type="checkbox"
-            id="rememberMe"
-            className={styles.checkbox}
-            checked={rememberMe}
-            onChange={() => setRememberMe(!rememberMe)}
-          />
-          <label htmlFor="rememberMe" className={styles.rememberText}>
-            Remember me
-          </label>
-        </div>
         <a onClick={onForgotPassword} className={styles.forgotPassword}>
           Forgot Password?
         </a>

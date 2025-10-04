@@ -188,10 +188,6 @@ class RoomRepo extends BaseRepo {
         }    
     }
     
-    // make this ano, to update instead of delete
-    // remember maam leah
-    // dont actually delete the room
-    // ghad, add another column in the db
     async deleteRoom (roomId, user_id){  
         try {
             const {
@@ -232,24 +228,8 @@ class RoomRepo extends BaseRepo {
     
     async uploadBannerImage(fileBuffer, fileName, mimeType){
         try {
-            // console.log('Uploading to Supabase storage:')
-            // console.log('- Bucket:', this.storageBucket)
-            // console.log('- File name:', fileName)
-            // console.log('- MIME type:', mimeType)
-            // console.log('- Buffer size:', fileBuffer.length)
-
-            // const {
-            //     data,
-            //     error
-            // } = await this.supabase.storage
-            // // .from(this.tableName)
-            // .from(this.storageBucket)
-            // .upload(fileName, fileBuffer, {
-            //     contentType: mimeType
-            // })
-
             const {
-                data,
+                _,
                 error
             } = await this.supabase.storage
             .from(this.storageBucket)
@@ -260,7 +240,6 @@ class RoomRepo extends BaseRepo {
             })
     
             if (error){
-                // console.log('Upload image error: ', error) 
                 throw error
             }
 
@@ -272,12 +251,8 @@ class RoomRepo extends BaseRepo {
                 throw new Error('Failed to get public URL for uploaded image');
             }
 
-            // console.log('Public URL generated:', urlData.publicUrl)
-            // console.log('url data:', urlData)
-
             return urlData.publicUrl
         } catch (error) {
-            // console.error('Error in uploadBannerImage:', error)
             throw error
         }    
     }

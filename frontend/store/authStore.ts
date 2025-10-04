@@ -104,7 +104,18 @@ export const useAuthStore = create<AuthState>()(
             register: async (formData: RegisterFormData, userType: 'student' | 'teacher'): Promise<AuthActionResult> => {
                 set({ loginLoading: true });
                 try {
-                    const response = await apiRegister(formData, userType);
+                    // Transform frontend form data to match backend API expectations
+                    const apiData = {
+                        email: formData.email,
+                        password: formData.password,
+                        firstName: formData.firstName,
+                        lastName: formData.lastName,
+                        gender: formData.gender.toLowerCase(), // Convert to lowercase to match backend expectation
+                        phone: formData.phone,
+                        role: userType // Backend expects 'role' instead of 'userType'
+                    };
+                    
+                    const response = await apiRegister(apiData, userType);
                     if (response.success) {
                         return { 
                             success: true,

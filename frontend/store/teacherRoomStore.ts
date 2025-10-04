@@ -55,11 +55,14 @@ export const useTeacherRoomStore = create<TeacherRoomState>()(
                             formData.append('banner', roomData.banner_image);
                             
                             const uploadResponse = await uploadImage(formData);
-                            if (uploadResponse.data && uploadResponse.data.data && uploadResponse.data.data.imageUrl) {
-                                bannerImageUrl = uploadResponse.data.data.imageUrl;
+                            if (uploadResponse.success) {
+                                bannerImageUrl = uploadResponse.imageUrl;
                                 console.log('Banner uploaded successfully:', bannerImageUrl);
                             } else {
-                                throw new Error('Failed to get image URL from upload response');
+                                return { 
+                                    success: false, 
+                                    error: 'Failed to get image URL from upload response' 
+                                };
                             }
                         } catch (uploadError: unknown) {
                             const uploadErrorMessage = uploadError instanceof Error ? uploadError.message : 'Failed to upload banner image';
@@ -68,7 +71,10 @@ export const useTeacherRoomStore = create<TeacherRoomState>()(
                                 error: `Failed to upload banner image: ${uploadErrorMessage}`,
                                 loading: false 
                             });
-                            return { success: false, error: `Failed to upload banner image: ${uploadErrorMessage}` };
+                            return { 
+                                success: false, 
+                                error: `Failed to upload banner image: ${uploadErrorMessage}` 
+                            };
                         }
                     } else if (typeof roomData.banner_image === 'string') {
                         // If banner_image is already a URL string, use it as is
@@ -120,8 +126,8 @@ export const useTeacherRoomStore = create<TeacherRoomState>()(
                             formData.append('banner', roomData.banner_image);
                             
                             const uploadResponse = await uploadImage(formData);
-                            if (uploadResponse.data && uploadResponse.data.data && uploadResponse.data.data.imageUrl) {
-                                bannerImageUrl = uploadResponse.data.data.imageUrl;
+                            if (uploadResponse.success) {
+                                bannerImageUrl = uploadResponse.imageUrl;
                                 console.log('Updated banner uploaded successfully:', bannerImageUrl);
                             } else {
                                 throw new Error('Failed to get image URL from upload response');

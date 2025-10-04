@@ -1,6 +1,6 @@
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
-import { PasswordInputProps } from '@/types/auth';
 import styles from '@/styles/login.module.css';
+import { PasswordInputProps } from '@/types';
 
 export default function PasswordInput({ 
   name, 

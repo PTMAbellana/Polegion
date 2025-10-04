@@ -103,20 +103,49 @@ export const uploadImage = async (formData) => {
     });
 
     console.log("Image upload response:", response.data);
-    return response;
+    return {
+      success: true,
+      imageUrl: response.data.data.imageUrl,
+      message: response.data.message || 'Image uploaded successfully'
+    };
   } catch (error) {
     console.error("Error uploading banner image:", error);
 
     if (error.response?.data?.error) {
-      throw new Error(error.response.data.error);
+      return {
+        success: false,
+        message: error.response.data.message,
+        error: error.response.data.error, 
+        status: error.response.status
+      };
     } else if (error.code === "ECONNABORTED") {
-      throw new Error("Upload timeout - file may be too large");
+      return {
+        success: false,
+        message: 'Image upload timed out - please try again',
+        error: 'Timeout Error',
+        status: 408
+      };
     } else if (error.message === "Network Error") {
-      throw new Error("Network error - please check your connection");
+      return {
+        success: false,
+        message: 'Network error - please check your connection',
+        error: 'Network Error',
+        status: null
+      }
     } else if (error.response?.status === 404) {
-      throw new Error("Upload endpoint not found - check server configuration");
+      return {
+        success: false,
+        message: 'Upload endpoint not found (404)',
+        error: 'Not Found',
+        status: 404
+      };
     } else {
-      throw new Error(`Failed to upload image: ${error.message}`);
+      return {
+        success: false,
+        message: 'An unknown error occurred during image upload',
+        error: error.message,
+        status: null
+      }
     }
   }
 };

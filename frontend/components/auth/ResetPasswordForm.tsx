@@ -11,12 +11,11 @@ import { ROUTES } from '@/constants/routes';
 import PasswordInput from '@/components/auth/inputs/PasswordInput';
 import { useMyApp } from '@/context/AppUtils';
 import styles from '@/styles/login.module.css';
+import { ResetPasswordFormProps } from '@/types';
 
-interface ResetPasswordFormProps {
-  token: string;
-}
-
-export default function ResetPasswordForm({ token }: ResetPasswordFormProps) {
+export default function ResetPasswordForm({ 
+  token 
+}: ResetPasswordFormProps) {
   const router = useRouter();
   const { resetPassword, loginLoading } = useAuthStore();
   const { refreshUserSession } = useMyApp();
