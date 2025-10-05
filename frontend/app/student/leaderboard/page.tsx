@@ -8,6 +8,7 @@ import PageHeader from '@/components/PageHeader'
 import RoomCardsList from '@/components/RoomCardsList'
 import LoadingOverlay from '@/components/LoadingOverlay'
 import styles from '@/styles/dashboard-wow.module.css'
+import { STUDENT_ROUTES } from '@/constants/routes'
 
 export default function StudentLeaderboardPage() {
     const router = useRouter()
@@ -16,7 +17,7 @@ export default function StudentLeaderboardPage() {
 
     const handleViewLeaderboard = (roomId: string | number) => {
         // Navigate to individual room leaderboard
-        router.push(`/leaderboard/${roomId}`)
+        router.push(`${STUDENT_ROUTES.LEADERBOARD}/${roomId}`)
     }
 
     return (

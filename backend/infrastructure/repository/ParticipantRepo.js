@@ -120,6 +120,7 @@ class ParticipantRepo extends BaseRepo {
                 .from(this.tableName)
                 .select('id, room:room_id(id, title, description, mantra, banner_image, created_at, code, visibility)')
                 .eq('user_id', user_id)
+                .order('id', { ascending: false })
 
             if (error) throw error
 

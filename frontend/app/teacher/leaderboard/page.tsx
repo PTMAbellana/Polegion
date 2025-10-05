@@ -8,15 +8,16 @@ import PageHeader from '@/components/PageHeader'
 import RoomCardsList from '@/components/RoomCardsList'
 import LoadingOverlay from '@/components/LoadingOverlay'
 import styles from '@/styles/dashboard-wow.module.css'
+import { TEACHER_ROUTES } from '@/constants/routes'
 
-export default function TeacherLeaderboardPage() {
+export default function TeacherRecordPage() {
     const router = useRouter()
     const { userProfile } = useAuthStore()
     const { createdRooms, loading } = useTeacherRoomStore()
 
     const handleViewLeaderboard = (roomId: string | number) => {
         // Navigate to individual room leaderboard
-        router.push(`/leaderboard/${roomId}`)
+        router.push(`${TEACHER_ROUTES.LEADERBOARD}/${roomId}`)
     }
 
     return (
