@@ -3,7 +3,7 @@ const upload = require('../middleware/ImageMiddleware')
 class RoomController {
     constructor(roomService){
         this.roomService = roomService
-        this.uploadMiddleware = upload.single('banner') // single file upload
+        this.uploadMiddleware = upload.single('image') // single file upload
     }
     
     // Get all rooms for a user

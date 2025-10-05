@@ -79,7 +79,7 @@ export default function JoinedRoomsPage() {
                     useRoomCode={true}
                     showClickableCard={true}
                     showDeleteButton={true}
-                    showRoomCode={true}
+                    showRoomCode={false}
                     onDeleteRoom={handleLeaveRoom}
                     emptyMessage="No rooms joined yet. Join your first room to get started!"
                     isLoading={loading}

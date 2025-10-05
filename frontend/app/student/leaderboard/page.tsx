@@ -14,9 +14,9 @@ export default function StudentLeaderboardPage() {
     const { userProfile } = useAuthStore()
     const { joinedRooms, loading } = useStudentRoomStore()
 
-    const handleViewLeaderboard = (roomCode: string | number) => {
+    const handleViewLeaderboard = (roomId: string | number) => {
         // Navigate to individual room leaderboard
-        router.push(`/leaderboard/${roomCode}`)
+        router.push(`/leaderboard/${roomId}`)
     }
 
     return (
@@ -31,10 +31,10 @@ export default function StudentLeaderboardPage() {
                 <RoomCardsList
                     rooms={joinedRooms}
                     onViewRoom={handleViewLeaderboard}
-                    useRoomCode={true}
+                    useRoomCode={false}
                     showClickableCard={true}
                     showDeleteButton={false}
-                    showRoomCode={true}
+                    showRoomCode={false}
                     emptyMessage="No rooms joined yet. Join rooms to view their leaderboards!"
                     isLoading={loading}
                     viewButtonText="View Leaderboard"

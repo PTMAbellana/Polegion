@@ -52,7 +52,7 @@ export const useTeacherRoomStore = create<TeacherRoomState>()(
                         try {
                             console.log('Uploading banner image...');
                             const formData = new FormData();
-                            formData.append('banner', roomData.banner_image);
+                            formData.append('image', roomData.banner_image);
                             
                             const uploadResponse = await uploadImage(formData);
                             if (uploadResponse.success) {
@@ -124,7 +124,7 @@ export const useTeacherRoomStore = create<TeacherRoomState>()(
                         try {
                             console.log('Uploading updated banner image...');
                             const formData = new FormData();
-                            formData.append('banner', roomData.banner_image);
+                            formData.append('image', roomData.banner_image);
                             
                             const uploadResponse = await uploadImage(formData);
                             if (uploadResponse.success) {

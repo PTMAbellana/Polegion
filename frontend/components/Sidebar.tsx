@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import toast from "react-hot-toast";
-import { FaHome, FaTrophy, FaUser, FaSignOutAlt, FaBars, FaTimes, FaChalkboardTeacher, FaDungeon, FaMedal, FaUserAstronaut, FaFortAwesome, FaShapes } from 'react-icons/fa';
+import { FaHome, FaUser, FaSignOutAlt, FaBars, FaTimes, FaChalkboardTeacher, FaDungeon, FaMedal, FaUserAstronaut, FaFortAwesome, FaShapes, FaRegFileAlt } from 'react-icons/fa';
 import styles from '@/styles/navbar.module.css';
 
 import { STUDENT_ROUTES, TEACHER_ROUTES } from '@/constants/routes'
@@ -28,7 +28,7 @@ const Sidebar = (
     const teacherNavItems = [
         { path: TEACHER_ROUTES.DASHBOARD, icon: FaHome, label: 'Dashboard', title: 'Home' },
         { path: TEACHER_ROUTES.VIRTUAL_ROOMS, icon: FaChalkboardTeacher, label: 'Virtual Rooms', title: 'Virtual Rooms' },
-        { path: TEACHER_ROUTES.LEADERBOARD, icon: FaTrophy, label: 'Leaderboards', title: 'Leaderboard' },
+        { path: TEACHER_ROUTES.LEADERBOARD, icon: FaRegFileAlt, label: 'Records', title: 'Leaderboard' },
         { path: TEACHER_ROUTES.PROFILE, icon: FaUser, label: 'Profile', title: 'Profile' },
     ];
 

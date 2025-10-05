@@ -41,5 +41,4 @@ export interface UpdateRoomData {
     description?: string
     mantra?: string
     banner_image?: string | File | null
-    visibility?: string
 }

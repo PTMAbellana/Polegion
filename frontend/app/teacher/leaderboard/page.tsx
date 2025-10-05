@@ -14,9 +14,9 @@ export default function TeacherLeaderboardPage() {
     const { userProfile } = useAuthStore()
     const { createdRooms, loading } = useTeacherRoomStore()
 
-    const handleViewLeaderboard = (roomCode: string | number) => {
+    const handleViewLeaderboard = (roomId: string | number) => {
         // Navigate to individual room leaderboard
-        router.push(`/leaderboard/${roomCode}`)
+        router.push(`/leaderboard/${roomId}`)
     }
 
     return (
@@ -31,13 +31,13 @@ export default function TeacherLeaderboardPage() {
                 <RoomCardsList
                     rooms={createdRooms}
                     onViewRoom={handleViewLeaderboard}
-                    useRoomCode={true}
+                    useRoomCode={false}
                     showClickableCard={true}
                     showDeleteButton={false}
-                    showRoomCode={true}
+                    showRoomCode={false}
                     emptyMessage="No rooms created yet. Create rooms to view their leaderboards!"
                     isLoading={loading}
-                    viewButtonText="View Leaderboard"
+                    viewButtonText="View Records"
                 />
             </div>
         </LoadingOverlay>
