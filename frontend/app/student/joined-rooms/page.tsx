@@ -9,8 +9,7 @@ import PageHeader from '@/components/PageHeader'
 import RoomCardsList from '@/components/RoomCardsList'
 import JoinRoomModal from '@/components/student/JoinRoomModal'
 import LoadingOverlay from '@/components/LoadingOverlay'
-import { ROUTES } from '@/constants/routes'
-
+import { STUDENT_ROUTES } from '@/constants/routes'
 
 export default function JoinedRoomsPage() {
     const router = useRouter()
@@ -21,7 +20,7 @@ export default function JoinedRoomsPage() {
     const [showJoinModal, setShowJoinModal] = useState(false)
 
     const handleViewRoom = (roomCode: string | number) => {
-        router.push(`${ROUTES.JOINED_ROOMS}/${roomCode}`)
+        router.push(`${STUDENT_ROUTES.JOINED_ROOMS}/${roomCode}`)
     }
 
     const handleLeaveRoom = async (roomId: string | number) => {

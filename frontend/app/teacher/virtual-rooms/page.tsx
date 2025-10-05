@@ -10,7 +10,7 @@ import RoomCardsList from '@/components/RoomCardsList'
 import CreateRoomModal from '@/components/teacher/CreateRoomModal'
 import EditRoomModal from '@/components/EditRoomModal'
 import LoadingOverlay from '@/components/LoadingOverlay'
-import { ROUTES } from '@/constants/routes'
+import { TEACHER_ROUTES } from '@/constants/routes'
 import { RoomType } from '@/types/common/room'
 import { updateRoom, uploadImage } from '@/api/rooms'
 import styles from '@/styles/dashboard-wow.module.css'
@@ -19,7 +19,7 @@ import toast from 'react-hot-toast'
 export default function VirtualRoomsPage() {
     const router = useRouter()
     const { userProfile } = useAuthStore()
-    const { createdRooms, loading, deleteRoom, setSelectedRoom } = useTeacherRoomStore()
+    const { createdRooms, loading, deleteRoom } = useTeacherRoomStore()
     const { isLoading: authLoading } = AuthProtection()
     
     const [showCreateModal, setShowCreateModal] = useState(false)
@@ -28,7 +28,7 @@ export default function VirtualRoomsPage() {
     const [editLoading, setEditLoading] = useState(false)
 
     const handleViewRoom = (roomCode: string | number) => {
-        router.push(`${ROUTES.VIRTUAL_ROOMS}/${roomCode}`)
+        router.push(`${TEACHER_ROUTES.VIRTUAL_ROOMS}/${roomCode}`)
     }
 
     const handleEditRoom = (room: RoomType) => {
