@@ -4,7 +4,6 @@ import React from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuthStore } from '@/store/authStore'
 import { useTeacherRoomStore } from '@/store/teacherRoomStore'
-import { AuthProtection } from '@/context/AuthProtection'
 import PageHeader from '@/components/PageHeader'
 import RoomCardsList from '@/components/RoomCardsList'
 import LoadingOverlay from '@/components/LoadingOverlay'
@@ -14,15 +13,10 @@ export default function TeacherLeaderboardPage() {
     const router = useRouter()
     const { userProfile } = useAuthStore()
     const { createdRooms, loading } = useTeacherRoomStore()
-    const { isLoading: authLoading } = AuthProtection()
 
     const handleViewLeaderboard = (roomCode: string | number) => {
         // Navigate to individual room leaderboard
         router.push(`/leaderboard/${roomCode}`)
-    }
-
-    if (authLoading) {
-        return <LoadingOverlay isLoading={true}><div /></LoadingOverlay>
     }
 
     return (

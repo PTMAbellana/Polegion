@@ -4,7 +4,6 @@ import React from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuthStore } from '@/store/authStore'
 import { useStudentRoomStore } from '@/store/studentRoomStore'
-import { AuthProtection } from '@/context/AuthProtection'
 import PageHeader from '@/components/PageHeader'
 import RoomCardsList from '@/components/RoomCardsList'
 import LoadingOverlay from '@/components/LoadingOverlay'
@@ -14,15 +13,10 @@ export default function StudentLeaderboardPage() {
     const router = useRouter()
     const { userProfile } = useAuthStore()
     const { joinedRooms, loading } = useStudentRoomStore()
-    const { isLoading: authLoading } = AuthProtection()
 
     const handleViewLeaderboard = (roomCode: string | number) => {
         // Navigate to individual room leaderboard
         router.push(`/leaderboard/${roomCode}`)
-    }
-
-    if (authLoading) {
-        return <LoadingOverlay isLoading={true}><div /></LoadingOverlay>
     }
 
     return (
