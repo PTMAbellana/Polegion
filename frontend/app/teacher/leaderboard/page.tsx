@@ -1,8 +1,51 @@
+"use client"
+
+import React from 'react'
+import { useRouter } from 'next/navigation'
+import { useAuthStore } from '@/store/authStore'
+import { useTeacherRoomStore } from '@/store/teacherRoomStore'
+import { AuthProtection } from '@/context/AuthProtection'
+import PageHeader from '@/components/PageHeader'
+import RoomCardsList from '@/components/RoomCardsList'
+import LoadingOverlay from '@/components/LoadingOverlay'
+import styles from '@/styles/dashboard-wow.module.css'
+
 export default function TeacherLeaderboardPage() {
+    const router = useRouter()
+    const { userProfile } = useAuthStore()
+    const { createdRooms, loading } = useTeacherRoomStore()
+    const { isLoading: authLoading } = AuthProtection()
+
+    const handleViewLeaderboard = (roomCode: string | number) => {
+        // Navigate to individual room leaderboard
+        router.push(`/leaderboard/${roomCode}`)
+    }
+
+    if (authLoading) {
+        return <LoadingOverlay isLoading={true}><div /></LoadingOverlay>
+    }
+
     return (
-        <div>
-            <h1>Teacher Leaderboard</h1>
-            {/* Add your leaderboard content here */}
-        </div>
+        <LoadingOverlay isLoading={loading}>
+            <PageHeader
+                title="Leaderboards"
+                userName={userProfile?.first_name}
+                subtitle="View leaderboards for your created rooms"
+            />
+
+            <div className={styles["scrollable-content"]}>
+                <RoomCardsList
+                    rooms={createdRooms}
+                    onViewRoom={handleViewLeaderboard}
+                    useRoomCode={true}
+                    showClickableCard={true}
+                    showDeleteButton={false}
+                    showRoomCode={true}
+                    emptyMessage="No rooms created yet. Create rooms to view their leaderboards!"
+                    isLoading={loading}
+                    viewButtonText="View Leaderboard"
+                />
+            </div>
+        </LoadingOverlay>
     )
-};
+}
