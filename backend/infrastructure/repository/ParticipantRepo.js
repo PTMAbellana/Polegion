@@ -118,7 +118,7 @@ class ParticipantRepo extends BaseRepo {
         try {
             const { data, error } = await this.supabase
                 .from(this.tableName)
-                .select('participant_id:id, room:room_id(id, title, description, mantra, banner_image, created_at, code, visibility)')
+                .select('id, room:room_id(id, title, description, mantra, banner_image, created_at, code, visibility)')
                 .eq('user_id', user_id)
 
             if (error) throw error

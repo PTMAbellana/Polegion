@@ -2,7 +2,7 @@
 const Mailer = require('../../utils/Mailer'); // Adjust path as needed
 const cache = require('../cache');
 const roomModel = require('../../domain/models/Room');
-
+const participantModel = require('../../domain/models/Participant');
 class ParticipantService {
     constructor(participantRepo, roomService, userService, leaderService){
         this.participantRepo = participantRepo
@@ -48,10 +48,14 @@ class ParticipantService {
             // Invalidate participant cache
             this._invalidateParticipantCache(data.room_id, user_id);
             
-            return {
-                participant_id: data.id,
-                room: roomModel.fromDbRoom(room).toDTO()
-            }
+            // Create a Participant instance and use toReturnRoomDTO()
+            const participant = participantModel.fromDBParticipant(
+                data.id,
+                user_id,
+                room
+            );
+            
+            return participant.toReturnRoomDTO();
         } catch (error) {
             throw error
         }
@@ -257,11 +261,21 @@ class ParticipantService {
             const data = await this.participantRepo.getJoinedRooms(user_id)
             console.log('joined rooms service: ', data)
             
+            // Transform data using Participant model and toReturnRoomDTO
+            const transformedData = data.map(participantData => {
+                const participant = participantModel.fromDBParticipant(
+                    participantData.id,
+                    participantData.user_id || participantData.user,
+                    participantData.room_id || participantData.room || participantData
+                );
+                return participant.toReturnRoomDTO();
+            });
+            
             // Cache the result
-            cache.set(cacheKey, data, this.CACHE_TTL);
+            cache.set(cacheKey, transformedData, this.CACHE_TTL);
             console.log('Cache miss: getJoinedRooms', user_id);
             
-            return data
+            return transformedData
         } catch (error) {
             throw error
         }

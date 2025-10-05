@@ -1,5 +1,4 @@
 import React, { useState, useRef } from 'react'
-import Image from 'next/image'
 import { useForm } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from 'yup'
@@ -144,7 +143,7 @@ export default function CreateRoomModal({ isOpen, onClose }: CreateRoomModalProp
                                 <div className={styles['banner-preview']} onClick={handleBannerClick}>
                                     {bannerPreview ? (
                                         <>
-                                            <Image src={bannerPreview} alt="Banner preview" fill style={{ objectFit: 'cover' }} />
+                                            <img src={bannerPreview} alt="Banner preview" />
                                             <div className={styles['banner-overlay']}>
                                                 <button
                                                     type="button"

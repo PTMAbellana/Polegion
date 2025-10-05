@@ -162,7 +162,7 @@ export default function EditRoomModal({ room, isOpen, onClose, onSubmit, isLoadi
                                 <div className={styles['banner-preview']} onClick={handleBannerClick}>
                                     {bannerPreview ? (
                                         <>
-                                            <img src={bannerPreview} alt="Banner preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                            <img src={bannerPreview} alt="Banner preview" />
                                             <div className={styles['banner-overlay']}>
                                                 <button
                                                     type="button"

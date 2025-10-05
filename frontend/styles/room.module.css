@@ -452,7 +452,7 @@
 
 /* Wider modal for grid layout */
 .modal-content-wide {
-  max-width: 800px;
+  max-width: 1250px;
 }
 
 .modal-content::before {
@@ -753,10 +753,11 @@
   cursor: default;
 }
 
-/* Full height banner in grid layout */
+/* Fixed height banner in grid layout */
 .modal-form-grid .banner-preview {
-  height: 100%;
+  height: 320px;
   min-height: 320px;
+  max-height: 320px;
 }
 
 .banner-preview:hover {
@@ -995,7 +996,7 @@
 
 /* Enhanced Form Styles */
 .form-group {
-  margin-bottom: 25px;
+  margin-bottom: 8px;
   animation: fadeInUp 0.6s ease-out calc(1.6s + var(--delay, 0s)) both;
 }
 

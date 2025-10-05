@@ -84,7 +84,8 @@ export const useTeacherRoomStore = create<TeacherRoomState>()(
                     // Prepare room data with the uploaded image URL
                     const roomDataWithImage = {
                         ...roomData,
-                        banner_image: bannerImageUrl
+                        banner_image: bannerImageUrl,
+                        visibility: 'private',
                     };
 
                     // Now create the room with the image URL
@@ -130,7 +131,10 @@ export const useTeacherRoomStore = create<TeacherRoomState>()(
                                 bannerImageUrl = uploadResponse.imageUrl;
                                 console.log('Updated banner uploaded successfully:', bannerImageUrl);
                             } else {
-                                throw new Error('Failed to get image URL from upload response');
+                                return { 
+                                    success: false, 
+                                    error: 'Failed to get image URL from upload response' 
+                                };
                             }
                         } catch (uploadError: unknown) {
                             const uploadErrorMessage = uploadError instanceof Error ? uploadError.message : 'Failed to upload banner image';
