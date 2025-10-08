@@ -53,7 +53,6 @@ class Room {
             description: this.description,
             mantra: this.mantra,
             banner_image: this.banner_image,
-            created_at: this.created_at,
             code: this.code,
             visibility: this.visibility
         }

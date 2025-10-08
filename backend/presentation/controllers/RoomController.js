@@ -10,17 +10,11 @@ class RoomController {
     getRooms = async (req, res) => {
         // console.log(req.user)
         try {
-            const rooms = await this.roomService.getRooms(req.user.id)
-            
-            if (!rooms) 
-                return res.status(400).json({ 
-                    message: 'No rooms found',
-                    error: error.message 
-            })
+            const data = await this.roomService.getRooms(req.user.id)
             
             return res.status(200).json({
                 message: 'Rooms fetched successfully',
-                data: rooms.map( room => room.toDTO() )
+                data: data
             });
         } catch (error) {
             if (error.status === 400)
@@ -56,32 +50,70 @@ class RoomController {
         }
     };
     
-    // for admin
+    // for teachers 
     getRoomByCode = async (req, res) => {
-        // console.log(typeof req.params)
-        // console.log(req.params)
-        // console.log(req.user)
         try {
-            let room = await this.roomService.getRoomByCode(req.params.code, req.user.id)  
+            const data = await this.roomService.getRoomByCode(req.params.code, req.user.id)  
                         
-            if (!room) return res.status(404).json({ error: 'Room not found' })
+            if (!data) 
+                return res.status(404).json({ 
+                    message: 'Room not found',
+                    error: 'Not found' 
+                })
             
-            res.status(200).json(room.toDTO())
+            return res.status(200).json({
+                message: 'Room fetched successfully',
+                data: data
+            })
         } catch (error) {
-            res.status(500).json({ error: 'Server error fetching room' })
+            console.error('Error in getRoomByCode:', error);
+            if (error.status === 400)
+                return res.status(400).json({ 
+                    message: 'Bad request',
+                    error: error.message 
+                })
+            if (error.status === 401)
+                return res.status(401).json({
+                    message: 'Unauthorized',
+                    error: 'Invalid token'
+            })
+            return res.status(500).json({ 
+                message: 'Server error fetching room',
+                error: error.message 
+            })
         }
     }
     
-    // for participants
+    // for students
     getRoomByCodeUsers = async (req, res) => {
         try {
-            let room = await this.roomService.getRoomByCodeUsers(req.params.code)  
+            const data = await this.roomService.getRoomByCodeUsers(req.params.code)  
                         
-            if (!room) return res.status(404).json({ error: 'Room not found' })
+            if (!data) 
+                return res.status(404).json({ 
+                    message: 'Room not found',
+                    error: 'Not found' 
+                })
             
-            res.status(200).json(room.toDTO())
+            return res.status(200).json({
+                message: 'Room fetched successfully',
+                data: data
+            })
         } catch (error) {
-            res.status(500).json({ error: 'Server error fetching room' })
+            if (error.status === 400)
+                return res.status(400).json({ 
+                    message: 'Bad request',
+                    error: error.message 
+                })
+            if (error.status === 401)
+                return res.status(401).json({
+                    message: 'Unauthorized',
+                    error: 'Invalid token'
+            })
+            return res.status(500).json({ 
+                message: 'Server error fetching room',
+                error: error.message 
+            })
         }
     }
     

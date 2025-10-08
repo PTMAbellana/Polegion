@@ -1,29 +1,30 @@
-import React, { useState, useRef } from 'react'
+import React from 'react'
 import { useForm } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
-import * as yup from 'yup'
 import { useTeacherRoomStore } from '@/store/teacherRoomStore'
-import { CreateRoomData } from '@/types/state/rooms'
+import { useRoomModal } from '@/hooks/useRoomModal'
 import styles from '@/styles/room.module.css'
+import { CreateRoomData, CreateRoomModalProps } from '@/types'
+import { createRoomSchema } from '@/schemas/roomSchemas'
 
-const createRoomSchema = yup.object().shape({
-    title: yup.string().required("Room title is required"),
-    description: yup.string().required("Room description is required"),
-    mantra: yup.string().required("Room mantra is required")
-})
-
-interface CreateRoomModalProps {
-    isOpen: boolean
-    onClose: () => void
-}
-
-export default function CreateRoomModal({ isOpen, onClose }: CreateRoomModalProps) {
+export default function CreateRoomModal({ 
+    isOpen, 
+    onClose 
+}: CreateRoomModalProps) {
     const { createRoom, loading } = useTeacherRoomStore()
-    const [submitError, setSubmitError] = useState<string>('')
-    const [bannerPreview, setBannerPreview] = useState<string | null>(null)
-    const [selectedFile, setSelectedFile] = useState<File | null>(null)
-    const [isFilePickerOpen, setIsFilePickerOpen] = useState<boolean>(false)
-    const fileInputRef = useRef<HTMLInputElement>(null)
+    const {
+        submitError,
+        bannerPreview,
+        selectedFile,
+        fileInputRef,
+        setSubmitError,
+        setIsFilePickerOpen,
+        handleFileChange,
+        handleBannerClick,
+        handleChangeBanner,
+        handleRemoveBanner,
+        resetModal
+    } = useRoomModal()
 
     const {
         register,
@@ -34,51 +35,7 @@ export default function CreateRoomModal({ isOpen, onClose }: CreateRoomModalProp
         resolver: yupResolver(createRoomSchema)
     })
 
-    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const file = event.target.files?.[0]
-        if (file) {
-            setSelectedFile(file)
-            const reader = new FileReader()
-            reader.onload = (e) => {
-                setBannerPreview(e.target?.result as string)
-                setIsFilePickerOpen(false)
-            }
-            reader.readAsDataURL(file)
-        } else {
-            setIsFilePickerOpen(false)
-        }
-        // Prevent the click event from firing again
-        event.stopPropagation()
-    }
 
-    const handleBannerClick = (event: React.MouseEvent<HTMLDivElement>) => {
-        // Only open file picker if no image is currently selected and file picker is not already open
-        if (!bannerPreview && !isFilePickerOpen) {
-            event.preventDefault()
-            event.stopPropagation()
-            setIsFilePickerOpen(true)
-            fileInputRef.current?.click()
-        }
-    }
-
-    const handleChangeBanner = (event: React.MouseEvent<HTMLButtonElement>) => {
-        event.preventDefault()
-        event.stopPropagation()
-        if (!isFilePickerOpen) {
-            setIsFilePickerOpen(true)
-            fileInputRef.current?.click()
-        }
-    }
-
-    const handleRemoveBanner = (event: React.MouseEvent<HTMLButtonElement>) => {
-        event.preventDefault()
-        event.stopPropagation()
-        setBannerPreview(null)
-        setSelectedFile(null)
-        if (fileInputRef.current) {
-            fileInputRef.current.value = ''
-        }
-    }
 
     const onSubmit = async (data: CreateRoomData) => {
         setSubmitError('')
@@ -93,8 +50,7 @@ export default function CreateRoomModal({ isOpen, onClose }: CreateRoomModalProp
             const result = await createRoom(formData)
             if (result.success) {
                 reset()
-                setBannerPreview(null)
-                setSelectedFile(null)
+                resetModal()
                 onClose()
             } else {
                 setSubmitError(result.error || 'Failed to create room')
@@ -106,13 +62,7 @@ export default function CreateRoomModal({ isOpen, onClose }: CreateRoomModalProp
 
     const handleClose = () => {
         reset()
-        setSubmitError('')
-        setBannerPreview(null)
-        setSelectedFile(null)
-        setIsFilePickerOpen(false)
-        if (fileInputRef.current) {
-            fileInputRef.current.value = ''
-        }
+        resetModal()
         onClose()
     }
 

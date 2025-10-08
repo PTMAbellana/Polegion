@@ -1,21 +1,55 @@
 import { create } from 'zustand'
 import { persist, createJSONStorage } from 'zustand/middleware'
-import { TeacherRoomState, CreateRoomData, UpdateRoomData } from '@/types/state/rooms'
+import { ExtendTeacherRoomState } from '@/types/state/rooms'
 import { 
     getRooms, 
     createRoom as apiCreateRoom, 
     updateRoom as apiUpdateRoom, 
     deleteRoom as apiDeleteRoom,
-    uploadImage
+    uploadImage,
+    getRoomByCode
 } from '@/api/rooms'
+import { CreateRoomData, UpdateRoomData } from '@/types';
 
-export const useTeacherRoomStore = create<TeacherRoomState>()(
+export const useTeacherRoomStore = create<ExtendTeacherRoomState>()(
     persist(
         (set) => ({
             createdRooms: [],
             loading: false,
             error: null,
             selectedRoom: null,
+
+            currentRoom: null,
+            roomLoading: false,
+
+            fetchRoomDetails: async (roomCode: string) => {
+                set({ roomLoading: true });
+                try {
+                    const response = await getRoomByCode(roomCode, 'teacher');
+                    if (response.success) {
+                        set({ 
+                            currentRoom: response.data 
+                        });
+                    } else {
+                        set({ 
+                            error: response.error || 'Failed to fetch room details',
+                            currentRoom: null
+                        });
+                    }
+                } catch (error: unknown) {
+                    const errorMessage = error instanceof Error ? error.message : 'Failed to fetch room details';
+                    set({
+                        currentRoom: null, 
+                        error: errorMessage 
+                    });
+                } finally {
+                    set({ roomLoading: false });
+                }
+            },
+            
+            clearCurrentRoom: () => {
+                set({ currentRoom: null });
+            },
 
             fetchCreatedRooms: async () => {
                 set({ loading: true, error: null });
@@ -93,7 +127,7 @@ export const useTeacherRoomStore = create<TeacherRoomState>()(
                     if (response.success && response.data) {
                         const newRoom = response.data;
                         set(state => ({ 
-                            createdRooms: [...state.createdRooms, newRoom],
+                            createdRooms: [ newRoom, ...state.createdRooms ],
                             loading: false 
                         }));
                         return { success: true, data: newRoom };
@@ -164,6 +198,7 @@ export const useTeacherRoomStore = create<TeacherRoomState>()(
                             createdRooms: state.createdRooms.map(room => 
                                 room.id?.toString() === roomId ? updatedRoom : room
                             ),
+                            currentRoom: state.currentRoom?.id?.toString() === roomId ? updatedRoom : state.currentRoom,
                             loading: false,
                             selectedRoom: null
                         }));

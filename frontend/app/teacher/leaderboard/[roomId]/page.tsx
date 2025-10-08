@@ -1,5 +1,7 @@
-export default function RecordPage({ params }: { params: { roomId: number } }) {
-    const { roomId } = params;
+import { use } from 'react'
+
+export default function RecordPage({ params }: { params: Promise<{ roomId: number }> }) {
+    const { roomId } = use(params);
 
     return (
         <div>

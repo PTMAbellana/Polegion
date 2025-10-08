@@ -1,3 +1,4 @@
+import { TProblemType, UserType } from "../common";
 import { RoomType } from "../common/room";
 
 export interface RoomCardProps {
@@ -30,4 +31,27 @@ export interface RoomCardsListProps {
   className?: string;
   viewButtonText?: string; // Custom text for view button
   deleteButtonText?: string; // Custom text for delete button
+}
+
+export interface RoomBannerProps {
+    title?: string
+    description?: string
+    mantra?: string
+    banner_image?: string | File | null
+    roomCode: string
+    copySuccess: boolean
+    onCopyRoomCode: () => void
+    onCompetitionDashboard: () => void
+    onEditRoom: () => void
+    onDeleteRoom: () => void
+}
+
+export interface ProblemsListProps {
+    problems: TProblemType[]
+    roomCode: string
+}
+
+export interface ParticipantsSidebarProps {
+    participants: UserType[]
+    onInviteParticipants: () => void
 }

@@ -9,20 +9,54 @@ class ParticipantService {
         this.roomService = roomService
         this.userService = userService
         this.leaderService = leaderService
-        this.CACHE_TTL = 10 * 60 * 1000; // 10 minutes for participant data
+        
+        // Different cache TTLs for different data types
+        this.PARTICIPANT_CACHE_TTL = 15 * 60 * 1000; // 15 minutes for basic participant data
+        this.XP_CACHE_TTL = 2 * 60 * 1000; // 2 minutes for XP data (changes frequently)
     }
 
     // Cache invalidation helper methods
     _invalidateParticipantCache(roomId, userId = null) {
-        const roomParticipantsKey = cache.generateKey('room_participants', roomId);
-        cache.delete(roomParticipantsKey);
+        // Invalidate basic participant cache
+        const basicKeys = [
+            cache.generateKey('room_participants_basic', roomId, '*'),
+            cache.generateKey('room_participants', roomId)
+        ];
+        
+        // Invalidate XP cache
+        const xpKeys = [
+            cache.generateKey('participants_xp', roomId, '*'),
+            cache.generateKey('participants_xp', roomId, null),
+            cache.generateKey('participants_xp', roomId, -1)
+        ];
+        
+        // Invalidate all related caches
+        [...basicKeys, ...xpKeys].forEach(key => {
+            if (key.includes('*')) {
+                cache.deletePattern(key);
+            } else {
+                cache.delete(key);
+            }
+        });
         
         if (userId) {
             const userRoomsKey = cache.generateKey('user_joined_rooms', userId);
             cache.delete(userRoomsKey);
         }
         
-        console.log('Invalidated participant cache for room:', roomId, 'user:', userId);
+        console.log('Invalidated participant and XP cache for room:', roomId, 'user:', userId);
+    }
+
+    // Method to invalidate only XP cache (when XP changes but participants don't)
+    _invalidateXPCache(roomId, compe_id = null) {
+        const xpKeys = [
+            cache.generateKey('participants_xp', roomId, compe_id),
+            cache.generateKey('participants_xp', roomId, null),
+            cache.generateKey('participants_xp', roomId, -1)
+        ];
+        
+        xpKeys.forEach(key => cache.delete(key));
+        console.log('Invalidated XP cache for room:', roomId, 'competition:', compe_id);
     }
 
     async joinRoom(user_id, room_code){
@@ -74,147 +108,143 @@ class ParticipantService {
         }
     }
 
-    //ang mu get kay ang owner or ang admin
-    async getRoomParticipantsForAdmin(room_id, creator_id, with_xp = false, compe_id = null ){
+    // Get basic participants (cached longer)
+    async getRoomParticipantsBasic(room_id, creator_id) {
         try {
-            const cacheKey = cache.generateKey('room_participants_admin', room_id, creator_id, with_xp, compe_id);
+            const cacheKey = cache.generateKey('room_participants_basic', room_id, creator_id);
             
-            // Check cache first
             const cached = cache.get(cacheKey);
             if (cached) {
-                console.log('Cache hit: getRoomParticipantsForAdmin', room_id);
+                console.log('Cache hit: getRoomParticipantsBasic', room_id);
                 return cached;
             }
             
-            //verify if room exists
-            const exist = await this.roomService.getRoomById(room_id, creator_id)
-            // console.log(exist)
-            if (!exist) throw new Error ('Room not found or not authorized')
-            const data = await this.participantRepo.getAllParticipants(room_id)
-            // console.log('data: ', data)
+            // Verify room exists
+            const exist = await this.roomService.getRoomById(room_id, creator_id);
+            if (!exist) throw new Error('Room not found or not authorized');
+            
+            const data = await this.participantRepo.getAllParticipants(room_id);
+            
             const participants = await Promise.all(
                 data.map(async (participant) => {
                     try {
-                        // Fetch user data from users table using user_id
-                        // console.log('participant: ', participant.id)
-                        const userData = await this.userService.getUserById(participant.user_id)
-                        if (!userData) return {}
-                        return {
-                            ...userData,
-                            participant_id: participant.id,
-                        }
-                        
+                        const userData = await this.userService.getUserById(participant.user_id);
+                        if (!userData) return null;
+                        return participantModel.fromDBParticipant(participant.id, userData, null)
                     } catch (error) {
-                        return {}
+                        return null;
                     }
                 })
-            )
-                        // console.log('participants: ', participants)
-            let result;
-            if (!with_xp) {
-                result = participants;
-            } else {
-                if (compe_id === null || compe_id === -1) {
-                    result = await Promise.all(
-                        participants.map(async p => {
-                            const res = await this.leaderService.getRoomBoardById(room_id, p.participant_id);
-                            return {
-                                ...p,
-                                accumulated_xp: res?.accumulated_xp ?? 0
-                            };
-                        })
-                    );
-                }
-                else {
-                    result = await Promise.all(
-                        participants.map(async p => {
-                            const res = await this.leaderService.getCompeBoardById(compe_id, p.participant_id);
-                            return {
-                                ...p,
-                                accumulated_xp: res?.accumulated_xp ?? 0
-                            };
-                        })
-                    );
-                }
+            );
+            
+            const result = participants.filter(p => p !== null);
+            
+            // Cache basic participants for longer
+            cache.set(cacheKey, result, this.PARTICIPANT_CACHE_TTL);
+            console.log('Cache miss: getRoomParticipantsBasic', room_id);
+            
+            return result;
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    // Get XP data separately (cached shorter)
+    async getParticipantsXPData(room_id, participants, compe_id = null) {
+        try {
+            const cacheKey = cache.generateKey('participants_xp', room_id, compe_id);
+            
+            const cached = cache.get(cacheKey);
+            if (cached) {
+                console.log('Cache hit: getParticipantsXPData', room_id, compe_id);
+                return cached;
             }
             
-            // Cache the result
-            cache.set(cacheKey, result);
-            console.log('Cache miss: getRoomParticipantsForAdmin', room_id);
+            let xpData;
+            if (compe_id === null || compe_id === -1) {
+                // Room-level XP
+                xpData = await Promise.all(
+                    participants.map(async p => {
+                        const res = await this.leaderService.getRoomBoardById(room_id, p.participant_id);
+                        return {
+                            participant_id: p.participant_id,
+                            accumulated_xp: res?.accumulated_xp ?? 0
+                        };
+                    })
+                );
+            } else {
+                // Competition-level XP
+                xpData = await Promise.all(
+                    participants.map(async p => {
+                        const res = await this.leaderService.getCompeBoardById(compe_id, p.participant_id);
+                        return {
+                            participant_id: p.participant_id,
+                            accumulated_xp: res?.accumulated_xp ?? 0
+                        };
+                    })
+                );
+            }
             
-            return result
-        } catch (error){
-            // console.log('Error in getRoomParticipantsForAdmin service: ', error)
-            throw error
+            // Cache XP data for shorter time
+            cache.set(cacheKey, xpData, this.XP_CACHE_TTL);
+            console.log('Cache miss: getParticipantsXPData', room_id, compe_id);
+            
+            return xpData;
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    // Combine participants with XP data
+    async getRoomParticipantsForAdmin(room_id, creator_id, with_xp = false, compe_id = null) {
+        try {
+            // Always get basic participants first
+            const participants = await this.getRoomParticipantsBasic(room_id, creator_id);
+            
+            if (!with_xp) {
+                return participants;
+            }
+            
+            // Get XP data separately
+            const xpData = await this.getParticipantsXPData(room_id, participants, compe_id);
+            
+            // Combine the data
+            const result = participants.map(participant => {
+                const xp = xpData.find(x => x.participant_id === participant.participant_id);
+                return {
+                    ...participant,
+                    accumulated_xp: xp?.accumulated_xp ?? 0
+                };
+            });
+            
+            return result;
+        } catch (error) {
+            throw error;
         }
     }
 
     //ang mu get kay ang participants
-    async getRoomParticipantsForUser(room_id, user_id, with_xp = false, compe_id = null){
+    async getRoomParticipantsForUser(room_id, user_id, with_xp = false, compe_id = null) {
         try {
-            // console.log('I am called in services')
-            //verify if room exists
-            const exist = await this.roomService.isRoomExist(room_id)
-            if (!exist) throw new Error ('Room not found')
-            //verify if currentuser is participant
-            const isPart = await this.checkPartStatus(user_id, room_id)
-            if (!isPart) throw new Error ('Not authorized')
+            const participants = await this.getRoomParticipantsBasicForUser(room_id, user_id);
             
-            const data = await this.participantRepo.getAllParticipants(room_id)
-        
-            const participants = await Promise.all(
-                data.map(async (participant) => {
-                    try {
-                        // Fetch user data from users table using user_id
-                        const userData = await this.userService.getUserById(participant.user_id)
-                        
-                        // console.log('getRoomParticipants userData: ', userData)
-                        if (!userData) {
-                            // console.warn(`User not found for ID: ${participant.user_id}`)
-                            return {}
-                        }
-
-                        return {
-                            ...userData,
-                            participant_id: participant.id,
-                        }
-                        
-                    } catch (error) {
-                        // console.warn(`Error fetching user ${participant.user_id}:`, error)
-                        return {}
-                    }
-                })
-            )
-            // console.log('getRoomParticipants parts: ', participants)
-            
-            if (!with_xp) return participants;
-            else {
-                if (compe_id === null || compe_id === -1) {
-                    return await Promise.all(
-                        participants.map(async p => {
-                            const res = await this.leaderService.getRoomBoardById(room_id, p.participant_id);
-                            return {
-                                ...p,
-                                accumulated_xp: res?.accumulated_xp ?? 0
-                            };
-                        })
-                    );
-                }
-                else {
-                    return await Promise.all(
-                        participants.map(async p => {
-                            const res = await this.leaderService.getCompeBoardById(compe_id, p.participant_id);
-                            return {
-                                ...p,
-                                accumulated_xp: res?.accumulated_xp ?? 0
-                            };
-                        })
-                    );
-                }
+            if (!with_xp) {
+                return participants;
             }
-        } catch (error){
-            // console.log('Error in getRoomParticipants service: ', error)
-            throw error
+            
+            const xpData = await this.getParticipantsXPData(room_id, participants, compe_id);
+            
+            const result = participants.map(participant => {
+                const xp = xpData.find(x => x.participant_id === participant.participant_id);
+                return {
+                    ...participant,
+                    accumulated_xp: xp?.accumulated_xp ?? 0
+                };
+            });
+            
+            return result;
+        } catch (error) {
+            throw error;
         }
     }
 

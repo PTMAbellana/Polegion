@@ -1907,3 +1907,41 @@ textarea.form-control {
     width: 8px;
   }
 }
+
+/* Room Details Page Styles */
+.mainContent {
+  display: flex;
+  min-height: calc(100vh - 250px);
+  padding: 1.5rem;
+  gap: 1.5rem;
+  position: relative;
+  z-index: 1;
+}
+
+.problemsSection {
+  flex: 2;
+  min-width: 0;
+}
+
+.sidebarSection {
+  flex: 1;
+  min-width: 320px;
+  max-width: 400px;
+}
+
+@media (max-width: 1024px) {
+  .mainContent {
+    flex-direction: column;
+    padding: 1rem;
+  }
+  
+  .problemsSection {
+    flex: none;
+  }
+  
+  .sidebarSection {
+    flex: none;
+    min-width: auto;
+    max-width: none;
+  }
+}

@@ -1,4 +1,5 @@
 const cache = require('../cache');
+const problemModel = require('../../domain/models/Problem');
 
 class ProblemService {
   constructor(problemRepo, roomService) {
@@ -49,10 +50,7 @@ class ProblemService {
       const problemsWithTimers = await Promise.all(
         problems.map(async problem => {
           const timerData = await this.problemRepo.fetchCompeProblemByProbId(problem.id);
-          return {
-            ...problem,
-            timer: timerData?.timer
-          };
+          return problemModel.fromDbProbTimer({...problem, timer: timerData?.timer});
         })
       );
       

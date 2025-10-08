@@ -1,19 +1,55 @@
 import { create } from 'zustand'
 import { persist, createJSONStorage } from 'zustand/middleware'
-import { StudentRoomState } from '@/types/state/rooms'
+import { ExtendedStudentRoomState } from '@/types/state/rooms'
 import { 
     getJoinedRooms as apiGetJoinedRooms, 
     joinRoom as apiJoinRoom, 
     leaveRoom as apiLeaveRoom 
 } from '@/api/participants'
+import { getRoomByCode } from '@/api/rooms';
 
-export const useStudentRoomStore = create<StudentRoomState>()(
+export const useStudentRoomStore = create<ExtendedStudentRoomState>()(
     persist(
         (set) => ({
             joinedRooms: [],
             loading: false,
             error: null,
             joinLoading: false,
+
+            currentRoom: null,
+            roomLoading: false,
+
+            fetchRoomDetails: async (roomCode: string) => {
+                set({ roomLoading: true, error: null });
+                try {
+                    const response = await getRoomByCode(roomCode, 'student');
+                    console.log('Fetched room details:', response);
+                    
+                    if (response.success) {
+                        set({ 
+                            currentRoom: response.data,
+                            roomLoading: false 
+                        });
+                    } else {
+                        set({ 
+                            currentRoom: null,
+                            roomLoading: false,
+                            error: response.error || 'Room not found'
+                        });
+                    }
+                } catch (error: unknown) {
+                    const errorMessage = error instanceof Error ? error.message : 'Failed to fetch room details';
+                    set({ 
+                        error: errorMessage,
+                        roomLoading: false,
+                        currentRoom: null
+                    });
+                }
+            },
+
+            clearCurrentRoom: () => {
+                set({ currentRoom: null });
+            },
 
             fetchJoinedRooms: async () => {
                 set({ loading: true, error: null });

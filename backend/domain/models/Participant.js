@@ -40,6 +40,16 @@ class Participant {
             code: this.room.code,
         }
     }       
+
+    toReturnUserDTO(){
+        return {
+            id: this.id,
+            first_name: this.user.first_name || this.user.firstName,
+            last_name: this.user.last_name || this.user.lastName,
+            profile_pic: this.user.profile_pic,
+            gender: this.user.gender
+        }
+    }
 }
 
 module.exports = Participant;

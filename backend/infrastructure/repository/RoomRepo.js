@@ -28,7 +28,7 @@ class RoomRepo extends BaseRepo {
             }
             const rooms = data.map(room => {
                 // console.log('Processing room:', room)
-                return roomModel.fromDbRoom(room)
+                return roomModel.fromDbRoom(room).toDTO()
             })
 
             // console.log('Processed rooms:', rooms);

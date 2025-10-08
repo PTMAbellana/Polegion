@@ -44,8 +44,7 @@ class UserService {
             }
             
             // Fetch from database
-            const result = await this.userRepo.getUserByuid(userId);
-            
+            const result = await this.userRepo.getUserByUid(userId);
             // Cache the result
             if (result) {
                 cache.set(cacheKey, result, this.CACHE_TTL);

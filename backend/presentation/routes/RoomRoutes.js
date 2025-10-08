@@ -100,6 +100,9 @@ class RoomRoutes {
      *               bannerImage:
      *                 type: string
      *                 example: https://example.com/banner.jpg
+     *               code:
+     *                 type: string
+     *                 example: room-uuid-123
      *               visibility:
      *                 type: string
      *                 example: private
@@ -233,74 +236,248 @@ class RoomRoutes {
         .put(this.roomController.updateRoom)
         .delete(this.roomController.deleteRoom);
     
-    /**
-     * @swagger
-     * /rooms/admin/code/{code}:
-     *   get:
-     *     tags: [Rooms]
-     *     summary: Get room by code (Admin)
-     *     description: Retrieve room information by room code (admin view)
-     *     security:
-     *       - bearerAuth: []
-     *     parameters:
-     *       - in: path
-     *         name: code
-     *         required: true
-     *         schema:
-     *           type: string
-     *         description: Room code
-     *         example: ROOM123
-     *     responses:
-     *       200:
-     *         description: Room retrieved successfully
-     *         content:
-     *           application/json:
-     *             schema:
-     *               type: object
-     *               properties:
-     *                 message: { type: string, example: "Room retrieved successfully" }
-     *                 room: { type: object }
-     *       404:
-     *         $ref: '#/components/responses/NotFoundError'
-     *       401:
-     *         $ref: '#/components/responses/UnauthorizedError'
-     */
-    this.router.route('/admin/code/:code')
+/**
+ * @swagger
+ * /rooms/teacher/code/{code}:
+ *   get:
+ *     tags: [Rooms]
+ *     summary: Get room by code (Teacher)
+ *     description: Retrieve room information by room code (teacher view)
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: code
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Room code
+ *         example: ROOM123
+ *     responses:
+ *       200:
+ *         description: Room retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message: 
+ *                   type: string
+ *                   example: "Room retrieved successfully"
+ *                 data: 
+ *                   type: object
+ *                   properties:
+ *                     room: 
+ *                       type: object
+ *                       properties:
+ *                         id: 
+ *                           type: number
+ *                           example: 123
+ *                         title: 
+ *                           type: string
+ *                           example: "Algorithm Practice Room"
+ *                         description: 
+ *                           type: string
+ *                           example: "A room for practicing data structures and algorithms"
+ *                         mantra: 
+ *                           type: string
+ *                           example: "Practice makes perfect"
+ *                         banner_image: 
+ *                           type: string
+ *                           example: "https://example.com/banner.jpg"
+ *                         code: 
+ *                           type: string
+ *                           example: "ROOM123"
+ *                         visibility: 
+ *                           type: string
+ *                           example: "private"
+ *                     participants: 
+ *                       type: array
+ *                       items: 
+ *                         type: object
+ *                         properties:
+ *                           participant_id: 
+ *                             type: number
+ *                             example: 456
+ *                           first_name: 
+ *                             type: string
+ *                             example: "John"
+ *                           last_name: 
+ *                             type: string
+ *                             example: "Doe"
+ *                           profile_pic: 
+ *                             type: string
+ *                             example: "https://example.com/john_doe.jpg"
+ *                     problems: 
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           id: 
+ *                             type: string
+ *                             example: "problem-uuid-123"
+ *                           title: 
+ *                             type: string
+ *                             example: "Problem 1"
+ *                           description: 
+ *                             type: string
+ *                             example: "A description of Problem 1"
+ *                           difficulty: 
+ *                             type: string
+ *                             example: "easy"
+ *                           visibility: 
+ *                             type: string
+ *                             example: "show"
+ *                           max_attempts: 
+ *                             type: number
+ *                             example: 3
+ *                           timer:  
+ *                             type: number
+ *                             example: 100
+ *       404:
+ *         $ref: '#/components/responses/NotFoundError'
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ */
+    this.router.route('/teacher/code/:code')
       .get(this.roomController.getRoomByCode)
     
-    /**
-     * @swagger
-     * /rooms/user/code/{code}:
-     *   get:
-     *     tags: [Rooms]
-     *     summary: Get room by code (User)
-     *     description: Retrieve room information by room code (user view)
-     *     security:
-     *       - bearerAuth: []
-     *     parameters:
-     *       - in: path
-     *         name: code
-     *         required: true
-     *         schema:
-     *           type: string
-     *         description: Room code
-     *         example: ROOM123
-     *     responses:
-     *       200:
-     *         description: Room retrieved successfully
-     *         content:
-     *           application/json:
-     *             schema:
-     *               type: object
-     *               properties:
-     *                 message: { type: string, example: "Room retrieved successfully" }
-     *                 room: { type: object }
-     *       404:
-     *         $ref: '#/components/responses/NotFoundError'
-     *       401:
-     *         $ref: '#/components/responses/UnauthorizedError'
-     */
-    this.router.route('/user/code/:code')
+/**
+ * @swagger
+ * /rooms/student/code/{code}:
+ *   get:
+ *     tags: [Rooms]
+ *     summary: Get room by code (Student)
+ *     description: Retrieve room information by room code (student view)
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: code
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Room code
+ *         example: ROOM123
+ *     responses:
+ *       200:
+ *         description: Room retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message: 
+ *                   type: string
+ *                   example: "Room retrieved successfully"
+ *                 data: 
+ *                   type: object
+ *                   properties:
+ *                     participant_id:
+ *                       type: number
+ *                       example: 456
+ *                     teacher: 
+ *                       type: object
+ *                       properties:
+ *                         id: 
+ *                           type: number
+ *                           example: 1
+ *                         first_name: 
+ *                           type: string
+ *                           example: "Jane"
+ *                         last_name: 
+ *                           type: string
+ *                           example: "Doe"
+ *                         gender:
+ *                           type: string
+ *                           example: "female"
+ *                         profile_pic: 
+ *                           type: string
+ *                           example: "https://example.com/jane_doe.jpg"
+ *                     room: 
+ *                       type: object
+ *                       properties:
+ *                         id: 
+ *                           type: number
+ *                           example: 123
+ *                         title: 
+ *                           type: string
+ *                           example: "Algorithm Practice Room"
+ *                         description: 
+ *                           type: string
+ *                           example: "A room for practicing data structures and algorithms"
+ *                         mantra: 
+ *                           type: string
+ *                           example: "Practice makes perfect"
+ *                         banner_image: 
+ *                           type: string
+ *                           example: "https://example.com/banner.jpg"
+ *                         code: 
+ *                           type: string
+ *                           example: "ROOM123"
+ *                         visibility: 
+ *                           type: string
+ *                           example: "private"
+ *                     participants: 
+ *                       type: array
+ *                       items: 
+ *                         type: object
+ *                         properties:
+ *                           participant_id: 
+ *                             type: number
+ *                             example: 456
+ *                           first_name: 
+ *                             type: string
+ *                             example: "John"
+ *                           last_name: 
+ *                             type: string
+ *                             example: "Doe"
+ *                           gender:
+ *                             type: string
+ *                             example: "male"
+ *                           profile_pic: 
+ *                             type: string
+ *                             example: "https://example.com/john_doe.jpg"
+ *                     competitions:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           id: 
+ *                             type: number
+ *                             example: 123
+ *                           title: 
+ *                             type: string
+ *                             example: "Quiz 1"
+ *                           status: 
+ *                             type: string
+ *                             example: "active"
+ *                     problems: 
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           id: 
+ *                             type: string
+ *                             example: "problem-uuid-123"
+ *                           title: 
+ *                             type: string
+ *                             example: "Problem 1"
+ *                           description: 
+ *                             type: string
+ *                             example: "A description of Problem 1"
+ *                           difficulty: 
+ *                             type: string
+ *                             example: "easy"
+ *                           max_attempts: 
+ *                             type: number
+ *                             example: 3
+ *       404:
+ *         $ref: '#/components/responses/NotFoundError'
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ */
+    this.router.route('/student/code/:code')
       .get(this.roomController.getRoomByCodeUsers)
 
     /**

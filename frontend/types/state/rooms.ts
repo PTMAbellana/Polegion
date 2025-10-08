@@ -1,4 +1,5 @@
-import { RoomType, JoinedRoomType } from '../common/room'
+import { RoomType, JoinedRoomType, JoinedRoomDetails, RoomDetails } from '../common/room'
+import { CreateRoomData, UpdateRoomData } from '../forms'
 
 export interface TeacherRoomState {
     createdRooms: RoomType[]
@@ -28,17 +29,19 @@ export interface StudentRoomState {
     clearError: () => void
 }
 
-export interface CreateRoomData {
-    title: string
-    description: string
-    mantra: string
-    banner_image?: string | File | null
-    visibility?: string
+// Extended state for additional functionalities
+export interface ExtendedStudentRoomState extends StudentRoomState {
+    currentRoom: JoinedRoomDetails | null; 
+    roomLoading: boolean;
+    
+    fetchRoomDetails: (roomCode: string) => Promise<void>;
+    clearCurrentRoom: () => void;
 }
 
-export interface UpdateRoomData {
-    title?: string
-    description?: string
-    mantra?: string
-    banner_image?: string | File | null
+export interface ExtendTeacherRoomState extends TeacherRoomState {
+    currentRoom: RoomDetails | null; 
+    roomLoading: boolean;
+    
+    fetchRoomDetails: (roomCode: string) => Promise<void>;
+    clearCurrentRoom: () => void;
 }

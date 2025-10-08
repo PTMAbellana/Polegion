@@ -12,6 +12,7 @@ import { useRouter } from "next/navigation";
 import Swal from 'sweetalert2'
 import { getRoomProblems } from '@/api/problems'
 import { ROUTES } from '@/constants/routes'
+import { useAuthStore } from '@/store/authStore'
 
 interface Room{
     id: number
@@ -54,7 +55,7 @@ export default function RoomDetail({ params } : { params  : Promise<{roomCode : 
     const [fetched, setFetched] = useState(false);
 
 
-    const { isLoggedIn } = useMyApp()
+    const { isLoggedIn } = useAuthStore()
     const { isLoading: authLoading } = AuthProtection()
 
     const router = useRouter();
@@ -81,7 +82,7 @@ export default function RoomDetail({ params } : { params  : Promise<{roomCode : 
     const callMe = async () => {
         try {
             setIsLoading(true)
-            const res = await getRoomByCode(roomCode.roomCode, 'admin')
+            const res = await getRoomByCode(roomCode.roomCode, 'teacher')
             console.log(res.data)
             setRoomDetails(res.data)
 

@@ -1,5 +1,6 @@
 const roomModel = require('../../domain/models/Room');
 const cache = require('../cache');
+const service = require('../services');
 
 class RoomService {
     constructor(roomRepo){
@@ -18,6 +19,7 @@ class RoomService {
         return result;
     }
 
+    //used
     async getRooms (user_id){
         try {
             const cacheKey = cache.generateKey('user_rooms', user_id);
@@ -96,7 +98,8 @@ class RoomService {
         }
     }
 
-    // for admin
+    //used
+    // for teachers and admins
     async getRoomByCode (roomCode, user_id){
         try {
             const cacheKey = cache.generateKey('room_by_code_admin', roomCode, user_id);
@@ -109,8 +112,16 @@ class RoomService {
             }
             
             // Fetch from database
-            const result = await this.roomRepo.getRoomByCode(roomCode, user_id);
-            
+            const room = await this.roomRepo.getRoomByCode(roomCode, user_id);
+            if (!room) throw new Error('Room not found');
+            const participants =  await service.participantService.getRoomParticipantsForAdmin(room.id, user_id);
+            const problems = await service.problemService.fetchRoomProblems(room.id, user_id);
+
+            const result = {
+                ...room.toDTO(),
+                participants: participants.map(p => p.toReturnUserDTO()),
+                problems: problems.map(p => p.toReturnTeacherDTO()),
+            }
             // Cache the result
             if (result) {
                 cache.set(cacheKey, result, this.CACHE_TTL);
@@ -123,7 +134,7 @@ class RoomService {
         }
     }
     
-    // for participants
+    // for student
     async getRoomByCodeUsers (roomCode){
         try {
             const cacheKey = cache.generateKey('room_by_code_users', roomCode);

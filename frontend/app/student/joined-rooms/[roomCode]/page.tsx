@@ -1,5 +1,7 @@
-export default function RoomPage({ params: stringifyParams }: { params: { roomCode: string } }) {
-    const { roomCode } = stringifyParams;
+import { use } from 'react'
+
+export default function RoomPage({ params }: { params: Promise<{ roomCode: string }> }) {
+    const { roomCode } = use(params);
 
     return (
         <div>

@@ -1,36 +1,26 @@
-import React, { useState, useRef, useEffect } from 'react'
+import React, { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
-import * as yup from 'yup'
-import { RoomType } from '@/types/common/room'
+import { useRoomModal } from '@/hooks/useRoomModal'
 import styles from '@/styles/room.module.css'
-
-interface EditRoomFormData {
-    title: string
-    description: string
-    mantra: string
-}
-
-interface EditRoomModalProps {
-    room: RoomType | null
-    isOpen: boolean
-    onClose: () => void
-    onSubmit: (formData: EditRoomFormData & { banner_image: File | null }, roomId: number) => Promise<void>
-    isLoading: boolean
-}
-
-const editRoomSchema = yup.object().shape({
-    title: yup.string().required("Room title is required"),
-    description: yup.string().required("Room description is required"),
-    mantra: yup.string().required("Room mantra is required")
-})
+import { EditRoomFormData, EditRoomModalProps } from '@/types'
+import { editRoomSchema } from '@/schemas/roomSchemas'
 
 export default function EditRoomModal({ room, isOpen, onClose, onSubmit, isLoading }: EditRoomModalProps) {
-    const [submitError, setSubmitError] = useState<string>('')
-    const [bannerPreview, setBannerPreview] = useState<string | null>(null)
-    const [selectedFile, setSelectedFile] = useState<File | null>(null)
-    const [isFilePickerOpen, setIsFilePickerOpen] = useState<boolean>(false)
-    const fileInputRef = useRef<HTMLInputElement>(null)
+    const {
+        submitError,
+        bannerPreview,
+        selectedFile,
+        fileInputRef,
+        setSubmitError,
+        setIsFilePickerOpen,
+        handleFileChange,
+        handleBannerClick,
+        handleChangeBanner,
+        handleRemoveBanner,
+        resetModal,
+        setBannerFromExisting
+    } = useRoomModal(typeof room?.banner_image === 'string' ? room?.banner_image : null)
 
     const {
         register,
@@ -48,60 +38,11 @@ export default function EditRoomModal({ room, isOpen, onClose, onSubmit, isLoadi
             setValue("title", room.title || "")
             setValue("description", room.description || "")
             setValue("mantra", room.mantra || "")
-            
-            // Set banner preview from existing room image
-            if (room.banner_image && typeof room.banner_image === 'string') {
-                setBannerPreview(room.banner_image)
-            } else {
-                setBannerPreview(null)
-            }
-            setSelectedFile(null)
+            setBannerFromExisting(typeof room.banner_image === 'string' ? room.banner_image : null)
         }
-    }, [room, isOpen, setValue])
-
-    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const file = event.target.files?.[0]
-        if (file) {
-            setSelectedFile(file)
-            const reader = new FileReader()
-            reader.onload = (e) => {
-                setBannerPreview(e.target?.result as string)
-                setIsFilePickerOpen(false)
-            }
-            reader.readAsDataURL(file)
-        } else {
-            setIsFilePickerOpen(false)
-        }
-        event.stopPropagation()
-    }
-
-    const handleBannerClick = (event: React.MouseEvent<HTMLDivElement>) => {
-        if (!bannerPreview && !isFilePickerOpen) {
-            event.preventDefault()
-            event.stopPropagation()
-            setIsFilePickerOpen(true)
-            fileInputRef.current?.click()
-        }
-    }
-
-    const handleChangeBanner = (event: React.MouseEvent<HTMLButtonElement>) => {
-        event.preventDefault()
-        event.stopPropagation()
-        if (!isFilePickerOpen) {
-            setIsFilePickerOpen(true)
-            fileInputRef.current?.click()
-        }
-    }
-
-    const handleRemoveBanner = (event: React.MouseEvent<HTMLButtonElement>) => {
-        event.preventDefault()
-        event.stopPropagation()
-        setBannerPreview(null)
-        setSelectedFile(null)
-        if (fileInputRef.current) {
-            fileInputRef.current.value = ''
-        }
-    }
+        // Only run when room or isOpen changes, not on every setValue/setBannerFromExisting
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [room, isOpen])
 
     const onSubmitForm = async (data: EditRoomFormData) => {
         if (!room) return
@@ -124,13 +65,7 @@ export default function EditRoomModal({ room, isOpen, onClose, onSubmit, isLoadi
 
     const handleClose = () => {
         reset()
-        setSubmitError('')
-        setBannerPreview(null)
-        setSelectedFile(null)
-        setIsFilePickerOpen(false)
-        if (fileInputRef.current) {
-            fileInputRef.current.value = ''
-        }
+        resetModal()
         onClose()
     }
 
@@ -202,10 +137,6 @@ export default function EditRoomModal({ room, isOpen, onClose, onSubmit, isLoadi
                                             setTimeout(() => setIsFilePickerOpen(false), 300)
                                         }}
                                         disabled={isLoading}
-                                        style={{ 
-                                            pointerEvents: bannerPreview ? 'none' : 'auto',
-                                            display: bannerPreview ? 'none' : 'block'
-                                        }}
                                     />
                                 </div>
                             </div>

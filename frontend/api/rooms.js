@@ -29,14 +29,33 @@ export const getRoomById = async (id) => {
   }
 };
 
-export const getRoomByCode = async (code, type='join') => {
+export const getRoomByCode = async (code, type='admin') => {
   try {
-    return type === 'join' ? 
-    await api.get(`/rooms/user/code/${code}`) :
-    await api.get(`/rooms/admin/code/${code}`) 
+    let response;
+    switch (type) {
+      case 'student':
+        response = await api.get(`/rooms/student/code/${code}`);
+        break;
+      case 'teacher':
+        response = await api.get(`/rooms/teacher/code/${code}`);
+        break;
+      default:
+        throw new Error(`Unknown room type: ${type}`);
+    }
+
+    return {
+      success: true,
+      data: response.data.data,
+      message: 'Room fetched successfully'
+    };
   } catch (error) {
-    console.error("Error fetching room by code:", error);
-    throw error;
+    console.log("Error fetching room by code:", error);
+    return {
+      success: false,
+      message: error.response?.data?.message || 'Error fetching room by code',
+      error: error.response?.data?.error || error.message,
+      status: error.response?.status
+    }
   }
 };
 
