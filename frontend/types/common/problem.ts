@@ -1,7 +1,7 @@
 // for studeent view under room details
 export interface SProblemType {
     id: number;
-    title: string;
+    title: string | 'No Title';
     description: string;
     difficulty: 'easy' | 'intermediate' | 'hard';
     max_attempts?: number;

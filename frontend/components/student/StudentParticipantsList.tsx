@@ -1,13 +1,15 @@
 import React from 'react'
-import { FaUsers, FaPlus, FaUserSlash } from 'react-icons/fa'
+import { FaUsers } from 'react-icons/fa'
 import styles from '@/styles/room-details.module.css'
-import { ParticipantsSidebarProps } from '@/types'
+import { UserType } from '@/types'
 
+interface StudentParticipantsListProps {
+    participants: UserType[]
+}
 
-export default function ParticipantsSidebar({ 
-    participants, 
-    onInviteParticipants 
-}: ParticipantsSidebarProps) {
+export default function StudentParticipantsList({ 
+    participants
+}: StudentParticipantsListProps) {
     return (
         <div className={styles.participantsContainer}>
             <div className={styles.participantsHeader}>
@@ -21,19 +23,11 @@ export default function ParticipantsSidebar({
             </div>
             
             <div className={styles.participantsContent}>
-                <button
-                    onClick={onInviteParticipants}
-                    className={styles.inviteButton}
-                >
-                    <FaPlus />
-                    Invite Participants
-                </button>
-
                 {participants.length === 0 ? (
                     <div className={styles.emptyParticipants}>
                         <FaUsers className={styles.emptyParticipantsIcon} />
                         <h3 className={styles.emptyParticipantsTitle}>No Participants Yet</h3>
-                        <p className={styles.emptyParticipantsDescription}>Invite students to join your room!</p>
+                        <p className={styles.emptyParticipantsDescription}>Be the first to join!</p>
                     </div>
                 ) : (
                     <div className={styles.participantsList}>
@@ -55,13 +49,6 @@ export default function ParticipantsSidebar({
                                         {participant.first_name} {participant.last_name}
                                     </p>
                                 </div>
-                                <button
-                                    className={styles.kickButton}
-                                    title="Kick participant"
-                                    // onClick={() => handleKick(participant)} // You handle this
-                                >
-                                    <FaUserSlash />
-                                </button>
                             </div>
                         ))}
                     </div>

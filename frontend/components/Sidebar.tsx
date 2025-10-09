@@ -3,18 +3,17 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import toast from "react-hot-toast";
-import { FaHome, FaUser, FaSignOutAlt, FaBars, FaTimes, FaChalkboardTeacher, FaDungeon, FaMedal, FaUserAstronaut, FaFortAwesome, FaShapes, FaRegFileAlt } from 'react-icons/fa';
+import { FaSignOutAlt, FaBars, FaTimes } from 'react-icons/fa';
 import styles from '@/styles/navbar.module.css';
-
-import { STUDENT_ROUTES, TEACHER_ROUTES } from '@/constants/routes'
 import Swal from "sweetalert2";
 import { useAuthStore } from "@/store/authStore";
+import { studentNavItems, teacherNavItems } from "@/constants/nav";
 
 const Sidebar = (
     {
         userRole
     } : {
-        userRole: 'teacher' | 'student' | null
+        userRole: 'teacher' | 'student' | 'admin' | null 
     }
 ) => {
     const {isLoggedIn, logout } = useAuthStore();
@@ -23,24 +22,6 @@ const Sidebar = (
     const [isMobile, setIsMobile] = useState(false);
     const [isHovering, setIsHovering] = useState(false);
 
-    // temporary paths
-    // Navigation items for teachers
-    const teacherNavItems = [
-        { path: TEACHER_ROUTES.DASHBOARD, icon: FaHome, label: 'Dashboard', title: 'Home' },
-        { path: TEACHER_ROUTES.VIRTUAL_ROOMS, icon: FaChalkboardTeacher, label: 'Virtual Rooms', title: 'Virtual Rooms' },
-        { path: TEACHER_ROUTES.LEADERBOARD, icon: FaRegFileAlt, label: 'Records', title: 'Leaderboard' },
-        { path: TEACHER_ROUTES.PROFILE, icon: FaUser, label: 'Profile', title: 'Profile' },
-    ];
-
-    // Navigation items for students
-    const studentNavItems = [
-        { path: STUDENT_ROUTES.DASHBOARD, icon: FaHome, label: 'Dashboard', title: 'Home' },
-        { path: STUDENT_ROUTES.JOINED_ROOMS, icon: FaDungeon, label: 'Joined Rooms', title: 'Joined Rooms' },
-        { path: STUDENT_ROUTES.WORLD_MAP, icon: FaFortAwesome, label: 'World Map', title: 'World Map' },
-        { path: STUDENT_ROUTES.PLAYGROUND, icon: FaShapes, label: 'Playground', title: 'Playground' },
-        { path: STUDENT_ROUTES.LEADERBOARD, icon: FaMedal, label: 'Wall of Fame', title: 'Leaderboard' },
-        { path: STUDENT_ROUTES.PROFILE, icon: FaUserAstronaut, label: 'Profile', title: 'Profile' },
-    ];
 
     const navItems = userRole === 'teacher' ? teacherNavItems : studentNavItems;
 
@@ -63,22 +44,15 @@ const Sidebar = (
     const handleLogout = async () => {
         // Show SweetAlert confirmation dialog
         const result = await Swal.fire({
-            title: 'Are you sure?',
-            text: 'Do you want to logout from your account?',
-            icon: 'question',
+            title: 'Logout?',
+            text: 'Are you sure you want to logout from your account?',
+            icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#ef4444',
             cancelButtonColor: '#6b7280',
-            confirmButtonText: 'Yes, logout!',
+            confirmButtonText: 'Yes, logout',
             cancelButtonText: 'Cancel',
             reverseButtons: true,
-            customClass: {
-                popup: 'swal-popup',
-                title: 'swal-title',
-                content: 'swal-content',
-                confirmButton: 'swal-confirm-btn',
-                cancelButton: 'swal-cancel-btn'
-            },
             showClass: {
                 popup: 'animate__animated animate__fadeInDown animate__faster'
             },
@@ -89,44 +63,13 @@ const Sidebar = (
 
         // If user confirmed logout
         if (result.isConfirmed) {
-            // Show loading indicator
-            Swal.fire({
-                title: 'Logging out...',
-                text: 'Please wait while we sign you out.',
-                icon: 'info',
-                allowOutsideClick: false,
-                allowEscapeKey: false,
-                showConfirmButton: false,
-                didOpen: () => {
-                    Swal.showLoading();
-                }
-            });
-
             try {
                 logout();
-                
-                // Close loading and show success
-                Swal.fire({
-                    title: 'Logged out!',
-                    text: 'You have been successfully logged out.',
-                    icon: 'success',
-                    confirmButtonColor: '#10b981',
-                    confirmButtonText: 'OK',
-                    timer: 2000,
-                    timerProgressBar: true,
-                    showClass: {
-                        popup: 'animate__animated animate__fadeInDown animate__faster'
-                    },
-                    hideClass: {
-                        popup: 'animate__animated animate__fadeOutUp animate__faster'
-                    }
-                });
-                
                 toast.success("Logged out successfully");
                 
             } catch (error) {
                 console.log('Logout error: ', error);
-                
+
                 // Show error alert
                 Swal.fire({
                     title: 'Logout Error',

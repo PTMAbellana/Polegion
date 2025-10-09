@@ -24,3 +24,9 @@ export interface EditRoomModalProps {
     onSubmit: (formData: EditRoomFormData & { banner_image: File | null }, roomId: number) => Promise<void>
     isLoading: boolean
 }
+
+export interface InviteParticipantModalProps {
+    isOpen: boolean
+    onClose: () => void
+    onSubmit: (email: string) => Promise<void> // Add this
+}

@@ -139,7 +139,7 @@ class RoomRepo extends BaseRepo {
             .single()
     
             if (error) throw error
-            return data ? true: false
+            return data 
         } catch (error) {
             throw error
         }    

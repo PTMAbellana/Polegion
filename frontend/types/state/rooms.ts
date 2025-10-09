@@ -25,7 +25,7 @@ export interface StudentRoomState {
     // Actions
     fetchJoinedRooms: () => Promise<void>
     joinRoom: (roomCode: string) => Promise<{ success: boolean; error?: string; data?: RoomType }>
-    leaveRoom: (roomId: string) => Promise<{ success: boolean; error?: string }>
+    leaveRoom: (roomId: number) => Promise<{ success: boolean; error?: string }>
     clearError: () => void
 }
 
@@ -41,6 +41,7 @@ export interface ExtendedStudentRoomState extends StudentRoomState {
 export interface ExtendTeacherRoomState extends TeacherRoomState {
     currentRoom: RoomDetails | null; 
     roomLoading: boolean;
+    inviteParticipant: (roomCode: string, email: string) => Promise<{ success: boolean; error?: string }>;
     
     fetchRoomDetails: (roomCode: string) => Promise<void>;
     clearCurrentRoom: () => void;

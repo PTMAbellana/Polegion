@@ -87,7 +87,7 @@ class RoomController {
     // for students
     getRoomByCodeUsers = async (req, res) => {
         try {
-            const data = await this.roomService.getRoomByCodeUsers(req.params.code)  
+            const data = await this.roomService.getRoomByCodeUsers(req.params.code, req.user.id)  
                         
             if (!data) 
                 return res.status(404).json({ 

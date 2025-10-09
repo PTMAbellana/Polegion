@@ -1,5 +1,6 @@
 const supabase = require('../../config/supabase')
 const cache = require('../cache');
+const compeModel = require('../../domain/models/Competition');
 
 class CompeService {
     constructor(compeRepo, partService, leaderService, roomService, probService) {
@@ -71,6 +72,35 @@ class CompeService {
             console.log('Cache miss: getCompeByRoomId', room_id, type);
             
             return data
+        } catch (error) {
+            throw error
+        }
+    }
+
+    async getAllCompeByRoomId(room_id) {
+        try {
+            const cacheKey = cache.generateKey('all_competitions_by_room', room_id);
+            
+            // Check cache first
+            const cached = cache.get(cacheKey);
+            if (cached) {
+                console.log('Cache hit: getAllCompeByRoomId', room_id);
+                return cached;
+            }
+            
+            console.log("Fetching all competitions for room:", room_id)
+            const data = await this.compeRepo.getCompeByRoomId(room_id)
+
+            if (!data || data.length === 0) return []
+            
+            // Convert to domain models
+            const competitions = data.map(comp => compeModel.fromDbCompetition(comp));
+            
+            // Cache the result
+            cache.set(cacheKey, competitions);
+            console.log('Cache miss: getAllCompeByRoomId', room_id);
+            
+            return competitions;
         } catch (error) {
             throw error
         }

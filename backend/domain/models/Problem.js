@@ -19,7 +19,7 @@ class Problem {
     static fromDbRoom (problemData){
         return new Problem (
             problemData.id,
-            problemData.title,
+            problemData.title || 'No Title',
             problemData.description,
             problemData.room_id,
             problemData.creator_id,
@@ -37,7 +37,7 @@ class Problem {
     static fromDbProbTimer (problemData, timer){
         return new Problem (
             problemData.id,
-            problemData.title,
+            problemData.title || 'No Title',
             problemData.description,
             problemData.room_id,
             problemData.creator_id,

@@ -1,26 +1,32 @@
 import React from 'react'
-import { FaTrophy, FaEdit, FaTrash, FaArrowLeft } from 'react-icons/fa'
+import { FaSignOutAlt, FaArrowLeft } from 'react-icons/fa'
 import { useRouter } from 'next/navigation'
 import styles from '@/styles/room-details.module.css'
-import { RoomBannerProps } from '@/types'
-import { useTeacherRoomStore } from '@/store/teacherRoomStore'
-import { TEACHER_ROUTES } from '@/constants/routes'
+import { useStudentRoomStore } from '@/store/studentRoomStore'
+import { STUDENT_ROUTES } from '@/constants/routes'
 
-export default function RoomBanner({
+interface StudentRoomBannerProps {
+    title?: string
+    description?: string
+    mantra?: string
+    banner_image?: string | File | null
+    roomId: string
+    onLeaveRoom: () => void
+}
+
+export default function StudentRoomBanner({
     title,
     description,
     mantra,
     banner_image,
-    onCompetitionDashboard,
-    onEditRoom,
-    onDeleteRoom
-}: RoomBannerProps) {
+    onLeaveRoom
+}: StudentRoomBannerProps) {
     const router = useRouter()
-    const { clearCurrentRoom } = useTeacherRoomStore()
+    const { clearCurrentRoom } = useStudentRoomStore()
 
     const handleBackClick = () => {
         clearCurrentRoom()
-        router.replace(TEACHER_ROUTES.VIRTUAL_ROOMS)
+        router.replace(STUDENT_ROUTES.JOINED_ROOMS)
     }
 
     return (
@@ -62,30 +68,15 @@ export default function RoomBanner({
                     </div>
                 </div>
 
-                {/* Right side - Action Buttons */}
+                {/* Right side - Leave Room Button */}
                 <div className={styles.roomBannerRight}>
-                    {/* Action Buttons */}
                     <div className={styles.roomBannerActions}>
                         <button
-                            onClick={onCompetitionDashboard}
-                            className={`${styles.roomBannerButton} ${styles.competitionButton}`}
+                            onClick={onLeaveRoom}
+                            className={`${styles.roomBannerButton} ${styles.leaveButton}`}
                         >
-                            <FaTrophy className={styles.roomBannerButtonIcon} />
-                            Competition Dashboard
-                        </button>
-                        <button
-                            onClick={onEditRoom}
-                            className={`${styles.roomBannerButton} ${styles.editButton}`}
-                        >
-                            <FaEdit className={styles.roomBannerButtonIcon} />
-                            Edit Room
-                        </button>
-                        <button
-                            onClick={onDeleteRoom}
-                            className={`${styles.roomBannerButton} ${styles.deleteButton}`}
-                        >
-                            <FaTrash className={styles.roomBannerButtonIcon} />
-                            Delete Room
+                            <FaSignOutAlt className={styles.roomBannerButtonIcon} />
+                            Leave Room
                         </button>
                     </div>
                 </div>

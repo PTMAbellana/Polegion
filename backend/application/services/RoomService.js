@@ -134,8 +134,9 @@ class RoomService {
         }
     }
     
+    //used
     // for student
-    async getRoomByCodeUsers (roomCode){
+    async getRoomByCodeUsers (roomCode, user_id){
         try {
             const cacheKey = cache.generateKey('room_by_code_users', roomCode);
             
@@ -147,8 +148,27 @@ class RoomService {
             }
             
             // Fetch from database
-            const result = await this.roomRepo.getRoomByCodeUsers(roomCode);
-            
+            const room = await this.roomRepo.getRoomByCodeUsers(roomCode);
+            if (!room) throw new Error('Room not found');
+
+            const part = await service.participantService.getPartInfoByUserId(user_id, room.id)
+
+            if (!part) {
+                throw new Error('Not a participant of the room');
+            }
+            const participants =  await service.participantService.getRoomParticipantsForUser(room.id, user_id);
+            const problems = await service.problemService.fetchRoomProblems(room.id, room.user_id);
+            const teacher = await service.userService.getUserById(room.user_id);
+            const competitions = await service.competitionService.getAllCompeByRoomId(room.id);
+
+            const result = {
+                ...room.toDTO(),
+                participant_id: part, // no participant id for students
+                participants: participants.map(p => p.toReturnUserDTO()), // no participants for students
+                problems: problems.map(p => p.toReturnStudentDTO()),
+                competitions: competitions.map(c => c.toDTO()),
+                teacher: teacher 
+            }
             // Cache the result
             if (result) {
                 cache.set(cacheKey, result, this.CACHE_TTL);
@@ -157,6 +177,7 @@ class RoomService {
             
             return result;
         } catch (error) {
+            console.log(error)
             throw error
         }
     }
@@ -234,9 +255,14 @@ class RoomService {
         }
     }
 
-    async isRoomExist(room_id){
+    async isRoomExist(room_id = null, room_code = null){
         try {
-            return await this.roomRepo.isRoomExistById(room_id)
+            if (room_id) {
+                return await this.roomRepo.isRoomExistById(room_id);
+            } else if (room_code) {
+                return await this.roomRepo.getRoomByCodeUsers(room_code);
+            }
+            return false;
         } catch (error) {
             throw error
         }

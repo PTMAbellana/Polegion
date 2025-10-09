@@ -14,6 +14,7 @@ import { TEACHER_ROUTES } from '@/constants/routes'
 import { FaCopy, FaCheck } from 'react-icons/fa'
 import styles from '@/styles/room-details.module.css'
 import { use } from 'react'
+import InviteParticipantModal from '@/components/teacher/InviteParticipantModal'
 
 export default function RoomDetailsPage({ params }: { params: Promise<{ roomCode: string }> }) {
     const { roomCode } = use(params)
@@ -30,13 +31,16 @@ export default function RoomDetailsPage({ params }: { params: Promise<{ roomCode
     const {
         showEditModal,
         setShowEditModal,
+        showInviteModal,
+        setShowInviteModal,
         editLoading,
         copySuccess,
         handleCopyRoomCode,
         handleEditSubmit,
         handleDeleteRoom,
         handleCompetitionDashboard,
-        handleInviteParticipants
+        handleInviteParticipants,
+        handleInviteSubmit
     } = useRoomManagement(roomCode)
 
     useEffect(() => {
@@ -147,6 +151,13 @@ export default function RoomDetailsPage({ params }: { params: Promise<{ roomCode
                 onClose={() => setShowEditModal(false)}
                 onSubmit={handleEditSubmit}
                 isLoading={editLoading}
+            />
+
+            {/* Invite Participant Modal */}
+            <InviteParticipantModal 
+                isOpen={showInviteModal}
+                onClose={() => setShowInviteModal(false)}
+                onSubmit={handleInviteSubmit}
             />
         </div>
     )

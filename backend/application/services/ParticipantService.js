@@ -1,7 +1,6 @@
 // const userModel = require('../../domain/models/User')
 const Mailer = require('../../utils/Mailer'); // Adjust path as needed
 const cache = require('../cache');
-const roomModel = require('../../domain/models/Room');
 const participantModel = require('../../domain/models/Participant');
 class ParticipantService {
     constructor(participantRepo, roomService, userService, leaderService){
@@ -59,10 +58,11 @@ class ParticipantService {
         console.log('Invalidated XP cache for room:', roomId, 'competition:', compe_id);
     }
 
+    //used
     async joinRoom(user_id, room_code){
         try {
 
-            const room = await this.roomService.getRoomByCodeUsers(room_code);
+            const room = await this.roomService.isRoomExist(null, room_code);
             if (!room) {
                 throw new Error('Room not found');
             }
@@ -95,6 +95,7 @@ class ParticipantService {
         }
     }
     
+    //used
     async leaveRoom(user_id, room_id){
         try {
             const result = await this.participantRepo.removeParticipant(user_id, room_id)
@@ -195,6 +196,7 @@ class ParticipantService {
         }
     }
 
+    //used
     // Combine participants with XP data
     async getRoomParticipantsForAdmin(room_id, creator_id, with_xp = false, compe_id = null) {
         try {
@@ -223,11 +225,39 @@ class ParticipantService {
         }
     }
 
+    //used
     //ang mu get kay ang participants
     async getRoomParticipantsForUser(room_id, user_id, with_xp = false, compe_id = null) {
         try {
-            const participants = await this.getRoomParticipantsBasicForUser(room_id, user_id);
+
+            const cacheKey = cache.generateKey('room_participants_basic', room_id);
             
+            const cached = cache.get(cacheKey);
+            if (cached) {
+                console.log('Cache hit: getRoomParticipantsBasic', room_id);
+                return cached;
+            }
+
+            const data = await this.participantRepo.getAllParticipants(room_id);
+            
+            const parts = await Promise.all(
+                data.map(async (parts) => {
+                    try {
+                        const userData = await this.userService.getUserById(parts.user_id);
+                        if (!userData) return null;
+                        return participantModel.fromDBParticipant(parts.id, userData, null)
+                    } catch (error) {
+                        return null;
+                    }
+                })
+            );
+
+            const participants = parts.filter(p => p !== null);
+
+            // Cache basic participants for longer
+            cache.set(cacheKey, participants, this.PARTICIPANT_CACHE_TTL);
+            console.log('Cache miss: getRoomParticipantsBasic', room_id);
+
             if (!with_xp) {
                 return participants;
             }
@@ -277,6 +307,7 @@ class ParticipantService {
         }
     }
 
+    //used
     async getJoinedRooms(user_id) {
         try {
             const cacheKey = cache.generateKey('user_joined_rooms', user_id);
@@ -311,11 +342,8 @@ class ParticipantService {
         }
     }
 
-    async inviteByEmail(inviter, email, roomCode) {
-//         const subject = "You're invited to join a Polegion room!";
-//         const content = `Hi! ${inviter.name} (${inviter.email}) has invited you to join a room on Polegion.
-// Room Code: ${roomCode}
-// Join here: https://your-app-url/virtual-rooms/join/${roomCode}`;
+    //used PERO TARONGONON RAWR
+    async inviteByEmail(email, roomCode) {
         const mailOptions = {
             from: "Polegion <marga18nins@gmail.com>",
             to: email,
@@ -325,7 +353,11 @@ class ParticipantService {
                 code: roomCode,
             },
         }
-        await Mailer.sendMail(mailOptions);
+        try {
+            await Mailer.sendMail(mailOptions);
+        } catch (error) {
+            throw error
+        }
     }
 
     // di ni sha mu ano sa controller

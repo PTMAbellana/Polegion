@@ -1,6 +1,6 @@
 "use client"
 
-import React from 'react'
+import React, { useEffect } from 'react'
 import { useAuthStore } from '@/store/authStore'
 import { useTeacherRoomStore } from '@/store/teacherRoomStore'
 import { useVirtualRoomsManagement } from '@/hooks/useVirtualRoomsManagement'
@@ -13,7 +13,7 @@ import styles from '@/styles/dashboard-wow.module.css'
 
 export default function VirtualRoomsPage() {
     const { userProfile, appLoading } = useAuthStore()
-    const { createdRooms, loading } = useTeacherRoomStore()
+    const { createdRooms, loading, clearCurrentRoom } = useTeacherRoomStore()
     
     const {
         showCreateModal,
@@ -47,6 +47,10 @@ export default function VirtualRoomsPage() {
             + Create Room
         </button>
     )
+
+    useEffect(() => {
+        clearCurrentRoom()
+    }, [clearCurrentRoom])
 
     if (appLoading) {
         return <LoadingOverlay isLoading={true}><div /></LoadingOverlay>

@@ -88,11 +88,11 @@ export const useStudentRoomStore = create<ExtendedStudentRoomState>()(
                         // Refresh the joined rooms list after successful join
                         const joinedResponse = await apiGetJoinedRooms();
                         if (joinedResponse.success) {
-                            
-                            set({ 
-                                joinedRooms: response.data,
-                                joinLoading: false 
-                            });
+                            const newJoin = response.data;
+                            set(state => ({ 
+                                joinedRooms: [newJoin, ...state.joinedRooms],
+                                joinLoading: false
+                            }));
                         } else {
                             set({ joinLoading: false });
                         }
@@ -114,14 +114,14 @@ export const useStudentRoomStore = create<ExtendedStudentRoomState>()(
                 }
             },
 
-            leaveRoom: async (roomId: string) => {
+            leaveRoom: async (roomId: number) => {
                 set({ loading: true, error: null });
                 try {
                     const response = await apiLeaveRoom(roomId);
                     if (response.success) {
                         set(state => ({ 
                             joinedRooms: state.joinedRooms.filter(room => 
-                                room.id?.toString() !== roomId
+                                room.id !== roomId
                             ),
                             loading: false 
                         }));

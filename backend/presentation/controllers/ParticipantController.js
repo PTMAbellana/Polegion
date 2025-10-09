@@ -232,17 +232,36 @@ class ParticipantController {
 
     async inviteByEmail(req, res) {
         const { email, roomCode } = req.body;
-        const inviter = {
-          name: req.user.fullName,
-          email: req.user.email,
-        };
         try {
-          await this.participantService.inviteByEmail(inviter, email, roomCode);
-          res.json({ success: true });
-        } catch (error) {
-          res.status(500).json({ error: 'Failed to send invitation.' });
+            await this.participantService.inviteByEmail(email, roomCode);
+                return res.json({ 
+                    message: 'Invitation sent successfully' 
+                });
+            } catch (error) {
+                if (error.status === 400) {
+                    return res.status(400).json({ 
+                        message: 'Failed to send invitation.',
+                        error: error.message 
+                    });
+                }
+                if (error.status === 404) {
+                    return res.status(404).json({ 
+                        message: 'Failed to send invitation.',
+                        error: error.message 
+                    });
+                }
+                if (error.status === 401) {
+                    return res.status(401).json({ 
+                        message: 'Unauthorized',
+                        error: 'Invalid token' 
+                    });
+                }
+                return res.status(500).json({ 
+                    message: 'Failed to send invitation.',
+                    error: error.message 
+                });
+            }
         }
-      }
 }
 
 module.exports = ParticipantController

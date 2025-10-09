@@ -1,12 +1,15 @@
 import React from 'react'
 import { useRouter } from 'next/navigation'
-import { FaBook, FaPlus, FaEye, FaEyeSlash, FaEdit, FaTrash, FaBullseye, FaClock } from 'react-icons/fa'
+import { FaBook, FaExternalLinkAlt, FaEye, FaEyeSlash, FaBullseye, FaClock } from 'react-icons/fa'
 import styles from '@/styles/room-details.module.css'
-import { ProblemsListProps } from '@/types'
-import { TEACHER_ROUTES } from '@/constants/routes'
+import { TProblemType, SProblemType } from '@/types'
 
+interface ProblemsTabProps {
+    problems: (TProblemType | SProblemType)[]
+    roomCode: string
+}
 
-export default function ProblemsList({ problems, roomCode }: ProblemsListProps) {
+export default function ProblemsTab({ problems, roomCode }: ProblemsTabProps) {
     const router = useRouter()
 
     const getDifficultyClass = (difficulty: string) => {
@@ -23,42 +26,20 @@ export default function ProblemsList({ problems, roomCode }: ProblemsListProps) 
         }
     }
 
-    const handleCreateProblem = () => {
-        router.push(`${TEACHER_ROUTES.VIRTUAL_ROOMS}/${roomCode}/create-problem`)
+    const handleOpenProblem = (problemId: number | undefined) => {
+        if (problemId) {
+            router.push(`/student/joined-rooms/${roomCode}/problem/${problemId}`)
+        }
     }
 
     return (
         <div className={styles.problemsContainer}>
-            <div className={styles.problemsHeader}>
-                <h2 className={styles.problemsTitle}>
-                    <FaBook />
-                    Problems
-                    <span className={styles.problemsCount}>
-                        {problems.length}
-                    </span>
-                </h2>
-                <button
-                    onClick={handleCreateProblem}
-                    className={styles.createButton}
-                >
-                    <FaPlus />
-                    Create Problem
-                </button>
-            </div>
-            
             <div className={styles.problemsContent}>
                 {problems.length === 0 ? (
                     <div className={styles.emptyState}>
                         <FaBook className={styles.emptyStateIcon} />
                         <h3 className={styles.emptyStateTitle}>No Problems Yet</h3>
-                        <p className={styles.emptyStateDescription}>Create your first problem to get started!</p>
-                        <button
-                            onClick={handleCreateProblem}
-                            className={styles.createFirstButton}
-                        >
-                            <FaPlus />
-                            Create First Problem
-                        </button>
+                        <p className={styles.emptyStateDescription}>Your teacher hasn&apos;t created any problems yet!</p>
                     </div>
                 ) : (
                     <div>
@@ -67,14 +48,13 @@ export default function ProblemsList({ problems, roomCode }: ProblemsListProps) 
                                 <div className={styles.problemHeader}>
                                     <h3 className={styles.problemTitle}>{problem.title}</h3>
                                     <div className={styles.problemActions}>
-                                        <button className={`${styles.actionButton} ${styles.viewButton}`}>
-                                            <FaEye />
-                                        </button>
-                                        <button className={`${styles.actionButton} ${styles.editButton}`}>
-                                            <FaEdit />
-                                        </button>
-                                        <button className={`${styles.actionButton} ${styles.deleteButton}`}>
-                                            <FaTrash />
+                                        <button 
+                                            className={`${styles.actionButton} ${styles.openButton}`}
+                                            onClick={() => handleOpenProblem(problem.id)}
+                                            title="Open problem"
+                                        >
+                                            <FaExternalLinkAlt />
+                                            Open
                                         </button>
                                     </div>
                                 </div>
@@ -83,13 +63,15 @@ export default function ProblemsList({ problems, roomCode }: ProblemsListProps) 
                                     <span className={`${styles.difficultyBadge} ${getDifficultyClass(problem.difficulty)}`}>
                                         {problem.difficulty}
                                     </span>
-                                    <div className={styles.visibilityIndicator}>
-                                        {problem.visibility === 'show' ? (
-                                            <><FaEye /> Visible</>
-                                        ) : (
-                                            <><FaEyeSlash /> Hidden</>
-                                        )}
-                                    </div>
+                                    {'visibility' in problem && (
+                                        <div className={styles.visibilityIndicator}>
+                                            {problem.visibility === 'show' ? (
+                                                <><FaEye /> Visible</>
+                                            ) : (
+                                                <><FaEyeSlash /> Hidden</>
+                                            )}
+                                        </div>
+                                    )}
                                 </div>
                                 
                                 <p className={styles.problemDescription}>{problem.description}</p>

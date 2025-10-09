@@ -9,6 +9,9 @@ import {
     uploadImage,
     getRoomByCode
 } from '@/api/rooms'
+import {
+    inviteParticipant as apiInviteParticipant
+} from '@/api/participants'
 import { CreateRoomData, UpdateRoomData } from '@/types';
 
 export const useTeacherRoomStore = create<ExtendTeacherRoomState>()(
@@ -246,6 +249,35 @@ export const useTeacherRoomStore = create<ExtendTeacherRoomState>()(
                         loading: false 
                     });
                     return { success: false, error: errorMessage };
+                }
+            },
+            
+            inviteParticipant: async (roomCode: string, email: string) => {
+                set({ loading: true, error: null });
+                try {
+                    // TODO: Replace with your actual API call
+                    const response = await apiInviteParticipant(email, roomCode);
+                    
+                    console.log('API: Inviting participant:', email, 'to room:', roomCode);
+                    
+                    // Optionally refresh room details to update participants list
+                    // const updatedRoom = await get().fetchRoomDetails(roomCode);
+                    
+                    set({ loading: false });
+                    return { 
+                        success: true,
+                        message: response.message 
+                    };
+                } catch (error: unknown) {
+                    const errorMessage = error instanceof Error ? error.message : 'Failed to invite participant';
+                    set({ 
+                        error: errorMessage,
+                        loading: false 
+                    });
+                    return { 
+                        success: false, 
+                        error: errorMessage 
+                    };
                 }
             },
 

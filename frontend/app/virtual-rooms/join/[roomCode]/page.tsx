@@ -11,6 +11,7 @@ import { useRouter } from "next/navigation"
 import { ROUTES } from "@/constants/routes"
 import { getAllCompe } from "@/api/competitions"
 import Swal from "sweetalert2"
+import { useAuthStore } from "@/store/authStore"
 
 interface Room{
     id?: string
@@ -54,8 +55,7 @@ export default function JoinRoom({ params } : { params  : Promise<{roomCode : st
     const [sending, setSending] = useState(false);
     const [playingCompetition, setPlayingCompetition] = useState<string | null>(null);
     
-    const { isLoggedIn } = useMyApp()
-    const { isLoading: authLoading } = AuthProtection()
+    const { isLoggedIn, authLoading } = useAuthStore()
 
     console.log(roomCode)
 

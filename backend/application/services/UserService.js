@@ -32,6 +32,7 @@ class UserService {
         }
     }
 
+    //used
     async getUserById(userId) {
         try {
             const cacheKey = cache.generateKey('user_by_id', userId);

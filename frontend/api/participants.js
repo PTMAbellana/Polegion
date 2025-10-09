@@ -97,13 +97,23 @@ export const getJoinedRooms = async () => {
   }
 };
 
-export const inviteParticipant = async ({ email, roomCode }) => {
+export const inviteParticipant = async ( email, roomCode ) => {
   try {
-    return await api.post('/participants/invite', {
+    const res = await api.post('/participants/invite', {
       email,
       roomCode,
     });
+
+    return {
+      success: true,
+      message: res.data.message || 'Invitation sent successfully'
+    }
   } catch (error) {
-    throw error;
+    return {
+      success: false,
+      message: error.response?.data?.error || 'Failed to send invitation.',
+      error: error.response?.data?.error || error.message,
+      status: error.response?.status
+    }
   }
 };

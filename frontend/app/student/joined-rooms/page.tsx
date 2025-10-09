@@ -1,46 +1,33 @@
 "use client"
 
-import React, { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import React from 'react'
 import { useAuthStore } from '@/store/authStore'
 import { useStudentRoomStore } from '@/store/studentRoomStore'
 import { AuthProtection } from '@/context/AuthProtection'
+import { useJoinedRoomsManagement } from '@/hooks/useJoinedRoomsManagement'
 import PageHeader from '@/components/PageHeader'
 import RoomCardsList from '@/components/RoomCardsList'
 import JoinRoomModal from '@/components/student/JoinRoomModal'
 import LoadingOverlay from '@/components/LoadingOverlay'
-import { STUDENT_ROUTES } from '@/constants/routes'
+import styles from '@/styles/dashboard-wow.module.css' // Add this import
 
 export default function JoinedRoomsPage() {
-    const router = useRouter()
     const { userProfile } = useAuthStore()
-    const { joinedRooms, loading, leaveRoom } = useStudentRoomStore()
+    const { joinedRooms, loading } = useStudentRoomStore()
     const { isLoading: authLoading } = AuthProtection()
     
-    const [showJoinModal, setShowJoinModal] = useState(false)
-
-    const handleViewRoom = (roomCode: string | number) => {
-        router.push(`${STUDENT_ROUTES.JOINED_ROOMS}/${roomCode}`)
-    }
-
-    const handleLeaveRoom = async (roomId: string | number) => {
-        if (window.confirm('Are you sure you want to leave this room?')) {
-            // Find the room to get the participant_id
-            const room = joinedRooms.find(r => r.id?.toString() === roomId.toString());
-            if (room && room.id) {
-                const result = await leaveRoom(room.id.toString())
-                if (!result.success) {
-                    alert(result.error || 'Failed to leave room')
-                }
-            } else {
-                alert('Room not found or invalid participant data')
-            }
-        }
-    }
+    const {
+        showJoinModal,
+        handleViewRoom,
+        handleLeaveRoom,
+        handleOpenJoinModal,
+        handleCloseJoinModal,
+        handleJoinSuccess
+    } = useJoinedRoomsManagement()
 
     const joinRoomButton = (
         <button
-            onClick={() => setShowJoinModal(true)}
+            onClick={handleOpenJoinModal}
             className="btn btn-primary"
             style={{
                 background: 'linear-gradient(135deg, #22c55e 0%, #84cc16 100%)',
@@ -71,7 +58,7 @@ export default function JoinedRoomsPage() {
                 actionButton={joinRoomButton}
             />
 
-            <div style={{ padding: '2rem' }}>
+            <div className={styles["scrollable-content"]}> {/* Changed from inline style to className */}
                 <RoomCardsList
                     rooms={joinedRooms}
                     onViewRoom={handleViewRoom}
@@ -89,8 +76,9 @@ export default function JoinedRoomsPage() {
 
             <JoinRoomModal
                 isOpen={showJoinModal}
-                onClose={() => setShowJoinModal(false)}
+                onClose={handleCloseJoinModal}
+                onSuccess={handleJoinSuccess}
             />
         </LoadingOverlay>
     )
-};
+}

@@ -99,6 +99,23 @@ class InMemoryCache {
     }
 
     /**
+     * Delete all cache entries matching a pattern (RegExp or string)
+     * @param {RegExp|string} pattern - Pattern to match keys (string will be converted to RegExp)
+     * @returns {number} Number of deleted keys
+     */
+    deletePattern(pattern) {
+        let regex = pattern instanceof RegExp ? pattern : new RegExp(pattern);
+        const keysToDelete = [];
+        for (const key of this.cache.keys()) {
+            if (regex.test(key)) {
+                keysToDelete.push(key);
+            }
+        }
+        keysToDelete.forEach(key => this.delete(key));
+        return keysToDelete.length;
+    }
+
+    /**
      * Get cache statistics
      */
     getStats() {
