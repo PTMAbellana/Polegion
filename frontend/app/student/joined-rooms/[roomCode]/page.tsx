@@ -30,7 +30,7 @@ export default function StudentRoomDetailsPage({ params }: { params: Promise<{ r
         copySuccess,
         handleLeaveRoom,
         handleCopyRoomCode
-    } = useStudentRoomManagement(roomCode, currentRoom?.id?.toString())
+    } = useStudentRoomManagement(roomCode, currentRoom?.id)
 
     useEffect(() => {
         if (roomCode && isLoggedIn) {

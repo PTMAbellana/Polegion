@@ -1,26 +1,12 @@
 import React, { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
-import * as yup from 'yup'
 import { useStudentRoomStore } from '@/store/studentRoomStore'
 import styles from '@/styles/room.module.css'
+import { JoinRoomFormData, JoinRoomModalProps } from '@/types'
+import { joinRoomSchema } from '@/schemas/roomSchemas'
 
-const joinRoomSchema = yup.object().shape({
-    roomCode: yup.string()
-        .required("Room code is required")
-        .min(6, "Room code must be at least 6 characters")
-})
-
-interface JoinRoomFormData {
-    roomCode: string
-}
-
-interface JoinRoomModalProps {
-    isOpen: boolean
-    onClose: () => void
-}
-
-export default function JoinRoomModal({ isOpen, onClose }: JoinRoomModalProps) {
+export default function JoinRoomModal({ isOpen, onClose, onSuccess }: JoinRoomModalProps) {
     const { joinRoom, joinLoading } = useStudentRoomStore()
     const [submitError, setSubmitError] = useState<string>('')
 
@@ -37,10 +23,16 @@ export default function JoinRoomModal({ isOpen, onClose }: JoinRoomModalProps) {
         setSubmitError('')
         
         try {
+            console.log('Attempting to join room with code:', data.roomCode)
             const result = await joinRoom(data.roomCode)
             if (result.success) {
-                reset()
                 onClose()
+                console.log('Attempting to join room with code:', data.roomCode)
+                if (onSuccess) {
+                    console.log('Joined room with code:', data.roomCode)
+                    onSuccess(data.roomCode)
+                }
+                reset()
             } else {
                 setSubmitError(result.error || 'Failed to join room')
             }

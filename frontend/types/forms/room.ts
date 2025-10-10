@@ -18,3 +18,7 @@ export interface EditRoomFormData {
     description: string
     mantra: string
 }
+
+export interface JoinRoomFormData {
+    roomCode: string
+}

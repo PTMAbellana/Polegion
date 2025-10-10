@@ -23,7 +23,6 @@ export const useJoinedRoomsManagement = () => {
             return
         }
 
-        // Show SweetAlert2 confirmation
         const result = await Swal.fire({
             title: 'Leave Room?',
             text: `Are you sure you want to leave "${room.title}"? You can rejoin later with the room code.`,
@@ -72,9 +71,7 @@ export const useJoinedRoomsManagement = () => {
     }
 
     const handleJoinSuccess = (roomCode: string) => {
-        // Show success toast
         toast.success('Successfully joined room!')
-        // Redirect to the room details page
         router.push(`${STUDENT_ROUTES.JOINED_ROOMS}/${roomCode}`)
     }
 

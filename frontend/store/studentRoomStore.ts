@@ -138,17 +138,12 @@ export const useStudentRoomStore = create<ExtendedStudentRoomState>()(
                 try {
                     const response = await apiJoinRoom(roomCode);
                     if (response.success) {
-                        // Refresh the joined rooms list after successful join
-                        const joinedResponse = await apiGetJoinedRooms();
-                        if (joinedResponse.success) {
-                            const newJoin = response.data;
-                            set(state => ({ 
-                                joinedRooms: [newJoin, ...state.joinedRooms],
-                                joinLoading: false
-                            }));
-                        } else {
-                            set({ joinLoading: false });
-                        }
+                        const newJoin = response.data;
+                        set(state => ({ 
+                            joinedRooms: [newJoin, ...state.joinedRooms],
+                            joinLoading: false
+                        }));
+                    
                         return { success: true, data: response.data };
                     } else {
                         set({ 

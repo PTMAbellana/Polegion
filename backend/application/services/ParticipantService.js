@@ -60,10 +60,10 @@ class ParticipantService {
     }
 
     //used
-    async joinRoom(user_id, room_code){
+async joinRoom(user_id, room_code){
         try {
 
-            const room = await this.roomService.isRoomExist(null, room_code);
+            const room = await this.roomService.getRoomByCodeUsers(room_code);
             if (!room) {
                 throw new Error('Room not found');
             }

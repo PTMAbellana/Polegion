@@ -30,3 +30,9 @@ export interface InviteParticipantModalProps {
     onClose: () => void
     onSubmit: (email: string) => Promise<void> // Add this
 }
+
+export interface JoinRoomModalProps {
+    isOpen: boolean
+    onClose: () => void
+    onSuccess?: (roomCode: string) => void
+}
