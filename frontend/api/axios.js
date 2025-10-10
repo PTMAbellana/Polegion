@@ -22,11 +22,28 @@ export const authUtils = {
 			localStorage.setItem("refresh_token", session.refresh_token);
 			localStorage.setItem("user", JSON.stringify(user));
 
-			const expiresAt = session.expires_at
-				? session.expires_at * 1000
-				: Date.now() + 24 * 60 * 60 * 1000;
+            // // ✅ Better handling of expires_at
+            // let expiresAt;
+            
+            // if (session.expires_at) {
+            //     // Check if it's in seconds (typical Unix timestamp < year 3000)
+            //     const timestamp = session.expires_at;
+                
+            //     // If timestamp is less than 10 digits, it's in seconds
+            //     // If more than 10 digits, it's already in milliseconds
+            //     if (timestamp < 10000000000) {
+            //         // It's in seconds, convert to milliseconds
+            //         expiresAt = timestamp * 1000;
+            //     } else {
+            //         // Already in milliseconds
+            //         expiresAt = timestamp;
+            //     }
+            // } else {
+            //     // Fallback: Default to 1 hour from now
+            //     expiresAt = Date.now() + (60 * 60 * 1000);
+            // }
 
-			localStorage.setItem("expires_at", expiresAt.toString());
+			localStorage.setItem("expires_at", session.expires_at);
 		}
 	},
 
@@ -45,8 +62,8 @@ export const authUtils = {
 	},
 
 	isTokenValid: () => {
-		const expiresAt = parseInt(localStorage.getItem("expires_at") || "0");
-		return expiresAt > Date.now();
+		const expiresAt = parseInt(localStorage.getItem("expires_at") || 0);
+		return expiresAt > Math.floor(Date.now() / 1000);
 	},
 
 	clearAuthData: () => {

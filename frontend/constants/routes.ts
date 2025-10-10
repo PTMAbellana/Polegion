@@ -50,7 +50,7 @@ export const STUDENT_ROUTES = {
     EDIT_PROFILE: `/student${ROUTES.EDIT_PROFILE}`,
 
     // play competition
-    PLAY: `/student${ROUTES.PLAY}`,
+    PLAY: `/student${ROUTES.COMPETITION}`,
 }
 
 export const TEACHER_ROUTES = {
