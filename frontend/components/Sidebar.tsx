@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import toast from "react-hot-toast";
@@ -21,7 +21,7 @@ const Sidebar = (
     const [isCollapsed, setIsCollapsed] = useState(true);
     const [isMobile, setIsMobile] = useState(false);
     const [isHovering, setIsHovering] = useState(false);
-
+    const sidebarRef = useRef<HTMLDivElement>(null);
 
     const navItems = userRole === 'teacher' ? teacherNavItems : studentNavItems;
 
@@ -40,6 +40,35 @@ const Sidebar = (
             window.removeEventListener('resize', checkMobile);
         };
     }, []);
+
+    // Handle click outside to close sidebar on mobile
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            // Only handle on mobile when sidebar is open
+            if (!isMobile || isCollapsed) return;
+
+            const target = event.target as Node;
+            
+            // Check if click is outside sidebar and not on the toggle button
+            if (
+                sidebarRef.current && 
+                !sidebarRef.current.contains(target) &&
+                !(target as Element).closest(`.${styles["mobile-toggle-btn"]}`)
+            ) {
+                setIsCollapsed(true);
+            }
+        };
+
+        // Add event listener
+        if (isMobile && !isCollapsed) {
+            document.addEventListener('mousedown', handleClickOutside);
+        }
+
+        // Cleanup
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [isMobile, isCollapsed]);
 
     const handleLogout = async () => {
         // Show SweetAlert confirmation dialog
@@ -128,8 +157,17 @@ const Sidebar = (
 
             {isLoggedIn && (
                 <>
+                    {/* Mobile Overlay */}
+                    {isMobile && !isCollapsed && (
+                        <div 
+                            className={styles.overlay}
+                            onClick={() => setIsCollapsed(true)}
+                        />
+                    )}
+
                     {/* Sidebar */}
                     <div 
+                        ref={sidebarRef}
                         className={sidebarClass}
                         onMouseEnter={handleMouseEnter}
                         onMouseLeave={handleMouseLeave}
