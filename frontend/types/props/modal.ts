@@ -1,4 +1,5 @@
 import { RoomType } from "../common";
+import { useSecurityActions } from "@/hooks/profile/useSecurityActions"
 import { EditRoomFormData } from "../forms";
 
 export interface ModalProps {
@@ -35,4 +36,18 @@ export interface JoinRoomModalProps {
     isOpen: boolean
     onClose: () => void
     onSuccess?: (roomCode: string) => void
+}
+
+export interface PasswordChangeModalProps {
+    isOpen: boolean
+    onClose: () => void
+    onSuccess: () => void
+    securityHook: ReturnType<typeof useSecurityActions>
+}
+
+export interface EmailChangeModalProps {
+    isOpen: boolean
+    onClose: () => void
+    onSuccess: () => void
+    securityHook: ReturnType<typeof useSecurityActions>
 }

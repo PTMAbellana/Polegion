@@ -32,3 +32,5 @@ export const BREAKPOINTS = {
   LG: 1024,
   XL: 1280,
 } as const;
+
+export type TabType = 'problems' | 'competitions'

@@ -3,15 +3,8 @@ import { FaBook, FaTrophy } from 'react-icons/fa'
 import styles from '@/styles/room-details.module.css'
 import ProblemsTab from './ProblemsTab'
 import CompetitionsTab from './CompetitionsTab'
-import { TProblemType, SProblemType, CompetitionType } from '@/types'
-
-interface TabContainerProps {
-    problems: (TProblemType | SProblemType)[]
-    competitions: CompetitionType[]
-    roomCode: string
-}
-
-type TabType = 'problems' | 'competitions'
+import { TabContainerProps } from '@/types'
+import { TabType } from '@/constants/ui'
 
 export default function TabContainer({ problems, competitions, roomCode }: TabContainerProps) {
     const [activeTab, setActiveTab] = useState<TabType>('problems')

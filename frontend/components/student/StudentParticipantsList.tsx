@@ -1,11 +1,7 @@
 import React from 'react'
 import { FaUsers } from 'react-icons/fa'
 import styles from '@/styles/room-details.module.css'
-import { UserType } from '@/types'
-
-interface StudentParticipantsListProps {
-    participants: UserType[]
-}
+import { StudentParticipantsListProps } from '@/types'
 
 export default function StudentParticipantsList({ 
     participants

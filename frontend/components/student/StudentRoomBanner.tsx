@@ -4,15 +4,8 @@ import { useRouter } from 'next/navigation'
 import styles from '@/styles/room-details.module.css'
 import { useStudentRoomStore } from '@/store/studentRoomStore'
 import { STUDENT_ROUTES } from '@/constants/routes'
+import { StudentRoomBannerProps } from '@/types'
 
-interface StudentRoomBannerProps {
-    title?: string
-    description?: string
-    mantra?: string
-    banner_image?: string | File | null
-    roomId: string
-    onLeaveRoom: () => void
-}
 
 export default function StudentRoomBanner({
     title,

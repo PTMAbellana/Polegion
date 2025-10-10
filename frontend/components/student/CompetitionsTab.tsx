@@ -2,12 +2,8 @@ import React from 'react'
 import { useRouter } from 'next/navigation'
 import { FaTrophy, FaExternalLinkAlt } from 'react-icons/fa'
 import styles from '@/styles/room-details.module.css'
-import { CompetitionType } from '@/types'
 import { STUDENT_ROUTES } from '@/constants/routes'
-
-interface CompetitionsTabProps {
-    competitions: CompetitionType[]
-}
+import { CompetitionsTabProps } from '@/types'
 
 export default function CompetitionsTab({ competitions }: CompetitionsTabProps) {
     const router = useRouter()

@@ -55,3 +55,16 @@ export interface ParticipantsSidebarProps {
     participants: UserType[]
     onInviteParticipants: () => void
 }
+
+export interface StudentRoomBannerProps {
+    title?: string
+    description?: string
+    mantra?: string
+    banner_image?: string | File | null
+    roomId: string
+    onLeaveRoom: () => void
+}
+
+export interface StudentParticipantsListProps {
+    participants: UserType[]
+}
