@@ -59,11 +59,30 @@ export const getAllParticipants = async (room_id, type='user', withXp=false, com
     const compeParam = compe_id ? `compe_id=${compe_id}` : '';
     const query = [xpParam, compeParam].filter(Boolean).join('&');
 
-    return type === 'user' ? 
-      await api.get(`/participants/user/lists/${room_id}${query ? '?' + query : ''}`) : 
-      await api.get(`/participants/creator/lists/${room_id}${query ? '?' + query : ''}`);
+    let res;
+    switch (type) {
+      case 'student': 
+        res = await api.get(`/participants/student/lists/${room_id}${query ? '?' + query : ''}`);
+        break;
+      case 'teacher':
+      case 'creator':
+        res = await api.get(`/participants/creator/lists/${room_id}${query ? '?' + query : ''}`);
+        break;
+      default:
+        throw new Error('Invalid type parameter. Must be "user" or "creator".');  
+    }
+    return {
+      success: true,
+      data: res.data.data,
+      message: 'Participants fetched successfully'
+    }
   } catch (error) {
-    throw error;
+    return {
+      success: false,
+      message: error.response?.data?.message || 'Server error fetching participants',
+      error: error.response?.data?.error || error.message,
+      status: error.response?.status || 500
+    }
   }
 };
 

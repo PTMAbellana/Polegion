@@ -56,7 +56,7 @@ class CompeService {
             }
             
             console.log("Fetching competitions for room:", room_id, "User ID:", user_id, "Type:", type)
-            if (type === 'admin') {
+            if (type === 'admin' || type === 'creator' || type === 'teacher') {
                 const room = await this.roomService.getRoomById(room_id, user_id)
                 if (!room) throw new Error("Room not found")
             } else {
@@ -67,11 +67,13 @@ class CompeService {
             const data = await this.compeRepo.getCompeByRoomId(room_id)
             if (!data || data.length === 0) return []
             
+            const compe = data.map(comp => comp.toDTO());
+
             // Cache the result
-            cache.set(cacheKey, data);
+            cache.set(cacheKey, compe);
             console.log('Cache miss: getCompeByRoomId', room_id, type);
             
-            return data
+            return compe
         } catch (error) {
             throw error
         }

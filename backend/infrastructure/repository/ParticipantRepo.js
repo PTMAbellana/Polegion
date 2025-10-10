@@ -24,7 +24,6 @@ class ParticipantRepo extends BaseRepo {
 
             return data
         } catch(error){
-            console.log('akdask', error)
             throw error
         }
     }
@@ -39,9 +38,12 @@ class ParticipantRepo extends BaseRepo {
             .eq('user_id', user_id)
             .eq('room_id', room_id)
             .select()
+            .single()
 
             if (error) throw error
             
+            if (!data) return new Error('Participant not found')
+
             return data
         } catch (error) {
             throw error

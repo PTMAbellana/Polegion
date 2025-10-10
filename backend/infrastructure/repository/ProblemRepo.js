@@ -47,7 +47,7 @@ class ProblemRepo {
     }
   }
 
-  async fetchRoomProblems(room_id, creator_id) {
+  async fetchRoomProblems(room_id) {
     try {
       const {
         data, 
@@ -56,7 +56,6 @@ class ProblemRepo {
       .from(this.tableName)
       .select('*')
       .eq('room_id', room_id)
-      .eq('creator_id', creator_id)
       .order('created_at', {
         ascending: false
       })

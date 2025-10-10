@@ -11,4 +11,5 @@ export interface SProblemType {
 // for teacher view under room details
 export interface TProblemType extends SProblemType {
   visibility: 'show' | 'hide';
+  expected_solution?: object | null; // expected solution for auto-grading, null means no expected solution
 }

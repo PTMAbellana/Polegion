@@ -4,13 +4,16 @@ import { ExtendedStudentRoomState } from '@/types/state/rooms'
 import { 
     getJoinedRooms as apiGetJoinedRooms, 
     joinRoom as apiJoinRoom, 
-    leaveRoom as apiLeaveRoom 
+    leaveRoom as apiLeaveRoom, 
+    getAllParticipants
 } from '@/api/participants'
-import { getRoomByCode } from '@/api/rooms';
+import { getRoomProblems } from '@/api/problems';
+import { CompetitionType, SProblemType, UserType } from '@/types';
+import { getAllCompe } from '@/api/competitions';
 
 export const useStudentRoomStore = create<ExtendedStudentRoomState>()(
     persist(
-        (set) => ({
+        (set, get) => ({
             joinedRooms: [],
             loading: false,
             error: null,
@@ -22,28 +25,78 @@ export const useStudentRoomStore = create<ExtendedStudentRoomState>()(
             fetchRoomDetails: async (roomCode: string) => {
                 set({ roomLoading: true, error: null });
                 try {
-                    const response = await getRoomByCode(roomCode, 'student');
-                    console.log('Fetched room details:', response);
-                    
-                    if (response.success) {
-                        set({ 
-                            currentRoom: response.data,
-                            roomLoading: false 
-                        });
-                    } else {
-                        set({ 
+                    const room = get().joinedRooms.find(r => r.code === roomCode);
+                    if (!room) {
+                        console.log('Room not found with code:', roomCode);
+                        set ({
+                            error: 'Room not found',
                             currentRoom: null,
-                            roomLoading: false,
-                            error: response.error || 'Room not found'
                         });
+                        return;
                     }
+
+                    const [resPart, resProb, resCompe] = await Promise.allSettled([
+                        getAllParticipants(room.id, 'student'), 
+                        getRoomProblems(room.id, 'student'),
+                        getAllCompe(room.id, 'student')
+                    ]);
+                    
+                    let participants: UserType[];
+                    let problems: SProblemType[];
+                    let competitions: CompetitionType[] = [{
+                        id: 1,
+                        title: 'Math Competition',
+                        status: 'active'
+                    }];
+
+                    if (resPart.status === 'fulfilled') {
+                        console.log('Fetched participants:', resPart.value);
+                        participants = resPart.value.success ? resPart.value.data : [];
+                    } else {
+                        console.log('Failed to fetch participants:', resPart.reason);
+                        participants = [];
+                    }
+                    if (resProb.status === 'fulfilled') {
+                        console.log('Fetched problems:', resProb.value);
+                        problems = resProb.value.success ? resProb.value.data : [];
+                    } else {
+                        console.log('Failed to fetch problems:', resProb.reason);
+                        problems = [];
+                    }
+
+                    if (resCompe.status === 'fulfilled') {
+                        console.log('Fetched competitions:', resCompe.value);
+                        competitions = resCompe.value.success ? resCompe.value.data : [];
+                    } else {
+                        console.log('Failed to fetch competitions:', resCompe.reason);
+                        competitions = [];
+                    }
+                    
+                    set({
+                        currentRoom: {
+                            ...room,
+                            participants,
+                            problems,
+                            competitions,
+                            teacher: {
+                                first_name: 'John',
+                                last_name: 'Doe',
+                                gender: 'male',
+                                profile_pic: null,
+                                role: 'teacher'
+                            }
+                        }
+                    });
                 } catch (error: unknown) {
                     const errorMessage = error instanceof Error ? error.message : 'Failed to fetch room details';
+                    console.error('Fetch room details error:', error);
                     set({ 
                         error: errorMessage,
                         roomLoading: false,
                         currentRoom: null
                     });
+                } finally {
+                    set({ roomLoading: false });
                 }
             },
 
@@ -123,13 +176,11 @@ export const useStudentRoomStore = create<ExtendedStudentRoomState>()(
                             joinedRooms: state.joinedRooms.filter(room => 
                                 room.id !== roomId
                             ),
-                            loading: false 
                         }));
                         return { success: true };
                     } else {
                         set({ 
                             error: response.error || 'Failed to leave room',
-                            loading: false 
                         });
                         return { success: false, error: response.error || 'Failed to leave room' };
                     }
@@ -137,9 +188,10 @@ export const useStudentRoomStore = create<ExtendedStudentRoomState>()(
                     const errorMessage = error instanceof Error ? error.message : 'Failed to leave room';
                     set({ 
                         error: errorMessage,
-                        loading: false 
                     });
                     return { success: false, error: errorMessage };
+                } finally {
+                    set({ loading: false });
                 }
             },
 

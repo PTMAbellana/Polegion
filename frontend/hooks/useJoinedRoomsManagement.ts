@@ -43,18 +43,6 @@ export const useJoinedRoomsManagement = () => {
         })
 
         if (result.isConfirmed) {
-            // Show loading indicator
-            Swal.fire({
-                title: 'Leaving room...',
-                text: 'Please wait while we process your request.',
-                icon: 'info',
-                allowOutsideClick: false,
-                allowEscapeKey: false,
-                showConfirmButton: false,
-                didOpen: () => {
-                    Swal.showLoading()
-                }
-            })
 
             try {
                 // Use room_code instead of id for the API call

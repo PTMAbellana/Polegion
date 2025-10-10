@@ -32,18 +32,20 @@ class Participant {
 
     toReturnRoomDTO(){
         return {
-            id: this.id,   
+            id: this.room.id,
             title: this.room.title,
             description: this.room.description,
             mantra: this.room.mantra,
             banner_image: this.room.banner_image,
             code: this.room.code,
+            participant_id: this.id,   
         }
     }       
 
     toReturnUserDTO(){
         return {
-            id: this.id,
+            participant_id: this.id,
+            user_id: this.user.id,
             first_name: this.user.first_name || this.user.firstName,
             last_name: this.user.last_name || this.user.lastName,
             profile_pic: this.user.profile_pic,

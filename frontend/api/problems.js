@@ -11,11 +11,21 @@ export const createProblem = async (problemData, room_code) => {
   }
 };
 
-export const getRoomProblems = async(room_id) => {
+export const getRoomProblems = async(room_id, type='admin') => {
   try {
-    return (await api.get(`/problems/${room_id}`)).data
+    const res = await api.get(`/problems/${room_id}`, { params: { type } })
+    return {
+      success: true,
+      message: res.data.message,
+      data: res.data.data
+    }
   } catch (error) {
-    throw error
+    return {
+      success: false,
+      message: error.response?.data?.message || 'Server error failed to get problems',
+      error: error.response?.data?.error || error.message,
+      status: error.response?.status || 500
+    }
   }
 }
 

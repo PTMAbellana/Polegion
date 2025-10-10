@@ -1,6 +1,5 @@
 const roomModel = require('../../domain/models/Room');
 const cache = require('../cache');
-const service = require('../services');
 
 class RoomService {
     constructor(roomRepo){
@@ -19,7 +18,6 @@ class RoomService {
         return result;
     }
 
-    //used
     async getRooms (user_id){
         try {
             const cacheKey = cache.generateKey('user_rooms', user_id);
@@ -98,8 +96,7 @@ class RoomService {
         }
     }
 
-    //used
-    // for teachers and admins
+    // for admin
     async getRoomByCode (roomCode, user_id){
         try {
             const cacheKey = cache.generateKey('room_by_code_admin', roomCode, user_id);
@@ -112,16 +109,8 @@ class RoomService {
             }
             
             // Fetch from database
-            const room = await this.roomRepo.getRoomByCode(roomCode, user_id);
-            if (!room) throw new Error('Room not found');
-            const participants =  await service.participantService.getRoomParticipantsForAdmin(room.id, user_id);
-            const problems = await service.problemService.fetchRoomProblems(room.id, user_id);
-
-            const result = {
-                ...room.toDTO(),
-                participants: participants.map(p => p.toReturnUserDTO()),
-                problems: problems.map(p => p.toReturnTeacherDTO()),
-            }
+            const result = await this.roomRepo.getRoomByCode(roomCode, user_id);
+            
             // Cache the result
             if (result) {
                 cache.set(cacheKey, result, this.CACHE_TTL);
@@ -134,9 +123,8 @@ class RoomService {
         }
     }
     
-    //used
-    // for student
-    async getRoomByCodeUsers (roomCode, user_id){
+    // for participants
+    async getRoomByCodeUsers (roomCode){
         try {
             const cacheKey = cache.generateKey('room_by_code_users', roomCode);
             
@@ -148,27 +136,8 @@ class RoomService {
             }
             
             // Fetch from database
-            const room = await this.roomRepo.getRoomByCodeUsers(roomCode);
-            if (!room) throw new Error('Room not found');
-
-            const part = await service.participantService.getPartInfoByUserId(user_id, room.id)
-
-            if (!part) {
-                throw new Error('Not a participant of the room');
-            }
-            const participants =  await service.participantService.getRoomParticipantsForUser(room.id, user_id);
-            const problems = await service.problemService.fetchRoomProblems(room.id, room.user_id);
-            const teacher = await service.userService.getUserById(room.user_id);
-            const competitions = await service.competitionService.getAllCompeByRoomId(room.id);
-
-            const result = {
-                ...room.toDTO(),
-                participant_id: part, // no participant id for students
-                participants: participants.map(p => p.toReturnUserDTO()), // no participants for students
-                problems: problems.map(p => p.toReturnStudentDTO()),
-                competitions: competitions.map(c => c.toDTO()),
-                teacher: teacher 
-            }
+            const result = await this.roomRepo.getRoomByCodeUsers(roomCode);
+            
             // Cache the result
             if (result) {
                 cache.set(cacheKey, result, this.CACHE_TTL);
@@ -177,7 +146,6 @@ class RoomService {
             
             return result;
         } catch (error) {
-            console.log(error)
             throw error
         }
     }
@@ -255,14 +223,9 @@ class RoomService {
         }
     }
 
-    async isRoomExist(room_id = null, room_code = null){
+    async isRoomExist(room_id){
         try {
-            if (room_id) {
-                return await this.roomRepo.isRoomExistById(room_id);
-            } else if (room_code) {
-                return await this.roomRepo.getRoomByCodeUsers(room_code);
-            }
-            return false;
+            return await this.roomRepo.isRoomExistById(room_id)
         } catch (error) {
             throw error
         }

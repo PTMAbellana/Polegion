@@ -6,17 +6,18 @@ import {
     createRoom as apiCreateRoom, 
     updateRoom as apiUpdateRoom, 
     deleteRoom as apiDeleteRoom,
-    uploadImage,
-    getRoomByCode
+    uploadImage
 } from '@/api/rooms'
 import {
-    inviteParticipant as apiInviteParticipant
+    inviteParticipant as apiInviteParticipant,
+    getAllParticipants
 } from '@/api/participants'
 import { CreateRoomData, UpdateRoomData } from '@/types';
+import { getRoomProblems } from '@/api/problems'
 
 export const useTeacherRoomStore = create<ExtendTeacherRoomState>()(
     persist(
-        (set) => ({
+        (set, get) => ({
             createdRooms: [],
             loading: false,
             error: null,
@@ -28,17 +29,37 @@ export const useTeacherRoomStore = create<ExtendTeacherRoomState>()(
             fetchRoomDetails: async (roomCode: string) => {
                 set({ roomLoading: true });
                 try {
-                    const response = await getRoomByCode(roomCode, 'teacher');
-                    if (response.success) {
-                        set({ 
-                            currentRoom: response.data 
+                    const room = get().createdRooms.find(r => r.code === roomCode);
+                    if (!room) {
+                        set ({
+                            error: 'Room not found',
+                            currentRoom: null,
+                            roomLoading: false
                         });
-                    } else {
-                        set({ 
-                            error: response.error || 'Failed to fetch room details',
-                            currentRoom: null
-                        });
+                        return;
                     }
+                    const [resPart, resProb] = await Promise.allSettled([getAllParticipants(room.id, 'teacher'), getRoomProblems(room.id)]);
+                    
+                    let participants;
+                    let problems;
+
+                    if (resPart.status === 'fulfilled') {
+                        participants = resPart.value.success ? resPart.value.data : [];
+                    } else {
+                        participants = [];
+                    }
+                    if (resProb.status === 'fulfilled') {
+                        problems = resProb.value.success ? resProb.value.data : [];
+                    } else {
+                        problems = [];
+                    }
+                    set({
+                        currentRoom: {
+                            ...room,
+                            participants,
+                            problems
+                        }
+                    });
                 } catch (error: unknown) {
                     const errorMessage = error instanceof Error ? error.message : 'Failed to fetch room details';
                     set({

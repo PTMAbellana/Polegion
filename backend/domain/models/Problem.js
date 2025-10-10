@@ -61,7 +61,8 @@ class Problem {
             visibility: this.visibility,
             difficulty: this.difficulty,
             max_attempts: this.max_attempts,
-            timer: this.timer
+            timer: this.timer,
+            expected_solution: this.expected_solution
         }
     }
 

@@ -32,19 +32,19 @@ class ProblemService {
     }
   }
   
-  async fetchRoomProblems(room_id, creator_id) {
+  async fetchRoomProblems(room_id, type) {
     try {
-      const cacheKey = cache.generateKey('room_problems', room_id, creator_id);
+      const cacheKey = cache.generateKey('room_problems', room_id);
       
       // Check cache first
       const cached = cache.get(cacheKey);
       if (cached) {
-        console.log('Cache hit: fetchRoomProblems', room_id, creator_id);
+        console.log('Cache hit: fetchRoomProblems', room_id);
         return cached;
       }
-      
-      const problems = await this.problemRepo.fetchRoomProblems(room_id, creator_id);
-      
+
+      const problems = await this.problemRepo.fetchRoomProblems(room_id, type);
+
       if (!problems || problems.length === 0) return [];
       
       const problemsWithTimers = await Promise.all(
@@ -53,12 +53,18 @@ class ProblemService {
           return problemModel.fromDbProbTimer({...problem, timer: timerData?.timer});
         })
       );
-      
+
       // Cache the result
       cache.set(cacheKey, problemsWithTimers, this.CACHE_TTL);
-      console.log('Cached: fetchRoomProblems', room_id, creator_id);
+      console.log('Cached: fetchRoomProblems', room_id);
+
+      if (type !== 'student') {        
+        return problemsWithTimers
+          .filter(p => p.visibility === 'show')
+          .map(p => p.toReturnTeacherDTO());
+      }
       
-      return problemsWithTimers;
+      return problemsWithTimers.map(p => p.toReturnStudentDTO());
     } catch (error) {
       throw error;
     }

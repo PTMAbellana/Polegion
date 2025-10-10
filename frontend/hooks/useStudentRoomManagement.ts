@@ -5,7 +5,7 @@ import { STUDENT_ROUTES } from '@/constants/routes'
 import Swal from 'sweetalert2'
 import toast from 'react-hot-toast'
 
-export function useStudentRoomManagement(roomCode: string, roomId?: string) {
+export function useStudentRoomManagement(roomCode: string, roomId?: number) {
     const router = useRouter()
     const { leaveRoom, clearCurrentRoom } = useStudentRoomStore()
     const [copySuccess, setCopySuccess] = useState(false)

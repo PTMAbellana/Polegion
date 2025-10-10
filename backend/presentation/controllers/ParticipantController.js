@@ -102,8 +102,9 @@ class ParticipantController {
         try {
             const participants = await this.participantService.getRoomParticipantsForAdmin(room_id, req.user.id, withXp, compe_id)
             // console.log('getRoomParticipants called 2: ', participants)
-            res.status(200).json({
-                participants
+            return res.status(200).json({
+               message: 'Successfully fetched participants',
+               data: participants 
             })
             // console.log('getRoomParticipants called 3: ', res.data)
         } catch (error) {
@@ -111,11 +112,18 @@ class ParticipantController {
 
             if (error.message === 'Room not found or not authorized')
                 return res.status(404).json({
-                    error: 'Room not found or not authorized'
+                    message: 'Room not found or not authorized',
+                    error: 'Not found'
+                })
+            if (error.status === 401)
+                return res.status(401).json({
+                    message: 'Unauthorized',
+                    error: 'Invalid token'
                 })
 
-            res.status(500).json({
-                error: 'Server error fetching participants'
+            return res.status(500).json({
+                message: 'Server error fetching participants',
+                error: error.message
             })
         }
     }
@@ -127,17 +135,25 @@ class ParticipantController {
         const compe_id = req.query.compe_id ? parseInt(req.query.compe_id) : -1; 
         try {
             const participants = await this.participantService.getRoomParticipantsForUser(room_id, req.user.id, withXp, compe_id)
-            // console.log(participants)
-            res.status(200).json({
-                participants
+            console.log('participants: ', participants)
+            return res.status(200).json({
+                message: 'Successfully fetched participants',
+                data: participants
             })
         } catch (error) {
             if (error.message === 'Room not found or not authorized')
                 return res.status(404).json({
-                    error: 'Room not found or not authorized'
+                    message: 'Room not found or not authorized',
+                    error: 'Not found'
                 })
-            res.status(500).json({
-                error: 'Server error fetching participants'
+            if (error.status === 401)
+                return res.status(401).json({
+                    message: 'Unauthorized',
+                    error: 'Invalid token'
+                })
+            return res.status(500).json({
+                message: 'Server error fetching participants',
+                error: error.message
             })
         }
     }

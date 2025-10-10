@@ -17,14 +17,28 @@ class ProblemController {
   }
 
   getRoomProblems = async (req, res) => {
-    const { room_id } = req.params
+    const { room_id, type } = req.params
     try{
-      const problems = await this.problemService.fetchRoomProblems(room_id, req.user.id)
-      res.status(200).json(problems)
+      const problems = await this.problemService.fetchRoomProblems(room_id, type)
+      return res.status(200).json({
+        message: 'Successfully fetched problems',
+        data: problems
+      })
     } catch (error){
       console.log(error)
-      res.status(500).json({
-        error: 'Server error failed to get problems'
+      if (error.message === 'Room not found or not authorized')
+        return res.status(404).json({
+          message: 'Room not found or not authorized',
+          error: 'Not found'
+        })
+      if (error.status === 401)
+        return res.status(401).json({
+          message: 'Unauthorized',
+          error: 'Invalid token'
+        })
+      return res.status(500).json({
+        message: 'Server error failed to get problems',
+        error: error.message
       })
     }
   }

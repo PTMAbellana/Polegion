@@ -2,6 +2,7 @@
 const Mailer = require('../../utils/Mailer'); // Adjust path as needed
 const cache = require('../cache');
 const participantModel = require('../../domain/models/Participant');
+
 class ParticipantService {
     constructor(participantRepo, roomService, userService, leaderService){
         this.participantRepo = participantRepo
@@ -110,9 +111,9 @@ class ParticipantService {
     }
 
     // Get basic participants (cached longer)
-    async getRoomParticipantsBasic(room_id, creator_id) {
+    async getRoomParticipantsBasic(room_id, creator_id = null, skipAuth = false) {
         try {
-            const cacheKey = cache.generateKey('room_participants_basic', room_id, creator_id);
+            const cacheKey = cache.generateKey('room_participants_basic', room_id, creator_id || 'public');
             
             const cached = cache.get(cacheKey);
             if (cached) {
@@ -120,9 +121,11 @@ class ParticipantService {
                 return cached;
             }
             
-            // Verify room exists
-            const exist = await this.roomService.getRoomById(room_id, creator_id);
-            if (!exist) throw new Error('Room not found or not authorized');
+            // Verify room exists (only if creator_id is provided and not skipping auth)
+            if (creator_id && !skipAuth) {
+                const exist = await this.roomService.getRoomById(room_id, creator_id);
+                if (!exist) throw new Error('Room not found or not authorized');
+            }
             
             const data = await this.participantRepo.getAllParticipants(room_id);
             
@@ -200,11 +203,11 @@ class ParticipantService {
     // Combine participants with XP data
     async getRoomParticipantsForAdmin(room_id, creator_id, with_xp = false, compe_id = null) {
         try {
-            // Always get basic participants first
-            const participants = await this.getRoomParticipantsBasic(room_id, creator_id);
+            // Get participants with authorization check
+            const participants = await this.getRoomParticipantsBasic(room_id, creator_id, false);
             
             if (!with_xp) {
-                return participants;
+                return participants.map(p => p.toReturnUserDTO());
             }
             
             // Get XP data separately
@@ -214,7 +217,7 @@ class ParticipantService {
             const result = participants.map(participant => {
                 const xp = xpData.find(x => x.participant_id === participant.participant_id);
                 return {
-                    ...participant,
+                    ...participant.toReturnUserDTO(),
                     accumulated_xp: xp?.accumulated_xp ?? 0
                 };
             });
@@ -229,50 +232,23 @@ class ParticipantService {
     //ang mu get kay ang participants
     async getRoomParticipantsForUser(room_id, user_id, with_xp = false, compe_id = null) {
         try {
-
-            const cacheKey = cache.generateKey('room_participants_basic', room_id);
+            // Get participants without authorization check (skipAuth = true)
+            const participants = await this.getRoomParticipantsBasic(room_id, null, true);
             
-            const cached = cache.get(cacheKey);
-            if (cached) {
-                console.log('Cache hit: getRoomParticipantsBasic', room_id);
-                return cached;
-            }
-
-            const data = await this.participantRepo.getAllParticipants(room_id);
-            
-            const parts = await Promise.all(
-                data.map(async (parts) => {
-                    try {
-                        const userData = await this.userService.getUserById(parts.user_id);
-                        if (!userData) return null;
-                        return participantModel.fromDBParticipant(parts.id, userData, null)
-                    } catch (error) {
-                        return null;
-                    }
-                })
-            );
-
-            const participants = parts.filter(p => p !== null);
-
-            // Cache basic participants for longer
-            cache.set(cacheKey, participants, this.PARTICIPANT_CACHE_TTL);
-            console.log('Cache miss: getRoomParticipantsBasic', room_id);
-
             if (!with_xp) {
-                return participants;
+                return participants.map(p => p.toReturnUserDTO());
             }
             
+            // Get XP data separately
             const xpData = await this.getParticipantsXPData(room_id, participants, compe_id);
             
-            const result = participants.map(participant => {
+            return participants.map(participant => {
                 const xp = xpData.find(x => x.participant_id === participant.participant_id);
                 return {
-                    ...participant,
+                    ...participant.toReturnUserDTO(),
                     accumulated_xp: xp?.accumulated_xp ?? 0
                 };
             });
-            
-            return result;
         } catch (error) {
             throw error;
         }

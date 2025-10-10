@@ -274,7 +274,7 @@ class ParticipantRoutes {
 
         /**
          * @swagger
-         * /participants/user/lists/{room_id}:
+         * /participants/student/lists/{room_id}:
          *   get:
          *     tags: [Participants]
          *     summary: Get room participants (User view)
@@ -304,7 +304,7 @@ class ParticipantRoutes {
          *       404:
          *         $ref: '#/components/responses/NotFoundError'
          */
-        this.router.get('/user/lists/:room_id', this.participantController.getRoomParticipantsUser)
+        this.router.get('/student/lists/:room_id', this.participantController.getRoomParticipantsUser)
 
         /**
          * @swagger
