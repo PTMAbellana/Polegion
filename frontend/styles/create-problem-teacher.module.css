@@ -1,4 +1,22 @@
 /* Root Container - No fixed positioning */
+.variables {
+  --primary-gradient: linear-gradient(135deg, #2C514C 0%, #6D8A72 100%);
+  --secondary-gradient: linear-gradient(135deg, #eab308 0%, #f59e0b 100%);
+  --accent-gradient: linear-gradient(135deg, #65a30d 0%, #a3a833 100%);
+  --tertiary-gradient: linear-gradient(135deg, #16a34a 0%, #ca8a04 100%);
+  --card-gradient: linear-gradient(135deg, #ffffff 0%, #f7fee7 100%);
+  --background-gradient: linear-gradient(135deg, #f0fdf4 0%, #fefce8 50%, #fffbeb 100%);
+  --text-primary: #1f2937;
+  --text-secondary: #4b5563;
+  --text-success: #166534;
+  --text-warning: #92400e;
+  --text-light: #ffffff;
+  --border-radius: 1.5rem;
+  --box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  --sidebar-width: 50px;
+}
+
 .root {
   width: 100%;
   height: 100vh;
@@ -6,6 +24,7 @@
   box-sizing: border-box;
   overflow: hidden;
   position: relative;
+  composes: variables;
 }
 
 /* Back Button */
@@ -57,6 +76,66 @@
   overflow: hidden;
 }
 
+/* Playground Root - Container for Header + Workspace */
+.playgroundRoot {
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: linear-gradient(135deg, #f0fdf4 0%, #fefce8 50%, #fffbeb 100%);
+  
+  /* CSS Variables for compatibility */
+  --primary-gradient: linear-gradient(135deg, #2C514C 0%, #6D8A72 100%);
+  --secondary-gradient: linear-gradient(135deg, #eab308 0%, #f59e0b 100%);
+  --accent-gradient: linear-gradient(135deg, #65a30d 0%, #a3a833 100%);
+  --tertiary-gradient: linear-gradient(135deg, #16a34a 0%, #ca8a04 100%);
+  --card-gradient: linear-gradient(135deg, #ffffff 0%, #f7fee7 100%);
+  --background-gradient: linear-gradient(135deg, #f0fdf4 0%, #fefce8 50%, #fffbeb 100%);
+  --text-primary: #1f2937;
+  --text-secondary: #4b5563;
+  --text-success: #166534;
+  --text-warning: #92400e;
+  --text-light: #ffffff;
+  --border-radius: 1.5rem;
+  --box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.playgroundRoot::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: 
+    radial-gradient(circle at 20% 20%, rgba(34, 197, 94, 0.08) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(234, 179, 8, 0.08) 0%, transparent 50%),
+    radial-gradient(circle at 40% 60%, rgba(132, 204, 22, 0.06) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Playground Workspace - 2 Column Layout (Toolbox + Main Area only) */
+.playgroundWorkspace {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  grid-template-rows: 1fr;
+  gap: 1.5rem;
+  max-width: 1600px;
+  width: 100%;
+  height: 100%;
+  margin: 0 auto;
+  flex: 1;
+  padding: 1.5rem 2rem;
+  box-sizing: border-box;
+  overflow: hidden;
+  position: relative;
+  z-index: 1;
+  min-height: 0;
+}
+
 @media (max-width: 1400px) {
   .workspace {
     grid-template-columns: 260px 1fr 300px;
@@ -67,6 +146,10 @@
   .workspace {
     grid-template-columns: 1fr;
     gap: 1rem;
+  }
+  
+  .playgroundWorkspace {
+    grid-template-columns: 1fr;
   }
 }
 
@@ -1014,4 +1097,49 @@
   .rowBtn {
     width: 100%;
   }
+}
+
+/* ========== Playground-Specific Overrides ========== */
+
+/* Force grid items to take full height */
+.playgroundWorkspace > * {
+  min-height: 0;
+  overflow: hidden;
+}
+
+.playgroundWorkspace .sidebar {
+  display: flex;
+  flex-direction: column;
+}
+
+.playgroundWorkspace .toolbox {
+  flex: 1;
+  max-height: 100%;
+  overflow-y: auto;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.playgroundWorkspace .mainContent {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.playgroundWorkspace .mainArea {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+}
+
+.playgroundWorkspace .mainAreaHeader {
+  flex-shrink: 0;
+}
+
+.playgroundWorkspace .stageContainer {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }

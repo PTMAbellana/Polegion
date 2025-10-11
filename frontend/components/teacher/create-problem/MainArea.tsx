@@ -1,9 +1,9 @@
 import React, { useRef, useState } from "react";
 import { Stage, Layer } from "react-konva";
 import styles from "@/styles/create-problem-teacher.module.css";
-import CircleShape from "./shapes/CircleShape";
 import SquareShape from "./shapes/SquareShape";
 import TriangleShape from "./shapes/TriangleShape";
+import CircleShape from "./shapes/CircleShape";
 
 interface Point {
   x: number;
@@ -70,7 +70,9 @@ const MainArea: React.FC<MainAreaProps> = ({
     const updateStageSize = () => {
       if (mainAreaRef.current) {
         const rect = mainAreaRef.current.getBoundingClientRect();
-        const headerHeight = 48;
+        // Dynamically get header height instead of hardcoding
+        const header = mainAreaRef.current.firstElementChild;
+        const headerHeight = header ? header.getBoundingClientRect().height : 40;
         
         setStageSize({
           width: rect.width,
@@ -79,10 +81,25 @@ const MainArea: React.FC<MainAreaProps> = ({
       }
     };
 
-    updateStageSize();
+    // Initial size calculation with small delay to ensure layout is ready
+    const timer = setTimeout(updateStageSize, 50);
+    
+    // Use ResizeObserver for more reliable size updates
+    const resizeObserver = new ResizeObserver(() => {
+      updateStageSize();
+    });
+
+    if (mainAreaRef.current) {
+      resizeObserver.observe(mainAreaRef.current);
+    }
+
     window.addEventListener('resize', updateStageSize);
     
-    return () => window.removeEventListener('resize', updateStageSize);
+    return () => {
+      clearTimeout(timer);
+      resizeObserver.disconnect();
+      window.removeEventListener('resize', updateStageSize);
+    };
   }, []);
 
   const handleDrop = (e: React.DragEvent) => {
