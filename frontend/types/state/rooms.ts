@@ -41,8 +41,16 @@ export interface ExtendedStudentRoomState extends StudentRoomState {
 export interface ExtendTeacherRoomState extends TeacherRoomState {
     currentRoom: RoomDetails | null; 
     roomLoading: boolean;
-    inviteParticipant: (roomCode: string, email: string) => Promise<{ success: boolean; error?: string }>;
+    inviteParticipant: (roomCode: string, email: string) => Promise<{ success: boolean; error?: string; message?: string }>;
     
     fetchRoomDetails: (roomCode: string) => Promise<void>;
     clearCurrentRoom: () => void;
+
+    // Problem Management
+    problems: any[];
+    currentProblem: any | null;
+    problemLoading: boolean;
+    fetchProblems: (roomCode: string) => Promise<void>;
+    setCurrentProblem: (problem: any) => void;
+    clearCurrentProblem: () => void;
 }

@@ -29,6 +29,10 @@ export const useTeacherRoomStore = create<ExtendTeacherRoomState>()(
             fetchRoomDetails: async (roomCode: string) => {
                 set({ roomLoading: true });
                 try {
+                    const currentRoom = get().currentRoom;
+                    if (currentRoom !== null && currentRoom.code === roomCode) {
+                        return;
+                    }
                     const room = get().createdRooms.find(r => r.code === roomCode);
                     if (!room) {
                         set ({
@@ -308,7 +312,40 @@ export const useTeacherRoomStore = create<ExtendTeacherRoomState>()(
 
             clearError: () => {
                 set({ error: null });
-            }
+            },
+
+            // Problem Management
+            problems: [],
+            currentProblem: null,
+            problemLoading: false,
+
+            fetchProblems: async (roomCode: string) => {
+                set({ problemLoading: true, error: null });
+                try {
+                    const room = get().createdRooms.find(r => r.code === roomCode);
+                    if (!room) {
+                        set({ problemLoading: false, error: 'Room not found' });
+                        return;
+                    }
+                    const response = await getRoomProblems(room.id);
+                    if (response.success) {
+                        set({ problems: response.data, problemLoading: false });
+                    } else {
+                        set({ problems: [], problemLoading: false, error: response.error });
+                    }
+                } catch (error: unknown) {
+                    const errorMessage = error instanceof Error ? error.message : 'Failed to fetch problems';
+                    set({ error: errorMessage, problemLoading: false });
+                }
+            },
+
+            setCurrentProblem: (problem) => {
+                set({ currentProblem: problem });
+            },
+
+            clearCurrentProblem: () => {
+                set({ currentProblem: null });
+            },
         }),
         {
             name: 'teacher-rooms',
