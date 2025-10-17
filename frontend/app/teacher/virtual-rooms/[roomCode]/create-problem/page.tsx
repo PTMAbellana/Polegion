@@ -2,7 +2,7 @@
 
 import styles from "@/styles/create-problem-teacher.module.css";
 import { useRouter } from "next/navigation";
-import React, { useState, useEffect, useCallback, use } from "react";
+import React, { useEffect, useCallback, use } from "react";
 import Swal from "sweetalert2";
 
 // Components
@@ -23,7 +23,7 @@ import { useProblemFormState } from "@/hooks/teacher/useProblemFormState";
 
 // Store and API
 import { useTeacherRoomStore } from "@/store/teacherRoomStore";
-import { createProblem, updateProblem, deleteProblem } from "@/api/problems";
+import { ProblemPayload, TProblemType } from "@/types";
 
 const XP_MAP = { Easy: 10, Intermediate: 20, Hard: 30 };
 const MAX_SHAPES = 1;
@@ -33,7 +33,17 @@ export default function CreateProblemPage({ params }: { params: Promise<{ roomCo
   const { roomCode } = use(params);
 
   // Store
-  const { problems, fetchProblems, currentProblem, setCurrentProblem, clearCurrentProblem } = useTeacherRoomStore();
+  const { 
+    currentRoom, 
+    currentProblem, 
+    setCurrentProblem, 
+    clearCurrentProblem,
+    addProblemToRoom,
+    updateProblemInRoom,
+    removeProblemFromRoom
+} = useTeacherRoomStore();
+console.log("Current Room in CreateProblemPage:", currentRoom);
+  const problems : TProblemType[] = currentRoom?.problems || [];
 
   // Custom hooks
   const {
@@ -90,19 +100,21 @@ export default function CreateProblemPage({ params }: { params: Promise<{ roomCo
     resetForm,
   } = useProblemFormState();
 
-  // Load problems on mount
-  useEffect(() => {
-    if (roomCode) {
-      fetchProblems(roomCode);
-    }
-  }, [roomCode, fetchProblems]);
-
   // Focus prompt input when editing
   useEffect(() => {
     if (editingPrompt && promptInputRef.current) {
       promptInputRef.current.focus();
     }
   }, [editingPrompt]);
+
+
+  // ADD THIS NEW USEEFFECT:
+  // Load room details (including problems) when page loads
+  // useEffect(() => {
+  //   if (roomCode && (!currentRoom || currentRoom.code !== roomCode)) {
+  //     fetchRoomDetails(roomCode);
+  //   }
+  // }, [roomCode, currentRoom, fetchRoomDetails]);
 
   // Handle keyboard delete for shapes
   useEffect(() => {
@@ -133,76 +145,110 @@ export default function CreateProblemPage({ params }: { params: Promise<{ roomCo
   const handleSave = async () => {
     const shapesWithProps = shapes.map(getShapeProperties);
 
-    const payload = {
-      title,
-      description: prompt,
-      expected_solution: shapesWithProps,
-      difficulty,
-      visibility: visible ? "show" : "hide",
-      max_attempts: limitAttempts,
-      expected_xp: XP_MAP[difficulty as keyof typeof XP_MAP],
-      timer: timerOpen ? timerValue : null,
-      hint: hintOpen ? hint : null,
+    const payload: ProblemPayload = {
+        title,
+        description: prompt,
+        expected_solution: shapesWithProps,
+        difficulty,
+        visibility: visible ? "show" : "hide",
+        max_attempts: limitAttempts,
+        expected_xp: XP_MAP[difficulty as keyof typeof XP_MAP],
+        timer: timerOpen ? timerValue : null,
+        hint: hintOpen ? hint : null,
     };
 
     try {
-      if (!currentProblem) {
-        await createProblem(payload, roomCode);
-        await Swal.fire({
-          title: "Problem Created",
-          text: "Your problem has been successfully created!",
-          icon: "success",
-          confirmButtonText: "OK",
-        });
-      } else {
-        await updateProblem(currentProblem.id, payload);
-        await Swal.fire({
-          title: "Problem Edited",
-          text: "Your problem has been successfully edited!",
-          icon: "success",
-          confirmButtonText: "OK",
-        });
-      }
-      
-      await fetchProblems(roomCode);
-      resetForm();
-      setShapes([]);
-      setSelectedId(null);
-      handleAllShapesDeleted();
-      clearCurrentProblem();
+        if (!currentProblem) {
+            // CREATE: Call API and add to store
+            // const response = await createProblem(payload, roomCode);
+            
+            // Add the newly created problem to the array (no API call needed!)
+            const res = await addProblemToRoom(payload); // Assuming API returns the created problem
+            if (!res.success) {
+                return Swal.fire({
+                    title: "Error",
+                    text: res.error || "Failed to create problem",
+                    icon: "error",
+                    confirmButtonText: "OK",
+                });
+            }
+
+            await Swal.fire({
+                title: "Problem Created",
+                text: "Your problem has been successfully created!",
+                icon: "success",
+                confirmButtonText: "OK",
+            });
+        } else {
+            // UPDATE: Call API and update in store
+            // const response = await updateProblem(currentProblem.id, payload);
+            
+            // Update the problem in the array (no API call needed!)
+            const res = await updateProblemInRoom(currentProblem.id, payload); // Assuming API returns updated problem
+            if (!res.success) {
+              return Swal.fire({
+                    title: "Error",
+                    text: res.error || "Failed to update problem",
+                    icon: "error",
+                    confirmButtonText: "OK",
+                });
+            }
+            await Swal.fire({
+                title: "Problem Edited",
+                text: "Your problem has been successfully edited!",
+                icon: "success",
+                confirmButtonText: "OK",
+            });
+        }
+        
+        // No fetchProblems(roomCode) needed anymore! ✅
+        
+        resetForm();
+        setShapes([]);
+        setSelectedId(null);
+        handleAllShapesDeleted();
+        clearCurrentProblem();
     } catch (error) {
-      console.error("Save error:", error);
-      await Swal.fire({
-        title: "Error",
-        text: currentProblem 
-          ? "There was an error editing the problem. Please try again."
-          : "There was an error creating the problem. Please try again.",
-        icon: "error",
-        confirmButtonText: "OK",
-      });
+        console.error("Save error:", error);
+        await Swal.fire({
+            title: "Error",
+            text: currentProblem 
+                ? "There was an error editing the problem. Please try again."
+                : "There was an error creating the problem. Please try again.",
+            icon: "error",
+            confirmButtonText: "OK",
+        });
     }
-  };
+};
 
   const handleDeleteProblem = async (problemId: string) => {
     const result = await Swal.fire({
-      title: "Are you sure?",
-      text: "You won't be able to revert this!",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#d33",
-      cancelButtonColor: "#3085d6",
-      confirmButtonText: "Yes, delete it!",
+        title: "Are you sure?",
+        text: "You won't be able to revert this!",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#d33",
+        cancelButtonColor: "#3085d6",
+        confirmButtonText: "Yes, delete it!",
     });
 
     if (result.isConfirmed) {
-      try {
-        await deleteProblem(problemId);
-        await fetchProblems(roomCode);
-        await Swal.fire("Deleted!", "Your problem has been deleted.", "success");
-      } catch (error) {
-        console.error("Error deleting problem:", error);
-        await Swal.fire("Error!", "Failed to delete the problem.", "error");
-      }
+        try {
+            // await deleteProblem(problemId);
+            
+            // Remove from array (no API call needed!)
+            const res = await removeProblemFromRoom(problemId);
+
+            if (res.success) {
+                await Swal.fire("Deleted!", "Your problem has been deleted.", "success");
+            } else {
+                console.log(res.error);
+                await Swal.fire("Error!", "Failed to delete the problem.", "error");
+            }
+        } catch (error) {
+            console.error("Error deleting problem:", error);
+            await Swal.fire("Error!", "Failed to delete the problem.", "error");
+        }
     }
   };
 

@@ -1,5 +1,6 @@
+import { TProblemType } from '../common'
 import { RoomType, JoinedRoomType, JoinedRoomDetails, RoomDetails } from '../common/room'
-import { CreateRoomData, UpdateRoomData } from '../forms'
+import { CreateRoomData, ProblemPayload, UpdateRoomData } from '../forms'
 
 export interface TeacherRoomState {
     createdRooms: RoomType[]
@@ -47,10 +48,12 @@ export interface ExtendTeacherRoomState extends TeacherRoomState {
     clearCurrentRoom: () => void;
 
     // Problem Management
-    problems: any[];
-    currentProblem: any | null;
-    problemLoading: boolean;
-    fetchProblems: (roomCode: string) => Promise<void>;
-    setCurrentProblem: (problem: any) => void;
+    currentProblem: TProblemType | null;
+    setCurrentProblem: (problem: TProblemType) => void;
     clearCurrentProblem: () => void;
+    
+    // New optimistic update methods:
+    addProblemToRoom: (problem: ProblemPayload) => Promise<{ success: boolean; error?: string }>;
+    updateProblemInRoom: (problemId: string, updatedProblem: Partial<ProblemPayload>) => Promise<{ success: boolean; error?: string }>;
+    removeProblemFromRoom: (problemId: string) => Promise<{ success: boolean; error?: string }>;
 }

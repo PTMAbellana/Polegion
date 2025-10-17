@@ -1,6 +1,6 @@
 // for studeent view under room details
 export interface SProblemType {
-    id: number;
+    id: string;
     title: string | 'No Title';
     description: string;
     difficulty: 'easy' | 'intermediate' | 'hard';

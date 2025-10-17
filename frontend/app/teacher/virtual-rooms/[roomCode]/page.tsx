@@ -42,16 +42,22 @@ export default function RoomDetailsPage({ params }: { params: Promise<{ roomCode
         handleInviteParticipants,
         handleInviteSubmit
     } = useRoomManagement(roomCode)
-
+console.log("RoomDetailsPage - currentRoom:", currentRoom)
     useEffect(() => {
         if (roomCode && isLoggedIn) {
             fetchRoomDetails(roomCode)
         }
 
         return () => {
-            clearCurrentRoom()
+            // Only clear if navigating OUTSIDE the room context
+            // If the next pathname does NOT start with `/teacher/virtual-rooms/${roomCode}`
+            // then clear, otherwise keep
+            const nextPath = window.location.pathname;
+            if (!nextPath.startsWith(`${TEACHER_ROUTES.VIRTUAL_ROOMS}/${roomCode}`)) {
+                clearCurrentRoom();
+            }
         }
-    }, [roomCode, isLoggedIn, appLoading, fetchRoomDetails, clearCurrentRoom, router])
+    }, [roomCode, isLoggedIn, appLoading, fetchRoomDetails, clearCurrentRoom, router]);
 
     if (appLoading || roomLoading) {
         return <LoadingOverlay isLoading={true}><div /></LoadingOverlay>

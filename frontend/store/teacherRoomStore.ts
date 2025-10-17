@@ -13,7 +13,7 @@ import {
     getAllParticipants
 } from '@/api/participants'
 import { CreateRoomData, UpdateRoomData } from '@/types';
-import { getRoomProblems } from '@/api/problems'
+import { createProblem, deleteProblem, getRoomProblems, updateProblem } from '@/api/problems'
 
 export const useTeacherRoomStore = create<ExtendTeacherRoomState>()(
     persist(
@@ -42,7 +42,12 @@ export const useTeacherRoomStore = create<ExtendTeacherRoomState>()(
                         });
                         return;
                     }
-                    const [resPart, resProb] = await Promise.allSettled([getAllParticipants(room.id, 'teacher'), getRoomProblems(room.id)]);
+                    const [resPart, resProb] = await Promise.allSettled(
+                        [
+                            getAllParticipants(room.id, 'teacher'), 
+                            getRoomProblems(room.id)
+                        ]
+                    );
                     
                     let participants;
                     let problems;
@@ -54,6 +59,7 @@ export const useTeacherRoomStore = create<ExtendTeacherRoomState>()(
                     }
                     if (resProb.status === 'fulfilled') {
                         problems = resProb.value.success ? resProb.value.data : [];
+                        
                     } else {
                         problems = [];
                     }
@@ -314,30 +320,7 @@ export const useTeacherRoomStore = create<ExtendTeacherRoomState>()(
                 set({ error: null });
             },
 
-            // Problem Management
-            problems: [],
             currentProblem: null,
-            problemLoading: false,
-
-            fetchProblems: async (roomCode: string) => {
-                set({ problemLoading: true, error: null });
-                try {
-                    const room = get().createdRooms.find(r => r.code === roomCode);
-                    if (!room) {
-                        set({ problemLoading: false, error: 'Room not found' });
-                        return;
-                    }
-                    const response = await getRoomProblems(room.id);
-                    if (response.success) {
-                        set({ problems: response.data, problemLoading: false });
-                    } else {
-                        set({ problems: [], problemLoading: false, error: response.error });
-                    }
-                } catch (error: unknown) {
-                    const errorMessage = error instanceof Error ? error.message : 'Failed to fetch problems';
-                    set({ error: errorMessage, problemLoading: false });
-                }
-            },
 
             setCurrentProblem: (problem) => {
                 set({ currentProblem: problem });
@@ -346,7 +329,77 @@ export const useTeacherRoomStore = create<ExtendTeacherRoomState>()(
             clearCurrentProblem: () => {
                 set({ currentProblem: null });
             },
-        }),
+
+            // Add new problem to currentRoom.problems array
+            addProblemToRoom: async(problem) => {
+               const response = await createProblem(problem, get().currentRoom?.code || '');
+               if (!response.success || !response.data) {
+                     return { 
+                        success: false, 
+                        error: 'Failed to add problem to room'  
+                    };
+               }
+               set(state => ({
+                   currentRoom: state.currentRoom ? {
+                       ...state.currentRoom,
+                       problems: [...(state.currentRoom.problems || []), response.data]
+                   } : null
+                }));
+                return {
+                    success: true,
+                    message: response.message
+                }
+            },
+
+            // Update existing problem in currentRoom.problems array
+            updateProblemInRoom: async (problemId, updatedProblem) => {
+                const response = await updateProblem(problemId, updatedProblem);
+                if (response.success) {
+                    set(state => ({
+                        currentRoom: state.currentRoom ? {
+                            ...state.currentRoom,
+                            problems: (state.currentRoom.problems || []).map(p => 
+                                p.id === problemId ? { ...p, ...updatedProblem } : p
+                            )
+                        } : null
+                    }));
+                    return {
+                        success: true,
+                        message: response.message
+                    }
+                } else {
+                    console.log('Failed to update problem in room');
+                    console.log(response.error);
+                    return {
+                        success: false,
+                        error: response.error
+                    }
+                }
+            },
+
+            // Remove problem from currentRoom.problems array
+            removeProblemFromRoom: async (problemId) => {
+                const response = await deleteProblem(problemId);
+                if (response.success) {
+                    set(state => ({
+                        currentRoom: state.currentRoom ? {
+                            ...state.currentRoom,
+                            problems: (state.currentRoom.problems || []).filter(p => p.id !== problemId)
+                        } : null
+                    }));
+                    return {
+                        success: true,
+                        message: response.message
+                    };
+                } else {
+                    console.log('Failed to delete problem from room');
+                    console.log(response.error);
+                    return {
+                        success: false,
+                        error: response.error
+                    };
+                }
+        }}),
         {
             name: 'teacher-rooms',
             storage: createJSONStorage(() => localStorage),
