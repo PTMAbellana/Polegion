@@ -165,12 +165,13 @@ console.log("Current Room in CreateProblemPage:", currentRoom);
             // Add the newly created problem to the array (no API call needed!)
             const res = await addProblemToRoom(payload); // Assuming API returns the created problem
             if (!res.success) {
-                return Swal.fire({
-                    title: "Error",
-                    text: res.error || "Failed to create problem",
-                    icon: "error",
-                    confirmButtonText: "OK",
-                });
+              // console.error("Create problem error:", res.error);
+              return Swal.fire({
+                  title: "Error",
+                  text: res.error || "Failed to create problem",
+                  icon: "error",
+                  confirmButtonText: "OK",
+              });
             }
 
             await Swal.fire({

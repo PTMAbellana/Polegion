@@ -21,12 +21,15 @@ class ProblemService {
       const res = await this.problemRepo.createRoomProb(compile);
    
       if (!res) throw new Error('Problem creation failed')
-      await this.problemRepo.createCompeProb(res.id, timer)
+      const result = await this.problemRepo.createCompeProb(res.id, timer)
 
       // Invalidate room problems cache
       this._invalidateRoomProblemsCache(room.id, creator.id, data.room_code);
 
-      return res
+      return {
+        ...res.toDTO(),
+        timer: result.timer
+      }
     } catch (error) {
       throw error
     }
@@ -200,13 +203,20 @@ class ProblemService {
       const {timer, ...rest} = problemData
       const updatedProblem = await this.problemRepo.updateProblem(problem_id, creator_id, rest)
       if (timer) {
-        await this.problemRepo.updateTimer(problem_id, timer)
+        const result = await this.problemRepo.updateTimer(problem_id, timer)
+        return {
+          ...updatedProblem.toDTO(),
+          timer: result.timer
+        }
       }
       
       // Invalidate problem-related cache
       this._invalidateProblemCache(problem_id);
       
-      return updatedProblem
+      return {
+        ...updatedProblem.toDTO(),
+        timer: timer
+      }
     } catch (error) {
       console.log('Error in updateProblem:', error);
       throw error

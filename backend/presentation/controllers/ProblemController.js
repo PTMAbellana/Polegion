@@ -7,12 +7,30 @@ class ProblemController {
     try { 
       console.log(req.body)
       // console.log(req.user)
-      const problem = await this.problemService.createProblem(req.body, req.user);
-      res.status(201).json('message: Successfully saved the problem');
+      const data = await this.problemService.createProblem(req.body, req.user);
+      res.status(201).json({
+        message: "Problem created successfully",
+        data: data
+      });
 
     } catch (err) {
       console.error(err);
-      res.status(500).json({ error: "Failed to create problem" });
+      if (err.message === 'Room not found or not authorized') {
+        return res.status(404).json({ 
+          message: "Room not found or not authorized",
+          error: "Not found"
+        });
+      }
+      if (err.status === 401) {
+        return res.status(401).json({ 
+          message: "Unauthorized",
+          error: "Invalid token"
+        });
+      }
+      res.status(500).json({ 
+        message: "Failed to create problem",
+        error: err.message
+      });
     }
   }
 

@@ -333,8 +333,10 @@ export const useTeacherRoomStore = create<ExtendTeacherRoomState>()(
             // Add new problem to currentRoom.problems array
             addProblemToRoom: async(problem) => {
                const response = await createProblem(problem, get().currentRoom?.code || '');
-               if (!response.success || !response.data) {
-                     return { 
+               if (!response.success) {
+                    console.log('Failed to add problem to room');
+                    console.log(response.error); 
+                    return { 
                         success: false, 
                         error: 'Failed to add problem to room'  
                     };
@@ -342,7 +344,7 @@ export const useTeacherRoomStore = create<ExtendTeacherRoomState>()(
                set(state => ({
                    currentRoom: state.currentRoom ? {
                        ...state.currentRoom,
-                       problems: [...(state.currentRoom.problems || []), response.data]
+                       problems: [response.data, ...(state.currentRoom.problems || []) ]
                    } : null
                 }));
                 return {
@@ -359,7 +361,7 @@ export const useTeacherRoomStore = create<ExtendTeacherRoomState>()(
                         currentRoom: state.currentRoom ? {
                             ...state.currentRoom,
                             problems: (state.currentRoom.problems || []).map(p => 
-                                p.id === problemId ? { ...p, ...updatedProblem } : p
+                                p.id === problemId ? { ...p, ...response.data } : p
                             )
                         } : null
                     }));

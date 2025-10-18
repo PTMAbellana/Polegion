@@ -20,7 +20,7 @@ class ProblemRepo {
         .single();
   
       if (error) throw error;
-      return data;
+      return probModel.fromDbRoom(data);
     } catch (error) {
       throw error
     }
@@ -160,7 +160,7 @@ class ProblemRepo {
         .single();
   
       if (error) throw error;
-      return data;
+      return probModel.fromDbRoom(data);
     } catch (error) {
       throw error
     }
