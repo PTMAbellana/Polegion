@@ -1,12 +1,6 @@
 import React from "react";
 import styles from "@/styles/create-problem-teacher.module.css";
-
-interface TimerProps {
-  timerOpen: boolean;
-  setTimerOpen: (open: boolean) => void;
-  timerValue: number;
-  setTimerValue: (value: number) => void;
-}
+import { TimerProps } from "@/types";
 
 const Timer: React.FC<TimerProps> = ({
   timerOpen,

@@ -1,22 +1,23 @@
 import React from 'react'
 import { useRouter } from 'next/navigation'
-import { FaBook, FaPlus, FaEye, FaEyeSlash, FaEdit, FaTrash, FaBullseye, FaClock } from 'react-icons/fa'
+import { FaBook, FaPlus, FaEye, FaEyeSlash, FaTrash, FaBullseye, FaClock } from 'react-icons/fa'
 import styles from '@/styles/room-details.module.css'
 import { ProblemsListProps } from '@/types'
 import { TEACHER_ROUTES } from '@/constants/routes'
+import { useTeacherRoomStore } from '@/store/teacherRoomStore'
 
 
 export default function ProblemsList({ problems, roomCode }: ProblemsListProps) {
     const router = useRouter()
-
+    const { removeProblemFromRoom } = useTeacherRoomStore()
     const getDifficultyClass = (difficulty: string) => {
         switch (difficulty) {
-            case 'easy':
+            case 'Easy':
                 return styles.difficultyEasy
-            case 'intermediate':
-            case 'medium':
+            case 'Intermediate':
+            case 'Medium':
                 return styles.difficultyMedium
-            case 'hard':
+            case 'Hard':
                 return styles.difficultyHard
             default:
                 return styles.difficultyMedium
@@ -25,6 +26,11 @@ export default function ProblemsList({ problems, roomCode }: ProblemsListProps) 
 
     const handleCreateProblem = () => {
         router.push(`${TEACHER_ROUTES.VIRTUAL_ROOMS}/${roomCode}/create-problem`)
+    }
+
+    const handleDeleteProblem = (problemId: string | undefined) => () => {
+        if (!problemId) return;
+        removeProblemFromRoom(problemId)        
     }
 
     return (
@@ -67,13 +73,10 @@ export default function ProblemsList({ problems, roomCode }: ProblemsListProps) 
                                 <div className={styles.problemHeader}>
                                     <h3 className={styles.problemTitle}>{problem.title}</h3>
                                     <div className={styles.problemActions}>
-                                        <button className={`${styles.actionButton} ${styles.viewButton}`}>
-                                            <FaEye />
-                                        </button>
-                                        <button className={`${styles.actionButton} ${styles.editButton}`}>
-                                            <FaEdit />
-                                        </button>
-                                        <button className={`${styles.actionButton} ${styles.deleteButton}`}>
+                                        <button 
+                                        className={`${styles.actionButton} ${styles.deleteButton}`}
+                                        onClick={handleDeleteProblem(problem.id)}
+                                        >
                                             <FaTrash />
                                         </button>
                                     </div>

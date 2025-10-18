@@ -1,10 +1,6 @@
 import React from "react";
 import styles from "@/styles/create-problem-teacher.module.css";
-
-interface SetVisibilityProps {
-  visible: boolean;
-  setVisible: (v: boolean) => void;
-}
+import { SetVisibilityProps } from "@/types";
 
 const SetVisibility: React.FC<SetVisibilityProps> = ({
   visible,

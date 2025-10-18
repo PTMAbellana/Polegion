@@ -23,7 +23,7 @@ import { useProblemFormState } from "@/hooks/teacher/useProblemFormState";
 
 // Store and API
 import { useTeacherRoomStore } from "@/store/teacherRoomStore";
-import { ProblemPayload, TProblemType } from "@/types";
+import { Problem, ProblemPayload, TProblemType } from "@/types";
 
 const XP_MAP = { Easy: 10, Intermediate: 20, Hard: 30 };
 const MAX_SHAPES = 1;
@@ -400,7 +400,7 @@ console.log("Current Room in CreateProblemPage:", currentRoom);
           </div>
           <div className={styles.problemsContent}>
             <ProblemsList
-              problems={problems}
+              problems={problems as Problem[]}
               onEdit={handleEditProblem}
               onDelete={handleDeleteProblem}
             />

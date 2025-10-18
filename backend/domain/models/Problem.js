@@ -62,6 +62,8 @@ class Problem {
             difficulty: this.difficulty,
             max_attempts: this.max_attempts,
             timer: this.timer,
+            expected_xp: this.expected_xp,
+            hint: this.hint,
             expected_solution: this.expected_solution
         }
     }
@@ -70,8 +72,11 @@ class Problem {
         return {
             id: this.id,
             title: this.title,
+            description: this.description,
             difficulty: this.difficulty,
             max_attempts: this.max_attempts,
+            expected_xp: this.expected_xp,
+            hint: this.hint,
             timer: this.timer
         }
     }

@@ -9,3 +9,13 @@ export interface ProblemPayload {
     timer: number | null,
     hint: string | null,
 }
+
+export interface Shape {
+  id: number;
+  type: string;
+  x: number;
+  y: number;
+  size: number;
+  fill?: string;
+  points?: unknown;
+}

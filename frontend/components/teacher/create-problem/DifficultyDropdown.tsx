@@ -1,18 +1,9 @@
 import React, { useRef, useState, useEffect } from "react";
 import styles from "@/styles/create-problem-teacher.module.css";
+import { DropdownProps } from "@/types/props/problem";
+import { DIFFICULTY_COLORS } from "@/constants/dropdown";
 
-const DIFFICULTY_COLORS = {
-  Easy: "#8FFFC2",
-  Intermediate: "#FFFD9B",
-  Hard: "#FFB49B",
-};
-
-interface Props {
-  difficulty: string;
-  setDifficulty: (d: string) => void;
-}
-
-const DifficultyDropdown: React.FC<Props> = ({ difficulty, setDifficulty }) => {
+const DifficultyDropdown: React.FC<DropdownProps> = ({ difficulty, setDifficulty }) => {
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 

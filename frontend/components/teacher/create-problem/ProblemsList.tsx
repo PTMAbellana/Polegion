@@ -1,31 +1,10 @@
 import React from 'react';
 import styles from '@/styles/create-problem-teacher.module.css';
+import { DIFFICULTY_COLORS } from '@/constants/dropdown';
+import { ExistingProblemsListProps } from '@/types';
 
-const DIFFICULTY_COLORS = {
-  Easy: "#8FFFC2",
-  Intermediate: "#FFFD9B",
-  Hard: "#FFB49B",
-};
 
-interface Problem {
-  id: string;
-  title?: string | null;
-  description?: string | null;
-  visibility: string;
-  difficulty: string;
-  max_attempts: number;
-  expected_xp: number;
-  timer?: number | null;
-  hint?: string | null;
-}
-
-interface ProblemsListProps {
-  problems: Problem[];
-  onEdit: (problemId: string) => void;
-  onDelete: (problemId: string) => void;
-}
-
-const ProblemsList: React.FC<ProblemsListProps> = ({ problems, onEdit, onDelete }) => {
+const ProblemsList: React.FC<ExistingProblemsListProps> = ({ problems, onEdit, onDelete }) => {
   if (problems.length === 0) {
     return (
       <div className={styles.noProblems}>

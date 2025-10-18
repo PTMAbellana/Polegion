@@ -36,6 +36,7 @@ class ProblemService {
   }
   
   async fetchRoomProblems(room_id, type) {
+    console.log('i am correct!')
     try {
       const cacheKey = cache.generateKey('room_problems', room_id);
       
@@ -61,13 +62,13 @@ class ProblemService {
       cache.set(cacheKey, problemsWithTimers, this.CACHE_TTL);
       console.log('Cached: fetchRoomProblems', room_id);
 
-      if (type !== 'student') {        
+      if (type === 'student') {        
         return problemsWithTimers
           .filter(p => p.visibility === 'show')
-          .map(p => p.toReturnTeacherDTO());
+          .map(p => p.toReturnStudentDTO());
       }
-      
-      return problemsWithTimers.map(p => p.toReturnStudentDTO());
+      console.log('problemsWithTimers:', problemsWithTimers);
+      return problemsWithTimers.map(p => p.toReturnTeacherDTO());
     } catch (error) {
       throw error;
     }

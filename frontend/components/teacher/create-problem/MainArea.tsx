@@ -4,45 +4,8 @@ import styles from "@/styles/create-problem-teacher.module.css";
 import SquareShape from "./shapes/SquareShape";
 import TriangleShape from "./shapes/TriangleShape";
 import CircleShape from "./shapes/CircleShape";
-
-interface Point {
-  x: number;
-  y: number;
-}
-
-interface Shape {
-  id: number;
-  type: string;
-  x: number;
-  y: number;
-  size: number;
-  fill?: string;
-  points?: unknown;
-}
-
-interface MainAreaProps {
-  shapes: Shape[];
-  setShapes: React.Dispatch<React.SetStateAction<Shape[]>>;
-  selectedId: number | null;
-  setSelectedId: (id: number | null) => void;
-  setSelectedTool: (tool: string | null) => void;
-  saveButton?: React.ReactNode;
-  shapeLimit: number;
-  shapeCount: number;
-  onLimitReached: () => void;
-  onAllShapesDeleted: () => void;
-  pxToUnits: (px: number) => number;
-  showAreaByShape: {
-    circle: boolean;
-    triangle: boolean;
-    square: boolean;
-  };
-  showSides: boolean;
-  showAngles: boolean;
-  showDiameter: boolean;
-  showCircumference: boolean;
-  showHeight: boolean;
-}
+import { MainAreaProps } from "@/types/props/problem";
+import { Shape } from "@/types";
 
 const MainArea: React.FC<MainAreaProps> = ({
   shapes,

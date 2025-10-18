@@ -1,32 +1,7 @@
 import React, { useState, useEffect } from "react";
 import styles from "@/styles/create-problem-teacher.module.css";
 import Filters from "./Filters";
-
-interface ToolboxProps {
-  selectedTool: string | null;
-  setSelectedTool: (tool: string | null) => void;
-  showSides: boolean;
-  setShowSides: (show: boolean) => void;
-  showAngles: boolean;
-  setShowAngles: (show: boolean) => void;
-  showAreaByShape: {
-    circle: boolean;
-    triangle: boolean;
-    square: boolean;
-  };
-  setShowAreaByShape: React.Dispatch<React.SetStateAction<{
-    circle: boolean;
-    triangle: boolean;
-    square: boolean;
-  }>>;
-  showDiameter: boolean;
-  setShowDiameter: (show: boolean) => void;
-  showCircumference: boolean;
-  setShowCircumference: (show: boolean) => void;
-  showHeight: boolean;
-  setShowHeight: (show: boolean) => void;
-  shapes: Array<{ id: number; type: string; [key: string]: any }>;
-}
+import { ToolboxProps } from "@/types";
 
 const Toolbox: React.FC<ToolboxProps> = ({
   selectedTool,

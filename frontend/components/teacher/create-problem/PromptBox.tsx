@@ -1,13 +1,6 @@
 import React from "react";
 import styles from "@/styles/create-problem-teacher.module.css";
-
-interface PromptBoxProps {
-  prompt: string;
-  setPrompt: (prompt: string) => void;
-  editingPrompt: boolean;
-  setEditingPrompt: (editing: boolean) => void;
-  promptInputRef: React.RefObject<HTMLTextAreaElement>;
-}
+import { PromptBoxProps } from "@/types";
 
 const PromptBox: React.FC<PromptBoxProps> = ({
   prompt,

@@ -1,9 +1,6 @@
 import React, { useEffect, useRef } from "react";
 import styles from "@/styles/create-problem-teacher.module.css";
-
-interface ShapeLimitPopupProps {
-  onClose: () => void;
-}
+import { ShapeLimitPopupProps } from "@/types";
 
 const ShapeLimitPopup: React.FC<ShapeLimitPopupProps> = ({ onClose }) => {
   const modalRef = useRef<HTMLDivElement>(null);

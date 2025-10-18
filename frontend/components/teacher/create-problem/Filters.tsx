@@ -2,30 +2,7 @@ import React, { useState } from "react";
 import styles from "@/styles/create-problem-teacher.module.css";
 import ToggleSwitch from "./ToggleSwitch";
 import { FaCaretDown, FaCaretRight } from "react-icons/fa";
-
-interface FiltersProps {
-  shapes: Array<{ id: number; type: string; [key: string]: any }>;
-  showSides: boolean;
-  setShowSides: (show: boolean) => void;
-  showAngles: boolean;
-  setShowAngles: (show: boolean) => void;
-  showAreaByShape: {
-    circle: boolean;
-    triangle: boolean;
-    square: boolean;
-  };
-  setShowAreaByShape: React.Dispatch<React.SetStateAction<{
-    circle: boolean;
-    triangle: boolean;
-    square: boolean;
-  }>>;
-  showHeight: boolean;
-  setShowHeight: (show: boolean) => void;
-  showDiameter: boolean;
-  setShowDiameter: (show: boolean) => void;
-  showCircumference: boolean;
-  setShowCircumference: (show: boolean) => void;
-}
+import { FiltersProps } from "@/types/props/problem";
 
 const Filters: React.FC<FiltersProps> = ({
   shapes,

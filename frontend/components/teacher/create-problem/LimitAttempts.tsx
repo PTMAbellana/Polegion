@@ -1,10 +1,6 @@
 import React, { useState } from "react";
 import styles from "@/styles/create-problem-teacher.module.css";
-
-interface LimitAttemptsProps {
-  limit: number | null;
-  setLimit: (n: number | null) => void;
-}
+import { LimitAttemptsProps } from "@/types/props/problem";
 
 const LimitAttempts: React.FC<LimitAttemptsProps> = ({
   limit,

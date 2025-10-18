@@ -12,3 +12,9 @@ export const GENDERS = [
 ] as const;
 
 export type Gender = typeof GENDERS[number];
+
+export const DIFFICULTY_COLORS = {
+  Easy: "#8FFFC2",
+  Intermediate: "#FFFD9B",
+  Hard: "#FFB49B",
+};

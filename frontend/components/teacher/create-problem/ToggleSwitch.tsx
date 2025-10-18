@@ -1,13 +1,6 @@
 import React from "react";
 import styles from "@/styles/create-problem-teacher.module.css";
-
-interface ToggleSwitchProps {
-  checked: boolean;
-  onChange: () => void;
-  label: string;
-  description?: string;
-  disabled?: boolean;
-}
+import { ToggleSwitchProps } from "@/types";
 
 const ToggleSwitch: React.FC<ToggleSwitchProps> = ({ 
   checked, 
