@@ -4,15 +4,48 @@ import { useTeacherRoomStore } from '@/store/teacherRoomStore'
 import { TEACHER_ROUTES } from '@/constants/routes'
 import toast from 'react-hot-toast'
 import Swal from 'sweetalert2'
+import { UserType } from '@/types/common/user'
 
 export const useRoomManagement = (roomCode: string) => {
     const router = useRouter()
-    const { currentRoom, deleteRoom, updateRoom, inviteParticipant } = useTeacherRoomStore()
+    const { currentRoom, deleteRoom, updateRoom, inviteParticipant, removeParticipant } = useTeacherRoomStore()
 
     const [showEditModal, setShowEditModal] = useState(false)
     const [showInviteModal, setShowInviteModal] = useState(false) // Add this
     const [editLoading, setEditLoading] = useState(false)
     const [copySuccess, setCopySuccess] = useState(false)
+
+    const handleKickParticipant = async (participant: UserType) => {
+        // alert(`Kicking participant: ${participant.first_name} ${participant.last_name}
+        //         participant ID: ${participant.participant_id}
+        //     `)
+        // Implement kick logic here, e.g., call a store action or API
+        try {
+
+            const confirm = await Swal.fire({
+                title: `Remove ${participant.first_name} ${participant.last_name}?`,
+                text: "This participant will be removed from the room.",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#d33",
+                cancelButtonColor: "#3085d6",
+                confirmButtonText: "Yes, remove",
+            });
+
+            if (!confirm.isConfirmed) return;
+
+            // If confirmed, proceed with kicking the participant
+            const res = await removeParticipant(participant.participant_id);
+            if (res.success) {
+                toast.success(res.message || 'Participant kicked successfully')
+            } else {
+                toast.error(res.error || 'Failed to kick participant') 
+            }
+        } catch (error) {
+            console.error('❌ Failed to kick participant:', error)
+            toast.error('Failed to kick participant')
+        }     
+    }
 
     const handleInviteParticipants = () => {
         setShowInviteModal(true) // Open the modal
@@ -137,5 +170,6 @@ export const useRoomManagement = (roomCode: string) => {
         handleCompetitionDashboard,
         handleInviteParticipants,
         handleInviteSubmit, // ADD THIS LINE
+        handleKickParticipant // ADD THIS LINE
     }
 }

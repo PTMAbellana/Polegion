@@ -56,4 +56,6 @@ export interface ExtendTeacherRoomState extends TeacherRoomState {
     addProblemToRoom: (problem: ProblemPayload) => Promise<{ success: boolean; error?: string }>;
     updateProblemInRoom: (problemId: string, updatedProblem: Partial<ProblemPayload>) => Promise<{ success: boolean; error?: string }>;
     removeProblemFromRoom: (problemId: string) => Promise<{ success: boolean; error?: string }>;
+
+    removeParticipant: (partId: number) => Promise<{ success: boolean; error?: string; message?: string }>;
 }

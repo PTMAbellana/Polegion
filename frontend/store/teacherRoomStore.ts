@@ -10,7 +10,8 @@ import {
 } from '@/api/rooms'
 import {
     inviteParticipant as apiInviteParticipant,
-    getAllParticipants
+    getAllParticipants,
+    kickParticipant
 } from '@/api/participants'
 import { CreateRoomData, UpdateRoomData } from '@/types';
 import { createProblem, deleteProblem, getRoomProblems, updateProblem } from '@/api/problems'
@@ -54,6 +55,7 @@ export const useTeacherRoomStore = create<ExtendTeacherRoomState>()(
 
                     if (resPart.status === 'fulfilled') {
                         participants = resPart.value.success ? resPart.value.data : [];
+                        console.log('Fetched participants:', participants);
                     } else {
                         participants = [];
                     }
@@ -332,31 +334,44 @@ export const useTeacherRoomStore = create<ExtendTeacherRoomState>()(
 
             // Add new problem to currentRoom.problems array
             addProblemToRoom: async(problem) => {
-               const response = await createProblem(problem, get().currentRoom?.code || '');
-               if (!response.success) {
-                    console.log('Failed to add problem to room');
-                    console.log(response.error); 
-                    return { 
-                        success: false, 
-                        error: 'Failed to add problem to room'  
-                    };
-               }
-               set(state => ({
-                   currentRoom: state.currentRoom ? {
-                       ...state.currentRoom,
-                       problems: [response.data, ...(state.currentRoom.problems || []) ]
-                   } : null
-                }));
-                return {
-                    success: true,
-                    message: response.message
+                try {
+                    const response = await createProblem(problem, get().currentRoom?.code || '');
+                    if (!response.success) {
+                         console.log('Failed to add problem to room');
+                         console.log(response.error); 
+                         return { 
+                             success: false, 
+                             error: 'Failed to add problem to room'  
+                         };
+                    }
+                    set(state => ({
+                        currentRoom: state.currentRoom ? {
+                            ...state.currentRoom,
+                            problems: [response.data, ...(state.currentRoom.problems || []) ]
+                        } : null
+                     }));
+                     return {
+                         success: true,
+                         message: response.message
+                     }
+                } catch (error) {
+                    console.error('Error adding problem to room:', error);
+                    return { success: false, error: 'Error adding problem to room' };
                 }
             },
 
             // Update existing problem in currentRoom.problems array
             updateProblemInRoom: async (problemId, updatedProblem) => {
-                const response = await updateProblem(problemId, updatedProblem);
-                if (response.success) {
+                try {
+                    const response = await updateProblem(problemId, updatedProblem);
+                    if (!response.success) {
+                        console.log('Failed to update problem in room');
+                        console.log(response.error);
+                        return {
+                            success: false,
+                            error: response.error
+                        }
+                    }
                     set(state => ({
                         currentRoom: state.currentRoom ? {
                             ...state.currentRoom,
@@ -369,20 +384,27 @@ export const useTeacherRoomStore = create<ExtendTeacherRoomState>()(
                         success: true,
                         message: response.message
                     }
-                } else {
-                    console.log('Failed to update problem in room');
-                    console.log(response.error);
+                } catch (error) {
+                    console.error('Error updating problem in room:', error);
                     return {
                         success: false,
-                        error: response.error
+                        error: 'Error updating problem in room'
                     }
                 }
             },
 
             // Remove problem from currentRoom.problems array
             removeProblemFromRoom: async (problemId) => {
-                const response = await deleteProblem(problemId);
-                if (response.success) {
+                try {
+                    const response = await deleteProblem(problemId);
+                    if (!response.success) {
+                        console.log('Failed to delete problem from room');
+                        console.log(response.error);
+                        return {
+                            success: false,
+                            error: response.error
+                        };
+                    }
                     set(state => ({
                         currentRoom: state.currentRoom ? {
                             ...state.currentRoom,
@@ -393,18 +415,52 @@ export const useTeacherRoomStore = create<ExtendTeacherRoomState>()(
                         success: true,
                         message: response.message
                     };
-                } else {
-                    console.log('Failed to delete problem from room');
-                    console.log(response.error);
+                } catch (error) {
+                    console.error('Error removing problem from room:', error);
                     return {
                         success: false,
-                        error: response.error
+                        error: 'Error removing problem from room'
+                    }
+                }
+         },
+
+         removeParticipant: async (partId) => {
+            const currentRoom = get().currentRoom;
+            if (!currentRoom) return{
+                success: false,
+                error: 'No current room selected'
+            }
+
+            try {
+                const response = await kickParticipant(currentRoom.id, partId);
+                if (!response.success) {
+                    return {
+                        success: false,
+                        error: response.error || 'Failed to remove participant'
                     };
                 }
-        }}),
-        {
-            name: 'teacher-rooms',
-            storage: createJSONStorage(() => localStorage),
+                set(state => ({
+                    currentRoom: state.currentRoom ? {
+                        ...state.currentRoom,
+                        participants: (state.currentRoom.participants || []).filter(p => p.participant_id !== partId)
+                    } : null
+                }));
+                return {
+                    success: true,
+                    message: response.message 
+                };
+            } catch (error) {
+                console.error('Failed to remove participant:', error);
+                return { 
+                    success: false, 
+                    error: 'Failed to remove participant' 
+                };
+            }
+        }
+    }),
+    {
+        name: 'teacher-rooms',
+        storage: createJSONStorage(() => localStorage),
             partialize: (state) => ({
                 createdRooms: state.createdRooms,
             }),

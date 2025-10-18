@@ -50,6 +50,26 @@ class ParticipantRepo extends BaseRepo {
         }
     }
 
+    async kickParticipant(participant_id){
+        try {
+            const {
+                data, 
+                error
+            } = await this.supabase.from(this.tableName)
+            .delete()
+            .eq('id', participant_id)
+            .select()
+            .single()
+
+            if (error) throw error
+            
+            if (!data) return new Error('Participant not found')
+
+            return data
+        } catch (error) {
+            throw error
+        }
+    }
     async getAllParticipants(room_id){
         // todo:
         // get all participants in the current room

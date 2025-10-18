@@ -60,7 +60,7 @@ class ParticipantService {
     }
 
     //used
-async joinRoom(user_id, room_code){
+    async joinRoom(user_id, room_code){
         try {
 
             const room = await this.roomService.getRoomByCodeUsers(room_code);
@@ -273,12 +273,18 @@ async joinRoom(user_id, room_code){
 
     async removeParticipant (creator, participant, room) {
         try {
+            console.log('Removing participant:', participant, 'from room:', room, 'by creator:', creator);
             // verify if room exists
             const data = await this.roomService.getRoomById(room, creator)
             if (!data) throw new Error('Room not found or not authorized')
 
-            return await this.participantRepo.removeParticipant(participant, room)
+            const res = await this.participantRepo.kickParticipant(participant)
+
+            this._invalidateParticipantCache(room, participant);
+            
+            return res
         } catch (error){
+            console.error('Error in removeParticipant:', error);
             throw error
         }
     }

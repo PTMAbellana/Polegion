@@ -54,6 +54,7 @@ export interface ProblemsListProps {
 export interface ParticipantsSidebarProps {
     participants: UserType[]
     onInviteParticipants: () => void
+    onKickParticipant: (participant: UserType) => void
 }
 
 export interface StudentRoomBannerProps {

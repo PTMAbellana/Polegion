@@ -89,11 +89,20 @@ export const getAllParticipants = async (room_id, type='user', withXp=false, com
 export const kickParticipant = async (room_id, part_id) => {
   try {
     console.log({room_id, part_id})
-    return await api.delete(
+    const res = await api.delete(
       `/participants/room/${room_id}/participant/${part_id}`,
     );
+    return {
+      success: true,
+      message: res.data.message || 'Participant kicked successfully',
+    };
   } catch (error) {
-    throw error;
+    return {
+      success: false,
+      message: error.response?.data?.message || 'Error kicking participant',
+      error: error.response?.data?.error || error.message,
+      status: error.response?.status
+    };
   }
 };
 

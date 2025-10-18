@@ -200,13 +200,26 @@ class ParticipantController {
 
         try {
             await this.participantService.removeParticipant(req.user.id, user_id, room_id)
-            res.status(201).json({
+            return res.status(201).json({
                 message: 'Successfully removed a participant'
             })
         } catch (error) {
             // console.error('Error removing participant: ', error)
-            res.status(500).json({
-                error: 'Server error removing participant'
+            if (error.message === 'Participant not found') {
+                return res.status(404).json({
+                    message: 'Participant not found',
+                    error: 'Not found'
+                })
+            }
+            if (error.status === 401) {
+                return res.status(401).json({
+                    message: 'Unauthorized - Invalid token',
+                    error: 'Invalid token'
+                })
+            }
+            return res.status(500).json({
+                message: 'Server error removing participant',
+                error: error.message
             })
         }
     }

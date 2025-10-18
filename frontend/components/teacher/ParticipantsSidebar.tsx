@@ -6,7 +6,8 @@ import { ParticipantsSidebarProps } from '@/types'
 
 export default function ParticipantsSidebar({ 
     participants, 
-    onInviteParticipants 
+    onInviteParticipants,
+    onKickParticipant 
 }: ParticipantsSidebarProps) {
     return (
         <div className={styles.participantsContainer}>
@@ -58,7 +59,7 @@ export default function ParticipantsSidebar({
                                 <button
                                     className={styles.kickButton}
                                     title="Kick participant"
-                                    // onClick={() => handleKick(participant)} // You handle this
+                                    onClick={() => onKickParticipant(participant)} // You handle this
                                 >
                                     <FaUserSlash />
                                 </button>

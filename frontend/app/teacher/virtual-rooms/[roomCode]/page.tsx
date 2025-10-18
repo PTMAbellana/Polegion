@@ -40,7 +40,8 @@ export default function RoomDetailsPage({ params }: { params: Promise<{ roomCode
         handleDeleteRoom,
         handleCompetitionDashboard,
         handleInviteParticipants,
-        handleInviteSubmit
+        handleInviteSubmit,
+        handleKickParticipant
     } = useRoomManagement(roomCode)
 console.log("RoomDetailsPage - currentRoom:", currentRoom)
     useEffect(() => {
@@ -146,6 +147,7 @@ console.log("RoomDetailsPage - currentRoom:", currentRoom)
                     <ParticipantsSidebar
                         participants={participants}
                         onInviteParticipants={handleInviteParticipants}
+                        onKickParticipant={handleKickParticipant}
                     />
                 </div>
             </div>
