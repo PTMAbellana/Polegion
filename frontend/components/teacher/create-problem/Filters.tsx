@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import styles from "@/styles/create-problem-teacher.module.css";
 import ToggleSwitch from "./ToggleSwitch";
+import { FaCaretDown, FaCaretRight } from "react-icons/fa";
 
 interface FiltersProps {
   shapes: Array<{ id: number; type: string; [key: string]: any }>;
@@ -132,7 +133,7 @@ const Filters: React.FC<FiltersProps> = ({
             <button className={`${styles.filterSectionHeader} ${expandedSection === 'global' ? styles.expanded : ''}`} onClick={() => toggleSection('global')}>
               <span className={styles.sectionIcon}>🌐</span>
               <span className={styles.sectionTitle}>Global</span>
-              <span className={styles.expandIcon}>{expandedSection === 'global' ? '▼' : '▶'}</span>
+              <span className={styles.expandIcon}>{expandedSection === 'global' ? <FaCaretDown /> : <FaCaretRight />}</span>
             </button>
             {expandedSection === 'global' && (
               <div className={styles.filterSectionContent}>
@@ -152,7 +153,7 @@ const Filters: React.FC<FiltersProps> = ({
             <button className={`${styles.filterSectionHeader} ${expandedSection === 'square' ? styles.expanded : ''}`} onClick={() => toggleSection('square')}>
               <span className={styles.sectionIcon}>⬜</span>
               <span className={styles.sectionTitle}>Square</span>
-              <span className={styles.expandIcon}>{expandedSection === 'square' ? '▼' : '▶'}</span>
+              <span className={styles.expandIcon}>{expandedSection === 'square' ? <FaCaretDown /> : <FaCaretRight />}</span>
             </button>
             {expandedSection === 'square' && (
               <div className={styles.filterSectionContent}>
@@ -169,7 +170,7 @@ const Filters: React.FC<FiltersProps> = ({
             <button className={`${styles.filterSectionHeader} ${expandedSection === 'triangle' ? styles.expanded : ''}`} onClick={() => toggleSection('triangle')}>
               <span className={styles.sectionIcon}>🔺</span>
               <span className={styles.sectionTitle}>Triangle</span>
-              <span className={styles.expandIcon}>{expandedSection === 'triangle' ? '▼' : '▶'}</span>
+              <span className={styles.expandIcon}>{expandedSection === 'triangle' ? <FaCaretDown /> : <FaCaretRight />}</span>
             </button>
             {expandedSection === 'triangle' && (
               <div className={styles.filterSectionContent}>
@@ -189,7 +190,7 @@ const Filters: React.FC<FiltersProps> = ({
             <button className={`${styles.filterSectionHeader} ${expandedSection === 'circle' ? styles.expanded : ''}`} onClick={() => toggleSection('circle')}>
               <span className={styles.sectionIcon}>⭕</span>
               <span className={styles.sectionTitle}>Circle</span>
-              <span className={styles.expandIcon}>{expandedSection === 'circle' ? '▼' : '▶'}</span>
+              <span className={styles.expandIcon}>{expandedSection === 'circle' ?  <FaCaretDown /> : <FaCaretRight />}</span>
             </button>
             {expandedSection === 'circle' && (
               <div className={styles.filterSectionContent}>

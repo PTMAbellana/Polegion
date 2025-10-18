@@ -102,7 +102,7 @@ export default function ProblemsList({ problems, roomCode }: ProblemsListProps) 
                                     {problem.timer && (
                                         <div className={styles.visibilityIndicator}>
                                             <FaClock />
-                                            <span>{problem.timer}min</span>
+                                            <span>{problem.timer} sec</span>
                                         </div>
                                     )}
                                 </div>
