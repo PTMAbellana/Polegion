@@ -2,17 +2,63 @@
 
 /* Container with sidebar allowance */
 .leaderboard_container {
-  min-height: 100vh;
+  height: 100vh;
   background: linear-gradient(135deg, #2C514C 0%, #122932 50%, #1a3a3a 100%);
   position: relative;
-  overflow-x: hidden;
+  overflow: hidden;
   transition: margin-left 0.3s ease;
+  display: flex;
+  flex-direction: column;
 }
 
-/* For collapsed sidebar */
-/* .leaderboard_container.sidebar_collapsed {
-  margin-left: 70px;
-} */
+/* Scrollable Content Area */
+.leaderboard_scrollable {
+  overflow-y: auto;
+  overflow-x: hidden;
+  background: transparent;
+  position: relative;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  flex: 1;
+}
+
+/* Custom Scrollbar Styles */
+.leaderboard_scrollable::-webkit-scrollbar {
+  width: 12px;
+}
+
+.leaderboard_scrollable::-webkit-scrollbar-track {
+  background: linear-gradient(180deg, rgba(250, 188, 96, 0.15) 0%, rgba(44, 81, 76, 0.1) 100%);
+  border-radius: 10px;
+  border: 2px solid rgba(250, 188, 96, 0.1);
+}
+
+.leaderboard_scrollable::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #FABC60 0%, #E8A83B 50%, #D97706 100%);
+  border-radius: 10px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+.leaderboard_scrollable::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #F0B84C 0%, #C97E2E 50%, #B45309 100%);
+  background-clip: content-box;
+  box-shadow: 0 0 10px rgba(250, 188, 96, 0.6);
+}
+
+.leaderboard_scrollable::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* Firefox scrollbar styling */
+.leaderboard_scrollable {
+  scrollbar-width: thin;
+  scrollbar-color: #FABC60 rgba(250, 188, 96, 0.1);
+}
+
+/* Smooth scroll behavior */
+.leaderboard_scrollable {
+  scroll-behavior: smooth;
+}
 
 .leaderboard_container::before {
   content: '';
@@ -269,13 +315,14 @@
   font-weight: 500;
 }
 
-/* Leaderboard Grid */
+/* Leaderboard Grid - Base container (overridden in split layout) */
 .leaderboard_grid {
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  max-width: 800px;
+  width: 90%;
   margin: 0 auto;
+  max-width: 800px;
 }
 
 .leaderboard_item {
@@ -921,5 +968,214 @@
   
   .rank_badge {
     border: 2px solid currentColor;
+  }
+}
+
+/* ========== Competition Split Layout ========== */
+.competition_split_container {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 2rem;
+  padding: 2rem;
+  margin: 0 auto;
+  max-width: 1400px;
+}
+
+.competition_list_sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  max-height: calc(100vh - 400px);
+  overflow-y: auto;
+  padding-right: 0.5rem;
+  color: black;
+}
+
+.competition_list_sidebar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.competition_list_sidebar::-webkit-scrollbar-track {
+  background: rgba(250, 188, 96, 0.1);
+  border-radius: 3px;
+}
+
+.competition_list_sidebar::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #FABC60 0%, #E8A83B 100%);
+  border-radius: 3px;
+}
+
+.competition_list_sidebar::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #FFD580 0%, #FABC60 100%);
+}
+
+.competition_item_button {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  border: 2px solid transparent;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(0, 0, 0, 0.8);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: left;
+  font-weight: 500;
+}
+
+.competition_item_button:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: black;
+  transform: translateX(4px);
+  font-weight: 600;
+}
+
+.competition_item_button.active {
+  background: linear-gradient(135deg, #FABC60 0%, #E8A83B 100%);
+  color: #122932;
+  border-color: #FFD580;
+  box-shadow: 0 8px 24px rgba(250, 188, 96, 0.3);
+  font-weight: 700;
+}
+
+.competition_item_icon {
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+
+.competition_item_info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.competition_item_title {
+  font-weight: 600;
+  font-size: 0.95rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: rgba(0, 0, 0, 1) !important;
+  letter-spacing: 0.3px;
+}
+
+.competition_item_button:hover .competition_item_title,
+.competition_item_button.active .competition_item_title {
+  color: currentColor !important;
+  font-weight: 700;
+}
+
+.competition_item_count {
+  font-size: 0.75rem;
+  opacity: 0.85;
+  color: rgba(0, 0, 0, 0.9) !important;
+  font-weight: 500;
+}
+
+.competition_content_area {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Leaderboard Grid within Split Layout */
+.competition_content_area .leaderboard_grid {
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  align-items: center;
+}
+
+.competition_content_area .leaderboard_item {
+  width: 90%;
+}
+
+.competition_leaderboard_header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.5rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 16px;
+  border: 1px solid rgba(250, 188, 96, 0.2);
+}
+
+.competition_leaderboard_header_icon {
+  width: 3rem;
+  height: 3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #FABC60 0%, #E8A83B 100%);
+  border-radius: 12px;
+  color: #122932;
+  font-size: 1.5rem;
+}
+
+.competition_leaderboard_header_info {
+  flex: 1;
+}
+
+.competition_leaderboard_header_title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  /* color: white; */
+  margin-bottom: 0.25rem;
+}
+
+.competition_leaderboard_header_subtitle {
+  font-size: 0.9rem;
+  color: rgba(0, 0, 0, 0.7);
+}
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+  .competition_split_container {
+    grid-template-columns: 280px 1fr;
+    gap: 1.5rem;
+    padding: 1.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .competition_split_container {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    padding: 1rem;
+  }
+
+  .competition_list_sidebar {
+    max-height: 300px;
+    flex-direction: row;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding-right: 1rem;
+  }
+
+  .competition_list_sidebar::-webkit-scrollbar {
+    height: 6px;
+  }
+
+  .competition_item_button {
+    min-width: 150px;
+    flex-shrink: 0;
+  }
+
+  .competition_content_area {
+    gap: 1rem;
+  }
+}
+
+/* Mobile responsive scrollbar */
+@media (max-width: 768px) {
+  .leaderboard_scrollable {
+    height: calc(100vh - 80px);
+  }
+  
+  .leaderboard_scrollable::-webkit-scrollbar {
+    width: 8px;
   }
 }
