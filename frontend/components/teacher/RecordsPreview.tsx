@@ -11,7 +11,7 @@ interface RecordsPreviewProps {
   emptyMessage?: string
 }
 
-type SortField = 'firstName' | 'lastName' | 'xp' | 'rank'
+type SortField = 'firstName' | 'lastName' | 'xp'
 type SortDirection = 'asc' | 'desc'
 
 export default function RecordsPreview({
@@ -19,8 +19,8 @@ export default function RecordsPreview({
   searchTerm = '',
   emptyMessage = 'No records available'
 }: RecordsPreviewProps) {
-  const [sortField, setSortField] = useState<SortField>('rank')
-  const [sortDirection, setSortDirection] = useState<SortDirection>('asc')
+  const [sortField, setSortField] = useState<SortField>('xp')
+  const [sortDirection, setSortDirection] = useState<SortDirection>('desc')
 
   // Sort and filter records
   const sortedRecords = useMemo(() => {
@@ -48,10 +48,6 @@ export default function RecordsPreview({
           compareA = a.xp || 0
           compareB = b.xp || 0
           break
-        case 'rank':
-          compareA = records.indexOf(a)
-          compareB = records.indexOf(b)
-          break
       }
 
       if (compareA < compareB) {
@@ -64,12 +60,25 @@ export default function RecordsPreview({
     })
   }, [records, sortField, sortDirection, searchTerm])
 
+  // Create a rank map based on XP (rank never changes, always based on XP order)
+  const rankMap = useMemo(() => {
+    const xpSorted = [...records].sort((a, b) => (b.xp || 0) - (a.xp || 0))
+    const map = new Map<RecordStudent, number>()
+    xpSorted.forEach((record, index) => {
+      map.set(record, index + 1)
+    })
+    return map
+  }, [records])
+
   const handleSort = (field: SortField) => {
     if (sortField === field) {
+      // If clicking same field, toggle direction
       setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')
     } else {
+      // If clicking different field, set appropriate default direction
       setSortField(field)
-      setSortDirection('asc')
+      // XP should default to descending (highest first), names to ascending
+      setSortDirection(field === 'xp' ? 'desc' : 'asc')
     }
   }
 
@@ -96,13 +105,9 @@ export default function RecordsPreview({
       {/* Scrollable Table */}
       <div className={styles.records_preview_container}>
         <div className={styles.records_table_header}>
-          <button
-            onClick={() => handleSort('rank')}
-            className={styles.records_table_header_cell}
-          >
+          <div className={styles.records_table_header_cell}>
             <span>Rank</span>
-            <SortIcon field="rank" />
-          </button>
+          </div>
           <button
             onClick={() => handleSort('firstName')}
             className={styles.records_table_header_cell}
@@ -128,17 +133,17 @@ export default function RecordsPreview({
 
         <div className={styles.records_table_body}>
           {sortedRecords.map((record, idx) => (
-            <div key={idx} className={styles.records_table_row}>
-              <div className={styles.records_table_cell}>#{idx + 1}</div>
-              <div className={styles.records_table_cell}>
-                {record.first_name || 'Unknown'}
-              </div>
-              <div className={styles.records_table_cell}>
-                {record.last_name || ''}
-              </div>
-              <div className={styles.records_table_cell}>
-                <strong>{record.xp || 0}</strong>
-              </div>
+            <div key={`record-${idx}-${record.xp}`} className={styles.records_table_row}>
+                <div className={styles.records_table_cell}>#{rankMap.get(record)}</div>
+                <div className={styles.records_table_cell}>
+                    {record.first_name || 'Unknown'}
+                </div>
+                <div className={styles.records_table_cell}>
+                    {record.last_name || ''}
+                </div>
+                <div className={styles.records_table_cell}>
+                    <strong>{record.xp || 0}</strong>
+                </div>
             </div>
           ))}
         </div>

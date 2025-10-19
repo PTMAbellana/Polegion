@@ -21,7 +21,6 @@ export default function RecordsDownloadSection({
   competitions = []
 }: RecordsDownloadSectionWithPreviewProps) {
   const [recordType, setRecordType] = useState<'room' | 'competition'>('room')
-  const [downloadFormat, setDownloadFormat] = useState<'csv' | 'json'>('csv')
   const [selectedCompetitionId, setSelectedCompetitionId] = useState<string>('')
   const [searchTerm, setSearchTerm] = useState('')
   const searchInputRef = useRef<HTMLInputElement>(null)
@@ -39,13 +38,13 @@ export default function RecordsDownloadSection({
 
   const handleDownload = async () => {
     if (recordType === 'room') {
-      await onDownloadRoomAction(downloadFormat)
+      await onDownloadRoomAction()
     } else {
       if (!selectedCompetitionId) {
         alert('Please select a competition')
         return
       }
-      await onDownloadCompetitionAction(downloadFormat, selectedCompetitionId)
+      await onDownloadCompetitionAction(selectedCompetitionId)
     }
   }
 
@@ -118,37 +117,13 @@ export default function RecordsDownloadSection({
 
       {/* Download Controls */}
       <div className={styles.records_download_controls}>
-        <div className={styles.records_format_selector}>
-          <label className={styles.records_selector_label}>Format:</label>
-          <div className={styles.records_format_buttons}>
-            <button
-              className={`${styles.records_format_button} ${
-                downloadFormat === 'csv' ? styles.records_format_button_active : ''
-              }`}
-              onClick={() => setDownloadFormat('csv')}
-              disabled={isLoading}
-            >
-              CSV
-            </button>
-            <button
-              className={`${styles.records_format_button} ${
-                downloadFormat === 'json' ? styles.records_format_button_active : ''
-              }`}
-              onClick={() => setDownloadFormat('json')}
-              disabled={isLoading}
-            >
-              JSON
-            </button>
-          </div>
-        </div>
-
         <button
           onClick={handleDownload}
           disabled={isLoading || (recordType === 'competition' && !selectedCompetitionId)}
           className={styles.records_download_button}
         >
           <Download size={18} />
-          <span>{isLoading ? 'Downloading...' : 'Download Records'}</span>
+          <span>{isLoading ? 'Downloading...' : 'Download CSV Records'}</span>
         </button>
       </div>
     </div>

@@ -96,6 +96,92 @@ class LeaderboardRoutes {
          *         $ref: '#/components/responses/NotFoundError'
          */
         this.router.get('/competition/:room_id', this.leaderController.getCompeBoard)
+
+        /**
+         * @swagger
+         * /leaderboards/room/{room_id}/export-csv:
+         *   get:
+         *     tags: [Leaderboards]
+         *     summary: Download room records as CSV
+         *     description: Export all student records for a room as CSV file. Includes room name and all student data.
+         *     security:
+         *       - bearerAuth: []
+         *     parameters:
+         *       - in: path
+         *         name: room_id
+         *         required: true
+         *         schema:
+         *           type: integer
+         *         description: Room ID
+         *         example: 51
+         *     responses:
+         *       200:
+         *         description: CSV file generated and downloaded successfully
+         *         content:
+         *           text/csv:
+         *             schema:
+         *               type: string
+         *               example: |
+         *                 Room: Computer Science 101
+         *                 First Name,Last Name,XP
+         *                 "John","Doe","5432"
+         *                 "Jane","Smith","2150"
+         *                 "Bob","Johnson","1800"
+         *             headers:
+         *               Content-Disposition:
+         *                 schema:
+         *                   type: string
+         *                   example: attachment; filename="room-51-records-2025-10-20.csv"
+         *       401:
+         *         description: Unauthorized - Invalid or missing authentication token
+         *       404:
+         *         description: Room not found or user not authorized
+         *       500:
+         *         description: Failed to generate CSV export
+         */
+        this.router.get('/room/:room_id/export-csv', this.leaderController.downloadRoomRecordsCSV)
+
+    /**
+     * @swagger
+     * /leaderboards/room/{room_id}/competition/{competition_id}/export-csv:
+     *   get:
+     *     tags:
+     *       - Leaderboards
+     *     summary: Download competition records as CSV
+     *     description: Export all student records for a specific competition within a room as CSV file
+     *     parameters:
+     *       - in: path
+     *         name: room_id
+     *         required: true
+     *         schema:
+     *           type: integer
+     *         description: Room ID
+     *       - in: path
+     *         name: competition_id
+     *         required: true
+     *         schema:
+     *           type: integer
+     *         description: Competition ID
+     *     security:
+     *       - BearerAuth: []
+     *     responses:
+     *       200:
+     *         description: CSV file download
+     *         content:
+     *           text/csv:
+     *             schema:
+     *               type: string
+     *               example: |
+     *                 Competition: Midterm Challenge
+     *                 First Name,Last Name,XP
+     *                 "Alice","Williams","5432"
+     *                 "Charlie","Brown","3200"
+     *       404:
+     *         description: Competition not found
+     *       500:
+     *         description: Server error
+     */
+        this.router.get('/room/:room_id/competition/:competition_id/export-csv', this.leaderController.downloadCompetitionRecordsCSV)
     }
     
     getRouter(){

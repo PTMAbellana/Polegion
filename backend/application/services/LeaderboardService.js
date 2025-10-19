@@ -37,16 +37,12 @@ class LeaderboardService {
                 data.map(async (row) => {
                     try {
                     const userData = await this.userService.getUserById(row.participant.user_id)
-                    const profile_pic = await this.userService.getProfilePicture(row.participant.user_id)
                     return {
                         accumulated_xp: row.accumulated_xp,
-                        participants: {
-                            ...userData,
-                            ...profile_pic
-                        } 
+                        participants: userData 
                     };
                     } catch (err) {
-                    return { accumulated_xp: row.accumulated_xp };
+                        return null;
                     }
                 })
             )
@@ -79,29 +75,15 @@ class LeaderboardService {
                 data.map(async (row) => {
                     try {
                     const userData = await this.userService.getUserById(row.participant.user_id)
-                    const profile_pic = await this.userService.getProfilePicture(row.participant.user_id)
                     return {
                         competition: row.competition,
                         accumulated_xp: row.accumulated_xp,
-                        participant: {
-                            id: row.participant.id,
-                            fullName: userData.fullName || userData.full_name,
-                            email: userData.email,
-                            profile_pic: profile_pic.profile_pic || profile_pic.profilePic
-                        }
+                        participant: userData
+                        
                     };
                     } catch (err) {
                     console.error("User lookup failed:", err);
-                    return { 
-                        competition: row.competition,
-                        accumulated_xp: row.accumulated_xp,
-                        participant: {
-                            id: row.participant.id,
-                            fullName: 'Unknown User',
-                            email: 'unknown@email.com',
-                            profile_pic: null
-                        }
-                    }; 
+                        return null;
                     }
                 })
             )
@@ -238,6 +220,80 @@ class LeaderboardService {
         }
         
         // Note: Cache invalidation is handled by the calling method
+    }
+
+    async generateRoomRecordsCSV(room_id) {
+        try {
+            const data = await this.getRoomBoard(room_id)
+            
+            if (!data || data.length === 0) {
+                throw new Error('No records found for this room')
+            }
+
+            const roomTitle = data[0]?.participants?.rooms?.[0]?.title || `Room ${room_id}`
+            
+            let csvContent = `Room: ${roomTitle}\n`
+            csvContent += `First Name,Last Name,XP\n`
+            
+            const sortedData = data.sort((a, b) => (b.accumulated_xp || 0) - (a.accumulated_xp || 0))
+            
+            sortedData.forEach(row => {
+                const firstName = row.participants?.first_name || ''
+                const lastName = row.participants?.last_name || ''
+                const xp = row.accumulated_xp || 0
+                
+                csvContent += `"${firstName}","${lastName}","${xp}"\n`
+            })
+
+            return {
+                content: csvContent,
+                filename: `${roomTitle}-records-${new Date().toISOString().split('T')[0]}.csv`
+            }
+        } catch (error) {
+            throw error
+        }
+    }
+
+    async generateCompetitionRecordsCSV(room_id, competition_id) {
+        try {
+            // Get all competitions for the room
+            const allCompetitions = await this.getCompeBoard(room_id)
+            
+            if (!allCompetitions || allCompetitions.length === 0) {
+                throw new Error('No records found for this room')
+            }
+
+            // Filter to get only the specific competition
+            const competition = allCompetitions.find(comp => comp.id === parseInt(competition_id))
+            
+            if (!competition) {
+                throw new Error('Competition not found in this room')
+            }
+
+            const competitionTitle = competition.title || `Competition ${competition_id}`
+            
+            let csvContent = `Competition: ${competitionTitle}\n`
+            csvContent += `First Name,Last Name,XP\n`
+            
+            if (competition.data && Array.isArray(competition.data)) {
+                const sortedStudents = competition.data.sort((a, b) => (b.accumulated_xp || 0) - (a.accumulated_xp || 0))
+                
+                sortedStudents.forEach(student => {
+                    const firstName = student.participants?.first_name || ''
+                    const lastName = student.participants?.last_name || ''
+                    const xp = student.accumulated_xp || 0
+                    
+                    csvContent += `"${firstName}","${lastName}","${xp}"\n`
+                })
+            }
+
+            return {
+                content: csvContent,
+                filename: `${competitionTitle}-records-${new Date().toISOString().split('T')[0]}.csv`
+            }
+        } catch (error) {
+            throw error
+        }
     }
 }
 

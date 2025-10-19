@@ -42,7 +42,7 @@ export default function Home() {
           name="description"
           content="Explore interactive geometry visualizations and gamified learning"
         />
-        <link rel="icon" type="image/png" href="/images/polegionIcon.png" />
+        {/* <link rel="icon" type="image/png" href="/images/polegionIcon.png" /> */}
       </Head>
 
       <div className={styles.container}>

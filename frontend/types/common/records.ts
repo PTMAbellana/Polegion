@@ -3,11 +3,11 @@
  */
 
 export interface RecordStudent {
-  student_name?: string
+  id?: string | number           // Add this - unique identifier
+  user_id?: string | number       // Or this
   first_name?: string
   last_name?: string
-  email?: string
-  xp: number
+  xp?: number
   competitions_completed?: number
   average_score?: number
   problems_solved?: number
