@@ -5,3 +5,4 @@ export * from './modal';
 export * from './tabs';
 export * from './problem';
 export * from './leaderboard';
+export * from './records';

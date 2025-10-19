@@ -22,28 +22,6 @@ export const authUtils = {
 			localStorage.setItem("access_token", session.access_token);
 			localStorage.setItem("refresh_token", session.refresh_token);
 			localStorage.setItem("user", JSON.stringify(user));
-
-            // // ✅ Better handling of expires_at
-            // let expiresAt;
-            
-            // if (session.expires_at) {
-            //     // Check if it's in seconds (typical Unix timestamp < year 3000)
-            //     const timestamp = session.expires_at;
-                
-            //     // If timestamp is less than 10 digits, it's in seconds
-            //     // If more than 10 digits, it's already in milliseconds
-            //     if (timestamp < 10000000000) {
-            //         // It's in seconds, convert to milliseconds
-            //         expiresAt = timestamp * 1000;
-            //     } else {
-            //         // Already in milliseconds
-            //         expiresAt = timestamp;
-            //     }
-            // } else {
-            //     // Fallback: Default to 1 hour from now
-            //     expiresAt = Date.now() + (60 * 60 * 1000);
-            // }
-
 			localStorage.setItem("expires_at", session.expires_at);
 		}
 	},
@@ -116,6 +94,39 @@ const processQueue = (error, token = null) => {
     failedQueue = [];
 };
 
+// ✅ NEW: Function to update authStore after token refresh
+const updateAuthStoreAfterRefresh = (newData) => {
+	try {
+		// Dynamically import to avoid circular dependencies
+		import('@/store/authStore').then(({ useAuthStore }) => {
+			const store = useAuthStore.getState();
+			
+			if (newData?.user && newData?.session) {
+				const profile = {
+					id: newData.user.id,
+					email: newData.user.email,
+					first_name: newData.user.first_name,
+					last_name: newData.user.last_name,
+					gender: newData.user.gender,
+					phone: newData.user.phone,
+					profile_pic: newData.user.profile_pic,
+					role: newData.user.role,
+				};
+				
+				store.setAuthToken(newData.session.access_token);
+				store.setUserProfile(profile);
+				store.setIsLoggedIn(true);
+				
+				console.log('✅ AuthStore updated after token refresh');
+			}
+		}).catch(error => {
+			console.error('Error importing authStore:', error);
+		});
+	} catch (error) {
+		console.error('Error updating authStore after refresh:', error);
+	}
+};
+
 api.interceptors.response.use(
     (response) => response,
     async (error) => {
@@ -147,6 +158,9 @@ api.interceptors.response.use(
                     
                     // Update stored auth data
                     authUtils.saveAuthData(response.data.data);
+                    
+                    // ✅ NEW: Update authStore to keep UI in sync
+                    updateAuthStoreAfterRefresh(response.data.data);
 
                     // Update the original request with new token
                     originalRequest.headers['Authorization'] = `Bearer ${newAccessToken}`;

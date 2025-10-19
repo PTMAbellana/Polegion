@@ -5,3 +5,4 @@ export * from './user';
 export * from './competition';
 export * from './problem';
 export * from './leaderboard';
+export * from './records';
