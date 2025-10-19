@@ -6,14 +6,13 @@
   background: linear-gradient(135deg, #2C514C 0%, #122932 50%, #1a3a3a 100%);
   position: relative;
   overflow-x: hidden;
-  margin-left: 70px; /* Allowance for sidebar */
   transition: margin-left 0.3s ease;
 }
 
 /* For collapsed sidebar */
-.leaderboard_container.sidebar_collapsed {
+/* .leaderboard_container.sidebar_collapsed {
   margin-left: 70px;
-}
+} */
 
 .leaderboard_container::before {
   content: '';

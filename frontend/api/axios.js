@@ -1,3 +1,4 @@
+import { ROUTES } from "@/constants/routes";
 import axios from "axios";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
@@ -159,7 +160,7 @@ api.interceptors.response.use(
                     // Refresh failed, logout user
                     authUtils.clearAuthData();
                     localStorage.removeItem('auth-storage');
-                    window.location.href = '/teacher/auth/login'; // or student route
+                    window.location.href = ROUTES.HOME; 
                     processQueue(new Error('Token refresh failed'), null);
                     return Promise.reject(error);
                 }
@@ -167,7 +168,7 @@ api.interceptors.response.use(
                 console.error('Token refresh failed:', refreshError);
                 authUtils.clearAuthData();
                 localStorage.removeItem('auth-storage');
-                window.location.href = '/teacher/auth/login';
+                window.location.href = ROUTES.HOME;
                 processQueue(refreshError, null);
                 return Promise.reject(refreshError);
             }
