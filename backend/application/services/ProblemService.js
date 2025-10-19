@@ -36,7 +36,6 @@ class ProblemService {
   }
   
   async fetchRoomProblems(room_id, type) {
-    console.log('i am correct!')
     try {
       const cacheKey = cache.generateKey('room_problems', room_id);
       
@@ -54,9 +53,11 @@ class ProblemService {
       const problemsWithTimers = await Promise.all(
         problems.map(async problem => {
           const timerData = await this.problemRepo.fetchCompeProblemByProbId(problem.id);
-          return problemModel.fromDbProbTimer({...problem, timer: timerData?.timer});
+          return problemModel.fromDbProbTimer(problem, timerData?.timer);
         })
       );
+
+      console.log('problemsWithTimers:', problemsWithTimers);
 
       // Cache the result
       cache.set(cacheKey, problemsWithTimers, this.CACHE_TTL);

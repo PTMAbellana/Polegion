@@ -170,34 +170,45 @@ export const useAuthStore = create<AuthState>()(
             },
 
             refreshUserSession: async (): Promise<boolean> => {
-                const { setAuthLoading, setAuthToken, setIsLoggedIn, setUserProfile, logout } = get();
+                const authData = authUtils.getAuthData();
                 
-                setAuthLoading(true);
-                try {
-                    const authData = authUtils.getAuthData();
-                    console.log('Auth data from storage:', authData);
+                if (!authData.accessToken && !authData.refreshToken) {
+                    console.log('No tokens found');
+                    set({
+                        authToken: null,
+                        userProfile: null,
+                        isLoggedIn: false,
+                    });
+                    return false;
+                }
 
-                    if (!authData.accessToken && !authData.refreshToken) {
-                        console.log('No access or refresh token found, logging out');
-                        // Just clear the state directly instead of calling logout()
-                        authUtils.clearAuthData();
-                        localStorage.removeItem('auth-storage');
-                        set({
-                            authToken: null,
-                            userProfile: null,
-                            isLoggedIn: false,
-                            authLoading: false, // Important: set loading to false here
-                        });
-                        return false;
-                    }
+                // Check if access token is expired
+                if (!authUtils.isTokenValid()) {
+                    try {
+                        const response = await refreshToken(); // Your API call
 
-                    // ✅ CHECK IF TOKEN IS EXPIRED USING YOUR expires_at
-                    if (!authUtils.isTokenValid()) {
-                        console.log('Token is expired based on expires_at, logging out');
-                        
-                        if (!authData.refreshToken) {
-                            console.log('No refresh token available, logging out');
-                            // Don't call logout(), just clear the state
+                        if (response.success) {
+                            const newData = response.data;
+                            const profile: UserProfileDTO = {
+                                id: newData.user.id,
+                                email: newData.user.email,
+                                first_name: newData.user.first_name,
+                                last_name: newData.user.last_name,
+                                gender: newData.user.gender,
+                                phone: newData.user.phone,
+                                profile_pic: newData.user.profile_pic,
+                                role: newData.user.role,
+                            };
+
+                            authUtils.saveAuthData(newData);
+                            set({
+                                authToken: newData.session.access_token,
+                                isLoggedIn: true,
+                                userProfile: profile,
+                            });
+                            return true;
+                        } else {
+                            // Refresh failed, clear auth
                             authUtils.clearAuthData();
                             localStorage.removeItem('auth-storage');
                             set({
@@ -207,62 +218,14 @@ export const useAuthStore = create<AuthState>()(
                             });
                             return false;
                         }
-
-                        try {
-
-                            const refresh = await refreshToken();
-
-                            if (refresh.success) {
-                                console.log('Token refreshed successfully');
-                                const newData = refresh.data;
-
-                                const profile: UserProfileDTO = {
-                                    id: newData.user.id,
-                                    email: newData.user.email,
-                                    first_name: newData.user.first_name,
-                                    last_name: newData.user.last_name,
-                                    gender: newData.user.gender,
-                                    phone: newData.user.phone,
-                                    profile_pic: newData.user.profile_pic,
-                                    role: newData.user.role,
-                                };
-                                authUtils.saveAuthData(newData);
-                    
-                                set({
-                                    authToken: newData.session.access_token,
-                                    isLoggedIn: true,
-                                    userProfile: profile,
-                                });
-
-                                return true;
-                            } else {
-                                console.log('Failed to refresh token, logging out');
-                                await logout();
-                                return false;
-                            }
-                        } catch (error) {
-                            console.error('Error during token refresh:', error);
-                            await logout();
-                            return false;
-                        }
+                    } catch (error) {
+                        console.error('Token refresh error:', error);
+                        return false;
                     }
-
-                    console.log('Token is valid, setting auth state from storage');
-                    setAuthToken(authData.accessToken);
-                    setIsLoggedIn(true);
-
-                    if (authData.user && Object.keys(authData.user).length > 0) {
-                        console.log('Loading existing user profile from localStorage');
-                        setUserProfile(authData.user); // ← Use your formatted data
-                    }
-                    
-                    return true;
-                } catch (error) {
-                    console.error("Session refresh error:", error);
-                    return get().isLoggedIn;
-                } finally {
-                    setAuthLoading(false);
                 }
+
+                // Token is still valid
+                return true;
             },
 
             logout: async () => {
@@ -277,12 +240,19 @@ export const useAuthStore = create<AuthState>()(
             },
 
             initialize: async () => {
-                const { refreshUserSession, setAppLoading } = get();
-                    setAppLoading(true);
+                set({ appLoading: true });
                 try {
-                    await refreshUserSession();
+                    const isValid = await get().refreshUserSession();
+                    
+                    if (!isValid) {
+                        console.log('Session invalid, user not logged in');
+                    } else {
+                        console.log('Session valid, user logged in');
+                    }
+                } catch (error) {
+                    console.error('Initialization error:', error);
                 } finally {
-                    setAppLoading(false);
+                    set({ appLoading: false });
                 }
             },
 

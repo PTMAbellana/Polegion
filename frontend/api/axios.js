@@ -103,80 +103,78 @@ let isRefreshing = false;
 let failedQueue = [];
 
 const processQueue = (error, token = null) => {
-	failedQueue.forEach((prom) => {
-		if (error) {
-			prom.reject(error);
-		} else {
-			prom.resolve(token);
-		}
-	});
-	failedQueue = [];
+    failedQueue.forEach(prom => {
+        if (error) {
+            prom.reject(error);
+        } else {
+            prom.resolve(token);
+        }
+    });
+    
+    isRefreshing = false;
+    failedQueue = [];
 };
 
 api.interceptors.response.use(
-	(response) => response,
-	async (error) => {
-		const originalRequest = error.config;
-		
-		// Don't retry for certain errors
-		if (
-			error.code === "ECONNABORTED" ||
-			error.message === "Network Error" ||
-			[403, 404].includes(error.response?.status)
-		) {
-			return Promise.reject(error);
-		}
+    (response) => response,
+    async (error) => {
+        const originalRequest = error.config;
 
-		if (error.response?.status === 401 && !originalRequest._retry) {
-			originalRequest._retry = true;
-			
-			const authData = authUtils.getAuthData();
-			if (authData.refreshToken && !isRefreshing) {
-				isRefreshing = true;
-				
-				try {
-					const refreshResponse = await axios.post(`${API_URL}/auth/refresh`, {
-						refresh_token: authData.refreshToken
-					});
-					
-					if (refreshResponse.data.success) {
-						const newSession = refreshResponse.data.data.session;
-						const userData = refreshResponse.data.data.user;
-						
-						// Update localStorage
-						authUtils.saveAuthData({
-							session: newSession,
-							user: userData
-						});
-						
-						// Update the authorization header
-						api.defaults.headers.common['Authorization'] = `Bearer ${newSession.access_token}`;
-						originalRequest.headers['Authorization'] = `Bearer ${newSession.access_token}`;
-						
-						processQueue(null, newSession.access_token);
-						return api(originalRequest);
-					} else {
-						processQueue(error, null);
-						authUtils.clearAuthData();
-						window.location.href = '/auth/login';
-						return Promise.reject(error);
-					}
-				} catch (refreshError) {
-					processQueue(refreshError, null);
-					authUtils.clearAuthData();
-					window.location.href = '/auth/login';
-					return Promise.reject(refreshError);
-				} finally {
-					isRefreshing = false;
-				}
-			} else {
-				authUtils.clearAuthData();
-				window.location.href = '/auth/login';
-			}
-		}
-		
-		return Promise.reject(error);
-	}
+        // If error is 401 (Unauthorized) and we haven't already tried to refresh
+        if (error.response?.status === 401 && !originalRequest._retry) {
+            if (isRefreshing) {
+                // If already refreshing, queue this request
+                return new Promise((resolve, reject) => {
+                    failedQueue.push({ resolve, reject });
+                }).then(token => {
+                    originalRequest.headers['Authorization'] = `Bearer ${token}`;
+                    return api(originalRequest);
+                }).catch(err => Promise.reject(err));
+            }
+
+            originalRequest._retry = true;
+            isRefreshing = true;
+
+            try {
+                // Call your refresh token endpoint
+                const response = await axios.post(`${API_URL}/auth/refresh-token`, {
+                    refresh_token: authUtils.getAuthData().refreshToken
+                });
+
+                if (response.data.success) {
+                    const newAccessToken = response.data.data.session.access_token;
+                    
+                    // Update stored auth data
+                    authUtils.saveAuthData(response.data.data);
+
+                    // Update the original request with new token
+                    originalRequest.headers['Authorization'] = `Bearer ${newAccessToken}`;
+                    
+                    // Process queued requests with new token
+                    processQueue(null, newAccessToken);
+                    
+                    // Retry original request
+                    return api(originalRequest);
+                } else {
+                    // Refresh failed, logout user
+                    authUtils.clearAuthData();
+                    localStorage.removeItem('auth-storage');
+                    window.location.href = '/teacher/auth/login'; // or student route
+                    processQueue(new Error('Token refresh failed'), null);
+                    return Promise.reject(error);
+                }
+            } catch (refreshError) {
+                console.error('Token refresh failed:', refreshError);
+                authUtils.clearAuthData();
+                localStorage.removeItem('auth-storage');
+                window.location.href = '/teacher/auth/login';
+                processQueue(refreshError, null);
+                return Promise.reject(refreshError);
+            }
+        }
+
+        return Promise.reject(error);
+    }
 );
 
 export default api;
