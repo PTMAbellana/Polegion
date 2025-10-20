@@ -2,14 +2,14 @@
 
 import React, { useState, useMemo, useRef } from 'react'
 import { Download } from 'lucide-react'
-import { RecordsDownloadSectionProps } from '@/types'
+import { RecordsDownloadSectionProps, RecordStudent } from '@/types/common/records'
 import styles from '@/styles/leaderboard.module.css'
 import RecordsPreview from './RecordsPreview'
 
 interface RecordsDownloadSectionWithPreviewProps extends RecordsDownloadSectionProps {
-  roomRecords: Array<{ first_name?: string; last_name?: string; xp: number }>
-  competitionRecords: Map<string, Array<{ first_name?: string; last_name?: string; xp: number }>>
-  competitions: Array<{ id: string; name: string }>
+  roomRecords: RecordStudent[]
+  competitionRecords: Map<number, RecordStudent[]>
+  competitions: Array<{ id: number; title: string }>
 }
 
 export default function RecordsDownloadSection({
@@ -21,7 +21,7 @@ export default function RecordsDownloadSection({
   competitions = []
 }: RecordsDownloadSectionWithPreviewProps) {
   const [recordType, setRecordType] = useState<'room' | 'competition'>('room')
-  const [selectedCompetitionId, setSelectedCompetitionId] = useState<string>('')
+  const [selectedCompetitionId, setSelectedCompetitionId] = useState<number | ''>('')
   const [searchTerm, setSearchTerm] = useState('')
   const searchInputRef = useRef<HTMLInputElement>(null)
 
@@ -44,7 +44,7 @@ export default function RecordsDownloadSection({
         alert('Please select a competition')
         return
       }
-      await onDownloadCompetitionAction(selectedCompetitionId)
+      await onDownloadCompetitionAction(selectedCompetitionId.toString())
     }
   }
 
@@ -83,14 +83,14 @@ export default function RecordsDownloadSection({
             <label className={styles.records_selector_label}>Select Competition:</label>
             <select
               value={selectedCompetitionId}
-              onChange={(e) => setSelectedCompetitionId(e.target.value)}
+              onChange={(e) => setSelectedCompetitionId(e.target.value ? parseInt(e.target.value) : '')}
               disabled={isLoading}
               className={styles.records_select}
             >
               <option value="">-- Choose a competition --</option>
               {competitions.map((comp) => (
                 <option key={comp.id} value={comp.id}>
-                  {comp.name}
+                  {comp.title}
                 </option>
               ))}
             </select>

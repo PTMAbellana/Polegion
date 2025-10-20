@@ -6,8 +6,8 @@ import { LeaderboardItem, LeaderboardData, RecordStudent } from '@/types'
 
 interface UseRecordsPreviewReturn {
   roomRecords: RecordStudent[]
-  competitionRecords: Map<string, RecordStudent[]>
-  competitions: Array<{ id: string; name: string }>
+  competitionRecords: Map<number, RecordStudent[]>
+  competitions: Array<{ id: number; title: string }>
   loading: boolean
   error: string | null
   fetchRecords: () => Promise<void>
@@ -30,13 +30,13 @@ function convertToRecordStudent(item: LeaderboardItem): RecordStudent {
 }
 
 // Cache for preventing duplicate requests
-const dataCache = new Map<string, { data: { roomRecords: RecordStudent[]; competitionRecords: Map<string, RecordStudent[]>; competitions: Array<{ id: string; name: string }> }; timestamp: number }>()
+const dataCache = new Map<string, { data: { roomRecords: RecordStudent[]; competitionRecords: Map<number, RecordStudent[]>; competitions: Array<{ id: number; title: string }> }; timestamp: number }>()
 const CACHE_DURATION = 5 * 60 * 1000 // 5 minutes
 
 export function useRecordsPreview(roomId: number): UseRecordsPreviewReturn {
   const [roomRecords, setRoomRecords] = useState<RecordStudent[]>([])
-  const [competitionRecords, setCompetitionRecords] = useState<Map<string, RecordStudent[]>>(new Map())
-  const [competitions, setCompetitions] = useState<Array<{ id: string; name: string }>>([])
+  const [competitionRecords, setCompetitionRecords] = useState<Map<number, RecordStudent[]>>(new Map())
+  const [competitions, setCompetitions] = useState<Array<{ id: number; title: string }>>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const abortControllerRef = useRef<AbortController | null>(null)
@@ -80,17 +80,17 @@ export function useRecordsPreview(roomId: number): UseRecordsPreviewReturn {
       setRoomRecords(roomRecordsConverted)
 
       // Extract competitions and convert their records
-      const competitionMap = new Map<string, RecordStudent[]>()
-      const competitionsList: Array<{ id: string; name: string }> = []
+      const competitionMap = new Map<number, RecordStudent[]>()
+      const competitionsList: Array<{ id: number; title: string }> = []
 
       competitionLeaderboards.forEach((compe: LeaderboardData) => {
-        const competitionId = compe.id?.toString() || ''
-        const competitionName = compe.title || `Competition ${competitionId}`
+        const competitionId = typeof compe.id === 'string' ? parseInt(compe.id) : (compe.id || 0)
+        const competitionTitle = compe.title || `Competition ${competitionId}`
 
         if (competitionId) {
           competitionsList.push({
             id: competitionId,
-            name: competitionName
+            title: competitionTitle
           })
 
           // Convert competition records

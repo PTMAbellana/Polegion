@@ -22,5 +22,20 @@ export interface RecordsData {
   generatedAt: string
 }
 
+export interface Competition {
+  id: number
+  title: string
+}
+
+export interface RecordsDownloadSectionProps {
+  onDownloadRoomAction: () => Promise<void>
+  onDownloadCompetitionAction: (competitionId: string) => Promise<void>
+  isLoading?: boolean
+  roomRecords?: RecordStudent[]
+  competitionRecords?: Map<number, RecordStudent[]>
+  competitions?: Competition[]
+}
+
 export type DownloadFormat = 'csv' | 'json'
 export type RecordType = 'room' | 'competition'
+
