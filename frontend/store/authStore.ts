@@ -5,7 +5,7 @@ import {
     login as apiLogin, 
     register as apiRegister,
     logout as apiLogout,
-    refreshToken, 
+    // refreshToken,  // ✅ REMOVED: axios interceptor handles this now
     // resetPassword as apiResetPassword 
 } from '@/api/auth';
 import { AuthState, UserProfileDTO, AuthActionResult } from '@/types';
@@ -172,8 +172,8 @@ export const useAuthStore = create<AuthState>()(
             refreshUserSession: async (): Promise<boolean> => {
                 const authData = authUtils.getAuthData();
                 
-                if (!authData.accessToken && !authData.refreshToken) {
-                    console.log('No tokens found');
+                if (!authData.accessToken) {
+                    console.log('No access token found');
                     set({
                         authToken: null,
                         userProfile: null,
@@ -182,50 +182,17 @@ export const useAuthStore = create<AuthState>()(
                     return false;
                 }
 
-                // Check if access token is expired
-                if (!authUtils.isTokenValid()) {
-                    try {
-                        const response = await refreshToken(); // Your API call
-
-                        if (response.success) {
-                            const newData = response.data;
-                            const profile: UserProfileDTO = {
-                                id: newData.user.id,
-                                email: newData.user.email,
-                                first_name: newData.user.first_name,
-                                last_name: newData.user.last_name,
-                                gender: newData.user.gender,
-                                phone: newData.user.phone,
-                                profile_pic: newData.user.profile_pic,
-                                role: newData.user.role,
-                            };
-
-                            authUtils.saveAuthData(newData);
-                            set({
-                                authToken: newData.session.access_token,
-                                isLoggedIn: true,
-                                userProfile: profile,
-                            });
-                            return true;
-                        } else {
-                            // Refresh failed, clear auth
-                            authUtils.clearAuthData();
-                            localStorage.removeItem('auth-storage');
-                            set({
-                                authToken: null,
-                                userProfile: null,
-                                isLoggedIn: false,
-                            });
-                            return false;
-                        }
-                    } catch (error) {
-                        console.error('Token refresh error:', error);
-                        return false;
-                    }
+                // Token is still valid, just restore state from localStorage
+                if (authData.user && authData.user.id) {
+                    set({
+                        authToken: authData.accessToken,
+                        userProfile: authData.user,
+                        isLoggedIn: true,
+                    });
+                    return true;
                 }
 
-                // Token is still valid
-                return true;
+                return false;
             },
 
             logout: async () => {

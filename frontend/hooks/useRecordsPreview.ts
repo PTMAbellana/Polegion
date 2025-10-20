@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { getRoomLeaderboards, getCompetitionLeaderboards } from '@/api/leaderboards'
 import { LeaderboardItem, LeaderboardData, RecordStudent } from '@/types'
 
@@ -29,31 +29,55 @@ function convertToRecordStudent(item: LeaderboardItem): RecordStudent {
   }
 }
 
+// Cache for preventing duplicate requests
+const dataCache = new Map<string, { data: { roomRecords: RecordStudent[]; competitionRecords: Map<string, RecordStudent[]>; competitions: Array<{ id: string; name: string }> }; timestamp: number }>()
+const CACHE_DURATION = 5 * 60 * 1000 // 5 minutes
+
 export function useRecordsPreview(roomId: number): UseRecordsPreviewReturn {
   const [roomRecords, setRoomRecords] = useState<RecordStudent[]>([])
   const [competitionRecords, setCompetitionRecords] = useState<Map<string, RecordStudent[]>>(new Map())
   const [competitions, setCompetitions] = useState<Array<{ id: string; name: string }>>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const abortControllerRef = useRef<AbortController | null>(null)
 
-  const fetchRecords = async () => {
+  const fetchRecords = useCallback(async () => {
     try {
+      // Cancel previous requests
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort()
+      }
+      abortControllerRef.current = new AbortController()
+
       setLoading(true)
       setError(null)
 
-      // Fetch room leaderboards (all records regardless of XP)
-      const roomRes = await getRoomLeaderboards(roomId)
+      // Check cache first
+      const cacheKey = `records-${roomId}`
+      const cached = dataCache.get(cacheKey)
+      if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
+        console.log('Using cached data for room', roomId)
+        setRoomRecords(cached.data.roomRecords)
+        setCompetitionRecords(cached.data.competitionRecords)
+        setCompetitions(cached.data.competitions)
+        setLoading(false)
+        return
+      }
+
+      // Fetch both in parallel
+      const [roomRes, compeRes] = await Promise.all([
+        getRoomLeaderboards(roomId),
+        getCompetitionLeaderboards(roomId)
+      ])
+
       const roomLeaderboards = roomRes.data || []
+      const competitionLeaderboards = compeRes.data || []
       
-      // Convert to RecordStudent format (includes 0 XP)
+      // Convert room records
       const roomRecordsConverted = roomLeaderboards.map((item: LeaderboardItem) =>
         convertToRecordStudent(item)
       )
       setRoomRecords(roomRecordsConverted)
-
-      // Fetch competition leaderboards
-      const compeRes = await getCompetitionLeaderboards(roomId)
-      const competitionLeaderboards = compeRes.data || []
 
       // Extract competitions and convert their records
       const competitionMap = new Map<string, RecordStudent[]>()
@@ -69,7 +93,7 @@ export function useRecordsPreview(roomId: number): UseRecordsPreviewReturn {
             name: competitionName
           })
 
-          // Convert competition records (includes 0 XP)
+          // Convert competition records
           const records = compe.data.map((item: LeaderboardItem) =>
             convertToRecordStudent(item)
           )
@@ -79,7 +103,18 @@ export function useRecordsPreview(roomId: number): UseRecordsPreviewReturn {
 
       setCompetitions(competitionsList)
       setCompetitionRecords(competitionMap)
+
+      // Cache the result
+      dataCache.set(cacheKey, {
+        data: { roomRecords: roomRecordsConverted, competitionRecords: competitionMap, competitions: competitionsList },
+        timestamp: Date.now()
+      })
     } catch (err) {
+      // Ignore abort errors
+      if (err instanceof Error && err.name === 'AbortError') {
+        return
+      }
+      
       const errorMessage = err instanceof Error ? err.message : 'Failed to fetch records'
       console.error('Error fetching records:', err)
       setError(errorMessage)
@@ -89,14 +124,20 @@ export function useRecordsPreview(roomId: number): UseRecordsPreviewReturn {
     } finally {
       setLoading(false)
     }
-  }
+  }, [roomId])
 
   useEffect(() => {
     if (roomId) {
       void fetchRecords()
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [roomId])
+
+    return () => {
+      // Cleanup: abort pending requests when component unmounts
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort()
+      }
+    }
+  }, [roomId, fetchRecords])
 
   return {
     roomRecords,

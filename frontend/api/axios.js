@@ -94,39 +94,6 @@ const processQueue = (error, token = null) => {
     failedQueue = [];
 };
 
-// ✅ NEW: Function to update authStore after token refresh
-const updateAuthStoreAfterRefresh = (newData) => {
-	try {
-		// Dynamically import to avoid circular dependencies
-		import('@/store/authStore').then(({ useAuthStore }) => {
-			const store = useAuthStore.getState();
-			
-			if (newData?.user && newData?.session) {
-				const profile = {
-					id: newData.user.id,
-					email: newData.user.email,
-					first_name: newData.user.first_name,
-					last_name: newData.user.last_name,
-					gender: newData.user.gender,
-					phone: newData.user.phone,
-					profile_pic: newData.user.profile_pic,
-					role: newData.user.role,
-				};
-				
-				store.setAuthToken(newData.session.access_token);
-				store.setUserProfile(profile);
-				store.setIsLoggedIn(true);
-				
-				console.log('✅ AuthStore updated after token refresh');
-			}
-		}).catch(error => {
-			console.error('Error importing authStore:', error);
-		});
-	} catch (error) {
-		console.error('Error updating authStore after refresh:', error);
-	}
-};
-
 api.interceptors.response.use(
     (response) => response,
     async (error) => {
@@ -154,13 +121,11 @@ api.interceptors.response.use(
                 });
 
                 if (response.data.success) {
-                    const newAccessToken = response.data.data.session.access_token;
+                    const newData = response.data.data;
+                    const newAccessToken = newData.session.access_token;
                     
-                    // Update stored auth data
-                    authUtils.saveAuthData(response.data.data);
-                    
-                    // ✅ NEW: Update authStore to keep UI in sync
-                    updateAuthStoreAfterRefresh(response.data.data);
+                    // Update localStorage with new tokens
+                    authUtils.saveAuthData(newData);
 
                     // Update the original request with new token
                     originalRequest.headers['Authorization'] = `Bearer ${newAccessToken}`;
@@ -168,7 +133,7 @@ api.interceptors.response.use(
                     // Process queued requests with new token
                     processQueue(null, newAccessToken);
                     
-                    // Retry original request
+                    // Retry original request with new token
                     return api(originalRequest);
                 } else {
                     // Refresh failed, logout user

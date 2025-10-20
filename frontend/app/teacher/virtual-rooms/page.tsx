@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useEffect } from 'react'
+import React, { useEffect, useMemo } from 'react'
 import { useAuthStore } from '@/store/authStore'
 import { useTeacherRoomStore } from '@/store/teacherRoomStore'
 import { useVirtualRoomsManagement } from '@/hooks/useVirtualRoomsManagement'
@@ -28,7 +28,7 @@ export default function VirtualRoomsPage() {
         handleCloseEditModal
     } = useVirtualRoomsManagement()
 
-    const createRoomButton = (
+    const createRoomButton = useMemo(() => (
         <button
             onClick={() => setShowCreateModal(true)}
             className="btn btn-primary"
@@ -46,7 +46,7 @@ export default function VirtualRoomsPage() {
         >
             + Create Room
         </button>
-    )
+    ), [setShowCreateModal])
 
     useEffect(() => {
         clearCurrentRoom()

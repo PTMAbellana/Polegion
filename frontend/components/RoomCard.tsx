@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { memo } from 'react';
 import styles from '@/styles/dashboard-wow.module.css';
 import { RoomCardProps } from '@/types';
 
-const RoomCard: React.FC<RoomCardProps> = ({ 
+const RoomCard: React.FC<RoomCardProps> = memo(({ 
   room, 
   onViewRoom, 
   useRoomCode = true, 
@@ -111,6 +111,10 @@ const RoomCard: React.FC<RoomCardProps> = ({
       </div>
     </div>
   );
-};
+}, (prevProps, nextProps) => {
+  return prevProps.room.id === nextProps.room.id;
+});
+
+RoomCard.displayName = 'RoomCard';
 
 export default RoomCard;
