@@ -14,19 +14,19 @@ export default function ProblemsTab({ problems, roomCode }: ProblemsTabProps) {
 
     const getDifficultyClass = (difficulty: string) => {
         switch (difficulty) {
-            case 'easy':
+            case 'Easy':
                 return styles.difficultyEasy
-            case 'intermediate':
-            case 'medium':
+            case 'Intermediate':
+            case 'Medium':
                 return styles.difficultyMedium
-            case 'hard':
+            case 'Hard':
                 return styles.difficultyHard
             default:
                 return styles.difficultyMedium
         }
     }
 
-    const handleOpenProblem = (problemId: number | undefined) => {
+    const handleOpenProblem = (problemId: string | undefined) => {
         if (problemId) {
             router.push(`/student/joined-rooms/${roomCode}/problem/${problemId}`)
         }

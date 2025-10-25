@@ -4,7 +4,7 @@ import React, { use, useEffect, useState, useCallback, useMemo } from 'react';
 import { ArrowLeft, ChevronDown, ChevronUp, Edit3 } from 'lucide-react';
 import styles from '@/styles/competition.module.css';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { useMyApp } from '@/context/AppUtils';
+import { useAuthStore } from '@/store/authStore';
 import { AuthProtection } from '@/context/AuthProtection';
 import Loader from '@/components/Loader';
 import { addCompeProblem, getCompeProblems, getRoomProblems, removeCompeProblem, updateTimer } from '@/api/problems';
@@ -100,7 +100,7 @@ const CompetitionDashboard = ({ params } : { params  : Promise<{competitionId : 
     console.log('  - connectionStatus:', connectionStatus);
   }, [liveCompetition, competition, currentCompetition, isConnected, connectionStatus]);
     
-  const { isLoggedIn } = useMyApp()
+  const { isLoggedIn } = useAuthStore()
   const { isLoading: authLoading } = AuthProtection()
   // const router = useRouter();
 

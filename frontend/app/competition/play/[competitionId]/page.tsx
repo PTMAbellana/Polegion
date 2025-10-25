@@ -4,7 +4,7 @@ import React, { use, useEffect, useState, useCallback } from 'react';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import styles from '@/styles/competition.module.css';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useMyApp } from '@/context/AppUtils';
+import { useAuthStore } from '@/store/authStore';
 import { AuthProtection } from '@/context/AuthProtection';
 import Loader from '@/components/Loader';
 import { getRoomProblems } from '@/api/problems';
@@ -80,8 +80,7 @@ const CompetitionDashboard = ({ params } : { params  : Promise<{competitionId : 
   // Use live competition data when available, fallback to initial API state
   const currentCompetition: Competition = liveCompetition || competition || {} as Competition;
 
-  const { isLoggedIn } = useMyApp()
-  const { isLoading: authLoading } = AuthProtection()
+  const { isLoggedIn } = useAuthStore()
 
   // ✅ ENHANCED: Better initial data fetching with competition state handling
   const callMe = useCallback( async () => {
@@ -119,15 +118,15 @@ const CompetitionDashboard = ({ params } : { params  : Promise<{competitionId : 
 
   // Competition logic
   useEffect(() => {
-      if (isLoggedIn && !authLoading && !fetched) {
+      if (isLoggedIn && !fetched) {
           callMe()
           setFetched(true)
       } else {
-          if (authLoading || !isLoggedIn) {
+          if (!isLoggedIn) {
               setIsLoading(true)
           }
       }
-  }, [isLoggedIn, authLoading, fetched, callMe])
+  }, [isLoggedIn, fetched, callMe])
 
   // Sync real-time participants data
   useEffect(() => {
@@ -529,7 +528,7 @@ const CompetitionDashboard = ({ params } : { params  : Promise<{competitionId : 
     );
   };
 
-  if (isLoading || authLoading) {
+  if (isLoading) {
     return (
       <div className={styles["dashboard-container"]}>
         <div className={styles["loading-container"]}>
