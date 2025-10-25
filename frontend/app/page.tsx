@@ -1,69 +1,24 @@
 "use client";
 import Head from "next/head";
 import Image from "next/image";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { supabase } from "@/lib/supabaseClient";
-import { ROUTES } from "@/constants/routes";
-import { refreshToken } from "@/api/auth";
-import { useMyApp } from "@/context/AppUtils";
-import { getUserProfile } from "@/api/users";
+import { STUDENT_ROUTES } from "@/constants/routes";
 import styles from "../styles/landingpage.module.css";
 
 export default function Home() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
-  const { setIsLoggedIn, setUserProfile } = useMyApp();
-
-  useEffect(() => {
-    const handleTokens = async () => {
-      const hash = window.location.hash.substring(1);
-      const params = new URLSearchParams(hash);
-      const access_token = params.get("access_token");
-      const refresh_token = params.get("refresh_token");
-      const expiresAt = params.get("expires_at");
-
-      if (access_token && refresh_token) {
-        localStorage.setItem("access_token", access_token);
-        localStorage.setItem("refresh_token", refresh_token);
-
-        const expiresAtMs = parseInt(expiresAt!) * 1000;
-        localStorage.setItem("expires_at", expiresAtMs.toString());
-
-        const { data, error } = await supabase.auth.setSession({
-          access_token,
-          refresh_token,
-        });
-
-        if (error) {
-          console.error("Failed to set session:", error.message);
-        } else {
-          refreshToken();
-          setIsLoggedIn(true);
-
-          const pr = await getUserProfile();
-          if (pr?.data) {
-            setUserProfile(pr.data);
-            const updateUser = { ...pr.data };
-            localStorage.setItem("user", JSON.stringify(updateUser));
-            router.push(ROUTES.DASHBOARD);
-          }
-        }
-      }
-    };
-
-    handleTokens();
-  }, []);
 
   const handleSignIn = () => {
-    router.push("/auth/login");
+    router.push(STUDENT_ROUTES.LOGIN); //TEMPORARY CHANGE
   };
 
   const handleGetStarted = () => {
     setIsLoading(true);
     setTimeout(() => {
       setIsLoading(false);
-      router.push("/auth/login");
+      router.push(STUDENT_ROUTES.LOGIN); // TEMPORARY CHANGE
     }, 1000);
   };
 

@@ -36,7 +36,7 @@ const CASTLES: Castle[] = [
     unlocked: true,
     completed: false,
     terrain: 'mountain',
-    route: '/world-map/castle1',
+    route: 'student/worldmap/castle1',
     imageNumber: 1
   },
   {
@@ -51,7 +51,7 @@ const CASTLES: Castle[] = [
     unlocked: true,
     completed: true,
     terrain: 'forest',
-    route: '/world-map/castle2',
+    route: 'student/worldmap/castle2',
     imageNumber: 2
   },
   {
@@ -66,7 +66,7 @@ const CASTLES: Castle[] = [
     unlocked: true,
     completed: false,
     terrain: 'coastal',
-    route: '/world-map/castle3',
+    route: 'student/worldmap/castle3',
     imageNumber: 3
   },
   {
@@ -81,7 +81,7 @@ const CASTLES: Castle[] = [
     unlocked: false,
     completed: false,
     terrain: 'desert',
-    route: '/world-map/castle4',
+    route: 'student/worldmap/castle4',
     imageNumber: 4
   },
   {
@@ -96,7 +96,7 @@ const CASTLES: Castle[] = [
     unlocked: false,
     completed: false,
     terrain: 'highland',
-    route: '/world-map/castle5',
+    route: 'student/worldmap/castle5',
     imageNumber: 5
   },
   {
@@ -111,7 +111,7 @@ const CASTLES: Castle[] = [
     unlocked: false,
     completed: false,
     terrain: 'mystical',
-    route: '/world-map/castle6',
+    route: 'student/worldmap/castle6',
     imageNumber: 6
   },
   {
@@ -126,7 +126,7 @@ const CASTLES: Castle[] = [
     unlocked: false,
     completed: false,
     terrain: 'mystical',
-    route: '/world-map/castle7',
+    route: 'student/worldmap/castle7',
     imageNumber: 7
   }
 ];

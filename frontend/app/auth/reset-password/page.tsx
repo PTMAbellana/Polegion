@@ -11,7 +11,6 @@ import { useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
 import { yupResolver } from "@hookform/resolvers/yup"
 import toast from "react-hot-toast"
-import { useMyApp } from "@/context/AppUtils"
 import api from "@/api/axios"
 
 interface ResetPasswordFormData {
@@ -68,7 +67,6 @@ const passwordSchema = yup.object().shape({
 export default function ResetPassword() {
     const router = useRouter();
     const searchParams = useSearchParams();
-    const { refreshUserSession } = useMyApp();
 
     const [loading, setLoading] = useState(true);
     const [tokenError, setTokenError] = useState(false);
@@ -134,8 +132,6 @@ export default function ResetPassword() {
             
             if (success) {
                 toast.success("Password reset successfully!");
-                
-                await refreshUserSession();
                 
                 setTimeout(() => {
                     passwordHandler.redirectToLogin();

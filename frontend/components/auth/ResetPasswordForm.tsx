@@ -9,7 +9,6 @@ import { ResetPasswordFormData } from '@/types/auth';
 import { resetPasswordSchema } from '@/schemas/authSchemas';
 import { ROUTES } from '@/constants/routes';
 import PasswordInput from '@/components/auth/inputs/PasswordInput';
-import { useMyApp } from '@/context/AppUtils';
 import styles from '@/styles/login.module.css';
 import { ResetPasswordFormProps } from '@/types';
 
@@ -18,7 +17,6 @@ export default function ResetPasswordForm({
 }: ResetPasswordFormProps) {
   const router = useRouter();
   const { resetPassword, loginLoading } = useAuthStore();
-  const { refreshUserSession } = useMyApp();
   
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -36,7 +34,6 @@ export default function ResetPasswordForm({
     
     if (result.success) {
       toast.success("Password reset successfully!");
-      await refreshUserSession();
       
       setTimeout(() => {
         router.push(ROUTES.LOGIN);
