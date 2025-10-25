@@ -10,18 +10,28 @@ class RoomController {
     getRooms = async (req, res) => {
         // console.log(req.user)
         try {
-            const rooms = await this.roomService.getRooms(req.user.id)
+            const data = await this.roomService.getRooms(req.user.id)
             
-            if (!rooms) return res.status(400).json({ error: error.message })
-            
-            // console.log('getRooms 1: ', rooms)
-            // console.log('getRooms 2: ', rooms.map( room => room.toDTO() ))
-
-            res.status(200).json(
-                rooms.map( room => room.toDTO() )
-            );
+            return res.status(200).json({
+                message: 'Rooms fetched successfully',
+                data: data
+            });
         } catch (error) {
-            res.status(500).json({ error: 'Server error fetching rooms' })
+            if (error.status === 400)
+                return res.status(400).json({ 
+                    message: 'No rooms found',
+                    error: error.message 
+            })
+              
+            if (error.status === 401)
+                return res.status(401).json({
+                    message: 'Unauthorized',
+                    error: 'Unauthorized'
+            })
+            return res.status(500).json({ 
+                message: 'Server error fetching rooms',
+                error: error.message
+            })
         }
     };
     
@@ -40,32 +50,70 @@ class RoomController {
         }
     };
     
-    // for admin
+    // for teachers 
     getRoomByCode = async (req, res) => {
-        // console.log(typeof req.params)
-        // console.log(req.params)
-        // console.log(req.user)
         try {
-            let room = await this.roomService.getRoomByCode(req.params.code, req.user.id)  
+            const data = await this.roomService.getRoomByCode(req.params.code, req.user.id)  
                         
-            if (!room) return res.status(404).json({ error: 'Room not found' })
+            if (!data) 
+                return res.status(404).json({ 
+                    message: 'Room not found',
+                    error: 'Not found' 
+                })
             
-            res.status(200).json(room.toDTO())
+            return res.status(200).json({
+                message: 'Room fetched successfully',
+                data: data
+            })
         } catch (error) {
-            res.status(500).json({ error: 'Server error fetching room' })
+            console.error('Error in getRoomByCode:', error);
+            if (error.status === 400)
+                return res.status(400).json({ 
+                    message: 'Bad request',
+                    error: error.message 
+                })
+            if (error.status === 401)
+                return res.status(401).json({
+                    message: 'Unauthorized',
+                    error: 'Invalid token'
+            })
+            return res.status(500).json({ 
+                message: 'Server error fetching room',
+                error: error.message 
+            })
         }
     }
     
-    // for participants
+    // for students
     getRoomByCodeUsers = async (req, res) => {
         try {
-            let room = await this.roomService.getRoomByCodeUsers(req.params.code)  
+            const data = await this.roomService.getRoomByCodeUsers(req.params.code, req.user.id)  
                         
-            if (!room) return res.status(404).json({ error: 'Room not found' })
+            if (!data) 
+                return res.status(404).json({ 
+                    message: 'Room not found',
+                    error: 'Not found' 
+                })
             
-            res.status(200).json(room.toDTO())
+            return res.status(200).json({
+                message: 'Room fetched successfully',
+                data: data
+            })
         } catch (error) {
-            res.status(500).json({ error: 'Server error fetching room' })
+            if (error.status === 400)
+                return res.status(400).json({ 
+                    message: 'Bad request',
+                    error: error.message 
+                })
+            if (error.status === 401)
+                return res.status(401).json({
+                    message: 'Unauthorized',
+                    error: 'Invalid token'
+            })
+            return res.status(500).json({ 
+                message: 'Server error fetching room',
+                error: error.message 
+            })
         }
     }
     
@@ -76,7 +124,6 @@ class RoomController {
             description, 
             mantra, 
             banner_image, 
-            code,
             visibility
         } = req.body
         
@@ -87,15 +134,35 @@ class RoomController {
                 mantra, 
                 banner_image, //url from the previous upload
                 req.user.id,
-                code,
-                visibility
+                visibility,
             )
             
-            if (!room) return res.status(400).json({ error: error.message })
+            if (!room) 
+                return res.status(400).json({ 
+                    message: 'Room creation failed',
+                    error: error.message 
+                })
             
-            res.status(201).json(room.toDTO());
+            return res.status(201).json({
+                message: 'Room created successfully',
+                data: room.toDTO()
+            });
         } catch (error) {
-            res.status(500).json({ error: 'Server error creating room' })
+            if (error.status === 400)
+                return res.status(400).json({ 
+                    message: 'Room creation failed',
+                    error: error.message 
+                })
+              
+            if (error.status === 401)
+                return res.status(401).json({
+                    message: 'Unauthorized',
+                    error: 'Unauthorized'
+            })
+            return res.status(500).json({
+                message: 'Server error creating room',
+                error: error.message
+            });
         }
     };
     
@@ -105,8 +172,7 @@ class RoomController {
             title, 
             description, 
             mantra, 
-            banner_image,
-            visibility
+            banner_image
         } = req.body
         
         try {
@@ -116,27 +182,64 @@ class RoomController {
                 description, 
                 mantra, 
                 banner_image,
-                visibility,
                 req.user.id
             )
             
-            if (!room) return res.status(400).json({ error: error.message })
-            res.status(200).json(room.toDTO())
+            if (!room) 
+                return res.status(400).json({ 
+                    message: 'Room update failed',
+                    error: error.message 
+                })
+            return res.status(200).json({
+                message: 'Room updated successfully',
+                data: room.toDTO()
+            })
         } catch (error) {
             // console.error('Error updating room:', error)
-            if (error.message === 'Room not found or not authorized') return res.status(404).json({ error: 'Room not found or not authorized' })
-            res.status(500).json({ error: 'Server error updating room' })
+            if (error.message === 'Room not found or not authorized') 
+                return res.status(404).json({ 
+                    message: 'Room update failed',
+                    error: 'Room not found or not authorized'
+                })
+
+            if (error.status === 401)
+                return res.status(401).json({
+                    message: 'Unauthorized',
+                    error: 'Unauthorized'
+                })
+
+            return res.status(500).json({
+                message: 'Server error updating room',
+                error: error.message 
+            })
         }
     };
     
     // Delete a room
     deleteRoom = async (req, res) => {
         try {
+            console.log('Deleting room with ID:', req.params.id);
             await this.roomService.deleteRoom(req.params.id, req.user.id)
             
-            res.status(200).json({ message: 'Room deleted successfully' })
+            return res.status(200).json({ 
+                message: 'Room deleted successfully' 
+            })
         } catch (error) {
-            res.status(500).json({ error: 'Server error deleting room' })
+            if (error.message === 'Room not found') 
+                return res.status(404).json({ 
+                    message: 'Room deletion failed',
+                    error: 'Room not found or not authorized' 
+            })
+
+            if (error.status === 401)
+                return res.status(401).json({ 
+                    message: 'Unauthorized',
+                    error: 'Unauthorized' 
+            })
+            return res.status(500).json({ 
+                message: 'Server error deleting room',
+                error: error.message 
+            })
         }
     };
     
@@ -147,15 +250,16 @@ class RoomController {
             // console.log('File received:', req.file ? req.file.originalname : 'No file')
 
             if (!req.file) {
-                return res.status(400).json({ error: 'No file uploaded' })
+                return res.status(400).json({ 
+                    message: 'Please upload an image file',
+                    error: 'No file uploaded'
+                })
             }
             
             const file = req.file
             const fileExtension = file.originalname.split('.').pop()
             const fileName = `${Date.now()}.${fileExtension}`
 
-            // console.log('Uploading file:', fileName)
-        
             // This implementation will depend on how you handle file uploads
             // You might need to use multer or another library
             const url = await this.roomService.uploadBannerImage(
@@ -164,20 +268,44 @@ class RoomController {
                 file.mimetype
             )
 
-            // console.log('Image uploaded successfully:', url)
             
-            if (!url) return res.status(400).json({ error: error.message })
+            if (!url) 
+                return res.status(400).json({ 
+                    message: 'Image upload failed',
+                    error: error.message 
+                })
                         
-            res.status(200).json({ 
+            return res.status(200).json({ 
                 data: {
-                        imageUrl: url,
-                        fileName: fileName
+                    imageUrl: url,
+                    fileName: fileName
                 },
                 message: 'Image uploaded successfully'
              })
         } catch (error) {
             console.error('Error uploading image:', error)
-            res.status(500).json({ error: 'Server error uploading image' })
+            if (error.message === 'Invalid file type') {
+                return res.status(400).json({ 
+                    message: 'Invalid file type. Only images are allowed.',
+                    error: 'Invalid file type'
+                })
+            }
+            if (error.message === 'File too large') {
+                return res.status(400).json({ 
+                    message: 'File too large. Maximum size is 5MB.',
+                    error: 'File too large'
+                })
+            }
+            if (error.status === 401) {
+                return res.status(401).json({ 
+                    message: 'Unauthorized',
+                    error: 'Unauthorized'
+                })
+            }
+            return res.status(500).json({ 
+                message: 'Server error uploading image',
+                error: error.message 
+            })
         }
     };
 

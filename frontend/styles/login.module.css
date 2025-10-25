@@ -237,7 +237,7 @@
   
   .rememberForgot {
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-end;
     align-items: center;
     margin-bottom: 24px;
     font-family: 'Poppins', sans-serif;
@@ -264,14 +264,26 @@
   }
   
   .forgotPassword {
-    font-weight: 300;
-    color: #4D4D4D;
+    font-weight: 500;
+    color: #2F3E75;
     text-decoration: none;
     cursor: pointer;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    padding: 4px 8px;
+    border-radius: 4px;
+    position: relative;
   }
   
   .forgotPassword:hover {
-    text-decoration: underline;
+    color: #1e2b5c;
+    /* background-color: rgba(47, 62, 117, 0.1); */
+    text-decoration: none;
+    transform: translateY(-1px);
+  }
+  
+  .forgotPassword:active {
+    transform: translateY(0);
   }
   
   .loginButton {
@@ -587,4 +599,27 @@
   color: #777;
   display: flex;
   padding: 4px;
+}
+
+.backButton {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  background: none;
+  border: none;
+  color: #666;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 8px 12px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.backButton:hover {
+  color: #2c514c;
+  background: rgba(44, 81, 76, 0.1);
 }

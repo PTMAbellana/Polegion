@@ -7,7 +7,11 @@
     "frontend": "cd frontend && npm run dev",
     "backend": "cd backend && npm run dev",
     "dev": "concurrently \"npm run backend\" \"npm run frontend\"",
-    "install-all": "npm install && cd frontend && npm install && cd ../backend && npm install"
+    "install-all": "npm install && cd frontend && npm install && cd ../backend && npm install",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:studio": "prisma studio",
+    "prisma:seed": "node prisma/seed.js"
   },
   "keywords": [],
   "author": "",
@@ -23,15 +27,26 @@
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.50.3",
+    "bcryptjs": "^3.0.2",
     "canvas": "^3.1.2",
+    "compression": "^1.8.1",
+    "express-handlebars": "^8.0.3",
+    "express-rate-limit": "^8.1.0",
     "googleapi": "^1.0.2",
     "googleapis": "^152.0.0",
+    "handlebars": "^4.7.8",
+    "helmet": "^8.1.0",
+    "joi": "^18.0.1",
     "konva": "^9.3.22",
+    "morgan": "^1.10.1",
     "next": "^15.3.2",
     "nodemailer": "^7.0.5",
     "nodemailer-express-handlebars": "^7.0.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
-    "react-konva": "^19.0.7"
+    "react-konva": "^19.0.7",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1",
+    "zustand": "^5.0.8"
   }
 }

@@ -37,6 +37,15 @@ class Room {
         }
     }
 
+    toDbObjectUpdate (){
+        return {
+            title: this.title,
+            description: this.description,
+            mantra: this.mantra, 
+            banner_image: this.banner_image,
+        }
+    }
+
     toDTO(){
         return {
             id: this.id,
@@ -44,8 +53,6 @@ class Room {
             description: this.description,
             mantra: this.mantra,
             banner_image: this.banner_image,
-            user_id: this.user_id,
-            create_at: this.create_at,
             code: this.code,
             visibility: this.visibility
         }

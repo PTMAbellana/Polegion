@@ -22,18 +22,46 @@ class UserController {
     }
     
     updateUserProfile = async (req, res) => {
-        const { fullName, gender, phone } = req.body
+        console.log('Update profile endpoint hit', req.body);
+        const { 
+            first_name, 
+            last_name, 
+            gender, 
+            phone 
+        } = req.body
     
         try {
-            const updateUser = await this.userService.updateUserProfile({
-                fullName,
+            const data = await this.userService.updateUserProfile({
+                first_name,
+                last_name,
                 gender,
                 phone,
                 token: req.token
             })
-            return res.status(200).json(updateUser.toDTO())
+            if (!data) 
+                return res.status(400).json({ 
+                    message: 'Update failed',
+                    error: 'Bad request' 
+                })
+
+            return res.status(200).json({
+                data: data,
+                message: 'Profile updated successfully'
+            })
         } catch (error) {
-            res.status(500).json({
+            if (error.status === 400)
+                return res.status(400).json({ 
+                    message: 'Update failed',
+                    error: 'Bad request' 
+                })
+           
+            if (error.status === 401)
+                return res.status(401).json({
+                    message: 'Unauthorized',
+                    error: 'Invalid token'
+                })
+
+            return res.status(500).json({
                 error: 'Server error updating user profile'
             })
         }
@@ -43,10 +71,26 @@ class UserController {
         const { newEmail } = req.body
 
         try {
-            const data = await this.userService.updateEmail(newEmail, req.user.id)
-            return res.status(200).json(data.toDTO())
+            await this.userService.updateEmail(newEmail, req.user.id)
+            console.log('success')
+            return res.status(200).json({
+                message: 'Email updated successfully'
+            })
         } catch (error) {
-            res.status(500).json({
+            console.log('akdjhasd', error);
+            if (error.status === 400)
+                return res.status(400).json({
+                    message: 'Update email failed',
+                    error: 'Bad request'
+                })
+            
+            if (error.status === 401)
+                return res.status(401).json({
+                    message: 'Unauthorized',
+                    error: 'Invalid token'
+                })
+
+            return res.status(500).json({
                 error: 'Server error updating email'
             })
         }
@@ -56,24 +100,48 @@ class UserController {
         const { newPassword } = req.body
 
         try {
-            const data = await this.userService.updatePassword(newPassword, req.user.id)
-            return res.status(200).json(data.toDTO())
+            await this.userService.updatePassword(newPassword, req.user.id)
+            return res.status(200).json({
+                message: 'Password updated successfully'
+            })
+
         } catch (error) {
-            res.status(500).json({
-                error: 'Server error updating email'
+            if (error.status === 400)
+                return res.status(400).json({
+                    message: 'Update password failed',
+                    error: 'Bad request'
+                })
+            
+            if (error.status === 401)
+                return res.status(401).json({
+                    message: 'Unauthorized',
+                    error: 'Invalid token'
+                })
+
+            return res.status(500).json({
+                message: 'Server error updating email',
+                error: error.message
             })
         }
     }
 
-    // will get back at you
     deactivateAccount = async (req, res) => {
         const duration = '876600h'
         try {
-            const data = await this.userService.updateUserBan(req.user.id, duration)
-            return res.status(200).json(data)
+            await this.userService.updateUserBan(req.user.id, duration)
+            return res.status(200).json({
+                message: 'Account deactivated successfully'
+            })
         } catch (error) {
-            res.status(500).json({
-                error: 'Server error deactivating account'
+            if (error.status === 401)
+                return res.status(401).json({
+                    message: 'Unauthorized',
+                    error: 'Invalid token'
+                })
+
+            return res.status(500).json({
+                message: 'Server error deactivating account',
+                error: error.message
             })
         }
     }
@@ -103,18 +171,35 @@ class UserController {
 
             // console.log('Image uploaded successfully:', url)
             
-            if (!url) return res.status(400).json({ error: error.message })
+            if (!url) return res.status(400).json({ 
+                message: 'Image upload failed',
+                error: error.message 
+            })
                         
-            res.status(200).json({ 
+            return res.status(200).json({ 
                 data: {
-                        imageUrl: url,
-                        fileName: fileName
+                    imageUrl: url,
+                    fileName: fileName
                 },
                 message: 'Image uploaded successfully'
              })
         } catch (error) {
-            console.error('Error uploading image:', error)
-            res.status(500).json({ error: 'Server error uploading image' })
+            if (error.status === 400)
+                return res.status(400).json({ 
+                    message: 'Image upload failed',
+                    error: error.message 
+                })
+           
+            if (error.status === 401)
+                return res.status(401).json({
+                    message: 'Unauthorized',
+                    error: 'Invalid token'
+                })
+
+            return res.status(500).json({
+                message: 'Server error uploading image',
+                error: error.message
+            })
         }
     };
 // Middleware getter for multer

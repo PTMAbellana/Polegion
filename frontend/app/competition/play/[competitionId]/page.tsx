@@ -12,7 +12,7 @@ import { getAllParticipants } from '@/api/participants';
 import { getCompeById } from '@/api/competitions';
 import { useCompetitionRealtime } from '@/hooks/useCompetitionRealtime';
 import { useCompetitionTimer } from '@/hooks/useCompetitionTimer';
-import { ConnectionStatus } from '@/components/ConnectionStatus';
+import { ConnectionStatus } from '@/components/debug/ConnectionStatus';
 
 // Interfaces
 interface Participant {

@@ -1,4 +1,5 @@
 const BaseRepo = require('./BaseRepo')
+const compeModel = require('../../domain/models/Competition')
 
 class CompeRepo extends BaseRepo {
     constructor(supabase){
@@ -39,7 +40,7 @@ class CompeRepo extends BaseRepo {
                 .order('created_at', { ascending: false })
 
             if (error) throw error
-            return data
+            return data.map(comp => compeModel.fromDbCompetition(comp));
         } catch (error) {
             console.log("Error fetching competitions by room ID:", error)
             throw error

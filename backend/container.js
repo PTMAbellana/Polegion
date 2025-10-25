@@ -45,6 +45,9 @@ const LeaderboardRoutes = require('./presentation/routes/LeaderboardRoutes');
 const AttemptsRoutes = require('./presentation/routes/AttemptsRoutes');
 const CompetitionRoutes = require('./presentation/routes/CompetitionRoutes');
 
+// Import services registry
+const servicesRegistry = require('./application/services');
+
 // Initialize repositories
 const userRepository = new UserRepository(supabase);
 const roomRepository = new RoomRepository(supabase);
@@ -56,7 +59,7 @@ const competitionRepository = new CompetitionRepository(supabase);
 const xpRepository = new XPRepository(supabase);
 
 // Initialize services
-const authService = new AuthService(userRepository);
+const authService = new AuthService(userRepository, supabase);
 const userService = new UserService(userRepository);
 const roomService = new RoomService(roomRepository);
 const problemService = new ProblemService(problemRepository, roomRepository);
@@ -66,6 +69,20 @@ const leaderboardService = new LeaderboardService(leaderboardRepository, userSer
 const participantService = new ParticipantService(participantRepository, roomService, userService, leaderboardService);
 const attemptsService = new AttemptsService(attemptsRepository, xpService, leaderboardService, gradingService, participantService);
 const competitionService = new CompetitionService(competitionRepository, participantService, leaderboardService, roomService, problemService);
+
+// Register all services in the registry 🚀
+servicesRegistry.registerServices({
+    authService,
+    userService,
+    roomService,
+    problemService,
+    gradingService,
+    xpService,
+    leaderboardService,
+    participantService,
+    attemptsService,
+    competitionService
+});
 
 // Initialize middleware
 const authMiddleware = new AuthMiddleware(authService);
@@ -98,5 +115,8 @@ module.exports = {
   problemRoutes: problemRoutes.getRouter(),
   leaderboardRoutes: leaderboardRoutes.getRouter(),
   attemptsRoutes: attemptsRoutes.getRouter(),
-  competitionRoutes: competitionRoutes.getRouter()
+  competitionRoutes: competitionRoutes.getRouter(),
+
+  // services (for testing or other uses)
+  services: servicesRegistry.getServices()
 }

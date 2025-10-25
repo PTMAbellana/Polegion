@@ -21,7 +21,7 @@ class LeaderboardRepo extends BaseRepo {
                     ), accumulated_xp`)
                 .eq('room_id', room_id)
                 .order('accumulated_xp', { ascending: false })
-                .limit(5)
+                // .limit(5)
 
                 if (error) throw error
                 if (!data) throw error
@@ -58,7 +58,7 @@ class LeaderboardRepo extends BaseRepo {
                 foreignTable: 'competition'
              })
             .order('accumulated_xp', { ascending: false })
-            .limit(5)
+            // .limit(5)
     
             if (error) throw error
             if (!data) throw error

@@ -15,9 +15,19 @@ export const createCompe = async (room_id, title) => {
 export const getAllCompe = async (room_id, type  = 'admin') => {
     try {
         const res = await api.get(`competitions/${room_id}?type=${type}`)
-        return res.data 
+        return {
+            success: true,
+            data: res.data.data,
+            message: res.data.message || 'Competitions fetched successfully'
+        } 
     } catch (error) {
-        throw error
+        console.log('Error fetching competitions:', error)
+        return {
+            success: false,
+            message: error.response?.data?.message || 'Server error fetching competitions',
+            error: error.response?.data?.error || error.message,
+            status: error.response?.status || 500
+        }
     }
 }
 

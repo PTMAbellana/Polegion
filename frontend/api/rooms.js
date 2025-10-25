@@ -4,11 +4,19 @@ import api from './axios';
 export const getRooms = async () => {
   try {
     const res = await api.get("/rooms");
-    console.log("from api getrooms: ", res);
-    return res;
+    return {
+      success: true,
+      data: res.data.data,
+      message: 'Rooms fetched successfully'
+    }
   } catch (error) {
     console.error("Error fetching rooms:", error);
-    throw error;
+    return {
+      success: false,
+      message: error.response?.data?.error || 'Error fetching rooms',
+      error: error.response?.data?.error || error.message,
+      status: error.response?.status 
+    };
   }
 };
 
@@ -21,40 +29,81 @@ export const getRoomById = async (id) => {
   }
 };
 
-export const getRoomByCode = async (code, type='join') => {
+export const getRoomByCode = async (code, type='admin') => {
   try {
-    return type === 'join' ? 
-    await api.get(`/rooms/user/code/${code}`) :
-    await api.get(`/rooms/admin/code/${code}`) 
+    let response;
+    switch (type) {
+      case 'student':
+        response = await api.get(`/rooms/student/code/${code}`);
+        break;
+      case 'teacher':
+        response = await api.get(`/rooms/teacher/code/${code}`);
+        break;
+      default:
+        throw new Error(`Unknown room type: ${type}`);
+    }
+
+    return {
+      success: true,
+      data: response.data.data,
+      message: 'Room fetched successfully'
+    };
   } catch (error) {
-    console.error("Error fetching room by code:", error);
-    throw error;
+    console.log("Error fetching room by code:", error);
+    return {
+      success: false,
+      message: error.response?.data?.message || 'Error fetching room by code',
+      error: error.response?.data?.error || error.message,
+      status: error.response?.status
+    }
   }
 };
 
 export const createRoom = async (roomData) => {
   try {
-    console.log("Creating room with data:", roomData);
-    return await api.post("/rooms", roomData);
+    const res = await api.post("/rooms", roomData);
+    return {
+      success: true,
+      data: res.data.data,
+      message: 'Room created successfully'
+    }
   } catch (error) {
     console.error("Error creating room:", error);
-    throw error;
+    return {
+      success: false,
+      message: error.response?.data?.error || 'Error creating room',
+      error: error.response?.data?.error || error.message,
+      status: error.response?.status 
+    }
   }
 };
 
 export const updateRoom = async (id, roomData) => {
   try {
-    console.log("Updating room with data:", roomData);
-    return await api.put(`/rooms/id/${id}`, roomData);
+    const res = await api.put(`/rooms/id/${id}`, roomData);
+    return {
+      success: true,
+      data: res.data.data,
+      message: 'Room updated successfully'
+    }
   } catch (error) {
     console.error("Error updating room:", error);
-    throw error;
+    return {
+      success: false,
+      message: error.response?.data?.error || 'Error updating room',
+      error: error.response?.data?.error || error.message,
+      status: error.response?.status
+    };
   }
 };
 
 export const deleteRoom = async (id) => {
   try {
-    return await api.delete(`/rooms/id/${id}`);
+    const res =  await api.delete(`/rooms/id/${id}`);
+    return {
+      success: true,
+      message: res.data.message || 'Room deleted successfully'
+    }
   } catch (error) {
     console.error("Error deleting room:", error);
     throw error;
@@ -73,20 +122,49 @@ export const uploadImage = async (formData) => {
     });
 
     console.log("Image upload response:", response.data);
-    return response;
+    return {
+      success: true,
+      imageUrl: response.data.data.imageUrl,
+      message: response.data.message || 'Image uploaded successfully'
+    };
   } catch (error) {
     console.error("Error uploading banner image:", error);
 
     if (error.response?.data?.error) {
-      throw new Error(error.response.data.error);
+      return {
+        success: false,
+        message: error.response.data.message,
+        error: error.response.data.error, 
+        status: error.response.status
+      };
     } else if (error.code === "ECONNABORTED") {
-      throw new Error("Upload timeout - file may be too large");
+      return {
+        success: false,
+        message: 'Image upload timed out - please try again',
+        error: 'Timeout Error',
+        status: 408
+      };
     } else if (error.message === "Network Error") {
-      throw new Error("Network error - please check your connection");
+      return {
+        success: false,
+        message: 'Network error - please check your connection',
+        error: 'Network Error',
+        status: null
+      }
     } else if (error.response?.status === 404) {
-      throw new Error("Upload endpoint not found - check server configuration");
+      return {
+        success: false,
+        message: 'Upload endpoint not found (404)',
+        error: 'Not Found',
+        status: 404
+      };
     } else {
-      throw new Error(`Failed to upload image: ${error.message}`);
+      return {
+        success: false,
+        message: 'An unknown error occurred during image upload',
+        error: error.message,
+        status: null
+      }
     }
   }
 };

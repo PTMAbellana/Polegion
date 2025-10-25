@@ -1,7 +1,6 @@
 const BaseRepo = require('./BaseRepo')
 const userModel = require('../../domain/models/User')
 const jwt = require('jsonwebtoken')
-const { data } = require('autoprefixer')
 
 class UserRepo extends BaseRepo{
     constructor(supabase){
@@ -11,31 +10,29 @@ class UserRepo extends BaseRepo{
         this.defaultLink = 'https://uwllqanzveqanfpfnndu.supabase.co/storage/v1/object/public/profile-images/1751777126476.png'
     }
 
-    async refreshSession(refreshToken) {
+    // for getProfile na route /profile
+    async getUserByUid(userId) {
         try {
-            console.log('Attempting to refresh session with token:', refreshToken ? 'Present' : 'Missing')
-            
             const {
                 data,
                 error
-            } = await this.supabase.auth.refreshSession({
-                refresh_token: refreshToken
-            })
+            } = await this.supabase.from(this.tableName)
+            .select('*')
+            .eq('user_id', userId)
+            .single()
 
-            if (error) {
-                console.error('Refresh session error from Supabase:', error)
-                throw error
-            }
-            
-            console.log('Refresh session successful, new session expires at:', data.session?.expires_at)
-            return data
+            if (error) throw error
+
+            console.log('User profile data:', data)
+
+            return userModel.fromDbUser(data)
         } catch (error) {
-            console.error('Refresh session failed:', error)
+            console.error('Error in getUserByUid:', error)
             throw error
         }
     }
 
-    async getUserById(token){
+    async getUserByToken(token){
         try {
             const {
                 data,
@@ -75,28 +72,33 @@ class UserRepo extends BaseRepo{
         }
     }
     
-    async updateUser(userData) {
+    async updateUser(userData, userId) {
         try {
             const {
                 data,
                 error
-            } = await this.supabase.auth.updateUser({
-                data: {
-                    fullName: userData.fullName,
-                    gender: userData.gender,
-                    phone: userData.phone
-                }
+            } = await this.supabase
+            .from(this.tableName)
+            .update({
+                first_name: userData.first_name,
+                last_name: userData.last_name,
+                gender: userData.gender,
+                phone: userData.phone
             })
-            
+            .eq('user_id', userId)
+            .select()
+            .single()
+
             if (error) throw error
-            
-            return userModel.fromDbUser(data.user)
+
+            return userModel.fromInputUser(data, userId)
         } catch (error) {
             throw error
         }
     }
 
     async updateUserEmail(email, userId) {
+        
         try {
             const { data, error } = await this.supabase.auth.admin.updateUserById(
                 userId,
@@ -141,26 +143,6 @@ class UserRepo extends BaseRepo{
         }
     }
     
-    async signInWithPassword (email, password){
-        try {
-            const {
-                data,
-                error
-            } = await this.supabase.auth.signInWithPassword({
-                email, 
-                password
-            })
-
-            // console.log(this.supabase.auth.getSession())
-
-            if (error) throw error
-            
-            return data
-        } catch (error) {
-            throw error
-        }
-    }
-    
     async resetPassword (email, redirectUrl){
         try {
             const { data, error } = await this.supabase.auth.resetPasswordForEmail(
@@ -177,46 +159,23 @@ class UserRepo extends BaseRepo{
         }
     }
 
-    async signUp (email, password, options){
+    async createUserProfile (userId, userData){
+        const newUser = userModel.fromInputUser(userData, userId).toJSON()
         try {
             const { 
                 data, 
                 error 
-            } = await this.supabase.auth.signUp({
-                email,
-                password,
-                options
-            })
-    
-            if (error) throw error 
-
-            const userId = data?.user?.id;
-
-            const { 
-                data: user, 
-                error: userError 
             } = await this.supabase.from(this.tableName)
             .insert({
                 user_id: userId,
-                profile_pic: this.defaultLink
+                ...newUser
             })
-            if (userError) {
-                throw new Error('Failed to update user profile image: ' + userError.message)    
+            .select()
+            .single()
+            if (error) {
+                throw new Error('Failed to create user profile: ' + error.message)
             }
-
             return data
-        } catch (error) {
-            throw error
-        }
-    }
-
-    async signOut () {
-        try {
-            const { error } = await this.supabase.auth.signOut()
-
-            if (error) throw error
-
-            return true
         } catch (error) {
             throw error
         }

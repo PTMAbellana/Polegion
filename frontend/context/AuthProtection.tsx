@@ -1,23 +1,22 @@
 "use client"
 
 import { usePathname, useRouter } from "next/navigation"
-import { useMyApp } from "./AppUtils"
 import { useEffect, useState } from "react"
-import { ROUTES, PUBLIC_ROUTES } from '@/constants/routes'
+import { ROUTES, PUBLIC_ROUTES, STUDENT_ROUTES } from '@/constants/routes'
+import { useAuthStore } from "@/store/authStore"
 
-export function AuthProtection () {
+export function AuthProtection() {
     const {
         isLoggedIn,
         authLoading,
         appLoading,
         authToken
-    } = useMyApp()
+    } = useAuthStore()
 
     const [localLoading, setLocalLoading] = useState(true)
     const router = useRouter()
     const pathname = usePathname()
 
-    // Combine loading states for convenience
     const globalLoading = authLoading || appLoading;
 
     useEffect(() => {
@@ -26,29 +25,21 @@ export function AuthProtection () {
             return;
         }
 
-        async function handleRouteProtection() {
+        const handleRouteProtection = () => {
             setLocalLoading(true)
+            
             try {
-                console.log("Auth protection check - Path:", pathname, "IsLoggedIn:", isLoggedIn, "HasToken:", !!authToken)
-
-                // Redirect to login if not authenticated and route is protected
+                // Redirect to home if not authenticated and route is protected
                 if (!isLoggedIn && !PUBLIC_ROUTES.includes(pathname)) {
-                    console.log("Redirecting to login: User not logged in and route is protected")
                     router.replace(ROUTES.HOME)
                     return;
                 }
 
-                // Redirect to dashboard if authenticated and on login or register page
-                if (
-                    isLoggedIn &&
-                    (pathname === ROUTES.LOGIN || pathname === ROUTES.REGISTER)
-                ) {
-                    console.log("Redirecting to dashboard: User is logged in and on login/register page")
-                    router.replace(ROUTES.DASHBOARD)
+                // Redirect to dashboard if authenticated and on public routes
+                if (isLoggedIn && PUBLIC_ROUTES.includes(pathname)) {
+                    router.replace(STUDENT_ROUTES.DASHBOARD) // TEMPORARY
                     return;
                 }
-
-                console.log('Route protection check completed')
             } catch (error) {
                 console.error('Auth protection error:', error)
             } finally {
@@ -56,7 +47,8 @@ export function AuthProtection () {
             }
         }
 
-        handleRouteProtection();
+        const timer = setTimeout(handleRouteProtection, 100);
+        return () => clearTimeout(timer);
     }, [pathname, router, isLoggedIn, globalLoading, authToken])
 
     return { 

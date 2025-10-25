@@ -28,7 +28,7 @@ class RoomRepo extends BaseRepo {
             }
             const rooms = data.map(room => {
                 // console.log('Processing room:', room)
-                return roomModel.fromDbRoom(room)
+                return roomModel.fromDbRoom(room).toDTO()
             })
 
             // console.log('Processed rooms:', rooms);
@@ -139,7 +139,7 @@ class RoomRepo extends BaseRepo {
             .single()
     
             if (error) throw error
-            return data ? true: false
+            return data 
         } catch (error) {
             throw error
         }    
@@ -153,6 +153,7 @@ class RoomRepo extends BaseRepo {
             } = await this.supabase.from(this.tableName)
             .insert(room.toDbObject())
             .select()
+            .single()
     
             if (error) {
                 console.error('Database error:', error);
@@ -161,7 +162,7 @@ class RoomRepo extends BaseRepo {
             if (!data || data.length === 0) {
                 throw new Error('Failed to create room - no data returned');
             }
-            return roomModel.fromDbRoom(data[0])
+            return roomModel.fromDbRoom(data)
         } catch (error) {
             throw error
         }    
@@ -173,23 +174,20 @@ class RoomRepo extends BaseRepo {
                 data,
                 error
             } = await this.supabase.from(this.tableName)
-            .update(room.toDbObject())
+            .update(room.toDbObjectUpdate())
             .eq('id', roomId)
             .eq('user_id', user_id)
             .select()
+            .single()
     
             if (error) throw error
-            if (data.length === 0) throw new Error ('Room not found or not authoriized')
-            return roomModel.fromDbRoom(data[0])
+            if (!data) throw new Error ('Room not found')
+            return roomModel.fromDbRoom(data)
         } catch (error) {
             throw error
         }    
     }
     
-    // make this ano, to update instead of delete
-    // remember maam leah
-    // dont actually delete the room
-    // ghad, add another column in the db
     async deleteRoom (roomId, user_id){  
         try {
             const {
@@ -199,8 +197,11 @@ class RoomRepo extends BaseRepo {
             .delete()
             .eq('id', roomId)
             .eq('user_id', user_id)
-    
+            .select()
+            .single()
+            
             if (error) throw error
+            if (!data) throw new Error('Room not found')
             return true
         } catch (error) {
             throw error
@@ -227,24 +228,8 @@ class RoomRepo extends BaseRepo {
     
     async uploadBannerImage(fileBuffer, fileName, mimeType){
         try {
-            // console.log('Uploading to Supabase storage:')
-            // console.log('- Bucket:', this.storageBucket)
-            // console.log('- File name:', fileName)
-            // console.log('- MIME type:', mimeType)
-            // console.log('- Buffer size:', fileBuffer.length)
-
-            // const {
-            //     data,
-            //     error
-            // } = await this.supabase.storage
-            // // .from(this.tableName)
-            // .from(this.storageBucket)
-            // .upload(fileName, fileBuffer, {
-            //     contentType: mimeType
-            // })
-
             const {
-                data,
+                _,
                 error
             } = await this.supabase.storage
             .from(this.storageBucket)
@@ -255,7 +240,6 @@ class RoomRepo extends BaseRepo {
             })
     
             if (error){
-                // console.log('Upload image error: ', error) 
                 throw error
             }
 
@@ -267,12 +251,8 @@ class RoomRepo extends BaseRepo {
                 throw new Error('Failed to get public URL for uploaded image');
             }
 
-            // console.log('Public URL generated:', urlData.publicUrl)
-            // console.log('url data:', urlData)
-
             return urlData.publicUrl
         } catch (error) {
-            // console.error('Error in uploadBannerImage:', error)
             throw error
         }    
     }
