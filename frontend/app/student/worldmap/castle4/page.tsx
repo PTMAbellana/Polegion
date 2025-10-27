@@ -16,11 +16,8 @@ const FractalBastionChapterSelection = () => {
     {
       id: 1,
       title: "Chapter 1: The Hall of Mirrors",
-      subtitle: "Symmetry & Congruence",
       objective: "Mirror Match",
       description: "Understand line and rotational symmetry through mystical mirrors",
-      difficulty: "Beginner",
-      estimatedTime: "15 min",
       unlocked: true,
       completed: false,
       reward: "Crystal of Balance",
@@ -29,11 +26,8 @@ const FractalBastionChapterSelection = () => {
     {
       id: 2,
       title: "Chapter 2: The Tessellated Vault",
-      subtitle: "Polygon Patterns",
       objective: "Pattern Weaver",
       description: "Master polygon identification and tessellation patterns",
-      difficulty: "Intermediate", 
-      estimatedTime: "20 min",
       unlocked: true,
       completed: false,
       reward: "Tessellation Key",
@@ -42,11 +36,8 @@ const FractalBastionChapterSelection = () => {
     {
       id: 3,
       title: "Chapter 3: The Chamber of Motion",
-      subtitle: "Transformations",
       objective: "Transformation Master",
       description: "Master translation, rotation, and reflection of geometric shapes",
-      difficulty: "Intermediate",
-      estimatedTime: "20 min", 
       unlocked: true,
       completed: false,
       reward: "Cog of Motion",
@@ -55,11 +46,8 @@ const FractalBastionChapterSelection = () => {
     {
       id: 4,
       title: "Chapter 4: The Polygonal Throne",
-      subtitle: "Polygon Mastery",
       objective: "Angle Architect",
       description: "Deepen understanding of polygons — identifying, drawing, similarity, congruence, and finding interior angles",
-      difficulty: "Advanced",
-      estimatedTime: "25 min", 
       unlocked: false,
       completed: false,
       reward: "Crown of Angles",
@@ -224,13 +212,7 @@ const FractalBastionChapterSelection = () => {
 
                   <div className={styles.chapterContent}>
                     <h3 className={styles.chapterTitle}>{chapter.title}</h3>
-                    <p className={styles.chapterSubtitle}>{chapter.subtitle}</p>
                     <p className={styles.chapterObjective}>Objective: {chapter.objective}</p>
-                    
-                    <div className={styles.chapterMeta}>
-                      <span className={styles.difficulty}>{chapter.difficulty}</span>
-                      <span className={styles.estimatedTime}>{chapter.estimatedTime}</span>
-                    </div>
                   </div>
 
                   <div className={styles.chapterStatus}>
