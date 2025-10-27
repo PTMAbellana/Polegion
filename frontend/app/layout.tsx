@@ -27,7 +27,7 @@ export default function RootLayout({
         <AppProvider>
           {children}
         </AppProvider>
-        <Footer />
+        {/* <Footer /> */}
       </body>
     </html>
   );

@@ -1,9 +1,11 @@
 "use client"
 import React, { useState, useEffect, useRef } from 'react';
 import { ChevronRight, ChevronLeft, Home, RotateCcw, Target, Award, Zap } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import styles from '@/styles/castle.module.css';
 
 const AngleMasteryTutorial = () => {
+  const router = useRouter();
   const [currentStep, setCurrentStep] = useState(0);
   const [showCharacter, setShowCharacter] = useState(true);
   const [characterSide, setCharacterSide] = useState('right');
@@ -37,20 +39,31 @@ const AngleMasteryTutorial = () => {
       hint: "This castle specializes in all things angular!"
     },
     {
-      id: 'angle-naming-intro',
-      title: 'Naming Angles - The Three-Point Method',
+      id: 'angle-basics',
+      title: 'What is an Angle?',
       characterSide: 'left',
-      dialogue: "Every angle has a proper name! We name angles using three points: the vertex (middle point) and one point on each ray. The vertex always goes in the middle. Let's practice naming angles correctly!",
+      dialogue: "An angle is formed when two rays meet at a common point called the vertex! Think of it as measuring the 'opening' between two directions. The wider the opening, the larger the angle!",
+      content: 'angle-basics',
+      interactive: true,
+      instruction: 'Drag the rays to see how angles change',
+      hint: "Watch how the angle measurement changes as you move the rays!"
+    },
+    {
+      id: 'angle-naming',
+      title: 'Naming Angles - The Three-Point Method',
+      characterSide: 'right',
+      dialogue: "Every angle has a proper name! We name angles using three points: one point on each ray and the vertex in the middle. The vertex ALWAYS goes in the middle of the name!",
       content: 'angle-naming',
       interactive: true,
-      instruction: 'Click on the angles to practice naming them',
+      instruction: 'Click on angles to practice naming them correctly',
+      goal: 3,
       hint: "Remember: Point-Vertex-Point naming convention!"
     },
     {
-      id: 'angle-measuring-game',
-      title: 'Angle Measurement Challenge',
-      characterSide: 'right',
-      dialogue: "Time to become a master measurer! Use your protractor skills to estimate these angles. Remember: acute (0°-90°), right (90°), obtuse (90°-180°), and straight (180°)!",
+      id: 'angle-measuring',
+      title: 'Measuring Angles with a Protractor',
+      characterSide: 'left',
+      dialogue: "Time to become a master measurer! Angles are measured in degrees (°). A full rotation is 360°. Use your estimation skills to measure these angles!",
       content: 'angle-measuring',
       interactive: true,
       instruction: 'Estimate the angle measurements and click to submit',
@@ -58,10 +71,10 @@ const AngleMasteryTutorial = () => {
       hint: "Look at the angle opening to estimate its size!"
     },
     {
-      id: 'angle-types-identifier',
-      title: 'Angle Types Detective',
-      characterSide: 'left',
-      dialogue: "Become an angle detective! Your mission: identify and classify different types of angles. Drag each angle to its correct category. Sharp eyes and quick thinking will help you succeed!",
+      id: 'angle-types',
+      title: 'Types of Angles',
+      characterSide: 'right',
+      dialogue: "Angles have special names based on their size! Acute angles are less than 90°, right angles are exactly 90°, obtuse angles are between 90° and 180°, and straight angles are exactly 180°!",
       content: 'angle-types',
       interactive: true,
       instruction: 'Drag angles to their correct type categories',
@@ -69,9 +82,9 @@ const AngleMasteryTutorial = () => {
       hint: "Acute < 90°, Right = 90°, Obtuse > 90° but < 180°"
     },
     {
-      id: 'angle-constructor',
+      id: 'angle-construction',
       title: 'Angle Construction Master',
-      characterSide: 'right',
+      characterSide: 'left',
       dialogue: "Now you'll become an angle architect! Construct specific angles by dragging the rays to match the target measurement. Precision is key - get within 5° of the target!",
       content: 'angle-construction',
       interactive: true,
@@ -79,54 +92,62 @@ const AngleMasteryTutorial = () => {
       hint: "Watch the measurement display as you drag!"
     },
     {
-      id: 'congruent-angles-matcher',
-      title: 'Congruent Angles Memory Match',
-      characterSide: 'left',
-      dialogue: "Congruent angles have exactly the same measure! Find and match pairs of congruent angles in this memory-style game. Look carefully - some angles might look different but have the same measurement!",
-      content: 'congruent-matching',
-      interactive: true,
-      instruction: 'Click pairs of congruent angles to match them',
-      goal: 6,
-      hint: "Congruent angles have identical measurements!"
-    },
-    {
-      id: 'complementary-supplementary-intro',
-      title: 'Angle Relationships - Partners in Crime',
+      id: 'complementary-supplementary',
+      title: 'Angle Relationships - Perfect Partners',
       characterSide: 'right',
       dialogue: "Some angles are best friends! Complementary angles add up to 90°, while supplementary angles add up to 180°. These relationships are everywhere in geometry!",
       content: 'complementary-supplementary',
       interactive: true,
-      instruction: 'Identify complementary and supplementary angle pairs',
+      instruction: 'Find pairs of complementary and supplementary angles',
       hint: "Complementary = 90°, Supplementary = 180°"
     },
     {
-      id: 'missing-angle-solver',
-      title: 'Missing Angle Detective',
+      id: 'vertical-angles',
+      title: 'Vertical Angles - Mirror Images',
       characterSide: 'left',
-      dialogue: "Time for some angle algebra! When you know the relationship between angles, you can solve for missing measurements. Use your knowledge of complementary, supplementary, and other relationships!",
-      content: 'missing-angle',
+      dialogue: "When two lines intersect, they create four angles! The angles opposite each other are called vertical angles, and they're always equal! It's like looking in a mirror!",
+      content: 'vertical-angles',
+      interactive: true,
+      instruction: 'Identify pairs of vertical angles',
+      hint: "Vertical angles are across from each other and always equal!"
+    },
+    {
+      id: 'adjacent-angles',
+      title: 'Adjacent Angles - Friendly Neighbors',
+      characterSide: 'right',
+      dialogue: "Adjacent angles are next-door neighbors! They share a common vertex and a common side, but don't overlap. When adjacent angles form a straight line, they're supplementary!",
+      content: 'adjacent-angles',
+      interactive: true,
+      instruction: 'Find pairs of adjacent angles',
+      hint: "Adjacent angles share a vertex and a side!"
+    },
+    {
+      id: 'angle-bisector',
+      title: 'Angle Bisectors - Perfect Division',
+      characterSide: 'left',
+      dialogue: "An angle bisector is like a perfectly fair judge - it divides an angle into two equal parts! This ray splits the angle right down the middle, creating two congruent angles.",
+      content: 'angle-bisector',
+      interactive: true,
+      instruction: 'Create angle bisectors by dragging the ray to the middle',
+      hint: "The bisector creates two equal angles!"
+    },
+    {
+      id: 'missing-angles',
+      title: 'Missing Angle Detective',
+      characterSide: 'right',
+      dialogue: "Time for some angle algebra! When you know the relationships between angles, you can solve for missing measurements. Use complementary, supplementary, and vertical angle rules!",
+      content: 'missing-angles',
       interactive: true,
       instruction: 'Solve for the missing angle measurements',
       goal: 4,
       hint: "Use angle relationships: complementary, supplementary, or vertical angles!"
     },
     {
-      id: 'word-problems-challenge',
-      title: 'Real-World Angle Problems',
-      characterSide: 'right',
-      dialogue: "Mathematics comes alive in the real world! Solve these word problems involving angles. From architecture to navigation, angles are everywhere around us!",
-      content: 'word-problems',
-      interactive: true,
-      instruction: 'Read carefully and solve the angle word problems',
-      goal: 3,
-      hint: "Break down the problem step by step!"
-    },
-    {
-      id: 'angle-master-final',
-      title: 'Angle Master Challenge',
+      id: 'angle-challenge',
+      title: 'Angle Master Challenge!',
       characterSide: 'left',
-      dialogue: "The ultimate test! Combine all your angle knowledge in this final challenge. Name, measure, construct, and solve - prove you're a true Angle Master!",
-      content: 'final-challenge',
+      dialogue: "The ultimate test! Combine all your angle knowledge in this final challenge. Name, measure, identify types, and find relationships - prove you're a true Angle Master!",
+      content: 'angle-challenge',
       interactive: true,
       instruction: 'Complete all angle challenges to become an Angle Master',
       hint: "Use everything you've learned!"
@@ -135,7 +156,7 @@ const AngleMasteryTutorial = () => {
       id: 'completion-castle2',
       title: 'Congratulations, Angle Master!',
       characterSide: 'right',
-      dialogue: "Outstanding work! You've mastered the mysteries of angles and earned the title of Angle Master! Your skills in measuring, naming, and understanding angle relationships will serve you well in advanced geometry. The mathematical world salutes you!",
+      dialogue: "Outstanding work! You've mastered the mysteries of angles and earned the title of Angle Master! Your skills in measuring, naming, and understanding angle relationships will serve you well in advanced geometry!",
       content: 'completion',
       interactive: false,
       hint: "You've conquered the Tower of Angles!"
@@ -198,20 +219,20 @@ const AngleMasteryTutorial = () => {
       case 'angle-types':
         handleAngleTypesClick(scaledX, scaledY);
         break;
-      case 'congruent-matching':
-        handleCongruentMatchingClick(scaledX, scaledY);
-        break;
       case 'complementary-supplementary':
         handleComplementarySupplementaryClick(scaledX, scaledY);
         break;
-      case 'missing-angle':
-        handleMissingAngleClick(scaledX, scaledY);
+      case 'vertical-angles':
+        handleVerticalAnglesClick(scaledX, scaledY);
         break;
-      case 'word-problems':
-        handleWordProblemsClick(scaledX, scaledY);
+      case 'adjacent-angles':
+        handleAdjacentAnglesClick(scaledX, scaledY);
         break;
-      case 'final-challenge':
-        handleFinalChallengeClick(scaledX, scaledY);
+      case 'missing-angles':
+        handleMissingAnglesClick(scaledX, scaledY);
+        break;
+      case 'angle-challenge':
+        handleAngleChallengeClick(scaledX, scaledY);
         break;
     }
   };
@@ -250,8 +271,16 @@ const AngleMasteryTutorial = () => {
   };
 
   const handleAngleTypesClick = (x, y) => {
-    // Handle angle type classification game
-    const typeAngles = generateAngleTypesData();
+    const typeAngles = [
+      { x: 100, y: 100, degrees: 45, type: 'acute', classified: false, id: 'type1' },
+      { x: 200, y: 100, degrees: 90, type: 'right', classified: false, id: 'type2' },
+      { x: 300, y: 100, degrees: 120, type: 'obtuse', classified: false, id: 'type3' },
+      { x: 400, y: 100, degrees: 180, type: 'straight', classified: false, id: 'type4' },
+      { x: 150, y: 200, degrees: 30, type: 'acute', classified: false, id: 'type5' },
+      { x: 250, y: 200, degrees: 150, type: 'obtuse', classified: false, id: 'type6' },
+      { x: 350, y: 200, degrees: 60, type: 'acute', classified: false, id: 'type7' },
+      { x: 200, y: 300, degrees: 90, type: 'right', classified: false, id: 'type8' }
+    ];
     
     typeAngles.forEach(angle => {
       const distance = Math.sqrt((x - angle.x) ** 2 + (y - angle.y) ** 2);
@@ -264,218 +293,46 @@ const AngleMasteryTutorial = () => {
     });
   };
 
-  const handleCongruentMatchingClick = (x, y) => {
-    // Handle congruent angle matching game
-    const congruentAngles = generateCongruentAnglesData();
-    
-    congruentAngles.forEach(angle => {
-      const distance = Math.sqrt((x - angle.x) ** 2 + (y - angle.y) ** 2);
-      if (distance < 20 && !angle.matched) {
-        selectAngleForMatching(angle);
-      }
-    });
-  };
-
   const handleComplementarySupplementaryClick = (x, y) => {
-    // Handle complementary/supplementary relationships
-    const relationshipAngles = generateRelationshipAnglesData();
-    
-    relationshipAngles.forEach(anglePair => {
-      anglePair.angles.forEach(angle => {
-        const distance = Math.sqrt((x - angle.x) ** 2 + (y - angle.y) ** 2);
-        if (distance < 20) {
-          checkAngleRelationship(anglePair);
-        }
-      });
-    });
+    // Handle complementary/supplementary angle pair identification
+    showFeedbackMessage('Find angle pairs that add to 90° or 180°!', 'info');
   };
 
-  const handleMissingAngleClick = (x, y) => {
-    // Handle missing angle solver
-    const missingAngleProblems = generateMissingAngleData();
-    
-    missingAngleProblems.forEach(problem => {
-      const distance = Math.sqrt((x - problem.clickArea.x) ** 2 + (y - problem.clickArea.y) ** 2);
-      if (distance < 30) {
-        promptMissingAngleSolution(problem);
-      }
-    });
+  const handleVerticalAnglesClick = (x, y) => {
+    // Handle vertical angle identification
+    showFeedbackMessage('Look for opposite angles when lines intersect!', 'info');
   };
 
-  const handleWordProblemsClick = (x, y) => {
-    // Handle word problems
-    const problemAreas = [
-      { x: 150, y: 100, width: 200, height: 80, problemId: 'problem1' },
-      { x: 150, y: 200, width: 200, height: 80, problemId: 'problem2' },
-      { x: 150, y: 300, width: 200, height: 80, problemId: 'problem3' }
-    ];
-
-    problemAreas.forEach(area => {
-      if (x >= area.x && x <= area.x + area.width && 
-          y >= area.y && y <= area.y + area.height) {
-        showWordProblem(area.problemId);
-      }
-    });
+  const handleAdjacentAnglesClick = (x, y) => {
+    // Handle adjacent angle identification
+    showFeedbackMessage('Find angles that share a vertex and side!', 'info');
   };
 
-  const handleFinalChallengeClick = (x, y) => {
-    // Handle final challenge - combination of all skills
-    handleMultiSkillChallenge(x, y);
+  const handleMissingAnglesClick = (x, y) => {
+    // Handle missing angle problems
+    showFeedbackMessage('Use angle relationships to find missing measurements!', 'info');
   };
 
-  // Mouse interaction handlers
-  const handleMouseDown = (event) => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    
-    const rect = canvas.getBoundingClientRect();
-    const x = event.clientX - rect.left;
-    const y = event.clientY - rect.top;
-
-    const scaleX = canvas.width / rect.width;
-    const scaleY = canvas.height / rect.height;
-    const scaledX = x * scaleX;
-    const scaledY = y * scaleY;
-
-    // Handle construction mode dragging
-    if (currentTutorial.content === 'angle-construction') {
-      const constructionPoints = getConstructionPoints();
-      constructionPoints.forEach(point => {
-        const distance = Math.sqrt((scaledX - point.x) ** 2 + (scaledY - point.y) ** 2);
-        if (distance < 15 && point.draggable) {
-          setDraggedPoint(point.id);
-          canvas.style.cursor = 'grabbing';
-        }
-      });
-    }
+  const handleAngleChallengeClick = (x, y) => {
+    // Handle final challenge interactions
+    showFeedbackMessage('Apply all your angle knowledge!', 'info');
   };
 
-  const handleMouseMove = (event) => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    
-    const rect = canvas.getBoundingClientRect();
-    const x = event.clientX - rect.left;
-    const y = event.clientY - rect.top;
-
-    const scaleX = canvas.width / rect.width;
-    const scaleY = canvas.height / rect.height;
-    const scaledX = x * scaleX;
-    const scaledY = y * scaleY;
-
-    if (draggedPoint && currentTutorial.content === 'angle-construction') {
-      // Update construction angle
-      updateConstructionAngle(scaledX, scaledY);
-    }
+  // Helper functions
+  const updateScore = (points) => {
+    setGameState(prev => ({ 
+      ...prev, 
+      score: prev.score + points,
+      correctAnswers: prev.correctAnswers + 1
+    }));
   };
 
-  const handleMouseUp = () => {
-    if (draggedPoint) {
-      const canvas = canvasRef.current;
-      if (canvas) {
-        canvas.style.cursor = 'default';
-      }
-      
-      // Check if constructed angle meets target
-      if (currentTutorial.content === 'angle-construction') {
-        checkConstructionAccuracy();
-      }
-    }
-    setDraggedPoint(null);
+  const showFeedbackMessage = (message, type) => {
+    setFeedbackMessage(message);
+    setShowFeedback(true);
+    setTimeout(() => setShowFeedback(false), 3000);
   };
 
-  // Helper functions for game data generation
-  const generateAngleTypesData = () => {
-    return [
-      { x: 100, y: 100, degrees: 45, type: 'acute', classified: false, id: 'type1' },
-      { x: 200, y: 100, degrees: 90, type: 'right', classified: false, id: 'type2' },
-      { x: 300, y: 100, degrees: 120, type: 'obtuse', classified: false, id: 'type3' },
-      { x: 400, y: 100, degrees: 180, type: 'straight', classified: false, id: 'type4' },
-      { x: 150, y: 200, degrees: 30, type: 'acute', classified: false, id: 'type5' },
-      { x: 250, y: 200, degrees: 150, type: 'obtuse', classified: false, id: 'type6' },
-      { x: 350, y: 200, degrees: 60, type: 'acute', classified: false, id: 'type7' },
-      { x: 200, y: 300, degrees: 90, type: 'right', classified: false, id: 'type8' }
-    ];
-  };
-
-  const generateCongruentAnglesData = () => {
-    return [
-      { x: 100, y: 150, degrees: 45, pair: 'A', matched: false, id: 'cong1' },
-      { x: 350, y: 200, degrees: 45, pair: 'A', matched: false, id: 'cong2' },
-      { x: 200, y: 100, degrees: 90, pair: 'B', matched: false, id: 'cong3' },
-      { x: 400, y: 300, degrees: 90, pair: 'B', matched: false, id: 'cong4' },
-      { x: 150, y: 300, degrees: 60, pair: 'C', matched: false, id: 'cong5' },
-      { x: 300, y: 150, degrees: 60, pair: 'C', matched: false, id: 'cong6' }
-    ];
-  };
-
-  const generateRelationshipAnglesData = () => {
-    return [
-      {
-        type: 'complementary',
-        angles: [
-          { x: 150, y: 150, degrees: 30, id: 'comp1a' },
-          { x: 200, y: 150, degrees: 60, id: 'comp1b' }
-        ],
-        identified: false
-      },
-      {
-        type: 'supplementary',
-        angles: [
-          { x: 300, y: 200, degrees: 120, id: 'supp1a' },
-          { x: 350, y: 200, degrees: 60, id: 'supp1b' }
-        ],
-        identified: false
-      }
-    ];
-  };
-
-  const generateMissingAngleData = () => {
-    return [
-      {
-        type: 'complementary',
-        knownAngle: 35,
-        missingAngle: 55,
-        clickArea: { x: 150, y: 150 },
-        solved: false,
-        id: 'missing1'
-      },
-      {
-        type: 'supplementary',
-        knownAngle: 110,
-        missingAngle: 70,
-        clickArea: { x: 300, y: 200 },
-        solved: false,
-        id: 'missing2'
-      },
-      {
-        type: 'triangle',
-        knownAngles: [60, 70],
-        missingAngle: 50,
-        clickArea: { x: 250, y: 300 },
-        solved: false,
-        id: 'missing3'
-      },
-      {
-        type: 'linear-pair',
-        knownAngle: 145,
-        missingAngle: 35,
-        clickArea: { x: 400, y: 150 },
-        solved: false,
-        id: 'missing4'
-      }
-    ];
-  };
-
-  const getConstructionPoints = () => {
-    return [
-      { x: 250, y: 200, id: 'vertex', draggable: false },
-      { x: 350, y: 200, id: 'ray1-end', draggable: false },
-      { x: 300, y: 150, id: 'ray2-end', draggable: true }
-    ];
-  };
-
-  // Angle naming dialog - enhanced with animations and sounds
   const showAngleNamingDialog = (angle) => {
     const options = [
       formatAngleName('A', 'B', 'C'),
@@ -484,7 +341,11 @@ const AngleMasteryTutorial = () => {
       formatAngleName(angle.name.charAt(0), angle.name.charAt(1), angle.name.charAt(2))
     ];
     
-    promptUserChoice(`Name this angle:`, options, (answer) => {
+    const userChoice = prompt(`Name this angle:\n${options.map((opt, i) => `${i + 1}. ${opt}`).join('\n')}\nEnter choice number:`);
+    const choiceIndex = parseInt(userChoice) - 1;
+    
+    if (choiceIndex >= 0 && choiceIndex < options.length) {
+      const answer = options[choiceIndex];
       const correct = answer === formatAngleName(angle.name.charAt(0), angle.name.charAt(1), angle.name.charAt(2)) ||
                      answer === formatAngleName(angle.name.charAt(2), angle.name.charAt(1), angle.name.charAt(0));
       
@@ -494,7 +355,8 @@ const AngleMasteryTutorial = () => {
       } else {
         showFeedbackMessage(`Incorrect. The correct answer is ${formatAngleName(angle.name.charAt(0), angle.name.charAt(1), angle.name.charAt(2))} or ${formatAngleName(angle.name.charAt(2), angle.name.charAt(1), angle.name.charAt(0))}`, 'error');
       }
-    });
+      setGameState(prev => ({ ...prev, attempts: prev.attempts + 1 }));
+    }
   };
 
   const promptAngleMeasurement = (angle) => {
@@ -530,213 +392,23 @@ const AngleMasteryTutorial = () => {
       straight: 'Straight (= 180°)'
     };
 
-    promptUserChoice(`Classify this ${angle.degrees}° angle:`, 
-      types.map(type => typeDescriptions[type]), 
-      (answer) => {
-        const selectedType = types.find(type => typeDescriptions[type] === answer);
-        
-        if (selectedType === angle.type) {
-          updateScore(15);
-          showFeedbackMessage('Correct classification! 🎯', 'success');
-          markAngleAsClassified(angle.id);
-        } else {
-          showFeedbackMessage(`Incorrect. This ${angle.degrees}° angle is ${typeDescriptions[angle.type]}`, 'error');
-        }
-      });
-  };
-
-  const selectAngleForMatching = (angle) => {
-    const currentSelection = gameState.selectedAngle;
-    
-    if (!currentSelection) {
-      setGameState(prev => ({ ...prev, selectedAngle: angle }));
-      showFeedbackMessage('First angle selected. Choose another to match!', 'info');
-    } else {
-      if (currentSelection.pair === angle.pair && currentSelection.id !== angle.id) {
-        // Correct match!
-        updateScore(25);
-        showFeedbackMessage('Perfect match! These angles are congruent! 🎉', 'success');
-        markAnglesAsMatched([currentSelection.id, angle.id]);
-        setGameState(prev => ({ 
-          ...prev, 
-          selectedAngle: null,
-          matchedPairs: [...prev.matchedPairs, currentSelection.pair]
-        }));
-      } else {
-        showFeedbackMessage('These angles are not congruent. Try again!', 'error');
-        setGameState(prev => ({ ...prev, selectedAngle: null }));
-      }
-    }
-  };
-
-  const checkAngleRelationship = (anglePair) => {
-    const sum = anglePair.angles[0].degrees + anglePair.angles[1].degrees;
-    
-    if (anglePair.type === 'complementary' && sum === 90) {
-      updateScore(20);
-      showFeedbackMessage(`Correct! ${anglePair.angles[0].degrees}° + ${anglePair.angles[1].degrees}° = 90° (Complementary)`, 'success');
-    } else if (anglePair.type === 'supplementary' && sum === 180) {
-      updateScore(20);
-      showFeedbackMessage(`Correct! ${anglePair.angles[0].degrees}° + ${anglePair.angles[1].degrees}° = 180° (Supplementary)`, 'success');
-    } else {
-      showFeedbackMessage(`These angles sum to ${sum}°. Look for the correct relationship!`, 'info');
-    }
-  };
-
-  const promptMissingAngleSolution = (problem) => {
-    let promptText = '';
-    
-    switch (problem.type) {
-      case 'complementary':
-        promptText = `If two angles are complementary and one measures ${problem.knownAngle}°, what is the other angle?`;
-        break;
-      case 'supplementary':
-        promptText = `If two angles are supplementary and one measures ${problem.knownAngle}°, what is the other angle?`;
-        break;
-      case 'triangle':
-        promptText = `In a triangle, two angles measure ${problem.knownAngles[0]}° and ${problem.knownAngles[1]}°. What is the third angle?`;
-        break;
-      case 'linear-pair':
-        promptText = `Two angles form a linear pair. If one measures ${problem.knownAngle}°, what is the other angle?`;
-        break;
-    }
-
-    const userAnswer = prompt(promptText);
-    const answer = parseInt(userAnswer);
-    
-    if (answer === problem.missingAngle) {
-      updateScore(30);
-      showFeedbackMessage('Excellent problem solving! 🧮', 'success');
-      markProblemAsSolved(problem.id);
-    } else {
-      showFeedbackMessage(`Incorrect. The answer is ${problem.missingAngle}°. Remember the angle relationships!`, 'error');
-    }
-  };
-
-  const showWordProblem = (problemId) => {
-    const problems = {
-      problem1: {
-        text: "A ladder is leaning against a wall. The ladder makes a 70° angle with the ground. What angle does the ladder make with the wall?",
-        answer: 20,
-        explanation: "The ladder, wall, and ground form a right triangle. 90° - 70° = 20°"
-      },
-      problem2: {
-        text: "Two roads intersect forming four angles. If one angle measures 55°, what do the other three angles measure?",
-        answer: "55°, 125°, 125°",
-        explanation: "Vertical angles are equal (55°, 55°) and adjacent angles are supplementary (125°, 125°)"
-      },
-      problem3: {
-        text: "In a triangular garden, one corner is 90° and another is 35°. What is the third corner?",
-        answer: 55,
-        explanation: "Angles in a triangle sum to 180°. 180° - 90° - 35° = 55°"
-      }
-    };
-
-    const problem = problems[problemId];
-    const userAnswer = prompt(problem.text);
-    
-    // Simple validation - in a real app, you'd want more sophisticated checking
-    if (userAnswer && (userAnswer.includes(problem.answer.toString()) || userAnswer === problem.answer.toString())) {
-      updateScore(40);
-      showFeedbackMessage(`Correct! ${problem.explanation} 🏆`, 'success');
-    } else {
-      showFeedbackMessage(`Incorrect. ${problem.explanation}`, 'info');
-    }
-  };
-
-  const updateConstructionAngle = (x, y) => {
-    const vertex = { x: 250, y: 200 };
-    const ray1End = { x: 350, y: 200 };
-    const ray2End = { x, y };
-    
-    const constructedAngle = calculateAngle(vertex, ray1End, ray2End);
-    setGameState(prev => ({ ...prev, constructedAngle }));
-    
-    // Update the draggable point position
-    setInteractivePoints(prev => 
-      prev.map(point => 
-        point.id === 'ray2-end' ? { ...point, x, y } : point
-      )
-    );
-  };
-
-  const checkConstructionAccuracy = () => {
-    const difference = Math.abs(gameState.constructedAngle - gameState.targetAngle);
-    
-    if (difference <= gameState.tolerance) {
-      updateScore(50);
-      showFeedbackMessage(`Perfect construction! You built a ${Math.round(gameState.constructedAngle)}° angle! 🎯`, 'success');
-      generateNewTargetAngle();
-    } else {
-      showFeedbackMessage(`Close! You built ${Math.round(gameState.constructedAngle)}°, target was ${gameState.targetAngle}°. Try again!`, 'info');
-    }
-  };
-
-  const generateNewTargetAngle = () => {
-    const newTarget = Math.floor(Math.random() * 160) + 10; // 10° to 170°
-    setGameState(prev => ({ ...prev, targetAngle: newTarget }));
-  };
-
-  const handleMultiSkillChallenge = (x, y) => {
-    // Complex challenge combining all skills
-    // This would implement a comprehensive final test
-    showFeedbackMessage('Final challenge activated! Show your mastery! 🏆', 'info');
-  };
-
-  // Utility functions
-  const updateScore = (points) => {
-    setGameState(prev => ({ 
-      ...prev, 
-      score: prev.score + points,
-      correctAnswers: prev.correctAnswers + 1
-    }));
-  };
-
-  const showFeedbackMessage = (message, type) => {
-    setFeedbackMessage(message);
-    setShowFeedback(true);
-    setTimeout(() => setShowFeedback(false), 3000);
-  };
-
-  const markAngleAsClassified = (angleId) => {
-    // Mark angle as classified in game state
-    setInteractivePoints(prev => 
-      prev.map(point => 
-        point.id === angleId ? { ...point, classified: true } : point
-      )
-    );
-  };
-
-  const markAnglesAsMatched = (angleIds) => {
-    // Mark angles as matched
-    setInteractivePoints(prev => 
-      prev.map(point => 
-        angleIds.includes(point.id) ? { ...point, matched: true } : point
-      )
-    );
-  };
-
-  const markProblemAsSolved = (problemId) => {
-    // Mark problem as solved
-    setGameState(prev => ({ 
-      ...prev, 
-      [`${problemId}_solved`]: true 
-    }));
-  };
-
-  const promptUserChoice = (question, options, callback) => {
-    // In a real implementation, you'd use a modal or custom component
-    // For now, using simple prompt
-    const optionsText = options.map((opt, i) => `${i + 1}. ${opt}`).join('\n');
-    const userChoice = prompt(`${question}\n${optionsText}\nEnter choice number:`);
-    
+    const userChoice = prompt(`Classify this ${angle.degrees}° angle:\n${types.map((type, i) => `${i + 1}. ${typeDescriptions[type]}`).join('\n')}\nEnter choice number:`);
     const choiceIndex = parseInt(userChoice) - 1;
-    if (choiceIndex >= 0 && choiceIndex < options.length) {
-      callback(options[choiceIndex]);
+    
+    if (choiceIndex >= 0 && choiceIndex < types.length) {
+      const selectedType = types[choiceIndex];
+      
+      if (selectedType === angle.type) {
+        updateScore(15);
+        showFeedbackMessage('Correct classification! 🎯', 'success');
+      } else {
+        showFeedbackMessage(`Incorrect. This ${angle.degrees}° angle is ${typeDescriptions[angle.type]}`, 'error');
+      }
+      setGameState(prev => ({ ...prev, attempts: prev.attempts + 1 }));
     }
   };
 
-  // Canvas drawing function
+  // Enhanced canvas drawing function
   const drawCanvas = () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -748,7 +420,7 @@ const AngleMasteryTutorial = () => {
     ctx.fillStyle = '#f0f8ff';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // Draw grid with angle-themed colors
+    // Draw grid
     ctx.strokeStyle = '#e0e8f0';
     ctx.lineWidth = 1;
     for (let i = 0; i < canvas.width; i += 25) {
@@ -769,6 +441,9 @@ const AngleMasteryTutorial = () => {
       case 'introduction':
         drawIntroduction(ctx);
         break;
+      case 'angle-basics':
+        drawAngleBasics(ctx);
+        break;
       case 'angle-naming':
         drawAngleNaming(ctx);
         break;
@@ -781,20 +456,23 @@ const AngleMasteryTutorial = () => {
       case 'angle-construction':
         drawAngleConstruction(ctx);
         break;
-      case 'congruent-matching':
-        drawCongruentMatching(ctx);
-        break;
       case 'complementary-supplementary':
         drawComplementarySupplementary(ctx);
         break;
-      case 'missing-angle':
-        drawMissingAngle(ctx);
+      case 'vertical-angles':
+        drawVerticalAngles(ctx);
         break;
-      case 'word-problems':
-        drawWordProblems(ctx);
+      case 'adjacent-angles':
+        drawAdjacentAngles(ctx);
         break;
-      case 'final-challenge':
-        drawFinalChallenge(ctx);
+      case 'angle-bisector':
+        drawAngleBisector(ctx);
+        break;
+      case 'missing-angles':
+        drawMissingAngles(ctx);
+        break;
+      case 'angle-challenge':
+        drawAngleChallenge(ctx);
         break;
       case 'completion':
         drawCompletion(ctx);
@@ -804,9 +482,8 @@ const AngleMasteryTutorial = () => {
     }
   };
 
-  // Individual drawing functions for each game mode
+  // Individual drawing functions
   const drawIntroduction = (ctx) => {
-    // Welcome animation with rotating protractor
     const centerX = 250;
     const centerY = 200;
     const time = Date.now() * 0.002;
@@ -886,41 +563,80 @@ const AngleMasteryTutorial = () => {
     ctx.textAlign = 'left';
   };
 
+  const drawAngleBasics = (ctx) => {
+    const vertex = { x: 250, y: 200 };
+    const ray1End = interactivePoints.length > 0 ? interactivePoints[0] : { x: 380, y: 150, id: 'ray1End' };
+    const ray2End = interactivePoints.length > 1 ? interactivePoints[1] : { x: 120, y: 120, id: 'ray2End' };
+
+    // Calculate angle
+    const angle1 = Math.atan2(ray1End.y - vertex.y, ray1End.x - vertex.x);
+    const angle2 = Math.atan2(ray2End.y - vertex.y, ray2End.x - vertex.x);
+    let angleDiff = angle1 - angle2;
+    if (angleDiff < 0) angleDiff += 2 * Math.PI;
+    if (angleDiff > Math.PI) angleDiff = 2 * Math.PI - angleDiff;
+    const angleDegrees = angleDiff * (180 / Math.PI);
+
+    // Draw rays
+    ctx.strokeStyle = '#4CAF50';
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.moveTo(vertex.x, vertex.y);
+    ctx.lineTo(ray1End.x, ray1End.y);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(vertex.x, vertex.y);
+    ctx.lineTo(ray2End.x, ray2End.y);
+    ctx.stroke();
+
+    // Draw vertex
+    ctx.beginPath();
+    ctx.arc(vertex.x, vertex.y, 15, 0, 2 * Math.PI);
+    ctx.fillStyle = '#FF5722';
+    ctx.fill();
+
+    // Draw angle arc
+    const arcRadius = 60;
+    ctx.beginPath();
+    ctx.arc(vertex.x, vertex.y, arcRadius, Math.min(angle1, angle2), Math.max(angle1, angle2));
+    ctx.strokeStyle = '#FF9800';
+    ctx.lineWidth = 5;
+    ctx.stroke();
+
+    // Display measurement
+    ctx.fillStyle = '#2C1810';
+    ctx.font = 'bold 20px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText(`${Math.round(angleDegrees)}°`, vertex.x, vertex.y - 80);
+
+    // Labels
+    ctx.font = 'bold 16px Arial';
+    ctx.fillText('Vertex', vertex.x, vertex.y + 35);
+    ctx.fillText('Ray 1', ray1End.x + 15, ray1End.y);
+    ctx.fillText('Ray 2', ray2End.x - 25, ray2End.y);
+
+    ctx.textAlign = 'left';
+
+    // Set up interactive points
+    if (interactivePoints.length < 2) {
+      setInteractivePoints([ray1End, ray2End]);
+    }
+  };
+
   const drawAngleNaming = (ctx) => {
     const angles = [
-      { 
-        vertex: { x: 150, y: 150, label: 'B' }, 
-        point1: { x: 100, y: 100, label: 'A' }, 
-        point2: { x: 200, y: 120, label: 'C' }, 
-        id: 'angle1',
-        clicked: interactivePoints.some(p => p.id === 'angle1')
-      },
-      { 
-        vertex: { x: 350, y: 200, label: 'E' }, 
-        point1: { x: 300, y: 150, label: 'D' }, 
-        point2: { x: 400, y: 180, label: 'F' }, 
-        id: 'angle2',
-        clicked: interactivePoints.some(p => p.id === 'angle2')
-      },
-      { 
-        vertex: { x: 250, y: 300, label: 'H' }, 
-        point1: { x: 200, y: 250, label: 'G' }, 
-        point2: { x: 300, y: 280, label: 'I' }, 
-        id: 'angle3',
-        clicked: interactivePoints.some(p => p.id === 'angle3')
-      }
+      { vertex: { x: 150, y: 150 }, point1: { x: 100, y: 100 }, point2: { x: 200, y: 120 }, name: 'ABC' },
+      { vertex: { x: 350, y: 200 }, point1: { x: 300, y: 150 }, point2: { x: 400, y: 180 }, name: 'DEF' },
+      { vertex: { x: 250, y: 300 }, point1: { x: 200, y: 250 }, point2: { x: 300, y: 280 }, name: 'GHI' }
     ];
 
-    angles.forEach(angle => {
-      const angleColor = angle.clicked ? '#4CAF50' : '#2196F3';
-      const degrees = calculateAngle(angle.vertex, angle.point1, angle.point2);
-
+    angles.forEach((angle, index) => {
       // Draw rays
+      ctx.strokeStyle = '#2196F3';
+      ctx.lineWidth = 3;
       ctx.beginPath();
       ctx.moveTo(angle.vertex.x, angle.vertex.y);
       ctx.lineTo(angle.point1.x, angle.point1.y);
-      ctx.strokeStyle = angleColor;
-      ctx.lineWidth = 3;
       ctx.stroke();
 
       ctx.beginPath();
@@ -928,107 +644,56 @@ const AngleMasteryTutorial = () => {
       ctx.lineTo(angle.point2.x, angle.point2.y);
       ctx.stroke();
 
-      // Draw angle arc
-      const angle1 = Math.atan2(angle.point1.y - angle.vertex.y, angle.point1.x - angle.vertex.x);
-      const angle2 = Math.atan2(angle.point2.y - angle.vertex.y, angle.point2.x - angle.vertex.x);
-      
-      ctx.beginPath();
-      ctx.arc(angle.vertex.x, angle.vertex.y, 30, angle1, angle2);
-      ctx.strokeStyle = angleColor;
-      ctx.lineWidth = 2;
-      ctx.stroke();
-
-      // Draw points with labels
-      [angle.point1, angle.vertex, angle.point2].forEach(point => {
-        // Point circle
+      // Draw points
+      [angle.point1, angle.vertex, angle.point2].forEach((point, i) => {
         ctx.beginPath();
         ctx.arc(point.x, point.y, 8, 0, 2 * Math.PI);
-        ctx.fillStyle = angleColor;
+        ctx.fillStyle = i === 1 ? '#FF5722' : '#4CAF50';
         ctx.fill();
-        ctx.strokeStyle = '#1976D2';
-        ctx.lineWidth = 2;
-        ctx.stroke();
-
-        // Label
-        ctx.fillStyle = '#2C1810';
-        ctx.font = 'bold 16px Arial';
-        ctx.textAlign = 'center';
-        ctx.fillText(point.label, point.x, point.y - 15);
       });
 
-      // Click area indicator
-      if (!angle.clicked) {
-        const time = Date.now() * 0.005;
-        const pulseRadius = 25 + Math.sin(time) * 5;
-        ctx.beginPath();
-        ctx.arc(angle.vertex.x, angle.vertex.y, pulseRadius, 0, 2 * Math.PI);
-        ctx.strokeStyle = `${angleColor}60`;
-        ctx.lineWidth = 2;
-        ctx.stroke();
-      }
+      // Labels
+      ctx.fillStyle = '#2C1810';
+      ctx.font = 'bold 14px Arial';
+      ctx.fillText(angle.name.charAt(0), angle.point1.x - 15, angle.point1.y - 10);
+      ctx.fillText(angle.name.charAt(1), angle.vertex.x - 8, angle.vertex.y + 25);
+      ctx.fillText(angle.name.charAt(2), angle.point2.x + 10, angle.point2.y - 10);
 
-      // Show angle name if clicked
-      if (angle.clicked) {
-        const nameX = angle.vertex.x;
-        const nameY = angle.vertex.y + 50;
-        
-        ctx.fillStyle = 'rgba(76, 175, 80, 0.9)';
-        ctx.fillRect(nameX - 40, nameY - 15, 80, 25);
-        ctx.strokeStyle = '#4CAF50';
-        ctx.lineWidth = 2;
-        ctx.strokeRect(nameX - 40, nameY - 15, 80, 25);
-
-        ctx.fillStyle = 'white';
-        ctx.font = 'bold 14px Arial';
-        ctx.textAlign = 'center';
-        ctx.fillText(`∠${angle.point1.label}${angle.vertex.label}${angle.point2.label}`, nameX, nameY - 2);
-      }
+      // Angle name
+      ctx.font = 'bold 12px Arial';
+      ctx.fillText(`∠${angle.name}`, angle.vertex.x - 20, angle.vertex.y - 25);
     });
 
-    ctx.textAlign = 'left';
-
     // Instructions
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
-    ctx.fillRect(10, 10, 480, 60);
-    ctx.strokeStyle = '#2196F3';
-    ctx.lineWidth = 2;
-    ctx.strokeRect(10, 10, 480, 60);
-
-    ctx.fillStyle = '#2C1810';
-    ctx.font = 'bold 16px Arial';
-    ctx.fillText('🎯 Click on angles to practice naming them!', 20, 35);
-    ctx.font = '14px Arial';
     ctx.fillStyle = '#666';
-    ctx.fillText('Remember: Angles are named using three points (Point-Vertex-Point)', 20, 55);
+    ctx.font = 'bold 14px Arial';
+    ctx.fillText('Click on angles to practice naming them!', 20, 30);
   };
 
   const drawAngleMeasuring = (ctx) => {
     const measurementAngles = [
-      { vertex: { x: 120, y: 150 }, angle: 45, id: 'measure1', measured: gameState[`measure1_measured`] },
-      { vertex: { x: 280, y: 120 }, angle: 90, id: 'measure2', measured: gameState[`measure2_measured`] },
-      { vertex: { x: 400, y: 200 }, angle: 135, id: 'measure3', measured: gameState[`measure3_measured`] },
-      { vertex: { x: 200, y: 280 }, angle: 60, id: 'measure4', measured: gameState[`measure4_measured`] },
-      { vertex: { x: 350, y: 320 }, angle: 120, id: 'measure5', measured: gameState[`measure5_measured`] }
+      { vertex: { x: 120, y: 150 }, angle: 45, id: 'measure1' },
+      { vertex: { x: 280, y: 120 }, angle: 90, id: 'measure2' },
+      { vertex: { x: 400, y: 200 }, angle: 135, id: 'measure3' },
+      { vertex: { x: 200, y: 280 }, angle: 60, id: 'measure4' },
+      { vertex: { x: 350, y: 320 }, angle: 120, id: 'measure5' }
     ];
 
-    measurementAngles.forEach((angleData, index) => {
-      const { vertex, angle: actualAngle, measured } = angleData;
-      const angleColor = getAngleColor(actualAngle);
-      
-      // Calculate ray endpoints
+    measurementAngles.forEach((angle, index) => {
+      const vertex = angle.vertex;
+      const degrees = angle.angle;
+      const ray1Angle = 0;
+      const ray2Angle = (degrees * Math.PI) / 180;
+
       const ray1End = { x: vertex.x + 50, y: vertex.y };
-      const angleRad = (actualAngle * Math.PI) / 180;
-      const ray2End = { 
-        x: vertex.x + 50 * Math.cos(angleRad), 
-        y: vertex.y - 50 * Math.sin(angleRad) 
-      };
+      const ray2End = { x: vertex.x + 50 * Math.cos(ray2Angle), y: vertex.y - 50 * Math.sin(ray2Angle) };
 
       // Draw rays
+      ctx.strokeStyle = getAngleColor(degrees);
+      ctx.lineWidth = 3;
       ctx.beginPath();
       ctx.moveTo(vertex.x, vertex.y);
       ctx.lineTo(ray1End.x, ray1End.y);
-      ctx.strokeStyle = angleColor;
-      ctx.lineWidth = 4;
       ctx.stroke();
 
       ctx.beginPath();
@@ -1036,229 +701,126 @@ const AngleMasteryTutorial = () => {
       ctx.lineTo(ray2End.x, ray2End.y);
       ctx.stroke();
 
+      // Draw vertex
+      ctx.beginPath();
+      ctx.arc(vertex.x, vertex.y, 10, 0, 2 * Math.PI);
+      ctx.fillStyle = '#FF5722';
+      ctx.fill();
+
       // Draw angle arc
       ctx.beginPath();
-      ctx.arc(vertex.x, vertex.y, 35, 0, angleRad, false);
-      ctx.strokeStyle = angleColor;
+      ctx.arc(vertex.x, vertex.y, 30, -ray2Angle, 0);
+      ctx.strokeStyle = getAngleColor(degrees);
       ctx.lineWidth = 3;
       ctx.stroke();
 
-      // Draw vertex point
-      ctx.beginPath();
-      ctx.arc(vertex.x, vertex.y, 10, 0, 2 * Math.PI);
-      ctx.fillStyle = measured ? '#4CAF50' : '#FF5722';
-      ctx.fill();
-      ctx.strokeStyle = measured ? '#388E3C' : '#D84315';
-      ctx.lineWidth = 2;
-      ctx.stroke();
-
-      // Pulsing effect for unmeasured angles
-      if (!measured) {
-        const time = Date.now() * 0.004;
-        const pulseRadius = 20 + Math.sin(time + index) * 3;
-        ctx.beginPath();
-        ctx.arc(vertex.x, vertex.y, pulseRadius, 0, 2 * Math.PI);
-        ctx.strokeStyle = `${angleColor}50`;
-        ctx.lineWidth = 2;
-        ctx.stroke();
-      }
-
-      // Show measurement if already measured
-      if (measured) {
-        ctx.fillStyle = 'rgba(76, 175, 80, 0.9)';
-        ctx.fillRect(vertex.x - 25, vertex.y - 40, 50, 25);
-        ctx.strokeStyle = '#4CAF50';
-        ctx.lineWidth = 2;
-        ctx.strokeRect(vertex.x - 25, vertex.y - 40, 50, 25);
-
-        ctx.fillStyle = 'white';
-        ctx.font = 'bold 14px Arial';
-        ctx.textAlign = 'center';
-        ctx.fillText(`${actualAngle}°`, vertex.x, vertex.y - 25);
-      }
-
-      // Label
+      // Question mark
       ctx.fillStyle = '#2C1810';
-      ctx.font = 'bold 12px Arial';
+      ctx.font = 'bold 16px Arial';
       ctx.textAlign = 'center';
-      ctx.fillText(`${index + 1}`, vertex.x, vertex.y + 30);
+      ctx.fillText('?°', vertex.x, vertex.y - 45);
     });
 
     ctx.textAlign = 'left';
-
-    // Score display
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
-    ctx.fillRect(10, 10, 200, 80);
-    ctx.strokeStyle = '#FF9800';
-    ctx.lineWidth = 2;
-    ctx.strokeRect(10, 10, 200, 80);
-
-    ctx.fillStyle = '#2C1810';
-    ctx.font = 'bold 18px Arial';
-    ctx.fillText('🎯 Measurement Challenge', 20, 35);
-    ctx.font = '14px Arial';
     ctx.fillStyle = '#666';
-    ctx.fillText(`Score: ${gameState.score}`, 20, 55);
-    ctx.fillText(`Attempts: ${gameState.attempts}`, 20, 75);
-
-    // Instructions
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
-    ctx.fillRect(10, 320, 480, 70);
-    ctx.strokeStyle = '#2196F3';
-    ctx.lineWidth = 2;
-    ctx.strokeRect(10, 320, 480, 70);
-
-    ctx.fillStyle = '#2C1810';
     ctx.font = 'bold 14px Arial';
-    ctx.fillText('📐 Click on the numbered angles to estimate their measurements', 20, 340);
-    ctx.font = '12px Arial';
-    ctx.fillStyle = '#666';
-    ctx.fillText('• Acute angles: 0° - 90°  • Right angles: 90°  • Obtuse angles: 90° - 180°', 20, 360);
-    ctx.fillText('• Get within 5° for excellent, within 10° for good!', 20, 375);
+    ctx.fillText('Click on angles to estimate their measurements!', 20, 30);
   };
 
   const drawAngleTypes = (ctx) => {
-    const typeAngles = generateAngleTypesData();
-    
-    // Draw category boxes
+    const typeAngles = [
+      { x: 100, y: 100, degrees: 45, type: 'acute' },
+      { x: 200, y: 100, degrees: 90, type: 'right' },
+      { x: 300, y: 100, degrees: 120, type: 'obtuse' },
+      { x: 400, y: 100, degrees: 180, type: 'straight' },
+      { x: 150, y: 200, degrees: 30, type: 'acute' },
+      { x: 250, y: 200, degrees: 150, type: 'obtuse' },
+      { x: 350, y: 200, degrees: 60, type: 'acute' },
+      { x: 200, y: 300, degrees: 90, type: 'right' }
+    ];
+
+    // Draw type categories
     const categories = [
-      { name: 'Acute (< 90°)', x: 50, y: 50, width: 100, height: 60, color: '#4CAF50' },
-      { name: 'Right (= 90°)', x: 170, y: 50, width: 100, height: 60, color: '#2196F3' },
-      { name: 'Obtuse (90°-180°)', x: 290, y: 50, width: 100, height: 60, color: '#FF9800' },
-      { name: 'Straight (= 180°)', x: 410, y: 50, width: 100, height: 60, color: '#9C27B0' }
+      { name: 'Acute (< 90°)', x: 50, y: 350, color: '#4CAF50' },
+      { name: 'Right (= 90°)', x: 150, y: 350, color: '#2196F3' },
+      { name: 'Obtuse (90° - 180°)', x: 250, y: 350, color: '#FF9800' },
+      { name: 'Straight (= 180°)', x: 400, y: 350, color: '#9C27B0' }
     ];
 
     categories.forEach(category => {
-      ctx.fillStyle = `${category.color}30`;
-      ctx.fillRect(category.x, category.y, category.width, category.height);
-      ctx.strokeStyle = category.color;
-      ctx.lineWidth = 2;
-      ctx.strokeRect(category.x, category.y, category.width, category.height);
-
       ctx.fillStyle = category.color;
-      ctx.font = 'bold 12px Arial';
+      ctx.fillRect(category.x, category.y, 80, 30);
+      ctx.fillStyle = 'white';
+      ctx.font = 'bold 10px Arial';
       ctx.textAlign = 'center';
-      ctx.fillText(category.name.split(' ')[0], category.x + category.width/2, category.y + 20);
-      ctx.font = '10px Arial';
-      ctx.fillText(category.name.split(' ')[1] || '', category.x + category.width/2, category.y + 35);
+      ctx.fillText(category.name, category.x + 40, category.y + 20);
     });
 
-    // Draw angles to classify
-    typeAngles.forEach(angleData => {
-      const { x, y, degrees, type, classified } = angleData;
-      const angleColor = classified ? '#4CAF50' : getAngleColor(degrees);
-      
-      // Calculate ray endpoints
-      const ray1End = { x: x + 30, y: y };
-      const angleRad = (degrees * Math.PI) / 180;
-      const ray2End = { 
-        x: x + 30 * Math.cos(angleRad), 
-        y: y - 30 * Math.sin(angleRad) 
-      };
+    // Draw angles
+    typeAngles.forEach(angle => {
+      const vertex = { x: angle.x, y: angle.y };
+      const degrees = angle.degrees;
+      const ray1End = { x: vertex.x + 30, y: vertex.y };
+      const ray2Angle = (degrees * Math.PI) / 180;
+      const ray2End = { x: vertex.x + 30 * Math.cos(ray2Angle), y: vertex.y - 30 * Math.sin(ray2Angle) };
 
       // Draw rays
-      ctx.beginPath();
-      ctx.moveTo(x, y);
-      ctx.lineTo(ray1End.x, ray1End.y);
-      ctx.strokeStyle = angleColor;
+      ctx.strokeStyle = getAngleColor(degrees);
       ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(vertex.x, vertex.y);
+      ctx.lineTo(ray1End.x, ray1End.y);
       ctx.stroke();
 
       ctx.beginPath();
-      ctx.moveTo(x, y);
+      ctx.moveTo(vertex.x, vertex.y);
       ctx.lineTo(ray2End.x, ray2End.y);
       ctx.stroke();
 
-      // Draw angle arc
+      // Draw vertex
       ctx.beginPath();
-      ctx.arc(x, y, 20, 0, angleRad, false);
-      ctx.strokeStyle = angleColor;
-      ctx.lineWidth = 2;
-      ctx.stroke();
-
-      // Draw vertex point
-      ctx.beginPath();
-      ctx.arc(x, y, 8, 0, 2 * Math.PI);
-      ctx.fillStyle = classified ? '#4CAF50' : '#FF5722';
+      ctx.arc(vertex.x, vertex.y, 8, 0, 2 * Math.PI);
+      ctx.fillStyle = '#FF5722';
       ctx.fill();
-      ctx.strokeStyle = classified ? '#388E3C' : '#D84315';
-      ctx.lineWidth = 2;
-      ctx.stroke();
 
-      // Show degree measurement
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
-      ctx.fillRect(x - 15, y + 25, 30, 20);
-      ctx.strokeStyle = angleColor;
-      ctx.lineWidth = 1;
-      ctx.strokeRect(x - 15, y + 25, 30, 20);
-
+      // Show degrees
       ctx.fillStyle = '#2C1810';
-      ctx.font = 'bold 10px Arial';
+      ctx.font = 'bold 12px Arial';
       ctx.textAlign = 'center';
-      ctx.fillText(`${degrees}°`, x, y + 38);
-
-      // Success checkmark if classified
-      if (classified) {
-        ctx.fillStyle = '#4CAF50';
-        ctx.font = 'bold 16px Arial';
-        ctx.fillText('✓', x + 20, y - 5);
-      }
+      ctx.fillText(`${degrees}°`, vertex.x, vertex.y - 25);
     });
 
     ctx.textAlign = 'left';
-
-    // Instructions
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
-    ctx.fillRect(10, 320, 480, 70);
-    ctx.strokeStyle = '#FF9800';
-    ctx.lineWidth = 2;
-    ctx.strokeRect(10, 320, 480, 70);
-
-    ctx.fillStyle = '#2C1810';
-    ctx.font = 'bold 14px Arial';
-    ctx.fillText('🕵️ Click on each angle to classify it into the correct type!', 20, 340);
-    ctx.font = '12px Arial';
     ctx.fillStyle = '#666';
-    ctx.fillText('Look at the degree measurement and the visual opening to determine the type', 20, 360);
-    ctx.fillText(`Progress: ${typeAngles.filter(a => a.classified).length}/${typeAngles.length} classified`, 20, 375);
+    ctx.font = 'bold 14px Arial';
+    ctx.fillText('Drag angles to their correct type categories!', 20, 30);
   };
 
   const drawAngleConstruction = (ctx) => {
     const vertex = { x: 250, y: 200 };
-    const ray1End = { x: 350, y: 200 };
-    const ray2End = interactivePoints.find(p => p.id === 'ray2-end') || { x: 300, y: 150 };
+    const fixedRay = { x: 350, y: 200 };
+    const movableRay = interactivePoints.length > 0 ? interactivePoints[0] : { x: 250, y: 120, id: 'movableRay' };
     
-    // Calculate current angle
-    const currentAngle = calculateAngle(vertex, ray1End, ray2End);
-    const targetAngle = gameState.targetAngle;
-    const difference = Math.abs(currentAngle - targetAngle);
-    
-    const constructionColor = difference <= gameState.tolerance ? '#4CAF50' : '#FF9800';
+    const angle1 = Math.atan2(fixedRay.y - vertex.y, fixedRay.x - vertex.x);
+    const angle2 = Math.atan2(movableRay.y - vertex.y, movableRay.x - vertex.x);
+    let angleDiff = angle1 - angle2;
+    if (angleDiff < 0) angleDiff += 2 * Math.PI;
+    const currentAngle = angleDiff * (180 / Math.PI);
 
-    // Draw fixed ray (horizontal)
+    // Draw fixed ray
+    ctx.strokeStyle = '#666';
+    ctx.lineWidth = 4;
     ctx.beginPath();
     ctx.moveTo(vertex.x, vertex.y);
-    ctx.lineTo(ray1End.x, ray1End.y);
+    ctx.lineTo(fixedRay.x, fixedRay.y);
+    ctx.stroke();
+
+    // Draw movable ray
     ctx.strokeStyle = '#2196F3';
     ctx.lineWidth = 4;
-    ctx.stroke();
-
-    // Draw draggable ray
     ctx.beginPath();
     ctx.moveTo(vertex.x, vertex.y);
-    ctx.lineTo(ray2End.x, ray2End.y);
-    ctx.strokeStyle = constructionColor;
-    ctx.lineWidth = 4;
-    ctx.stroke();
-
-    // Draw angle arc
-    const angle1 = Math.atan2(ray1End.y - vertex.y, ray1End.x - vertex.x);
-    const angle2 = Math.atan2(ray2End.y - vertex.y, ray2End.x - vertex.x);
-    
-    ctx.beginPath();
-    ctx.arc(vertex.x, vertex.y, 50, angle1, angle2, angle2 < angle1);
-    ctx.strokeStyle = constructionColor;
-    ctx.lineWidth = 5;
+    ctx.lineTo(movableRay.x, movableRay.y);
     ctx.stroke();
 
     // Draw vertex
@@ -1266,885 +828,364 @@ const AngleMasteryTutorial = () => {
     ctx.arc(vertex.x, vertex.y, 12, 0, 2 * Math.PI);
     ctx.fillStyle = '#FF5722';
     ctx.fill();
-    ctx.strokeStyle = '#D84315';
-    ctx.lineWidth = 3;
-    ctx.stroke();
 
-    // Draw draggable point with enhanced visual feedback
-    const pointColor = draggedPoint === 'ray2-end' ? '#FF5722' : constructionColor;
+    // Draw movable point
     ctx.beginPath();
-    ctx.arc(ray2End.x, ray2End.y, 15, 0, 2 * Math.PI);
-    ctx.fillStyle = pointColor;
+    ctx.arc(movableRay.x, movableRay.y, 10, 0, 2 * Math.PI);
+    ctx.fillStyle = '#2196F3';
     ctx.fill();
-    ctx.strokeStyle = difference <= gameState.tolerance ? '#388E3C' : '#F57C00';
-    ctx.lineWidth = 3;
+
+    // Draw angle arc
+    ctx.beginPath();
+    ctx.arc(vertex.x, vertex.y, 50, angle2, angle1);
+    ctx.strokeStyle = '#FF9800';
+    ctx.lineWidth = 4;
     ctx.stroke();
 
-    // Drag indicator
-    if (draggedPoint !== 'ray2-end') {
-      const time = Date.now() * 0.005;
-      const pulseRadius = 20 + Math.sin(time) * 3;
-      ctx.beginPath();
-      ctx.arc(ray2End.x, ray2End.y, pulseRadius, 0, 2 * Math.PI);
-      ctx.strokeStyle = `${constructionColor}60`;
-      ctx.lineWidth = 2;
-      ctx.stroke();
-    }
-
-    // Target display
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
-    ctx.fillRect(10, 10, 220, 100);
-    ctx.strokeStyle = '#2196F3';
-    ctx.lineWidth = 2;
-    ctx.strokeRect(10, 10, 220, 100);
-
+    // Display measurements
     ctx.fillStyle = '#2C1810';
     ctx.font = 'bold 18px Arial';
-    ctx.fillText('🎯 Angle Construction', 20, 35);
-    ctx.font = 'bold 16px Arial';
-    ctx.fillText(`Target: ${targetAngle}°`, 20, 60);
-    ctx.fillText(`Current: ${Math.round(currentAngle)}°`, 20, 80);
-    
-    // Accuracy indicator
-    ctx.fillStyle = difference <= gameState.tolerance ? '#4CAF50' : '#FF9800';
-    ctx.font = 'bold 14px Arial';
-    ctx.fillText(`Difference: ${Math.round(difference)}°`, 20, 100);
+    ctx.textAlign = 'center';
+    ctx.fillText(`Current: ${Math.round(currentAngle)}°`, 250, 50);
+    ctx.fillText(`Target: ${gameState.targetAngle}°`, 250, 75);
 
-    // Success message
+    const difference = Math.abs(currentAngle - gameState.targetAngle);
     if (difference <= gameState.tolerance) {
-      ctx.fillStyle = 'rgba(76, 175, 80, 0.9)';
-      ctx.fillRect(250, 10, 240, 60);
-      ctx.strokeStyle = '#4CAF50';
-      ctx.lineWidth = 2;
-      ctx.strokeRect(250, 10, 240, 60);
-
-      ctx.fillStyle = 'white';
-      ctx.font = 'bold 16px Arial';
-      ctx.textAlign = 'center';
-      ctx.fillText('🎉 Perfect Construction!', 370, 35);
-      ctx.font = '14px Arial';
-      ctx.fillText('Click to get a new target angle', 370, 55);
+      ctx.fillStyle = '#4CAF50';
+      ctx.fillText('SUCCESS! ✓', 250, 100);
     }
 
     ctx.textAlign = 'left';
 
-    // Instructions
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
-    ctx.fillRect(10, 320, 480, 70);
-    ctx.strokeStyle = '#FF9800';
-    ctx.lineWidth = 2;
-    ctx.strokeRect(10, 320, 480, 70);
-
-    ctx.fillStyle = '#2C1810';
-    ctx.font = 'bold 14px Arial';
-    ctx.fillText('🔧 Drag the orange endpoint to construct the target angle!', 20, 340);
-    ctx.font = '12px Arial';
-    ctx.fillStyle = '#666';
-    ctx.fillText('• The blue ray is fixed (0° reference)', 20, 360);
-    ctx.fillText(`• Get within ${gameState.tolerance}° of the target for a perfect score!`, 20, 375);
-  };
-
-  const drawCongruentMatching = (ctx) => {
-    const congruentAngles = generateCongruentAnglesData();
-    const selectedAngle = gameState.selectedAngle;
-
-    congruentAngles.forEach(angleData => {
-      const { x, y, degrees, pair, matched, id } = angleData;
-      
-      let angleColor = getAngleColor(degrees);
-      if (matched) angleColor = '#4CAF50';
-      else if (selectedAngle && selectedAngle.id === id) angleColor = '#FF5722';
-      else if (selectedAngle && selectedAngle.pair === pair) angleColor = '#FFC107';
-
-      // Calculate ray endpoints
-      const ray1End = { x: x + 35, y: y };
-      const angleRad = (degrees * Math.PI) / 180;
-      const ray2End = { 
-        x: x + 35 * Math.cos(angleRad), 
-        y: y - 35 * Math.sin(angleRad) 
-      };
-
-      // Draw rays
-      ctx.beginPath();
-      ctx.moveTo(x, y);
-      ctx.lineTo(ray1End.x, ray1End.y);
-      ctx.strokeStyle = angleColor;
-      ctx.lineWidth = 4;
-      ctx.stroke();
-
-      ctx.beginPath();
-      ctx.moveTo(x, y);
-      ctx.lineTo(ray2End.x, ray2End.y);
-      ctx.stroke();
-
-      // Draw angle arc
-      ctx.beginPath();
-      ctx.arc(x, y, 25, 0, angleRad, false);
-      ctx.strokeStyle = angleColor;
-      ctx.lineWidth = 3;
-      ctx.stroke();
-
-      // Draw vertex point with enhanced visual feedback
-      ctx.beginPath();
-      ctx.arc(x, y, matched ? 12 : 10, 0, 2 * Math.PI);
-      ctx.fillStyle = angleColor;
-      ctx.fill();
-      ctx.strokeStyle = matched ? '#388E3C' : '#D84315';
-      ctx.lineWidth = 2;
-      ctx.stroke();
-
-      // Show degree measurement
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
-      ctx.fillRect(x - 15, y + 35, 30, 20);
-      ctx.strokeStyle = angleColor;
-      ctx.lineWidth = 1;
-      ctx.strokeRect(x - 15, y + 35, 30, 20);
-
-      ctx.fillStyle = '#2C1810';
-      ctx.font = 'bold 11px Arial';
-      ctx.textAlign = 'center';
-      ctx.fillText(`${degrees}°`, x, y + 48);
-
-      // Selection indicator
-      if (selectedAngle && selectedAngle.id === id) {
-        const time = Date.now() * 0.006;
-        const pulseRadius = 18 + Math.sin(time) * 3;
-        ctx.beginPath();
-        ctx.arc(x, y, pulseRadius, 0, 2 * Math.PI);
-        ctx.strokeStyle = '#FF5722';
-        ctx.lineWidth = 3;
-        ctx.stroke();
-      }
-
-      // Match indicator
-      if (matched) {
-        ctx.fillStyle = '#4CAF50';
-        ctx.font = 'bold 18px Arial';
-        ctx.textAlign = 'center';
-        ctx.fillText('✓', x + 25, y - 5);
-      }
-
-      // Pair indicator for potential matches
-      if (selectedAngle && selectedAngle.pair === pair && selectedAngle.id !== id && !matched) {
-        ctx.fillStyle = '#FFC107';
-        ctx.font = 'bold 16px Arial';
-        ctx.textAlign = 'center';
-        ctx.fillText('?', x + 25, y - 5);
-      }
-    });
-
-    ctx.textAlign = 'left';
-
-    // Score and progress display
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
-    ctx.fillRect(10, 10, 250, 80);
-    ctx.strokeStyle = '#9C27B0';
-    ctx.lineWidth = 2;
-    ctx.strokeRect(10, 10, 250, 80);
-
-    ctx.fillStyle = '#2C1810';
-    ctx.font = 'bold 18px Arial';
-    ctx.fillText('🧩 Congruent Angle Matching', 20, 35);
-    ctx.font = '14px Arial';
-    ctx.fillStyle = '#666';
-    ctx.fillText(`Matched Pairs: ${gameState.matchedPairs.length}/3`, 20, 55);
-    ctx.fillText(`Score: ${gameState.score}`, 20, 75);
-
-    // Instructions
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
-    ctx.fillRect(10, 320, 480, 70);
-    ctx.strokeStyle = '#9C27B0';
-    ctx.lineWidth = 2;
-    ctx.strokeRect(10, 320, 480, 70);
-
-    ctx.fillStyle = '#2C1810';
-    ctx.font = 'bold 14px Arial';
-    ctx.fillText('🎮 Click on angles to select them, then click another to match!', 20, 340);
-    ctx.font = '12px Arial';
-    ctx.fillStyle = '#666';
-    ctx.fillText('• Congruent angles have exactly the same measurement', 20, 360);
-    ctx.fillText('• Selected angle glows red, potential matches glow yellow', 20, 375);
-
-    if (selectedAngle) {
-      ctx.fillStyle = '#FF5722';
-      ctx.font = 'bold 12px Arial';
-      ctx.fillText(`Selected: ${selectedAngle.degrees}° angle - Find its match!`, 350, 360);
+    if (interactivePoints.length < 1) {
+      setInteractivePoints([movableRay]);
     }
   };
 
   const drawComplementarySupplementary = (ctx) => {
-    const relationshipData = generateRelationshipAnglesData();
-
-    relationshipData.forEach((pair, pairIndex) => {
-      const { type, angles, identified } = pair;
-      const pairColor = type === 'complementary' ? '#4CAF50' : '#2196F3';
-      const displayColor = identified ? '#4CAF50' : pairColor;
-
-      angles.forEach((angleData, angleIndex) => {
-        const { x, y, degrees } = angleData;
-        
-        // Calculate ray endpoints
-        const ray1End = { x: x + 40, y: y };
-        const angleRad = (degrees * Math.PI) / 180;
-        const ray2End = { 
-          x: x + 40 * Math.cos(angleRad), 
-          y: y - 40 * Math.sin(angleRad) 
-        };
-
-        // Draw rays
-        ctx.beginPath();
-        ctx.moveTo(x, y);
-        ctx.lineTo(ray1End.x, ray1End.y);
-        ctx.strokeStyle = displayColor;
-        ctx.lineWidth = 4;
-        ctx.stroke();
-
-        ctx.beginPath();
-        ctx.moveTo(x, y);
-        ctx.lineTo(ray2End.x, ray2End.y);
-        ctx.stroke();
-
-        // Draw angle arc
-        ctx.beginPath();
-        ctx.arc(x, y, 30, 0, angleRad, false);
-        ctx.strokeStyle = displayColor;
-        ctx.lineWidth = 3;
-        ctx.stroke();
-
-        // Draw vertex
-        ctx.beginPath();
-        ctx.arc(x, y, 10, 0, 2 * Math.PI);
-        ctx.fillStyle = displayColor;
-        ctx.fill();
-        ctx.strokeStyle = identified ? '#388E3C' : displayColor;
-        ctx.lineWidth = 2;
-        ctx.stroke();
-
-        // Show degree measurement
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
-        ctx.fillRect(x - 20, y + 40, 40, 20);
-        ctx.strokeStyle = displayColor;
-        ctx.lineWidth = 1;
-        ctx.strokeRect(x - 20, y + 40, 40, 20);
-
-        ctx.fillStyle = '#2C1810';
-        ctx.font = 'bold 12px Arial';
-        ctx.textAlign = 'center';
-        ctx.fillText(`${degrees}°`, x, y + 53);
-      });
-
-      // Draw connection line between related angles
-      if (angles.length >= 2) {
-        ctx.beginPath();
-        ctx.moveTo(angles[0].x, angles[0].y);
-        ctx.lineTo(angles[1].x, angles[1].y);
-        ctx.strokeStyle = `${displayColor}40`;
-        ctx.lineWidth = 3;
-        ctx.setLineDash([10, 5]);
-        ctx.stroke();
-        ctx.setLineDash([]);
-      }
-
-      // Show relationship label
-      if (angles.length >= 2) {
-        const midX = (angles[0].x + angles[1].x) / 2;
-        const midY = (angles[0].y + angles[1].y) / 2 - 20;
-        const sum = angles[0].degrees + angles[1].degrees;
-
-        ctx.fillStyle = identified ? 'rgba(76, 175, 80, 0.9)' : 'rgba(255, 255, 255, 0.9)';
-        ctx.fillRect(midX - 60, midY - 15, 120, 30);
-        ctx.strokeStyle = displayColor;
-        ctx.lineWidth = 2;
-        ctx.strokeRect(midX - 60, midY - 15, 120, 30);
-
-        ctx.fillStyle = identified ? 'white' : '#2C1810';
-        ctx.font = 'bold 12px Arial';
-        ctx.textAlign = 'center';
-        ctx.fillText(`${angles[0].degrees}° + ${angles[1].degrees}° = ${sum}°`, midX, midY - 5);
-        ctx.font = '10px Arial';
-        ctx.fillText(type.charAt(0).toUpperCase() + type.slice(1), midX, midY + 8);
-
-        if (identified) {
-          ctx.fillStyle = '#4CAF50';
-          ctx.font = 'bold 16px Arial';
-          ctx.fillText('✓', midX + 70, midY);
-        }
-      }
-    });
-
-    ctx.textAlign = 'left';
-
-    // Information panel
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
-    ctx.fillRect(10, 10, 300, 100);
-    ctx.strokeStyle = '#FF9800';
-    ctx.lineWidth = 2;
-    ctx.strokeRect(10, 10, 300, 100);
-
+    // Draw complementary angles (add to 90°)
     ctx.fillStyle = '#2C1810';
-    ctx.font = 'bold 18px Arial';
-    ctx.fillText('📐 Angle Relationships', 20, 35);
-    ctx.font = '14px Arial';
-    ctx.fillStyle = '#4CAF50';
-    ctx.fillText('• Complementary: Sum = 90°', 20, 55);
-    ctx.fillStyle = '#2196F3';
-    ctx.fillText('• Supplementary: Sum = 180°', 20, 75);
-    ctx.fillStyle = '#666';
-    ctx.font = '12px Arial';
-    ctx.fillText(`Score: ${gameState.score}`, 20, 95);
+    ctx.font = 'bold 16px Arial';
+    ctx.fillText('Complementary Angles (Add to 90°)', 50, 50);
 
-    // Instructions
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
-    ctx.fillRect(10, 320, 480, 70);
-    ctx.strokeStyle = '#FF9800';
-    ctx.lineWidth = 2;
-    ctx.strokeRect(10, 320, 480, 70);
+    const comp1 = { vertex: { x: 100, y: 100 }, angle1: 30, angle2: 60 };
+    const comp2 = { vertex: { x: 250, y: 100 }, angle1: 45, angle2: 45 };
 
-    ctx.fillStyle = '#2C1810';
-    ctx.font = 'bold 14px Arial';
-    ctx.fillText('🔍 Click on angle pairs to identify their relationship!', 20, 340);
-    ctx.font = '12px Arial';
-    ctx.fillStyle = '#666';
-    ctx.fillText('• Look at the sum of the two connected angles', 20, 360);
-    ctx.fillText('• Complementary pairs sum to 90°, Supplementary pairs sum to 180°', 20, 375);
-  };
-
-  const drawMissingAngle = (ctx) => {
-    const problems = generateMissingAngleData();
-
-    problems.forEach((problem, index) => {
-      const { type, knownAngle, knownAngles, missingAngle, clickArea, solved } = problem;
-      const problemColor = solved ? '#4CAF50' : '#FF9800';
-      
-      let displayText = '';
-      let subText = '';
-      
-      switch (type) {
-        case 'complementary':
-          displayText = `${knownAngle}° + ? = 90°`;
-          subText = 'Complementary Angles';
-          break;
-        case 'supplementary':
-          displayText = `${knownAngle}° + ? = 180°`;
-          subText = 'Supplementary Angles';
-          break;
-        case 'triangle':
-          displayText = `${knownAngles[0]}° + ${knownAngles[1]}° + ? = 180°`;
-          subText = 'Triangle Angle Sum';
-          break;
-        case 'linear-pair':
-          displayText = `${knownAngle}° + ? = 180°`;
-          subText = 'Linear Pair';
-          break;
-      }
-
-      // Draw problem box
-      const boxWidth = 200;
-      const boxHeight = 80;
-      
-      ctx.fillStyle = solved ? 'rgba(76, 175, 80, 0.2)' : 'rgba(255, 152, 0, 0.2)';
-      ctx.fillRect(clickArea.x - boxWidth/2, clickArea.y - boxHeight/2, boxWidth, boxHeight);
-      ctx.strokeStyle = problemColor;
+    [comp1, comp2].forEach(pair => {
+      // Draw first angle
+      ctx.strokeStyle = '#4CAF50';
       ctx.lineWidth = 3;
-      ctx.strokeRect(clickArea.x - boxWidth/2, clickArea.y - boxHeight/2, boxWidth, boxHeight);
+      ctx.beginPath();
+      ctx.arc(pair.vertex.x, pair.vertex.y, 40, 0, (pair.angle1 * Math.PI) / 180);
+      ctx.stroke();
 
-      // Problem text
-      ctx.fillStyle = problemColor;
-      ctx.font = 'bold 16px Arial';
-      ctx.textAlign = 'center';
-      ctx.fillText(displayText, clickArea.x, clickArea.y - 10);
-      
-      ctx.font = '12px Arial';
-      ctx.fillStyle = '#666';
-      ctx.fillText(subText, clickArea.x, clickArea.y + 10);
+      // Draw second angle
+      ctx.strokeStyle = '#2196F3';
+      ctx.beginPath();
+      ctx.arc(pair.vertex.x, pair.vertex.y, 40, (pair.angle1 * Math.PI) / 180, (Math.PI) / 2);
+      ctx.stroke();
 
-      // Problem number
-      ctx.fillStyle = problemColor;
-      ctx.font = 'bold 14px Arial';
-      ctx.fillText(`Problem ${index + 1}`, clickArea.x, clickArea.y - 30);
-
-      // Solution display if solved
-      if (solved) {
-        ctx.fillStyle = '#4CAF50';
-        ctx.font = 'bold 18px Arial';
-        ctx.fillText(`✓ ${missingAngle}°`, clickArea.x, clickArea.y + 30);
-      } else {
-        // Click indicator
-        const time = Date.now() * 0.005;
-        const pulseRadius = 15 + Math.sin(time + index) * 3;
-        ctx.beginPath();
-        ctx.arc(clickArea.x, clickArea.y, pulseRadius, 0, 2 * Math.PI);
-        ctx.strokeStyle = `${problemColor}60`;
-        ctx.lineWidth = 2;
-        ctx.stroke();
-      }
-
-      // Visual representation based on problem type
-      if (type === 'triangle') {
-        // Draw triangle outline
-        const triangleSize = 30;
-        const tx = clickArea.x;
-        const ty = clickArea.y + 50;
-        
-        ctx.beginPath();
-        ctx.moveTo(tx, ty - triangleSize);
-        ctx.lineTo(tx - triangleSize, ty + triangleSize);
-        ctx.lineTo(tx + triangleSize, ty + triangleSize);
-        ctx.closePath();
-        ctx.strokeStyle = problemColor;
-        ctx.lineWidth = 2;
-        ctx.stroke();
-      }
+      ctx.fillStyle = '#2C1810';
+      ctx.font = 'bold 12px Arial';
+      ctx.fillText(`${pair.angle1}°`, pair.vertex.x + 15, pair.vertex.y - 15);
+      ctx.fillText(`${pair.angle2}°`, pair.vertex.x - 25, pair.vertex.y - 15);
     });
 
-    ctx.textAlign = 'left';
-
-    // Score display
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
-    ctx.fillRect(10, 10, 200, 80);
-    ctx.strokeStyle = '#9C27B0';
-    ctx.lineWidth = 2;
-    ctx.strokeRect(10, 10, 200, 80);
-
+    // Draw supplementary angles (add to 180°)
     ctx.fillStyle = '#2C1810';
-    ctx.font = 'bold 18px Arial';
-    ctx.fillText('🧮 Missing Angles', 20, 35);
-    ctx.font = '14px Arial';
-    ctx.fillStyle = '#666';
-    const solvedCount = problems.filter(p => p.solved).length;
-    ctx.fillText(`Solved: ${solvedCount}/${problems.length}`, 20, 55);
-    ctx.fillText(`Score: ${gameState.score}`, 20, 75);
+    ctx.font = 'bold 16px Arial';
+    ctx.fillText('Supplementary Angles (Add to 180°)', 50, 250);
 
-    // Instructions
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
-    ctx.fillRect(10, 320, 480, 70);
-    ctx.strokeStyle = '#9C27B0';
-    ctx.lineWidth = 2;
-    ctx.strokeRect(10, 320, 480, 70);
+    const supp1 = { vertex: { x: 100, y: 300 }, angle1: 120, angle2: 60 };
+    const supp2 = { vertex: { x: 350, y: 300 }, angle1: 100, angle2: 80 };
 
-    ctx.fillStyle = '#2C1810';
-    ctx.font = 'bold 14px Arial';
-    ctx.fillText('🎯 Click on each problem to solve for the missing angle!', 20, 340);
-    ctx.font = '12px Arial';
-    ctx.fillStyle = '#666';
-    ctx.fillText('• Use angle relationships: complementary (90°), supplementary (180°)', 20, 360);
-    ctx.fillText('• Triangle angles always sum to 180°', 20, 375);
-  };
-
-  const drawWordProblems = (ctx) => {
-    const problemAreas = [
-      { 
-        x: 50, y: 80, width: 400, height: 80, 
-        problemId: 'problem1',
-        title: 'Ladder Problem',
-        preview: 'A ladder makes a 70° angle with the ground...',
-        solved: gameState['problem1_solved']
-      },
-      { 
-        x: 50, y: 180, width: 400, height: 80, 
-        problemId: 'problem2',
-        title: 'Intersecting Roads',
-        preview: 'Two roads intersect forming four angles...',
-        solved: gameState['problem2_solved']
-      },
-      { 
-        x: 50, y: 280, width: 400, height: 80, 
-        problemId: 'problem3',
-        title: 'Triangular Garden',
-        preview: 'A triangular garden has corners of 90° and 35°...',
-        solved: gameState['problem3_solved']
-      }
-    ];
-
-    problemAreas.forEach((area, index) => {
-      const problemColor = area.solved ? '#4CAF50' : '#2196F3';
-      
-      // Draw problem card
-      ctx.fillStyle = area.solved ? 'rgba(76, 175, 80, 0.1)' : 'rgba(33, 150, 243, 0.1)';
-      ctx.fillRect(area.x, area.y, area.width, area.height);
-      ctx.strokeStyle = problemColor;
-      ctx.lineWidth = 3;
-      ctx.strokeRect(area.x, area.y, area.width, area.height);
-
-      // Problem title
-      ctx.fillStyle = problemColor;
-      ctx.font = 'bold 18px Arial';
-      ctx.fillText(`${index + 1}. ${area.title}`, area.x + 15, area.y + 25);
-
-      // Problem preview
-      ctx.fillStyle = '#666';
-      ctx.font = '14px Arial';
-      ctx.fillText(area.preview, area.x + 15, area.y + 50);
-
-      // Status indicator
-      if (area.solved) {
-        ctx.fillStyle = '#4CAF50';
-        ctx.font = 'bold 16px Arial';
-        ctx.fillText('✓ SOLVED', area.x + area.width - 100, area.y + 35);
-      } else {
-        ctx.fillStyle = '#FF9800';
-        ctx.font = 'bold 14px Arial';
-        ctx.fillText('Click to solve →', area.x + area.width - 120, area.y + 35);
-        
-        // Pulse effect for unsolved problems
-        const time = Date.now() * 0.003;
-        const pulseRadius = 10 + Math.sin(time + index) * 3;
-        ctx.beginPath();
-        ctx.arc(area.x + area.width - 80, area.y + 35, pulseRadius, 0, 2 * Math.PI);
-        ctx.strokeStyle = `${problemColor}60`;
-        ctx.lineWidth = 2;
-        ctx.stroke();
-      }
-    });
-
-    ctx.textAlign = 'left';
-
-    // Instructions panel for word problems
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
-    ctx.fillRect(10, 320, 480, 70);
-    ctx.strokeStyle = '#FF9800';
-    ctx.lineWidth = 2;
-    ctx.strokeRect(10, 320, 480, 70);
-
-    ctx.fillStyle = '#2C1810';
-    ctx.font = 'bold 14px Arial';
-    ctx.fillText('📖 Solve these real-world problems involving angles', 20, 340);
-    ctx.font = '12px Arial';
-    ctx.fillStyle = '#666';
-    ctx.fillText('• Read each problem carefully', 20, 360);
-    ctx.fillText('• Think about the angle relationships involved', 20, 375);
-  };
-
-  const drawFinalChallenge = (ctx) => {
-    // Multi-skill challenge combining all angle concepts
-    const challengeElements = [
-      {
-        type: 'name',
-        vertex: { x: 150, y: 100, label: 'B' },
-        point1: { x: 100, y: 50, label: 'A' },
-        point2: { x: 200, y: 80, label: 'C' },
-        completed: gameState['final_naming_completed']
-      },
-      {
-        type: 'measure',
-        x: 350, y: 120,
-        angle: 75,
-        completed: gameState['final_measuring_completed']
-      },
-      {
-        type: 'construct',
-        target: 60,
-        x: 200, y: 250,
-        completed: gameState['final_construction_completed']
-      },
-      {
-        type: 'solve',
-        problem: 'Complementary: 35° + ? = 90°',
-        answer: 55,
-        x: 400, y: 280,
-        completed: gameState['final_solving_completed']
-      }
-    ];
-
-    // Challenge progress tracker
-    const completedTasks = challengeElements.filter(el => el.completed).length;
-    const totalTasks = challengeElements.length;
-
-    // Header
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
-    ctx.fillRect(10, 10, 480, 100);
-    ctx.strokeStyle = '#9C27B0';
-    ctx.lineWidth = 3;
-    ctx.strokeRect(10, 10, 480, 100);
-
-    ctx.fillStyle = '#9C27B0';
-    ctx.font = 'bold 24px Arial';
-    ctx.textAlign = 'center';
-    ctx.fillText('🏆 ANGLE MASTER FINAL CHALLENGE', 250, 40);
-    
-    ctx.font = 'bold 18px Arial';
-    ctx.fillStyle = '#2C1810';
-    ctx.fillText(`Progress: ${completedTasks}/${totalTasks} Tasks Completed`, 250, 65);
-    
-    // Progress bar
-    const progressWidth = 400;
-    const progressHeight = 20;
-    const progressX = 50;
-    const progressY = 75;
-    
-    ctx.fillStyle = '#E0E0E0';
-    ctx.fillRect(progressX, progressY, progressWidth, progressHeight);
-    ctx.fillStyle = '#4CAF50';
-    ctx.fillRect(progressX, progressY, (progressWidth * completedTasks) / totalTasks, progressHeight);
-    ctx.strokeStyle = '#388E3C';
-    ctx.lineWidth = 2;
-    ctx.strokeRect(progressX, progressY, progressWidth, progressHeight);
-
-    challengeElements.forEach((element, index) => {
-      const taskColor = element.completed ? '#4CAF50' : '#FF9800';
-      
-      switch (element.type) {
-        case 'name':
-          // Draw angle naming task
-          const { vertex, point1, point2 } = element;
-          const degrees = calculateAngle(vertex, point1, point2);
-
-          // Draw rays
-          ctx.beginPath();
-          ctx.moveTo(vertex.x, vertex.y);
-          ctx.lineTo(point1.x, point1.y);
-          ctx.strokeStyle = taskColor;
-          ctx.lineWidth = 3;
-          ctx.stroke();
-
-          ctx.beginPath();
-          ctx.moveTo(vertex.x, vertex.y);
-          ctx.lineTo(point2.x, point2.y);
-          ctx.stroke();
-
-          // Draw points with labels
-          [point1, vertex, point2].forEach(point => {
-            ctx.beginPath();
-            ctx.arc(point.x, point.y, 8, 0, 2 * Math.PI);
-            ctx.fillStyle = taskColor;
-            ctx.fill();
-            ctx.strokeStyle = '#1976D2';
-            ctx.lineWidth = 2;
-            ctx.stroke();
-
-            ctx.fillStyle = '#2C1810';
-            ctx.font = 'bold 14px Arial';
-            ctx.textAlign = 'center';
-            ctx.fillText(point.label, point.x, point.y - 15);
-          });
-
-          // Task label
-          ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
-          ctx.fillRect(vertex.x - 40, vertex.y + 30, 80, 25);
-          ctx.strokeStyle = taskColor;
-          ctx.lineWidth = 2;
-          ctx.strokeRect(vertex.x - 40, vertex.y + 30, 80, 25);
-
-          ctx.fillStyle = taskColor;
-          ctx.font = 'bold 12px Arial';
-          ctx.textAlign = 'center';
-          ctx.fillText('Task 1: NAME', vertex.x, vertex.y + 47);
-          
-          if (element.completed) {
-            ctx.fillStyle = '#4CAF50';
-            ctx.font = 'bold 16px Arial';
-            ctx.fillText('✓', vertex.x + 50, vertex.y + 10);
-          }
-          break;
-
-        case 'measure':
-          // Draw angle measuring task
-          const { x, y, angle } = element;
-          const ray1End = { x: x + 40, y: y };
-          const angleRad = (angle * Math.PI) / 180;
-          const ray2End = { 
-            x: x + 40 * Math.cos(angleRad), 
-            y: y - 40 * Math.sin(angleRad) 
-          };
-
-          // Draw rays
-          ctx.beginPath();
-          ctx.moveTo(x, y);
-          ctx.lineTo(ray1End.x, ray1End.y);
-          ctx.strokeStyle = taskColor;
-          ctx.lineWidth = 3;
-          ctx.stroke();
-
-          ctx.beginPath();
-          ctx.moveTo(x, y);
-          ctx.lineTo(ray2End.x, ray2End.y);
-          ctx.stroke();
-
-          // Draw angle arc
-          ctx.beginPath();
-          ctx.arc(x, y, 25, 0, angleRad, false);
-          ctx.strokeStyle = taskColor;
-          ctx.lineWidth = 3;
-          ctx.stroke();
-
-          // Draw vertex
-          ctx.beginPath();
-          ctx.arc(x, y, 8, 0, 2 * Math.PI);
-          ctx.fillStyle = taskColor;
-          ctx.fill();
-
-          // Task label
-          ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
-          ctx.fillRect(x - 40, y + 35, 80, 25);
-          ctx.strokeStyle = taskColor;
-          ctx.lineWidth = 2;
-          ctx.strokeRect(x - 40, y + 35, 80, 25);
-
-          ctx.fillStyle = taskColor;
-          ctx.font = 'bold 12px Arial';
-          ctx.textAlign = 'center';
-          ctx.fillText('Task 2: MEASURE', x, y + 52);
-
-          if (element.completed) {
-            ctx.fillStyle = '#4CAF50';
-            ctx.font = 'bold 16px Arial';
-            ctx.fillText('✓', x + 50, y + 10);
-            ctx.font = 'bold 14px Arial';
-            ctx.fillText(`${angle}°`, x, y - 15);
-          }
-          break;
-
-        case 'construct':
-          // Draw angle construction task
-          const constructX = element.x;
-          const constructY = element.y;
-          const targetAngle = element.target;
-
-          // Draw construction base
-          ctx.beginPath();
-          ctx.moveTo(constructX, constructY);
-          ctx.lineTo(constructX + 50, constructY);
-          ctx.strokeStyle = '#2196F3';
-          ctx.lineWidth = 3;
-          ctx.stroke();
-
-          // Draw target angle indicator
-          const targetRad = (targetAngle * Math.PI) / 180;
-          ctx.beginPath();
-          ctx.arc(constructX, constructY, 35, 0, targetRad, false);
-          ctx.strokeStyle = taskColor;
-          ctx.lineWidth = 3;
-          ctx.setLineDash([5, 5]);
-          ctx.stroke();
-          ctx.setLineDash([]);
-
-          // Draw vertex
-          ctx.beginPath();
-          ctx.arc(constructX, constructY, 8, 0, 2 * Math.PI);
-          ctx.fillStyle = taskColor;
-          ctx.fill();
-
-          // Task label
-          ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
-          ctx.fillRect(constructX - 50, constructY + 35, 100, 25);
-          ctx.strokeStyle = taskColor;
-          ctx.lineWidth = 2;
-          ctx.strokeRect(constructX - 50, constructY + 35, 100, 25);
-
-          ctx.fillStyle = taskColor;
-          ctx.font = 'bold 12px Arial';
-          ctx.textAlign = 'center';
-          ctx.fillText(`Task 3: BUILD ${targetAngle}°`, constructX, constructY + 52);
-
-          if (element.completed) {
-            ctx.fillStyle = '#4CAF50';
-            ctx.font = 'bold 16px Arial';
-            ctx.fillText('✓', constructX + 60, constructY + 10);
-          }
-          break;
-
-        case 'solve':
-          // Draw problem solving task
-          const solveX = element.x;
-          const solveY = element.y;
-
-          // Problem box
-          ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
-          ctx.fillRect(solveX - 80, solveY - 30, 160, 60);
-          ctx.strokeStyle = taskColor;
-          ctx.lineWidth = 2;
-          ctx.strokeRect(solveX - 80, solveY - 30, 160, 60);
-
-          ctx.fillStyle = taskColor;
-          ctx.font = 'bold 12px Arial';
-          ctx.textAlign = 'center';
-          ctx.fillText('Task 4: SOLVE', solveX, solveY - 15);
-          ctx.font = '11px Arial';
-          ctx.fillText(element.problem, solveX, solveY);
-
-          if (element.completed) {
-            ctx.fillStyle = '#4CAF50';
-            ctx.font = 'bold 14px Arial';
-            ctx.fillText(`✓ Answer: ${element.answer}°`, solveX, solveY + 15);
-          }
-          break;
-      }
-    });
-
-    ctx.textAlign = 'left';
-
-    // Completion celebration
-    if (completedTasks === totalTasks) {
-      // Fireworks effect
-      const time = Date.now() * 0.01;
-      for (let i = 0; i < 6; i++) {
-        const angle = (i * Math.PI * 2) / 6 + time;
-        const distance = 50 + Math.sin(time * 2 + i) * 20;
-        const sparkleX = 250 + Math.cos(angle) * distance;
-        const sparkleY = 200 + Math.sin(angle) * distance;
-        
-        ctx.beginPath();
-        ctx.arc(sparkleX, sparkleY, 3, 0, 2 * Math.PI);
-        ctx.fillStyle = `hsl(${(time * 50 + i * 60) % 360}, 70%, 60%)`;
-        ctx.fill();
-      }
-
-      // Victory message
-      ctx.fillStyle = 'rgba(255, 215, 0, 0.9)';
-      ctx.fillRect(150, 180, 200, 60);
+    [supp1, supp2].forEach(pair => {
+      // Draw angles
       ctx.strokeStyle = '#FF9800';
       ctx.lineWidth = 3;
-      ctx.strokeRect(150, 180, 200, 60);
+      ctx.beginPath();
+      ctx.arc(pair.vertex.x, pair.vertex.y, 40, 0, (pair.angle1 * Math.PI) / 180);
+      ctx.stroke();
+
+      ctx.strokeStyle = '#9C27B0';
+      ctx.beginPath();
+      ctx.arc(pair.vertex.x, pair.vertex.y, 40, (pair.angle1 * Math.PI) / 180, Math.PI);
+      ctx.stroke();
 
       ctx.fillStyle = '#2C1810';
+      ctx.font = 'bold 12px Arial';
+      ctx.fillText(`${pair.angle1}°`, pair.vertex.x + 15, pair.vertex.y - 15);
+      ctx.fillText(`${pair.angle2}°`, pair.vertex.x - 35, pair.vertex.y - 15);
+    });
+  };
+
+  const drawVerticalAngles = (ctx) => {
+    const intersection = { x: 250, y: 200 };
+
+    // Draw intersecting lines
+    ctx.strokeStyle = '#2196F3';
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.moveTo(150, 150);
+    ctx.lineTo(350, 250);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(150, 250);
+    ctx.lineTo(350, 150);
+    ctx.stroke();
+
+    // Draw intersection point
+    ctx.beginPath();
+    ctx.arc(intersection.x, intersection.y, 10, 0, 2 * Math.PI);
+    ctx.fillStyle = '#FF5722';
+    ctx.fill();
+
+    // Highlight vertical angle pairs
+    ctx.strokeStyle = '#4CAF50';
+    ctx.lineWidth = 6;
+    ctx.beginPath();
+    ctx.arc(intersection.x, intersection.y, 30, 0, Math.PI / 4);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.arc(intersection.x, intersection.y, 30, Math.PI, Math.PI + Math.PI / 4);
+    ctx.stroke();
+
+    ctx.strokeStyle = '#FF9800';
+    ctx.beginPath();
+    ctx.arc(intersection.x, intersection.y, 40, Math.PI / 4, 3 * Math.PI / 4);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.arc(intersection.x, intersection.y, 40, 5 * Math.PI / 4, 7 * Math.PI / 4);
+    ctx.stroke();
+
+    // Labels
+    ctx.fillStyle = '#2C1810';
+    ctx.font = 'bold 14px Arial';
+    ctx.fillText('Vertical angles are equal!', 50, 50);
+    ctx.fillStyle = '#4CAF50';
+    ctx.fillText('Green angles = 45°', 50, 350);
+    ctx.fillStyle = '#FF9800';
+    ctx.fillText('Orange angles = 135°', 200, 350);
+  };
+
+  const drawAdjacentAngles = (ctx) => {
+    const vertex = { x: 200, y: 200 };
+
+    // Draw three rays forming adjacent angles
+    ctx.strokeStyle = '#2196F3';
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.moveTo(vertex.x, vertex.y);
+    ctx.lineTo(vertex.x + 100, vertex.y);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(vertex.x, vertex.y);
+    ctx.lineTo(vertex.x + 70, vertex.y - 70);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(vertex.x, vertex.y);
+    ctx.lineTo(vertex.x, vertex.y - 100);
+    ctx.stroke();
+
+    // Highlight adjacent angles
+    ctx.strokeStyle = '#4CAF50';
+    ctx.lineWidth = 5;
+    ctx.beginPath();
+    ctx.arc(vertex.x, vertex.y, 40, -Math.PI / 4, 0);
+    ctx.stroke();
+
+    ctx.strokeStyle = '#FF9800';
+    ctx.beginPath();
+    ctx.arc(vertex.x, vertex.y, 50, -Math.PI / 2, -Math.PI / 4);
+    ctx.stroke();
+
+    // Draw vertex
+    ctx.beginPath();
+    ctx.arc(vertex.x, vertex.y, 12, 0, 2 * Math.PI);
+    ctx.fillStyle = '#FF5722';
+    ctx.fill();
+
+    // Labels
+    ctx.fillStyle = '#2C1810';
+    ctx.font = 'bold 16px Arial';
+    ctx.fillText('Adjacent Angles', 50, 50);
+    ctx.font = 'bold 14px Arial';
+    ctx.fillText('• Share a vertex', 50, 350);
+    ctx.fillText('• Share a common side', 50, 370);
+    ctx.fillText('• Do not overlap', 50, 390);
+  };
+
+  const drawAngleBisector = (ctx) => {
+    const vertex = { x: 250, y: 250 };
+    const ray1End = { x: 150, y: 150 };
+    const ray2End = { x: 350, y: 150 };
+    const bisectorEnd = interactivePoints.length > 0 ? interactivePoints[0] : { x: 250, y: 150, id: 'bisector' };
+
+    // Calculate if bisector is correct
+    const angle1 = Math.atan2(ray1End.y - vertex.y, ray1End.x - vertex.x);
+    const angle2 = Math.atan2(ray2End.y - vertex.y, ray2End.x - vertex.x);
+    const bisectorAngle = Math.atan2(bisectorEnd.y - vertex.y, bisectorEnd.x - vertex.x);
+    const correctBisectorAngle = (angle1 + angle2) / 2;
+
+    const isCorrect = Math.abs(bisectorAngle - correctBisectorAngle) < 0.1;
+
+    // Draw main rays
+    ctx.strokeStyle = '#2196F3';
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.moveTo(vertex.x, vertex.y);
+    ctx.lineTo(ray1End.x, ray1End.y);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(vertex.x, vertex.y);
+    ctx.lineTo(ray2End.x, ray2End.y);
+    ctx.stroke();
+
+    // Draw bisector
+    ctx.strokeStyle = isCorrect ? '#4CAF50' : '#FF5722';
+    ctx.lineWidth = 4;
+    ctx.setLineDash([5, 5]);
+    ctx.beginPath();
+    ctx.moveTo(vertex.x, vertex.y);
+    ctx.lineTo(bisectorEnd.x, bisectorEnd.y);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // Draw vertex
+    ctx.beginPath();
+    ctx.arc(vertex.x, vertex.y, 12, 0, 2 * Math.PI);
+    ctx.fillStyle = '#FF5722';
+    ctx.fill();
+
+    // Draw draggable point
+    ctx.beginPath();
+    ctx.arc(bisectorEnd.x, bisectorEnd.y, 10, 0, 2 * Math.PI);
+    ctx.fillStyle = isCorrect ? '#4CAF50' : '#FF5722';
+    ctx.fill();
+
+    // Labels
+    ctx.fillStyle = '#2C1810';
+    ctx.font = 'bold 16px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText(isCorrect ? 'Perfect Bisector! ✓' : 'Drag to bisect the angle', 250, 50);
+
+    if (interactivePoints.length < 1) {
+      setInteractivePoints([bisectorEnd]);
+    }
+  };
+
+  const drawMissingAngles = (ctx) => {
+    // Problem 1: Complementary angles
+    ctx.fillStyle = '#2C1810';
+    ctx.font = 'bold 14px Arial';
+    ctx.fillText('Problem 1: If angle A = 35°, find its complement', 50, 50);
+
+    const vertex1 = { x: 150, y: 100 };
+    ctx.strokeStyle = '#4CAF50';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.arc(vertex1.x, vertex1.y, 30, 0, (35 * Math.PI) / 180);
+    ctx.stroke();
+
+    ctx.strokeStyle = '#FF5722';
+    ctx.setLineDash([3, 3]);
+    ctx.beginPath();
+    ctx.arc(vertex1.x, vertex1.y, 30, (35 * Math.PI) / 180, Math.PI / 2);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    ctx.fillStyle = '#2C1810';
+    ctx.font = 'bold 12px Arial';
+    ctx.fillText('35°', vertex1.x + 15, vertex1.y - 10);
+    ctx.fillText('?°', vertex1.x - 20, vertex1.y - 10);
+
+    // Problem 2: Supplementary angles
+    ctx.font = 'bold 14px Arial';
+    ctx.fillText('Problem 2: If angle B = 110°, find its supplement', 50, 200);
+
+    const vertex2 = { x: 150, y: 250 };
+    ctx.strokeStyle = '#2196F3';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.arc(vertex2.x, vertex2.y, 40, 0, (110 * Math.PI) / 180);
+    ctx.stroke();
+
+    ctx.strokeStyle = '#FF5722';
+    ctx.setLineDash([3, 3]);
+    ctx.beginPath();
+    ctx.arc(vertex2.x, vertex2.y, 40, (110 * Math.PI) / 180, Math.PI);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    ctx.fillStyle = '#2C1810';
+    ctx.font = 'bold 12px Arial';
+    ctx.fillText('110°', vertex2.x + 20, vertex2.y - 10);
+    ctx.fillText('?°', vertex2.x - 30, vertex2.y - 10);
+
+    // Show answers
+    ctx.fillStyle = '#666';
+    ctx.font = 'bold 12px Arial';
+    ctx.fillText('Click to reveal answers', 300, 350);
+  };
+
+  const drawAngleChallenge = (ctx) => {
+    // Challenge overview
+    ctx.fillStyle = '#2C1810';
+    ctx.font = 'bold 18px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText('🏆 ANGLE MASTER CHALLENGE 🏆', 250, 50);
+
+    ctx.font = 'bold 14px Arial';
+    ctx.fillText('Complete all tasks to become an Angle Master!', 250, 75);
+
+    // Task checklist
+    const tasks = [
+      'Name 3 angles correctly',
+      'Measure 5 angles within 10°',
+      'Classify 4 angle types',
+      'Find 2 complementary pairs',
+      'Identify 2 vertical angle pairs'
+    ];
+
+    ctx.textAlign = 'left';
+    ctx.font = 'bold 12px Arial';
+    ctx.fillText('Challenge Tasks:', 50, 120);
+
+    tasks.forEach((task, index) => {
+      const completed = Math.random() > 0.5; // Random completion for demo
+      ctx.fillStyle = completed ? '#4CAF50' : '#666';
+      ctx.fillText(`${completed ? '✓' : '○'} ${task}`, 50, 140 + index * 20);
+    });
+
+    // Progress
+    const progress = 3; // Example progress
+    ctx.fillStyle = '#2196F3';
+    ctx.fillRect(50, 260, (progress / 5) * 200, 20);
+    ctx.strokeStyle = '#1976D2';
+    ctx.strokeRect(50, 260, 200, 20);
+
+    ctx.fillStyle = '#2C1810';
+    ctx.font = 'bold 14px Arial';
+    ctx.fillText(`Progress: ${progress}/5 tasks completed`, 50, 300);
+
+    if (progress === 5) {
+      ctx.fillStyle = '#4CAF50';
       ctx.font = 'bold 20px Arial';
       ctx.textAlign = 'center';
-      ctx.fillText('🎉 ANGLE MASTER! 🎉', 250, 205);
-      ctx.font = '14px Arial';
-      ctx.fillText('All tasks completed!', 250, 225);
-    } else {
-      // Instructions for remaining tasks
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
-      ctx.fillRect(10, 320, 480, 70);
-      ctx.strokeStyle = '#9C27B0';
-      ctx.lineWidth = 2;
-      ctx.strokeRect(10, 320, 480, 70);
-
-      ctx.fillStyle = '#2C1810';
-      ctx.font = 'bold 14px Arial';
-      ctx.fillText('🎯 Complete all 4 tasks to become an Angle Master!', 20, 340);
-      ctx.font = '12px Arial';
-      ctx.fillStyle = '#666';
-      ctx.fillText('• Click on angles to name them  • Estimate measurements  • Construct angles  • Solve problems', 20, 360);
-      ctx.fillText(`Tasks remaining: ${totalTasks - completedTasks}`, 20, 375);
+      ctx.fillText('🎉 CHALLENGE COMPLETE! 🎉', 250, 350);
+      ctx.fillText('You are now an ANGLE MASTER!', 250, 375);
     }
   };
 
   const drawCompletion = (ctx) => {
-    // Graduation celebration scene
     const centerX = 250;
     const centerY = 200;
-    const time = Date.now() * 0.003;
-
-    // Animated background elements
-    for (let i = 0; i < 12; i++) {
-      const angle = (i * Math.PI * 2) / 12 + time;
-      const distance = 100 + Math.sin(time * 2 + i) * 30;
-      const elementX = centerX + Math.cos(angle) * distance;
-      const elementY = centerY + Math.sin(angle) * distance;
-      
-      // Floating geometric symbols
-      const symbols = ['∠', '°', '📐', '✓', '🎯', '⭐'];
-      const symbol = symbols[i % symbols.length];
-      
-      ctx.fillStyle = `hsl(${(time * 30 + i * 30) % 360}, 60%, 50%)`;
-      ctx.font = 'bold 20px Arial';
-      ctx.textAlign = 'center';
-      ctx.save();
-      ctx.globalAlpha = 0.7 + Math.sin(time * 3 + i) * 0.3;
-      ctx.fillText(symbol, elementX, elementY);
-      ctx.restore();
-    }
 
     // Central trophy/medal
     ctx.beginPath();
@@ -2161,87 +1202,88 @@ const AngleMasteryTutorial = () => {
     ctx.textAlign = 'center';
     ctx.fillText('🏆', centerX, centerY - 10);
 
-    // Angle Master title
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
-    ctx.fillRect(centerX - 120, centerY + 60, 240, 80);
-    ctx.strokeStyle = '#FFD700';
-    ctx.lineWidth = 3;
-    ctx.strokeRect(centerX - 120, centerY + 60, 240, 80);
-
-    ctx.fillStyle = '#2C1810';
-    ctx.font = 'bold 24px Arial';
-    ctx.textAlign = 'center';
-    ctx.fillText('ANGLE MASTER', centerX, centerY + 85);
-    ctx.font = '16px Arial';
-    ctx.fillStyle = '#666';
-    ctx.fillText('Certified Geometry Expert', centerX, centerY + 110);
-    ctx.font = 'bold 18px Arial';
-    ctx.fillStyle = '#FF9800';
-    ctx.fillText(`Final Score: ${gameState.score}`, centerX, centerY + 130);
-
-    // Achievement badges
-    const achievements = [
-      { name: 'Angle Namer', icon: '📝', x: centerX - 150, y: centerY + 180 },
-      { name: 'Protractor Pro', icon: '📐', x: centerX - 50, y: centerY + 180 },
-      { name: 'Constructor', icon: '🔧', x: centerX + 50, y: centerY + 180 },
-      { name: 'Problem Solver', icon: '🧮', x: centerX + 150, y: centerY + 180 }
-    ];
-
-    achievements.forEach((achievement, index) => {
-      // Badge background
-      ctx.beginPath();
-      ctx.arc(achievement.x, achievement.y, 25, 0, 2 * Math.PI);
-      ctx.fillStyle = '#4CAF50';
-      ctx.fill();
-      ctx.strokeStyle = '#388E3C';
-      ctx.lineWidth = 3;
-      ctx.stroke();
-
-      // Badge icon
-      ctx.fillStyle = 'white';
-      ctx.font = 'bold 20px Arial';
-      ctx.textAlign = 'center';
-      ctx.fillText(achievement.icon, achievement.x, achievement.y + 5);
-
-      // Badge name
-      ctx.fillStyle = '#2C1810';
-      ctx.font = 'bold 10px Arial';
-      ctx.fillText(achievement.name, achievement.x, achievement.y + 45);
-    });
-
-    // Celebration message
+    // Completion message
     ctx.fillStyle = '#4CAF50';
     ctx.font = 'bold 18px Arial';
     ctx.textAlign = 'center';
-    ctx.fillText('🎉 Congratulations! You have mastered the art of angles! 🎉', centerX, 50);
+    ctx.fillText('🎉 Congratulations! You are now an Angle Master! 🎉', centerX, 50);
 
-    // Stats summary
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
-    ctx.fillRect(10, 10, 200, 120);
-    ctx.strokeStyle = '#4CAF50';
-    ctx.lineWidth = 2;
-    ctx.strokeRect(10, 10, 200, 120);
+    // Achievement badges
+    const badges = ['Angle Namer', 'Angle Measurer', 'Type Classifier', 'Relationship Expert'];
+    badges.forEach((badge, index) => {
+      const x = 50 + (index * 100);
+      const y = 320;
+      
+      ctx.fillStyle = '#2196F3';
+      ctx.fillRect(x, y, 90, 30);
+      ctx.fillStyle = 'white';
+      ctx.font = 'bold 10px Arial';
+      ctx.textAlign = 'center';
+      ctx.fillText(badge, x + 45, y + 20);
+    });
 
-    ctx.fillStyle = '#2C1810';
-    ctx.font = 'bold 16px Arial';
     ctx.textAlign = 'left';
-    ctx.fillText('📊 Your Journey:', 20, 35);
-    ctx.font = '14px Arial';
-    ctx.fillStyle = '#666';
-    ctx.fillText(`✓ Total Score: ${gameState.score}`, 20, 55);
-    ctx.fillText(`✓ Correct Answers: ${gameState.correctAnswers}`, 20, 75);
-    ctx.fillText(`✓ Total Attempts: ${gameState.attempts}`, 20, 95);
-    
-    const accuracy = gameState.attempts > 0 ? Math.round((gameState.correctAnswers / gameState.attempts) * 100) : 0;
-    ctx.fillText(`✓ Accuracy: ${accuracy}%`, 20, 115);
+  };
 
-    ctx.textAlign = 'center';
+  // Mouse interaction handlers
+  const handleMouseDown = (event) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    
+    const rect = canvas.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
+
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    const scaledX = x * scaleX;
+    const scaledY = y * scaleY;
+
+    // Handle construction and bisector mode dragging
+    if (currentTutorial.content === 'angle-construction' || 
+        currentTutorial.content === 'angle-bisector' ||
+        currentTutorial.content === 'angle-basics') {
+      
+      interactivePoints.forEach(point => {
+        const distance = Math.sqrt((scaledX - point.x) ** 2 + (scaledY - point.y) ** 2);
+        if (distance < 20) {
+          setDraggedPoint(point.id);
+        }
+      });
+    }
+  };
+
+  const handleMouseMove = (event) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    
+    const rect = canvas.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
+
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    const scaledX = x * scaleX;
+    const scaledY = y * scaleY;
+
+    if (draggedPoint) {
+      setInteractivePoints(points =>
+        points.map(point =>
+          point.id === draggedPoint ? { ...point, x: scaledX, y: scaledY } : point
+        )
+      );
+    }
+  };
+
+  const handleMouseUp = () => {
+    setDraggedPoint(null);
   };
 
   // Navigation and control functions
   const nextStep = () => {
     if (currentStep < tutorialSteps.length - 1) {
       setCurrentStep(currentStep + 1);
+      setCharacterSide(tutorialSteps[currentStep + 1].characterSide);
       setInteractivePoints([]);
       setGameState(prev => ({ ...prev, selectedAngle: null }));
     }
@@ -2250,6 +1292,7 @@ const AngleMasteryTutorial = () => {
   const prevStep = () => {
     if (currentStep > 0) {
       setCurrentStep(currentStep - 1);
+      setCharacterSide(tutorialSteps[currentStep - 1].characterSide);
       setInteractivePoints([]);
       setGameState(prev => ({ ...prev, selectedAngle: null }));
     }
@@ -2277,17 +1320,12 @@ const AngleMasteryTutorial = () => {
     setShowHint(!showHint);
   };
 
-  // Effect hooks for initialization and updates
+  // Effect hooks
   useEffect(() => {
     setInteractivePoints([]);
     setDraggedPoint(null);
     
     const timer = setTimeout(() => {
-      // Initialize points for specific steps
-      if (currentTutorial.content === 'angle-construction') {
-        setInteractivePoints(getConstructionPoints());
-      }
-      
       drawCanvas();
     }, 100);
     
@@ -2298,230 +1336,512 @@ const AngleMasteryTutorial = () => {
     drawCanvas();
   }, [currentTutorial, interactivePoints, gameState, draggedPoint]);
 
-  // Animation loop for dynamic effects
-  useEffect(() => {
-    const interval = setInterval(() => {
-      if (currentTutorial.content === 'introduction' || 
-          currentTutorial.content === 'angle-construction' ||
-          currentTutorial.content === 'congruent-matching' ||
-          currentTutorial.content === 'missing-angle' ||
-          currentTutorial.content === 'final-challenge' ||
-          currentTutorial.content === 'completion') {
-        drawCanvas();
-      }
-    }, 100);
-
-    return () => clearInterval(interval);
-  }, [currentTutorial.content, interactivePoints, gameState]);
-
-  // Event listeners setup
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    canvas.addEventListener('click', handleCanvasClick);
-    canvas.addEventListener('mousedown', handleMouseDown);
-    canvas.addEventListener('mousemove', handleMouseMove);
-    canvas.addEventListener('mouseup', handleMouseUp);
-
-    return () => {
-      canvas.removeEventListener('click', handleCanvasClick);
-      canvas.removeEventListener('mousedown', handleMouseDown);
-      canvas.removeEventListener('mousemove', handleMouseMove);
-      canvas.removeEventListener('mouseup', handleMouseUp);
-    };
-  }, [currentTutorial, draggedPoint]);
-
-  // Main component render using Castle 1 layout structure
   return (
     <div className={styles.castleContainer}>
-      {/* Header - same as Castle 1 */}
+      {/* Header */}
       <div className={styles.castleHeader}>
-        <h1 className={styles.castleTitle}>
-          🏰 Castle 2: Tower of Angles
-        </h1>
-        <div className={styles.castleProgressInfo}>
-          <div className={styles.castleProgressLabel}>Step</div>
-          <div className={styles.castleProgressNumbers}>
-            {currentStep + 1}/{tutorialSteps.length}
-          </div>
-        </div>
-      </div>
-
-      {/* Progress bar - same as Castle 1 */}
-      <div className={styles.castleProgressContainer}>
-        <div className={styles.castleProgressBar}>
-          <div 
-            className={styles.castleProgressFill} 
-            style={{ width: `${((currentStep + 1) / tutorialSteps.length) * 100}%` }}
-          ></div>
-        </div>
-        <div className={styles.castleProgressText}>
-          Progress: {Math.round(((currentStep + 1) / tutorialSteps.length) * 100)}%
-        </div>
-      </div>
-
-      {/* Main content area - same layout as Castle 1 */}
-      <div className={styles.castleMainContent}>
-        
-        {/* Left side - Character and info */}
-        <div className={styles.castleLeftPanel}>
-          {showCharacter && (
-            <div className={styles.castleCharacter}>
-              <div className={styles.castleCharacterAvatar}>
-                🧙‍♂️
-              </div>
-              <div className={styles.castleCharacterName}>
-                Master Protractor
-              </div>
-              <div className={styles.castleCharacterTitle}>
-                Guardian of Angular Wisdom
-              </div>
-            </div>
-          )}
-
-          {/* Lesson info */}
-          <div className={styles.castleLessonInfo}>
-            <h2 className={styles.castleLessonTitle}>
-              {currentTutorial.title}
-              {currentTutorial.interactive && (
-                <span className={styles.castleInteractiveBadge}>
-                  <Zap size={14} />
-                  Interactive
-                </span>
-              )}
-            </h2>
-            
-            <div className={styles.castleLessonContent}>
-              <p className={styles.castleDialogue}>
-                {currentTutorial.dialogue}
-              </p>
-              
-              {currentTutorial.instruction && (
-                <div className={styles.castleInstruction}>
-                  <Target className={styles.castleInstructionIcon} />
-                  <div>
-                    <strong>Your Quest:</strong>
-                    <p>{currentTutorial.instruction}</p>
-                  </div>
-                </div>
-              )}
-              
-              {currentTutorial.hint && showHint && (
-                <div className={styles.castleHint}>
-                  <span className={styles.castleHintIcon}>💡</span>
-                  <div>
-                    <strong>Hint:</strong>
-                    <p>{currentTutorial.hint}</p>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Score display */}
-          <div className={styles.castleScorePanel}>
-            <div className={styles.castleScoreItem}>
-              <Award className={styles.castleScoreIcon} />
+        <div className={styles.castleHeaderContent}>
+          <div className={styles.castleHeaderFlex}>
+            <div className={styles.castleHeaderLeft}>
+              <div className={styles.castleEmoji}>🏰</div>
               <div>
-                <div className={styles.castleScoreLabel}>Score</div>
-                <div className={styles.castleScoreValue}>{gameState.score}</div>
+                <h1 className={styles.castleTitle}>Euclidean Spire</h1>
+                <p className={styles.castleSubtitle}>Introduction to Basic Geometry</p>
               </div>
             </div>
-            <div className={styles.castleScoreItem}>
-              <Target className={styles.castleScoreIcon} />
-              <div>
-                <div className={styles.castleScoreLabel}>Accuracy</div>
-                <div className={styles.castleScoreValue}>
-                  {gameState.attempts > 0 ? Math.round((gameState.correctAnswers / gameState.attempts) * 100) : 0}%
-                </div>
-              </div>
+            <div className={styles.castleProgressInfo}>
+              <div className={styles.castleProgressLabel}>Progress</div>
+              <div className={styles.castleProgressNumbers}>{currentStep + 1}/{tutorialSteps.length}</div>
             </div>
           </div>
         </div>
 
-        {/* Right side - Canvas area */}
-        <div className={styles.castleRightPanel}>
-          <div className={styles.castleCanvasContainer}>
-            <canvas 
-              ref={canvasRef} 
-              className={styles.castleCanvas}
-              width={500}
-              height={400}
+        {/* Progress Bar */}
+        <div className={styles.castleProgressContainer}>
+          <div className={styles.castleProgressBar}>
+            <div 
+              className={styles.castleProgressFill}
+              style={{ width: `${((currentStep + 1) / tutorialSteps.length) * 100}%` }}
             />
           </div>
         </div>
       </div>
 
-      {/* Bottom controls - same as Castle 1 */}
-      <div className={styles.castleControls}>
-        <div className={styles.castleNavigationButtons}>
-          <button 
-            className={`${styles.castleButton} ${styles.castleButtonSecondary}`}
-            onClick={prevStep}
-            disabled={currentStep === 0}
-          >
-            <ChevronLeft size={20} />
-            Previous
-          </button>
-          
-          <div className={styles.castleStepIndicator}>
-            {tutorialSteps.map((_, index) => (
-              <button
-                key={index}
-                className={`${styles.castleStepDot} ${
-                  index === currentStep ? styles.castleStepDotActive : ''
-                } ${index < currentStep ? styles.castleStepDotCompleted : ''}`}
-                onClick={() => setCurrentStep(index)}
-                aria-label={`Go to step ${index + 1}`}
-              />
-            ))}
+      {/* Main Content */}
+      <div className={styles.castleMain}>
+        <div className={styles.castleContentWrapper}>
+          {/* Tutorial Area */}
+          <div className={styles.castleTutorialArea}>
+            {/* Character Dialogue */}
+            <div className={`${styles.castleCharacterSection} ${styles[characterSide]}`}>
+              {showCharacter && (
+                <div className={styles.castleCharacterContent}>
+                  {/* Character Avatar */}
+                  <div className={styles.castleCharacterAvatarSection}>
+                    <div className={styles.castleCharacterAvatar}>
+                      🧙‍♂️
+                    </div>
+                    <h3 className={styles.castleCharacterName}>Master Euclid</h3>
+                    <p className={styles.castleCharacterRole}>Guardian of Geometric Wisdom</p>
+                  </div>
+
+                  {/* Dialogue Box */}
+                  <div className={styles.castleDialogueBox}>
+                    <div className={characterSide === 'right' ? styles.castleDialogueArrowRight : styles.castleDialogueArrowLeft} />
+                    
+                    <h4 className={styles.castleDialogueTitle}>{currentTutorial.title}</h4>
+                    <p className={styles.castleDialogueText}>{currentTutorial.dialogue}</p>
+                    
+                    {currentTutorial.instruction && (
+                      <div className={styles.castleInstructionBox}>
+                        <p className={styles.castleInstructionText}>
+                          📝 {currentTutorial.instruction}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Interactive Canvas Area */}
+            <div className={`${styles.castleCanvasSection} ${characterSide === 'right' ? styles.left : styles.right}`}>
+              <div className={styles.castleCanvasContent}>
+                <div className={styles.castleCanvasHeader}>
+                  <h3 className={styles.castleCanvasTitle}>Interactive Learning Canvas</h3>
+                  {currentTutorial.interactive && (
+                    <button
+                      onClick={resetTutorial}
+                      className={styles.castleResetButton}
+                    >
+                      <RotateCcw className={styles.icon16} />
+                      Reset
+                    </button>
+                  )}
+                </div>
+
+                <div className={styles.castleCanvasWrapper}>
+                  <canvas
+                    ref={canvasRef}
+                    width={500}
+                    height={400}
+                    className={styles.castleCanvas}
+                    onClick={handleCanvasClick}
+                    onMouseDown={handleMouseDown}
+                    onMouseMove={handleMouseMove}
+                    onMouseUp={handleMouseUp}
+                  />
+                </div>
+
+                {currentTutorial.content === 'completion' && (
+                  <div className={styles.castleCompletionSection}>
+                    <div className={styles.castleCompletionEmoji}>🏆</div>
+                    <h3 className={styles.castleCompletionTitle}>Castle Conquered!</h3>
+                    <p className={styles.castleCompletionText}>You've completed the Euclidean Spire tutorial!</p>
+                    <div className={styles.castleCompletionBadges}>
+                      <span className={styles.castleBadgeGreen}>+150 XP</span>
+                      <span className={styles.castleBadgeBlue}>Basic Geometry Mastered</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
-          
-          <button 
-            className={`${styles.castleButton} ${styles.castleButtonPrimary}`}
-            onClick={nextStep}
-            disabled={currentStep === tutorialSteps.length - 1}
-          >
-            Next
-            <ChevronRight size={20} />
-          </button>
-        </div>
-        
-        <div className={styles.castleActionButtons}>
-          <button 
-            className={`${styles.castleButton} ${styles.castleButtonSecondary}`}
-            onClick={toggleHint}
-          >
-            💡 {showHint ? 'Hide' : 'Show'} Hint
-          </button>
-          
-          <button 
-            className={`${styles.castleButton} ${styles.castleButtonSecondary}`}
-            onClick={resetTutorial}
-          >
-            <RotateCcw size={16} />
-            Reset
-          </button>
-          
-          <button 
-            className={`${styles.castleButton} ${styles.castleButtonSecondary}`}
-            onClick={() => window.location.href = '/world-map'}
-          >
-            <Home size={16} />
-            World Map
-          </button>
+
+          {/* Navigation Controls */}
+          <div className={styles.castleNavigation}>
+            <div className={styles.castleNavigationFlex}>
+              <button
+                onClick={prevStep}
+                disabled={currentStep === 0}
+                className={styles.castleNavButton}
+              >
+                <ChevronLeft className={styles.icon20} />
+                Previous
+              </button>
+
+              <div className={styles.castleNavCenter}>
+                <button 
+                  onClick={() => window.location.href = '/world-map'}
+                  className={styles.castleMapButton}
+                >
+                  <Home className={styles.icon16} />
+                  Map
+                </button>
+                <span className={styles.castleStepText}>
+                  Step {currentStep + 1} of {tutorialSteps.length}
+                </span>
+              </div>
+
+              <button
+                onClick={nextStep}
+                disabled={currentStep === tutorialSteps.length - 1}
+                className={styles.castleNavButton}
+              >
+                {currentStep === tutorialSteps.length - 1 ? 'Complete' : 'Next'}
+                <ChevronRight className={styles.icon20} />
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Feedback toast - same as Castle 1 */}
-      {showFeedback && (
-        <div className={styles.castleFeedback}>
-          {feedbackMessage}
+      {/* Achievement Popup */}
+      {currentTutorial.content === 'completion' && (
+        <div className={styles.castleAchievementOverlay}>
+          <div className={styles.castleAchievementModal}>
+            <div className={styles.castleAchievementContent}>
+              <div className={styles.castleAchievementEmoji}>🏆</div>
+              <h2 className={styles.castleAchievementTitle}>Castle Conquered!</h2>
+              <p className={styles.castleAchievementSubtitle}>You've mastered the fundamentals of geometry!</p>
+              
+              <div className={styles.castleRewardsSection}>
+                <h3 className={styles.castleRewardsTitle}>Rewards Earned:</h3>
+                <div className={styles.castleRewardsList}>
+                  <div className={styles.castleRewardItem}>
+                    <span className={styles.castleRewardLabel}>Experience Points</span>
+                    <span className={styles.castleRewardValueGreen}>+150 XP</span>
+                  </div>
+                  <div className={styles.castleRewardItem}>
+                    <span className={styles.castleRewardLabel}>Achievement</span>
+                    <span className={styles.castleRewardValueBlue}>Geometry Novice</span>
+                  </div>
+                  <div className={styles.castleRewardItem}>
+                    <span className={styles.castleRewardLabel}>Progress</span>
+                    <span className={styles.castleRewardValuePurple}>Castle 1 Complete</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className={styles.castleAchievementButtons}>
+                <button 
+                  onClick={() => window.location.href = '/world-map'}
+                  className={styles.castleAchievementButtonAmber}
+                >
+                  Return to Map
+                </button>
+                <button 
+                  onClick={() => window.location.href = '/world-map/castle2'}
+                  className={styles.castleAchievementButtonGreen}
+                >
+                  Next Castle
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </div>
   );
+
+
+// Helper function to calculate line intersection
+const calculateIntersection = (p1, p2, p3, p4) => {
+  const x1 = p1.x, y1 = p1.y, x2 = p2.x, y2 = p2.y;
+  const x3 = p3.x, y3 = p3.y, x4 = p4.x, y4 = p4.y;
+
+  const denom = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4);
+  
+  if (Math.abs(denom) < 0.001) {
+    // Lines are parallel, return midpoint
+    return { x: 250, y: 200 };
+  }
+
+  const t = ((x1 - x3) * (y3 - y4) - (y1 - x3) * (x3 - x4)) / denom;
+  
+  return {
+    x: x1 + t * (x2 - x1),
+    y: y1 + t * (y2 - y1)
+  };
+};
+
+// Helper function to check if point is near another point
+const isPointNear = (point1, point2, threshold = 20) => {
+  const distance = Math.sqrt((point1.x - point2.x) ** 2 + (point1.y - point2.y) ** 2);
+  return distance < threshold;
+};
+
+// Helper function to generate random angle problems
+const generateAngleProblem = () => {
+  const problemTypes = ['complementary', 'supplementary', 'vertical', 'linear'];
+  const type = problemTypes[Math.floor(Math.random() * problemTypes.length)];
+  
+  switch (type) {
+    case 'complementary':
+      const angle1 = Math.floor(Math.random() * 80) + 10; // 10-89 degrees
+      return {
+        type: 'complementary',
+        given: angle1,
+        answer: 90 - angle1,
+        question: `If one angle is ${angle1}°, what is its complement?`
+      };
+    
+    case 'supplementary':
+      const angle2 = Math.floor(Math.random() * 160) + 20; // 20-179 degrees
+      return {
+        type: 'supplementary',
+        given: angle2,
+        answer: 180 - angle2,
+        question: `If one angle is ${angle2}°, what is its supplement?`
+      };
+    
+    case 'vertical':
+      const angle3 = Math.floor(Math.random() * 170) + 10;
+      return {
+        type: 'vertical',
+        given: angle3,
+        answer: angle3,
+        question: `If one vertical angle is ${angle3}°, what is its opposite angle?`
+      };
+    
+    case 'linear':
+      const angle4 = Math.floor(Math.random() * 120) + 30;
+      const angle5 = Math.floor(Math.random() * (180 - angle4 - 10)) + 10;
+      const answer = 180 - angle4 - angle5;
+      return {
+        type: 'linear',
+        given: `${angle4}° and ${angle5}°`,
+        answer: answer,
+        question: `Three angles on a line measure ${angle4}°, ${angle5}°, and ?°. What is the missing angle?`
+      };
+  }
+};
+
+// Helper function to check angle relationships
+const checkAngleRelationship = (angle1, angle2, type) => {
+  switch (type) {
+    case 'complementary':
+      return Math.abs((angle1 + angle2) - 90) < 2;
+    case 'supplementary':
+      return Math.abs((angle1 + angle2) - 180) < 2;
+    case 'vertical':
+      return Math.abs(angle1 - angle2) < 2;
+    default:
+      return false;
+  }
+};
+
+// Helper function to format degrees
+const formatDegrees = (degrees) => {
+  return `${Math.round(degrees)}°`;
+};
+
+// Helper function to create angle arc path
+const createAngleArc = (ctx, vertex, startAngle, endAngle, radius, clockwise = false) => {
+  ctx.beginPath();
+  if (clockwise) {
+    ctx.arc(vertex.x, vertex.y, radius, startAngle, endAngle, false);
+  } else {
+    ctx.arc(vertex.x, vertex.y, radius, startAngle, endAngle, true);
+  }
+  return ctx;
+};
+
+// Helper function to draw arrow
+const drawArrow = (ctx, fromX, fromY, toX, toY, arrowLength = 10) => {
+  const angle = Math.atan2(toY - fromY, toX - fromX);
+  
+  // Draw main line
+  ctx.beginPath();
+  ctx.moveTo(fromX, fromY);
+  ctx.lineTo(toX, toY);
+  ctx.stroke();
+  
+  // Draw arrowhead
+  ctx.beginPath();
+  ctx.moveTo(toX, toY);
+  ctx.lineTo(
+    toX - arrowLength * Math.cos(angle - Math.PI / 6),
+    toY - arrowLength * Math.sin(angle - Math.PI / 6)
+  );
+  ctx.moveTo(toX, toY);
+  ctx.lineTo(
+    toX - arrowLength * Math.cos(angle + Math.PI / 6),
+    toY - arrowLength * Math.sin(angle + Math.PI / 6)
+  );
+  ctx.stroke();
+};
+
+// Helper function to draw text with background
+const drawTextWithBackground = (ctx, text, x, y, backgroundColor = 'rgba(255, 255, 255, 0.9)', textColor = '#2C1810') => {
+  const metrics = ctx.measureText(text);
+  const padding = 8;
+  const backgroundWidth = metrics.width + (padding * 2);
+  const backgroundHeight = 20;
+  
+  // Draw background
+  ctx.fillStyle = backgroundColor;
+  ctx.beginPath();
+  ctx.roundRect(x - padding, y - 15, backgroundWidth, backgroundHeight, 5);
+  ctx.fill();
+  
+  // Draw border
+  ctx.strokeStyle = textColor;
+  ctx.lineWidth = 1;
+  ctx.stroke();
+  
+  // Draw text
+  ctx.fillStyle = textColor;
+  ctx.fillText(text, x, y);
+};
+
+// Helper function to animate elements
+const animateElement = (element, property, targetValue, duration = 300) => {
+  const startValue = element[property];
+  const startTime = Date.now();
+  
+  const animate = () => {
+    const elapsed = Date.now() - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+    
+    // Easing function (ease-out)
+    const easedProgress = 1 - Math.pow(1 - progress, 3);
+    
+    element[property] = startValue + (targetValue - startValue) * easedProgress;
+    
+    if (progress < 1) {
+      requestAnimationFrame(animate);
+    }
+  };
+  
+  animate();
+};
+
+// Helper function to check if angle is within tolerance
+const isAngleWithinTolerance = (actual, target, tolerance = 5) => {
+  return Math.abs(actual - target) <= tolerance;
+};
+
+// Helper function to get next angle in sequence
+const getNextTargetAngle = () => {
+  const commonAngles = [30, 45, 60, 90, 120, 135, 150];
+  return commonAngles[Math.floor(Math.random() * commonAngles.length)];
+};
+
+// Helper function to calculate distance between two points
+const calculateDistance = (point1, point2) => {
+  return Math.sqrt((point1.x - point2.x) ** 2 + (point1.y - point2.y) ** 2);
+};
+
+// Helper function to normalize angle to 0-360 range
+const normalizeAngle = (angle) => {
+  while (angle < 0) angle += 360;
+  while (angle >= 360) angle -= 360;
+  return angle;
+};
+
+// Helper function to convert radians to degrees
+const radToDeg = (radians) => {
+  return (radians * 180) / Math.PI;
+};
+
+// Helper function to convert degrees to radians
+const degToRad = (degrees) => {
+  return (degrees * Math.PI) / 180;
+};
+
+// Animation frame handler
+let animationFrameId;
+
+const startAnimation = () => {
+  const animate = () => {
+    if (currentTutorial.content === 'introduction' || 
+        currentTutorial.content === 'angle-basics' ||
+        currentTutorial.content === 'completion') {
+      drawCanvas();
+    }
+       animationFrameId = requestAnimationFrame(animate);
+  };
+  animate();
+};
+
+const stopAnimation = () => {
+  if (animationFrameId) {
+    cancelAnimationFrame(animationFrameId);
+    animationFrameId = null;
+  }
+};
+
+// Effect for starting/stopping animations
+useEffect(() => {
+  startAnimation();
+  return () => stopAnimation();
+}, [currentTutorial.content]);
+
+// Effect for handling window resize
+useEffect(() => {
+  const handleResize = () => {
+    // Redraw canvas on resize
+    setTimeout(drawCanvas, 100);
+  };
+
+  window.addEventListener('resize', handleResize);
+  return () => window.removeEventListener('resize', handleResize);
+}, []);
+
+// Effect for keyboard shortcuts
+useEffect(() => {
+  const handleKeyPress = (event) => {
+    switch (event.key) {
+      case 'ArrowLeft':
+        if (currentStep > 0) {
+          event.preventDefault();
+          prevStep();
+        }
+        break;
+      case 'ArrowRight':
+        if (currentStep < tutorialSteps.length - 1) {
+          event.preventDefault();
+          nextStep();
+        }
+        break;
+      case 'h':
+      case 'H':
+        if (event.ctrlKey || event.metaKey) {
+          event.preventDefault();
+          toggleHint();
+        }
+        break;
+      case 'r':
+      case 'R':
+        if (event.ctrlKey || event.metaKey) {
+          event.preventDefault();
+          resetTutorial();
+        }
+        break;
+      case 'Escape':
+        if (showFeedback) {
+          setShowFeedback(false);
+        }
+        break;
+    }
+  };
+
+  window.addEventListener('keydown', handleKeyPress);
+  return () => window.removeEventListener('keydown', handleKeyPress);
+}, [currentStep, showFeedback, tutorialSteps.length]);
+
+// Effect for auto-progression on certain achievements
+useEffect(() => {
+  if (gameState.score > 0 && gameState.score % 100 === 0) {
+    showFeedbackMessage(`🎉 Milestone reached! ${gameState.score} points!`, 'success');
+  }
+}, [gameState.score]);
+
+// Effect for updating character side based on tutorial step
+useEffect(() => {
+  setCharacterSide(currentTutorial.characterSide || 'right');
+}, [currentStep, currentTutorial.characterSide]);
+
+// Clean up on unmount
+useEffect(() => {
+  return () => {
+    stopAnimation();
+    setInteractivePoints([]);
+    setDraggedPoint(null);
+  };
+}, []);
+
 };
 
 export default AngleMasteryTutorial;
