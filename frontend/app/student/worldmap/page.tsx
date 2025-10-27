@@ -1,125 +1,18 @@
 "use client";
 
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/authStore';
+import { useWorldMap } from '@/hooks/useWorldMap';
+import { AuthProtection } from '@/context/AuthProtection';
 import Loader from '@/components/Loader';
-import styles from '@/styles/world-map.module.css';
 import WorldMapIntro from '@/components/world/WorldMapIntro';
-// import BackgroundEffect from '@/components/world/BackgroundEffect';
-
-interface Castle {
-  id: string;
-  name: string;
-  region: string;
-  description: string;
-  difficulty: 'Easy' | 'Intermediate' | 'Hard';
-  problems: number;
-  xp: number;
-  position: { x: number; y: number };
-  unlocked: boolean;
-  completed: boolean;
-  terrain: 'mountain' | 'forest' | 'desert' | 'coastal' | 'highland' | 'mystical';
-  route: string;
-  imageNumber: number;
-}
-
-const CASTLES: Castle[] = [
-  {
-    id: 'euclidean-tower',
-    name: 'Euclidean Spire',
-    region: 'Northern Peaks',
-    description: 'Glowing white tower where geometry was first discovered',
-    difficulty: 'Easy',
-    problems: 12,
-    xp: 150,
-    position: { x: 75, y: 15 },
-    unlocked: true,
-    completed: false,
-    terrain: 'mountain',
-    route: '/student/worldmap/castle1',
-    imageNumber: 1
-  },
-  {
-    id: 'polygon-palace',
-    name: 'Polygon Citadel',
-    region: 'Eastern Woods',
-    description: 'Hidden fortress among the many-sided mysteries of the woods',
-    difficulty: 'Easy',
-    problems: 15,
-    xp: 200,
-    position: { x: 85, y: 35 },
-    unlocked: true,
-    completed: true,
-    terrain: 'forest',
-    route: '/student/worldmap/castle2',
-    imageNumber: 2
-  },
-  {
-    id: 'circle-keep',
-    name: 'Circle Sanctuary',
-    region: 'Golden Shores',
-    description: 'Shining coastal fortress guarding curved secrets',
-    difficulty: 'Intermediate',
-    problems: 18,
-    xp: 300,
-    position: { x: 20, y: 25 },
-    unlocked: true,
-    completed: false,
-    terrain: 'coastal',
-    route: '/student/worldmap/castle3',
-    imageNumber: 3
-  },
-  {
-    id: 'fractal-fortress',
-    name: 'Fractal Bastion',
-    region: 'Misty Highlands',
-    description: 'Floating mystical castle of infinite patterns',
-    difficulty: 'Hard',
-    problems: 25,
-    xp: 500,
-    position: { x: 55, y: 35 },
-    unlocked: false,
-    completed: false,
-    terrain: 'highland',
-    route: '/student/worldmap/castle4',
-    imageNumber: 4
-  },
-  {
-    id: 'dimensional-domain',
-    name: 'Arcane Observatory',
-    region: 'Celestial Heights',
-    description: 'Tower rising above the clouds into dimensional realms',
-    difficulty: 'Hard',
-    problems: 30,
-    xp: 600,
-    position: { x: 65, y: 60 },
-    unlocked: false,
-    completed: false,
-    terrain: 'mystical',
-    route: '/student/worldmap/castle5',
-    imageNumber: 5
-  },
-  {
-    id: 'infinity-keep',
-    name: 'Infinity Throne',
-    region: 'The Eternal Realm',
-    description: 'The legendary seat of geometric mastery',
-    difficulty: 'Hard',
-    problems: 35,
-    xp: 1000,
-    position: { x: 35, y: 55 },
-    unlocked: false,
-    completed: false,
-    terrain: 'mystical',
-    route: '/student/worldmap/castle7',
-    imageNumber: 7
-  }
-];
+import styles from '@/styles/world-map.module.css';
+import type { CastleWithProgress } from '@/types/castle.types';
 
 interface CastleMarkerProps {
-  castle: Castle;
-  type: 'prev' | 'current' | 'next';
+  castle: CastleWithProgress;
+  type: 'prev' | 'current' | 'next';  
   isSelected: boolean;
   isHovered: boolean;
   onClick: () => void;
@@ -138,20 +31,31 @@ function CastleMarker({
   onMouseLeave,
   animationClass,
 }: CastleMarkerProps) {
+  const [imgError, setImgError] = useState(false);
+  
   const markerClasses = [
     styles.castle_marker,
     type === 'current' ? styles.current_castle : styles.side_castle,
-    castle.unlocked ? styles.unlocked : styles.locked,
-    castle.completed ? styles.completed : '',
+    castle.progress?.unlocked ? styles.unlocked : styles.locked,
+    castle.progress?.completed ? styles.completed : '',
     isSelected ? styles.selected : '',
     isHovered ? styles.hovered : '',
     animationClass || '',
   ].join(' ');
 
-  const imageContainerClasses = [
-    styles.castle_image_container,
-    type === 'current' ? styles.castle_large : styles.castle_small,
-  ].join(' ');
+  const getImagePath = () => {
+    if (imgError) {
+      return 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200"><rect width="200" height="200" fill="%234a5568"/><text y="50%" x="50%" text-anchor="middle" dominant-baseline="middle" font-size="100">🏰</text></svg>';
+    }
+    return `/images/${castle.image_number}.png`;
+  };
+
+  const handleImageError = () => {
+    if (!imgError) {
+      console.warn(`Image not found: /images/${castle.image_number}.png`);
+      setImgError(true);
+    }
+  };
 
   return (
     <div
@@ -160,33 +64,35 @@ function CastleMarker({
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
     >
-      <div className={imageContainerClasses}>
+      <div className={styles.castle_image_container}>
         <img
-          src={`/images/${castle.imageNumber}.png`}
+          src={getImagePath()}
           alt={castle.name}
           style={{
-            filter: !castle.unlocked ? 'grayscale(1) brightness(0.7)' : 'none',
+            filter: !castle.progress?.unlocked ? 'grayscale(1) brightness(0.7)' : 'none',
           }}
-          className={`${styles.castle_image} ${!castle.unlocked ? styles.locked_filter : ''}`}
+          className={`${styles.castle_image} ${!castle.progress?.unlocked ? styles.locked_filter : ''}`}
           draggable={false}
+          onError={handleImageError}
         />
 
-        {castle.completed && (
+        {castle.progress?.completed && (
           <div className={styles.completion_crown}>
             <span>👑</span>
           </div>
         )}
 
-        {!castle.unlocked && (
+        {!castle.progress?.unlocked && (
           <div className={styles.lock_overlay}>
             <span>🔒</span>
           </div>
         )}
 
-        {castle.unlocked && !castle.completed && (
+        {castle.progress?.unlocked && !castle.progress?.completed && (
           <div className={styles.available_glow}></div>
         )}
       </div>
+      
       {type === 'current' && (
         <div className={styles.castle_name_plate}>{castle.name}</div>
       )}
@@ -195,23 +101,71 @@ function CastleMarker({
 }
 
 export default function WorldMapPage() {
-  const { appLoading, authLoading, isLoggedIn } = useAuthStore();
-  const [selectedCastle, setSelectedCastle] = useState<Castle | null>(null);
-  const [hoveredCastle, setHoveredCastle] = useState<Castle | null>(null);
+  const router = useRouter();
+  const { userProfile } = useAuthStore();
+  const { isLoading: authLoading } = AuthProtection();
+
+  // All useState hooks at the top
+  const [showIntro, setShowIntro] = useState(false);
+  const [selectedCastle, setSelectedCastle] = useState<CastleWithProgress | null>(null);
+  const [hoveredCastle, setHoveredCastle] = useState<CastleWithProgress | null>(null);
   const [currentCastleIndex, setCurrentCastleIndex] = useState(0);
   const [direction, setDirection] = useState<'left' | 'right' | null>(null);
-  const router = useRouter();
-  const [showIntro, setShowIntro] = useState(false);
+  const [isNavExpanded, setIsNavExpanded] = useState(false);
+  const [backgroundError, setBackgroundError] = useState(false);
+
+  const {
+    castles,
+    loading: castlesLoading,
+    error,
+    selectCastle,
+    refreshCastles
+  } = useWorldMap(userProfile?.id || '');
+
+  // All useEffect hooks together
+  // Listen for navbar expansion state
+  useEffect(() => {
+    const checkNavbarHover = (e: MouseEvent) => {
+      if (window.innerWidth > 968) {
+        const isNearNavbar = e.clientX <= 70;
+        setIsNavExpanded(isNearNavbar);
+      } else {
+        setIsNavExpanded(false);
+      }
+    };
+
+    const handleResize = () => {
+      if (window.innerWidth <= 968) {
+        setIsNavExpanded(false);
+      }
+    };
+
+    window.addEventListener('mousemove', checkNavbarHover);
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      window.removeEventListener('mousemove', checkNavbarHover);
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
 
   useEffect(() => {
-    // Only check for intro logic *after* loading is done and user is logged in
-    if (!authLoading && !appLoading && isLoggedIn) {
+    if (!authLoading && userProfile) {
       const hasSeenIntro = localStorage.getItem('hasSeenMapIntro');
       if (!hasSeenIntro) {
         setShowIntro(true);
       }
     }
-  }, [authLoading, appLoading, isLoggedIn]); // This dependency array is key
+  }, [authLoading, userProfile]);
+
+  useEffect(() => {
+    if (castles.length > 0) {
+      const firstUnlockedIndex = castles.findIndex(c => c.progress?.unlocked);
+      if (firstUnlockedIndex >= 0) {
+        setCurrentCastleIndex(firstUnlockedIndex);
+      }
+    }
+  }, [castles]);
 
   useEffect(() => {
     if (direction) {
@@ -220,22 +174,45 @@ export default function WorldMapPage() {
     }
   }, [direction, currentCastleIndex]);
 
+  // Background image preloading effect
+  useEffect(() => {
+    if (castles.length === 0) return;
+    
+    const currentCastle = castles[currentCastleIndex];
+    if (!currentCastle) return;
+
+    const currentBackgroundImage = `/images/${currentCastle.image_number}-background.png`;
+    
+    setBackgroundError(false);
+    
+    const img = new Image();
+    img.src = currentBackgroundImage;
+    
+    img.onerror = () => {
+      console.warn(`Background image not found: ${currentBackgroundImage}`);
+      setBackgroundError(true);
+    };
+  }, [currentCastleIndex, castles]);
+
+  // Callbacks
   const handleIntroComplete = () => {
     setShowIntro(false);
     localStorage.setItem('hasSeenMapIntro', 'true');
   };
 
   const goNext = useCallback(() => {
+    if (castles.length === 0) return;
     setDirection('right');
-    setCurrentCastleIndex((prevIndex) => (prevIndex + 1) % CASTLES.length);
+    setCurrentCastleIndex((prevIndex) => (prevIndex + 1) % castles.length);
     setSelectedCastle(null);
-  }, []);
+  }, [castles.length]);
 
   const goPrev = useCallback(() => {
+    if (castles.length === 0) return;
     setDirection('left');
-    setCurrentCastleIndex((prevIndex) => (prevIndex - 1 + CASTLES.length) % CASTLES.length);
+    setCurrentCastleIndex((prevIndex) => (prevIndex - 1 + castles.length) % castles.length);
     setSelectedCastle(null);
-  }, []);
+  }, [castles.length]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -249,126 +226,166 @@ export default function WorldMapPage() {
     return () => window.removeEventListener('keydown', onKey);
   }, [goPrev, goNext]);
 
-  if (authLoading || appLoading) {
+  const handleCastleClick = (castle: CastleWithProgress) => {
+    if (!castle.progress?.unlocked) {
+      return;
+    }
+    
+    if (castles[currentCastleIndex].id !== castle.id) {
+      const newIndex = castles.findIndex(c => c.id === castle.id);
+      if (newIndex !== -1) {
+        setDirection(newIndex > currentCastleIndex ? 'right' : 'left');
+        setCurrentCastleIndex(newIndex);
+        setSelectedCastle(null);
+      }
+    } else {
+      setSelectedCastle(selectedCastle?.id === castle.id ? null : castle);
+    }
+  };
+
+  const handleEnterCastle = async (castle: CastleWithProgress) => {
+    if (!castle.progress?.unlocked) {
+      alert('🔒 This castle is locked! Complete previous castles to unlock.');
+      return;
+    }
+
+    try {
+      await selectCastle(castle);
+      // Use the castle's route property instead of ID
+      router.push(castle.route);
+    } catch (err) {
+      console.error('Failed to enter castle:', err);
+      alert('Failed to load castle details.');
+    }
+  };
+
+  // Helper function for background style
+  const getBackgroundStyle = () => {
+    if (castles.length === 0) {
+      return {
+        backgroundImage: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      };
+    }
+
+    const currentCastle = castles[currentCastleIndex];
+    const currentBackgroundImage = `/images/${currentCastle.image_number}-background.png`;
+
+    if (!backgroundError) {
+      return {
+        backgroundImage: `url('${currentBackgroundImage}')`,
+      };
+    }
+
+    const gradients: Record<number, string> = {
+      1: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      2: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+      3: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+      4: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+      5: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
+    };
+
+    return {
+      backgroundImage: gradients[currentCastle.image_number] || gradients[1],
+    };
+  };
+
+  // Early returns AFTER all hooks
+  if (authLoading || castlesLoading) {
     return (
-      <div className={styles.loading_container}>
+      <div className={`${styles.loading_container} ${isNavExpanded ? styles.expanded : ''}`}>
         <Loader />
         <p>Loading Ancient Map...</p>
       </div>
     );
   }
 
-  if (!isLoggedIn) {
+  if (!userProfile) {
     return (
-      <div className={styles.error_container}>
+      <div className={`${styles.error_container} ${isNavExpanded ? styles.expanded : ''}`}>
         <h2>Access Denied</h2>
         <p>Please log in to access the World Map.</p>
       </div>
     );
   }
 
-  const handleCastleClick = (castle: Castle) => {
-    if (!castle.unlocked) return;
-    if (CASTLES[currentCastleIndex].id !== castle.id) {
-      const newIndex = CASTLES.findIndex(c => c.id === castle.id);
-      if (newIndex !== -1) {
-        if (newIndex > currentCastleIndex) {
-          setDirection('right');
-        } else {
-          setDirection('left');
-        }
-        setCurrentCastleIndex(newIndex);
-        setSelectedCastle(null);
-      }
-    } else {
-      setSelectedCastle(castle);
-    }
-  };
+  if (error) {
+    return (
+      <div className={`${styles.error_container} ${isNavExpanded ? styles.expanded : ''}`}>
+        <h2>⚠️ Error Loading Map</h2>
+        <p>{error}</p>
+        <button onClick={() => refreshCastles()}>Reload Page</button>
+      </div>
+    );
+  }
 
-  const handleEnterCastle = (castle: Castle) => {
-    if (!castle.unlocked) return;
-    router.push(castle.route);
-  };
+  if (castles.length === 0) {
+    return (
+      <div className={`${styles.error_container} ${isNavExpanded ? styles.expanded : ''}`}>
+        <h2>No Castles Found</h2>
+        <p>The database has no castle data.</p>
+        <button onClick={() => refreshCastles()}>Retry</button>
+      </div>
+    );
+  }
 
-  const getDifficultyColor = (difficulty: string) => {
-    switch (difficulty) {
-      case 'Easy':
-        return '#228B22';
-      case 'Intermediate':
-        return '#DAA520';
-      case 'Hard':
-        return '#8B0000';
-      default:
-        return '#8B4513';
-    }
-  };
-
-  const prevIndex = (currentCastleIndex - 1 + CASTLES.length) % CASTLES.length;
-  const nextIndex = (currentCastleIndex + 1) % CASTLES.length;
+  const prevIndex = (currentCastleIndex - 1 + castles.length) % castles.length;
+  const nextIndex = (currentCastleIndex + 1) % castles.length;
 
   const castlesToDisplay = [
-    { castle: CASTLES[prevIndex], type: 'prev' as const },
-    { castle: CASTLES[currentCastleIndex], type: 'current' as const },
-    { castle: CASTLES[nextIndex], type: 'next' as const },
+    { castle: castles[prevIndex], type: 'prev' as const },
+    { castle: castles[currentCastleIndex], type: 'current' as const },
+    { castle: castles[nextIndex], type: 'next' as const },
   ];
 
-  const currentTerrain = CASTLES[currentCastleIndex].terrain;
+  const getAnimationClass = (type: 'prev' | 'current' | 'next'): string => {
+    if (!direction) return '';
+    
+    if (direction === 'right') {
+      if (type === 'prev') return styles.shrink_to_side;
+      if (type === 'current') return styles.grow_to_center;
+      if (type === 'next') return styles.slide_in_right;
+    } else if (direction === 'left') {
+      if (type === 'prev') return styles.slide_in_left;
+      if (type === 'current') return styles.grow_to_center;
+      if (type === 'next') return styles.shrink_to_side;
+    }
+    
+    return '';
+  };
+
+  const currentCastle = castles[currentCastleIndex];
+
+  const totalCastles = castles.length;
+  const unlockedCastles = castles.filter(c => c.progress?.unlocked).length;
+  const completedCastles = castles.filter(c => c.progress?.completed).length;
+  const totalQuestions = castles.reduce((sum, c) => sum + (c.questions_count || 0), 0);
 
   return (
-    <div className={styles.world_map_page_container}>
+    <div className={`${styles.world_map_page_container} ${isNavExpanded ? styles.expanded : ''}`}>
       {showIntro && <WorldMapIntro onIntroComplete={handleIntroComplete} />}
-      <div
-        style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          width: '100%',
-          height: '100%',
-          zIndex: 0,
-          backgroundImage: 'url("/images/world-map-bg.svg")',
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat',
-          pointerEvents: 'none',
-        }}
+      
+      {/* Dynamic Background */}
+      <div 
+        className={`${styles.map_background} ${isNavExpanded ? styles.expanded : ''}`}
+        style={getBackgroundStyle()}
       />
 
-      {/* <BackgroundEffect terrain={currentTerrain} /> */}
-
-      <div className={styles.carousel_wrapper} style={{ position: 'relative', zIndex: 5 }}>
-        <button
-          className={`${styles.carousel_arrow} ${styles.arrow_left}`}
-          onClick={goPrev}
-          aria-label="Previous castle"
-        >
-          <svg
-            width="30"
-            height="30"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="3"
-            strokeLinecap="round"
-            strokeLinejoin="round"
+      {/* Main Content */}
+      <main className={styles.main_content}>
+        {/* Carousel */}
+        <div className={styles.carousel_container}>
+          <button
+            className={`${styles.carousel_arrow} ${styles.arrow_left}`}
+            onClick={goPrev}
+            aria-label="Previous castle"
           >
-            <polyline points="15 18 9 12 15 6"></polyline>
-          </svg>
-        </button>
+            <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+              <polyline points="15 18 9 12 15 6" />
+            </svg>
+          </button>
 
-        <div className={styles.carousel_track}>
-          {castlesToDisplay.map(({ castle, type }) => {
-            let animationClass = '';
-            if (direction === 'right') {
-              if (type === 'prev') animationClass = styles.shrink_to_side;
-              if (type === 'current') animationClass = styles.grow_to_center;
-              if (type === 'next') animationClass = styles.slide_in_right;
-            } else if (direction === 'left') {
-              if (type === 'prev') animationClass = styles.slide_in_left;
-              if (type === 'current') animationClass = styles.grow_to_center;
-              if (type === 'next') animationClass = styles.shrink_to_side;
-            }
-
-            return (
+          <div className={styles.carousel_track}>
+            {castlesToDisplay.map(({ castle, type }) => (
               <CastleMarker
                 key={castle.id}
                 castle={castle}
@@ -378,34 +395,160 @@ export default function WorldMapPage() {
                 onClick={() => handleCastleClick(castle)}
                 onMouseEnter={() => setHoveredCastle(castle)}
                 onMouseLeave={() => setHoveredCastle(null)}
-                animationClass={animationClass}
+                animationClass={getAnimationClass(type)}
               />
-            );
-          })}
+            ))}
+          </div>
+
+          <button
+            className={`${styles.carousel_arrow} ${styles.arrow_right}`}
+            onClick={goNext}
+            aria-label="Next castle"
+          >
+            <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+              <polyline points="9 18 15 12 9 6" />
+            </svg>
+          </button>
         </div>
 
-        <button
-          className={`${styles.carousel_arrow} ${styles.arrow_right}`}
-          onClick={goNext}
-          aria-label="Next castle"
-        >
-          <svg
-            width="30"
-            height="30"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="3"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <polyline points="9 18 15 12 9 6"></polyline>
-          </svg>
-        </button>
-      </div>
+        {/* Stats Panel - Always Visible */}
+        <div className={styles.info_panel}>
+          <div className={styles.info_card}>
+            <div className={styles.stats_section}>
+              <div className={styles.stat_item}>
+                <div className={styles.stat_icon}>🏰</div>
+                <div className={styles.stat_content}>
+                  <div className={styles.stat_label}>Total Castles</div>
+                  <div className={styles.stat_value}>{totalCastles}</div>
+                </div>
+              </div>
 
+              <div className={styles.stat_item}>
+                <div className={styles.stat_icon}>🔓</div>
+                <div className={styles.stat_content}>
+                  <div className={styles.stat_label}>Unlocked</div>
+                  <div className={styles.stat_value}>{unlockedCastles}</div>
+                </div>
+              </div>
+
+              <div className={styles.stat_item}>
+                <div className={styles.stat_icon}>✅</div>
+                <div className={styles.stat_content}>
+                  <div className={styles.stat_label}>Completed</div>
+                  <div className={styles.stat_value}>{completedCastles}</div>
+                </div>
+              </div>
+
+              <div className={styles.stat_item}>
+                <div className={styles.stat_icon}>📝</div>
+                <div className={styles.stat_content}>
+                  <div className={styles.stat_label}>Total Questions</div>
+                  <div className={styles.stat_value}>{totalQuestions}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      {/* Castle Details Modal */}
       {selectedCastle && (
-        <div className={styles.castle_details_panel}>
+        <div 
+          className={styles.modal_overlay}
+          onClick={() => setSelectedCastle(null)}
+        >
+          <div 
+            className={styles.modal_content}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              className={styles.close_button}
+              onClick={() => setSelectedCastle(null)}
+              aria-label="Close"
+            >
+              ×
+            </button>
+
+            <div className={styles.castle_details}>
+              <div className={styles.castle_header}>
+                <h2 className={styles.castle_details_title}>{selectedCastle.name}</h2>
+                <p className={styles.castle_region}>{selectedCastle.region || 'Unknown Region'}</p>
+              </div>
+
+              <p className={styles.castle_description}>
+                {selectedCastle.description || 'A mysterious castle awaits your exploration...'}
+              </p>
+
+              <div className={styles.castle_info_grid}>
+                <div className={styles.castle_info_item}>
+                  <div className={styles.castle_info_label}>Difficulty</div>
+                  <div className={`${styles.castle_info_value} ${styles[selectedCastle.difficulty?.toLowerCase() || 'easy']}`}>
+                    {selectedCastle.difficulty || 'Easy'}
+                  </div>
+                </div>
+
+                <div className={styles.castle_info_item}>
+                  <div className={styles.castle_info_label}>Questions</div>
+                  <div className={styles.castle_info_value}>
+                    {selectedCastle.questions_count || 0}
+                  </div>
+                </div>
+
+                <div className={styles.castle_info_item}>
+                  <div className={styles.castle_info_label}>Status</div>
+                  <div className={styles.castle_info_value}>
+                    {selectedCastle.progress?.completed ? '✅ Complete' : 
+                     selectedCastle.progress?.unlocked ? '🔓 Unlocked' : '🔒 Locked'}
+                  </div>
+                </div>
+
+                <div className={styles.castle_info_item}>
+                  <div className={styles.castle_info_label}>Order</div>
+                  <div className={styles.castle_info_value}>
+                    {selectedCastle.order}
+                  </div>
+                </div>
+              </div>
+
+              {selectedCastle.progress?.unlocked && (
+                <>
+                  <div className={styles.progress_section}>
+                    <div className={styles.progress_label}>
+                      Progress: {selectedCastle.progress.questions_answered || 0} / {selectedCastle.questions_count || 0}
+                    </div>
+                    <div className={styles.progress_bar}>
+                      <div 
+                        className={styles.progress_fill}
+                        style={{
+                          width: `${((selectedCastle.progress.questions_answered || 0) / (selectedCastle.questions_count || 1)) * 100}%`
+                        }}
+                      />
+                    </div>
+                    <p className={styles.progress_text}>
+                      {Math.round(((selectedCastle.progress.questions_answered || 0) / (selectedCastle.questions_count || 1)) * 100)}% Complete
+                    </p>
+                  </div>
+
+                  <button
+                    className={styles.enter_button}
+                    onClick={() => handleEnterCastle(selectedCastle)}
+                    disabled={!selectedCastle.progress?.unlocked}
+                  >
+                    {selectedCastle.progress?.completed ? 'Revisit Castle' : 'Enter Castle'}
+                  </button>
+                </>
+              )}
+
+              {!selectedCastle.progress?.unlocked && (
+                <button
+                  className={styles.enter_button}
+                  disabled
+                >
+                  🔒 Complete Previous Castles to Unlock
+                </button>
+              )}
+            </div>
+          </div>
         </div>
       )}
     </div>

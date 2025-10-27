@@ -191,7 +191,7 @@ export default function WorldMapIntro({ onIntroComplete }: WorldMapIntroProps) {
       ) : (
         <div className={styles.intro_logo_container}>
           <img 
-            src="/images/world-map-logo.svg" 
+            src="/images/world-map-logo.png" 
             alt="Polegion Logo" 
             className={styles.intro_logo}
           />

@@ -12,7 +12,10 @@ const {
     problemRoutes,
     leaderboardRoutes,
     attemptsRoutes,
-    competitionRoutes
+    competitionRoutes,
+    castleRoutes,
+    chapterRoutes,
+    progressRoutes
 } = require('./container')
 
 const app = express()
@@ -34,6 +37,9 @@ app.use('/api/problems', problemRoutes)
 app.use('/api/leaderboards', leaderboardRoutes)
 app.use('/api/attempts', attemptsRoutes)
 app.use('/api/competitions', competitionRoutes)
+app.use('/api/castles', castleRoutes)
+app.use('/api/chapters', chapterRoutes)
+app.use('/api/progress', progressRoutes)
 
 //swagger documentation
 app.use('/api-docs', swaggerServe, swaggerSetup)
