@@ -149,7 +149,12 @@ const FractalBastionChapterSelection = () => {
         className={styles.backButton}
         onClick={handleBackToWorldMap}
       >
-        Back to World Map
+        <img 
+          src="/images/world-map-button.png" 
+          alt="Back to World Map" 
+          className={styles.backButtonImage}
+        />
+        <span className={styles.backButtonText}>World Map</span>
       </button>
 
       {/* Castle Title - Positioned at top center */}
