@@ -43,37 +43,140 @@ const TiledChamber = () => {
     3: generateComplexPattern(),
   };
 
-  // Generate patterns - Updated for 3x3 target
+  // Generate patterns - Updated for 5x5 target (25 cells) - TRUE TESSELLATIONS
   function generateTrianglePattern() {
     const pattern = [];
-    // Create a triangle tessellation pattern
-    for (let i = 0; i < 9; i++) {
-      pattern.push({ 
-        type: 'triangle', 
-        rotation: i % 2 === 0 ? 0 : 180 
-      });
+    // Create a complete triangle and square tessellation - NO GAPS
+    // Pattern: Alternating triangles (up/down) with squares filling gaps
+    const positions = [
+      // Row 0
+      { row: 0, col: 0, type: 'triangle', rotation: 0 },
+      { row: 0, col: 1, type: 'square', rotation: 0 },
+      { row: 0, col: 2, type: 'triangle', rotation: 0 },
+      { row: 0, col: 3, type: 'square', rotation: 0 },
+      { row: 0, col: 4, type: 'triangle', rotation: 0 },
+      // Row 1
+      { row: 1, col: 0, type: 'square', rotation: 0 },
+      { row: 1, col: 1, type: 'triangle', rotation: 180 },
+      { row: 1, col: 2, type: 'square', rotation: 0 },
+      { row: 1, col: 3, type: 'triangle', rotation: 180 },
+      { row: 1, col: 4, type: 'square', rotation: 0 },
+      // Row 2
+      { row: 2, col: 0, type: 'triangle', rotation: 0 },
+      { row: 2, col: 1, type: 'square', rotation: 0 },
+      { row: 2, col: 2, type: 'triangle', rotation: 0 },
+      { row: 2, col: 3, type: 'square', rotation: 0 },
+      { row: 2, col: 4, type: 'triangle', rotation: 0 },
+      // Row 3
+      { row: 3, col: 0, type: 'square', rotation: 0 },
+      { row: 3, col: 1, type: 'triangle', rotation: 180 },
+      { row: 3, col: 2, type: 'square', rotation: 0 },
+      { row: 3, col: 3, type: 'triangle', rotation: 180 },
+      { row: 3, col: 4, type: 'square', rotation: 0 },
+      // Row 4
+      { row: 4, col: 0, type: 'triangle', rotation: 0 },
+      { row: 4, col: 1, type: 'square', rotation: 0 },
+      { row: 4, col: 2, type: 'triangle', rotation: 0 },
+      { row: 4, col: 3, type: 'square', rotation: 0 },
+      { row: 4, col: 4, type: 'triangle', rotation: 0 },
+    ];
+    
+    for (let i = 0; i < 25; i++) {
+      const row = Math.floor(i / 5);
+      const col = i % 5;
+      const match = positions.find(p => p.row === row && p.col === col);
+      pattern.push(match || null);
     }
     return pattern;
   }
 
   function generateHexagonPattern() {
     const pattern = [];
-    // Create hexagon pattern
-    for (let i = 0; i < 9; i++) {
-      pattern.push({ type: 'hexagon', rotation: 0 });
+    // Create a hexagon tessellation pattern - NO GAPS
+    // Hexagons naturally tessellate together
+    const positions = [
+      // Row 0
+      { row: 0, col: 0, type: 'hexagon', rotation: 0 },
+      { row: 0, col: 1, type: 'hexagon', rotation: 0 },
+      { row: 0, col: 2, type: 'hexagon', rotation: 0 },
+      { row: 0, col: 3, type: 'hexagon', rotation: 0 },
+      { row: 0, col: 4, type: 'hexagon', rotation: 0 },
+      // Row 1
+      { row: 1, col: 0, type: 'hexagon', rotation: 0 },
+      { row: 1, col: 1, type: 'hexagon', rotation: 0 },
+      { row: 1, col: 2, type: 'hexagon', rotation: 0 },
+      { row: 1, col: 3, type: 'hexagon', rotation: 0 },
+      { row: 1, col: 4, type: 'hexagon', rotation: 0 },
+      // Row 2
+      { row: 2, col: 0, type: 'hexagon', rotation: 0 },
+      { row: 2, col: 1, type: 'hexagon', rotation: 0 },
+      { row: 2, col: 2, type: 'hexagon', rotation: 0 },
+      { row: 2, col: 3, type: 'hexagon', rotation: 0 },
+      { row: 2, col: 4, type: 'hexagon', rotation: 0 },
+      // Row 3
+      { row: 3, col: 0, type: 'hexagon', rotation: 0 },
+      { row: 3, col: 1, type: 'hexagon', rotation: 0 },
+      { row: 3, col: 2, type: 'hexagon', rotation: 0 },
+      { row: 3, col: 3, type: 'hexagon', rotation: 0 },
+      { row: 3, col: 4, type: 'hexagon', rotation: 0 },
+      // Row 4
+      { row: 4, col: 0, type: 'hexagon', rotation: 0 },
+      { row: 4, col: 1, type: 'hexagon', rotation: 0 },
+      { row: 4, col: 2, type: 'hexagon', rotation: 0 },
+      { row: 4, col: 3, type: 'hexagon', rotation: 0 },
+      { row: 4, col: 4, type: 'hexagon', rotation: 0 },
+    ];
+    
+    for (let i = 0; i < 25; i++) {
+      const row = Math.floor(i / 5);
+      const col = i % 5;
+      const match = positions.find(p => p.row === row && p.col === col);
+      pattern.push(match || null);
     }
     return pattern;
   }
 
   function generateComplexPattern() {
     const pattern = [];
-    // Create a mixed pattern
-    const types = ['square', 'triangle', 'hexagon'];
-    for (let i = 0; i < 9; i++) {
-      pattern.push({ 
-        type: types[i % 3], 
-        rotation: (i % 4) * 90 
-      });
+    // Create a complete square tessellation with triangular decorations - NO GAPS
+    const positions = [
+      // Row 0
+      { row: 0, col: 0, type: 'square', rotation: 0 },
+      { row: 0, col: 1, type: 'square', rotation: 0 },
+      { row: 0, col: 2, type: 'square', rotation: 0 },
+      { row: 0, col: 3, type: 'square', rotation: 0 },
+      { row: 0, col: 4, type: 'square', rotation: 0 },
+      // Row 1
+      { row: 1, col: 0, type: 'square', rotation: 0 },
+      { row: 1, col: 1, type: 'square', rotation: 0 },
+      { row: 1, col: 2, type: 'square', rotation: 0 },
+      { row: 1, col: 3, type: 'square', rotation: 0 },
+      { row: 1, col: 4, type: 'square', rotation: 0 },
+      // Row 2
+      { row: 2, col: 0, type: 'square', rotation: 0 },
+      { row: 2, col: 1, type: 'square', rotation: 0 },
+      { row: 2, col: 2, type: 'square', rotation: 0 },
+      { row: 2, col: 3, type: 'square', rotation: 0 },
+      { row: 2, col: 4, type: 'square', rotation: 0 },
+      // Row 3
+      { row: 3, col: 0, type: 'square', rotation: 0 },
+      { row: 3, col: 1, type: 'square', rotation: 0 },
+      { row: 3, col: 2, type: 'square', rotation: 0 },
+      { row: 3, col: 3, type: 'square', rotation: 0 },
+      { row: 3, col: 4, type: 'square', rotation: 0 },
+      // Row 4
+      { row: 4, col: 0, type: 'square', rotation: 0 },
+      { row: 4, col: 1, type: 'square', rotation: 0 },
+      { row: 4, col: 2, type: 'square', rotation: 0 },
+      { row: 4, col: 3, type: 'square', rotation: 0 },
+      { row: 4, col: 4, type: 'square', rotation: 0 },
+    ];
+    
+    for (let i = 0; i < 25; i++) {
+      const row = Math.floor(i / 5);
+      const col = i % 5;
+      const match = positions.find(p => p.row === row && p.col === col);
+      pattern.push(match || null);
     }
     return pattern;
   }
@@ -111,11 +214,29 @@ const TiledChamber = () => {
     setRotation((rotation + 90) % 360);
   };
 
-  // Check if pattern matches target - Updated for 25 cells
+  // Check if pattern matches target - Only checks required positions
   const checkPatternCompletion = (currentGrid) => {
-    const filledCells = currentGrid.filter(cell => cell !== null).length;
+    // Check if all required tiles match the target pattern
+    let allMatch = true;
     
-    if (filledCells === 25) { // Changed from 49 to 25
+    for (let i = 0; i < 25; i++) {
+      const targetTile = targetPattern[i];
+      const gridTile = currentGrid[i];
+      
+      // If target has a tile at this position
+      if (targetTile) {
+        // Grid must have a matching tile
+        if (!gridTile || 
+            gridTile.type !== targetTile.type || 
+            gridTile.rotation !== targetTile.rotation) {
+          allMatch = false;
+          break;
+        }
+      }
+      // If target is empty (null), we don't care what's in the grid
+    }
+    
+    if (allMatch) {
       // Pattern complete
       setPatternsCreated(patternsCreated + 1);
       setWizardDialogue("Magnificent! The pattern is complete!");
@@ -123,7 +244,7 @@ const TiledChamber = () => {
       if (currentStage < 3) {
         setTimeout(() => {
           setCurrentStage(currentStage + 1);
-          setGrid(Array(25).fill(null)); // Changed to 25
+          setGrid(Array(25).fill(null));
           setSelectedTile(null);
           setRotation(0);
           setWizardDialogue("Now, let's try a more complex tessellation!");
@@ -250,7 +371,15 @@ const TiledChamber = () => {
       {/* Header */}
       <div className={styles.header}>
         <h1 className={styles.chapterTitle}>Chapter 2: The Tiled Chamber</h1>
-        <p className={styles.progressInfo}>{patternsCreated}/3 Patterns Created</p>
+        <div className={styles.progressContainer}>
+          <p className={styles.progressInfo}>Pattern {currentStage} of 3</p>
+          <div className={styles.progressBar}>
+            <div 
+              className={styles.progressFill} 
+              style={{ width: `${(patternsCreated / 3) * 100}%` }}
+            />
+          </div>
+        </div>
       </div>
 
       {/* Main Game Area */}
@@ -298,29 +427,29 @@ const TiledChamber = () => {
           </div>
         </div>
 
-        {/* Target Pattern - Now 3x3 */}
+        {/* Target Pattern - Now 5x5 */}
         <div className={styles.targetPanel}>
           <h3 className={styles.panelTitle}>Target Pattern</h3>
           <div className={styles.targetPreview}>
             <div className={styles.targetGrid}>
               {targetPattern.map((pattern, index) => (
                 <div key={index} className={styles.targetCell}>
-                  {renderShape(
+                  {pattern && renderShape(
                     pattern.type,
                     '#66BBFF',
                     pattern.rotation,
-                    25
+                    20
                   )}
                 </div>
               ))}
             </div>
           </div>
           <div className={styles.stageInfo}>
-            <p>Stage {currentStage} of 3</p>
+            <p>Pattern {currentStage} of 3</p>
             <p className={styles.stageHint}>
-              {currentStage === 1 && "Tessellate triangles or squares"}
-              {currentStage === 2 && "Combine hexagons and rectangles"}
-              {currentStage === 3 && "Create custom tessellations"}
+              {currentStage === 1 && "Tessellate triangles and squares"}
+              {currentStage === 2 && "Complete the hexagon tessellation"}
+              {currentStage === 3 && "Fill with square tessellation"}
             </p>
           </div>
         </div>

@@ -45,21 +45,40 @@
   font-family: 'UnifrakturMaguntia', serif;
   font-size: clamp(1.5rem, 3vw, 2rem);
   color: #E8F4FD;
-  margin-bottom: 0.3rem;
+  margin-bottom: 0.5rem;
   text-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
   letter-spacing: 2px;
 }
 
+.progressContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+}
+
 .progressInfo {
   color: #E8F4FD;
-  font-size: clamp(0.8rem, 1.5vw, 0.9rem);
-  font-weight: 400;
-  opacity: 0.8;
-  background: rgba(0, 0, 0, 0.3);
-  padding: 0.4rem 1.2rem;
-  border-radius: 20px;
-  display: inline-block;
-  margin-top: 0.3rem;
+  font-size: clamp(0.75rem, 1.1vw, 0.85rem);
+  font-weight: 500;
+  opacity: 0.9;
+  margin: 0;
+}
+
+.progressBar {
+  width: clamp(200px, 30vw, 300px);
+  height: 12px;
+  background: rgba(0, 0, 0, 0.4);
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid #66BBFF;
+}
+
+.progressFill {
+  height: 100%;
+  background: linear-gradient(90deg, #4CAF50, #45a049);
+  transition: width 0.5s ease;
+  border-radius: 10px;
 }
 
 /* Main Game Area */
@@ -87,7 +106,7 @@
   padding: 1rem;
   backdrop-filter: blur(10px);
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-  width: 220px;
+  width: clamp(240px, 20vw, 280px);
   display: flex;
   flex-direction: column;
   gap: 0.8rem;
@@ -115,14 +134,15 @@
   background: rgba(44, 24, 63, 0.6);
   border: 2px solid #4FC3F7;
   border-radius: 10px;
-  padding: 0.5rem;
+  padding: 0.6rem;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   transition: all 0.3s ease;
-  min-height: 60px;
+  min-height: 70px;
   aspect-ratio: 1;
+  overflow: hidden;
 }
 
 .tileOption:hover {
@@ -258,16 +278,16 @@
 
 .targetGrid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: clamp(0.3rem, 0.5vw, 0.4rem);
+  grid-template-columns: repeat(5, 1fr);
+  gap: clamp(0.2rem, 0.4vw, 0.3rem);
   width: 100%;
-  max-width: 180px;
+  max-width: 200px;
 }
 
 .targetCell {
   width: 100%;
   aspect-ratio: 1;
-  max-width: 55px;
+  max-width: 38px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -360,7 +380,7 @@
   backdrop-filter: blur(10px);
   box-shadow: 0 5px 20px rgba(0, 0, 0, 0.4);
   position: relative;
-  align-items: flex-start;
+  margin-bottom: 3rem;
 }
 
 .wizardSpeech::before {
@@ -542,9 +562,12 @@
     max-width: 55%;
   }
   
-  .tilePanel,
+  .tilePanel {
+    width: clamp(220px, 18vw, 260px);
+  }
+  
   .targetPanel {
-    width: clamp(160px, 18vw, 200px);
+    width: clamp(200px, 18vw, 240px);
   }
 }
 
@@ -555,9 +578,12 @@
     gap: 0.8rem;
   }
   
-  .tilePanel,
+  .tilePanel {
+    width: 200px;
+  }
+  
   .targetPanel {
-    width: 160px;
+    width: 180px;
   }
   
   .gridContainer {
@@ -609,6 +635,11 @@
     font-size: 1.8rem;
   }
   
+  .progressBar {
+    width: clamp(180px, 50vw, 250px);
+    height: 10px;
+  }
+  
   .tileGrid {
     grid-template-columns: repeat(3, 1fr);
   }
@@ -624,12 +655,12 @@
   }
   
   .targetGrid {
-    gap: 0.3rem;
+    gap: 0.2rem;
+    max-width: 180px;
   }
   
   .targetCell {
-    width: 40px;
-    height: 40px;
+    max-width: 34px;
   }
   
   .wizardImage {
@@ -660,6 +691,11 @@
 @media (max-width: 480px) {
   .chapterTitle {
     font-size: 1.5rem;
+  }
+  
+  .progressBar {
+    width: 180px;
+    height: 10px;
   }
   
   .gameArea {
