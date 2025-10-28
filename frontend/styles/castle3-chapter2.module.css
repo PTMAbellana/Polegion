@@ -1,0 +1,877 @@
+@import url('https://fonts.googleapis.com/css2?family=UnifrakturMaguntia&family=Cinzel:wght@400;600&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap');
+
+/* Main Container */
+.chapterContainer {
+  height: 100vh;
+  width: 100vw;
+  background-image: url('/images/castle3-chapter2-background.png');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  position: relative;
+  overflow: hidden;
+  font-family: 'Cinzel', serif;
+  display: flex;
+  flex-direction: column;
+}
+
+.backgroundOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(
+    circle at 50% 50%,
+    rgba(255, 215, 0, 0.1) 0%,
+    rgba(139, 69, 19, 0.3) 50%,
+    rgba(255, 215, 0, 0.1) 100%
+  );
+  backdrop-filter: blur(1px);
+  animation: rippleGlow 4s ease-in-out infinite;
+}
+
+@keyframes rippleGlow {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.6; }
+}
+
+/* Header */
+.header {
+  position: relative;
+  z-index: 10;
+  text-align: center;
+  padding: 0.8rem 1rem;
+  background: transparent;
+  border: none;
+}
+
+.chapterTitle {
+  font-family: 'UnifrakturMaguntia', serif;
+  font-size: 2rem;
+  color: #FFD700;
+  margin-bottom: 0.3rem;
+  text-shadow: 
+    0 0 20px rgba(255, 215, 0, 0.8),
+    0 0 40px rgba(255, 215, 0, 0.5),
+    2px 2px 6px rgba(0, 0, 0, 0.8);
+  letter-spacing: 2px;
+}
+
+.progressInfo {
+  color: #FFE4B5;
+  font-size: 0.9rem;
+  font-weight: 600;
+  opacity: 1;
+  background: rgba(139, 69, 19, 0.6);
+  padding: 0.4rem 1.2rem;
+  border-radius: 20px;
+  border: 2px solid #FFD700;
+  display: inline-block;
+  margin-top: 0.3rem;
+  box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+}
+
+/* Progress Bar */
+.progressBarContainer {
+  width: 100%;
+  max-width: 500px;
+  height: 12px;
+  background: rgba(0, 0, 0, 0.6);
+  border-radius: 6px;
+  overflow: hidden;
+  margin: 0.5rem auto;
+  border: 2px solid #FFD700;
+  box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+}
+
+.progressBarFill {
+  height: 100%;
+  background: linear-gradient(90deg, #FFD700, #FFA500);
+  border-radius: 4px;
+  transition: width 0.5s ease;
+  box-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
+}
+
+/* Task Panel - Right Side */
+.taskPanel {
+  position: fixed;
+  right: 10rem;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  z-index: 20;
+  background: rgba(26, 15, 10, 0.9);
+  border: 2px solid #FFD700;
+  border-radius: 12px;
+  padding: 0.8rem 0.6rem;
+  backdrop-filter: blur(10px);
+  max-height: 65vh;
+  overflow-y: auto;
+  width: 200px;
+  box-shadow: 0 0 25px rgba(255, 215, 0, 0.4);
+}
+
+.taskPanelTitle {
+  color: #FFD700;
+  font-size: 1rem;
+  font-weight: bold;
+  text-align: center;
+  margin: 0 0 0.5rem 0;
+  text-shadow: 0 0 10px rgba(255, 215, 0, 0.6);
+  border-bottom: 2px solid #FFD700;
+  padding-bottom: 0.4rem;
+}
+
+.taskItem {
+  background: rgba(139, 69, 19, 0.4);
+  border: 2px solid #8B6914;
+  border-radius: 8px;
+  padding: 0.5rem 0.6rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.3s ease;
+}
+
+.taskItem:hover {
+  border-color: #FFD700;
+  background: rgba(255, 215, 0, 0.2);
+  transform: translateX(-3px);
+  box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+}
+
+.taskIcon {
+  color: #9E9E9E;
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+.taskItem span {
+  color: #FFE4B5;
+  font-size: 0.8rem;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.taskItem span.completed {
+  color: #4DB6AC;
+}
+
+/* Main Game Area */
+.gameArea {
+  flex: 1;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem;
+  z-index: 10;
+  max-height: calc(100vh - 140px);
+  /* Add margins to account for fixed side panels */
+  /* margin-left: 100px; 
+  margin-right: 100px; */
+}
+
+/* Central Pedestal */
+.centralPedestal {
+  position: relative;
+  z-index: 15;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.pedestalBase {
+  background: linear-gradient(45deg, rgba(26, 15, 10, 0.9), rgba(44, 24, 16, 0.85));
+  border: 2px solid #FFD700;
+  border-radius: 12px;
+  padding: 0.8rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.7), 0 0 30px rgba(255, 215, 0, 0.3);
+}
+
+.circleContainer {
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 50%;
+  padding: 0.4rem;
+  box-shadow: 0 0 30px rgba(255, 215, 0, 0.4);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    box-shadow: 0 0 30px rgba(255, 215, 0, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 50px rgba(255, 215, 0, 0.6);
+  }
+}
+
+.pedestalLabel {
+  color: #FFD700;
+  font-size: 1.1rem;
+  font-weight: bold;
+  text-align: center;
+  text-shadow: 0 0 15px rgba(255, 215, 0, 0.8), 2px 2px 6px rgba(0, 0, 0, 0.6);
+}
+
+.pedestalDescription {
+  color: #FFE4B5;
+  font-size: 0.85rem;
+  text-align: center;
+  line-height: 1.3;
+  max-width: 480px;
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
+}
+
+/* Instruction Text - Below Description */
+.pedestalInstruction {
+  color: #FFD700;
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-align: center;
+  text-shadow: 0 0 10px rgba(255, 215, 0, 0.8), 2px 2px 6px rgba(0, 0, 0, 0.8);
+  background: rgba(139, 69, 19, 0.6);
+  padding: 0.5rem 1.5rem;
+  border-radius: 8px;
+  margin-top: 0.5rem;
+  border: 2px solid #FFD700;
+  letter-spacing: 1px;
+  box-shadow: 0 0 15px rgba(255, 215, 0, 0.4);
+}
+
+/* Circle SVG Styles */
+.circleSvg {
+  filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.3));
+  width: 300px;
+  height: 300px;
+}
+
+.mainCircle {
+  transition: all 0.3s ease;
+}
+
+.circlePart {
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.circlePart:hover {
+  filter: brightness(1.3) drop-shadow(0 0 10px rgba(255, 215, 0, 0.8));
+}
+
+.targetPart {
+  animation: targetPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes targetPulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+.pulseRing {
+  animation: pulseRing 2s ease-in-out infinite;
+}
+
+@keyframes pulseRing {
+  0% {
+    r: 10;
+    opacity: 1;
+  }
+  100% {
+    r: 20;
+    opacity: 0;
+  }
+}
+
+.circleLabel {
+  fill: #FFD700;
+  font-weight: bold;
+  font-family: 'Cinzel', serif;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+  filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.6));
+}
+
+/* Old Instruction Text - DEPRECATED, using pedestalInstruction instead */
+.instructionText {
+  display: none; /* Hidden - instruction moved inside pedestal */
+}
+
+/* Wizard Section - LEFT SIDE */
+.wizardContainer {
+  position: fixed;
+  left: 7rem;
+  top: 70%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 1rem;
+  z-index: 20;
+}
+
+.wizardImage {
+  width: 200px;
+  height: auto;
+  border: none;
+  object-fit: cover;
+  box-shadow: none;
+  flex-shrink: 0;
+}
+
+.wizardSpeech {
+  max-width: 200px;
+  background: rgba(26, 15, 10, 0.95);
+  border: 2px solid #FFD700;
+  border-radius: 12px;
+  padding: 1rem;
+  position: relative;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5), 0 0 20px rgba(255, 215, 0, 0.3);
+}
+
+/* Speech bubble arrow pointing to wizard */
+.wizardSpeech::before {
+  content: '';
+  position: absolute;
+  left: -10px;
+  top: 70%;
+  transform: translateY(0%);
+  width: 0;
+  height: 0;
+  border-top: 10px solid transparent;
+  border-bottom: 10px solid transparent;
+  border-right: 10px solid #FFD700;
+}
+
+.wizardSpeech::after {
+  content: '';
+  position: absolute;
+  left: -7px;
+  top: 70%;
+  transform: translateY(0%);
+  width: 0;
+  height: 0;
+  border-top: 8px solid transparent;
+  border-bottom: 8px solid transparent;
+  border-right: 8px solid rgba(26, 15, 10, 0.95);
+}
+
+.wizardSpeech p {
+  margin: 0;
+  color: #FFE4B5;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  font-family: 'Cinzel', serif;
+  text-align: left;
+  font-weight: 500;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+}
+
+/* Control Panel */
+.controlPanel {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  justify-content: center;
+  gap: 0.8rem;
+  padding: 0.6rem 1rem;
+  background: transparent;
+  flex-shrink: 0;
+}
+
+.controlButton {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: rgba(26, 15, 10, 0.9);
+  color: #FFD700;
+  border: 2px solid #FFD700;
+  padding: 0.6rem 1.2rem;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5), 0 0 15px rgba(255, 215, 0, 0.2);
+  font-family: 'Cinzel', serif;
+  text-shadow: 0 0 8px rgba(255, 215, 0, 0.5);
+}
+
+.controlButton:hover:not(:disabled) {
+  background: rgba(139, 69, 19, 0.8);
+  transform: translateY(-2px);
+  box-shadow: 0 0 25px rgba(255, 215, 0, 0.6);
+  border-color: #FFD700;
+}
+
+.controlButton:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.controlButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: rgba(158, 158, 158, 0.2);
+  color: #9E9E9E;
+  border-color: #9E9E9E;
+  text-shadow: none;
+}
+
+/* Completion Modal */
+.completionModal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  backdrop-filter: blur(5px);
+}
+
+.modalContent {
+  background: linear-gradient(135deg, rgba(26, 15, 10, 0.98), rgba(44, 24, 16, 0.98));
+  border: 4px solid #FFD700;
+  border-radius: 20px;
+  padding: 3rem;
+  max-width: 500px;
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.9), 0 0 40px rgba(255, 215, 0, 0.5);
+  animation: modalAppear 0.5s ease-out;
+}
+
+@keyframes modalAppear {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.modalContent h2 {
+  font-family: 'UnifrakturMaguntia', serif;
+  font-size: 2.5rem;
+  color: #FFD700;
+  margin: 0 0 1rem 0;
+  text-shadow: 0 0 25px rgba(255, 215, 0, 0.8), 2px 2px 6px rgba(0, 0, 0, 0.8);
+}
+
+.modalContent p {
+  color: #FFE4B5;
+  font-size: 1.2rem;
+  margin: 1rem 0;
+  font-family: 'Cinzel', serif;
+  font-weight: 600;
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
+}
+
+.reward {
+  margin: 2rem 0;
+}
+
+.reward p {
+  color: #FFE4B5;
+  font-weight: 500;
+}
+
+.pearl {
+  font-size: 4rem;
+  animation: rotate 3s linear infinite;
+  filter: drop-shadow(0 0 25px rgba(255, 255, 255, 0.9));
+}
+
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.nextChapterButton {
+  background: rgba(139, 69, 19, 0.8);
+  color: #FFD700;
+  border: 2px solid #FFD700;
+  padding: 1rem 2rem;
+  border-radius: 12px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5), 0 0 20px rgba(255, 215, 0, 0.3);
+  font-family: 'Cinzel', serif;
+  margin-top: 1rem;
+  text-shadow: 0 0 10px rgba(255, 215, 0, 0.6);
+}
+
+.nextChapterButton:hover {
+  background: rgba(139, 69, 19, 1);
+  transform: translateY(-2px);
+  box-shadow: 0 0 30px rgba(255, 215, 0, 0.7);
+  border-color: #FFD700;
+}
+
+/* Responsive Design */
+@media (max-width: 1400px) {
+  .wizardImage {
+    width: 100px;
+    height: 100px;
+  }
+
+  .wizardSpeech {
+    max-width: 240px;
+    padding: 0.8rem;
+  }
+
+  .wizardSpeech p {
+    font-size: 0.75rem;
+  }
+
+  .taskPanel {
+    width: 150px;
+    padding: 0.7rem 0.5rem;
+  }
+
+  .taskPanelTitle {
+    font-size: 0.95rem;
+  }
+
+  .taskItem {
+    padding: 0.4rem 0.5rem;
+  }
+
+  .taskItem span {
+    font-size: 0.75rem;
+  }
+
+  .circleSvg {
+    width: 250px;
+    height: 250px;
+  }
+
+  .pedestalLabel {
+    font-size: 1rem;
+  }
+
+  .pedestalDescription {
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 1200px) {
+  .chapterTitle {
+    font-size: 1.8rem;
+  }
+
+  .wizardContainer {
+    left: 0.5rem;
+    gap: 0.8rem;
+  }
+
+  .wizardImage {
+    width: 90px;
+    height: 90px;
+  }
+
+  .wizardSpeech {
+    max-width: 200px;
+    padding: 0.7rem;
+  }
+
+  .wizardSpeech p {
+    font-size: 0.75rem;
+  }
+
+  .taskPanel {
+    right: 0.5rem;
+    width: 140px;
+  }
+
+  .taskItem {
+    padding: 0.4rem;
+  }
+
+  .taskItem span {
+    font-size: 0.7rem;
+  }
+
+  .taskIcon {
+    width: 16px;
+    height: 16px;
+  }
+
+  .circleSvg {
+    width: 280px;
+    height: 280px;
+  }
+
+  .instructionText {
+    font-size: 0.85rem;
+    padding: 0.3rem 1rem;
+    bottom: 4rem;
+  }
+
+  .controlButton {
+    font-size: 0.8rem;
+    padding: 0.5rem 1rem;
+    gap: 0.3rem;
+  }
+}
+
+@media (max-width: 1024px) {
+  .container {
+    min-height: 100vh;
+  }
+
+  .chapterTitle {
+    font-size: 1.5rem;
+  }
+
+  .progressInfo {
+    font-size: 0.75rem;
+  }
+
+  .wizardContainer {
+    left: 0.5rem;
+    gap: 0.7rem;
+  }
+
+  .wizardImage {
+    width: 80px;
+    height: 80px;
+  }
+
+  .wizardSpeech {
+    max-width: 180px;
+    padding: 0.7rem;
+  }
+
+  .wizardSpeech p {
+    font-size: 0.7rem;
+  }
+
+  .taskPanel {
+    right: 0.5rem;
+    width: 140px;
+  }
+
+  .circleSvg {
+    width: 300px;
+    height: 300px;
+  }
+
+  .instructionText {
+    font-size: 0.85rem;
+    bottom: 4rem;
+  }
+
+  .controlPanel {
+    padding: 0.5rem 0.8rem;
+  }
+
+  .controlButton {
+    font-size: 0.8rem;
+    padding: 0.5rem 1rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    min-height: 100vh;
+    overflow-y: auto;
+  }
+
+  .header {
+    padding: 0.6rem 0.8rem;
+  }
+
+  .chapterTitle {
+    font-size: 1.3rem;
+  }
+
+  .progressInfo {
+    font-size: 0.7rem;
+  }
+
+  .gameArea {
+    flex-direction: column;
+    padding: 0.5rem;
+    max-height: none;
+  }
+
+  .wizardContainer {
+    position: static;
+    width: 100%;
+    max-width: 100%;
+    margin: 0.5rem 0;
+    padding: 0;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.8rem;
+  }
+
+  .wizardImage {
+    width: 60px;
+    height: 60px;
+  }
+
+  .wizardSpeech {
+    flex: 1;
+    max-width: none;
+  }
+
+  .wizardSpeech p {
+    font-size: 0.75rem;
+  }
+
+  .pedestalBase {
+    padding: 0.8rem;
+  }
+
+  .pedestalLabel {
+    font-size: 0.95rem;
+  }
+
+  .pedestalDescription {
+    font-size: 0.75rem;
+    max-width: 280px;
+  }
+
+  .circleSvg {
+    width: 250px;
+    height: 250px;
+  }
+
+  .taskPanel {
+    position: static;
+    width: 100%;
+    max-width: 100%;
+    margin: 0.5rem 0;
+    padding: 0.8rem;
+  }
+
+  .taskList {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+
+  .taskPanelTitle {
+    width: 100%;
+    font-size: 0.95rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .taskItem {
+    flex: 0 1 calc(50% - 0.2rem);
+    padding: 0.4rem;
+  }
+
+  .taskItem span {
+    font-size: 0.7rem;
+  }
+
+  .taskIcon {
+    width: 14px;
+    height: 14px;
+  }
+
+  .instructionText {
+    position: static;
+    margin: 0.5rem 0;
+    font-size: 0.8rem;
+    padding: 0.3rem 0.8rem;
+  }
+
+  .controlPanel {
+    padding: 0.5rem;
+    gap: 0.5rem;
+  }
+
+  .controlButton {
+    flex: 1;
+    font-size: 0.75rem;
+    padding: 0.5rem 0.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    min-height: 100vh;
+    overflow-y: auto;
+  }
+
+  .header {
+    padding: 0.5rem;
+  }
+
+  .chapterTitle {
+    font-size: 1.1rem;
+  }
+
+  .progressInfo {
+    font-size: 0.65rem;
+  }
+
+  .wizardImage {
+    width: 50px;
+    height: 50px;
+  }
+
+  .wizardSpeech p {
+    font-size: 0.7rem;
+  }
+
+  .circleSvg {
+    width: 200px;
+    height: 200px;
+  }
+
+  .pedestalLabel {
+    font-size: 0.85rem;
+  }
+
+  .pedestalDescription {
+    font-size: 0.7rem;
+    max-width: 200px;
+  }
+
+  .taskItem {
+    flex: 0 1 100%;
+  }
+
+  .taskItem span {
+    font-size: 0.65rem;
+  }
+
+  .controlPanel {
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    padding: 0.5rem;
+  }
+
+  .controlButton {
+    flex: 0 1 calc(50% - 0.2rem);
+    font-size: 0.7rem;
+    padding: 0.5rem;
+  }
+}
