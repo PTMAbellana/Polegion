@@ -43,13 +43,24 @@ export default function WorldMapPage() {
   // Refs for touch/swipe
   const touchStartX = useRef<number>(0)
   const touchEndX = useRef<number>(0)
+  const hasFetchedRef = useRef<boolean>(false)
+  const lastUserIdRef = useRef<string | null>(null)
 
-  // Fetch castles on mount if not already loaded
+  // Fetch castles on mount or when user changes - always refresh to get latest progress
   useEffect(() => {
-    if (userProfile?.id && castles.length === 0 && !loading) {
-      fetchCastles(userProfile.id)
+    const userId = userProfile?.id
+    
+    // Only fetch if:
+    // 1. We have a userId
+    // 2. Haven't fetched yet OR user changed
+    if (userId && (!hasFetchedRef.current || lastUserIdRef.current !== userId)) {
+      console.log('[WorldMap] Fetching castles for user:', userId)
+      hasFetchedRef.current = true
+      lastUserIdRef.current = userId
+      fetchCastles(userId)
     }
-  }, [userProfile?.id, castles.length, loading, fetchCastles])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userProfile?.id])
 
   // Navbar expansion listener
   useEffect(() => {

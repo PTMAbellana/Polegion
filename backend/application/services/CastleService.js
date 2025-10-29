@@ -59,11 +59,59 @@ class CastleService {
     }
 
     async getAllCastlesWithUserProgress(userId) {
+        console.log(`[CastleService] getAllCastlesWithUserProgress for userId: ${userId}`);
+        
         const cacheKey = cache.generateKey('all_castles_user', userId);
         const cached = cache.get(cacheKey);
-        if (cached) return cached;
+        if (cached) {
+            console.log(`[CastleService] Returning cached castles for user ${userId}`);
+            return cached;
+        }
 
         const castles = await this.castleRepo.getAllCastlesWithUserProgress(userId);
+        
+        // Auto-initialize first castle if user has no progress at all
+        if (this.userCastleProgressRepo && castles.length > 0) {
+            const hasAnyProgress = castles.some(c => c.progress);
+            
+            if (!hasAnyProgress) {
+                console.log(`[CastleService] User ${userId} has no castle progress, auto-creating for first castle`);
+                
+                // Find the first castle (unlock_order = 1)
+                const firstCastle = castles.find(c => c.unlockOrder === 1) || castles[0];
+                
+                if (firstCastle) {
+                    console.log(`[CastleService] Creating progress for castle: ${firstCastle.name}`);
+                    
+                    // Create progress for the first castle
+                    const newProgress = await this.userCastleProgressRepo.createUserCastleProgress({
+                        user_id: userId,
+                        castle_id: firstCastle.id,
+                        unlocked: true, // First castle is always unlocked
+                        completed: false,
+                        total_xp_earned: 0,
+                        completion_percentage: 0,
+                        started_at: new Date().toISOString()
+                    });
+                    
+                    // Update the castle object with the new progress
+                    firstCastle.progress = {
+                        id: newProgress.id,
+                        user_id: newProgress.userId,
+                        castle_id: newProgress.castleId,
+                        unlocked: newProgress.unlocked,
+                        completed: newProgress.completed,
+                        total_xp_earned: newProgress.totalXpEarned,
+                        completion_percentage: newProgress.completionPercentage,
+                        started_at: newProgress.startedAt,
+                        completed_at: newProgress.completedAt
+                    };
+                    
+                    console.log(`[CastleService] First castle progress created:`, newProgress);
+                }
+            }
+        }
+        
         cache.set(cacheKey, castles, this.CACHE_TTL);
         return castles;
     }

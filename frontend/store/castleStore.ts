@@ -24,6 +24,12 @@ export const useCastleStore = create<CastleState>()(
                     console.log('[CastleStore] Fetching castles for user:', userId)
                     const castles = await getAllCastles(userId)
                     console.log('[CastleStore] Fetched castles:', castles)
+                    console.log('[CastleStore] Castle progress details:', castles.map(c => ({
+                        name: c.name,
+                        unlocked: c.progress?.unlocked,
+                        completed: c.progress?.completed,
+                        hasProgress: !!c.progress
+                    })))
                     
                     const sortedCastles = castles.sort(
                         (a, b) => a.unlock_order - b.unlock_order
@@ -33,6 +39,8 @@ export const useCastleStore = create<CastleState>()(
                     const firstUnlockedIndex = sortedCastles.findIndex(
                         c => c.progress?.unlocked
                     )
+                    
+                    console.log('[CastleStore] First unlocked castle index:', firstUnlockedIndex)
                     
                     set({
                         castles: sortedCastles,
@@ -104,7 +112,7 @@ export const useCastleStore = create<CastleState>()(
             name: 'castle-storage',
             storage: createJSONStorage(() => localStorage),
             partialize: (state) => ({
-                initialized: state.initialized,
+                // Only persist UI preferences, not castle data (which can become stale)
                 showIntro: state.showIntro
             })
         }

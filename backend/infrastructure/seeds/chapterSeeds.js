@@ -136,7 +136,7 @@ const castle1Chapter1Minigames = [
 // Castle 1 - Chapter 2 Quizzes
 const castle1Chapter2Quizzes = [
     {
-        id: 'c2q1d2e3-4567-89ab-cdef-012345678901',
+        id: 'c2d1d2e3-4567-89ab-cdef-012345678901',
         chapter_id: '69d21734-679b-45ea-9203-1dd15194e5cf',
         title: 'Lines & Relationships Quiz',
         description: 'Test your understanding of parallel, intersecting, and perpendicular lines',
@@ -178,7 +178,7 @@ const castle1Chapter2Quizzes = [
 // Castle 1 - Chapter 2 Minigames
 const castle1Chapter2Minigames = [
     {
-        id: 'c2m1g2e3-5678-90ab-cdef-123456789012',
+        id: 'c2d1d2e3-5678-90ab-cdef-123456789012',
         chapter_id: '69d21734-679b-45ea-9203-1dd15194e5cf',
         title: 'Paths of Power',
         description: 'Identify parallel, intersecting, and perpendicular lines',

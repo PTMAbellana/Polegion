@@ -5,7 +5,17 @@ export const getAllCastles = async (userId) => {
     try {
         const endpoint = userId ? `castles?userId=${userId}` : 'castles'
         console.log('[CastleAPI] Fetching from endpoint:', endpoint)
-        const res = await api.get(endpoint)
+        
+        // Bypass cache for user-specific castle data to ensure fresh progress
+        const config = userId ? {
+            cache: {
+                ttl: 0, // No caching for user-specific data
+                interpretHeader: false
+            }
+        } : undefined
+        
+        const res = await api.get(endpoint, config)
+        
         console.log('[CastleAPI] Response:', res.data)
         return res.data.data || []
     } catch (error) {
