@@ -180,11 +180,31 @@ class CastleService {
             // 3.5. Seed quizzes and minigames for each chapter if needed
             if (this.quizAndMinigameSeeder) {
                 for (const chapter of chapters) {
-                    // Use unlock_order as castle number (Castle 1 has unlock_order=1, Castle 2 has unlock_order=2, etc.)
+                    console.log(`[CastleService] Chapter object:`, chapter);
+                    console.log(`[CastleService] Chapter properties:`, {
+                        hasChapterNumber: 'chapterNumber' in chapter,
+                        hasChapter_number: 'chapter_number' in chapter,
+                        chapterNumberValue: chapter.chapterNumber,
+                        chapter_numberValue: chapter.chapter_number,
+                        allKeys: Object.keys(chapter)
+                    });
+                    console.log(`[CastleService] Castle properties:`, {
+                        hasUnlockOrder: 'unlockOrder' in castle,
+                        hasUnlock_order: 'unlock_order' in castle,
+                        unlockOrderValue: castle.unlockOrder,
+                        unlock_orderValue: castle.unlock_order,
+                        allKeys: Object.keys(castle)
+                    });
+                    console.log(`[CastleService] Seeding quiz/minigame for chapter:`, {
+                        id: chapter.id,
+                        number: chapter.chapterNumber,
+                        castle: castle.unlockOrder
+                    });
+                    // Use unlockOrder as castle number (Castle 1 has unlockOrder=1, Castle 2 has unlockOrder=2, etc.)
                     await this.quizAndMinigameSeeder.seedForChapter(
                         chapter.id, 
-                        chapter.chapterNumber, 
-                        castle.unlockOrder
+                        chapter.chapterNumber,  // Use camelCase from Chapter model
+                        castle.unlockOrder      // Use camelCase from Castle model
                     );
                 }
             }
