@@ -4,21 +4,12 @@ import { useRouter } from "next/navigation";
 import Head from "next/head";
 import LoginForm from "@/components/auth/LoginForm";
 import ForgotPasswordModal from "@/components/auth/ForgotPasswordModal";
-import { useAuthStore } from "@/store/authStore";
-import { ROUTES, STUDENT_ROUTES } from "@/constants/routes";
+import { STUDENT_ROUTES } from "@/constants/routes";
 import styles from "@/styles/login.module.css";
 
 export default function StudentLogin() {
   const router = useRouter();
-  const { isLoggedIn, refreshUserSession } = useAuthStore();
   const [showForgotPasswordModal, setShowForgotPasswordModal] = useState(false);
-
-  useEffect(() => {
-    refreshUserSession();
-    if (isLoggedIn) {
-      router.push(ROUTES.DASHBOARD);
-    }
-  }, [isLoggedIn, router, refreshUserSession]);
 
   useEffect(() => {
     if (showForgotPasswordModal) {

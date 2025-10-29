@@ -11,11 +11,6 @@
   position: relative;
   font-family: 'Nunito', sans-serif;
   transition: margin-left 0.3s ease;
-  margin-left: 70px;
-}
-
-.world_map_page_container.expanded {
-  margin-left: 250px;
 }
 
 /* ========================================
@@ -79,7 +74,7 @@
 .main_content {
   position: relative;
   z-index: 10;
-  width: 100%;
+  width: 95%;
   height: 100vh;
   display: flex;
   flex-direction: column;

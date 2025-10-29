@@ -1,5 +1,5 @@
 export interface CompetitionType {
   id: number;
   title: string;
-  status: 'active' | 'ongoing' | 'done';
+  status: 'ACTIVE' | 'ONGOING' | 'DONE';
 }

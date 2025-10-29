@@ -2,7 +2,7 @@
 
 import { usePathname, useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
-import { ROUTES, PUBLIC_ROUTES, STUDENT_ROUTES } from '@/constants/routes'
+import { ROUTES, PUBLIC_ROUTES, STUDENT_ROUTES, TEACHER_ROUTES } from '@/constants/routes'
 import { useAuthStore } from "@/store/authStore"
 
 export function AuthProtection() {
@@ -10,7 +10,8 @@ export function AuthProtection() {
         isLoggedIn,
         authLoading,
         appLoading,
-        authToken
+        authToken,
+        userProfile
     } = useAuthStore()
 
     const [localLoading, setLocalLoading] = useState(true)
@@ -37,7 +38,17 @@ export function AuthProtection() {
 
                 // Redirect to dashboard if authenticated and on public routes
                 if (isLoggedIn && PUBLIC_ROUTES.includes(pathname)) {
-                    router.replace(STUDENT_ROUTES.DASHBOARD) // TEMPORARY
+                    switch (userProfile?.role) {
+                        case 'student':
+                            router.replace(STUDENT_ROUTES.DASHBOARD)
+                            break;
+                        case 'teacher':
+                        case 'admin':
+                            router.replace(TEACHER_ROUTES.DASHBOARD)
+                            break;
+                        default:
+                            router.replace(ROUTES.DASHBOARD)
+                    }
                     return;
                 }
             } catch (error) {

@@ -4,10 +4,10 @@ import { useRouter } from "next/navigation";
 import Head from "next/head";
 import LoginForm from "@/components/auth/LoginForm";
 import ForgotPasswordModal from "@/components/auth/ForgotPasswordModal";
-import { TEACHER_ROUTES } from "@/constants/routes";
+import { ROUTES } from "@/constants/routes";
 import styles from "@/styles/login.module.css";
 
-export default function TeacherLogin() {
+export default function GeneralLogin() {
   const router = useRouter();
   const [showForgotPasswordModal, setShowForgotPasswordModal] = useState(false);
 
@@ -24,7 +24,7 @@ export default function TeacherLogin() {
   }, [showForgotPasswordModal]);
 
   const handleRegisterRedirect = () => {
-    router.push(TEACHER_ROUTES.REGISTER);
+    router.push(ROUTES.REGISTER);
   };
 
   const handleForgotPassword = () => {
@@ -35,12 +35,10 @@ export default function TeacherLogin() {
     setShowForgotPasswordModal(false);
   };
 
-
-
   return (
     <>
       <Head>
-        <title>Teacher Login | Polegion</title>
+        <title>Login | Polegion</title>
       </Head>
 
       <div className={styles.loginPage}>
@@ -55,10 +53,10 @@ export default function TeacherLogin() {
               />
             </div>
 
-            <h1 className={styles.welcomeTitle}>Welcome Back, Teacher!</h1>
-            <p className={styles.welcomeSubtitle}>Shape the future with interactive geometry</p>
+            <h1 className={styles.welcomeTitle}>Welcome Back!</h1>
+            <p className={styles.welcomeSubtitle}>Login to continue your geometry adventure</p>
 
-            <LoginForm onForgotPassword={handleForgotPassword} userType="teacher"/>
+            <LoginForm onForgotPassword={handleForgotPassword} userType="general" />
 
             <p className={styles.registerPrompt}>
               Don&apos;t have an Account?{" "}

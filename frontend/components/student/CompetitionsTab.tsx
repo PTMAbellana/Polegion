@@ -10,11 +10,11 @@ export default function CompetitionsTab({ competitions }: CompetitionsTabProps) 
 
     const getStatusClass = (status: string) => {
         switch (status) {
-            case 'active':
+            case 'ACTIVE':
                 return styles.statusActive
-            case 'ongoing':
+            case 'ONGOING':
                 return styles.statusOngoing
-            case 'done':
+            case 'DONE':
                 return styles.statusDone
             default:
                 return styles.statusActive
@@ -40,16 +40,19 @@ export default function CompetitionsTab({ competitions }: CompetitionsTabProps) 
                             <div key={competition.id} className={styles.problemCard}>
                                 <div className={styles.problemHeader}>
                                     <h3 className={styles.problemTitle}>{competition.title}</h3>
-                                    <div className={styles.problemActions}>
-                                        <button 
-                                            className={`${styles.actionButton} ${styles.openButton}`}
-                                            onClick={() => handleOpenCompetition(competition.id)}
-                                            title="Open competition"
-                                        >
-                                            <FaExternalLinkAlt />
-                                            Open
-                                        </button>
-                                    </div>
+
+                                   {competition.status !== 'DONE' && (
+                                        <div className={styles.problemActions}>
+                                            <button 
+                                                className={`${styles.actionButton} ${styles.openButton}`}
+                                                onClick={() => handleOpenCompetition(competition.id)}
+                                                title="Open competition"
+                                            >
+                                                <FaExternalLinkAlt />
+                                                Open
+                                            </button>
+                                        </div>
+                                   )} 
                                 </div>
                                 
                                 <div className={styles.problemMeta}>

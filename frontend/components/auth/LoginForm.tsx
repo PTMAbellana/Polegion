@@ -6,7 +6,7 @@ import toast from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import { useAuthStore } from '@/store/authStore';
-import { ROUTES, STUDENT_ROUTES, TEACHER_ROUTES } from '@/constants/routes';
+import { STUDENT_ROUTES, TEACHER_ROUTES } from '@/constants/routes';
 import styles from '@/styles/login.module.css';
 import { LoginFormData, LoginFormProps } from '@/types';
 import { loginSchema } from '@/schemas/authSchemas';
@@ -19,7 +19,6 @@ export default function LoginForm({
   const { login } = useAuthStore(); 
   
   const [showPassword, setShowPassword] = useState(false);
-  const [rememberMe, setRememberMe] = useState(false);
 
   const {
     register,
@@ -37,16 +36,25 @@ export default function LoginForm({
     
     if (result.success) {
       let route;
+      
+      // Wait for userProfile to be available
+      const { userProfile } = useAuthStore.getState();
+      
       switch(userType) {
         case "student":
           route = STUDENT_ROUTES.DASHBOARD;
           break;
-          case "teacher":
-            route = TEACHER_ROUTES.DASHBOARD;
+        case "teacher":
+          route = TEACHER_ROUTES.DASHBOARD;
           break;
         default:
-          route = ROUTES.DASHBOARD;
-        }
+          // For general login, redirect based on actual user role
+          route = userProfile?.role === "student" 
+            ? STUDENT_ROUTES.DASHBOARD 
+            : TEACHER_ROUTES.DASHBOARD;
+          break;
+      }
+      
       toast.success(result.message || "Login successful");
       router.push(route);
     } else {
