@@ -230,6 +230,98 @@ const castle1Chapter2Minigames = [
 ];
 
 // ============================================================================
+// CASTLE 1 - CHAPTER 3 - QUIZZES
+// ============================================================================
+
+const castle1Chapter3Quizzes = [
+    {
+        id: 'c3d1d2e3-4567-89ab-cdef-012345678901',
+        chapter_id: 'c9b7a976-d466-4831-aacf-f8e0476f5153',
+        title: 'Shapes of the Spire Quiz',
+        description: 'Identify and classify geometric shapes',
+        xp_reward: 75,
+        passing_score: 70,
+        time_limit: null,
+        quiz_config: {
+            questions: [
+                {
+                    question: 'Which shape has exactly 3 sides and 3 vertices?',
+                    options: ['Triangle', 'Square', 'Pentagon', 'Hexagon'],
+                    correctAnswer: 'Triangle',
+                    points: 20
+                },
+                {
+                    question: 'A quadrilateral with 4 equal sides and 4 right angles is called a:',
+                    options: ['Rectangle', 'Square', 'Rhombus', 'Trapezoid'],
+                    correctAnswer: 'Square',
+                    points: 25
+                },
+                {
+                    question: 'Which shape has NO vertices and NO sides?',
+                    options: ['Circle', 'Triangle', 'Square', 'Pentagon'],
+                    correctAnswer: 'Circle',
+                    points: 30
+                }
+            ]
+        }
+    }
+];
+
+// ============================================================================
+// CASTLE 1 - CHAPTER 3 - MINIGAMES
+// ============================================================================
+
+const castle1Chapter3Minigames = [
+    {
+        id: 'c3d1d2e3-5678-90ab-cdef-123456789012',
+        chapter_id: 'c9b7a976-d466-4831-aacf-f8e0476f5153',
+        title: 'Shape Summoner',
+        description: 'Identify triangles, squares, rectangles, circles, and polygons',
+        game_type: 'interactive',
+        xp_reward: 60,
+        time_limit: null,
+        order_index: 1,
+        game_config: {
+            questions: [
+                {
+                    id: 'mg1',
+                    instruction: 'Identify all TRIANGLES: Shapes with exactly 3 sides and 3 vertices.',
+                    shapes: [
+                        { id: 'S1', type: 'triangle', points: [350, 50, 250, 150, 450, 150], label: 'Shape A', color: '#FFD700' },
+                        { id: 'S2', type: 'square', x: 100, y: 50, size: 100, label: 'Shape B', color: '#66BBFF' },
+                        { id: 'S3', type: 'triangle', points: [550, 100, 500, 180, 600, 180], label: 'Shape C', color: '#FFD700' }
+                    ],
+                    correctAnswer: ['S1', 'S3'],
+                    hint: 'Triangles have 3 straight sides. Look for shapes with three corners!'
+                },
+                {
+                    id: 'mg2',
+                    instruction: 'Identify all RECTANGLES: Shapes with 4 sides, opposite sides equal, and 4 right angles.',
+                    shapes: [
+                        { id: 'S1', type: 'rectangle', x: 150, y: 60, width: 150, height: 100, label: 'Shape A', color: '#66BBFF' },
+                        { id: 'S2', type: 'circle', cx: 400, cy: 110, r: 50, label: 'Shape B', color: '#FF6B6B' },
+                        { id: 'S3', type: 'rectangle', x: 500, y: 80, width: 120, height: 80, label: 'Shape C', color: '#66BBFF' }
+                    ],
+                    correctAnswer: ['S1', 'S3'],
+                    hint: 'Rectangles have 4 right angles with opposite sides equal. Like a stretched square!'
+                },
+                {
+                    id: 'mg3',
+                    instruction: 'Identify the CIRCLE: A round shape with no sides or vertices.',
+                    shapes: [
+                        { id: 'S1', type: 'square', x: 100, y: 70, size: 90, label: 'Shape A', color: '#4ECDC4' },
+                        { id: 'S2', type: 'circle', cx: 350, cy: 120, r: 60, label: 'Shape B', color: '#FF6B6B' },
+                        { id: 'S3', type: 'pentagon', points: [550, 60, 600, 100, 570, 160, 480, 160, 450, 100], label: 'Shape C', color: '#9B59B6' }
+                    ],
+                    correctAnswer: ['S2'],
+                    hint: 'Circles are perfectly round with no corners or straight edges!'
+                }
+            ]
+        }
+    }
+];
+
+// ============================================================================
 // FUTURE CASTLES & CHAPTERS - ADD HERE
 // ============================================================================
 
@@ -287,7 +379,9 @@ module.exports = {
     castle1Chapter1Quizzes,
     castle1Chapter1Minigames,
     castle1Chapter2Quizzes,
-    castle1Chapter2Minigames
+    castle1Chapter2Minigames,
+    castle1Chapter3Quizzes,
+    castle1Chapter3Minigames
     // Export additional quizzes/minigames as you add them:
     // castle2Chapter1Quizzes,
     // castle2Chapter1Minigames,

@@ -145,7 +145,7 @@ class UserChapterProgressService {
             });
         }
         
-        // Unlock next chapter
+        // Unlock next chapter or castle
         const allChapters = await this.chapterRepo.getChaptersByCastleId(currentChapter.castleId);
         const sortedChapters = allChapters.sort((a, b) => a.chapterNumber - b.chapterNumber);
         const currentIndex = sortedChapters.findIndex(ch => ch.id === chapterId);
@@ -153,6 +153,7 @@ class UserChapterProgressService {
         console.log(`[UserChapterProgressService] Current chapter index: ${currentIndex}, Total chapters: ${sortedChapters.length}`);
         
         if (currentIndex !== -1 && currentIndex < sortedChapters.length - 1) {
+            // Unlock next chapter in same castle
             const nextChapter = sortedChapters[currentIndex + 1];
             console.log(`[UserChapterProgressService] Unlocking next chapter: ${nextChapter.title}`);
             const nextProgress = await this.userChapterProgressRepo.getUserChapterProgressByUserAndChapter(userId, nextChapter.id);
@@ -171,8 +172,73 @@ class UserChapterProgressService {
                 });
                 console.log(`[UserChapterProgressService] Created new progress for chapter ${nextChapter.chapter_number}`);
             }
+        } else if (currentIndex === sortedChapters.length - 1) {
+            // This is the last chapter in the castle - check if we should unlock next castle
+            console.log(`[UserChapterProgressService] Last chapter completed! Checking for next castle...`);
+            
+            // Get current castle details
+            const { data: castles } = await this.userCastleProgressRepo.supabase
+                .from('castles')
+                .select('*')
+                .order('unlock_order', { ascending: true });
+            
+            if (castles && castles.length > 0) {
+                const currentCastleIndex = castles.findIndex(c => c.id === currentChapter.castleId);
+                
+                if (currentCastleIndex !== -1 && currentCastleIndex < castles.length - 1) {
+                    const nextCastle = castles[currentCastleIndex + 1];
+                    console.log(`[UserChapterProgressService] Unlocking next castle: ${nextCastle.name}`);
+                    
+                    // Check if user has progress for next castle
+                    let nextCastleProgress = await this.userCastleProgressRepo.getUserCastleProgressByUserAndCastle(userId, nextCastle.id);
+                    
+                    if (nextCastleProgress) {
+                        // Update existing progress
+                        await this.userCastleProgressRepo.updateUserCastleProgress(nextCastleProgress.id, {
+                            unlocked: true
+                        });
+                        console.log(`[UserChapterProgressService] Updated existing castle progress`);
+                    } else {
+                        // Create new castle progress
+                        nextCastleProgress = await this.userCastleProgressRepo.createUserCastleProgress({
+                            user_id: userId,
+                            castle_id: nextCastle.id,
+                            unlocked: true,
+                            completed: false,
+                            total_xp_earned: 0,
+                            completion_percentage: 0
+                        });
+                        console.log(`[UserChapterProgressService] Created new castle progress`);
+                    }
+                    
+                    // Also unlock the first chapter of the next castle
+                    const nextCastleChapters = await this.chapterRepo.getChaptersByCastleId(nextCastle.id);
+                    if (nextCastleChapters && nextCastleChapters.length > 0) {
+                        const sortedNextChapters = nextCastleChapters.sort((a, b) => a.chapterNumber - b.chapterNumber);
+                        const firstChapter = sortedNextChapters[0];
+                        
+                        const firstChapterProgress = await this.userChapterProgressRepo.getUserChapterProgressByUserAndChapter(userId, firstChapter.id);
+                        
+                        if (firstChapterProgress) {
+                            await this.userChapterProgressRepo.updateUserChapterProgress(firstChapterProgress.id, {
+                                unlocked: true
+                            });
+                        } else {
+                            await this.userChapterProgressRepo.createUserChapterProgress({
+                                user_id: userId,
+                                chapter_id: firstChapter.id,
+                                unlocked: true,
+                                completed: false
+                            });
+                        }
+                        console.log(`[UserChapterProgressService] Unlocked first chapter of next castle: ${firstChapter.title}`);
+                    }
+                } else {
+                    console.log(`[UserChapterProgressService] This is the last castle - no next castle to unlock`);
+                }
+            }
         } else {
-            console.log(`[UserChapterProgressService] No next chapter to unlock (last chapter or not found)`);
+            console.log(`[UserChapterProgressService] No next chapter to unlock (not found)`);
         }
         
         this._invalidateUserChapterProgressCache(progress?.id);

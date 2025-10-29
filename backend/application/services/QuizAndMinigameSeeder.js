@@ -2,7 +2,9 @@ const {
     castle1Chapter1Quizzes, 
     castle1Chapter1Minigames,
     castle1Chapter2Quizzes,
-    castle1Chapter2Minigames
+    castle1Chapter2Minigames,
+    castle1Chapter3Quizzes,
+    castle1Chapter3Minigames
 } = require('../../infrastructure/seeds/chapterSeeds');
 
 // Mapping of castle and chapter to their respective seed data
@@ -10,7 +12,7 @@ const QUIZ_SEEDS = {
     1: { // Castle 1
         1: castle1Chapter1Quizzes,
         2: castle1Chapter2Quizzes,
-        // 3: castle1Chapter3Quizzes, // Add when ready
+        3: castle1Chapter3Quizzes,
     },
     // 2: { // Castle 2 - Add when ready
     //     1: castle2Chapter1Quizzes,
@@ -21,7 +23,7 @@ const MINIGAME_SEEDS = {
     1: { // Castle 1
         1: castle1Chapter1Minigames,
         2: castle1Chapter2Minigames,
-        // 3: castle1Chapter3Minigames, // Add when ready
+        3: castle1Chapter3Minigames,
     },
     // 2: { // Castle 2 - Add when ready
     //     1: castle2Chapter1Minigames,

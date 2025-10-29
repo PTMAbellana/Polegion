@@ -87,12 +87,12 @@ export default function Chapter2Page() {
   })
 
   const XP_VALUES = {
-    lesson: 20,
-    minigame: 30,
-    quiz1: 15,
-    quiz2: 15,
-    quiz3: 20,
-    total: 100
+    lesson: 30,
+    minigame: 45,
+    quiz1: 20,
+    quiz2: 25,
+    quiz3: 30,
+    total: 150
   }
 
   const openingDialogue = [

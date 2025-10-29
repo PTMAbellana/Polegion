@@ -55,16 +55,18 @@ class UserCastleProgressRepo extends BaseRepo {
     }
 
     async updateUserCastleProgress(id, updateData) {
+        // Build update object with only provided fields
+        const updateObj = {};
+        if (updateData.unlocked !== undefined) updateObj.unlocked = updateData.unlocked;
+        if (updateData.completed !== undefined) updateObj.completed = updateData.completed;
+        if (updateData.total_xp_earned !== undefined) updateObj.total_xp_earned = updateData.total_xp_earned;
+        if (updateData.completion_percentage !== undefined) updateObj.completion_percentage = updateData.completion_percentage;
+        if (updateData.started_at !== undefined) updateObj.started_at = updateData.started_at;
+        if (updateData.completed_at !== undefined) updateObj.completed_at = updateData.completed_at;
+        
         const { data, error } = await this.supabase
             .from('user_castle_progress')
-            .update({
-                unlocked: updateData.unlocked,
-                completed: updateData.completed,
-                total_xp_earned: updateData.total_xp_earned,
-                completion_percentage: updateData.completion_percentage,
-                started_at: updateData.started_at,
-                completed_at: updateData.completed_at
-            })
+            .update(updateObj)
             .eq('id', id)
             .select()
             .single();
