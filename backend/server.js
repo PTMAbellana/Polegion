@@ -13,11 +13,14 @@ const {
     leaderboardRoutes,
     attemptsRoutes,
     competitionRoutes,
-    castleRoutes,
-    chapterRoutes,
-    progressRoutes,
-    minigameRoutes,  // newly added
-    quizRoutes    // newly added
+    castleRoutes,          // Newly Added
+    chapterQuizRoutes,     // Newly Added
+    chapterRoutes,         // Newly Added
+    minigameRoutes,       // Newly Added
+    userCastleProgressRoutes, // Newly Added
+    userChapterProgressRoutes, // Newly Added
+    userMinigameAttemptRoutes, // Newly Added
+    userQuizAttemptRoutes      // Newly Added
 } = require('./container')
 
 const app = express()
@@ -39,11 +42,14 @@ app.use('/api/problems', problemRoutes)
 app.use('/api/leaderboards', leaderboardRoutes)
 app.use('/api/attempts', attemptsRoutes)
 app.use('/api/competitions', competitionRoutes)
-app.use('/api/castles', castleRoutes)
-app.use('/api/chapters', chapterRoutes)
-app.use('/api/progress', progressRoutes)
-app.use('/api/minigames', minigameRoutes) // Newly Added
-app.use('/api/quizzes', quizRoutes)       // Newly Added
+app.use('/api/castles', castleRoutes)                     // Newly Added
+app.use('/api/chapter-quizzes', chapterQuizRoutes)        // Newly Added
+app.use('/api/chapters', chapterRoutes)                   // Newly Added
+app.use('/api/minigames', minigameRoutes)                 // Newly Added
+app.use('/api/user-castle-progress', userCastleProgressRoutes) // Newly Added
+app.use('/api/user-chapter-progress', userChapterProgressRoutes) // Newly Added
+app.use('/api/user-minigame-attempts', userMinigameAttemptRoutes) // Newly Added
+app.use('/api/user-quiz-attempts', userQuizAttemptRoutes)       // Newly Added
 //swagger documentation
 app.use('/api-docs', swaggerServe, swaggerSetup)
 

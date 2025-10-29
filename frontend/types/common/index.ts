@@ -6,3 +6,6 @@ export * from './competition';
 export * from './problem';
 export * from './leaderboard';
 export * from './records';
+export * from './castle';
+export * from './chapter';
+export * from './quiz';

@@ -1,153 +1,66 @@
 class ChapterController {
-  constructor(chapterService) {
-    this.chapterService = chapterService;
-  }
-
-  /**
-   * GET /api/castles/:castleId/chapters
-   * Get chapters for a castle with progress
-   */
-  getChaptersWithProgress = async (req, res) => {
-    try {
-      const { castleId } = req.params;
-      const { userId } = req.query;
-
-      if (!userId) {
-        return res.status(400).json({
-          success: false,
-          error: 'User ID is required'
-        });
-      }
-
-      const chapters = await this.chapterService.getChaptersWithProgress(userId, castleId);
-
-      res.json({
-        success: true,
-        data: chapters
-      });
-    } catch (error) {
-      console.error('[ChapterController] Error getting chapters:', error);
-      res.status(500).json({
-        success: false,
-        error: error.message || 'Failed to fetch chapters'
-      });
+    constructor(chapterService) {
+        this.chapterService = chapterService;
     }
-  };
 
-  /**
-   * POST /api/castles/:castleId/chapters/initialize
-   * Initialize chapter progress
-   */
-  initializeProgress = async (req, res) => {
-    try {
-      const { castleId } = req.params;
-      const { userId } = req.body;
-
-      if (!userId) {
-        return res.status(400).json({
-          success: false,
-          error: 'User ID is required'
-        });
-      }
-
-      const result = await this.chapterService.initializeChapterProgress(userId, castleId);
-
-      res.json(result);
-    } catch (error) {
-      console.error('[ChapterController] Error initializing chapter progress:', error);
-      res.status(500).json({
-        success: false,
-        error: error.message || 'Failed to initialize chapters'
-      });
+    async create(req, res) {
+        try {
+            const chapter = await this.chapterService.createChapter(req.body);
+            res.status(201).json(chapter);
+        } catch (err) {
+            res.status(400).json({ error: err.message });
+        }
     }
-  };
 
-  /**
-   * GET /api/chapters/:chapterId
-   * Get chapter details
-   */
-  getChapterDetails = async (req, res) => {
-    try {
-      const { chapterId } = req.params;
-      const { userId } = req.query;
-
-      if (!userId) {
-        return res.status(400).json({
-          success: false,
-          error: 'User ID is required'
-        });
-      }
-
-      const chapter = await this.chapterService.getChapterDetails(userId, chapterId);
-
-      res.json({
-        success: true,
-        data: chapter
-      });
-    } catch (error) {
-      console.error('[ChapterController] Error getting chapter details:', error);
-      res.status(500).json({
-        success: false,
-        error: error.message || 'Failed to fetch chapter'
-      });
+    async getById(req, res) {
+        try {
+            const chapter = await this.chapterService.getChapterById(req.params.id);
+            if (!chapter) return res.status(404).json({ error: 'Not found' });
+            res.json(chapter);
+        } catch (err) {
+            res.status(400).json({ error: err.message });
+        }
     }
-  };
 
-  /**
-   * PUT /api/chapters/:chapterId/complete
-   * Complete a chapter
-   */
-  completeChapter = async (req, res) => {
-    try {
-      const { chapterId } = req.params;
-      const { userId } = req.body;
-
-      if (!userId) {
-        return res.status(400).json({
-          success: false,
-          error: 'User ID is required'
-        });
-      }
-
-      const result = await this.chapterService.completeChapter(userId, chapterId);
-
-      res.json(result);
-    } catch (error) {
-      console.error('[ChapterController] Error completing chapter:', error);
-      res.status(500).json({
-        success: false,
-        error: error.message || 'Failed to complete chapter'
-      });
+    async getAll(req, res) {
+        try {
+            const chapters = await this.chapterService.getAllChapters();
+            res.json(chapters);
+        } catch (err) {
+            res.status(400).json({ error: err.message });
+        }
     }
-  };
 
-  /**
-   * PUT /api/chapters/:chapterId/quiz
-   * Update quiz status
-   */
-  updateQuizStatus = async (req, res) => {
-    try {
-      const { chapterId } = req.params;
-      const { userId, passed, xpEarned } = req.body;
-
-      if (!userId) {
-        return res.status(400).json({
-          success: false,
-          error: 'User ID is required'
-        });
-      }
-
-      const result = await this.chapterService.updateQuizStatus(userId, chapterId, passed, xpEarned);
-
-      res.json(result);
-    } catch (error) {
-      console.error('[ChapterController] Error updating quiz status:', error);
-      res.status(500).json({
-        success: false,
-        error: error.message || 'Failed to update quiz'
-      });
+    async getByCastleId(req, res) {
+        try {
+            console.log('[ChapterController] Getting chapters for castle:', req.params.castleId);
+            const chapters = await this.chapterService.getChaptersByCastleId(req.params.castleId);
+            res.json({ success: true, data: chapters });
+        } catch (err) {
+            console.error('[ChapterController] Error getting chapters by castle:', err);
+            res.status(400).json({ success: false, error: err.message });
+        }
     }
-  };
+
+    async update(req, res) {
+        try {
+            const chapter = await this.chapterService.updateChapter(req.params.id, req.body);
+            if (!chapter) return res.status(404).json({ error: 'Not found' });
+            res.json(chapter);
+        } catch (err) {
+            res.status(400).json({ error: err.message });
+        }
+    }
+
+    async delete(req, res) {
+        try {
+            const chapter = await this.chapterService.deleteChapter(req.params.id);
+            if (!chapter) return res.status(404).json({ error: 'Not found' });
+            res.json({ success: true });
+        } catch (err) {
+            res.status(400).json({ error: err.message });
+        }
+    }
 }
 
 module.exports = ChapterController;

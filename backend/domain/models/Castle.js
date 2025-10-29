@@ -49,11 +49,11 @@ class Castle {
       description: this.description,
       difficulty: this.difficulty,
       terrain: this.terrain,
-      imageNumber: this.imageNumber,
-      totalXp: this.totalXp,
-      unlockOrder: this.unlockOrder,
+      image_number: this.imageNumber,
+      total_xp: this.totalXp,
+      unlock_order: this.unlockOrder,
       route: this.route,
-      createdAt: this.createdAt
+      created_at: this.createdAt
     };
   }
 }

@@ -4,6 +4,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/authStore';
 import { useTeacherRoomStore } from '@/store/teacherRoomStore';
 import { useStudentRoomStore } from '@/store/studentRoomStore';
+import { useCastleStore } from '@/store/castleStore';
 import Loader from '@/components/Loader';
 import { ROUTES, PUBLIC_ROUTES, STUDENT_ROUTES } from '@/constants/routes';
 
@@ -19,6 +20,7 @@ export default function AppProvider({ children }: { children: React.ReactNode })
   
   const { fetchCreatedRooms } = useTeacherRoomStore();
   const { fetchJoinedRooms } = useStudentRoomStore();
+  const { fetchCastles } = useCastleStore();
   
   const [localLoading, setLocalLoading] = useState(true);
   const router = useRouter();
@@ -60,6 +62,10 @@ export default function AppProvider({ children }: { children: React.ReactNode })
             fetchCreatedRooms();
           } else if (userProfile.role === 'student') {
             fetchJoinedRooms();
+            // Fetch castles for students
+            if (userProfile.id) {
+              fetchCastles(userProfile.id);
+            }
           }
         }
       } catch (error) {
@@ -80,7 +86,8 @@ export default function AppProvider({ children }: { children: React.ReactNode })
     authLoading,
     authToken,
     fetchCreatedRooms,
-    fetchJoinedRooms
+    fetchJoinedRooms,
+    fetchCastles
   ]);
 
   const isLoading = appLoading || authLoading || localLoading;

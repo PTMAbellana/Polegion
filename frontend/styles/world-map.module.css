@@ -206,7 +206,7 @@
 }
 
 /* ========================================
-   CASTLE MARKER
+   CASTLE MARKER - CAROUSEL ITEM
    ======================================== */
 
 .castle_marker {
@@ -215,54 +215,138 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: 100vh;
-  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
-  color: white;
-  text-align: center;
-  padding: 20px;
-  margin-left: 70px;
-  transition: margin-left 0.3s ease;
-}
-
-.loading_container.expanded,
-.error_container.expanded {
-  margin-left: 250px;
-}
-
-.loading_container p {
-  margin-top: 20px;
-  font-size: 18px;
-  font-family: 'Cinzel', serif;
-  color: #f4e4c1;
-}
-
-.error_container h2 {
-  font-size: 36px;
-  margin-bottom: 10px;
-  font-family: 'MedievalSharp', cursive;
-  color: #ff6b6b;
-}
-
-.error_container p {
-  font-size: 16px;
-  margin-bottom: 20px;
-  color: #f4e4c1;
-}
-
-.error_container button {
-  padding: 12px 30px;
-  background: linear-gradient(135deg, #8b7355, #5a3e2b);
-  color: #f4e4c1;
-  border: 2px solid #5a3e2b;
-  border-radius: 8px;
-  font-size: 16px;
-  font-weight: 600;
+  gap: 1rem;
   cursor: pointer;
-  transition: all 0.4s ease;
-  filter: drop-shadow(0 10px 25px rgba(0, 0, 0, 0.6));
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  filter: drop-shadow(0 8px 25px rgba(0, 0, 0, 0.6));
 }
 
-/* ==================== RESPONSIVE ==================== */
+/* Castle Size Variants */
+.current_castle {
+  width: 320px;
+  z-index: 20;
+}
+
+.side_castle {
+  width: 220px;
+  opacity: 0.6;
+  filter: drop-shadow(0 5px 15px rgba(0, 0, 0, 0.4));
+}
+
+/* Hover & Interaction States */
+.castle_marker:hover {
+  transform: translateY(-10px);
+  filter: drop-shadow(0 12px 35px rgba(218, 165, 32, 0.6));
+}
+
+.current_castle:hover {
+  transform: translateY(-15px) scale(1.05);
+}
+
+.side_castle:hover {
+  opacity: 0.85;
+  transform: translateY(-8px) scale(1.03);
+}
+
+.castle_marker.selected {
+  filter: drop-shadow(0 0 30px rgba(218, 165, 32, 0.8));
+}
+
+/* Image Container */
+.castle_image_container {
+  position: relative;
+  width: 100%;
+  height: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.castle_image {
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  transition: all 0.4s ease;
+  border-radius: 10px;
+}
+
+/* Locked State Filter */
+.locked_filter {
+  filter: grayscale(100%) brightness(0.5);
+  opacity: 0.6;
+}
+
+/* Completion Crown */
+.completion_crown {
+  position: absolute;
+  top: -15px;
+  right: 10%;
+  font-size: 3rem;
+  animation: floatCrown 2s ease-in-out infinite;
+  filter: drop-shadow(0 4px 12px rgba(255, 215, 0, 0.8));
+  z-index: 5;
+}
+
+@keyframes floatCrown {
+  0%, 100% {
+    transform: translateY(0) rotate(-5deg);
+  }
+  50% {
+    transform: translateY(-8px) rotate(5deg);
+  }
+}
+
+/* Lock Overlay */
+.lock_overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 4rem;
+  animation: lockPulse 2s ease-in-out infinite;
+  filter: drop-shadow(0 4px 15px rgba(0, 0, 0, 0.9));
+  z-index: 5;
+}
+
+@keyframes lockPulse {
+  0%, 100% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0.9;
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.1);
+    opacity: 1;
+  }
+}
+
+/* Castle Name Plate */
+.castle_name_plate {
+  background: linear-gradient(145deg, rgba(20, 20, 20, 0.9), rgba(40, 30, 20, 0.9));
+  backdrop-filter: blur(10px);
+  padding: 0.5rem 1.5rem;
+  border-radius: 30px;
+  border: 2px solid rgba(139, 69, 19, 0.6);
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #daa520;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.7);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  min-width: 160px;
+  text-align: center;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+  transition: all 0.3s ease;
+}
+
+.castle_marker:hover .castle_name_plate {
+  border-color: #daa520;
+  box-shadow: 0 6px 20px rgba(218, 165, 32, 0.5);
+}
+
+/* ========================================
+   RESPONSIVE - CASTLE SIZES
+   ======================================== */
+   
 @media (max-width: 1400px) {
   .current_castle {
     width: 280px;
@@ -273,7 +357,16 @@
   }
 
   .carousel_track {
-    gap: 35px;
+    gap: 1.75rem;
+  }
+
+  .completion_crown {
+    font-size: 2.5rem;
+    top: -12px;
+  }
+
+  .lock_overlay {
+    font-size: 3.5rem;
   }
 }
 
@@ -287,12 +380,25 @@
   }
 
   .carousel_track {
-    gap: 30px;
+    gap: 1.5rem;
   }
 
-  .stats_section,
-  .castle_info_grid {
-    grid-template-columns: repeat(2, 1fr);
+  .stats_panel {
+    gap: 1.5rem;
+    padding: 0.85rem 1.5rem;
+  }
+
+  .stat_value {
+    font-size: 1.3rem;
+  }
+
+  .completion_crown {
+    font-size: 2.25rem;
+    top: -10px;
+  }
+
+  .lock_overlay {
+    font-size: 3rem;
   }
 }
 
@@ -334,15 +440,53 @@
   }
 
   .main_content {
-    padding: 15px 20px;
+    padding: 1rem 1.25rem;
   }
 
-  .stats_section {
-    grid-template-columns: repeat(2, 1fr);
+  .stats_panel {
+    gap: 1.25rem;
+    padding: 0.75rem 1.25rem;
   }
 
-  .castle_info_grid {
-    grid-template-columns: repeat(2, 1fr);
+  .completion_crown {
+    font-size: 2rem;
+    top: -8px;
+  }
+
+  .lock_overlay {
+    font-size: 2.75rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .carousel_track {
+    gap: 1rem;
+  }
+
+  .stats_panel {
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 1rem 1.5rem;
+  }
+
+  .stat_item {
+    flex-direction: row;
+    justify-content: space-between;
+    width: 100%;
+  }
+
+  .carousel_arrow {
+    width: 50px;
+    height: 50px;
+  }
+
+  .modal_content {
+    padding: 2rem;
+    max-width: 90vw;
+  }
+
+  .modal_content h2 {
+    font-size: 1.75rem;
   }
 }
 
@@ -361,30 +505,56 @@
   }
 
   .carousel_track {
-    gap: 20px;
+    gap: 0.75rem;
   }
 
   .castle_name_plate {
-    font-size: 14px;
-    padding: 6px 15px;
+    font-size: 0.9rem;
+    padding: 0.4rem 1rem;
+    min-width: 140px;
   }
 
-  .info_card {
-    padding: 15px;
+  .completion_crown {
+    font-size: 1.75rem;
+    top: -6px;
   }
 
-  .castle_details_title {
-    font-size: 20px;
+  .lock_overlay {
+    font-size: 2.5rem;
   }
 
-  .stats_section {
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
+  .stats_panel {
+    padding: 0.85rem 1rem;
   }
 
-  .castle_info_grid {
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
+  .stat_label {
+    font-size: 0.75rem;
+  }
+
+  .stat_value {
+    font-size: 1.1rem;
+  }
+
+  .modal_content {
+    padding: 1.5rem;
+  }
+
+  .modal_content h2 {
+    font-size: 1.5rem;
+  }
+
+  .castle_description {
+    font-size: 0.9rem;
+    padding: 0.85rem;
+  }
+
+  .castle_info p {
+    font-size: 0.85rem;
+  }
+
+  .enter_button {
+    padding: 0.85rem 1.5rem;
+    font-size: 1rem;
   }
 }
 
@@ -672,29 +842,71 @@
 
 @media (max-width: 768px) {
   .world_map_logo {
-    width: 140px; /* CHANGE from 100px to 140px */
+    width: 140px;
     top: 1rem;
     right: 1rem;
-  }
-  
-  .castle_name_plate {
-    font-size: 1rem;
-    padding: 0.4rem 1rem;
-    min-width: 140px;
   }
 }
 
 @media (max-width: 480px) {
   .world_map_logo {
-    width: 110px; /* CHANGE from 80px to 110px */
+    width: 110px;
     top: 0.75rem;
     right: 0.75rem;
   }
-  
-  .castle_name_plate {
-    font-size: 0.9rem;
-    padding: 0.35rem 0.85rem;
-    min-width: 120px;
+}
+
+/* ========================================
+   SMOOTH SCROLLING FOR MODAL
+   ======================================== */
+
+.modal_content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.modal_content::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 10px;
+}
+
+.modal_content::-webkit-scrollbar-thumb {
+  background: rgba(139, 69, 19, 0.6);
+  border-radius: 10px;
+  border: 2px solid rgba(40, 30, 20, 0.95);
+}
+
+.modal_content::-webkit-scrollbar-thumb:hover {
+  background: rgba(218, 165, 32, 0.8);
+}
+
+/* ========================================
+   ACCESSIBILITY & POLISH
+   ======================================== */
+
+.carousel_arrow:focus-visible,
+.close_button:focus-visible,
+.enter_button:focus-visible,
+.indicator_dot:focus-visible {
+  outline: 3px solid rgba(218, 165, 32, 0.8);
+  outline-offset: 2px;
+}
+
+/* Reduce motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .castle_marker,
+  .castle_image,
+  .completion_crown,
+  .lock_overlay,
+  .castle_name_plate,
+  .carousel_arrow,
+  .indicator_dot,
+  .modal_overlay,
+  .modal_content,
+  .enter_button,
+  .close_button {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }
 

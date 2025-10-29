@@ -1,49 +1,26 @@
 import api from './axios';
 
-/**
- * Chapter API - Handles all chapter-related requests
- */
-
-// Complete a chapter
-export const completeChapter = async (chapterId, userId, xpEarned) => {
-  try {
-    const response = await api.post(`/chapters/${chapterId}/complete`, {
-      userId,
-      xpEarned
-    });
-    return response.data;
-  } catch (error) {
-    console.error('[Chapters API] Error completing chapter:', error);
-    throw error;
-  }
+export const getChaptersByCastle = async (castleId) => {
+  const res = await api.get(`/chapters/castle/${castleId}`);
+  return res.data;
 };
 
-/**
- * Update quiz status
- */
-export const updateQuizStatus = async (chapterId, userId, passed, xpEarned) => {
-  try {
-    const response = await api.post(`/chapters/${chapterId}/quiz`, {
-      userId,
-      passed,
-      xpEarned
-    });
-    return response.data;
-  } catch (error) {
-    console.error('[Chapters API] Error updating quiz status:', error);
-    throw error;
-  }
+export const getChapterById = async (chapterId) => {
+  const res = await api.get(`/chapters/${chapterId}`);
+  return res.data;
 };
 
-/**
- * Get chapter by ID
- */
-export const getChapterById = async (chapterId, userId) => {
-  try {
-    const response = await api.get(`/chapters/${chapterId}?userId=${userId}`);
-    return response.data;
-  } catch (error) {
-    console.error('[Chapters API] Error fetching chapter:', error);
-    throw error;
-  }
+export const startChapter = async (chapterId) => {
+  const res = await api.post(`/user-chapter-progress/start/${chapterId}`);
+  return res.data;
+};
+
+export const completeChapter = async (chapterId) => {
+  const res = await api.post(`/user-chapter-progress/${chapterId}/complete`);
+  return res.data;
+};
+
+export const awardLessonXP = async (chapterId, xpAmount) => {
+  const res = await api.post(`/user-chapter-progress/${chapterId}/award-xp`, { xp_amount: xpAmount });
+  return res.data;
 };

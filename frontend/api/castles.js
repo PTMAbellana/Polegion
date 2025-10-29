@@ -3,21 +3,15 @@ import api from './axios'
 // Get all castles with optional user progress
 export const getAllCastles = async (userId) => {
     try {
-        const endpoint = userId ? `castles/?userId=${userId}` : 'castles/'
+        const endpoint = userId ? `castles?userId=${userId}` : 'castles'
+        console.log('[CastleAPI] Fetching from endpoint:', endpoint)
         const res = await api.get(endpoint)
-        return {
-            success: true,
-            data: res.data.data,
-            message: res.data.message || 'Castles fetched successfully'
-        }
+        console.log('[CastleAPI] Response:', res.data)
+        return res.data.data || []
     } catch (error) {
-        console.log('Error fetching castles:', error)
-        return {
-            success: false,
-            message: error.response?.data?.message || 'Server error fetching castles',
-            error: error.response?.data?.error || error.message,
-            status: error.response?.status || 500
-        }
+        console.error('[CastleAPI] Error fetching castles:', error)
+        console.error('[CastleAPI] Error response:', error.response?.data)
+        throw error
     }
 }
 
@@ -28,58 +22,37 @@ export const getCastleById = async (castleId, userId) => {
             ? `castles/${castleId}?userId=${userId}` 
             : `castles/${castleId}`
         const res = await api.get(endpoint)
-        return {
-            success: true,
-            data: res.data.data,
-            message: res.data.message || 'Castle fetched successfully'
-        }
+        return res.data.data
     } catch (error) {
-        console.log('Error fetching castle:', error)
-        return {
-            success: false,
-            message: error.response?.data?.message || 'Server error fetching castle',
-            error: error.response?.data?.error || error.message,
-            status: error.response?.status || 500
-        }
+        console.error('Error fetching castle:', error)
+        throw error
     }
 }
 
-// Get chapters for a castle with user progress
-export const getChaptersWithProgress = async (castleId, userId) => {
+// Initialize user progress for a castle
+export const initializeCastleProgress = async (userId, castleRoute) => {
     try {
-        const res = await api.get(`castles/${castleId}/chapters?userId=${userId}`)
-        return {
-            success: true,
-            data: res.data.data,
-            message: res.data.message || 'Chapters fetched successfully'
-        }
+        console.log('[CastleAPI] Initializing castle progress:', { userId, castleRoute })
+        const res = await api.post('castles/initialize', { userId, castleRoute })
+        console.log('[CastleAPI] Initialize response:', res.data)
+        return res.data
     } catch (error) {
-        console.log('Error fetching chapters:', error)
-        return {
-            success: false,
-            message: error.response?.data?.message || 'Server error fetching chapters',
-            error: error.response?.data?.error || error.message,
-            status: error.response?.status || 500
+        console.error('[CastleAPI] Error initializing castle:', error)
+        console.error('[CastleAPI] Error type:', error.name)
+        console.error('[CastleAPI] Error message:', error.message)
+        console.error('[CastleAPI] Error response:', error.response?.data)
+        console.error('[CastleAPI] Error request:', error.request ? 'Request was made but no response' : 'Request was not made')
+        console.error('[CastleAPI] Error config:', error.config?.url, error.config?.method)
+        
+        // Provide more specific error messages
+        if (!error.response) {
+            if (error.request) {
+                throw new Error('Server not responding. Please check if the backend is running.')
+            } else {
+                throw new Error('Failed to make request: ' + error.message)
+            }
         }
-    }
-}
-
-// Unlock a castle for a user
-export const unlockCastle = async (userId, castleId) => {
-    try {
-        const res = await api.post(`castles/${castleId}/unlock`, { userId })
-        return {
-            success: true,
-            data: res.data.data,
-            message: res.data.message || 'Castle unlocked successfully'
-        }
-    } catch (error) {
-        console.log('Error unlocking castle:', error)
-        return {
-            success: false,
-            message: error.response?.data?.message || 'Server error unlocking castle',
-            error: error.response?.data?.error || error.message,
-            status: error.response?.status || 500
-        }
+        
+        throw error
     }
 }

@@ -1,49 +1,45 @@
 class Chapter {
-  constructor({
-    id,
-    castleId,
-    title,
-    description,
-    chapterNumber,
-    xpReward,
-    content,
-    createdAt
-  }) {
-    this.id = id;
-    this.castleId = castleId;
-    this.title = title;
-    this.description = description;
-    this.chapterNumber = chapterNumber;
-    this.xpReward = xpReward;
-    this.content = content;
-    this.createdAt = createdAt;
-  }
+    constructor({
+        id,
+        castle_id,
+        title,
+        description,
+        chapter_number,
+        xp_reward,
+        created_at
+    }) {
+        this.id = id;
+        this.castleId = castle_id;
+        this.title = title;
+        this.description = description;
+        this.chapterNumber = chapter_number;
+        this.xpReward = xp_reward;
+        this.createdAt = created_at;
+    }
 
-  static fromDatabase(data) {
-    return new Chapter({
-      id: data.id,
-      castleId: data.castle_id,
-      title: data.title,
-      description: data.description,
-      chapterNumber: data.chapter_number,
-      xpReward: data.xp_reward,
-      content: data.content,
-      createdAt: data.created_at
-    });
-  }
+    static fromDatabase(row) {
+        return new Chapter({
+            id: row.id,
+            castle_id: row.castle_id,
+            title: row.title,
+            description: row.description,
+            chapter_number: row.chapter_number,
+            xp_reward: row.xp_reward,
+            created_at: row.created_at
+        });
+    }
 
-  toJSON() {
-    return {
-      id: this.id,
-      castleId: this.castleId,
-      title: this.title,
-      description: this.description,
-      chapterNumber: this.chapterNumber,
-      xpReward: this.xpReward,
-      content: this.content,
-      createdAt: this.createdAt
-    };
-  }
+    toJSON() {
+        return {
+            id: this.id,
+            castle_id: this.castleId,
+            title: this.title,
+            description: this.description,
+            chapter_number: this.chapterNumber,
+            xp_reward: this.xpReward,
+            created_at: this.createdAt
+        };
+    }
 }
 
 module.exports = Chapter;

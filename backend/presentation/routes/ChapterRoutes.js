@@ -1,48 +1,80 @@
 const express = require('express');
 
+/**
+ * @swagger
+ * tags:
+ *   name: Chapters
+ *   description: Chapter management
+ */
 class ChapterRoutes {
-  constructor(chapterController, authMiddleware) {
-    this.router = express.Router();
-    this.chapterController = chapterController;
-    this.authMiddleware = authMiddleware;
-    this.initializeRoutes();
-  }
+    constructor(chapterController, authMiddleware) {
+        this.chapterController = chapterController;
+        this.authMiddleware = authMiddleware;
+        this.router = express.Router();
+        this.initializeRoutes();
+    }
 
-  initializeRoutes() {
-    /**
-     * @route   POST /api/chapters/:id/complete
-     * @desc    Mark chapter as complete
-     * @access  Private
-     */
-    this.router.post('/:id/complete',
-      this.authMiddleware.protect.bind(this.authMiddleware),
-      (req, res) => this.chapterController.completeChapter(req, res)
-    );
+    initializeRoutes() {
+        this.router.use(this.authMiddleware.protect);
 
-    /**
-     * @route   POST /api/chapters/:id/quiz
-     * @desc    Submit quiz result
-     * @access  Private
-     */
-    this.router.post('/:id/quiz',
-      this.authMiddleware.protect.bind(this.authMiddleware),
-      (req, res) => this.chapterController.submitQuiz(req, res)
-    );
+        /**
+         * @swagger
+         * /chapters:
+         *   post:
+         *     tags: [Chapters]
+         *     summary: Create a new chapter
+         */
+        this.router.post('/', this.chapterController.create.bind(this.chapterController));
 
-    /**
-     * @route   GET /api/chapters/:id
-     * @desc    Get chapter by ID
-     * @access  Private
-     */
-    this.router.get('/:id',
-      this.authMiddleware.protect.bind(this.authMiddleware),
-      (req, res) => this.chapterController.getChapterById(req, res)
-    );
-  }
+        /**
+         * @swagger
+         * /chapters:
+         *   get:
+         *     tags: [Chapters]
+         *     summary: Get all chapters
+         */
+        this.router.get('/', this.chapterController.getAll.bind(this.chapterController));
 
-  getRouter() {
-    return this.router;
-  }
+        /**
+         * @swagger
+         * /chapters/castle/{castleId}:
+         *   get:
+         *     tags: [Chapters]
+         *     summary: Get chapters by castle ID
+         */
+        this.router.get('/castle/:castleId', this.chapterController.getByCastleId.bind(this.chapterController));
+
+        /**
+         * @swagger
+         * /chapters/{id}:
+         *   get:
+         *     tags: [Chapters]
+         *     summary: Get a chapter by ID
+         */
+        this.router.get('/:id', this.chapterController.getById.bind(this.chapterController));
+
+        /**
+         * @swagger
+         * /chapters/{id}:
+         *   put:
+         *     tags: [Chapters]
+         *     summary: Update a chapter
+         */
+        this.router.put('/:id', this.chapterController.update.bind(this.chapterController));
+
+        /**
+         * @swagger
+         * /chapters/{id}:
+         *   delete:
+         *     tags: [Chapters]
+         *     summary: Delete a chapter
+         */
+        this.router.delete('/:id', this.chapterController.delete.bind(this.chapterController));
+    }
+
+    getRouter() {
+        return this.router;
+    }
 }
 
 module.exports = ChapterRoutes;
