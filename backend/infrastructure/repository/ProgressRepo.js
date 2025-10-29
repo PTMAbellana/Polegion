@@ -1,204 +1,266 @@
 const BaseRepo = require('./BaseRepo');
 
 class ProgressRepo extends BaseRepo {
-  constructor(supabase) {
-    super(supabase, 'user_castle_progress'); // Fixed table name
-  }
-
-  /**
-   * Find all castle progress for a user
-   */
-  async findByUserId(userId) {
-    try {
-      const { data, error } = await this.supabase
-        .from('user_castle_progress')
-        .select('*')
-        .eq('user_id', userId);
-
-      if (error) throw error;
-      return data || [];
-    } catch (error) {
-      console.error('[ProgressRepo] Error finding progress by user ID:', error);
-      throw error;
+    constructor(supabase) {
+        super(supabase, 'user_castle_progress');
+        this.castleProgressTable = 'user_castle_progress';
+        this.chapterProgressTable = 'user_chapter_progress';
     }
-  }
 
-  /**
-   * Find castle progress for a specific user and castle
-   */
-  async findByCastleAndUser(castleId, userId) {
-    try {
-      const { data, error } = await this.supabase
-        .from('user_castle_progress')
-        .select('*')
-        .eq('castle_id', castleId)
-        .eq('user_id', userId)
-        .single();
+    // ==================== CASTLE PROGRESS ====================
+    
+    async findCastleProgress(userId, castleId) {
+        try {
+            console.log(`[ProgressRepo] Finding castle progress for user ${userId}, castle ${castleId}`);
+            
+            const { data, error } = await this.supabase
+                .from(this.castleProgressTable)
+                .select('*')
+                .eq('user_id', userId)
+                .eq('castle_id', castleId)
+                .maybeSingle();
 
-      if (error && error.code !== 'PGRST116') throw error; // PGRST116 = no rows returned
-      return data;
-    } catch (error) {
-      console.error('[ProgressRepo] Error finding castle progress:', error);
-      throw error;
+            if (error) {
+                console.error('[ProgressRepo] Error finding castle progress:', error);
+                throw error;
+            }
+
+            console.log(`[ProgressRepo] Castle progress found:`, !!data);
+            return data;
+        } catch (error) {
+            console.error('[ProgressRepo] Error in findCastleProgress:', error);
+            throw error;
+        }
     }
-  }
 
-  /**
-   * Find all chapter progress for a user
-   */
-  async findChapterProgressByUser(userId) {
-    try {
-      const { data, error } = await this.supabase
-        .from('user_chapter_progress')
-        .select('*')
-        .eq('user_id', userId);
+    async createCastleProgress(progressData) {
+        try {
+            console.log(`[ProgressRepo] Creating castle progress:`, {
+                user_id: progressData.user_id,
+                castle_id: progressData.castle_id,
+                unlocked: progressData.unlocked
+            });
 
-      if (error) throw error;
-      return data || [];
-    } catch (error) {
-      console.error('[ProgressRepo] Error finding chapter progress:', error);
-      throw error;
+            const { data, error } = await this.supabase
+                .from(this.castleProgressTable)
+                .insert(progressData)
+                .select()
+                .single();
+
+            if (error) {
+                console.error('[ProgressRepo] Error creating castle progress:', error);
+                throw error;
+            }
+
+            console.log(`[ProgressRepo] ✅ Castle progress created:`, data.id);
+            return data;
+        } catch (error) {
+            console.error('[ProgressRepo] Error in createCastleProgress:', error);
+            throw error;
+        }
     }
-  }
 
-  /**
-   * Create or update castle progress
-   */
-  async upsertCastleProgress(progressData) {
-    try {
-      const { data, error } = await this.supabase
-        .from('user_castle_progress')
-        .upsert(progressData, {
-          onConflict: 'user_id,castle_id'
-        })
-        .select()
-        .single();
+    async updateCastleProgress(userId, castleId, updates) {
+        try {
+            console.log(`[ProgressRepo] Updating castle progress:`, {
+                user_id: userId,
+                castle_id: castleId,
+                updates
+            });
 
-      if (error) throw error;
-      return data;
-    } catch (error) {
-      console.error('[ProgressRepo] Error upserting castle progress:', error);
-      throw error;
+            const { data, error } = await this.supabase
+                .from(this.castleProgressTable)
+                .update({ ...updates, updated_at: new Date().toISOString() })
+                .eq('user_id', userId)
+                .eq('castle_id', castleId)
+                .select()
+                .single();
+
+            if (error) {
+                console.error('[ProgressRepo] Error updating castle progress:', error);
+                throw error;
+            }
+
+            console.log(`[ProgressRepo] ✅ Castle progress updated`);
+            return data;
+        } catch (error) {
+            console.error('[ProgressRepo] Error in updateCastleProgress:', error);
+            throw error;
+        }
     }
-  }
 
-  /**
-   * Create or update chapter progress
-   */
-  async upsertChapterProgress(progressData) {
-    try {
-      const { data, error } = await this.supabase
-        .from('user_chapter_progress')
-        .upsert(progressData, {
-          onConflict: 'user_id,chapter_id'
-        })
-        .select()
-        .single();
+    async findAllCastleProgress(userId) {
+        try {
+            console.log(`[ProgressRepo] Finding all castle progress for user ${userId}`);
+            
+            const { data, error } = await this.supabase
+                .from(this.castleProgressTable)
+                .select('*')
+                .eq('user_id', userId)
+                .order('created_at', { ascending: true });
 
-      if (error) throw error;
-      return data;
-    } catch (error) {
-      console.error('[ProgressRepo] Error upserting chapter progress:', error);
-      throw error;
+            if (error) {
+                console.error('[ProgressRepo] Error finding all castle progress:', error);
+                throw error;
+            }
+
+            console.log(`[ProgressRepo] Found ${data?.length || 0} castle progress records`);
+            return data || [];
+        } catch (error) {
+            console.error('[ProgressRepo] Error in findAllCastleProgress:', error);
+            throw error;
+        }
     }
-  }
 
-  /**
-   * Update castle progress percentage
-   */
-  async updateCastleProgressPercentage(userId, castleId, percentage, xpEarned) {
-    try {
-      const { data, error } = await this.supabase
-        .from('user_castle_progress')
-        .update({
-          completion_percentage: percentage,
-          total_xp_earned: xpEarned,
-          updated_at: new Date().toISOString()
-        })
-        .eq('user_id', userId)
-        .eq('castle_id', castleId)
-        .select()
-        .single();
+    // ==================== CHAPTER PROGRESS ====================
+    
+    async findChapterProgress(userId, chapterId) {
+        try {
+            console.log(`[ProgressRepo] Finding chapter progress for user ${userId}, chapter ${chapterId}`);
+            
+            const { data, error } = await this.supabase
+                .from(this.chapterProgressTable)
+                .select('*')
+                .eq('user_id', userId)
+                .eq('chapter_id', chapterId)
+                .maybeSingle();
 
-      if (error) throw error;
-      return data;
-    } catch (error) {
-      console.error('[ProgressRepo] Error updating castle progress percentage:', error);
-      throw error;
+            if (error) {
+                console.error('[ProgressRepo] Error finding chapter progress:', error);
+                throw error;
+            }
+
+            console.log(`[ProgressRepo] Chapter progress found:`, !!data);
+            return data;
+        } catch (error) {
+            console.error('[ProgressRepo] Error in findChapterProgress:', error);
+            throw error;
+        }
     }
-  }
 
-  /**
-   * Mark castle as completed
-   */
-  async completeCastle(userId, castleId) {
-    try {
-      const { data, error } = await this.supabase
-        .from('user_castle_progress')
-        .update({
-          completed: true,
-          completion_percentage: 100,
-          completed_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        })
-        .eq('user_id', userId)
-        .eq('castle_id', castleId)
-        .select()
-        .single();
+    async createChapterProgress(progressData) {
+        try {
+            console.log(`[ProgressRepo] Creating chapter progress:`, {
+                user_id: progressData.user_id,
+                chapter_id: progressData.chapter_id,
+                unlocked: progressData.unlocked
+            });
 
-      if (error) throw error;
-      return data;
-    } catch (error) {
-      console.error('[ProgressRepo] Error completing castle:', error);
-      throw error;
+            const { data, error } = await this.supabase
+                .from(this.chapterProgressTable)
+                .insert(progressData)
+                .select()
+                .single();
+
+            if (error) {
+                console.error('[ProgressRepo] Error creating chapter progress:', error);
+                throw error;
+            }
+
+            console.log(`[ProgressRepo] ✅ Chapter progress created:`, data.id);
+            return data;
+        } catch (error) {
+            console.error('[ProgressRepo] Error in createChapterProgress:', error);
+            throw error;
+        }
     }
-  }
 
-  /**
-   * Unlock a castle for a user
-   */
-  async unlockCastle(userId, castleId) {
-    try {
-      // Check if progress exists
-      const existing = await this.findByCastleAndUser(castleId, userId);
+    async updateChapterProgress(userId, chapterId, updates) {
+        try {
+            console.log(`[ProgressRepo] Updating chapter progress:`, {
+                user_id: userId,
+                chapter_id: chapterId,
+                updates
+            });
 
-      if (existing) {
-        // Update existing record
-        const { data, error } = await this.supabase
-          .from('user_castle_progress')
-          .update({
-            unlocked: true,
-            started_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
-          })
-          .eq('user_id', userId)
-          .eq('castle_id', castleId)
-          .select()
-          .single();
+            const { data, error } = await this.supabase
+                .from(this.chapterProgressTable)
+                .update({ ...updates, updated_at: new Date().toISOString() })
+                .eq('user_id', userId)
+                .eq('chapter_id', chapterId)
+                .select()
+                .single();
 
-        if (error) throw error;
-        return data;
-      } else {
-        // Create new record
-        const { data, error } = await this.supabase
-          .from('user_castle_progress')
-          .insert({
-            user_id: userId,
-            castle_id: castleId,
-            unlocked: true,
-            started_at: new Date().toISOString()
-          })
-          .select()
-          .single();
+            if (error) {
+                console.error('[ProgressRepo] Error updating chapter progress:', error);
+                throw error;
+            }
 
-        if (error) throw error;
-        return data;
-      }
-    } catch (error) {
-      console.error('[ProgressRepo] Error unlocking castle:', error);
-      throw error;
+            console.log(`[ProgressRepo] ✅ Chapter progress updated`);
+            return data;
+        } catch (error) {
+            console.error('[ProgressRepo] Error in updateChapterProgress:', error);
+            throw error;
+        }
     }
-  }
+
+    async createOrUpdateChapterProgress(progressData) {
+        try {
+            console.log(`[ProgressRepo] Creating or updating chapter progress:`, {
+                user_id: progressData.user_id,
+                chapter_id: progressData.chapter_id,
+                unlocked: progressData.unlocked
+            });
+
+            const existing = await this.findChapterProgress(
+                progressData.user_id,
+                progressData.chapter_id
+            );
+
+            if (existing) {
+                return await this.updateChapterProgress(existing.id, progressData);
+            }
+
+            return await this.createChapterProgress(progressData);
+        } catch (error) {
+            console.error('[ProgressRepo] Error in createOrUpdateChapterProgress:', error);
+            throw error;
+        }
+    }
+
+    async findAllChapterProgressForCastle(userId, castleId) {
+        try {
+            console.log(`[ProgressRepo] Finding all chapter progress for user ${userId}, castle ${castleId}`);
+            
+            // First get all chapters for this castle
+            const { data: chapters, error: chaptersError } = await this.supabase
+                .from('chapters')
+                .select('id')
+                .eq('castle_id', castleId);
+
+            if (chaptersError) {
+                console.error('[ProgressRepo] Error finding chapters:', chaptersError);
+                throw chaptersError;
+            }
+
+            if (!chapters || chapters.length === 0) {
+                console.log(`[ProgressRepo] No chapters found for castle ${castleId}`);
+                return [];
+            }
+
+            const chapterIds = chapters.map(ch => ch.id);
+            console.log(`[ProgressRepo] Found ${chapterIds.length} chapters, fetching progress...`);
+
+            // Then get progress for those chapters
+            const { data, error } = await this.supabase
+                .from(this.chapterProgressTable)
+                .select('*')
+                .eq('user_id', userId)
+                .in('chapter_id', chapterIds)
+                .order('created_at', { ascending: true });
+
+            if (error) {
+                console.error('[ProgressRepo] Error finding chapter progress:', error);
+                throw error;
+            }
+
+            console.log(`[ProgressRepo] Found ${data?.length || 0} chapter progress records`);
+            return data || [];
+        } catch (error) {
+            console.error('[ProgressRepo] Error in findAllChapterProgressForCastle:', error);
+            throw error;
+        }
+    }
 }
 
 module.exports = ProgressRepo;

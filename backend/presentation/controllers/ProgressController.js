@@ -1,277 +1,304 @@
 class ProgressController {
-  constructor(progressService) {
-    this.progressService = progressService;
-  }
-
-  /**
-   * POST /api/progress/castles/initialize
-   * Initialize castle progress for a user
-   */
-  initializeCastleProgress = async (req, res) => {
-    try {
-      const { userId } = req.body;
-
-      if (!userId) {
-        return res.status(400).json({
-          success: false,
-          error: 'User ID is required'
-        });
-      }
-
-      console.log('[ProgressController] Initializing castle progress for user:', userId);
-
-      const result = await this.progressService.initializeCastleProgress(userId);
-
-      res.json(result);
-    } catch (error) {
-      console.error('[ProgressController] Error initializing castle progress:', error);
-      res.status(500).json({
-        success: false,
-        error: error.message || 'Failed to initialize castle progress'
-      });
+    constructor(progressService) {
+        this.progressService = progressService;
     }
-  };
 
-  /**
-   * POST /api/progress/chapters/initialize
-   * Initialize chapter progress for a castle
-   */
-  initializeChapterProgress = async (req, res) => {
-    try {
-      const { userId, castleId } = req.body;
+    async getUserProgress(req, res) {
+        try {
+            const { userId, castleId } = req.params;
+            
+            console.log(`[ProgressController] Getting progress for user ${userId}, castle ${castleId}`);
 
-      if (!userId || !castleId) {
-        return res.status(400).json({
-          success: false,
-          error: 'User ID and Castle ID are required'
-        });
-      }
+            if (!userId || !castleId) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'User ID and Castle ID are required'
+                });
+            }
 
-      console.log('[ProgressController] Initializing chapter progress:', { userId, castleId });
+            const progress = await this.progressService.getUserCastleProgress(userId, castleId);
 
-      const result = await this.progressService.initializeChapterProgress(userId, castleId);
-
-      res.json(result);
-    } catch (error) {
-      console.error('[ProgressController] Error initializing chapter progress:', error);
-      res.status(500).json({
-        success: false,
-        error: error.message || 'Failed to initialize chapter progress'
-      });
+            return res.status(200).json({
+                success: true,
+                data: progress
+            });
+        } catch (error) {
+            console.error('[ProgressController] Error getting user progress:', error);
+            
+            // Return detailed error for debugging
+            return res.status(500).json({
+                success: false,
+                message: error.message || 'Failed to get user progress',
+                error: process.env.NODE_ENV === 'development' ? error.stack : undefined
+            });
+        }
     }
-  };
 
-  /**
-   * GET /api/progress/castles/:userId
-   * Get all castle progress for a user
-   */
-  getUserCastleProgress = async (req, res) => {
-    try {
-      const { userId } = req.params;
+    /**
+     * POST /progress/user/:userId/chapter/:chapterId/complete
+     * Complete a chapter
+     */
+    async completeChapter(req, res) {
+        try {
+            const { userId, chapterId } = req.params;
+            const { quiz_score, xp_earned } = req.body;
 
-      console.log('[ProgressController] Getting castle progress for user:', userId);
+            console.log(`[ProgressController] Completing chapter ${chapterId} for user ${userId}`);
 
-      const progress = await this.progressService.getUserCastleProgress(userId);
+            const result = await this.progressService.completeChapter(
+                userId,
+                chapterId,
+                quiz_score || 0,
+                xp_earned || 0
+            );
 
-      res.json({
-        success: true,
-        data: progress
-      });
-    } catch (error) {
-      console.error('[ProgressController] Error getting castle progress:', error);
-      res.status(500).json({
-        success: false,
-        error: error.message || 'Failed to fetch castle progress'
-      });
+            return res.status(200).json({
+                success: true,
+                data: result,
+                message: 'Chapter completed successfully'
+            });
+        } catch (error) {
+            console.error('[ProgressController] Error:', error);
+            return res.status(500).json({
+                success: false,
+                message: error.message || 'Failed to complete chapter',
+                error: error.message
+            });
+        }
     }
-  };
 
-  /**
-   * GET /api/progress/chapters/:castleId/:userId
-   * Get chapter progress for a castle
-   */
-  getChapterProgress = async (req, res) => {
-    try {
-      const { userId, castleId } = req.params;
+    /**
+     * GET /progress/overview/:userId
+     * Get overview of all castle progress
+     */
+    async getProgressOverview(req, res) {
+        try {
+            const { userId } = req.params;
 
-      console.log('[ProgressController] Getting chapter progress:', { userId, castleId });
+            const overview = await this.progressService.getProgressOverview(userId);
 
-      const progress = await this.progressService.getChapterProgress(userId, castleId);
-
-      res.json({
-        success: true,
-        data: progress
-      });
-    } catch (error) {
-      console.error('[ProgressController] Error getting chapter progress:', error);
-      res.status(500).json({
-        success: false,
-        error: error.message || 'Failed to fetch chapter progress'
-      });
+            return res.status(200).json({
+                success: true,
+                data: overview,
+                message: 'Progress overview fetched successfully'
+            });
+        } catch (error) {
+            console.error('[ProgressController] Error:', error);
+            return res.status(500).json({
+                success: false,
+                message: error.message || 'Failed to fetch overview',
+                error: error.message
+            });
+        }
     }
-  };
 
-  /**
-   * PUT /api/progress/castles/:castleId
-   * Update castle progress
-   */
-  updateCastleProgress = async (req, res) => {
-    try {
-      const { castleId } = req.params;
-      const { userId, ...updates } = req.body;
+    /**
+     * GET /progress/castles/:userId
+     * Get all castle progress
+     */
+    async getCastleProgress(req, res) {
+        try {
+            const { userId } = req.params;
 
-      if (!userId) {
-        return res.status(400).json({
-          success: false,
-          error: 'User ID is required'
-        });
-      }
+            const progress = await this.progressService.getCastleProgress(userId);
 
-      console.log('[ProgressController] Updating castle progress:', { userId, castleId, updates });
-
-      const updatedProgress = await this.progressService.updateCastleProgress(userId, castleId, updates);
-
-      res.json({
-        success: true,
-        data: updatedProgress
-      });
-    } catch (error) {
-      console.error('[ProgressController] Error updating castle progress:', error);
-      res.status(500).json({
-        success: false,
-        error: error.message || 'Failed to update castle progress'
-      });
+            return res.status(200).json({
+                success: true,
+                data: progress,
+                message: 'Castle progress fetched successfully'
+            });
+        } catch (error) {
+            console.error('[ProgressController] Error:', error);
+            return res.status(500).json({
+                success: false,
+                message: error.message || 'Failed to fetch castle progress',
+                error: error.message
+            });
+        }
     }
-  };
 
-  /**
-   * PUT /api/progress/chapters/:chapterId
-   * Update chapter progress
-   */
-  updateChapterProgress = async (req, res) => {
-    try {
-      const { chapterId } = req.params;
-      const { userId, ...updates } = req.body;
+    /**
+     * GET /progress/chapters/:castleId/:userId
+     * Get chapter progress for a castle
+     */
+    async getChapterProgress(req, res) {
+        try {
+            const { userId, castleId } = req.params;
 
-      if (!userId) {
-        return res.status(400).json({
-          success: false,
-          error: 'User ID is required'
-        });
-      }
+            const progress = await this.progressService.getChapterProgress(userId, castleId);
 
-      console.log('[ProgressController] Updating chapter progress:', { userId, chapterId, updates });
-
-      const updatedProgress = await this.progressService.updateChapterProgress(userId, chapterId, updates);
-
-      res.json({
-        success: true,
-        data: updatedProgress
-      });
-    } catch (error) {
-      console.error('[ProgressController] Error updating chapter progress:', error);
-      res.status(500).json({
-        success: false,
-        error: error.message || 'Failed to update chapter progress'
-      });
+            return res.status(200).json({
+                success: true,
+                data: progress,
+                message: 'Chapter progress fetched successfully'
+            });
+        } catch (error) {
+            console.error('[ProgressController] Error:', error);
+            return res.status(500).json({
+                success: false,
+                message: error.message || 'Failed to fetch chapter progress',
+                error: error.message
+            });
+        }
     }
-  };
 
-  /**
-   * POST /api/progress/castles/:castleId/unlock-next
-   * Unlock next castle after completing current one
-   */
-  unlockNextCastle = async (req, res) => {
-    try {
-      const { castleId } = req.params;
-      const { userId } = req.body;
+    /**
+     * PATCH /progress/user/:userId/chapter/:chapterId
+     * Update chapter progress
+     */
+    async updateChapterProgress(req, res) {
+        try {
+            const { userId, chapterId } = req.params;
+            const progressData = req.body;
 
-      if (!userId) {
-        return res.status(400).json({
-          success: false,
-          error: 'User ID is required'
-        });
-      }
+            const result = await this.progressService.updateChapterProgressData(
+                userId,
+                chapterId,
+                progressData
+            );
 
-      console.log('[ProgressController] Unlocking next castle after:', castleId);
-
-      const result = await this.progressService.unlockNextCastle(userId, castleId);
-
-      res.json(result);
-    } catch (error) {
-      console.error('[ProgressController] Error unlocking next castle:', error);
-      res.status(500).json({
-        success: false,
-        error: error.message || 'Failed to unlock next castle'
-      });
+            return res.status(200).json({
+                success: true,
+                data: result,
+                message: 'Chapter progress updated successfully'
+            });
+        } catch (error) {
+            console.error('[ProgressController] Error:', error);
+            return res.status(500).json({
+                success: false,
+                message: error.message || 'Failed to update chapter progress',
+                error: error.message
+            });
+        }
     }
-  };
 
-  /**
-   * POST /api/progress/chapters/:chapterId/unlock-next
-   * Unlock next chapter after completing current one
-   */
-  unlockNextChapter = async (req, res) => {
-    try {
-      const { chapterId } = req.params;
-      const { userId } = req.body;
+    /**
+     * POST /progress/minigames/:minigameId/attempt
+     * Record minigame attempt
+     */
+    async recordMinigameAttempt(req, res) {
+        try {
+            const { minigameId } = req.params;
+            const { userId, ...attemptData } = req.body;
 
-      if (!userId) {
-        return res.status(400).json({
-          success: false,
-          error: 'User ID is required'
-        });
-      }
+            const result = await this.progressService.recordMinigameAttempt(
+                userId,
+                minigameId,
+                attemptData
+            );
 
-      console.log('[ProgressController] Unlocking next chapter after:', chapterId);
-
-      const result = await this.progressService.unlockNextChapter(userId, chapterId);
-
-      res.json(result);
-    } catch (error) {
-      console.error('[ProgressController] Error unlocking next chapter:', error);
-      res.status(500).json({
-        success: false,
-        error: error.message || 'Failed to unlock next chapter'
-      });
+            return res.status(201).json({
+                success: true,
+                data: result,
+                message: 'Minigame attempt recorded successfully'
+            });
+        } catch (error) {
+            console.error('[ProgressController] Error:', error);
+            return res.status(500).json({
+                success: false,
+                message: error.message || 'Failed to record minigame attempt',
+                error: error.message
+            });
+        }
     }
-  };
 
-  /**
-   * GET /api/progress/overview/:userId
-   * Get complete progress overview (castles + chapters)
-   */
-  getProgressOverview = async (req, res) => {
-    try {
-      const { userId } = req.params;
+    /**
+     * POST /progress/quizzes/:chapterQuizId/attempt
+     * Record quiz attempt
+     */
+    async recordQuizAttempt(req, res) {
+        try {
+            const { chapterQuizId } = req.params;
+            const { userId, ...quizData } = req.body;
 
-      console.log('[ProgressController] Getting progress overview for user:', userId);
+            const result = await this.progressService.recordQuizAttempt(
+                userId,
+                chapterQuizId,
+                quizData
+            );
 
-      const castleProgress = await this.progressService.getUserCastleProgress(userId);
-
-      // Get chapter progress for each castle
-      const overview = await Promise.all(
-        castleProgress.map(async (castle) => {
-          const chapters = await this.progressService.getChapterProgress(userId, castle.castleId);
-          return {
-            castle,
-            chapters
-          };
-        })
-      );
-
-      res.json({
-        success: true,
-        data: overview
-      });
-    } catch (error) {
-      console.error('[ProgressController] Error getting progress overview:', error);
-      res.status(500).json({
-        success: false,
-        error: error.message || 'Failed to fetch progress overview'
-      });
+            return res.status(201).json({
+                success: true,
+                data: result,
+                message: 'Quiz attempt recorded successfully'
+            });
+        } catch (error) {
+            console.error('[ProgressController] Error:', error);
+            return res.status(500).json({
+                success: false,
+                message: error.message || 'Failed to record quiz attempt',
+                error: error.message
+            });
+        }
     }
-  };
+
+    /**
+     * Start a chapter
+     * POST /api/progress/chapters/:chapterId/start
+     */
+    async startChapter(req, res) {
+        try {
+            if (!req.user || !req.user.id) {
+                return res.status(401).json({
+                    success: false,
+                    message: 'User not authenticated'
+                });
+            }
+
+            const userId = req.user.id;
+            const { chapterId } = req.params;
+
+            const progress = await this.progressService.startChapter(userId, chapterId);
+
+            res.status(200).json({
+                success: true,
+                data: progress
+            });
+        } catch (error) {
+            console.error('Start chapter error:', error);
+            res.status(500).json({
+                success: false,
+                message: error.message
+            });
+        }
+    }
+
+    /**
+     * Award lesson XP
+     * POST /api/progress/chapters/:chapterId/xp/lesson
+     */
+    async awardLessonXP(req, res) {
+        try {
+            if (!req.user || !req.user.id) {
+                return res.status(401).json({
+                    success: false,
+                    message: 'User not authenticated'
+                });
+            }
+
+            const userId = req.user.id;
+            const { chapterId } = req.params;
+            const { xpAmount } = req.body;
+
+            const result = await this.progressService.awardChapterXP(
+                userId,
+                chapterId,
+                xpAmount,
+                'lesson'
+            );
+
+            res.status(200).json({
+                success: true,
+                data: result
+            });
+        } catch (error) {
+            console.error('Award lesson XP error:', error);
+            res.status(500).json({
+                success: false,
+                message: error.message
+            });
+        }
+    }
 }
 
 module.exports = ProgressController;

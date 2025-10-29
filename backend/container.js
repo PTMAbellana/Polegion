@@ -13,6 +13,12 @@ const CastleRepository = require('./infrastructure/repository/CastleRepo');
 const ChapterRepository = require('./infrastructure/repository/ChapterRepo');
 const ProgressRepository = require('./infrastructure/repository/ProgressRepo');
 
+// Newly Added Repositories
+const MinigameRepository = require('./infrastructure/repository/MinigameRepo');
+const UserMinigameAttemptRepository = require('./infrastructure/repository/UserMinigameAttemptRepo');
+const ChapterQuizRepository = require('./infrastructure/repository/ChapterQuizRepo');
+const UserQuizAttemptRepository = require('./infrastructure/repository/UserQuizAttemptRepo');
+
 // Import services
 const AuthService = require('./application/services/AuthService');
 const UserService = require('./application/services/UserService');
@@ -28,6 +34,10 @@ const CastleService = require('./application/services/CastleService');
 const ChapterService = require('./application/services/ChapterService');
 const ProgressService = require('./application/services/ProgressService');
 
+// Newly Added Services
+const MinigameService = require('./application/services/MinigameService');
+const QuizService = require('./application/services/QuizService');
+
 // Import controllers
 const AuthController = require('./presentation/controllers/AuthController');
 const UserController = require('./presentation/controllers/UserController');
@@ -40,6 +50,10 @@ const CompetitionController = require('./presentation/controllers/CompetitionCon
 const CastleController = require('./presentation/controllers/CastleController');
 const ChapterController = require('./presentation/controllers/ChapterController');
 const ProgressController = require('./presentation/controllers/ProgressController');
+
+// Newly Added Controllers
+const MinigameController = require('./presentation/controllers/MinigameController');
+const QuizController = require('./presentation/controllers/QuizController');
 
 // Import middleware
 const AuthMiddleware = require('./presentation/middleware/AuthMiddleware');
@@ -57,6 +71,10 @@ const CastleRoutes = require('./presentation/routes/CastleRoutes');
 const ChapterRoutes = require('./presentation/routes/ChapterRoutes');
 const ProgressRoutes = require('./presentation/routes/ProgressRoutes');
 
+// Newly Added Routes
+const MinigameRoutes = require('./presentation/routes/MinigameRoutes');
+const QuizRoutes = require('./presentation/routes/QuizRoutes');
+
 // Import services registry
 const servicesRegistry = require('./application/services');
 
@@ -73,8 +91,20 @@ const castleRepository = new CastleRepository(supabase);
 const chapterRepository = new ChapterRepository(supabase);
 const progressRepository = new ProgressRepository(supabase);
 
+// Newly Added Repositories
+const minigameRepository = new MinigameRepository(supabase);
+const userMinigameAttemptRepository = new UserMinigameAttemptRepository(supabase);
+const chapterQuizRepository = new ChapterQuizRepository(supabase);
+const userQuizAttemptRepository = new UserQuizAttemptRepository(supabase);
+
 console.log('[Container] Repositories initialized')
 console.log('[Container] ProgressRepo initialized:', !!ProgressRepository)
+console.log('[Container] ChapterRepo initialized:', !!ChapterRepository)
+console.log('[Container] CastleRepo initialized:', !!CastleRepository)
+console.log('[Container] UserMinigameAttemptRepo initialized:', !!UserMinigameAttemptRepository)
+console.log('[Container] MinigameRepo initialized:', !!MinigameRepository)
+console.log('[Container] ChapterQuizRepo initialized:', !!ChapterQuizRepository)
+console.log('[Container] UserQuizAttemptRepo initialized:', !!UserQuizAttemptRepository)
 
 // Initialize services
 const authService = new AuthService(userRepository, supabase);
@@ -97,6 +127,13 @@ console.log('[Container] CastleService initialized with repos:', {
 const chapterService = new ChapterService(chapterRepository, progressRepository)
 const progressService = new ProgressService(progressRepository, castleRepository, chapterRepository)
 
+// Added Newly Added Services
+const minigameService = new MinigameService(minigameRepository, userMinigameAttemptRepository, chapterService, progressService, xpService, leaderboardService);
+const quizService = new QuizService(chapterQuizRepository, userQuizAttemptRepository, chapterService, progressService, xpService, leaderboardService);
+
+console.log('[Container] MinigameService initialized:', !!minigameService);
+console.log('[Container] QuizService initialized:', !!quizService);
+
 // Register all services in the registry 🚀
 servicesRegistry.registerServices({
     authService,
@@ -111,7 +148,9 @@ servicesRegistry.registerServices({
     chapterService,
     progressService,
     attemptsService,
-    competitionService
+    competitionService,
+    minigameService,  // New
+    quizService // New
 });
 
 // Initialize middleware
@@ -130,6 +169,13 @@ const castleController = new CastleController(castleService);
 const chapterController = new ChapterController(chapterService);
 const progressController = new ProgressController(progressService);
 
+// Added New Controllers
+const minigameController = new MinigameController(minigameService);
+const quizController = new QuizController(quizService);
+
+console.log('[Container] MinigameController initialized:', !!minigameController);
+console.log('[Container] QuizController initialized:', !!quizController);
+
 // Initialize routes
 const authRoutes = new AuthRoutes(authController);
 const userRoutes = new UserRoutes(userController, authMiddleware);
@@ -143,6 +189,13 @@ const castleRoutes = new CastleRoutes(castleController, authMiddleware);
 const chapterRoutes = new ChapterRoutes(chapterController, authMiddleware);
 const progressRoutes = new ProgressRoutes(progressController, authMiddleware);
 
+// Added New Routes
+const minigameRoutes = new MinigameRoutes(minigameController, authMiddleware);
+const quizRoutes = new QuizRoutes(quizController, authMiddleware);
+
+console.log('[Container] MinigameRoutes initialized:', !!minigameRoutes);
+console.log('[Container] QuizRoutes initialized:', !!quizRoutes);
+
 module.exports = {
   authRoutes: authRoutes.getRouter(),
   userRoutes: userRoutes.getRouter(),
@@ -155,6 +208,8 @@ module.exports = {
   castleRoutes: castleRoutes.getRouter(),
   chapterRoutes: chapterRoutes.getRouter(),
   progressRoutes: progressRoutes.getRouter(),
+  minigameRoutes: minigameRoutes.getRouter(),  // newly added
+  quizRoutes: quizRoutes.getRouter(),          // newly added
 
   // services (for testing or other uses)
   services: servicesRegistry.getServices()

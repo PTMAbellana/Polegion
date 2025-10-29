@@ -1,86 +1,51 @@
 'use client';
 
 import React from 'react';
-import type { CastleWithProgress } from '@/types/castle.types';
-import styles from '@/styles/world-map.module.css';
+import { Star, Zap } from 'lucide-react';
 
 interface CastleCardProps {
-  castle: CastleWithProgress;
-  onClick: () => void;
+  castleName: string;
+  description: string;
+  imageNumber: number;
+  totalXpEarned: number;
+  chaptersRemaining: number;
+  styleModule: any;
 }
 
-export default function CastleCard({ castle, onClick }: CastleCardProps) {
-  const isLocked = !castle.progress?.unlocked;
-  const isCompleted = castle.progress?.completed || false;
-  const completionPercentage = castle.progress?.completion_percentage || 0;
-
+export default function CastleCard({
+  castleName,
+  description,
+  imageNumber,
+  totalXpEarned,
+  chaptersRemaining,
+  styleModule
+}: CastleCardProps) {
   return (
-    <div
-      className={`${styles.castle_card} ${isLocked ? styles.locked : ''} ${isCompleted ? styles.completed : ''}`}
-      onClick={onClick}
-    >
-      {/* Castle Image */}
-      <div className={styles.castle_image_wrapper}>
-        <img
-          src={`/images/castles/castle${castle.image_number}.png`}
-          alt={castle.name}
-          className={styles.castle_img}
-          style={{
-            filter: isLocked ? 'grayscale(1) brightness(0.5)' : 'none',
-          }}
-          onError={(e) => {
-            (e.target as HTMLImageElement).src = '/images/castles/castle1.png';
-          }}
-        />
-
-        {/* Lock Overlay */}
-        {isLocked && (
-          <div className={styles.lock_overlay}>
-            <span className={styles.lock_icon}>🔒</span>
-          </div>
-        )}
-
-        {/* Completion Crown */}
-        {isCompleted && (
-          <div className={styles.completion_crown}>
-            <span>👑</span>
-          </div>
-        )}
-
-        {/* Available Glow */}
-        {!isLocked && !isCompleted && (
-          <div className={styles.available_glow}></div>
-        )}
-      </div>
-
-      {/* Castle Info */}
-      <div className={styles.castle_info}>
-        <h3 className={styles.castle_name}>{castle.name}</h3>
-        <p className={styles.castle_region}>📍 {castle.region}</p>
-        
-        <div className={styles.castle_meta}>
-          <span className={styles.difficulty} data-difficulty={castle.difficulty}>
-            ⚡ {castle.difficulty}
-          </span>
-          <span className={styles.xp}>💎 {castle.total_xp} XP</span>
+    <div className={styleModule.wizardContainer}>
+      <div className={styleModule.wizardCard}>
+        <div className={styleModule.wizardAvatar}>
+          <img 
+            src={`/images/castles/castle${imageNumber}.png`}
+            alt={castleName}
+            className={styleModule.castleImage}
+            onError={(e) => {
+              e.currentTarget.style.display = 'none';
+              e.currentTarget.nextElementSibling?.classList.remove(styleModule.hidden);
+            }}
+          />
+          <span className={`${styleModule.wizardEmoji} ${styleModule.hidden}`}>🏰</span>
         </div>
-
-        {/* Progress Bar */}
-        {!isLocked && (
-          <div className={styles.progress_bar}>
-            <div
-              className={styles.progress_fill}
-              style={{ width: `${completionPercentage}%` }}
-            ></div>
-            <span className={styles.progress_text}>{completionPercentage}%</span>
+        <h2 className={styleModule.wizardName}>{castleName}</h2>
+        <p className={styleModule.wizardQuote}>"{description}"</p>
+        <div className={styleModule.wizardStats}>
+          <div className={styleModule.wizardStat}>
+            <Star className={styleModule.statIcon} />
+            <span>{totalXpEarned} XP Earned</span>
           </div>
-        )}
-
-        {/* Status Badge */}
-        <div className={styles.status_badge}>
-          {isLocked && <span className={styles.badge_locked}>🔒 Locked</span>}
-          {!isLocked && !isCompleted && <span className={styles.badge_available}>✨ Available</span>}
-          {isCompleted && <span className={styles.badge_completed}>✅ Completed</span>}
+          <div className={styleModule.wizardStat}>
+            <Zap className={styleModule.statIcon} />
+            <span>{chaptersRemaining} Chapters Remaining</span>
+          </div>
         </div>
       </div>
     </div>

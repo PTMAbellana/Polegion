@@ -1,69 +1,65 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuthStore } from '@/store/authStore';
-import { AuthProtection } from '@/context/AuthProtection';
-import Loader from '@/components/Loader';
-import styles from '@/styles/castle1.module.css';
+import { X, Sparkles, ChevronRight, Star, Award, CheckCircle, Lock, Volume2, VolumeX, Play, Pause, Target } from 'lucide-react';
+import { Stage, Layer, Circle, Line, Arrow, Text } from 'react-konva';
+import styles from '@/styles/castle1-chapter1.module.css';
+import { startChapter, awardLessonXP } from '@/api/progress';
+import { submitMinigameAttempt } from '@/api/minigames';
+import { submitQuizAttempt } from '@/api/quizzes';
 
-interface Lesson {
-  id: number;
-  title: string;
-  content: string;
-  image?: string;
-  examples: string[];
+interface Point {
+  id: string;
+  x: number;
+  y: number;
+  label: string;
 }
 
-const CHAPTER_INFO = {
-  number: 1,
-  title: 'The Point of Origin',
-  description: 'Master the fundamental building blocks of geometry: points, lines, rays, and line segments.',
-  icon: '📍',
-  xp_reward: 100,
-  lessons: [
+const CHAPTER_SETUP_DATA = {
+  quiz: {
+    title: "Lines, Rays & Segments Quiz",
+    description: "Test your understanding of geometric primitives",
+    xp_reward: 100,
+    passing_score: 70,
+    questions: [
+      {
+        question: "Which one has TWO endpoints?",
+        options: ["Line", "Ray", "Line Segment"],
+        correctAnswer: "Line Segment"
+      },
+      {
+        question: "Which geometric element extends infinitely in one direction?",
+        options: ["Line", "Ray", "Line Segment"],
+        correctAnswer: "Ray"
+      },
+      {
+        question: "Which extends infinitely in BOTH directions?",
+        options: ["Line", "Ray", "Line Segment"],
+        correctAnswer: "Line"
+      }
+    ]
+  },
+  minigames: [
     {
-      id: 1,
-      title: 'What is a Point?',
-      content: 'A point is the most basic element in geometry. It represents an exact location in space and has no size, width, or thickness. Points are named using capital letters.',
-      examples: [
-        'Point A represents a specific location',
-        'Points are dimensionless (0D)',
-        'Multiple points can exist in space',
-        'Points are used to define lines and shapes'
-      ]
-    },
-    {
-      id: 2,
-      title: 'Understanding Lines',
-      content: 'A line extends infinitely in both directions. It has no endpoints and is perfectly straight. A line is named using any two points on it or with a single lowercase letter.',
-      examples: [
-        'Line AB extends forever in both directions',
-        'Symbol: ↔ (arrows on both ends)',
-        'Lines are one-dimensional (1D)',
-        'Two points determine a unique line'
-      ]
-    },
-    {
-      id: 3,
-      title: 'What are Rays?',
-      content: 'A ray has one endpoint and extends infinitely in one direction. It is named by its endpoint first, followed by another point on the ray.',
-      examples: [
-        'Ray AB starts at A and goes through B',
-        'Symbol: → (arrow on one end)',
-        'The endpoint is always named first',
-        'Rays are used to represent directions'
-      ]
-    },
-    {
-      id: 4,
-      title: 'Line Segments',
-      content: 'A line segment is part of a line with two endpoints. It has a definite length that can be measured. It is named by its two endpoints.',
-      examples: [
-        'Segment AB connects points A and B',
-        'Symbol: ¯ (bar over the letters)',
-        'Line segments have measurable length',
-        'Used to create polygons and shapes'
+      title: "Identify the Geometric Elements",
+      description: "Click on the correct geometric element",
+      game_type: "interactive",
+      xp_reward: 75,
+      order_index: 1,
+      questions: [
+        {
+          question: "Click on all points that form a line segment",
+          type: "line-segment"
+        },
+        {
+          question: "Click on the starting point and direction of a ray",
+          type: "ray"
+        },
+        {
+          question: "Click on any two points on an infinite line",
+          type: "line"
+        }
       ]
     }
   ]
@@ -71,608 +67,1116 @@ const CHAPTER_INFO = {
 
 export default function Chapter1Page() {
   const router = useRouter();
-  const { userProfile } = useAuthStore();
-  const { isLoading: authLoading } = AuthProtection();
-
-  const [loading, setLoading] = useState(false);
-  const [currentLesson, setCurrentLesson] = useState(0);
-  const [showQuiz, setShowQuiz] = useState(false);
-  const [showMinigame, setShowMinigame] = useState(false);
-  const [lessonComplete, setLessonComplete] = useState<boolean[]>([]);
-  const [quizAnswers, setQuizAnswers] = useState<{ [key: number]: string }>({});
-  const [quizSubmitted, setQuizSubmitted] = useState(false);
-  const [score, setScore] = useState(0);
-
+  const [currentScene, setCurrentScene] = useState<'opening' | 'lesson' | 'minigame' | 'quiz1' | 'quiz2' | 'quiz3' | 'reward'>('opening');
+  const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
+  const [showFeedback, setShowFeedback] = useState(false);
+  const [isCorrect, setIsCorrect] = useState(false);
+  const [wizardMessage, setWizardMessage] = useState("");
+  const [messageIndex, setMessageIndex] = useState(0);
+  const [isTyping, setIsTyping] = useState(false);
+  const [autoAdvance, setAutoAdvance] = useState(false);
+  const [displayedText, setDisplayedText] = useState("");
+  const [isMuted, setIsMuted] = useState(false);
+  
   // Minigame state
-  const [minigameScore, setMinigameScore] = useState(0);
-  const [minigameLevel, setMinigameLevel] = useState(1);
   const [selectedPoints, setSelectedPoints] = useState<string[]>([]);
-  const [targetPattern, setTargetPattern] = useState<string>('line');
+  const [currentQuestion, setCurrentQuestion] = useState(0);
+  const [minigameFeedback, setMinigameFeedback] = useState<string>("");
+  const [isFeedbackCorrect, setIsFeedbackCorrect] = useState<boolean | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState<string | null>(null);
+  const [mousePos, setMousePos] = useState<{ x: number; y: number } | null>(null);
+  const [stageSize, setStageSize] = useState({ width: 700, height: 250 });
+  
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const typingIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const autoAdvanceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const taskListRef = useRef<HTMLDivElement | null>(null);
+  const gameAreaRef = useRef<HTMLDivElement | null>(null);
+  const canvasContainerRef = useRef<HTMLDivElement | null>(null);
+  
+  const [completedTasks, setCompletedTasks] = useState({
+    learnPoint: false,
+    learnLineSegment: false,
+    learnRay: false,
+    learnLine: false,
+    completeMinigame: false,
+    passQuiz1: false,
+    passQuiz2: false,
+    passQuiz3: false
+  });
+  
+  // XP state
+  const [earnedXP, setEarnedXP] = useState({
+    lesson: 0,
+    minigame: 0,
+    quiz: 0
+  });
+
+  // XP Distribution System
+  const XP_VALUES = {
+    lesson: 20,        // 20 XP for completing lesson
+    minigame: 30,      // 30 XP for completing minigame
+    quiz1: 15,         // 15 XP per quiz
+    quiz2: 15,
+    quiz3: 20,         // Final quiz worth more
+    total: 100
+  };
+
+  // Minigame questions
+  const minigameQuestions = [
+    {
+      instruction: "Create a Line Segment AB: Connect point A to point B. It has two endpoints and a fixed length.",
+      points: [
+        { id: 'A', x: 150, y: 125, label: 'A' },
+        { id: 'B', x: 550, y: 125, label: 'B' }
+      ],
+      correctAnswer: ['A', 'B'],
+      type: 'Line Segment',
+      showType: 'segment',
+      hint: "A line segment has endpoints on both ends - it doesn't extend beyond them."
+    },
+    {
+      instruction: "Create Ray CD: Start at point C and go through point D. It has ONE endpoint at C and extends infinitely through D.",
+      points: [
+        { id: 'C', x: 150, y: 125, label: 'C' },
+        { id: 'D', x: 350, y: 125, label: 'D' },
+        { id: 'E', x: 550, y: 125, label: 'E' }
+      ],
+      correctAnswer: ['C', 'D'],
+      type: 'Ray',
+      showType: 'ray',
+      hint: "A ray starts at one point and continues forever in one direction."
+    },
+    {
+      instruction: "Create Line FG: Connect points F and G.",
+      points: [
+        { id: 'F', x: 200, y: 100, label: 'F' },
+        { id: 'G', x: 350, y: 125, label: 'G' },
+        { id: 'H', x: 500, y: 150, label: 'H' }
+      ],
+      correctAnswer: ['F', 'G'],
+      // alternateAnswer: ['G', 'H'], // Add this for flexibility
+      type: 'Line',
+      showType: 'line',
+      hint: "A line has NO endpoints - it goes on forever in both directions."
+    }
+  ];
+
+  const openingDialogue = [
+    "Ah… a new seeker of shapes has arrived! Welcome, traveler.",
+    "I am Archim, Keeper of the Euclidean Spire — where all geometry was born.",
+    "Before this tower may awaken again, you must master the foundations of form...",
+    "...from the smallest point… to the grandest figure!"
+  ];
+
+  const lessonDialogue = [
+    "Every shape begins with a Point — small, yet mighty.",
+    "Without it, no line, ray, or segment could ever exist.",
+    "Watch closely. Two points form a connection… that is the beginning of a Line Segment.",
+    "If the path stretches endlessly in one direction — it is a Ray.",
+    "And if it continues in both… it becomes a Line — infinite and eternal.",
+    "Now, let us put your knowledge to practice!"
+  ];
+
+  const minigameDialogue = [
+    "Excellent! Now, let's see if you can create these shapes.",
+    "Click and drag from one point to another to connect them.",
+    "Choose wisely, young geometer!"
+  ];
+
+  // Wrap audio playback in try-catch
+  const playNarration = (filename: string) => {
+    try {
+      if (audioRef.current) {
+        audioRef.current.pause();
+      }
+      
+      const audio = new Audio(`/audio/narration/${filename}`);
+      
+      // Handle error gracefully
+      audio.onerror = () => {
+        console.warn(`Audio file not found: ${filename}`);
+      };
+      
+      audio.play().catch(err => {
+        console.warn('Audio playback failed:', err);
+      });
+      
+      audioRef.current = audio;
+    } catch (error) {
+      console.warn('Audio error:', error);
+    }
+  };
+
+  const [chapterId, setChapterId] = useState<string | null>(null);
+  const [quizId, setQuizId] = useState<string | null>(null);
+  const [minigameId, setMinigameId] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!authLoading && userProfile) {
-      initializeChapter();
-    }
-  }, [authLoading, userProfile]);
+    const initializeChapter = async () => {
+      if (!userProfile?.id) return;
 
-  const initializeChapter = async () => {
-    try {
-      setLoading(true);
-      // Initialize lesson completion tracking
-      setLessonComplete(new Array(CHAPTER_INFO.lessons.length).fill(false));
-      
-      // TODO: Load progress from API
-      // const progress = await fetchChapterProgress();
-      
-    } catch (error) {
-      console.error('Error initializing chapter:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+      try {
+        // Get chapters for castle1
+        const chaptersResponse = await getChaptersByCastle('CASTLE1_ID_HERE'); // Replace with actual castle ID
+        const chapter1 = chaptersResponse.data.find(ch => ch.chapter_number === 1);
+        
+        if (!chapter1) {
+          console.error('Chapter 1 not found');
+          return;
+        }
 
-  const handleLessonComplete = () => {
-    const newComplete = [...lessonComplete];
-    newComplete[currentLesson] = true;
-    setLessonComplete(newComplete);
+        setChapterId(chapter1.id);
 
-    if (currentLesson < CHAPTER_INFO.lessons.length - 1) {
-      setCurrentLesson(currentLesson + 1);
-    } else {
-      setShowQuiz(true);
-    }
-  };
+        // Setup chapter (creates quiz and minigames if they don't exist)
+        const setupResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/setup/chapters/${chapter1.id}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          },
+          body: JSON.stringify(CHAPTER_SETUP_DATA)
+        });
 
-  const handleQuizSubmit = () => {
-    let correctAnswers = 0;
-    const correctAnswerKey: { [key: number]: string } = {
-      0: 'b', // Point definition
-      1: 'c', // Line extends
-      2: 'a', // Ray endpoint
-      3: 'b', // Line segment
-      4: 'd'  // Naming convention
+        const setupData = await setupResponse.json();
+        
+        if (setupData.success) {
+          setQuizId(setupData.data.quiz?.id);
+          setMinigameId(setupData.data.minigames[0]?.id);
+        }
+
+        // Start chapter progress
+        await startChapter(chapter1.id);
+      } catch (error) {
+        console.error('Failed to initialize chapter:', error);
+      }
     };
 
-    Object.keys(quizAnswers).forEach((key) => {
-      if (quizAnswers[parseInt(key)] === correctAnswerKey[parseInt(key)]) {
-        correctAnswers++;
+    initializeChapter();
+  }, [userProfile]);
+
+  useEffect(() => {
+    if (isMuted && audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+    }
+  }, [isMuted]);
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (canvasContainerRef.current) {
+        const width = canvasContainerRef.current.offsetWidth;
+        setStageSize({ width: width, height: 250 });
       }
-    });
+    };
 
-    const percentage = (correctAnswers / 5) * 100;
-    setScore(percentage);
-    setQuizSubmitted(true);
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
-    if (percentage >= 70) {
-      // Quiz passed - show minigame
+  useEffect(() => {
+    if (!wizardMessage) return;
+    
+    setIsTyping(true);
+    setDisplayedText("");
+    let currentIndex = 0;
+    
+    let audioToPlay = "";
+    if (currentScene === 'opening') audioToPlay = `opening-${messageIndex + 1}`;
+    else if (currentScene === 'lesson') audioToPlay = `lesson-${messageIndex + 1}`;
+    else if (currentScene === 'minigame') audioToPlay = `minigame-${messageIndex + 1}`;
+    else if (currentScene.startsWith('quiz')) {
+      if (wizardMessage.includes("Splendid!") || wizardMessage.includes("Correct!")) audioToPlay = 'quiz-correct';
+      else if (wizardMessage.includes("Careful") || wizardMessage.includes("Not quite")) audioToPlay = 'quiz-incorrect';
+      else audioToPlay = 'quiz-intro';
+    } else if (currentScene === 'reward') audioToPlay = 'reward-intro';
+    
+    if (audioToPlay) playNarration(audioToPlay);
+
+    typingIntervalRef.current = setInterval(() => {
+      if (currentIndex < wizardMessage.length) {
+        setDisplayedText(wizardMessage.substring(0, currentIndex + 1));
+        currentIndex++;
+      } else {
+        setIsTyping(false);
+        clearInterval(typingIntervalRef.current!);
+        if (autoAdvance && (currentScene === 'opening' || currentScene === 'lesson' || currentScene === 'minigame')) {
+          autoAdvanceTimeoutRef.current = setTimeout(() => handleNextMessage(), 2500);
+        }
+      }
+    }, 30);
+
+    return () => {
+      if (typingIntervalRef.current) clearInterval(typingIntervalRef.current);
+      if (autoAdvanceTimeoutRef.current) clearTimeout(autoAdvanceTimeoutRef.current);
+      if (audioRef.current) audioRef.current.pause();
+    };
+  }, [wizardMessage]);
+
+  useEffect(() => {
+    if (!isTyping && autoAdvance && (currentScene === 'opening' || currentScene === 'lesson' || currentScene === 'minigame')) {
+      if (autoAdvanceTimeoutRef.current) clearTimeout(autoAdvanceTimeoutRef.current);
+      autoAdvanceTimeoutRef.current = setTimeout(() => handleNextMessage(), 2500);
+    }
+    return () => {
+      if (autoAdvanceTimeoutRef.current) clearTimeout(autoAdvanceTimeoutRef.current);
+    };
+  }, [isTyping, autoAdvance, currentScene]);
+
+  useEffect(() => {
+    if (currentScene === 'opening') {
+      setWizardMessage(openingDialogue[0]);
+      setMessageIndex(0);
+    } else if (currentScene === 'lesson') {
+      setWizardMessage(lessonDialogue[0]);
+      setMessageIndex(0);
+    } else if (currentScene === 'minigame') {
+      setWizardMessage(minigameDialogue[0]);
+      setMessageIndex(0);
+    }
+  }, [currentScene]);
+
+  useEffect(() => {
+    if (taskListRef.current) {
+      const completedCount = Object.values(completedTasks).filter(Boolean).length;
+      if (completedCount > 0) {
+        const taskItems = taskListRef.current.querySelectorAll(`.${styles.taskItem}`);
+        if (taskItems[completedCount - 1]) {
+          setTimeout(() => {
+            taskItems[completedCount - 1].scrollIntoView({
+              behavior: 'smooth',
+              block: 'nearest',
+              inline: 'nearest'
+            });
+          }, 300);
+        }
+      }
+    }
+  }, [completedTasks]);
+
+  useEffect(() => {
+    if (gameAreaRef.current && currentScene === 'lesson') {
       setTimeout(() => {
-        setShowQuiz(false);
-        setShowMinigame(true);
-      }, 3000);
+        const conceptCards = gameAreaRef.current?.querySelectorAll(`.${styles.conceptCard}`);
+        if (conceptCards && conceptCards.length > 0) {
+          const lastCard = conceptCards[conceptCards.length - 1];
+          lastCard.scrollIntoView({
+            behavior: 'smooth',
+            block: 'nearest',
+            inline: 'nearest'
+          });
+        }
+      }, 400);
+    }
+  }, [completedTasks.learnPoint, completedTasks.learnLineSegment, completedTasks.learnRay, completedTasks.learnLine]);
+
+  const handleDialogueClick = () => {
+    if (autoAdvanceTimeoutRef.current) clearTimeout(autoAdvanceTimeoutRef.current);
+    if (isTyping) {
+      if (typingIntervalRef.current) clearInterval(typingIntervalRef.current);
+      setDisplayedText(wizardMessage);
+      setIsTyping(false);
+    } else {
+      handleNextMessage();
     }
   };
 
-  const handleMinigameComplete = () => {
-    // TODO: Submit progress to backend
-    router.push('/student/worldmap/castle1');
+  const handleNextMessage = async () => {
+    if (currentScene === 'opening') {
+      if (messageIndex < openingDialogue.length - 1) {
+        setMessageIndex(prev => prev + 1);
+        setWizardMessage(openingDialogue[messageIndex + 1]);
+      } else {
+        setCurrentScene('lesson');
+        setMessageIndex(0);
+        setCompletedTasks(prev => ({ ...prev, learnPoint: true }));
+      }
+    } else if (currentScene === 'lesson') {
+      if (messageIndex < lessonDialogue.length - 1) {
+        setMessageIndex(prev => prev + 1);
+        setWizardMessage(lessonDialogue[messageIndex + 1]);
+        
+        if (messageIndex === 1) setCompletedTasks(prev => ({ ...prev, learnLineSegment: true }));
+        if (messageIndex === 2) setCompletedTasks(prev => ({ ...prev, learnRay: true }));
+        if (messageIndex === 3) setCompletedTasks(prev => ({ ...prev, learnLine: true }));
+      } else {
+        // Award lesson XP
+        if (chapterId) {
+          try {
+            await awardLessonXP(chapterId, XP_VALUES.lesson);
+            setEarnedXP(prev => ({ ...prev, lesson: XP_VALUES.lesson }));
+          } catch (error) {
+            console.error('Failed to award lesson XP:', error);
+          }
+        }
+        
+        setCurrentScene('minigame');
+        setMessageIndex(0);
+      }
+    } else if (currentScene === 'minigame') {
+      if (messageIndex < minigameDialogue.length - 1) {
+        setMessageIndex(prev => prev + 1);
+        setWizardMessage(minigameDialogue[messageIndex + 1]);
+      }
+    }
+  };
+
+  const handlePointMouseDown = (pointId: string) => {
+    setIsDragging(true);
+    setDragStart(pointId);
+    if (selectedPoints.length === 0) {
+      setSelectedPoints([pointId]);
+    }
+  };
+
+  const handlePointMouseUp = (pointId: string) => {
+    if (isDragging && dragStart && dragStart !== pointId) {
+      setSelectedPoints([dragStart, pointId]);
+      checkAnswer([dragStart, pointId]);
+    }
+    setIsDragging(false);
+    setDragStart(null);
+    setMousePos(null);
   };
 
   const handlePointClick = (pointId: string) => {
-    if (selectedPoints.includes(pointId)) {
-      setSelectedPoints(selectedPoints.filter(p => p !== pointId));
-    } else if (selectedPoints.length < 2) {
-      setSelectedPoints([...selectedPoints, pointId]);
-    }
-
-    // Check if pattern is correct
-    if (selectedPoints.length === 1) {
-      checkMinigamePattern([...selectedPoints, pointId]);
+    if (!isDragging) {
+      if (selectedPoints.length === 0) {
+        setSelectedPoints([pointId]);
+      } else if (selectedPoints.length === 1 && selectedPoints[0] !== pointId) {
+        const newSelection = [...selectedPoints, pointId];
+        setSelectedPoints(newSelection);
+        checkAnswer(newSelection);
+      }
     }
   };
 
-  const checkMinigamePattern = (points: string[]) => {
-    const isCorrect = validatePattern(points, targetPattern);
+  const handleMouseMove = (e: any) => {
+    if (isDragging && dragStart) {
+      const stage = e.target.getStage();
+      const pos = stage.getPointerPosition();
+      setMousePos(pos);
+    }
+  };
+
+  const checkAnswer = async (points: string[]) => {
+    const question = minigameQuestions[currentQuestion];
+    
+    // For rays, order matters! First point must be the endpoint
+    let isCorrect = false;
+    
+    if (question.showType === 'ray') {
+      // Ray must start at the correct endpoint (order matters)
+      isCorrect = (points[0] === question.correctAnswer[0] && points[1] === question.correctAnswer[1]);
+    } else if (question.showType === 'line') {
+      // Line can be any two points in any order
+      const isCorrectPrimary = 
+        (points.includes(question.correctAnswer[0]) && points.includes(question.correctAnswer[1]));
+      
+      const isCorrectAlternate = question.alternateAnswer ? 
+        (points.includes(question.alternateAnswer[0]) && points.includes(question.alternateAnswer[1])) : 
+        false;
+      
+      isCorrect = isCorrectPrimary || isCorrectAlternate;
+    } else {
+      // Line segment - any order works
+      isCorrect = (points.includes(question.correctAnswer[0]) && points.includes(question.correctAnswer[1]));
+    }
+
     if (isCorrect) {
-      setMinigameScore(minigameScore + 10);
-      setMinigameLevel(minigameLevel + 1);
-      setSelectedPoints([]);
-      generateNewPattern();
+      setIsFeedbackCorrect(true);
+      
+      let feedbackMessage = "";
+      if (question.showType === 'segment') {
+        feedbackMessage = "Perfect! This Line Segment AB has endpoints at A and B. It doesn't extend beyond them.";
+      } else if (question.showType === 'ray') {
+        feedbackMessage = "Excellent! Ray CD starts at point C (the endpoint) and goes forever through D.";
+      } else if (question.showType === 'line') {
+        feedbackMessage = "Brilliant! Line FG passes through both points but extends infinitely in both directions!";
+      }
+      
+      setMinigameFeedback(feedbackMessage);
+      
+      setTimeout(async () => {
+        if (currentQuestion < minigameQuestions.length - 1) {
+          setCurrentQuestion(prev => prev + 1);
+          setSelectedPoints([]);
+          setMinigameFeedback("");
+          setIsFeedbackCorrect(null);
+          setWizardMessage("Great work! Notice the differences. Now try the next one!");
+        } else {
+          // Submit minigame attempt
+          if (minigameId) {
+            try {
+              await submitMinigameAttempt(minigameId, {
+                score: 100,
+                time_taken: 0,
+                attempt_data: { completedQuestions: minigameQuestions.length }
+              });
+              
+              setEarnedXP(prev => ({ ...prev, minigame: XP_VALUES.minigame }));
+              setCompletedTasks(prev => ({ ...prev, completeMinigame: true }));
+            } catch (error) {
+              console.error('Failed to submit minigame:', error);
+            }
+          }
+          
+          setWizardMessage("Excellent! You now understand the key differences: Line Segment (2 endpoints), Ray (1 endpoint), and Line (no endpoints)!");
+          setTimeout(() => {
+            setCurrentScene('quiz1');
+            setWizardMessage("Now let's test your knowledge! Which of these continues infinitely in both directions?");
+          }, 3000);
+        }
+      }, 2500);
+    } else {
+      setIsFeedbackCorrect(false);
+      
+      // More helpful error messages
+      let errorMessage = "Not quite. ";
+      if (question.showType === 'segment') {
+        errorMessage += "Connect A to B to create a line segment with two endpoints.";
+      } else if (question.showType === 'ray') {
+        errorMessage += "Remember: Ray CD must START at C (the endpoint) and go THROUGH D!";
+      } else if (question.showType === 'line') {
+        errorMessage += "Connect F and G to create a line that extends infinitely both ways.";
+      }
+      
+      setMinigameFeedback(errorMessage);
+      setTimeout(() => {
+        setSelectedPoints([]);
+        setMinigameFeedback("");
+        setIsFeedbackCorrect(null);
+      }, 2500);
     }
   };
 
-  const validatePattern = (points: string[], pattern: string): boolean => {
-    // Simple validation - you can enhance this
-    return points.length === 2;
+  const getScaledPoints = () => {
+    const question = minigameQuestions[currentQuestion];
+    const scaleX = stageSize.width / 700;
+    const scaleY = stageSize.height / 250;
+    
+    return question.points.map(p => ({
+      ...p,
+      x: p.x * scaleX,
+      y: p.y * scaleY
+    }));
   };
 
-  const generateNewPattern = () => {
-    const patterns = ['line', 'ray', 'segment'];
-    setTargetPattern(patterns[Math.floor(Math.random() * patterns.length)]);
-  };
+  const renderConnection = () => {
+    if (selectedPoints.length !== 2) return null;
 
-  if (authLoading || loading) {
-    return (
-      <div className={styles.loading_container}>
-        <Loader />
-        <p>Loading Chapter 1...</p>
-      </div>
+    const question = minigameQuestions[currentQuestion];
+    const scaledPoints = getScaledPoints();
+    const p1 = scaledPoints.find(p => p.id === selectedPoints[0]);
+    const p2 = scaledPoints.find(p => p.id === selectedPoints[1]);
+    
+    if (!p1 || !p2) return null;
+
+    const elements = [];
+
+    // Draw the main line
+    elements.push(
+      <Line
+        key="main-line"
+        points={[p1.x, p1.y, p2.x, p2.y]}
+        stroke="#66BBFF"
+        strokeWidth={3}
+        lineCap="round"
+      />
     );
-  }
 
-  const lesson = CHAPTER_INFO.lessons[currentLesson];
-  const allLessonsComplete = lessonComplete.every(complete => complete);
+    // Draw endpoints or arrows based on type
+    if (question.showType === 'segment') {
+      // Two endpoints
+      elements.push(
+        <Circle key="endpoint1" x={p1.x} y={p1.y} radius={6} fill="#66BBFF" />,
+        <Circle key="endpoint2" x={p2.x} y={p2.y} radius={6} fill="#66BBFF" />
+      );
+    } else if (question.showType === 'ray') {
+      // Endpoint at start, arrow at end
+      elements.push(
+        <Circle key="endpoint-start" x={p1.x} y={p1.y} radius={6} fill="#66BBFF" />,
+        <Arrow
+          key="arrow-end"
+          points={[p1.x, p1.y, p2.x, p2.y]}
+          stroke="#66BBFF"
+          fill="#66BBFF"
+          strokeWidth={3}
+          pointerLength={15}
+          pointerWidth={15}
+        />
+      );
+    } else if (question.showType === 'line') {
+      // Arrows at both ends
+      elements.push(
+        <Arrow
+          key="arrow-line"
+          points={[p1.x, p1.y, p2.x, p2.y]}
+          stroke="#66BBFF"
+          fill="#66BBFF"
+          strokeWidth={3}
+          pointerLength={15}
+          pointerWidth={15}
+          pointerAtBeginning={true}
+        />
+      );
+    }
+
+    return elements;
+  };
+
+  const handleAnswerSelect = async (answer: string, correctAnswer: string, quizNumber: number) => {
+    setSelectedAnswer(answer);
+    const correct = answer === correctAnswer;
+    setIsCorrect(correct);
+    setShowFeedback(true);
+    
+    if (correct) {
+      // Collect answers for final submission
+      const quizAnswers = { [`question${quizNumber}`]: answer };
+      
+      // If last quiz, submit all answers
+      if (quizNumber === 3 && quizId) {
+        try {
+          const result = await submitQuizAttempt(quizId, quizAnswers);
+          
+          if (result.data.passed) {
+            setEarnedXP(prev => ({ ...prev, quiz: prev.quiz + XP_VALUES[`quiz${quizNumber}`] }));
+            setCompletedTasks(prev => ({ ...prev, [`passQuiz${quizNumber}`]: true }));
+          }
+        } catch (error) {
+          console.error('Failed to submit quiz:', error);
+        }
+      }
+      
+      if (quizNumber === 1) {
+        setEarnedXP(prev => ({ ...prev, quiz: prev.quiz + XP_VALUES.quiz1 }));
+        setWizardMessage(`Correct! +${XP_VALUES.quiz1} XP`);
+        setCompletedTasks(prev => ({ ...prev, passQuiz1: true }));
+        setTimeout(() => {
+          setCurrentScene('quiz2');
+          setSelectedAnswer(null);
+          setShowFeedback(false);
+          setWizardMessage("Next challenge: What geometric shape has exactly two endpoints?");
+        }, 2000);
+      } else if (quizNumber === 2) {
+        setEarnedXP(prev => ({ ...prev, quiz: prev.quiz + XP_VALUES.quiz2 }));
+        setWizardMessage(`Splendid! A line segment indeed has two endpoints! +${XP_VALUES.quiz2} XP`);
+        setCompletedTasks(prev => ({ ...prev, passQuiz2: true }));
+        setTimeout(() => {
+          setCurrentScene('quiz3');
+          setSelectedAnswer(null);
+          setShowFeedback(false);
+          setWizardMessage("Final question: Which shape starts at one point and extends infinitely?");
+        }, 2000);
+      } else if (quizNumber === 3) {
+        setEarnedXP(prev => ({ ...prev, quiz: prev.quiz + XP_VALUES.quiz3 }));
+        setWizardMessage(`Excellent! A ray starts at a point and goes on forever! +${XP_VALUES.quiz3} XP`);
+        setCompletedTasks(prev => ({ ...prev, passQuiz3: true }));
+        setTimeout(() => {
+          setCurrentScene('reward');
+          setWizardMessage("The first spark of geometry is yours. Carry it, for it will guide you through the paths ahead.");
+        }, 2000);
+      }
+    } else {
+      setWizardMessage("⚠️ Not quite right. Think carefully about the definition.");
+      setTimeout(() => {
+        setShowFeedback(false);
+        setSelectedAnswer(null);
+        if (quizNumber === 1) setWizardMessage("Try again! Which shape extends forever in both directions?");
+        else if (quizNumber === 2) setWizardMessage("Try again! Which shape has two endpoints?");
+        else if (quizNumber === 3) setWizardMessage("Try again! Which shape has one endpoint and extends infinitely?");
+      }, 2500);
+    }
+  };
+
+  const handleComplete = () => {
+    if (audioRef.current) audioRef.current.pause();
+    router.push('/student/worldmap/castle1');
+  };
+
+  const handleExit = () => {
+    if (audioRef.current) audioRef.current.pause();
+    router.push('/student/worldmap/castle1');
+  };
+
+  const toggleAutoAdvance = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setAutoAdvance(!autoAdvance);
+  };
+
+  const toggleMute = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsMuted(!isMuted);
+  };
+
+  const scaledPoints = getScaledPoints();
 
   return (
-    <div className={styles.chapter_container}>
-      {/* Background */}
-      <div className={styles.chapter_background} />
+    <div className={styles.chapterContainer}>
+      <div className={styles.backgroundOverlay}></div>
 
-      {/* Header */}
-      <header className={styles.chapter_header}>
-        <button 
-          className={styles.back_button}
-          onClick={() => router.push('/student/worldmap/castle1')}
-        >
-          ← Back to Castle
-        </button>
-
-        <div className={styles.chapter_title_section}>
-          <h1 className={styles.chapter_title}>
-            {CHAPTER_INFO.icon} {CHAPTER_INFO.title}
-          </h1>
-          <p className={styles.chapter_subtitle}>{CHAPTER_INFO.description}</p>
+      <div className={styles.topBar}>
+        <div className={styles.chapterInfo}>
+          <Sparkles className={styles.titleIcon} />
+          <div>
+            <h1 className={styles.chapterTitle}>Chapter 1: The Point of Origin</h1>
+            <p className={styles.chapterSubtitle}>The Euclidean Spire • Castle I</p>
+          </div>
         </div>
-
-        <div className={styles.chapter_progress_header}>
-          <span className={styles.progress_text}>
-            Lesson {currentLesson + 1} / {CHAPTER_INFO.lessons.length}
-          </span>
+        
+        <div className={styles.topBarActions}>
+          <button
+            className={`${styles.controlButton} ${isMuted ? styles.controlButtonActive : ''}`}
+            onClick={toggleMute}
+            title={isMuted ? "Audio: OFF" : "Audio: ON"}
+          >
+            {isMuted ? <VolumeX size={20} /> : <Volume2 size={20} />}
+          </button>
+          <button
+            className={`${styles.controlButton} ${autoAdvance ? styles.controlButtonActive : ''}`}
+            onClick={toggleAutoAdvance}
+            title={autoAdvance ? "Auto: ON" : "Auto: OFF"}
+          >
+            {autoAdvance ? <Pause size={20} /> : <Play size={20} />}
+          </button>
+          <button className={styles.exitButton} onClick={handleExit}>
+            <X size={20} />
+          </button>
         </div>
-      </header>
+      </div>
 
-      {/* Main Content */}
-      <main className={styles.chapter_content}>
-        {!showQuiz && !showMinigame && (
-          <div className={styles.lesson_container}>
-            {/* Lesson Progress Dots */}
-            <div className={styles.lesson_progress_dots}>
-              {CHAPTER_INFO.lessons.map((_, index) => (
-                <div
-                  key={index}
-                  className={`${styles.progress_dot} ${
-                    index === currentLesson ? styles.active : ''
-                  } ${lessonComplete[index] ? styles.completed : ''}`}
-                  onClick={() => lessonComplete[index] && setCurrentLesson(index)}
-                />
-              ))}
-            </div>
-
-            {/* Lesson Content */}
-            <div className={styles.lesson_card}>
-              <div className={styles.lesson_header}>
-                <span className={styles.lesson_number}>Lesson {currentLesson + 1}</span>
-                <h2 className={styles.lesson_title}>{lesson.title}</h2>
-              </div>
-
-              <div className={styles.lesson_body}>
-                {/* Visual Representation */}
-                <div className={styles.visual_container}>
-                  {currentLesson === 0 && (
-                    <svg className={styles.geometry_svg} viewBox="0 0 400 200">
-                      <circle cx="200" cy="100" r="8" fill="#5a3e2b" />
-                      <text x="200" y="130" textAnchor="middle" fill="#5a3e2b" fontSize="20" fontWeight="bold">
-                        A
-                      </text>
-                    </svg>
-                  )}
-                  
-                  {currentLesson === 1 && (
-                    <svg className={styles.geometry_svg} viewBox="0 0 400 200">
-                      <defs>
-                        <marker id="arrowLeft" markerWidth="10" markerHeight="10" refX="0" refY="3" orient="auto" markerUnits="strokeWidth">
-                          <path d="M10,0 L10,6 L0,3 z" fill="#5a3e2b" />
-                        </marker>
-                        <marker id="arrowRight" markerWidth="10" markerHeight="10" refX="10" refY="3" orient="auto" markerUnits="strokeWidth">
-                          <path d="M0,0 L0,6 L10,3 z" fill="#5a3e2b" />
-                        </marker>
-                      </defs>
-                      <line x1="50" y1="100" x2="350" y2="100" stroke="#5a3e2b" strokeWidth="3" markerStart="url(#arrowLeft)" markerEnd="url(#arrowRight)" />
-                      <circle cx="150" cy="100" r="6" fill="#e74c3c" />
-                      <circle cx="250" cy="100" r="6" fill="#e74c3c" />
-                      <text x="150" y="130" textAnchor="middle" fill="#5a3e2b" fontSize="18" fontWeight="bold">A</text>
-                      <text x="250" y="130" textAnchor="middle" fill="#5a3e2b" fontSize="18" fontWeight="bold">B</text>
-                    </svg>
-                  )}
-
-                  {currentLesson === 2 && (
-                    <svg className={styles.geometry_svg} viewBox="0 0 400 200">
-                      <defs>
-                        <marker id="rayArrow" markerWidth="10" markerHeight="10" refX="10" refY="3" orient="auto" markerUnits="strokeWidth">
-                          <path d="M0,0 L0,6 L10,3 z" fill="#5a3e2b" />
-                        </marker>
-                      </defs>
-                      <line x1="100" y1="100" x2="350" y2="100" stroke="#5a3e2b" strokeWidth="3" markerEnd="url(#rayArrow)" />
-                      <circle cx="100" cy="100" r="8" fill="#e74c3c" />
-                      <circle cx="225" cy="100" r="6" fill="#3498db" />
-                      <text x="100" y="130" textAnchor="middle" fill="#5a3e2b" fontSize="18" fontWeight="bold">A</text>
-                      <text x="225" y="130" textAnchor="middle" fill="#5a3e2b" fontSize="18" fontWeight="bold">B</text>
-                    </svg>
-                  )}
-
-                  {currentLesson === 3 && (
-                    <svg className={styles.geometry_svg} viewBox="0 0 400 200">
-                      <line x1="100" y1="100" x2="300" y2="100" stroke="#5a3e2b" strokeWidth="3" />
-                      <circle cx="100" cy="100" r="8" fill="#e74c3c" />
-                      <circle cx="300" cy="100" r="8" fill="#e74c3c" />
-                      <text x="100" y="130" textAnchor="middle" fill="#5a3e2b" fontSize="18" fontWeight="bold">A</text>
-                      <text x="300" y="130" textAnchor="middle" fill="#5a3e2b" fontSize="18" fontWeight="bold">B</text>
-                    </svg>
-                  )}
-                </div>
-
-                {/* Explanation */}
-                <div className={styles.lesson_explanation}>
-                  <p className={styles.lesson_text}>{lesson.content}</p>
-
-                  <div className={styles.examples_section}>
-                    <h3 className={styles.examples_title}>Key Points:</h3>
-                    <ul className={styles.examples_list}>
-                      {lesson.examples.map((example, index) => (
-                        <li key={index} className={styles.example_item}>
-                          {example}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-              </div>
-
-              {/* Navigation */}
-              <div className={styles.lesson_navigation}>
-                {currentLesson > 0 && (
-                  <button
-                    className={styles.nav_button_prev}
-                    onClick={() => setCurrentLesson(currentLesson - 1)}
-                  >
-                    ← Previous Lesson
-                  </button>
-                )}
-
-                <button
-                  className={styles.nav_button_next}
-                  onClick={handleLessonComplete}
-                >
-                  {currentLesson === CHAPTER_INFO.lessons.length - 1
-                    ? 'Take Quiz →'
-                    : 'Next Lesson →'}
-                </button>
-              </div>
+      <div className={styles.mainContent}>
+        <div className={styles.taskPanel}>
+          <div className={styles.taskPanelHeader}>
+            <span className={styles.taskPanelTitle}>Learning Objectives</span>
+            <div className={styles.progressText}>
+              {Object.values(completedTasks).filter(Boolean).length} / 8 Complete
             </div>
           </div>
-        )}
-
-        {/* Quiz Section */}
-        {showQuiz && !showMinigame && (
-          <div className={styles.quiz_container}>
-            <div className={styles.quiz_card}>
-              <h2 className={styles.quiz_title}>📝 Chapter Quiz</h2>
-              <p className={styles.quiz_subtitle}>Test your knowledge! Score 70% or higher to proceed.</p>
-
-              <div className={styles.quiz_questions}>
-                {/* Question 1 */}
-                <div className={styles.quiz_question}>
-                  <p className={styles.question_text}>1. What is a point in geometry?</p>
-                  <div className={styles.quiz_options}>
-                    <label className={styles.quiz_option}>
-                      <input
-                        type="radio"
-                        name="q0"
-                        value="a"
-                        onChange={(e) => setQuizAnswers({ ...quizAnswers, 0: e.target.value })}
-                      />
-                      <span>A shape with area</span>
-                    </label>
-                    <label className={styles.quiz_option}>
-                      <input
-                        type="radio"
-                        name="q0"
-                        value="b"
-                        onChange={(e) => setQuizAnswers({ ...quizAnswers, 0: e.target.value })}
-                      />
-                      <span>An exact location in space with no size</span>
-                    </label>
-                    <label className={styles.quiz_option}>
-                      <input
-                        type="radio"
-                        name="q0"
-                        value="c"
-                        onChange={(e) => setQuizAnswers({ ...quizAnswers, 0: e.target.value })}
-                      />
-                      <span>A line segment</span>
-                    </label>
-                  </div>
+          <div className={styles.taskList} ref={taskListRef}>
+            {[
+              { key: 'learnPoint', label: 'Learn: Point' },
+              { key: 'learnLineSegment', label: 'Learn: Line Segment' },
+              { key: 'learnRay', label: 'Learn: Ray' },
+              { key: 'learnLine', label: 'Learn: Line' },
+              { key: 'completeMinigame', label: 'Complete Practice' },
+              { key: 'passQuiz1', label: 'Pass Quiz 1' },
+              { key: 'passQuiz2', label: 'Pass Quiz 2' },
+              { key: 'passQuiz3', label: 'Pass Quiz 3' }
+            ].map(task => (
+              <div key={task.key} className={`${styles.taskItem} ${completedTasks[task.key as keyof typeof completedTasks] ? styles.taskCompleted : ''}`}>
+                <div className={styles.taskIconWrapper}>
+                  {completedTasks[task.key as keyof typeof completedTasks] ? (
+                    <CheckCircle size={18} className={styles.iconComplete} />
+                  ) : (
+                    <Lock size={18} className={styles.iconLocked} />
+                  )}
                 </div>
+                <span className={styles.taskText}>{task.label}</span>
+              </div>
+            ))}
+          </div>
+        </div>
 
-                {/* Question 2 */}
-                <div className={styles.quiz_question}>
-                  <p className={styles.question_text}>2. A line extends:</p>
-                  <div className={styles.quiz_options}>
-                    <label className={styles.quiz_option}>
-                      <input
-                        type="radio"
-                        name="q1"
-                        value="a"
-                        onChange={(e) => setQuizAnswers({ ...quizAnswers, 1: e.target.value })}
-                      />
-                      <span>In one direction only</span>
-                    </label>
-                    <label className={styles.quiz_option}>
-                      <input
-                        type="radio"
-                        name="q1"
-                        value="b"
-                        onChange={(e) => setQuizAnswers({ ...quizAnswers, 1: e.target.value })}
-                      />
-                      <span>Has two endpoints</span>
-                    </label>
-                    <label className={styles.quiz_option}>
-                      <input
-                        type="radio"
-                        name="q1"
-                        value="c"
-                        onChange={(e) => setQuizAnswers({ ...quizAnswers, 1: e.target.value })}
-                      />
-                      <span>Infinitely in both directions</span>
-                    </label>
-                  </div>
-                </div>
-
-                {/* Question 3 */}
-                <div className={styles.quiz_question}>
-                  <p className={styles.question_text}>3. A ray has:</p>
-                  <div className={styles.quiz_options}>
-                    <label className={styles.quiz_option}>
-                      <input
-                        type="radio"
-                        name="q2"
-                        value="a"
-                        onChange={(e) => setQuizAnswers({ ...quizAnswers, 2: e.target.value })}
-                      />
-                      <span>One endpoint and extends infinitely</span>
-                    </label>
-                    <label className={styles.quiz_option}>
-                      <input
-                        type="radio"
-                        name="q2"
-                        value="b"
-                        onChange={(e) => setQuizAnswers({ ...quizAnswers, 2: e.target.value })}
-                      />
-                      <span>Two endpoints</span>
-                    </label>
-                    <label className={styles.quiz_option}>
-                      <input
-                        type="radio"
-                        name="q2"
-                        value="c"
-                        onChange={(e) => setQuizAnswers({ ...quizAnswers, 2: e.target.value })}
-                      />
-                      <span>No endpoints</span>
-                    </label>
-                  </div>
-                </div>
-
-                {/* Question 4 */}
-                <div className={styles.quiz_question}>
-                  <p className={styles.question_text}>4. Which has measurable length?</p>
-                  <div className={styles.quiz_options}>
-                    <label className={styles.quiz_option}>
-                      <input
-                        type="radio"
-                        name="q3"
-                        value="a"
-                        onChange={(e) => setQuizAnswers({ ...quizAnswers, 3: e.target.value })}
-                      />
-                      <span>A line</span>
-                    </label>
-                    <label className={styles.quiz_option}>
-                      <input
-                        type="radio"
-                        name="q3"
-                        value="b"
-                        onChange={(e) => setQuizAnswers({ ...quizAnswers, 3: e.target.value })}
-                      />
-                      <span>A line segment</span>
-                    </label>
-                    <label className={styles.quiz_option}>
-                      <input
-                        type="radio"
-                        name="q3"
-                        value="c"
-                        onChange={(e) => setQuizAnswers({ ...quizAnswers, 3: e.target.value })}
-                      />
-                      <span>A ray</span>
-                    </label>
-                  </div>
-                </div>
-
-                {/* Question 5 */}
-                <div className={styles.quiz_question}>
-                  <p className={styles.question_text}>5. How do we name a line segment?</p>
-                  <div className={styles.quiz_options}>
-                    <label className={styles.quiz_option}>
-                      <input
-                        type="radio"
-                        name="q4"
-                        value="a"
-                        onChange={(e) => setQuizAnswers({ ...quizAnswers, 4: e.target.value })}
-                      />
-                      <span>Using one point</span>
-                    </label>
-                    <label className={styles.quiz_option}>
-                      <input
-                        type="radio"
-                        name="q4"
-                        value="b"
-                        onChange={(e) => setQuizAnswers({ ...quizAnswers, 4: e.target.value })}
-                      />
-                      <span>Using arrows</span>
-                    </label>
-                    <label className={styles.quiz_option}>
-                      <input
-                        type="radio"
-                        name="q4"
-                        value="d"
-                        onChange={(e) => setQuizAnswers({ ...quizAnswers, 4: e.target.value })}
-                      />
-                      <span>Using its two endpoints</span>
-                    </label>
+        <div className={styles.gameArea} ref={gameAreaRef}>
+          {currentScene === 'opening' && (
+            <div className={styles.sceneContent}>
+              <div className={styles.observatoryView}>
+                <div className={styles.doorPreview}>
+                  <h2 className={styles.doorTitle}>The Three Paths Ahead</h2>
+                  <div className={styles.doorGrid}>
+                    {[
+                      { label: 'Point of Origin', image: '/images/point-of-origin.png' },
+                      { label: 'Paths of Power', image: '/images/paths-of-power.png' },
+                      { label: 'Shapes of the Spire', image: '/images/shapes-of-the-spire.png' }
+                    ].map((door, i) => (
+                      <div key={i} className={styles.doorCard}>
+                        <div className={styles.doorImageWrapper}>
+                          <img src={door.image} alt={door.label} className={styles.doorImage} />
+                        </div>
+                        <span className={styles.doorLabel}>{door.label}</span>
+                      </div>
+                    ))}
                   </div>
                 </div>
               </div>
+            </div>
+          )}
 
-              {!quizSubmitted ? (
-                <button
-                  className={styles.submit_quiz_button}
-                  onClick={handleQuizSubmit}
-                  disabled={Object.keys(quizAnswers).length < 5}
-                >
-                  Submit Quiz
-                </button>
-              ) : (
-                <div className={styles.quiz_results}>
-                  <h3 className={styles.results_title}>
-                    {score >= 70 ? '🎉 Congratulations!' : '😔 Try Again'}
-                  </h3>
-                  <p className={styles.results_score}>Your Score: {score}%</p>
-                  <p className={styles.results_message}>
-                    {score >= 70
-                      ? 'You passed! Get ready for the mini-game...'
-                      : 'You need 70% or higher. Review the lessons and try again.'}
+          {currentScene === 'lesson' && (
+            <div className={styles.lessonContent}>
+              <div className={styles.conceptGrid}>
+                {completedTasks.learnPoint && (
+                  <div className={`${styles.conceptCard} ${styles.conceptUnlocked}`}>
+                    <div className={styles.conceptVisual}>
+                      <div className={styles.point}>
+                        <span className={styles.pointDot}></span>
+                      </div>
+                    </div>
+                    <h3 className={styles.conceptTitle}>Point</h3>
+                    <p className={styles.conceptDesc}>A precise location in space</p>
+                    <div className={styles.unlockBadge}>✓</div>
+                  </div>
+                )}
+                
+                {completedTasks.learnLineSegment && (
+                  <div className={`${styles.conceptCard} ${styles.conceptUnlocked}`}>
+                    <div className={styles.conceptVisual}>
+                      <div className={styles.segment}>
+                        <span className={styles.endpointLeft}></span>
+                        <span className={styles.endpointRight}></span>
+                      </div>
+                    </div>
+                    <h3 className={styles.conceptTitle}>Line Segment</h3>
+                    <p className={styles.conceptDesc}>Connects two points with defined endpoints</p>
+                    <div className={styles.unlockBadge}>✓</div>
+                  </div>
+                )}
+                
+                {completedTasks.learnRay && (
+                  <div className={`${styles.conceptCard} ${styles.conceptUnlocked}`}>
+                    <div className={styles.conceptVisual}>
+                      <div className={styles.ray}>
+                        <span className={styles.endpointLeft}></span>
+                        <span className={styles.arrowhead}></span>
+                      </div>
+                    </div>
+                    <h3 className={styles.conceptTitle}>Ray</h3>
+                    <p className={styles.conceptDesc}>Starts at a point, extends infinitely in one direction</p>
+                    <div className={styles.unlockBadge}>✓</div>
+                  </div>
+                )}
+                
+                {completedTasks.learnLine && (
+                  <div className={`${styles.conceptCard} ${styles.conceptUnlocked}`}>
+                    <div className={styles.conceptVisual}>
+                      <div className={styles.line}>
+                        <span className={styles.arrowheadLeft}></span>
+                        <span className={styles.arrowheadRight}></span>
+                      </div>
+                    </div>
+                    <h3 className={styles.conceptTitle}>Line</h3>
+                    <p className={styles.conceptDesc}>Extends infinitely in both directions</p>
+                    <div className={styles.unlockBadge}>✓</div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {currentScene === 'minigame' && (
+            <div className={styles.minigameContent}>
+              <div className={styles.minigameCard}>
+                <div className={styles.minigameHeader}>
+                  <h3 className={styles.minigameTitle}>Connect the Points</h3>
+                  <p className={styles.minigameInstruction}>
+                    {minigameQuestions[currentQuestion].instruction}
                   </p>
-                  {score < 70 && (
+                </div>
+                
+                <div className={styles.minigameCanvas} ref={canvasContainerRef}>
+                  <Stage
+                    width={stageSize.width}
+                    height={stageSize.height}
+                    onMouseMove={handleMouseMove}
+                    onMouseUp={() => {
+                      setIsDragging(false);
+                      setDragStart(null);
+                      setMousePos(null);
+                    }}
+                  >
+                    <Layer>
+                      {/* Draw temporary drag line */}
+                      {isDragging && dragStart && mousePos && (() => {
+                        const startPoint = scaledPoints.find(p => p.id === dragStart);
+                        if (startPoint) {
+                          return (
+                            <Line
+                              points={[startPoint.x, startPoint.y, mousePos.x, mousePos.y]}
+                              stroke="#66BBFF"
+                              strokeWidth={2}
+                              dash={[5, 5]}
+                              opacity={0.6}
+                            />
+                          );
+                        }
+                      })()}
+
+                      {/* Draw connection */}
+                      {renderConnection()}
+
+                      {/* Draw points */}
+                      {scaledPoints.map(point => (
+                        <React.Fragment key={point.id}>
+                          <Circle
+                            x={point.x}
+                            y={point.y}
+                            radius={selectedPoints.includes(point.id) || dragStart === point.id ? 10 : 8}
+                            fill={selectedPoints.includes(point.id) || dragStart === point.id ? "#66BBFF" : "#4FC3F7"}
+                            stroke="#66BBFF"
+                            strokeWidth={2}
+                            shadowBlur={selectedPoints.includes(point.id) || dragStart === point.id ? 15 : 8}
+                            shadowColor="#66BBFF"
+                            onMouseDown={() => handlePointMouseDown(point.id)}
+                            onMouseUp={() => handlePointMouseUp(point.id)}
+                            onClick={() => handlePointClick(point.id)}
+                            onTouchStart={() => handlePointMouseDown(point.id)}
+                            onTouchEnd={() => handlePointMouseUp(point.id)}
+                          />
+                          <Text
+                            x={point.x}
+                            y={point.y - 25}
+                            text={point.label}
+                            fontSize={18}
+                            fontFamily="Cinzel"
+                            fontStyle="bold"
+                            fill="#66BBFF"
+                            align="center"
+                            width={40}
+                            offsetX={20}
+                          />
+                        </React.Fragment>
+                      ))}
+                    </Layer>
+                  </Stage>
+                </div>
+
+                <div className={styles.minigameProgress}>
+                  Question {currentQuestion + 1} of {minigameQuestions.length}
+                </div>
+                
+                {minigameFeedback && (
+                  <div className={`${styles.minigameFeedback} ${
+                    isFeedbackCorrect ? styles.feedbackCorrect : 
+                    isFeedbackCorrect === false ? styles.feedbackIncorrect : ''
+                  }`}>
+                    {minigameFeedback}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {currentScene === 'quiz1' && (
+            <div className={styles.quizContent}>
+              <div className={styles.quizCard}>
+                <div className={styles.quizHeader}>
+                  <h3 className={styles.quizQuestion}>
+                    Which of these continues infinitely in <strong>both directions</strong>?
+                  </h3>
+                </div>
+                <div className={styles.answerGrid}>
+                  {[
+                    { label: 'A', text: 'Ray', type: 'ray' },
+                    { label: 'B', text: 'Line Segment', type: 'segment' },
+                    { label: 'C', text: 'Line', type: 'line' }
+                  ].map(answer => (
                     <button
-                      className={styles.retry_button}
-                      onClick={() => {
-                        setQuizSubmitted(false);
-                        setQuizAnswers({});
-                        setScore(0);
-                      }}
+                      key={answer.label}
+                      className={`${styles.answerButton} ${selectedAnswer === answer.label ? (isCorrect ? styles.answerCorrect : styles.answerIncorrect) : ''}`}
+                      onClick={() => handleAnswerSelect(answer.label, 'C', 1)}
+                      disabled={showFeedback}
                     >
-                      Retry Quiz
+                      <span className={styles.answerLabel}>{answer.label}</span>
+                      <div className={styles.answerContent}>
+                        <span className={styles.answerText}>{answer.text}</span>
+                        <div className={styles.visualPreview}>
+                          <div className={styles[answer.type]}>
+                            {answer.type === 'segment' && (
+                              <>
+                                <span className={styles.endpointLeft}></span>
+                                <span className={styles.endpointRight}></span>
+                              </>
+                            )}
+                            {answer.type === 'ray' && (
+                              <>
+                                <span className={styles.endpointLeft}></span>
+                                <span className={styles.arrowhead}></span>
+                              </>
+                            )}
+                            {answer.type === 'line' && (
+                              <>
+                                <span className={styles.arrowheadLeft}></span>
+                                <span className={styles.arrowheadRight}></span>
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      </div>
                     </button>
-                  )}
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {currentScene === 'quiz2' && (
+            <div className={styles.quizContent}>
+              <div className={styles.quizCard}>
+                <div className={styles.quizHeader}>
+                  <h3 className={styles.quizQuestion}>
+                    What geometric shape has exactly <strong>two endpoints</strong>?
+                  </h3>
+                </div>
+                <div className={styles.answerGrid}>
+                  {[
+                    { label: 'A', text: 'Point', type: 'point' },
+                    { label: 'B', text: 'Line Segment', type: 'segment' },
+                    { label: 'C', text: 'Ray', type: 'ray' }
+                  ].map(answer => (
+                    <button
+                      key={answer.label}
+                      className={`${styles.answerButton} ${selectedAnswer === answer.label ? (isCorrect ? styles.answerCorrect : styles.answerIncorrect) : ''}`}
+                      onClick={() => handleAnswerSelect(answer.label, 'B', 2)}
+                      disabled={showFeedback}
+                    >
+                      <span className={styles.answerLabel}>{answer.label}</span>
+                      <div className={styles.answerContent}>
+                        <span className={styles.answerText}>{answer.text}</span>
+                        <div className={styles.visualPreview}>
+                          <div className={styles[answer.type]}>
+                            {answer.type === 'point' && <span className={styles.pointDot}></span>}
+                            {answer.type === 'segment' && (
+                              <>
+                                <span className={styles.endpointLeft}></span>
+                                <span className={styles.endpointRight}></span>
+                              </>
+                            )}
+                            {answer.type === 'ray' && (
+                              <>
+                                <span className={styles.endpointLeft}></span>
+                                <span className={styles.arrowhead}></span>
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {currentScene === 'quiz3' && (
+            <div className={styles.quizContent}>
+              <div className={styles.quizCard}>
+                <div className={styles.quizHeader}>
+                  <h3 className={styles.quizQuestion}>
+                    Which shape starts at <strong>one point</strong> and extends <strong>infinitely</strong>?
+                  </h3>
+                </div>
+                <div className={styles.answerGrid}>
+                  {[
+                    { label: 'A', text: 'Line', type: 'line' },
+                    { label: 'B', text: 'Ray', type: 'ray' },
+                    { label: 'C', text: 'Line Segment', type: 'segment' }
+                  ].map(answer => (
+                    <button
+                      key={answer.label}
+                      className={`${styles.answerButton} ${selectedAnswer === answer.label ? (isCorrect ? styles.answerCorrect : styles.answerIncorrect) : ''}`}
+                      onClick={() => handleAnswerSelect(answer.label, 'B', 3)}
+                      disabled={showFeedback}
+                    >
+                      <span className={styles.answerLabel}>{answer.label}</span>
+                      <div className={styles.answerContent}>
+                        <span className={styles.answerText}>{answer.text}</span>
+                        <div className={styles.visualPreview}>
+                          <div className={styles[answer.type]}>
+                            {answer.type === 'line' && (
+                              <>
+                                <span className={styles.arrowheadLeft}></span>
+                                <span className={styles.arrowheadRight}></span>
+                              </>
+                            )}
+                            {answer.type === 'ray' && (
+                              <>
+                                <span className={styles.endpointLeft}></span>
+                                <span className={styles.arrowhead}></span>
+                              </>
+                            )}
+                            {answer.type === 'segment' && (
+                              <>
+                                <span className={styles.endpointLeft}></span>
+                                <span className={styles.endpointRight}></span>
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {currentScene === 'reward' && (
+            <div className={styles.rewardContent}>
+              <h2 className={styles.rewardTitle}>Chapter Complete!</h2>
+              <div className={styles.rewardCard}>
+                <div className={styles.relicDisplay}>
+                  <img 
+                    src="/images/pointlight-crystal.png" 
+                    alt="Pointlight Crystal" 
+                    className={styles.relicIcon} 
+                  />
+                </div>
+                <h3 className={styles.rewardName}>Pointlight Crystal</h3>
+                <p className={styles.rewardDescription}>The first spark of geometry is yours!</p>
+              </div>
+              <div className={styles.rewardStats}>
+                <div className={styles.statBox}>
+                  <Star className={styles.statIcon} />
+                  <div className={styles.statBreakdown}>
+                    <span className={styles.statValue}>+{earnedXP.lesson + earnedXP.minigame + earnedXP.quiz} XP</span>
+                    <span className={styles.statDetail}>
+                      Lesson: {earnedXP.lesson} • Practice: {earnedXP.minigame} • Quizzes: {earnedXP.quiz}
+                    </span>
+                  </div>
+                </div>
+                <div className={styles.statBox}>
+                  <Award className={styles.statIcon} />
+                  <span className={styles.statValue}>8/8 Tasks</span>
+                </div>
+              </div>
+              <button className={styles.returnButton} onClick={handleComplete}>
+                <span>Return to Castle</span>
+                <ChevronRight size={20} />
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {currentScene !== 'reward' && (
+        <div className={styles.dialogueWrapper}>
+          <div className={styles.dialogueContainer} onClick={handleDialogueClick}>
+            <div className={styles.characterSection}>
+              <div className={styles.portraitFrame}>
+                <img src="/images/archim-wizard.png" alt="Archim" className={styles.wizardPortrait} />
+              </div>
+            </div>
+            <div className={styles.messageSection}>
+              <div className={styles.dialogueTextWrapper}>
+                <div className={styles.dialogueSpeaker}>Archim</div>
+                <div className={styles.dialogueText}>
+                  <p>{displayedText}</p>
+                </div>
+              </div>
+              {!isTyping && currentScene !== 'minigame' && (
+                <div className={styles.continuePrompt}>
+                  <span>Click to continue</span>
+                  <ChevronRight size={16} className={styles.chevronBounce} />
                 </div>
               )}
             </div>
           </div>
-        )}
-
-        {/* Minigame: Dot Dash */}
-        {showMinigame && (
-          <div className={styles.minigame_container}>
-            <div className={styles.minigame_card}>
-              <h2 className={styles.minigame_title}>🎮 Dot Dash Mini-Game</h2>
-              <p className={styles.minigame_subtitle}>
-                Connect the dots to create the requested geometric element!
-              </p>
-
-              <div className={styles.minigame_stats}>
-                <div className={styles.minigame_stat}>
-                  <span className={styles.stat_label}>Level:</span>
-                  <span className={styles.stat_value}>{minigameLevel}</span>
-                </div>
-                <div className={styles.minigame_stat}>
-                  <span className={styles.stat_label}>Score:</span>
-                  <span className={styles.stat_value}>{minigameScore}</span>
-                </div>
-              </div>
-
-              <div className={styles.minigame_target}>
-                <p>Create a: <strong>{targetPattern.toUpperCase()}</strong></p>
-              </div>
-
-              <div className={styles.minigame_canvas}>
-                <svg viewBox="0 0 500 400" className={styles.dot_canvas}>
-                  {/* Grid of points */}
-                  {[0, 1, 2, 3, 4].map((row) =>
-                    [0, 1, 2, 3, 4].map((col) => {
-                      const pointId = `${row}-${col}`;
-                      const x = 100 + col * 80;
-                      const y = 80 + row * 80;
-                      const isSelected = selectedPoints.includes(pointId);
-
-                      return (
-                        <g key={pointId}>
-                          <circle
-                            cx={x}
-                            cy={y}
-                            r="12"
-                            fill={isSelected ? '#e74c3c' : '#5a3e2b'}
-                            className={styles.dot_point}
-                            onClick={() => handlePointClick(pointId)}
-                            style={{ cursor: 'pointer' }}
-                          />
-                          {isSelected && (
-                            <circle
-                              cx={x}
-                              cy={y}
-                              r="18"
-                              fill="none"
-                              stroke="#e74c3c"
-                              strokeWidth="2"
-                              className={styles.dot_pulse}
-                            />
-                          )}
-                        </g>
-                      );
-                    })
-                  )}
-
-                  {/* Draw line between selected points */}
-                  {selectedPoints.length === 2 && (
-                    <line
-                      x1={100 + parseInt(selectedPoints[0].split('-')[1]) * 80}
-                      y1={80 + parseInt(selectedPoints[0].split('-')[0]) * 80}
-                      x2={100 + parseInt(selectedPoints[1].split('-')[1]) * 80}
-                      y2={80 + parseInt(selectedPoints[1].split('-')[0]) * 80}
-                      stroke="#3498db"
-                      strokeWidth="3"
-                      className={styles.connecting_line}
-                    />
-                  )}
-                </svg>
-              </div>
-
-              <div className={styles.minigame_controls}>
-                <button
-                  className={styles.reset_button}
-                  onClick={() => setSelectedPoints([])}
-                >
-                  Reset
-                </button>
-                {minigameLevel > 5 && (
-                  <button
-                    className={styles.complete_button}
-                    onClick={handleMinigameComplete}
-                  >
-                    Complete Chapter! 🎉
-                  </button>
-                )}
-              </div>
-
-              <div className={styles.minigame_instructions}>
-                <h4>How to Play:</h4>
-                <ul>
-                  <li>Click on two dots to connect them</li>
-                  <li>Create the requested geometric element</li>
-                  <li>Complete 5 levels to finish!</li>
-                  <li>Earn points for each correct pattern</li>
-                </ul>
-              </div>
-            </div>
-          </div>
-        )}
-      </main>
+        </div>
+      )}
     </div>
   );
 }

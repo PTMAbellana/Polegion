@@ -15,7 +15,9 @@ const {
     competitionRoutes,
     castleRoutes,
     chapterRoutes,
-    progressRoutes
+    progressRoutes,
+    minigameRoutes,  // newly added
+    quizRoutes    // newly added
 } = require('./container')
 
 const app = express()
@@ -40,7 +42,8 @@ app.use('/api/competitions', competitionRoutes)
 app.use('/api/castles', castleRoutes)
 app.use('/api/chapters', chapterRoutes)
 app.use('/api/progress', progressRoutes)
-
+app.use('/api/minigames', minigameRoutes) // Newly Added
+app.use('/api/quizzes', quizRoutes)       // Newly Added
 //swagger documentation
 app.use('/api-docs', swaggerServe, swaggerSetup)
 

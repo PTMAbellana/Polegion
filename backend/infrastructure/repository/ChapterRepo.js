@@ -1,129 +1,173 @@
 const BaseRepo = require('./BaseRepo');
 
 class ChapterRepo extends BaseRepo {
-  constructor(supabase) {
-    super(supabase, 'chapters');
-  }
-
-  /**
-   * Find all chapters for a castle
-   */
-  async findByCastleId(castleId) {
-    try {
-      console.log('[ChapterRepo] Finding chapters for castle:', castleId);
-      
-      const { data, error } = await this.supabase
-        .from('chapters')
-        .select('*')
-        .eq('castle_id', castleId)
-        .order('chapter_number', { ascending: true });
-
-      if (error) {
-        console.error('[ChapterRepo] Supabase error:', error);
-        throw error;
-      }
-      
-      console.log('[ChapterRepo] Found chapters:', data?.length || 0);
-      return data || [];
-    } catch (error) {
-      console.error('[ChapterRepo] Error finding chapters by castle ID:', error);
-      throw error;
+    constructor(supabase) {
+        super(supabase, 'chapters'); // ✅ Pass 'chapters' to BaseRepo
+        this.tableName = 'chapters'; // ✅ Explicitly set tableName
     }
-  }
 
-  /**
-   * Find chapter by ID
-   */
-  async findById(id) {
-    try {
-      const { data, error } = await this.supabase
-        .from('chapters')
-        .select('*')
-        .eq('id', id)
-        .single();
+    async findByCastleId(castleId) {
+        try {
+            console.log(`[ChapterRepo] Finding chapters for castle ${castleId}`);
+            console.log(`[ChapterRepo] Using table: ${this.tableName}`); // Debug log
+            
+            const { data, error } = await this.supabase
+                .from('chapters') // ✅ Use hardcoded table name to be safe
+                .select('*')
+                .eq('castle_id', castleId)
+                .order('chapter_number', { ascending: true });
 
-      if (error) throw error;
-      return data;
-    } catch (error) {
-      console.error('[ChapterRepo] Error finding chapter by ID:', error);
-      throw error;
+            if (error) {
+                console.error('[ChapterRepo] Error finding chapters:', error);
+                throw error;
+            }
+
+            console.log(`[ChapterRepo] Found ${data?.length || 0} chapters`);
+            return data || [];
+        } catch (error) {
+            console.error('[ChapterRepo] Error in findByCastleId:', error);
+            throw error;
+        }
     }
-  }
 
-  /**
-   * Create new chapter
-   */
-  async create(chapterData) {
-    try {
-      const { data, error } = await this.supabase
-        .from('chapters')
-        .insert(chapterData)
-        .select()
-        .single();
+    async findById(chapterId) {
+        try {
+            console.log(`[ChapterRepo] Finding chapter ${chapterId}`);
+            
+            const { data, error } = await this.supabase
+                .from('chapters') // ✅ Use hardcoded table name
+                .select('*')
+                .eq('id', chapterId)
+                .single();
 
-      if (error) throw error;
-      return data;
-    } catch (error) {
-      console.error('[ChapterRepo] Error creating chapter:', error);
-      throw error;
+            if (error) {
+                console.error('[ChapterRepo] Error finding chapter:', error);
+                throw error;
+            }
+
+            console.log(`[ChapterRepo] Chapter found:`, !!data);
+            return data;
+        } catch (error) {
+            console.error('[ChapterRepo] Error in findById:', error);
+            throw error;
+        }
     }
-  }
 
-  /**
-   * Update chapter
-   */
-  async update(id, chapterData) {
-    try {
-      const { data, error } = await this.supabase
-        .from('chapters')
-        .update(chapterData)
-        .eq('id', id)
-        .select()
-        .single();
+    async create(chapterData) {
+        try {
+            console.log(`[ChapterRepo] Creating chapter:`, chapterData.title);
+            
+            const { data, error } = await this.supabase
+                .from('chapters')
+                .insert(chapterData)
+                .select()
+                .single();
 
-      if (error) throw error;
-      return data;
-    } catch (error) {
-      console.error('[ChapterRepo] Error updating chapter:', error);
-      throw error;
+            if (error) {
+                console.error('[ChapterRepo] Error creating chapter:', error);
+                throw error;
+            }
+
+            console.log(`[ChapterRepo] ✅ Chapter created:`, data.id);
+            return data;
+        } catch (error) {
+            console.error('[ChapterRepo] Error in create:', error);
+            throw error;
+        }
     }
-  }
 
-  /**
-   * Delete chapter
-   */
-  async delete(id) {
-    try {
-      const { error } = await this.supabase
-        .from('chapters')
-        .delete()
-        .eq('id', id);
+    async update(chapterId, updates) {
+        try {
+            console.log(`[ChapterRepo] Updating chapter ${chapterId}`);
+            
+            const { data, error } = await this.supabase
+                .from('chapters')
+                .update(updates)
+                .eq('id', chapterId)
+                .select()
+                .single();
 
-      if (error) throw error;
-      return true;
-    } catch (error) {
-      console.error('[ChapterRepo] Error deleting chapter:', error);
-      throw error;
+            if (error) {
+                console.error('[ChapterRepo] Error updating chapter:', error);
+                throw error;
+            }
+
+            console.log(`[ChapterRepo] ✅ Chapter updated`);
+            return data;
+        } catch (error) {
+            console.error('[ChapterRepo] Error in update:', error);
+            throw error;
+        }
     }
-  }
 
-  /**
-   * Get chapter count for a castle
-   */
-  async getChapterCount(castleId) {
-    try {
-      const { count, error } = await this.supabase
-        .from('chapters')
-        .select('*', { count: 'exact', head: true })
-        .eq('castle_id', castleId);
+    async delete(chapterId) {
+        try {
+            console.log(`[ChapterRepo] Deleting chapter ${chapterId}`);
+            
+            const { error } = await this.supabase
+                .from('chapters')
+                .delete()
+                .eq('id', chapterId);
 
-      if (error) throw error;
-      return count || 0;
-    } catch (error) {
-      console.error('[ChapterRepo] Error getting chapter count:', error);
-      throw error;
+            if (error) {
+                console.error('[ChapterRepo] Error deleting chapter:', error);
+                throw error;
+            }
+
+            console.log(`[ChapterRepo] ✅ Chapter deleted`);
+            return true;
+        } catch (error) {
+            console.error('[ChapterRepo] Error in delete:', error);
+            throw error;
+        }
     }
-  }
+
+    async findAll() {
+        try {
+            console.log(`[ChapterRepo] Finding all chapters`);
+            
+            const { data, error } = await this.supabase
+                .from('chapters')
+                .select('*')
+                .order('castle_id', { ascending: true })
+                .order('chapter_number', { ascending: true });
+
+            if (error) {
+                console.error('[ChapterRepo] Error finding all chapters:', error);
+                throw error;
+            }
+
+            console.log(`[ChapterRepo] Found ${data?.length || 0} chapters`);
+            return data || [];
+        } catch (error) {
+            console.error('[ChapterRepo] Error in findAll:', error);
+            throw error;
+        }
+    }
+
+    async findNextChapter(castleId, currentChapterNumber) {
+        try {
+            console.log(`[ChapterRepo] Finding next chapter for castle ${castleId}, current chapter number ${currentChapterNumber}`);
+            
+            const { data, error } = await this.supabase
+                .from('chapters')
+                .select('*')
+                .eq('castle_id', castleId)
+                .eq('chapter_number', currentChapterNumber + 1)
+                .single();
+
+            if (error && error.code !== 'PGRST116') {
+                console.error('[ChapterRepo] Error finding next chapter:', error);
+                throw error;
+            }
+
+            console.log(`[ChapterRepo] Next chapter found:`, !!data);
+            return data;
+        } catch (error) {
+            console.error('[ChapterRepo] Error in findNextChapter:', error);
+            throw error;
+        }
+    }
 }
 
 module.exports = ChapterRepo;
