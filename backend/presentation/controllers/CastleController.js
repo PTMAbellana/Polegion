@@ -120,6 +120,35 @@ class CastleController {
             res.status(400).json({ success: false, error: err.message });
         }
     }
+
+    /**
+     * Manually seed quiz and minigame data for a specific chapter
+     * POST /api/castles/seed-chapter
+     * Body: { chapterId, chapterNumber, castleNumber }
+     */
+    async seedChapter(req, res) {
+        try {
+            console.log('[CastleController] ===== SEED CHAPTER DATA =====');
+            console.log('[CastleController] req.body:', req.body);
+            
+            const { chapterId, chapterNumber, castleNumber } = req.body;
+            
+            if (!chapterId || !chapterNumber || !castleNumber) {
+                return res.status(400).json({ 
+                    success: false, 
+                    error: 'chapterId, chapterNumber, and castleNumber are required' 
+                });
+            }
+
+            const result = await this.castleService.seedChapterData(chapterId, chapterNumber, castleNumber);
+            
+            console.log('[CastleController] Successfully seeded chapter data');
+            res.json({ success: true, data: result });
+        } catch (err) {
+            console.error('[CastleController] Error in seedChapter:', err);
+            res.status(400).json({ success: false, error: err.message });
+        }
+    }
 }
 
 module.exports = CastleController;

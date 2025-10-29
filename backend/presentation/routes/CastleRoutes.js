@@ -28,6 +28,15 @@ class CastleRoutes {
 
         /**
          * @swagger
+         * /castles/seed-chapter:
+         *   post:
+         *     tags: [Castles]
+         *     summary: Manually seed quiz and minigame data for a specific chapter
+         */
+        this.router.post('/seed-chapter', this.castleController.seedChapter.bind(this.castleController));
+
+        /**
+         * @swagger
          * /castles:
          *   post:
          *     tags: [Castles]

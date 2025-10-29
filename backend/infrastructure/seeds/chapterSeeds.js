@@ -230,37 +230,69 @@ const castle1Chapter2Minigames = [
 ];
 
 // ============================================================================
-// CASTLE 1 - CHAPTER 3 - QUIZZES
+// CASTLE 2 - CHAPTER SEED DATA
 // ============================================================================
 
-const castle1Chapter3Quizzes = [
+// Castle 2 Chapters - Polygon & Measurement Castle
+const castle2Chapters = [
     {
-        id: 'c3d1d2e3-4567-89ab-cdef-012345678901',
-        chapter_id: 'c9b7a976-d466-4831-aacf-f8e0476f5153',
-        title: 'Shapes of the Spire Quiz',
-        description: 'Identify and classify geometric shapes',
-        xp_reward: 75,
+        id: 'f3a8b5c2-4d6e-7f8a-9b0c-1d2e3f4a5b6c',
+        title: 'Chapter 1: The Shapewood Path',
+        description: 'Journey through the enchanted forest and master polygon identification. Learn to recognize triangles, quadrilaterals, pentagons, hexagons, heptagons, and octagons.',
+        chapter_number: 1,
+        xp_reward: 150
+    },
+    {
+        id: 'a7b8c9d0-1e2f-3a4b-5c6d-7e8f9a0b1c2d',
+        title: 'Chapter 2: The Perimeter Pathway',
+        description: 'Guard the forest boundaries by calculating perimeters. Trace the edges of various polygons and sum their side lengths.',
+        chapter_number: 2,
+        xp_reward: 175
+    },
+    {
+        id: 'e5f6a7b8-9c0d-1e2f-3a4b-5c6d7e8f9a0b',
+        title: 'Chapter 3: The Courtyard of Area',
+        description: 'Restore ancient forest tiles by calculating areas. Master formulas for rectangles, squares, triangles, parallelograms, trapezoids, and composite figures.',
+        chapter_number: 3,
+        xp_reward: 200
+    }
+];
+
+// ============================================================================
+// CASTLE 2 - CHAPTER 1 - QUIZZES
+// ============================================================================
+
+const castle2Chapter1Quizzes = [
+    {
+        id: 'a1b2c3d4-5678-9abc-def0-123456789001',
+        chapter_id: 'f3a8b5c2-4d6e-7f8a-9b0c-1d2e3f4a5b6c',
+        title: 'Polygon Identification Quiz',
+        description: 'Test your knowledge of polygon shapes and their properties',
+        xp_reward: 80,
         passing_score: 70,
         time_limit: null,
         quiz_config: {
             questions: [
                 {
-                    question: 'Which shape has exactly 3 sides and 3 vertices?',
-                    options: ['Triangle', 'Square', 'Pentagon', 'Hexagon'],
-                    correctAnswer: 'Triangle',
+                    id: 'q1',
+                    question: 'How many sides does a triangle have?',
+                    options: ['2 sides', '3 sides', '4 sides', '5 sides'],
+                    correctAnswer: '3 sides',
                     points: 20
                 },
                 {
-                    question: 'A quadrilateral with 4 equal sides and 4 right angles is called a:',
-                    options: ['Rectangle', 'Square', 'Rhombus', 'Trapezoid'],
-                    correctAnswer: 'Square',
-                    points: 25
+                    id: 'q2',
+                    question: 'How many sides does a hexagon have?',
+                    options: ['4 sides', '5 sides', '6 sides', '7 sides'],
+                    correctAnswer: '6 sides',
+                    points: 20
                 },
                 {
-                    question: 'Which shape has NO vertices and NO sides?',
-                    options: ['Circle', 'Triangle', 'Square', 'Pentagon'],
-                    correctAnswer: 'Circle',
-                    points: 30
+                    id: 'q3',
+                    question: 'Which polygon has the most sides?',
+                    options: ['Pentagon (5)', 'Hexagon (6)', 'Heptagon (7)', 'Octagon (8)'],
+                    correctAnswer: 'Octagon (8)',
+                    points: 40
                 }
             ]
         }
@@ -268,53 +300,165 @@ const castle1Chapter3Quizzes = [
 ];
 
 // ============================================================================
-// CASTLE 1 - CHAPTER 3 - MINIGAMES
+// CASTLE 2 - CHAPTER 1 - MINIGAMES
 // ============================================================================
 
-const castle1Chapter3Minigames = [
+const castle2Chapter1Minigames = [
     {
-        id: 'c3d1d2e3-5678-90ab-cdef-123456789012',
-        chapter_id: 'c9b7a976-d466-4831-aacf-f8e0476f5153',
-        title: 'Shape Summoner',
-        description: 'Identify triangles, squares, rectangles, circles, and polygons',
+        id: 'b2c3d4e5-6789-abcd-ef01-234567890001',
+        chapter_id: 'f3a8b5c2-4d6e-7f8a-9b0c-1d2e3f4a5b6c',
+        title: 'Shape Collector',
+        description: 'Identify and collect polygons by clicking on the correct shapes',
         game_type: 'interactive',
-        xp_reward: 60,
+        xp_reward: 40,
         time_limit: null,
         order_index: 1,
         game_config: {
+            instructions: 'Click on the polygon that matches the name Sylvan calls out!',
+            rounds: [
+                {
+                    id: 'round1',
+                    targetShape: 'triangle',
+                    targetName: 'Triangle',
+                    sides: 3,
+                    hint: 'Look for the shape with 3 sides'
+                },
+                {
+                    id: 'round2',
+                    targetShape: 'square',
+                    targetName: 'Square (Quadrilateral)',
+                    sides: 4,
+                    hint: 'Find the shape with 4 equal sides'
+                },
+                {
+                    id: 'round3',
+                    targetShape: 'pentagon',
+                    targetName: 'Pentagon',
+                    sides: 5,
+                    hint: 'Search for the 5-sided polygon'
+                },
+                {
+                    id: 'round4',
+                    targetShape: 'hexagon',
+                    targetName: 'Hexagon',
+                    sides: 6,
+                    hint: 'Like a honeycomb cell - 6 sides'
+                },
+                {
+                    id: 'round5',
+                    targetShape: 'heptagon',
+                    targetName: 'Heptagon',
+                    sides: 7,
+                    hint: 'Count carefully - 7 sides'
+                },
+                {
+                    id: 'round6',
+                    targetShape: 'octagon',
+                    targetName: 'Octagon',
+                    sides: 8,
+                    hint: 'Like a stop sign - 8 sides'
+                }
+            ]
+        }
+    }
+];
+
+// ============================================================================
+// CASTLE 2 - CHAPTER 2 - QUIZZES
+// ============================================================================
+
+const castle2Chapter2Quizzes = [
+    {
+        id: 'c3d4e5f6-789a-bcde-f012-345678900002',
+        chapter_id: 'a7b8c9d0-1e2f-3a4b-5c6d-7e8f9a0b1c2d',
+        title: 'Perimeter Mastery Quiz',
+        description: 'Calculate the perimeter of various polygons',
+        xp_reward: 90,
+        passing_score: 70,
+        time_limit: null,
+        quiz_config: {
+            questions: [
+                {
+                    id: 'q1',
+                    question: 'What is the perimeter of a square with side length 5 cm?',
+                    options: ['10 cm', '15 cm', '20 cm', '25 cm'],
+                    correctAnswer: '20 cm',
+                    points: 20,
+                    hint: 'Perimeter of square = 4 × side'
+                },
+                {
+                    id: 'q2',
+                    question: 'A rectangle has length 8 cm and width 3 cm. What is its perimeter?',
+                    options: ['11 cm', '16 cm', '22 cm', '24 cm'],
+                    correctAnswer: '22 cm',
+                    points: 30,
+                    hint: 'Perimeter = 2(length + width)'
+                },
+                {
+                    id: 'q3',
+                    question: 'A triangle has sides of 6 cm, 8 cm, and 10 cm. What is the perimeter?',
+                    options: ['14 cm', '18 cm', '24 cm', '30 cm'],
+                    correctAnswer: '24 cm',
+                    points: 40,
+                    hint: 'Add all three sides together'
+                }
+            ]
+        }
+    }
+];
+
+// ============================================================================
+// CASTLE 2 - CHAPTER 2 - MINIGAMES
+// ============================================================================
+
+const castle2Chapter2Minigames = [
+    {
+        id: 'd4e5f6a7-89ab-cdef-0123-456789000002',
+        chapter_id: 'a7b8c9d0-1e2f-3a4b-5c6d-7e8f9a0b1c2d',
+        title: 'Perimeter Pathway',
+        description: 'Trace the edges and calculate perimeters of forest shapes',
+        game_type: 'interactive',
+        xp_reward: 50,
+        time_limit: null,
+        order_index: 1,
+        game_config: {
+            instructions: 'Calculate the perimeter by adding all side lengths!',
             questions: [
                 {
                     id: 'mg1',
-                    instruction: 'Identify all TRIANGLES: Shapes with exactly 3 sides and 3 vertices.',
-                    shapes: [
-                        { id: 'S1', type: 'triangle', points: [350, 50, 250, 150, 450, 150], label: 'Shape A', color: '#FFD700' },
-                        { id: 'S2', type: 'square', x: 100, y: 50, size: 100, label: 'Shape B', color: '#66BBFF' },
-                        { id: 'S3', type: 'triangle', points: [550, 100, 500, 180, 600, 180], label: 'Shape C', color: '#FFD700' }
-                    ],
-                    correctAnswer: ['S1', 'S3'],
-                    hint: 'Triangles have 3 straight sides. Look for shapes with three corners!'
+                    instruction: 'Find the perimeter of this square',
+                    shape: 'square',
+                    sides: [4, 4, 4, 4],
+                    correctAnswer: 16,
+                    unit: 'cm',
+                    hint: 'Add all four sides: 4 + 4 + 4 + 4'
                 },
                 {
                     id: 'mg2',
-                    instruction: 'Identify all RECTANGLES: Shapes with 4 sides, opposite sides equal, and 4 right angles.',
-                    shapes: [
-                        { id: 'S1', type: 'rectangle', x: 150, y: 60, width: 150, height: 100, label: 'Shape A', color: '#66BBFF' },
-                        { id: 'S2', type: 'circle', cx: 400, cy: 110, r: 50, label: 'Shape B', color: '#FF6B6B' },
-                        { id: 'S3', type: 'rectangle', x: 500, y: 80, width: 120, height: 80, label: 'Shape C', color: '#66BBFF' }
-                    ],
-                    correctAnswer: ['S1', 'S3'],
-                    hint: 'Rectangles have 4 right angles with opposite sides equal. Like a stretched square!'
+                    instruction: 'Find the perimeter of this rectangle',
+                    shape: 'rectangle',
+                    sides: [7, 3, 7, 3],
+                    correctAnswer: 20,
+                    unit: 'cm',
+                    hint: 'Add: 7 + 3 + 7 + 3'
                 },
                 {
                     id: 'mg3',
-                    instruction: 'Identify the CIRCLE: A round shape with no sides or vertices.',
-                    shapes: [
-                        { id: 'S1', type: 'square', x: 100, y: 70, size: 90, label: 'Shape A', color: '#4ECDC4' },
-                        { id: 'S2', type: 'circle', cx: 350, cy: 120, r: 60, label: 'Shape B', color: '#FF6B6B' },
-                        { id: 'S3', type: 'pentagon', points: [550, 60, 600, 100, 570, 160, 480, 160, 450, 100], label: 'Shape C', color: '#9B59B6' }
-                    ],
-                    correctAnswer: ['S2'],
-                    hint: 'Circles are perfectly round with no corners or straight edges!'
+                    instruction: 'Find the perimeter of this triangle',
+                    shape: 'triangle',
+                    sides: [5, 5, 6],
+                    correctAnswer: 16,
+                    unit: 'cm',
+                    hint: 'Add all three sides: 5 + 5 + 6'
+                },
+                {
+                    id: 'mg4',
+                    instruction: 'Find the perimeter of this pentagon',
+                    shape: 'pentagon',
+                    sides: [4, 4, 4, 4, 4],
+                    correctAnswer: 20,
+                    unit: 'cm',
+                    hint: 'A regular pentagon: 5 sides of 4 cm each'
                 }
             ]
         }
@@ -325,48 +469,14 @@ const castle1Chapter3Minigames = [
 // FUTURE CASTLES & CHAPTERS - ADD HERE
 // ============================================================================
 
-// Example structure for Castle 1 - Chapter 2 (when ready):
-// const castle1Chapter2Quizzes = [
+// Example structure for Castle 3 - Chapters (when ready):
+// const castle3Chapters = [
 //     {
 //         id: 'uuid-here',
-//         chapter_id: '69d21734-679b-45ea-9203-1dd15194e5cf',
-//         title: 'Lines Quiz',
-//         description: 'Test your knowledge of parallel and intersecting lines',
-//         xp_reward: 50,
-//         passing_score: 70,
-//         time_limit: null,
-//         quiz_config: { questions: [...] }
-//     }
-// ];
-//
-// const castle1Chapter2Minigames = [
-//     {
-//         id: 'uuid-here',
-//         chapter_id: '69d21734-679b-45ea-9203-1dd15194e5cf',
-//         title: 'Line Labyrinth',
-//         description: 'Navigate through parallel and perpendicular lines',
-//         game_type: 'interactive',
-//         xp_reward: 30,
-//         ...
-//     }
-// ];
-
-// Example structure for Castle 2 - Chapter 1 (when ready):
-// const castle2Chapter1Quizzes = [
-//     {
-//         id: 'uuid-here',
-//         chapter_id: 'castle-2-chapter-1-uuid',
-//         title: 'Castle 2 Quiz',
-//         ...
-//     }
-// ];
-//
-// const castle2Chapter1Minigames = [
-//     {
-//         id: 'uuid-here',
-//         chapter_id: 'castle-2-chapter-1-uuid',
-//         title: 'Castle 2 Minigame',
-//         ...
+//         title: 'Castle 3 Chapter',
+//         description: 'Description here',
+//         chapter_number: 1,
+//         xp_reward: 150
 //     }
 // ];
 
@@ -380,9 +490,10 @@ module.exports = {
     castle1Chapter1Minigames,
     castle1Chapter2Quizzes,
     castle1Chapter2Minigames,
-    castle1Chapter3Quizzes,
-    castle1Chapter3Minigames
-    // Export additional quizzes/minigames as you add them:
-    // castle2Chapter1Quizzes,
-    // castle2Chapter1Minigames,
+    // Castle 2
+    castle2Chapters,
+    castle2Chapter1Quizzes,
+    castle2Chapter1Minigames,
+    castle2Chapter2Quizzes,
+    castle2Chapter2Minigames
 };
