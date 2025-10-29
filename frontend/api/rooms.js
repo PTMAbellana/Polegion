@@ -8,7 +8,7 @@ export const getRooms = async () => {
       success: true,
       data: res.data.data,
       message: 'Rooms fetched successfully'
-    }
+    };
   } catch (error) {
     console.error("Error fetching rooms:", error);
     return {
@@ -22,7 +22,8 @@ export const getRooms = async () => {
 
 export const getRoomById = async (id) => {
   try {
-    return await api.get(`/rooms/id/${id}`);
+    const res = await api.get(`/rooms/id/${id}`);
+    return res.data;
   } catch (error) {
     console.error("Error fetching room by ID:", error);
     throw error;
@@ -99,7 +100,7 @@ export const updateRoom = async (id, roomData) => {
 
 export const deleteRoom = async (id) => {
   try {
-    const res =  await api.delete(`/rooms/id/${id}`);
+    const res = await api.delete(`/rooms/id/${id}`);
     return {
       success: true,
       message: res.data.message || 'Room deleted successfully'
@@ -174,9 +175,13 @@ export const changeVisibility = async (visibility, room_id) => {
     const response = await api.put("/rooms/change-visibility", {
       room_id,
       visibility
-    })
-    return response.data
+    });
+    
+    // Invalidate room cache
+    await cacheInvalidation.room(room_id);
+    
+    return response.data;
   } catch (error){
-    throw error
+    throw error;
   }
 }

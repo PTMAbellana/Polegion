@@ -11,11 +11,18 @@ import { useRecordsPreview } from '@/hooks/useRecordsPreview'
 import RecordsHeader from '@/components/teacher/RecordsHeader'
 import RecordsDownloadSection from '@/components/teacher/RecordsDownloadSection'
 import styles from '@/styles/leaderboard.module.css'
+import { useTeacherRoomStore } from '@/store/teacherRoomStore'
 
 export default function RecordPage({ params }: { params: Promise<{ roomId: number }> }) {
   const router = useRouter()
   const { roomId } = use(params)
   const { isLoggedIn, appLoading } = useAuthStore()
+  const { createdRooms } = useTeacherRoomStore()
+
+  // Find the room object by id
+  const roomObj = createdRooms.find(room => room.id?.toString() === roomId?.toString())
+  const roomCode = roomObj?.code || ''
+  const roomTitle = roomObj?.title || ''
 
   const {
     isLoading,
@@ -40,30 +47,26 @@ export default function RecordPage({ params }: { params: Promise<{ roomId: numbe
   }
 
   return (
-    <div className={styles.leaderboard_container}>
-      {/* Back Button */}
-      <div className={styles.back_button_container}>
-        <button onClick={handleBackClick} className={styles.back_button}>
-          <FaArrowLeft className={styles.back_icon} />
-          <span>Back</span>
-        </button>
-      </div>
+    <LoadingOverlay isLoading={recordsLoading}>
+      {recordsError ? (
+        <div style={{ padding: '2rem', textAlign: 'center', color: '#e74c3c' }}>
+          <p>{recordsError}</p>
+        </div>
+      ) : (
+        <div className={styles.leaderboard_container}>
+          {/* Back Button */}
+          <div className={styles.back_button_container}>
+            <button onClick={handleBackClick} className={styles.back_button}>
+              <FaArrowLeft className={styles.back_icon} />
+              <span>Back</span>
+            </button>
+          </div>
+    
+          {/* Scrollable Container */}
+          <div className={styles.leaderboard_scrollable}>
+            {/* Records Header */}
+            <RecordsHeader roomTitle={roomTitle} roomCode={roomCode} totalStudents={roomRecords.length} />
 
-      {/* Scrollable Container */}
-      <div className={styles.leaderboard_scrollable}>
-        {/* Records Header */}
-        <RecordsHeader roomId={roomId} totalStudents={roomRecords.length} />
-
-        {/* Main Content */}
-          {recordsLoading ? (
-            <div style={{ padding: '2rem', textAlign: 'center' }}>
-              <Loader />
-            </div>
-          ) : recordsError ? (
-            <div style={{ padding: '2rem', textAlign: 'center', color: '#e74c3c' }}>
-              <p>{recordsError}</p>
-            </div>
-          ) : (
             <RecordsDownloadSection
               onDownloadRoomAction={handleDownloadRoom}
               onDownloadCompetitionAction={handleDownloadCompetition}
@@ -72,8 +75,9 @@ export default function RecordPage({ params }: { params: Promise<{ roomId: numbe
               competitionRecords={competitionRecords}
               competitions={competitions}
             />
-          )}
-      </div>
-    </div>
+          </div>
+        </div>
+      )}
+    </LoadingOverlay>
   )
 }

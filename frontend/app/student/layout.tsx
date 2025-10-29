@@ -18,7 +18,7 @@ export default function StudentLayout({
     // Auto-fetch joined rooms when user is logged in as student
     if (
       isLoggedIn 
-      // && userProfile?.role === 'student'
+      && (userProfile?.role === 'student' || userProfile?.role === 'admin')
     ) {
       fetchJoinedRooms();
     }

@@ -5,6 +5,7 @@ export const joinRoom = async (room_code) => {
     const response = await api.post("/participants/join", {
       room_code,
     });
+    
     return {
       success: true,
       message: response.data.message || 'Successfully joined room',
@@ -23,6 +24,7 @@ export const joinRoom = async (room_code) => {
 export const leaveRoom = async (room_id) => {
   try {
     const res = await api.delete(`/participants/leave/${room_id}`);
+    
     return {
       success: true,
       message: res.data.message || 'Successfully left room',
@@ -58,7 +60,7 @@ export const getAllParticipants = async (room_id, type='user', withXp=false, com
     const xpParam = withXp ? 'withXp=true' : '';
     const compeParam = compe_id ? `compe_id=${compe_id}` : '';
     const query = [xpParam, compeParam].filter(Boolean).join('&');
-
+    
     let res;
     switch (type) {
       case 'student': 
@@ -71,11 +73,12 @@ export const getAllParticipants = async (room_id, type='user', withXp=false, com
       default:
         throw new Error('Invalid type parameter. Must be "user" or "creator".');  
     }
+    
     return {
       success: true,
       data: res.data.data,
       message: 'Participants fetched successfully'
-    }
+    };
   } catch (error) {
     return {
       success: false,
@@ -88,10 +91,11 @@ export const getAllParticipants = async (room_id, type='user', withXp=false, com
 
 export const kickParticipant = async (room_id, part_id) => {
   try {
-    console.log({room_id, part_id})
+    console.log({room_id, part_id});
     const res = await api.delete(
       `/participants/room/${room_id}/participant/${part_id}`,
     );
+    
     return {
       success: true,
       message: res.data.message || 'Participant kicked successfully',
@@ -113,7 +117,7 @@ export const getJoinedRooms = async () => {
       success: true,
       data: res.data.data,
       message: 'Joined rooms fetched successfully'
-    }
+    };
   } catch (error) {
     console.error('Error fetching joined rooms:', error);
     return {

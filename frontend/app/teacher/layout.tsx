@@ -18,7 +18,7 @@ export default function TeacherLayout({
     // Auto-fetch created rooms when user is logged in as teacher
     if (
       isLoggedIn 
-      // && userProfile?.role === 'teacher'
+      && (userProfile?.role === 'teacher' || userProfile?.role === 'admin')
     ) {
       fetchCreatedRooms();
     }

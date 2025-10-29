@@ -292,16 +292,13 @@ export default function WorldMapPage() {
   // Early returns AFTER all hooks
   if (authLoading || castlesLoading) {
     return (
-      <div className={`${styles.loading_container} ${isNavExpanded ? styles.expanded : ''}`}>
-        <Loader />
-        <p>Loading Ancient Map...</p>
-      </div>
+      <Loader />
     );
   }
 
   if (!userProfile) {
     return (
-      <div className={`${styles.error_container} ${isNavExpanded ? styles.expanded : ''}`}>
+      <div className={`${styles.error_container} `}>
         <h2>Access Denied</h2>
         <p>Please log in to access the World Map.</p>
       </div>
@@ -310,7 +307,7 @@ export default function WorldMapPage() {
 
   if (error) {
     return (
-      <div className={`${styles.error_container} ${isNavExpanded ? styles.expanded : ''}`}>
+      <div className={`${styles.error_container} `}>
         <h2>⚠️ Error Loading Map</h2>
         <p>{error}</p>
         <button onClick={() => refreshCastles()}>Reload Page</button>
@@ -320,7 +317,7 @@ export default function WorldMapPage() {
 
   if (castles.length === 0) {
     return (
-      <div className={`${styles.error_container} ${isNavExpanded ? styles.expanded : ''}`}>
+      <div className={`${styles.error_container}`}>
         <h2>No Castles Found</h2>
         <p>The database has no castle data.</p>
         <button onClick={() => refreshCastles()}>Retry</button>
@@ -353,7 +350,7 @@ export default function WorldMapPage() {
     return '';
   };
 
-  const currentCastle = castles[currentCastleIndex];
+  // const currentCastle = castles[currentCastleIndex];
 
   const totalCastles = castles.length;
   const unlockedCastles = castles.filter(c => c.progress?.unlocked).length;

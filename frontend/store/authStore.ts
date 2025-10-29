@@ -172,8 +172,10 @@ export const useAuthStore = create<AuthState>()(
             refreshUserSession: async (): Promise<boolean> => {
                 const authData = authUtils.getAuthData();
                 
+                console.log('🔄 Refreshing user session...');
+                
                 if (!authData.accessToken) {
-                    console.log('No access token found');
+                    console.log('❌ No access token found');
                     set({
                         authToken: null,
                         userProfile: null,
@@ -182,8 +184,17 @@ export const useAuthStore = create<AuthState>()(
                     return false;
                 }
 
-                // Token is still valid, just restore state from localStorage
+                // Check if token is expired (not just invalid, but actually expired)
+                // Note: Token refresh will happen automatically in axios interceptor if needed
+                if (authUtils.isTokenExpired()) {
+                    console.log('⏰ Token expired, will auto-refresh on next API call');
+                    // Don't clear session here - let the interceptor handle refresh
+                    // Just restore the session and let interceptor refresh token when needed
+                }
+
+                // Restore state from localStorage
                 if (authData.user && authData.user.id) {
+                    console.log('✅ Session restored from localStorage');
                     set({
                         authToken: authData.accessToken,
                         userProfile: authData.user,
@@ -192,6 +203,7 @@ export const useAuthStore = create<AuthState>()(
                     return true;
                 }
 
+                console.log('❌ No valid user data found');
                 return false;
             },
 

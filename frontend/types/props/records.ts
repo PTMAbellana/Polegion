@@ -3,7 +3,8 @@
  */
 
 export interface RecordsHeaderProps {
-  roomId: number
+  roomTitle: string
+  roomCode: string
   totalStudents: number
 }
 

@@ -1,13 +1,13 @@
-import api from './axios'
+import api from './axios';
 
 export const getRoomLeaderboards = async (room_id) => {
     try {
-        const res = await api.get(`leaderboards/room/${room_id}`)
+        const res = await api.get(`leaderboards/room/${room_id}`);
         return {
             success: true,
-            message: res.data.message,
+            message: 'Room leaderboards fetched successfully',
             data: res.data.data
-        } 
+        };
     } catch (error) {
         console.log('Error fetching room leaderboards:', error);
         return {
@@ -21,12 +21,12 @@ export const getRoomLeaderboards = async (room_id) => {
 
 export const getCompetitionLeaderboards = async (room_id) => {
     try {
-        const res = await api.get(`leaderboards/competition/${room_id}`)
+        const res = await api.get(`leaderboards/competition/${room_id}`);
         return {
             success: true,
-            message: res.data.message,
+            message: 'Competition leaderboards fetched successfully',
             data: res.data.data
-        }
+        };
     } catch (error) {
         console.log('Error fetching competition leaderboards:', error);
         return {

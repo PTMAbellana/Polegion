@@ -5,7 +5,7 @@ import { FileText } from 'lucide-react'
 import { RecordsHeaderProps } from '@/types'
 import styles from '@/styles/leaderboard.module.css'
 
-export default function RecordsHeader({ roomId, totalStudents }: RecordsHeaderProps) {
+export default function RecordsHeader({ roomTitle, roomCode, totalStudents }: RecordsHeaderProps) {
   return (
     <div className={styles.records_simple_header}>
       <div className={styles.records_header_content}>
@@ -13,7 +13,7 @@ export default function RecordsHeader({ roomId, totalStudents }: RecordsHeaderPr
           <FileText className={styles.records_header_icon} />
           <div>
             <h1 className={styles.records_header_title}>Student Records</h1>
-            <p className={styles.records_header_subtitle}>Room {roomId} • {totalStudents} students</p>
+            <p className={styles.records_header_subtitle}>{roomTitle} • Code: {roomCode} • {totalStudents} students</p>
           </div>
         </div>
       </div>

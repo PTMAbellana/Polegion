@@ -93,7 +93,7 @@ export default function Home() {
                 </>
               ) : (
                 <>
-                  Let's Get Started
+                  Let&aposs Get Started
                   <span className={styles.arrow}>→</span>
                 </>
               )}

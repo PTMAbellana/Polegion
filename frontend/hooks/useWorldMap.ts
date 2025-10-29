@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { getCastlesWithProgress, getChaptersWithProgress } from '@/api/castles';
 import type { CastleWithProgress, ChapterWithProgress } from '@/types/castle.types';
+import { ApiError } from '@/types';
 
 export const useWorldMap = (userId: string) => {
   const [castles, setCastles] = useState<CastleWithProgress[]>([]);
@@ -25,9 +26,9 @@ export const useWorldMap = (userId: string) => {
       setError(null);
       const response = await getCastlesWithProgress(userId);
       setCastles(response.data || []);
-    } catch (err: any) {
+    } catch (err: ApiError | unknown) {
       console.error('[useWorldMap] Error fetching castles:', err);
-      setError(err.message || 'Failed to load castles');
+      setError((err as ApiError).message || 'Failed to load castles');
     } finally {
       setLoading(false);
     }
@@ -40,9 +41,9 @@ export const useWorldMap = (userId: string) => {
       
       const response = await getChaptersWithProgress(castle.id, userId);
       setChapters(response.data || []);
-    } catch (err: any) {
+    } catch (err: ApiError | unknown) {
       console.error('[useWorldMap] Error fetching chapters:', err);
-      setError(err.message || 'Failed to load chapters');
+      setError((err as ApiError).message || 'Failed to load chapters');
       setChapters([]);
     } finally {
       setChaptersLoading(false);

@@ -1,27 +1,28 @@
-import api from './axios'
+import api from './axios';
 
 export const createCompe = async (room_id, title) => {
     try {
         const res = await api.post(`competitions/`, {
             room_id,
             title
-        })
-        return res.data 
+        });
+        
+        return res.data;
     } catch (error) {
-        throw error
+        throw error;
     }
 }
 
 export const getAllCompe = async (room_id, type  = 'admin') => {
     try {
-        const res = await api.get(`competitions/${room_id}?type=${type}`)
+        const res = await api.get(`competitions/${room_id}?type=${type}`);
         return {
             success: true,
             data: res.data.data,
-            message: res.data.message || 'Competitions fetched successfully'
-        } 
+            message: 'Competitions fetched successfully'
+        };
     } catch (error) {
-        console.log('Error fetching competitions:', error)
+        console.log('Error fetching competitions:', error);
         return {
             success: false,
             message: error.response?.data?.message || 'Server error fetching competitions',
@@ -33,10 +34,10 @@ export const getAllCompe = async (room_id, type  = 'admin') => {
 
 export const getCompeById = async (room_id, compe_id, type='creator') => {
     try {
-        const res = await api.get(`competitions/${room_id}/${compe_id}?type=${type}`)
-        return res.data 
+        const res = await api.get(`competitions/${room_id}/${compe_id}?type=${type}`);
+        return res.data;
     } catch (error) {
-        throw error
+        throw error;
     }
 }
 
@@ -104,9 +105,10 @@ export const resumeCompetition = async (compe_id) => {
 export const autoAdvanceCompetition = async (compe_id) => {
     try {
         // This can be implemented later if needed
-        const res = await api.post(`competitions/${compe_id}/auto-advance`)
-        return res.data 
+        const res = await api.post(`competitions/${compe_id}/auto-advance`);
+        
+        return res.data;
     } catch (error) {
-        throw error
+        throw error;
     }
 }

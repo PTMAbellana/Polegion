@@ -69,7 +69,7 @@ const CircleSanctuaryChapterSelection = () => {
     setChaptersState(prevChapters => 
       prevChapters.map(chapter => {
         let locked = chapter.locked;
-        let isCompleted = completed.includes(chapter.id);
+        const isCompleted = completed.includes(chapter.id);
 
         // Chapter 2 unlocks when Chapter 1 is complete
         if (chapter.id === 2) {

@@ -54,7 +54,7 @@
 .main_content {
   position: relative;
   z-index: 10;
-  width: 100%;
+  width: 95%;
   height: 100vh;
   display: flex;
   flex-direction: column;
@@ -649,14 +649,13 @@
   color: white;
   text-align: center;
   padding: 20px;
-  margin-left: 70px;
   transition: margin-left 0.3s ease;
 }
 
-.loading_container.expanded,
+/* .loading_container.expanded,
 .error_container.expanded {
   margin-left: 250px;
-}
+} */
 
 .loading_container p {
   margin-top: 20px;
@@ -750,16 +749,6 @@
 
   .map_background.expanded {
     left: 0;
-  }
-
-  .loading_container,
-  .error_container {
-    margin-left: 0;
-  }
-
-  .loading_container.expanded,
-  .error_container.expanded {
-    margin-left: 0;
   }
 
   .current_castle {
@@ -1220,13 +1209,7 @@
   color: white;
   text-align: center;
   padding: 20px;
-  margin-left: 70px;
   transition: margin-left 0.3s ease;
-}
-
-.loading_container.expanded,
-.error_container.expanded {
-  margin-left: 250px;
 }
 
 .loading_container p {

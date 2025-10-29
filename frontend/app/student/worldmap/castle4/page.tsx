@@ -80,7 +80,7 @@ const FractalBastionChapterSelection = () => {
     setChaptersState(prevChapters => 
       prevChapters.map(chapter => {
         let locked = chapter.locked;
-        let isCompleted = completed.includes(chapter.id);
+        const isCompleted = completed.includes(chapter.id);
 
         // Chapter 4 unlocks when Chapter 3 is complete
         if (chapter.id === 4) {

@@ -13,6 +13,7 @@
     "@supabase/supabase-js": "^2.50.0",
     "autoprefixer": "^10.4.21",
     "axios": "^1.9.0",
+    "axios-cache-interceptor": "^1.8.3",
     "bootstrap": "^5.3.6",
     "canvas": "^3.1.2",
     "lucide-react": "^0.508.0",

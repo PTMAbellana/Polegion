@@ -1,12 +1,14 @@
 import api from './axios';
 
 export const getUserProfile = async () => {
-  return await api.get("/users/profile");
+  const res = await api.get("/users/profile");
+  return res.data;
 };
 
 export const updateUserProfile = async (profileData) => {
   try {
     const response = await api.patch("/users/profile", profileData);
+    
     return {
       success: true,
       message: response.data.message,
@@ -27,6 +29,7 @@ export const updateEmail = async (newEmail) => {
   try {
     const response = await api.patch('/users/change-email', { newEmail });
     console.log('Email update response:', response);
+    
     return {
       success: true,
       message: response.data.message
@@ -62,6 +65,7 @@ export const updatePassword = async (newPassword) => {
 export const deactivateAccount = async () => {
   try {
     const response = await api.patch('/users/deactivate');
+    
     return {
       success: true,
       message: response.data.message

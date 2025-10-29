@@ -11,6 +11,7 @@ export const completeChapter = async (chapterId, userId, xpEarned) => {
       userId,
       xpEarned
     });
+    
     return response.data;
   } catch (error) {
     console.error('[Chapters API] Error completing chapter:', error);
@@ -28,6 +29,7 @@ export const updateQuizStatus = async (chapterId, userId, passed, xpEarned) => {
       passed,
       xpEarned
     });
+    
     return response.data;
   } catch (error) {
     console.error('[Chapters API] Error updating quiz status:', error);

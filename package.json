@@ -27,6 +27,7 @@
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.50.3",
+    "axios-cache-interceptor": "^1.8.3",
     "bcryptjs": "^3.0.2",
     "canvas": "^3.1.2",
     "compression": "^1.8.1",
