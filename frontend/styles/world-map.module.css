@@ -416,16 +416,6 @@
     left: 0;
   }
 
-  .loading_container,
-  .error_container {
-    margin-left: 0;
-  }
-
-  .loading_container.expanded,
-  .error_container.expanded {
-    margin-left: 0;
-  }
-
   .current_castle {
     width: 240px;
   }
@@ -489,16 +479,13 @@
   .current_castle {
     width: 200px;
   }
-  
-  .side_castle {
-    width: 140px;
-  }
-  
-  .carousel_arrow {
-    width: 40px;
-    height: 40px;
-  }
 
+  .lock_overlay {
+    font-size: 2.75rem;
+  }
+}
+
+@media (max-width: 768px) {
   .carousel_track {
     gap: 0.75rem;
   }
