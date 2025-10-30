@@ -20,7 +20,7 @@ export interface EmailInputProps {
 
 export interface LoginFormProps {
   onForgotPassword: () => void;
-  userType: "student" | "teacher";
+  userType: "student" | "teacher" | "general";
 }
 
 export interface ResetPasswordFormProps {

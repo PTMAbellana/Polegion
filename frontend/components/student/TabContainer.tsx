@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { FaBook, FaTrophy } from 'react-icons/fa'
+import { FaTrophy } from 'react-icons/fa'
 import styles from '@/styles/room-details.module.css'
 import ProblemsTab from './ProblemsTab'
 import CompetitionsTab from './CompetitionsTab'
@@ -7,20 +7,20 @@ import { TabContainerProps } from '@/types'
 import { TabType } from '@/constants/ui'
 
 export default function TabContainer({ problems, competitions, roomCode }: TabContainerProps) {
-    const [activeTab, setActiveTab] = useState<TabType>('problems')
+    const [activeTab, setActiveTab] = useState<TabType>('competitions')
 
     return (
         <div className={styles.tabsContainer}>
             {/* Tab Buttons */}
             <div className={styles.tabButtons}>
-                <button
+                {/* <button
                     className={`${styles.tabButton} ${activeTab === 'problems' ? styles.tabButtonActive : ''}`}
                     onClick={() => setActiveTab('problems')}
                 >
                     <FaBook />
                     Problems
                     <span className={styles.tabCount}>{problems.length}</span>
-                </button>
+                </button> */}
                 <button
                     className={`${styles.tabButton} ${activeTab === 'competitions' ? styles.tabButtonActive : ''}`}
                     onClick={() => setActiveTab('competitions')}

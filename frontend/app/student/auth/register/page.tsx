@@ -12,8 +12,6 @@ export default function StudentRegister() {
     router.push(STUDENT_ROUTES.LOGIN);
   };
 
-
-
   return (
     <>
       <Head>

@@ -3,7 +3,7 @@ import Head from "next/head";
 import Image from "next/image";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { STUDENT_ROUTES } from "@/constants/routes";
+import { ROUTES } from "@/constants/routes";
 import styles from "../styles/landingpage.module.css";
 
 export default function Home() {
@@ -11,14 +11,14 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSignIn = () => {
-    router.push(STUDENT_ROUTES.LOGIN); //TEMPORARY CHANGE
+    router.push(ROUTES.LOGIN); //TEMPORARY CHANGE
   };
 
   const handleGetStarted = () => {
     setIsLoading(true);
     setTimeout(() => {
       setIsLoading(false);
-      router.push(STUDENT_ROUTES.LOGIN); // TEMPORARY CHANGE
+      router.push(ROUTES.LOGIN); // TEMPORARY CHANGE
     }, 1000);
   };
 
@@ -93,7 +93,7 @@ export default function Home() {
                 </>
               ) : (
                 <>
-                  Let's Get Started
+                  Let&rsquo;s Get Started
                   <span className={styles.arrow}>→</span>
                 </>
               )}
@@ -220,32 +220,32 @@ export default function Home() {
         </section>
 
         {/* Testimonials */}
-        <section className={styles.testimonialsSection}>
+        {/* <section className={styles.testimonialsSection}>
           <div className={styles.sectionContent}>
             <h2 className={styles.sectionTitle}>What People Are Saying</h2>
             <div className={styles.testimonials}>
               <blockquote className={styles.testimonial}>
                 <p className={styles.testimonialText}>
-                  "My students are excited about geometry again!"
+                  &ldquo;My students are excited about geometry again!&rdquo;
                 </p>
                 <span className={styles.testimonialAuthor}>— Ms. Rivera, Math Teacher</span>
               </blockquote>
               <blockquote className={styles.testimonial}>
                 <p className={styles.testimonialText}>
-                  "My child actually asks to practice math now."
+                  &ldquo;My child actually asks to practice math now.&rdquo;
                 </p>
                 <span className={styles.testimonialAuthor}>— Jacob, Parent</span>
               </blockquote>
             </div>
           </div>
-        </section>
+        </section> */}
 
         {/* Bottom CTA */}
         <section className={styles.ctaSection}>
           <div className={styles.ctaContent}>
             <h2 className={styles.ctaTitle}>Start Your Adventure Now</h2>
             <p className={styles.ctaSubtitle}>
-              It's free to begin — jump into your first geometry quest today!
+              It&rsquo;s free to begin — jump into your first geometry quest today!
             </p>
             <button 
               className={styles.ctaButton} 

@@ -13,6 +13,7 @@ import { STUDENT_ROUTES } from '@/constants/routes'
 import { FaCopy, FaCheck } from 'react-icons/fa'
 import styles from '@/styles/room-details.module.css'
 import { use } from 'react'
+import Loader from '@/components/Loader'
 
 export default function StudentRoomDetailsPage({ params }: { params: Promise<{ roomCode: string }> }) {
     const { roomCode } = use(params)
@@ -65,7 +66,7 @@ export default function StudentRoomDetailsPage({ params }: { params: Promise<{ r
     }
 
     if (!currentRoom) {
-        return <LoadingOverlay isLoading={true}><div /></LoadingOverlay>
+        return <LoadingOverlay isLoading={true}><Loader /></LoadingOverlay>
     }
 
     const { participants = [], problems = [], competitions = [] } = currentRoom
