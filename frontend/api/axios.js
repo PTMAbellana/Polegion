@@ -182,17 +182,17 @@ async function refreshAccessToken() {
 	try {
 		console.log("🔄 Refreshing access token...");
 		
-		// Use plain axios for refresh to avoid interceptor loop
-		const plainAxios = axios.create({
-			baseURL: API_URL,
-			timeout: 10000,
-		});
+		// // Use plain axios for refresh to avoid interceptor loop
+		// const plainAxios = axios.create({
+		// 	baseURL: API_URL,
+		// 	timeout: 10000,
+		// });
 
-		const response = await plainAxios.post("/auth/refresh-token", {
+		const response = await api.post("/auth/refresh-token", {
 			refresh_token: refreshToken
 		});
 
-		if (response.data.success) {
+		if (response.status === 200) {
 			const newData = response.data.data;
 			const newAccessToken = newData.session.access_token;
 			
@@ -215,6 +215,9 @@ async function refreshAccessToken() {
 				} catch (e) {
 					console.error("Failed to update Zustand store:", e);
 				}
+				
+				// Dispatch event to notify other parts of the app
+				window.dispatchEvent(new Event('token-refreshed'));
 			}
 
 			// Clear cache after token refresh
@@ -228,12 +231,18 @@ async function refreshAccessToken() {
 	} catch (error) {
 		console.error("❌ Token refresh failed:", error);
 		
-		// Clear auth data and logout
-		authUtils.clearAuthData();
-		localStorage.removeItem('auth-storage');
-		
-		if (typeof window !== 'undefined') {
-			window.location.href = ROUTES.HOME;
+		// Only clear and redirect if it's a 401/403 (invalid refresh token)
+		if (error.response?.status === 401 || error.response?.status === 403) {
+			console.log("❌ Refresh token is invalid, logging out");
+			authUtils.clearAuthData();
+			localStorage.removeItem('auth-storage');
+			
+			if (typeof window !== 'undefined') {
+				window.location.href = ROUTES.HOME;
+			}
+		} else {
+			// For other errors (network, timeout), throw and let request fail naturally
+			console.warn("⚠️ Token refresh failed due to network/timeout, will retry on next request");
 		}
 		
 		throw error;

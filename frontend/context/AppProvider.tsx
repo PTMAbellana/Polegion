@@ -15,7 +15,8 @@ export default function AppProvider({ children }: { children: React.ReactNode })
     isLoggedIn, 
     userProfile,
     authToken,
-    initialize 
+    initialize,
+    syncAuthToken
   } = useAuthStore();
   
   const { fetchCreatedRooms } = useTeacherRoomStore();
@@ -30,6 +31,20 @@ export default function AppProvider({ children }: { children: React.ReactNode })
   useEffect(() => {
     initialize();
   }, [initialize]);
+
+  // ✅ FIX #2: Listen for token refresh events
+  useEffect(() => {
+    const handleTokenRefresh = () => {
+      const authStore = useAuthStore.getState();
+      console.log('🔄 Token refresh event detected, syncing store...');
+      authStore.syncAuthToken();
+    };
+    
+    if (typeof window !== 'undefined') {
+      window.addEventListener('token-refreshed', handleTokenRefresh);
+      return () => window.removeEventListener('token-refreshed', handleTokenRefresh);
+    }
+  }, [syncAuthToken]);
 
   // Handle route protection and data fetching
   useEffect(() => {

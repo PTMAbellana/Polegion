@@ -24,6 +24,7 @@ export interface AuthState {
     // Async Actions
     login: (email: string, password: string) => Promise<AuthActionResult>;
     refreshUserSession: () => Promise<boolean>;
+    syncAuthToken: () => void;
     logout: () => void;
     register: (data: RegisterFormData, userType: 'student' | 'teacher') => Promise<AuthActionResult>;
     resetPassword: (token: string, password: string) => Promise<AuthActionResult>;

@@ -169,6 +169,17 @@ export const useAuthStore = create<AuthState>()(
                 }
             },
 
+            syncAuthToken: () => {
+                const authData = authUtils.getAuthData();
+                if (authData.accessToken) {
+                    set({
+                        authToken: authData.accessToken,
+                        isLoggedIn: true
+                    });
+                    console.log('✅ Auth token synced from localStorage');
+                }
+            },
+
             refreshUserSession: async (): Promise<boolean> => {
                 const authData = authUtils.getAuthData();
                 
@@ -184,27 +195,40 @@ export const useAuthStore = create<AuthState>()(
                     return false;
                 }
 
-                // Check if token is expired (not just invalid, but actually expired)
-                // Note: Token refresh will happen automatically in axios interceptor if needed
+                // ✅ If token expired, refresh it IMMEDIATELY
                 if (authUtils.isTokenExpired()) {
-                    console.log('⏰ Token expired, will auto-refresh on next API call');
-                    // Don't clear session here - let the interceptor handle refresh
-                    // Just restore the session and let interceptor refresh token when needed
+                    try {
+                        console.log('🔄 Token expired on init, refreshing...');
+                        const refreshResult = await api.post('/auth/refresh-token', {
+                            refresh_token: authData.refreshToken
+                        });
+                        
+                        if (refreshResult.data.success) {
+                            const newData = refreshResult.data.data;
+                            authUtils.saveAuthData(newData);
+                            set({
+                                authToken: newData.session.access_token,
+                                isLoggedIn: true,
+                                userProfile: newData.user
+                            });
+                            console.log('✅ Token refreshed successfully on init');
+                            return true;
+                        }
+                    } catch (error) {
+                        console.error('❌ Failed to refresh token on init:', error);
+                        set({ isLoggedIn: false, authToken: null });
+                        return false;
+                    }
                 }
 
-                // Restore state from localStorage
-                if (authData.user && authData.user.id) {
-                    console.log('✅ Session restored from localStorage');
-                    set({
-                        authToken: authData.accessToken,
-                        userProfile: authData.user,
-                        isLoggedIn: true,
-                    });
-                    return true;
-                }
-
-                console.log('❌ No valid user data found');
-                return false;
+                // Token is still valid
+                set({
+                    authToken: authData.accessToken,
+                    userProfile: authData.user,
+                    isLoggedIn: true
+                });
+                console.log('✅ Session restored from localStorage with valid token');
+                return true;
             },
 
             logout: async () => {
@@ -405,6 +429,7 @@ export const useAuthStore = create<AuthState>()(
             partialize: (state) => ({
                 isLoggedIn: state.isLoggedIn,
                 userProfile: state.userProfile,
+                authToken: state.authToken,
             }),
         }
     )
