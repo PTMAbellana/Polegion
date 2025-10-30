@@ -358,14 +358,16 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2rem;
-  padding: 2rem;
-  max-width: 800px;
+  gap: 1.5rem;
+  padding: 1.5rem;
+  max-width: 700px;
   margin: 0 auto;
+  max-height: 100%;
+  overflow: hidden; /* Prevent scrollbar */
 }
 
 .rewardTitle {
-  font-size: 3rem;
+  font-size: 2.5rem;
   font-weight: 700;
   color: #D8C4B6;
   text-shadow: 0 0 20px rgba(216, 196, 182, 0.6);
@@ -374,85 +376,97 @@
 }
 
 .rewardCard {
-  background: rgba(33, 53, 85, 0.6);
+  background: linear-gradient(135deg, rgba(62, 88, 121, 0.5) 0%, rgba(33, 53, 85, 0.5) 100%);
   border: 2px solid #D8C4B6;
-  border-radius: 10px;
-  padding: 2rem;
+  border-radius: 12px;
+  padding: 1.5rem;
   text-align: center;
   width: 100%;
   backdrop-filter: blur(10px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
 }
 
 .relicDisplay {
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
   animation: float 3s ease-in-out infinite;
 }
 
 .relicIcon {
-  width: 120px;
-  height: 120px;
+  width: 100px;
+  height: 100px;
   filter: drop-shadow(0 0 20px rgba(216, 196, 182, 0.6));
 }
 
 .rewardName {
-  font-size: 1.8rem;
+  font-size: 1.5rem;
   font-weight: 600;
   color: #F5EFE7;
-  margin: 0 0 1rem 0;
+  margin: 0 0 0.75rem 0;
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
 }
 
 .rewardDescription {
-  font-size: 1.1rem;
+  font-size: 1rem;
   color: #D8C4B6;
-  line-height: 1.6;
+  line-height: 1.5;
   margin: 0;
 }
 
 .rewardStats {
   display: flex;
-  gap: 1.5rem;
+  gap: 1rem;
   width: 100%;
+  flex-wrap: wrap;
 }
 
 .statBox {
   flex: 1;
-  background: rgba(62, 88, 121, 0.3);
-  border: 1px solid rgba(216, 196, 182, 0.3);
-  border-radius: 6px;
-  padding: 1.5rem;
+  min-width: 120px;
+  background: linear-gradient(135deg, rgba(216, 196, 182, 0.2) 0%, rgba(245, 239, 231, 0.1) 100%);
+  border: 2px solid rgba(216, 196, 182, 0.4);
+  border-radius: 10px;
+  padding: 1rem;
   text-align: center;
+  backdrop-filter: blur(5px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 .statLabel {
   display: block;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   color: #D8C4B6;
   margin-bottom: 0.5rem;
+  font-weight: 500;
 }
 
 .statValue {
   display: block;
-  font-size: 2rem;
+  font-size: 1.75rem;
   font-weight: 700;
   color: #F5EFE7;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
 }
 
 .rewardActions {
   display: flex;
   gap: 1rem;
   width: 100%;
+  flex-wrap: wrap;
 }
 
 .retakeButton,
 .returnButton {
   flex: 1;
-  padding: 1rem 2rem;
-  border: none;
-  border-radius: 6px;
+  min-width: 150px;
+  padding: 0.875rem 1.5rem;
+  border: 2px solid #D8C4B6;
+  border-radius: 10px;
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
+  backdrop-filter: blur(5px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -460,21 +474,22 @@
 }
 
 .retakeButton {
-  background: rgba(62, 88, 121, 0.4);
+  background: linear-gradient(135deg, rgba(62, 88, 121, 0.5) 0%, rgba(33, 53, 85, 0.5) 100%);
   color: #F5EFE7;
-  border: 1px solid #D8C4B6;
+  border: 2px solid rgba(216, 196, 182, 0.6);
 }
 
 .returnButton {
   background: linear-gradient(135deg, #3E5879 0%, #213555 100%);
   color: #F5EFE7;
-  border: 1px solid #D8C4B6;
+  border: 2px solid #D8C4B6;
 }
 
 .retakeButton:hover,
 .returnButton:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(216, 196, 182, 0.4);
+  border-color: #F5EFE7;
 }
 
 /* Animations */

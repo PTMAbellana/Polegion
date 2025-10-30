@@ -8,7 +8,8 @@ import {
   ChapterDialogueBox,
   ChapterRewardScreen,
 } from '@/components/chapters/shared';
-import { PointBasedMinigame } from '@/components/chapters/minigames';
+import { PointBasedMinigame, GeometryPhysicsGame } from '@/components/chapters/minigames';
+import type { GeometryLevel } from '@/components/chapters/minigames/GeometryPhysicsGame';
 import { ConceptCard, LessonGrid, VisualDemo } from '@/components/chapters/lessons';
 import { useChapterData, useChapterDialogue, useChapterAudio } from '@/hooks/chapters';
 import Image from 'next/image';
@@ -42,9 +43,37 @@ const lessonDialogue = [
 ];
 
 const minigameDialogue = [
-  'Excellent! Now connect the points to form the shapes I call for.',
-  'Click the points in the correct order to form the requested shape.',
-  'Choose wisely, young geometer!',
+  'Excellent! Now let\'s put your knowledge into practice with a fun challenge!',
+  'Help the ball reach the trash can by creating geometric shapes.',
+  'Think carefully about where to place your points!',
+];
+
+// Minigame levels
+const minigameLevels: GeometryLevel[] = [
+  {
+    id: 1,
+    type: 'line-segment',
+    title: 'Level 1: Line Segment',
+    instruction: 'Create a line segment to guide the ball into the box. Click two points to create the segment.',
+    ballStartX: 20,
+    ballStartY: 10,
+  },
+  {
+    id: 2,
+    type: 'ray',
+    title: 'Level 2: Ray',
+    instruction: 'Create a ray starting near the box. Place the first point carefully, then the second point to set the direction.',
+    ballStartX: 15,
+    ballStartY: 15,
+  },
+  {
+    id: 3,
+    type: 'line',
+    title: 'Level 3: Line',
+    instruction: 'Create a line to guide the ball. Remember, a line extends infinitely in both directions!',
+    ballStartX: 10,
+    ballStartY: 20,
+  },
 ];
 
 // Learning objectives
@@ -75,7 +104,7 @@ export default function Chapter1PageRefactored() {
   const [currentScene, setCurrentScene] = useState<SceneType>('opening');
   const [isMuted, setIsMuted] = useState(false);
   const [autoAdvanceEnabled, setAutoAdvanceEnabled] = useState(false);
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [currentMinigameLevel, setCurrentMinigameLevel] = useState(0); // Track which minigame level (0-2)
   
   // Track which lesson tasks have been checked to prevent duplicates (using ref to avoid re-renders)
   const checkedLessonTasksRef = React.useRef<Set<number>>(new Set());
@@ -88,6 +117,7 @@ export default function Chapter1PageRefactored() {
   // Quiz state
   const [quizAnswers, setQuizAnswers] = useState<Record<string, string>>({});
   const [quizAttempts, setQuizAttempts] = useState(0);
+  const [quizFeedback, setQuizFeedback] = useState<'correct' | 'incorrect' | null>(null);
   
   // XP tracking
   const [earnedXP, setEarnedXP] = useState({
@@ -220,31 +250,30 @@ export default function Chapter1PageRefactored() {
     // Award to backend
     if (chapterId && userProfile?.id) {
       try {
-        await awardLessonXP({ userId: userProfile.id, chapterId, xp });
+        await awardLessonXP(chapterId, xp);
       } catch (error) {
         console.error('Failed to award XP:', error);
       }
     }
   };
 
-  const handleMinigameComplete = async (isCorrect: boolean, selectedPoints?: string[]) => {
+  const handleMinigameComplete = async (isCorrect: boolean) => {
     if (isCorrect) {
-      // Move to next question or complete minigame
-      if (minigame && currentQuestionIndex < minigame.game_config.questions.length - 1) {
-        setCurrentQuestionIndex(currentQuestionIndex + 1);
+      // Move to next level or complete minigame
+      if (currentMinigameLevel < minigameLevels.length - 1) {
+        setCurrentMinigameLevel(currentMinigameLevel + 1);
       } else {
+        // All levels complete
         markTaskComplete('task-4'); // Complete minigame task
         awardXP('minigame');
         
         // Submit minigame attempt
         if (minigame && userProfile?.id) {
           try {
-            await submitMinigameAttempt({
-              user_id: userProfile.id,
-              minigame_id: minigame.id,
+            await submitMinigameAttempt(minigame.id, {
               score: 100,
               time_taken: 60,
-              attempt_data: { selectedPoints },
+              attempt_data: { completedLevels: minigameLevels.length },
             });
           } catch (error) {
             console.error('Failed to submit minigame:', error);
@@ -265,44 +294,100 @@ export default function Chapter1PageRefactored() {
     const userAnswer = quizAnswers[question.id];
 
     if (userAnswer === question.correctAnswer) {
+      setQuizFeedback('correct');
       markTaskComplete(taskKey);
       
-      // Move to next quiz or reward
-      if (quizNumber === 1) setCurrentScene('quiz2');
-      else if (quizNumber === 2) setCurrentScene('quiz3');
-      else {
-        // All quizzes complete
-        awardXP('quiz');
+      // Delay moving to next scene to show feedback
+      setTimeout(() => {
+        setQuizFeedback(null);
         
-        // Submit quiz attempt
-        try {
-          await submitQuizAttempt({
-            user_id: userProfile.id,
-            quiz_id: quiz.id,
-            answers: quizAnswers,
-            score: 100,
-            time_taken: 120,
+        // Move to next quiz or reward
+        if (quizNumber === 1) {
+          setCurrentScene('quiz2');
+          // Clear the answer for the next quiz question
+          const nextQuestion = quiz.quiz_config.questions[1];
+          setQuizAnswers((prev) => {
+            const updated = { ...prev };
+            delete updated[nextQuestion.id];
+            return updated;
           });
-        } catch (error) {
-          console.error('Failed to submit quiz:', error);
-        }
-        
-        // Complete chapter
-        try {
-          await completeChapter({
-            userId: userProfile.id,
-            chapterId: chapterId!,
-            xpEarned: earnedXP.lesson + earnedXP.minigame + 50,
+        } else if (quizNumber === 2) {
+          setCurrentScene('quiz3');
+          // Clear the answer for the next quiz question
+          const nextQuestion = quiz.quiz_config.questions[2];
+          setQuizAnswers((prev) => {
+            const updated = { ...prev };
+            delete updated[nextQuestion.id];
+            return updated;
           });
-        } catch (error) {
-          console.error('Failed to complete chapter:', error);
+        } else {
+          // All quizzes complete
+          awardXP('quiz');
+          
+          // Submit quiz attempt
+          try {
+            submitQuizAttempt(quiz.id, quizAnswers);
+          } catch (error) {
+            console.error('Failed to submit quiz:', error);
+          }
+          
+          // Complete chapter
+          try {
+            completeChapter(chapterId!);
+          } catch (error) {
+            console.error('Failed to complete chapter:', error);
+          }
+          
+          setCurrentScene('reward');
         }
-        
-        setCurrentScene('reward');
-      }
+      }, 1000); // 1 second delay to show green feedback
     } else {
+      setQuizFeedback('incorrect');
       markTaskFailed(taskKey);
       setQuizAttempts(quizAttempts + 1);
+      
+      // Reset feedback and move to next question after delay
+      setTimeout(() => {
+        setQuizFeedback(null);
+        
+        // Move to next quiz even if incorrect
+        if (quizNumber === 1) {
+          setCurrentScene('quiz2');
+          // Clear the answer for the next quiz question
+          const nextQuestion = quiz.quiz_config.questions[1];
+          setQuizAnswers((prev) => {
+            const updated = { ...prev };
+            delete updated[nextQuestion.id];
+            return updated;
+          });
+        } else if (quizNumber === 2) {
+          setCurrentScene('quiz3');
+          // Clear the answer for the next quiz question
+          const nextQuestion = quiz.quiz_config.questions[2];
+          setQuizAnswers((prev) => {
+            const updated = { ...prev };
+            delete updated[nextQuestion.id];
+            return updated;
+          });
+        } else {
+          // All quizzes answered (even if some wrong)
+          // Submit quiz attempt
+          try {
+            submitQuizAttempt(quiz.id, quizAnswers);
+          } catch (error) {
+            console.error('Failed to submit quiz:', error);
+          }
+          
+          // Complete chapter (even with wrong answers)
+          try {
+            completeChapter(chapterId!);
+          } catch (error) {
+            console.error('Failed to complete chapter:', error);
+          }
+          
+          setCurrentScene('reward');
+        }
+      }, 1000);
     }
   };
 
@@ -310,6 +395,17 @@ export default function Chapter1PageRefactored() {
     setQuizAnswers({});
     setQuizAttempts(0);
     setFailedTasks({});
+    setQuizFeedback(null);
+    
+    // Clear quiz task completions (task-5, task-6, task-7)
+    setCompletedTasks((prev) => {
+      const updated = { ...prev };
+      delete updated['task-5'];
+      delete updated['task-6'];
+      delete updated['task-7'];
+      return updated;
+    });
+    
     setCurrentScene('quiz1');
   };
 
@@ -409,12 +505,10 @@ export default function Chapter1PageRefactored() {
           )}
 
           {/* Minigame Scene */}
-          {currentScene === 'minigame' && minigame && (
-            <PointBasedMinigame
-              question={minigame.game_config.questions[currentQuestionIndex]}
+          {currentScene === 'minigame' && (
+            <GeometryPhysicsGame
+              level={minigameLevels[currentMinigameLevel]}
               onComplete={handleMinigameComplete}
-              canvasWidth={800}
-              canvasHeight={600}
               styleModule={minigameStyles}
             />
           )}
@@ -448,11 +542,17 @@ export default function Chapter1PageRefactored() {
               </div>
 
               <button
-                className={minigameStyles.submitButton}
+                className={`${minigameStyles.submitButton} ${
+                  quizFeedback === 'correct' 
+                    ? minigameStyles.submitButtonCorrect 
+                    : quizFeedback === 'incorrect' 
+                    ? minigameStyles.submitButtonIncorrect 
+                    : ''
+                }`}
                 onClick={() => handleQuizSubmit(currentScene === 'quiz1' ? 1 : currentScene === 'quiz2' ? 2 : 3)}
-                disabled={!quizAnswers[quiz.quiz_config.questions[currentScene === 'quiz1' ? 0 : currentScene === 'quiz2' ? 1 : 2].id]}
+                disabled={!quizAnswers[quiz.quiz_config.questions[currentScene === 'quiz1' ? 0 : currentScene === 'quiz2' ? 1 : 2].id] || quizFeedback !== null}
               >
-                Submit Answer
+                {quizFeedback === 'correct' ? '✓ Correct!' : quizFeedback === 'incorrect' ? '✗ Incorrect' : 'Submit Answer'}
               </button>
             </div>
           )}
@@ -460,9 +560,9 @@ export default function Chapter1PageRefactored() {
           {/* Reward Scene */}
           {currentScene === 'reward' && (
             <ChapterRewardScreen
-              relicName="Compass of Precision"
-              relicImage="/images/relics/compass.png"
-              relicDescription="You have mastered the fundamental building blocks of geometry! The Compass of Precision allows you to mark exact locations in space."
+              relicName="Pointlight Crystal"
+              relicImage="/images/relics/pointlight-crystal.png"
+              relicDescription="You have mastered the fundamental building blocks of geometry! The Pointlight Crystal allows you to illuminate dark areas and reveal hidden paths."
               earnedXP={earnedXP}
               canRetakeQuiz={true}
               onRetakeQuiz={handleRetakeQuiz}

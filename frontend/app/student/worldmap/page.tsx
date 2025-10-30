@@ -88,10 +88,13 @@ export default function WorldMapPage() {
     }
   }, [])
 
-  // Intro display
+  // Intro display - use user-specific localStorage key
   useEffect(() => {
     if (!authLoading && userProfile) {
-      const hasSeenIntro = localStorage.getItem('hasSeenMapIntro')
+      // Use user-specific key so each user sees intro on their first visit
+      const introKey = `hasSeenMapIntro_${userProfile.id}`
+      const hasSeenIntro = localStorage.getItem(introKey)
+      
       if (!hasSeenIntro && !showIntro) {
         setShowIntro(true)
       }
@@ -148,7 +151,10 @@ export default function WorldMapPage() {
   // Callbacks
   const handleIntroComplete = () => {
     setShowIntro(false)
-    localStorage.setItem('hasSeenMapIntro', 'true')
+    // Store with user-specific key
+    if (userProfile) {
+      localStorage.setItem(`hasSeenMapIntro_${userProfile.id}`, 'true')
+    }
   }
 
   const goNext = useCallback(() => {

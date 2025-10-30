@@ -30,11 +30,29 @@ export default function CastlePage() {
   const [loading, setLoading] = useState(true)
   const [selectedChapter, setSelectedChapter] = useState<number | null>(null)
   const [hoveredChapter, setHoveredChapter] = useState<string | null>(null)
-  const [showIntro, setShowIntro] = useState(true)
+  const [showIntro, setShowIntro] = useState(false)
   const [castleData, setCastleData] = useState<CastleData | null>(null)
   const [castleProgress, setCastleProgress] = useState<CastleProgress | null>(null)
   const [chapters, setChapters] = useState<ChapterWithProgress[]>([])
   const [error, setError] = useState<string | null>(null)
+
+  // Check if user has seen castle intro - user-specific key
+  useEffect(() => {
+    if (userProfile?.id) {
+      const introKey = `hasSeenCastle2Intro_${userProfile.id}`
+      const hasSeenIntro = localStorage.getItem(introKey)
+      
+      if (!hasSeenIntro) {
+        setShowIntro(true)
+        // Hide intro after 3 seconds and mark as seen
+        const timer = setTimeout(() => {
+          setShowIntro(false)
+          localStorage.setItem(introKey, 'true')
+        }, 3000)
+        return () => clearTimeout(timer)
+      }
+    }
+  }, [userProfile?.id])
 
   useEffect(() => {
     if (!authLoading && userProfile?.id) {
@@ -54,11 +72,6 @@ export default function CastlePage() {
     window.addEventListener('focus', handleFocus)
     return () => window.removeEventListener('focus', handleFocus)
   }, [userProfile?.id, loading])
-
-  useEffect(() => {
-    const timer = setTimeout(() => setShowIntro(false), 3000)
-    return () => clearTimeout(timer)
-  }, [])
 
   const initializeCastle = async () => {
     try {

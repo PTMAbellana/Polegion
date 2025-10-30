@@ -78,51 +78,37 @@ const castle1Chapter1Minigames = [
     {
         id: 'b2c3d4e5-2345-6789-abcd-ef0123456789',
         chapter_id: '0847c3d5-3f86-4c1e-9b05-464270295cd8',
-        title: 'Identify the Geometric Elements',
-        description: 'Click and drag to create geometric shapes',
-        game_type: 'interactive',
+        title: 'Geometry Physics Challenge',
+        description: 'Guide the ball into the box using geometric shapes',
+        game_type: 'physics',
         xp_reward: 30,
         time_limit: null,
         order_index: 1,
         game_config: {
-            questions: [
+            levels: [
                 {
-                    id: 'mg1',
-                    instruction: 'Create a Line Segment AB: Connect point A to point B. It has two endpoints and a fixed length.',
-                    points: [
-                        { id: 'A', x: 150, y: 125, label: 'A' },
-                        { id: 'B', x: 550, y: 125, label: 'B' }
-                    ],
-                    correctAnswer: ['A', 'B'],
-                    type: 'Line Segment',
-                    showType: 'segment',
-                    hint: "A line segment has endpoints on both ends - it doesn't extend beyond them."
+                    id: 1,
+                    type: 'line-segment',
+                    title: 'Level 1: Line Segment',
+                    instruction: 'Create a line segment to guide the ball into the box. Click two points to create the segment.',
+                    ballStartX: 20,
+                    ballStartY: 10
                 },
                 {
-                    id: 'mg2',
-                    instruction: 'Create Ray CD: Start at point C and go through point D. It has ONE endpoint at C and extends infinitely through D.',
-                    points: [
-                        { id: 'C', x: 150, y: 125, label: 'C' },
-                        { id: 'D', x: 350, y: 125, label: 'D' },
-                        { id: 'E', x: 550, y: 80, label: 'E' }
-                    ],
-                    correctAnswer: ['C', 'D'],
-                    type: 'Ray',
-                    showType: 'ray',
-                    hint: 'A ray starts at one point and continues forever in one direction.'
+                    id: 2,
+                    type: 'ray',
+                    title: 'Level 2: Ray',
+                    instruction: 'Create a ray starting near the box. Place the first point carefully, then the second point to set the direction.',
+                    ballStartX: 15,
+                    ballStartY: 15
                 },
                 {
-                    id: 'mg3',
-                    instruction: 'Create Line FG: Connect points F and G.',
-                    points: [
-                        { id: 'F', x: 200, y: 100, label: 'F' },
-                        { id: 'G', x: 350, y: 125, label: 'G' },
-                        { id: 'H', x: 500, y: 90, label: 'H' }
-                    ],
-                    correctAnswer: ['F', 'G'],
-                    type: 'Line',
-                    showType: 'line',
-                    hint: 'A line has NO endpoints - it goes on forever in both directions.'
+                    id: 3,
+                    type: 'line',
+                    title: 'Level 3: Line',
+                    instruction: 'Create a line to guide the ball. Remember, a line extends infinitely in both directions!',
+                    ballStartX: 10,
+                    ballStartY: 20
                 }
             ]
         }

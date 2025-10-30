@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useAuthStore } from '@/store/authStore';
 import {
   CastleIntro,
   CastleHeader,
@@ -14,9 +15,10 @@ import styles from '@/styles/castle3-adventure.module.css';
 
 const CircleSanctuaryChapterSelection = () => {
   const router = useRouter();
+  const { userProfile } = useAuthStore();
   const [selectedChapter, setSelectedChapter] = useState(1);
   const [completedChapters, setCompletedChapters] = useState<number[]>([]);
-  const [showIntro, setShowIntro] = useState(true);
+  const [showIntro, setShowIntro] = useState(false);
 
   // Chapter data for Circle Sanctuary
   const chapters: Chapter[] = [
@@ -112,13 +114,23 @@ const CircleSanctuaryChapterSelection = () => {
   };
 
   useEffect(() => {
-    // Auto-dismiss intro after 3 seconds
-    const timer = setTimeout(() => {
-      setShowIntro(false);
-    }, 3000);
+    // Check if user has seen castle intro - user-specific key
+    if (userProfile?.id) {
+      const introKey = `hasSeenCastle3Intro_${userProfile.id}`;
+      const hasSeenIntro = localStorage.getItem(introKey);
+      
+      if (!hasSeenIntro) {
+        setShowIntro(true);
+        // Auto-dismiss intro after 3 seconds and mark as seen
+        const timer = setTimeout(() => {
+          setShowIntro(false);
+          localStorage.setItem(introKey, 'true');
+        }, 3000);
 
-    return () => clearTimeout(timer);
-  }, []);
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [userProfile?.id]);
 
   return (
     <div className={styles.chapterSelectionContainer}>

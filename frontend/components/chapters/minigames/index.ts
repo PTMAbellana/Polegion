@@ -4,3 +4,4 @@ export { default as ShapeBasedMinigame } from './ShapeBasedMinigame';
 export { default as AreaCalculationMinigame } from './AreaCalculationMinigame';
 export { default as CirclePartsMinigame } from './CirclePartsMinigame';
 export { default as PerimeterMinigame } from './PerimeterMinigame';
+export { default as GeometryPhysicsGame } from './GeometryPhysicsGame';
