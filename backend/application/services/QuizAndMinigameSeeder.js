@@ -73,9 +73,10 @@ class QuizAndMinigameSeeder {
 
             // Seed quizzes
             for (const quizData of quizSeeds) {
-                const existing = await this.chapterQuizRepo.getChapterQuizById(quizData.id);
+                // Check if quiz already exists for this chapter
+                const existingQuizzes = await this.chapterQuizRepo.getChapterQuizzesByChapterId(chapterId);
                 
-                if (!existing) {
+                if (!existingQuizzes || existingQuizzes.length === 0) {
                     console.log(`[QuizAndMinigameSeeder] Creating quiz: ${quizData.title}`);
                     const quiz = await this.chapterQuizRepo.createChapterQuiz({
                         ...quizData,
@@ -83,16 +84,17 @@ class QuizAndMinigameSeeder {
                     });
                     result.quizzes.push(quiz);
                 } else {
-                    console.log(`[QuizAndMinigameSeeder] Quiz already exists: ${quizData.title}`);
-                    result.quizzes.push(existing);
+                    console.log(`[QuizAndMinigameSeeder] Quiz already exists for chapter: ${quizData.title}`);
+                    result.quizzes.push(existingQuizzes[0]);
                 }
             }
 
             // Seed minigames
             for (const minigameData of minigameSeeds) {
-                const existing = await this.minigameRepo.getMinigameById(minigameData.id);
+                // Check if minigame already exists for this chapter
+                const existingMinigames = await this.minigameRepo.getMinigamesByChapterId(chapterId);
                 
-                if (!existing) {
+                if (!existingMinigames || existingMinigames.length === 0) {
                     console.log(`[QuizAndMinigameSeeder] Creating minigame: ${minigameData.title}`);
                     const minigame = await this.minigameRepo.createMinigame({
                         ...minigameData,
@@ -100,8 +102,8 @@ class QuizAndMinigameSeeder {
                     });
                     result.minigames.push(minigame);
                 } else {
-                    console.log(`[QuizAndMinigameSeeder] Minigame already exists: ${minigameData.title}`);
-                    result.minigames.push(existing);
+                    console.log(`[QuizAndMinigameSeeder] Minigame already exists for chapter: ${minigameData.title}`);
+                    result.minigames.push(existingMinigames[0]);
                 }
             }
 

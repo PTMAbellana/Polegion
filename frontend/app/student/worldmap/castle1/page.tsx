@@ -84,8 +84,11 @@ export default function CastlePage() {
       setCastleData(castle)
       setCastleProgress(progress)
       setChapters(chapterData || [])
+      
+      // Select first available chapter (unlocked but not completed)
       const firstAvailable = chapterData?.find((c) => c.progress?.unlocked && !c.progress?.completed) || chapterData?.[0]
       if (firstAvailable) setSelectedChapter(firstAvailable.chapter_number)
+      
     } catch (error: any) {
       console.error('[CastlePage] Error:', error)
       console.error('[CastlePage] Error details:', error.response?.data || error.message)

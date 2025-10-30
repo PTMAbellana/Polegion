@@ -27,14 +27,38 @@ export interface MinigamePoint {
     label: string
 }
 
+export interface MinigameLine {
+    id: string
+    x1: number
+    y1: number
+    x2: number
+    y2: number
+    label?: string
+}
+
 export interface MinigameQuestion {
     id: string
     instruction: string
-    points: MinigamePoint[]
-    correctAnswer: string[]
-    type: string
-    showType: 'segment' | 'ray' | 'line'
-    hint: string
+    // Chapter-specific properties (all optional to support different chapter types)
+    points?: MinigamePoint[]        // Chapter 1: point-based minigames
+    lines?: MinigameLine[]          // Chapter 2: line-based minigames
+    shapes?: any[]                  // Chapter 3: shape-based minigames
+    partType?: string               // Castle 3 Chapter 1: circle parts (center, radius, diameter, chord, arc, sector)
+    // Answer and metadata
+    correctAnswer: string | number | string[]
+    type?: string
+    showType?: 'segment' | 'ray' | 'line' | string
+    hint?: string
+    // Additional properties for calculation-based minigames
+    sides?: number
+    dimensions?: { length?: number; width?: number; base?: number; height?: number }
+    shape?: string
+    unit?: string
+    formula?: string
+    radius?: number
+    diameter?: number
+    base?: number
+    height?: number
 }
 
 export interface Minigame {

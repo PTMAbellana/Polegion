@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -11,7 +11,6 @@ import {
 import { PointBasedMinigame } from '@/components/chapters/minigames';
 import { ConceptCard, LessonGrid, VisualDemo } from '@/components/chapters/lessons';
 import { useChapterData, useChapterDialogue, useChapterAudio } from '@/hooks/chapters';
-import Image from 'next/image';
 import { awardLessonXP, completeChapter } from '@/api/chapters';
 import { submitQuizAttempt } from '@/api/chapterQuizzes';
 import { submitMinigameAttempt } from '@/api/minigames';
@@ -77,10 +76,6 @@ export default function Chapter1PageRefactored() {
   const [autoAdvanceEnabled, setAutoAdvanceEnabled] = useState(false);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   
-  // Track which lesson tasks have been checked to prevent duplicates (using ref to avoid re-renders)
-  const checkedLessonTasksRef = React.useRef<Set<number>>(new Set());
-  const previousMessageIndexRef = React.useRef<number>(-1);
-  
   // Task tracking
   const [completedTasks, setCompletedTasks] = useState<Record<string, boolean>>({});
   const [failedTasks, setFailedTasks] = useState<Record<string, boolean>>({});
@@ -121,88 +116,25 @@ export default function Chapter1PageRefactored() {
 
   const { playNarration, stopAudio } = useChapterAudio({ isMuted });
 
-  // Track lesson progress and mark tasks as dialogue progresses
-  React.useEffect(() => {
-    if (currentScene === 'lesson' && messageIndex >= 0 && messageIndex <= 3) {
-      console.log('Lesson scene - messageIndex:', messageIndex, 'previous:', previousMessageIndexRef.current);
-      
-      // Detect if we're jumping backward (dialogue reset) - reset the previous index
-      if (previousMessageIndexRef.current > messageIndex) {
-        console.log('Detected backward jump - resetting previous index');
-        previousMessageIndexRef.current = -1;
-      }
-      
-      // Only process if we haven't checked this task yet
-      if (checkedLessonTasksRef.current.has(messageIndex)) {
-        console.log('Skipping - already checked');
-        previousMessageIndexRef.current = messageIndex;
-        return;
-      }
-      
-      // Check if this is a valid progression:
-      // - First message should be 0 (when previous is -1, only accept messageIndex 0)
-      // - Otherwise, should be moving forward by 1 (sequential progression)
-      const isValidFirstMessage = previousMessageIndexRef.current === -1 && messageIndex === 0;
-      const isSequentialProgression = messageIndex === previousMessageIndexRef.current + 1;
-      
-      if (isValidFirstMessage || isSequentialProgression) {
-        console.log('Processing task for messageIndex:', messageIndex);
-        
-        // Mark the task based on messageIndex and track it
-        if (messageIndex === 0) {
-          console.log('Marking task-0 complete');
-          markTaskComplete('task-0'); // Learn about Point
-          checkedLessonTasksRef.current.add(0);
-        } else if (messageIndex === 1) {
-          console.log('Marking task-1 complete');
-          markTaskComplete('task-1'); // Learn about Line Segment
-          checkedLessonTasksRef.current.add(1);
-        } else if (messageIndex === 2) {
-          console.log('Marking task-2 complete');
-          markTaskComplete('task-2'); // Learn about Ray
-          checkedLessonTasksRef.current.add(2);
-        } else if (messageIndex === 3) {
-          console.log('Marking task-3 complete');
-          markTaskComplete('task-3'); // Learn about Line
-          checkedLessonTasksRef.current.add(3);
-        }
-      } else {
-        console.log('Skipping - invalid sequence (expected', previousMessageIndexRef.current + 1, 'got', messageIndex, ')');
-      }
-      
-      // Update previous messageIndex
-      previousMessageIndexRef.current = messageIndex;
-    }
-  }, [currentScene, messageIndex]);
-
   // Handlers
   function handleDialogueComplete() {
     if (currentScene === 'opening') {
-      checkedLessonTasksRef.current = new Set(); // Reset checked tasks when entering lesson scene
-      previousMessageIndexRef.current = -1; // Reset previous message index
       setCurrentScene('lesson');
+      resetDialogue();
       playNarration('chapter1-lesson-intro');
     } else if (currentScene === 'lesson' && messageIndex >= lessonDialogue.length - 1) {
-      // All lesson tasks should be marked by now through the useEffect above
+      markTaskComplete('task-0'); // First 4 objectives about learning concepts
+      markTaskComplete('task-1');
+      markTaskComplete('task-2');
+      markTaskComplete('task-3');
       awardXP('lesson');
       setCurrentScene('minigame');
+      resetDialogue();
     }
   }
 
-  // Reset dialogue when scene changes
-  React.useEffect(() => {
-    resetDialogue();
-  }, [currentScene]);
-
   const markTaskComplete = (taskKey: string) => {
-    setCompletedTasks((prev) => {
-      if (prev[taskKey]) {
-        console.log(`Task ${taskKey} already completed, skipping`);
-        return prev; // Already completed, don't update
-      }
-      console.log(`Marking task ${taskKey} as complete`);
-      return { ...prev, [taskKey]: true };
-    });
+    setCompletedTasks((prev) => ({ ...prev, [taskKey]: true }));
   };
 
   const markTaskFailed = (taskKey: string) => {
@@ -337,13 +269,13 @@ export default function Chapter1PageRefactored() {
 
   // Main render
   return (
-    <div className={`${baseStyles.chapterContainer} ${baseStyles.castle1Theme}`}>
+    <div className={baseStyles.chapterContainer}>
       <div className={baseStyles.backgroundOverlay}></div>
 
       {/* Top Bar */}
       <ChapterTopBar
-        chapterTitle="Chapter 1: The Point of Origin"
-        chapterSubtitle="Castle 1 - Euclidean Spire Quest"
+        chapterTitle="Chapter 1: Points and Lines"
+        chapterSubtitle="Castle 1 - Foundations of Geometry"
         isMuted={isMuted}
         autoAdvance={autoAdvanceEnabled}
         onToggleMute={() => setIsMuted(!isMuted)}
@@ -380,28 +312,28 @@ export default function Chapter1PageRefactored() {
               <ConceptCard
                 title="Point"
                 description="A point is a location in space. It has no size, no width, no length - just a position marked by a dot."
-                icon={<Image src="/images/castle1/point.png" alt="Point" width={200} height={80} />}
+                icon={<span style={{ fontSize: '4rem' }}>•</span>}
                 highlighted={messageIndex >= 0}
                 styleModule={lessonStyles}
               />
               <ConceptCard
                 title="Line Segment"
                 description="A line segment connects two points. It has a definite beginning and end, with measurable length."
-                icon={<Image src="/images/castle1/line-segment.png" alt="Line Segment" width={200} height={80} />}
+                icon={<span style={{ fontSize: '4rem' }}>─</span>}
                 highlighted={messageIndex >= 1}
                 styleModule={lessonStyles}
               />
               <ConceptCard
                 title="Ray"
                 description="A ray starts at one point and extends infinitely in one direction, like a beam of light."
-                icon={<Image src="/images/castle1/ray.png" alt="Ray" width={200} height={80} />}
+                icon={<span style={{ fontSize: '4rem' }}>→</span>}
                 highlighted={messageIndex >= 2}
                 styleModule={lessonStyles}
               />
               <ConceptCard
                 title="Line"
                 description="A line extends infinitely in both directions. It has no endpoints and continues forever."
-                icon={<Image src="/images/castle1/line.png" alt="Line" width={200} height={80} />}
+                icon={<span style={{ fontSize: '4rem' }}>↔</span>}
                 highlighted={messageIndex >= 3}
                 styleModule={lessonStyles}
               />
@@ -477,7 +409,7 @@ export default function Chapter1PageRefactored() {
       {currentScene !== 'reward' && (
         <ChapterDialogueBox
           wizardName="Archim, Keeper of the Euclidean Spire"
-          wizardImage="/images/archim-wizard.png"
+          wizardImage="/images/wizard-pythagoras.png"
           displayedText={displayedText}
           isTyping={isTyping}
           showContinuePrompt={!isTyping}

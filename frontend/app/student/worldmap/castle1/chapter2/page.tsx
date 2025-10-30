@@ -87,12 +87,12 @@ export default function Chapter2Page() {
   })
 
   const XP_VALUES = {
-    lesson: 30,
-    minigame: 45,
-    quiz1: 20,
-    quiz2: 25,
-    quiz3: 30,
-    total: 150
+    lesson: 20,
+    minigame: 30,
+    quiz1: 15,
+    quiz2: 15,
+    quiz3: 20,
+    total: 100
   }
 
   const openingDialogue = [
@@ -385,12 +385,17 @@ export default function Chapter2Page() {
     const question = minigame.game_config.questions[currentQuestion]
     
     // Check if selected lines match correct answer (order doesn't matter)
-    const correctSet = new Set(question.correctAnswer)
+    // Ensure correctAnswer is an array before creating Set
+    const correctAnswer = Array.isArray(question.correctAnswer) 
+      ? question.correctAnswer 
+      : [String(question.correctAnswer)]
+    
+    const correctSet = new Set(correctAnswer)
     const selectedSet = new Set(lines)
     
     const isCorrect = 
       correctSet.size === selectedSet.size &&
-      [...correctSet].every(id => selectedSet.has(id))
+      [...correctSet].every(id => selectedSet.has(id as string))
 
     if (isCorrect) {
       setIsFeedbackCorrect(true)
@@ -451,6 +456,8 @@ export default function Chapter2Page() {
     if (!minigame || !minigame.game_config.questions[currentQuestion]) return []
     
     const question = minigame.game_config.questions[currentQuestion]
+    if (!question.lines) return []
+    
     const scaleX = stageSize.width / 700
     const scaleY = stageSize.height / 250
     

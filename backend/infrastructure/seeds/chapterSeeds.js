@@ -230,6 +230,101 @@ const castle1Chapter2Minigames = [
 ];
 
 // ============================================================================
+// CASTLE 1 - CHAPTER 3 - QUIZZES
+// ============================================================================
+
+const castle1Chapter3Quizzes = [
+    {
+        id: 'c3d4e5f6-7890-abcd-ef01-234567890123',
+        chapter_id: 'c9b7a976-d466-4831-aacf-f8e0476f5153',
+        title: 'Shape Mastery Quiz',
+        description: 'Test your knowledge of geometric shapes',
+        xp_reward: 60,
+        passing_score: 70,
+        time_limit: null,
+        quiz_config: {
+            questions: [
+                {
+                    id: 'q1',
+                    question: 'Which shape has exactly 3 sides?',
+                    options: ['Square', 'Triangle', 'Circle', 'Pentagon'],
+                    correctAnswer: 'Triangle',
+                    points: 20
+                },
+                {
+                    id: 'q2',
+                    question: 'Which shape has 4 equal sides and 4 right angles?',
+                    options: ['Rectangle', 'Triangle', 'Square', 'Circle'],
+                    correctAnswer: 'Square',
+                    points: 20
+                },
+                {
+                    id: 'q3',
+                    question: 'Which shape has no sides and is perfectly round?',
+                    options: ['Triangle', 'Square', 'Circle', 'Rectangle'],
+                    correctAnswer: 'Circle',
+                    points: 20
+                }
+            ]
+        }
+    }
+];
+
+// ============================================================================
+// CASTLE 1 - CHAPTER 3 - MINIGAMES
+// ============================================================================
+
+const castle1Chapter3Minigames = [
+    {
+        id: 'c3d1d2e3-5678-90ab-cdef-123456789012',
+        chapter_id: 'c9b7a976-d466-4831-aacf-f8e0476f5153',
+        title: 'Shape Summoner',
+        description: 'Identify triangles, squares, rectangles, circles, and polygons',
+        game_type: 'interactive',
+        xp_reward: 60,
+        time_limit: null,
+        order_index: 1,
+        game_config: {
+            questions: [
+                {
+                    id: 'mg1',
+                    instruction: 'Identify all TRIANGLES: Shapes with exactly 3 sides and 3 vertices.',
+                    shapes: [
+                        { id: 'S1', type: 'triangle', points: [350, 50, 250, 150, 450, 150], color: '#FFD700', label: 'Shape A' },
+                        { id: 'S2', type: 'square', x: 100, y: 50, size: 100, color: '#66BBFF', label: 'Shape B' },
+                        { id: 'S3', type: 'triangle', points: [550, 100, 500, 180, 600, 180], color: '#FFD700', label: 'Shape C' }
+                    ],
+                    correctAnswer: ['S1', 'S3'],
+                    hint: 'Triangles have 3 straight sides. Look for shapes with three corners!'
+                },
+                {
+                    id: 'mg2',
+                    instruction: 'Identify all RECTANGLES: Shapes with 4 sides, opposite sides equal, and 4 right angles.',
+                    shapes: [
+                        { id: 'S1', type: 'rectangle', x: 150, y: 60, width: 150, height: 100, color: '#66BBFF', label: 'Shape A' },
+                        { id: 'S2', type: 'circle', cx: 400, cy: 110, r: 50, color: '#FF6B6B', label: 'Shape B' },
+                        { id: 'S3', type: 'rectangle', x: 500, y: 80, width: 120, height: 80, color: '#66BBFF', label: 'Shape C' }
+                    ],
+                    correctAnswer: ['S1', 'S3'],
+                    hint: 'Rectangles have 4 right angles with opposite sides equal. Like a stretched square!'
+                },
+                {
+                    id: 'mg3',
+                    instruction: 'Identify the CIRCLE: A round shape with no sides or vertices.',
+                    shapes: [
+                        { id: 'S1', type: 'square', x: 100, y: 70, size: 90, color: '#4ECDC4', label: 'Shape A' },
+                        { id: 'S2', type: 'circle', cx: 350, cy: 120, r: 60, color: '#FF6B6B', label: 'Shape B' },
+                        { id: 'S3', type: 'pentagon', points: [550, 60, 600, 100, 570, 160, 480, 160, 450, 100], color: '#9B59B6', label: 'Shape C' }
+                    ],
+                    correctAnswer: ['S2'],
+                    hint: 'Circles are perfectly round with no corners or straight edges!'
+                }
+            ]
+        }
+    }
+];
+
+// ============================================================================
 // CASTLE 2 - CHAPTER SEED DATA
 // ============================================================================
 
@@ -466,34 +561,573 @@ const castle2Chapter2Minigames = [
 ];
 
 // ============================================================================
-// FUTURE CASTLES & CHAPTERS - ADD HERE
+// CASTLE 2 - CHAPTER 3 - QUIZZES
 // ============================================================================
 
-// Example structure for Castle 3 - Chapters (when ready):
-// const castle3Chapters = [
-//     {
-//         id: 'uuid-here',
-//         title: 'Castle 3 Chapter',
-//         description: 'Description here',
-//         chapter_number: 1,
-//         xp_reward: 150
-//     }
-// ];
+const castle2Chapter3Quizzes = [
+    {
+        id: 'e5f6a7b8-9abc-def0-1234-567890000003',
+        chapter_id: 'e5f6a7b8-9c0d-1e2f-3a4b-5c6d7e8f9a0b',
+        title: 'Area Mastery Quiz',
+        description: 'Test your understanding of area formulas',
+        xp_reward: 100,
+        passing_score: 70,
+        time_limit: null,
+        quiz_config: {
+            questions: [
+                {
+                    id: 'q1',
+                    question: 'What is the area of a rectangle with length 6 cm and width 4 cm?',
+                    options: ['10 cm²', '20 cm²', '24 cm²', '28 cm²'],
+                    correctAnswer: '24 cm²',
+                    points: 20,
+                    hint: 'Area = length × width'
+                },
+                {
+                    id: 'q2',
+                    question: 'What is the area of a square with side length 7 cm?',
+                    options: ['14 cm²', '28 cm²', '49 cm²', '56 cm²'],
+                    correctAnswer: '49 cm²',
+                    points: 30,
+                    hint: 'Area = side × side'
+                },
+                {
+                    id: 'q3',
+                    question: 'What is the area of a triangle with base 10 cm and height 6 cm?',
+                    options: ['16 cm²', '30 cm²', '60 cm²', '20 cm²'],
+                    correctAnswer: '30 cm²',
+                    points: 50,
+                    hint: 'Area = ½ × base × height'
+                }
+            ]
+        }
+    }
+];
+
+// ============================================================================
+// CASTLE 2 - CHAPTER 3 - MINIGAMES
+// ============================================================================
+
+const castle2Chapter3Minigames = [
+    {
+        id: 'f6a7b8c9-0def-1234-5678-900000000003',
+        chapter_id: 'e5f6a7b8-9c0d-1e2f-3a4b-5c6d7e8f9a0b',
+        title: 'Courtyard of Area',
+        description: 'Restore ancient tiles by calculating areas',
+        game_type: 'interactive',
+        xp_reward: 50,
+        time_limit: null,
+        order_index: 1,
+        game_config: {
+            instructions: 'Calculate the area using the correct formula!',
+            questions: [
+                {
+                    id: 'mg1',
+                    instruction: 'Find the area of this rectangle',
+                    shape: 'rectangle',
+                    dimensions: { length: 8, width: 5 },
+                    correctAnswer: 40,
+                    unit: 'cm²',
+                    formula: 'Area = length × width',
+                    hint: '8 × 5 = 40'
+                },
+                {
+                    id: 'mg2',
+                    instruction: 'Find the area of this square',
+                    shape: 'square',
+                    dimensions: { side: 6 },
+                    correctAnswer: 36,
+                    unit: 'cm²',
+                    formula: 'Area = side × side',
+                    hint: '6 × 6 = 36'
+                },
+                {
+                    id: 'mg3',
+                    instruction: 'Find the area of this triangle',
+                    shape: 'triangle',
+                    dimensions: { base: 10, height: 8 },
+                    correctAnswer: 40,
+                    unit: 'cm²',
+                    formula: 'Area = ½ × base × height',
+                    hint: '½ × 10 × 8 = 40'
+                },
+                {
+                    id: 'mg4',
+                    instruction: 'Find the area of this parallelogram',
+                    shape: 'parallelogram',
+                    dimensions: { base: 9, height: 5 },
+                    correctAnswer: 45,
+                    unit: 'cm²',
+                    formula: 'Area = base × height',
+                    hint: '9 × 5 = 45'
+                }
+            ]
+        }
+    }
+];
+
+// ============================================================================
+// CASTLE 3 - CHAPTER SEED DATA
+// ============================================================================
+
+// Castle 3 Chapters - Circle Sanctuary Quest
+const castle3Chapters = [
+    {
+        id: '1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d',
+        title: 'Chapter 1: The Tide of Shapes',
+        description: 'Enter the Tidal Hall where glowing rings rise and fall like ripples on water. Identify the parts of a circle — center, radius, diameter, chord, arc, and sector.',
+        chapter_number: 1,
+        xp_reward: 150
+    },
+    {
+        id: '2b3c4d5e-6f7a-8b9c-0d1e-2f3a4b5c6d7e',
+        title: 'Chapter 2: The Path of the Perimeter',
+        description: 'Archim leads you to a massive circular gate made of ancient coral. Understand and compute the circumference of circles using C = 2πr and C = πd.',
+        chapter_number: 2,
+        xp_reward: 175
+    },
+    {
+        id: '3c4d5e6f-7a8b-9c0d-1e2f-3a4b5c6d7e8f',
+        title: 'Chapter 3: The Chamber of Space',
+        description: 'In the center of the sanctuary lies a circular pool glowing with starlight. Calculate the area of circles and recognize semi-circles and sectors using A = πr².',
+        chapter_number: 3,
+        xp_reward: 200
+    }
+];
+
+// ============================================================================
+// CASTLE 3 - CHAPTER 1 - QUIZZES
+// ============================================================================
+
+// Castle 3 - Chapter 1 Quizzes (The Tide of Shapes)
+const castle3Chapter1Quizzes = [
+    {
+        id: '4d5e6f7a-8b9c-0d1e-2f3a-4b5c6d7e8f9a',
+        chapter_id: '1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d',
+        title: 'Parts of a Circle Quiz',
+        description: 'Test your understanding of circle components',
+        xp_reward: 50,
+        passing_score: 70,
+        time_limit: null,
+        quiz_config: {
+            questions: [
+                {
+                    id: 'q1',
+                    question: 'What is the center of a circle?',
+                    options: [
+                        'The point equidistant from all points on the circle',
+                        'A line passing through the circle',
+                        'Half of the diameter',
+                        'The edge of the circle'
+                    ],
+                    correctAnswer: 'The point equidistant from all points on the circle',
+                    points: 20
+                },
+                {
+                    id: 'q2',
+                    question: 'Which part of a circle is a line segment from the center to any point on the circle?',
+                    options: ['Radius', 'Diameter', 'Chord', 'Arc'],
+                    correctAnswer: 'Radius',
+                    points: 15
+                },
+                {
+                    id: 'q3',
+                    question: 'What is the relationship between diameter and radius?',
+                    options: [
+                        'Diameter = 2 × Radius',
+                        'Diameter = Radius ÷ 2',
+                        'Diameter = Radius',
+                        'Diameter = Radius × 3'
+                    ],
+                    correctAnswer: 'Diameter = 2 × Radius',
+                    points: 20
+                },
+                {
+                    id: 'q4',
+                    question: 'A chord is:',
+                    options: [
+                        'A line segment connecting two points on the circle',
+                        'A line from center to edge',
+                        'Half of a circle',
+                        'The distance around the circle'
+                    ],
+                    correctAnswer: 'A line segment connecting two points on the circle',
+                    points: 15
+                },
+                {
+                    id: 'q5',
+                    question: 'What is an arc?',
+                    options: [
+                        'A curved portion of the circle',
+                        'A straight line through the circle',
+                        'The center point',
+                        'A radius doubled'
+                    ],
+                    correctAnswer: 'A curved portion of the circle',
+                    points: 15
+                },
+                {
+                    id: 'q6',
+                    question: 'A sector is:',
+                    options: [
+                        'A pie-shaped region between two radii and an arc',
+                        'A straight line',
+                        'The same as a chord',
+                        'Half of the diameter'
+                    ],
+                    correctAnswer: 'A pie-shaped region between two radii and an arc',
+                    points: 15
+                }
+            ]
+        }
+    }
+];
+
+// ============================================================================
+// CASTLE 3 - CHAPTER 1 - MINIGAMES
+// ============================================================================
+
+// Castle 3 - Chapter 1 Minigames (Ripple Reveal)
+const castle3Chapter1Minigames = [
+    {
+        id: '5e6f7a8b-9c0d-1e2f-3a4b-5c6d7e8f9a0b',
+        chapter_id: '1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d',
+        title: 'Ripple Reveal',
+        description: 'Identify circle parts as glowing rings rise and fall like water ripples',
+        game_type: 'interactive',
+        xp_reward: 40,
+        time_limit: null,
+        order_index: 1,
+        game_config: {
+            instructions: 'Archim names a part - tap or drag the correct segment!',
+            questions: [
+                {
+                    id: 'mg1',
+                    instruction: 'Find the CENTER of the circle',
+                    partType: 'center',
+                    correctAnswer: 'O',
+                    hint: 'The center is the point equidistant from all points on the circle - usually labeled O'
+                },
+                {
+                    id: 'mg2',
+                    instruction: 'Find the RADIUS',
+                    partType: 'radius',
+                    correctAnswer: 'OA',
+                    hint: 'A radius connects the center to any point on the circle'
+                },
+                {
+                    id: 'mg3',
+                    instruction: 'Find the DIAMETER',
+                    partType: 'diameter',
+                    correctAnswer: 'AB',
+                    hint: 'The diameter passes through the center and connects two opposite points on the circle'
+                },
+                {
+                    id: 'mg4',
+                    instruction: 'Find a CHORD (not diameter)',
+                    partType: 'chord',
+                    correctAnswer: 'CD',
+                    hint: 'A chord connects two points on the circle but does NOT pass through the center'
+                },
+                {
+                    id: 'mg5',
+                    instruction: 'Find an ARC',
+                    partType: 'arc',
+                    correctAnswer: 'arc-AB',
+                    hint: 'An arc is a curved portion of the circle between two points'
+                },
+                {
+                    id: 'mg6',
+                    instruction: 'Find a SECTOR',
+                    partType: 'sector',
+                    correctAnswer: 'sector-OAB',
+                    hint: 'A sector looks like a slice of pie - bounded by two radii and an arc'
+                }
+            ]
+        }
+    }
+];
+
+// ============================================================================
+// CASTLE 3 - CHAPTER 2 - QUIZZES
+// ============================================================================
+
+// Castle 3 - Chapter 2 Quizzes (The Path of the Perimeter)
+const castle3Chapter2Quizzes = [
+    {
+        id: '6f7a8b9c-0d1e-2f3a-4b5c-6d7e8f9a0b1c',
+        chapter_id: '2b3c4d5e-6f7a-8b9c-0d1e-2f3a4b5c6d7e',
+        title: 'Circumference Mastery Quiz',
+        description: 'Calculate circumferences using C = 2πr and C = πd',
+        xp_reward: 60,
+        passing_score: 70,
+        time_limit: null,
+        quiz_config: {
+            questions: [
+                {
+                    id: 'q1',
+                    question: 'What is the formula for the circumference of a circle using radius?',
+                    options: ['C = 2πr', 'C = πr²', 'C = πd', 'C = 2r'],
+                    correctAnswer: 'C = 2πr',
+                    points: 15
+                },
+                {
+                    id: 'q2',
+                    question: 'A circle has a radius of 5 cm. What is its circumference? (Use π = 3.14)',
+                    options: ['31.4 cm', '15.7 cm', '78.5 cm', '10 cm'],
+                    correctAnswer: '31.4 cm',
+                    points: 25,
+                    hint: 'C = 2πr = 2 × 3.14 × 5'
+                },
+                {
+                    id: 'q3',
+                    question: 'A circle has a diameter of 14 cm. What is its circumference? (Use π = 3.14)',
+                    options: ['43.96 cm', '21.98 cm', '153.86 cm', '28 cm'],
+                    correctAnswer: '43.96 cm',
+                    points: 25,
+                    hint: 'C = πd = 3.14 × 14'
+                },
+                {
+                    id: 'q4',
+                    question: 'If a circle has a radius of 7 cm, what is its diameter?',
+                    options: ['14 cm', '7 cm', '3.5 cm', '21 cm'],
+                    correctAnswer: '14 cm',
+                    points: 15,
+                    hint: 'Diameter = 2 × Radius'
+                },
+                {
+                    id: 'q5',
+                    question: 'Which formula uses diameter to find circumference?',
+                    options: ['C = πd', 'C = 2πr', 'C = πr²', 'C = d²'],
+                    correctAnswer: 'C = πd',
+                    points: 20
+                }
+            ]
+        }
+    }
+];
+
+// ============================================================================
+// CASTLE 3 - CHAPTER 2 - MINIGAMES
+// ============================================================================
+
+const castle3Chapter2Minigames = [
+    {
+        id: '7a8b9c0d-1e2f-3a4b-5c6d-7e8f9a0b1c2d',
+        chapter_id: '2b3c4d5e-6f7a-8b9c-0d1e-2f3a4b5c6d7e',
+        title: 'The Coral Compass',
+        description: 'Use circumference formulas to unlock ancient coral gates',
+        game_type: 'interactive',
+        xp_reward: 50,
+        time_limit: null,
+        order_index: 1,
+        game_config: {
+            instructions: 'Calculate the circumference to unlock each gate! (Use π = 3.14)',
+            questions: [
+                {
+                    id: 'mg1',
+                    instruction: 'Find the circumference (radius = 5 cm)',
+                    radius: 5,
+                    correctAnswer: 31.4,
+                    unit: 'cm',
+                    hint: 'C = 2πr = 2 × 3.14 × 5'
+                },
+                {
+                    id: 'mg2',
+                    instruction: 'Find the circumference (diameter = 12 cm)',
+                    diameter: 12,
+                    correctAnswer: 37.68,
+                    unit: 'cm',
+                    hint: 'C = πd = 3.14 × 12'
+                },
+                {
+                    id: 'mg3',
+                    instruction: 'Find the circumference (radius = 7 cm)',
+                    radius: 7,
+                    correctAnswer: 43.96,
+                    unit: 'cm',
+                    hint: 'C = 2πr = 2 × 3.14 × 7'
+                },
+                {
+                    id: 'mg4',
+                    instruction: 'Find the circumference (diameter = 10 cm)',
+                    diameter: 10,
+                    correctAnswer: 31.4,
+                    unit: 'cm',
+                    hint: 'C = πd = 3.14 × 10'
+                },
+                {
+                    id: 'mg5',
+                    instruction: 'Find the circumference (radius = 3.5 cm)',
+                    radius: 3.5,
+                    correctAnswer: 21.98,
+                    unit: 'cm',
+                    hint: 'C = 2πr = 2 × 3.14 × 3.5'
+                }
+            ]
+        }
+    }
+];
+
+// ============================================================================
+// CASTLE 3 - CHAPTER 3 - QUIZZES
+// ============================================================================
+
+// Castle 3 - Chapter 3 Quizzes (The Chamber of Space)
+const castle3Chapter3Quizzes = [
+    {
+        id: '8b9c0d1e-2f3a-4b5c-6d7e-8f9a0b1c2d3e',
+        chapter_id: '3c4d5e6f-7a8b-9c0d-1e2f-3a4b5c6d7e8f',
+        title: 'Circle Area Mastery Quiz',
+        description: 'Calculate areas of circles, semi-circles, and sectors',
+        xp_reward: 70,
+        passing_score: 70,
+        time_limit: null,
+        quiz_config: {
+            questions: [
+                {
+                    id: 'q1',
+                    question: 'What is the formula for the area of a circle?',
+                    options: ['A = πr²', 'A = 2πr', 'A = πd', 'A = r²'],
+                    correctAnswer: 'A = πr²',
+                    points: 15
+                },
+                {
+                    id: 'q2',
+                    question: 'Find the area of a circle with radius 7 cm (Use π = 3.14)',
+                    options: ['153.86 cm²', '43.96 cm²', '49 cm²', '98 cm²'],
+                    correctAnswer: '153.86 cm²',
+                    points: 25,
+                    hint: 'A = πr² = 3.14 × 7²'
+                },
+                {
+                    id: 'q3',
+                    question: 'A circle has a radius of 5 cm. What is its area? (Use π = 3.14)',
+                    options: ['78.5 cm²', '31.4 cm²', '25 cm²', '15.7 cm²'],
+                    correctAnswer: '78.5 cm²',
+                    points: 25,
+                    hint: 'A = πr² = 3.14 × 5²'
+                },
+                {
+                    id: 'q4',
+                    question: 'What is the area of a semi-circle with radius 4 cm? (Use π = 3.14)',
+                    options: ['25.12 cm²', '50.24 cm²', '12.56 cm²', '16 cm²'],
+                    correctAnswer: '25.12 cm²',
+                    points: 30,
+                    hint: 'Semi-circle area = (πr²) ÷ 2 = (3.14 × 16) ÷ 2'
+                },
+                {
+                    id: 'q5',
+                    question: 'Which of the following statements is true?',
+                    options: [
+                        'Diameter = twice the radius',
+                        'Radius = twice the diameter',
+                        'Circumference = radius × radius',
+                        'None of the above'
+                    ],
+                    correctAnswer: 'Diameter = twice the radius',
+                    points: 15
+                }
+            ]
+        }
+    }
+];
+
+// ============================================================================
+// CASTLE 3 - CHAPTER 3 - MINIGAMES
+// ============================================================================
+
+const castle3Chapter3Minigames = [
+    {
+        id: '9c0d1e2f-3a4b-5c6d-7e8f-9a0b1c2d3e4f',
+        chapter_id: '3c4d5e6f-7a8b-9c0d-1e2f-3a4b5c6d7e8f',
+        title: 'Lunar Pools',
+        description: 'Calculate areas to fill the starlit circular pools',
+        game_type: 'interactive',
+        xp_reward: 60,
+        time_limit: null,
+        order_index: 1,
+        game_config: {
+            instructions: 'Calculate the area using A = πr² (Use π = 3.14)',
+            questions: [
+                {
+                    id: 'mg1',
+                    instruction: 'Find the area of this circle (radius = 5 cm)',
+                    radius: 5,
+                    correctAnswer: 78.5,
+                    unit: 'cm²',
+                    hint: 'A = πr² = 3.14 × 5²'
+                },
+                {
+                    id: 'mg2',
+                    instruction: 'Find the area of this circle (radius = 7 cm)',
+                    radius: 7,
+                    correctAnswer: 153.86,
+                    unit: 'cm²',
+                    hint: 'A = πr² = 3.14 × 7²'
+                },
+                {
+                    id: 'mg3',
+                    instruction: 'Find the area of this semi-circle (radius = 6 cm)',
+                    radius: 6,
+                    shape: 'semi-circle',
+                    correctAnswer: 56.52,
+                    unit: 'cm²',
+                    hint: 'Semi-circle area = (πr²) ÷ 2 = (3.14 × 36) ÷ 2'
+                },
+                {
+                    id: 'mg4',
+                    instruction: 'Find the area of this circle (radius = 10 cm)',
+                    radius: 10,
+                    correctAnswer: 314,
+                    unit: 'cm²',
+                    hint: 'A = πr² = 3.14 × 10²'
+                },
+                {
+                    id: 'mg5',
+                    instruction: 'Find the area of this quarter-circle sector (radius = 8 cm)',
+                    radius: 8,
+                    shape: 'quarter-sector',
+                    correctAnswer: 50.24,
+                    unit: 'cm²',
+                    hint: 'Quarter-circle area = (πr²) ÷ 4 = (3.14 × 64) ÷ 4'
+                }
+            ]
+        }
+    }
+];
+
+// ============================================================================
+// FUTURE CASTLES & CHAPTERS - ADD HERE
+// ============================================================================
 
 // ============================================================================
 // EXPORTS
 // ============================================================================
 
 module.exports = {
+    // Castle 1
     castle1Chapters,
     castle1Chapter1Quizzes,
     castle1Chapter1Minigames,
     castle1Chapter2Quizzes,
     castle1Chapter2Minigames,
+    castle1Chapter3Quizzes,
+    castle1Chapter3Minigames,
     // Castle 2
     castle2Chapters,
     castle2Chapter1Quizzes,
     castle2Chapter1Minigames,
     castle2Chapter2Quizzes,
-    castle2Chapter2Minigames
+    castle2Chapter2Minigames,
+    castle2Chapter3Quizzes,
+    castle2Chapter3Minigames,
+    // Castle 3
+    castle3Chapters,
+    castle3Chapter1Quizzes,
+    castle3Chapter1Minigames,
+    castle3Chapter2Quizzes,
+    castle3Chapter2Minigames,
+    castle3Chapter3Quizzes,
+    castle3Chapter3Minigames
 };

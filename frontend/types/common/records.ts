@@ -22,7 +22,7 @@ export interface RecordsData {
   generatedAt: string
 }
 
-export interface Competition {
+export interface RecordCompetition {
   id: number
   title: string
 }
@@ -33,7 +33,7 @@ export interface RecordsDownloadSectionProps {
   isLoading?: boolean
   roomRecords?: RecordStudent[]
   competitionRecords?: Map<number, RecordStudent[]>
-  competitions?: Competition[]
+  competitions?: RecordCompetition[]
 }
 
 export type DownloadFormat = 'csv' | 'json'

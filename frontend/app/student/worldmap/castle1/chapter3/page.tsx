@@ -383,8 +383,13 @@ export default function Chapter3Page() {
     
     const question = minigame.game_config.questions[currentQuestion]
     
+    // Convert correctAnswer to array if needed
+    const correctAnswer = Array.isArray(question.correctAnswer) 
+      ? question.correctAnswer 
+      : [String(question.correctAnswer)]
+    
     // Check if selected shapes match correct answer (order doesn't matter)
-    const correctSet = new Set(question.correctAnswer)
+    const correctSet = new Set(correctAnswer)
     const selectedSet = new Set(shapes)
     
     const isCorrect = 
@@ -453,6 +458,8 @@ export default function Chapter3Page() {
     if (!minigame || !minigame.game_config.questions[currentQuestion]) return []
     
     const question = minigame.game_config.questions[currentQuestion]
+    if (!question.shapes) return []
+    
     const scaleX = stageSize.width / 700
     const scaleY = stageSize.height / 250
     

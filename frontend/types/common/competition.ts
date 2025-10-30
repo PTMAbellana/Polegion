@@ -1,3 +1,5 @@
+import { Problem } from './problem';
+
 // Competition Status Types
 export type CompetitionStatus = 'NEW' | 'ONGOING' | 'DONE';
 export type GameplayIndicator = 'ACTIVE' | 'PAUSE' | 'FINISHED';
@@ -29,19 +31,8 @@ export interface CompetitionProblem {
   problem: Problem;
 }
 
-// Problem Interface (compatible with existing structure)
-export interface Problem {
-  id: string;
-  title?: string | null;
-  description: string;
-  difficulty: 'easy' | 'medium' | 'hard';
-  max_attempts: number;
-  expected_xp: number;
-  timer: number | null;
-  visibility: 'show' | 'hide';
-  room_id?: number;
-  created_at?: string;
-}
+// Re-export Problem for convenience
+export type { Problem } from './problem';
 
 // Participant in Competition
 export interface CompetitionParticipant {

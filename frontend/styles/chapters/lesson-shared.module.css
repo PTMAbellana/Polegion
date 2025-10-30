@@ -1,0 +1,479 @@
+/* ============================================
+   LESSON COMPONENT STYLES
+   For concept cards, grids, and interactive examples
+   ============================================ */
+
+/* Concept Card - Horizontal layout by default (desktop/landscape) */
+.conceptCard {
+  display: flex;
+  flex-direction: row;
+  padding: 1rem;
+  background: rgba(33, 53, 85, 0.5);
+  border: 2px solid rgba(216, 196, 182, 0.3);
+  border-radius: 10px;
+  transition: all 0.3s ease;
+  overflow: hidden;
+  height: 100%;
+  min-width: 0;
+  word-wrap: break-word;
+  gap: 1rem;
+}
+
+.conceptCard:hover {
+  background: rgba(62, 88, 121, 0.5);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.conceptCardHighlighted {
+  border-color: #D8C4B6;
+  background: rgba(216, 196, 182, 0.15);
+  box-shadow: 0 0 20px rgba(216, 196, 182, 0.3);
+}
+
+.conceptCardClickable {
+  cursor: pointer;
+}
+
+/* Icon/Image Section - Fixed width for horizontal layout */
+.conceptImageSection {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 120px;
+  max-width: 120px;
+  min-height: 100px;
+  padding: 0.25rem;
+  background: rgba(245, 239, 231, 0.9);
+  border-radius: 6px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.conceptImage {
+  max-width: 100%;
+  height: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 3rem;
+  color: #D8C4B6;
+  filter: drop-shadow(0 0 10px rgba(216, 196, 182, 0.5));
+}
+
+.conceptImage img {
+  max-width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+
+/* Text Section - Title and description aligned left for horizontal layout */
+.conceptTextSection {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  justify-content: center;
+}
+
+.conceptContent {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.conceptTitle {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #F5EFE7;
+  margin: 0 0 0.5rem 0;
+  text-align: left;
+  min-height: 1.5rem;
+}
+
+.conceptDescription {
+  font-size: 0.85rem;
+  color: #D8C4B6;
+  line-height: 1.4;
+  margin: 0;
+  text-align: left;
+}
+
+/* Lesson Grid */
+.lessonGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr));
+  gap: 1rem;
+  width: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.lessonGrid1Col {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+  width: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.lessonGrid2Col {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  width: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.lessonGrid3Col {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(180px, 100%), 1fr));
+  gap: 1rem;
+  width: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.lessonGrid4Col {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(180px, 100%), 1fr));
+  gap: 1rem;
+  width: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.gapSmall {
+  gap: 0.75rem !important;
+}
+
+.gapMedium {
+  gap: 1.5rem !important;
+}
+
+.gapLarge {
+  gap: 2rem !important;
+}
+
+/* Responsive - adjust grid for smaller viewports */
+@media (max-width: 968px) {
+  .lessonGrid2Col {
+    grid-template-columns: 1fr;
+  }
+  
+  .lessonGrid3Col,
+  .lessonGrid4Col {
+    grid-template-columns: repeat(auto-fit, minmax(min(160px, 100%), 1fr));
+  }
+}
+
+/* Visual Demo */
+.visualDemo {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 100%;
+  margin: 1.5rem 0;
+}
+
+.visualDemoTitle {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #E8F4FD;
+  margin: 0;
+  text-align: center;
+}
+
+.visualDemoContent {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  min-height: 200px;
+}
+
+.visualDemoCaption {
+  font-size: 0.9rem;
+  color: #B8C5D6;
+  font-style: italic;
+  text-align: center;
+  margin: 0;
+}
+
+/* Interactive Example */
+.interactiveExample {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 2rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  width: 100%;
+}
+
+.exampleQuestion {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #E8F4FD;
+  text-align: center;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.explanation {
+  padding: 1.5rem;
+  border-radius: 6px;
+  margin-top: 1rem;
+  animation: slideDown 0.3s ease-out;
+}
+
+.explanation strong {
+  display: block;
+  font-size: 1.1rem;
+  margin-bottom: 0.75rem;
+}
+
+.explanation p {
+  margin: 0;
+  color: #E8F4FD;
+  line-height: 1.6;
+}
+
+.explanationCorrect {
+  background: rgba(76, 175, 80, 0.2);
+  border: 1px solid rgba(76, 175, 80, 0.4);
+  color: #4CAF50;
+}
+
+.explanationIncorrect {
+  background: rgba(244, 67, 54, 0.2);
+  border: 1px solid rgba(244, 67, 54, 0.4);
+  color: #F44336;
+}
+
+@keyframes slideDown {
+  0% {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Lesson Section */
+.lessonSection {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  padding: 2rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  margin: 1.5rem 0;
+}
+
+.lessonSectionTitle {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #FFD700;
+  margin: 0 0 1rem 0;
+  text-align: center;
+  text-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+}
+
+.lessonSectionDescription {
+  font-size: 1.05rem;
+  color: #B8C5D6;
+  line-height: 1.7;
+  margin: 0;
+  text-align: center;
+}
+
+/* Progress Indicator */
+.lessonProgress {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 1rem 0;
+}
+
+.progressDot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease;
+}
+
+.progressDotActive {
+  background: #FFD700;
+  box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+  transform: scale(1.3);
+}
+
+.progressDotCompleted {
+  background: #4CAF50;
+}
+
+/* Responsive */
+@media (max-width: 968px) {
+  .lessonGrid,
+  .lessonGrid2Col,
+  .lessonGrid3Col,
+  .lessonGrid4Col {
+    grid-template-columns: 1fr;
+  }
+
+  .conceptCard {
+    padding: 1rem;
+  }
+
+  .lessonSection {
+    padding: 1.5rem;
+  }
+
+  .interactiveExample {
+    padding: 1.5rem;
+  }
+}
+
+/* Portrait Mode - Super Compact - Switch to vertical layout */
+@media (max-width: 768px) and (orientation: portrait) {
+  .lessonGrid,
+  .lessonGrid2Col {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+  }
+
+  .lessonGrid3Col,
+  .lessonGrid4Col {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+  }
+
+  /* Vertical layout for portrait */
+  .conceptCard {
+    flex-direction: column;
+    padding: 0.5rem;
+    gap: 0.5rem;
+  }
+
+  .conceptImageSection {
+    min-width: auto;
+    max-width: none;
+    min-height: 80px;
+    max-height: 80px;
+    margin-bottom: 0.5rem;
+  }
+
+  .conceptTextSection {
+    justify-content: flex-start;
+  }
+
+  .conceptImage {
+    font-size: 2rem;
+  }
+
+  .conceptTitle {
+    font-size: 0.85rem;
+    text-align: center;
+  }
+
+  .conceptDescription {
+    font-size: 0.7rem;
+    line-height: 1.3;
+    text-align: center;
+  }
+
+  .lessonSection {
+    padding: 0.75rem;
+    gap: 1rem;
+  }
+
+  .lessonSectionTitle {
+    font-size: 1rem;
+  }
+
+  .lessonSectionDescription {
+    font-size: 0.8rem;
+  }
+
+  .interactiveExample {
+    padding: 0.75rem;
+    gap: 0.75rem;
+  }
+
+  .exampleQuestion {
+    font-size: 0.9rem;
+    padding-bottom: 0.5rem;
+  }
+
+  .visualDemo {
+    margin: 0.75rem 0;
+    gap: 0.5rem;
+  }
+
+  .visualDemoContent {
+    padding: 0.75rem;
+    min-height: 120px;
+  }
+
+  .visualDemoTitle {
+    font-size: 0.9rem;
+  }
+
+  .visualDemoCaption {
+    font-size: 0.75rem;
+  }
+}
+
+/* Landscape Mode - Keep horizontal layout with smaller sizing */
+@media (max-width: 768px) and (orientation: landscape) {
+  .lessonGrid2Col {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+  }
+
+  .lessonGrid3Col,
+  .lessonGrid4Col {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+  }
+
+  /* Maintain horizontal layout for landscape */
+  .conceptCard {
+    flex-direction: row;
+    padding: 0.75rem;
+    gap: 0.75rem;
+  }
+
+  .conceptImageSection {
+    min-width: 100px;
+    max-width: 100px;
+    min-height: auto;
+    max-height: none;
+  }
+
+  .conceptImage {
+    font-size: 2.5rem;
+  }
+
+  .conceptTitle {
+    font-size: 1rem;
+    text-align: left;
+  }
+
+  .conceptDescription {
+    font-size: 0.8rem;
+    text-align: left;
+  }
+}

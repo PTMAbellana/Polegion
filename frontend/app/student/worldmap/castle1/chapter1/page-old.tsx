@@ -1,26 +1,28 @@
-﻿"use client"
+"use client"
 
 import React, { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
-import { Stage, Layer, Circle, Line, Arc, Text, Group } from 'react-konva'
+import { Stage, Layer, Circle, Line, Arrow, Text } from 'react-konva'
 import { Sparkles, Volume2, VolumeX, Play, Pause, X, ChevronRight } from 'lucide-react'
 import { useAuthStore } from '@/store/authStore'
 import { AuthProtection } from '@/context/AuthProtection'
-import styles from '@/styles/castle3-chapter1.module.css'
+import styles from '@/styles/castle1-chapter1.module.css'
 import { getChaptersByCastle, awardLessonXP, completeChapter } from '@/api/chapters'
 import { getChapterQuizzesByChapter, submitQuizAttempt } from '@/api/chapterQuizzes'
 import { getMinigamesByChapter, submitMinigameAttempt } from '@/api/minigames'
 import type { 
   ChapterQuiz, 
-  Minigame
+  Minigame, 
+  MinigamePoint,
+  MinigameQuestion 
 } from '@/types/common'
 
-const CASTLE_ID = 'd6e7a642-5d4c-4f9e-8b3a-1c2d3e4f5a6b'
+const CASTLE_ID = 'cd5ddb70-b4ba-46cb-85fd-d66e5735619f'
 const CHAPTER_NUMBER = 1
 
 type SceneType = 'opening' | 'lesson' | 'minigame' | 'quiz1' | 'quiz2' | 'quiz3' | 'reward'
 
-export default function Castle3Chapter1Page() {
+export default function Chapter1Page() {
   const router = useRouter()
   const { userProfile } = useAuthStore()
   const { isLoading: authLoading } = AuthProtection()
@@ -29,7 +31,6 @@ export default function Castle3Chapter1Page() {
   const [quiz, setQuiz] = useState<ChapterQuiz | null>(null)
   const [minigame, setMinigame] = useState<Minigame | null>(null)
   const [loading, setLoading] = useState(true)
-  const [loadError, setLoadError] = useState<string | null>(null)
 
   const [currentScene, setCurrentScene] = useState<SceneType>('opening')
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null)
@@ -41,43 +42,44 @@ export default function Castle3Chapter1Page() {
   const [autoAdvance, setAutoAdvance] = useState(false)
   const [displayedText, setDisplayedText] = useState("")
   const [isMuted, setIsMuted] = useState(false)
-    
-  const [selectedPart, setSelectedPart] = useState<string | null>(null)
+  
+  const [selectedPoints, setSelectedPoints] = useState<string[]>([])
   const [currentQuestion, setCurrentQuestion] = useState(0)
   const [minigameFeedback, setMinigameFeedback] = useState<string>("")
   const [isFeedbackCorrect, setIsFeedbackCorrect] = useState<boolean | null>(null)
-  const [stageSize, setStageSize] = useState({ width: 700, height: 400 })
-    
+  const [isDragging, setIsDragging] = useState(false)
+  const [dragStart, setDragStart] = useState<string | null>(null)
+  const [mousePos, setMousePos] = useState<{ x: number; y: number } | null>(null)
+  const [stageSize, setStageSize] = useState({ width: 700, height: 250 })
+  
   const audioRef = useRef<HTMLAudioElement | null>(null)
   const typingIntervalRef = useRef<NodeJS.Timeout | null>(null)
   const autoAdvanceTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const taskListRef = useRef<HTMLDivElement | null>(null)
   const gameAreaRef = useRef<HTMLDivElement | null>(null)
   const canvasContainerRef = useRef<HTMLDivElement | null>(null)
-    
+  
   const [completedTasks, setCompletedTasks] = useState({
-    learnCenter: false,
-    learnRadius: false,
-    learnDiameter: false,
-    learnChord: false,
-    learnArc: false,
-    learnSector: false,
+    learnPoint: false,
+    learnLineSegment: false,
+    learnRay: false,
+    learnLine: false,
     completeMinigame: false,
     passQuiz1: false,
     passQuiz2: false,
     passQuiz3: false
   })
-    
+  
   const [failedTasks, setFailedTasks] = useState({
     passQuiz1: false,
     passQuiz2: false,
     passQuiz3: false
   })
-    
+  
   const [quizAnswers, setQuizAnswers] = useState<Record<string, string>>({})
   const [quizAttempts, setQuizAttempts] = useState(0)
   const [canRetakeQuiz, setCanRetakeQuiz] = useState(false)
-    
+  
   const [earnedXP, setEarnedXP] = useState({
     lesson: 0,
     minigame: 0,
@@ -86,34 +88,33 @@ export default function Castle3Chapter1Page() {
 
   const XP_VALUES = {
     lesson: 20,
-    minigame: 40,
-    quiz1: 20,
+    minigame: 30,
+    quiz1: 15,
     quiz2: 15,
-    quiz3: 15,
-    total: 150
+    quiz3: 20,
+    total: 100
   }
 
   const openingDialogue = [
-    "Welcome, seeker of sacred curves, to the Circle Sanctuary!",
-    "I am Archim, Guardian of the Golden Shores — where eternal shapes dwell.",
-    "Behold! These are Circles — the most perfect of all forms, with no beginning and no end.",
-    "From these sacred rings, we shall unlock the mysteries of the sanctuary!"
+    "Ah, a new seeker of shapes has arrived! Welcome, traveler.",
+    "I am Archim, Keeper of the Euclidean Spire — where all geometry was born.",
+    "These are Points — the seeds of all geometry. Touch one, and it comes alive!",
+    "From these points, we shall unlock the tower's ancient power!"
   ]
 
   const lessonDialogue = [
-    "Every circle has a heart — the CENTER, from which all distances are equal.",
-    "From the center to the edge flows the RADIUS — the measure of a circle's reach.",
-    "Twice the radius forms the DIAMETER — a path straight through the center.",
-    "Any line connecting two points on the edge is a CHORD — like a bridge across water.",
-    "The curved path along the edge is an ARC — a portion of the eternal ring.",
-    "Between two radii and an arc lies the SECTOR — a slice of the circle's soul.",
+    "Every shape begins with a Point — small, yet mighty.",
+    "Two points form a connection — that is the beginning of a Line Segment.",
+    "If the path stretches endlessly in one direction — it is a Ray.",
+    "And if it continues in both directions — it becomes a Line, infinite and eternal.",
+    "Watch closely as these fundamental forms reveal themselves.",
     "Now, let us put your knowledge to practice!"
   ]
 
   const minigameDialogue = [
-    "Excellent! The ripples reveal the circle's secrets.",
-    "Touch each part as I call for it — let the waters guide you.",
-    "Choose wisely, young scholar of curves!"
+    "Excellent! Now connect the points to form the shapes I call for.",
+    "Click and drag from one point to another to connect them.",
+    "Choose wisely, young geometer!"
   ]
 
   useEffect(() => {
@@ -121,22 +122,18 @@ export default function Castle3Chapter1Page() {
       if (!authLoading && userProfile?.id) {
         try {
           setLoading(true)
-          setLoadError(null)
           
-          console.log('[Castle3-Ch1] Loading data for castle:', CASTLE_ID)
+          console.log('[Chapter1] Loading data for castle:', CASTLE_ID)
           const chaptersRes = await getChaptersByCastle(CASTLE_ID)
-          console.log('[Castle3-Ch1] Chapters response:', chaptersRes)
+          console.log('[Chapter1] Chapters response:', chaptersRes)
           
           const chapter1 = chaptersRes.data?.find((ch: any) => ch.chapter_number === CHAPTER_NUMBER)
           
           if (!chapter1) {
-            console.error('[Castle3-Ch1] Chapter 1 not found')
-            setLoadError('Chapter 1 not found. Please contact support.')
-            setLoading(false)
-            return
+            throw new Error('Chapter 1 not found')
           }
           
-          console.log('[Castle3-Ch1] Found chapter 1:', chapter1)
+          console.log('[Chapter1] Found chapter 1:', chapter1)
           setChapterId(chapter1.id)
           
           const [quizzesRes, minigamesRes] = await Promise.all([
@@ -144,65 +141,25 @@ export default function Castle3Chapter1Page() {
             getMinigamesByChapter(chapter1.id)
           ])
           
-          console.log('[Castle3-Ch1] Quizzes response:', quizzesRes)
-          console.log('[Castle3-Ch1] Minigames response:', minigamesRes)
+          console.log('[Chapter1] Quizzes response:', quizzesRes)
+          console.log('[Chapter1] Minigames response:', minigamesRes)
           
-          // Set quiz or use fallback
           if (quizzesRes.data && quizzesRes.data.length > 0) {
-            console.log('[Castle3-Ch1] Setting quiz:', quizzesRes.data[0])
+            console.log('[Chapter1] Setting quiz:', quizzesRes.data[0])
             setQuiz(quizzesRes.data[0])
           } else {
-            console.warn('[Castle3-Ch1] No quizzes found, using fallback')
-            setQuiz({
-              id: 'fallback-quiz',
-              chapter_id: chapter1.id,
-              quiz_config: {
-                questions: [
-                  {
-                    question: "What is the center of a circle?",
-                    options: ["The point equidistant from all edge points", "Any point on the circle", "The largest diameter", "The smallest radius"],
-                    correctAnswer: "The point equidistant from all edge points"
-                  },
-                  {
-                    question: "Which part is a line segment from the center to any point on the circle?",
-                    options: ["Diameter", "Chord", "Radius", "Arc"],
-                    correctAnswer: "Radius"
-                  },
-                  {
-                    question: "What is the relationship between diameter and radius?",
-                    options: ["Diameter = 2 × Radius", "Diameter = Radius", "Diameter = Radius ÷ 2", "Diameter = Radius²"],
-                    correctAnswer: "Diameter = 2 × Radius"
-                  }
-                ]
-              }
-            } as any)
+            console.warn('[Chapter1] No quizzes found!')
           }
           
-          // Set minigame or use fallback
           if (minigamesRes.data && minigamesRes.data.length > 0) {
-            console.log('[Castle3-Ch1] Setting minigame:', minigamesRes.data[0])
+            console.log('[Chapter1] Setting minigame:', minigamesRes.data[0])
             setMinigame(minigamesRes.data[0])
           } else {
-            console.warn('[Castle3-Ch1] No minigames found, using fallback')
-            setMinigame({
-              id: 'fallback-minigame',
-              chapter_id: chapter1.id,
-              game_config: {
-                questions: [
-                  { partType: 'center', instruction: 'Click on the CENTER of the circle', hint: 'The center is the point in the middle.' },
-                  { partType: 'radius', instruction: 'Click on the RADIUS', hint: 'The radius goes from center to edge.' },
-                  { partType: 'diameter', instruction: 'Click on the DIAMETER', hint: 'The diameter passes through the center.' },
-                  { partType: 'chord', instruction: 'Click on the CHORD', hint: 'A chord connects two points on the circle.' },
-                  { partType: 'arc', instruction: 'Click on the ARC', hint: 'The arc is the curved edge of the circle.' },
-                  { partType: 'sector', instruction: 'Click on the SECTOR', hint: 'A sector is a pie-shaped region.' }
-                ]
-              }
-            } as any)
+            console.warn('[Chapter1] No minigames found!')
           }
           
         } catch (error) {
-          console.error('[Castle3-Ch1] Failed to load chapter data:', error)
-          setLoadError('Failed to load chapter data. Please try again.')
+          console.error('[Chapter1] Failed to load chapter data:', error)
         } finally {
           setLoading(false)
         }
@@ -213,6 +170,7 @@ export default function Castle3Chapter1Page() {
   }, [authLoading, userProfile])
 
   const playNarration = (filename: string) => {
+    // Skip audio playback if muted or no filename
     if (isMuted || !filename) return
     
     try {
@@ -223,15 +181,18 @@ export default function Castle3Chapter1Page() {
       const audio = new Audio(`/audio/narration/${filename}.mp3`)
       
       audio.onerror = () => {
+        // Silently fail - audio files will be added later
         console.log(`[Audio] File not found (optional): ${filename}.mp3`)
       }
       
       audio.play().catch(err => {
+        // Silently fail - audio is optional
         console.log(`[Audio] Playback skipped (optional): ${filename}.mp3`)
       })
       
       audioRef.current = audio
     } catch (error) {
+      // Silently fail - audio is optional
       console.log('[Audio] Audio playback is optional, continuing without sound')
     }
   }
@@ -247,7 +208,7 @@ export default function Castle3Chapter1Page() {
     const handleResize = () => {
       if (canvasContainerRef.current) {
         const width = canvasContainerRef.current.offsetWidth
-        setStageSize({ width: width, height: 400 })
+        setStageSize({ width: width, height: 250 })
       }
     }
 
@@ -264,14 +225,14 @@ export default function Castle3Chapter1Page() {
     let currentIndex = 0
     
     let audioToPlay = ""
-    if (currentScene === 'opening') audioToPlay = `castle3-opening-${messageIndex + 1}`
-    else if (currentScene === 'lesson') audioToPlay = `castle3-lesson-${messageIndex + 1}`
-    else if (currentScene === 'minigame') audioToPlay = `castle3-minigame-${messageIndex + 1}`
+    if (currentScene === 'opening') audioToPlay = `opening-${messageIndex + 1}`
+    else if (currentScene === 'lesson') audioToPlay = `lesson-${messageIndex + 1}`
+    else if (currentScene === 'minigame') audioToPlay = `minigame-${messageIndex + 1}`
     else if (currentScene.startsWith('quiz')) {
-      if (wizardMessage.includes("Correct!")) audioToPlay = 'castle3-quiz-correct'
-      else if (wizardMessage.includes("Not quite")) audioToPlay = 'castle3-quiz-incorrect'
-      else audioToPlay = 'castle3-quiz-intro'
-    } else if (currentScene === 'reward') audioToPlay = 'castle3-reward-intro'
+      if (wizardMessage.includes("Splendid!") || wizardMessage.includes("Correct!")) audioToPlay = 'quiz-correct'
+      else if (wizardMessage.includes("Careful") || wizardMessage.includes("Not quite")) audioToPlay = 'quiz-incorrect'
+      else audioToPlay = 'quiz-intro'
+    } else if (currentScene === 'reward') audioToPlay = 'reward-intro'
     
     if (audioToPlay) playNarration(audioToPlay)
 
@@ -350,7 +311,7 @@ export default function Castle3Chapter1Page() {
         }
       }, 400)
     }
-  }, [completedTasks.learnCenter, completedTasks.learnRadius, completedTasks.learnDiameter, completedTasks.learnChord, completedTasks.learnArc, completedTasks.learnSector])
+  }, [completedTasks.learnPoint, completedTasks.learnLineSegment, completedTasks.learnRay, completedTasks.learnLine])
 
   const handleDialogueClick = () => {
     if (autoAdvanceTimeoutRef.current) clearTimeout(autoAdvanceTimeoutRef.current)
@@ -371,18 +332,16 @@ export default function Castle3Chapter1Page() {
       } else {
         setCurrentScene('lesson')
         setMessageIndex(0)
-        setCompletedTasks(prev => ({ ...prev, learnCenter: true }))
+        setCompletedTasks(prev => ({ ...prev, learnPoint: true }))
       }
     } else if (currentScene === 'lesson') {
       if (messageIndex < lessonDialogue.length - 1) {
         setMessageIndex(prev => prev + 1)
         setWizardMessage(lessonDialogue[messageIndex + 1])
         
-        if (messageIndex === 1) setCompletedTasks(prev => ({ ...prev, learnRadius: true }))
-        if (messageIndex === 2) setCompletedTasks(prev => ({ ...prev, learnDiameter: true }))
-        if (messageIndex === 3) setCompletedTasks(prev => ({ ...prev, learnChord: true }))
-        if (messageIndex === 4) setCompletedTasks(prev => ({ ...prev, learnArc: true }))
-        if (messageIndex === 5) setCompletedTasks(prev => ({ ...prev, learnSector: true }))
+        if (messageIndex === 1) setCompletedTasks(prev => ({ ...prev, learnLineSegment: true }))
+        if (messageIndex === 2) setCompletedTasks(prev => ({ ...prev, learnRay: true }))
+        if (messageIndex === 3) setCompletedTasks(prev => ({ ...prev, learnLine: true }))
       } else {
         if (chapterId) {
           try {
@@ -404,25 +363,85 @@ export default function Castle3Chapter1Page() {
     }
   }
 
-  const handlePartClick = async (partType: string) => {
+  const handlePointMouseDown = (pointId: string) => {
+    setIsDragging(true)
+    setDragStart(pointId)
+    if (selectedPoints.length === 0) {
+      setSelectedPoints([pointId])
+    }
+  }
+
+  const handlePointMouseUp = (pointId: string) => {
+    if (isDragging && dragStart && dragStart !== pointId) {
+      setSelectedPoints([dragStart, pointId])
+      checkAnswer([dragStart, pointId])
+    }
+    setIsDragging(false)
+    setDragStart(null)
+    setMousePos(null)
+  }
+
+  const handlePointClick = (pointId: string) => {
+    if (!isDragging) {
+      if (selectedPoints.length === 0) {
+        setSelectedPoints([pointId])
+      } else if (selectedPoints.length === 1 && selectedPoints[0] !== pointId) {
+        const newSelection = [...selectedPoints, pointId]
+        setSelectedPoints(newSelection)
+        checkAnswer(newSelection)
+      }
+    }
+  }
+
+  const handleMouseMove = (e: any) => {
+    if (isDragging && dragStart) {
+      const stage = e.target.getStage()
+      const pos = stage.getPointerPosition()
+      setMousePos(pos)
+    }
+  }
+
+  const checkAnswer = async (points: string[]) => {
     if (!minigame || !minigame.game_config.questions[currentQuestion]) return
     
     const question = minigame.game_config.questions[currentQuestion]
-    setSelectedPart(partType)
     
-    const isCorrect = partType === question.partType
+    // Convert correctAnswer to array if needed
+    const correctAnswer = Array.isArray(question.correctAnswer) 
+      ? question.correctAnswer 
+      : [String(question.correctAnswer)]
     
+    let isCorrect = false
+    
+    if (question.showType === 'ray') {
+      isCorrect = (points[0] === correctAnswer[0] && points[1] === correctAnswer[1])
+    } else if (question.showType === 'line') {
+      isCorrect = (points.includes(correctAnswer[0]) && points.includes(correctAnswer[1]))
+    } else {
+      isCorrect = (points.includes(correctAnswer[0]) && points.includes(correctAnswer[1]))
+    }
+
     if (isCorrect) {
       setIsFeedbackCorrect(true)
-      setMinigameFeedback("Perfect! The ripples have revealed the truth.")
+      
+      let feedbackMessage = ""
+      if (question.showType === 'segment') {
+        feedbackMessage = "Perfect! This Line Segment has endpoints. It doesn't extend beyond them."
+      } else if (question.showType === 'ray') {
+        feedbackMessage = "Excellent! Ray starts at the endpoint and goes forever through the other point."
+      } else if (question.showType === 'line') {
+        feedbackMessage = "Brilliant! Line passes through both points but extends infinitely in both directions!"
+      }
+      
+      setMinigameFeedback(feedbackMessage)
       
       setTimeout(async () => {
         if (currentQuestion < minigame.game_config.questions.length - 1) {
           setCurrentQuestion(prev => prev + 1)
-          setSelectedPart(null)
+          setSelectedPoints([])
           setMinigameFeedback("")
           setIsFeedbackCorrect(null)
-          setWizardMessage("Well done! Now find the next part.")
+          setWizardMessage("Great work! Notice the differences. Now try the next one!")
         } else {
           if (minigame.id) {
             try {
@@ -439,7 +458,7 @@ export default function Castle3Chapter1Page() {
             }
           }
           
-          setWizardMessage("Magnificent! You understand the circle's sacred parts!")
+          setWizardMessage("Excellent! You now understand the key differences!")
           setTimeout(() => {
             setCurrentScene('quiz1')
             setWizardMessage("Now let's test your knowledge!")
@@ -450,253 +469,85 @@ export default function Castle3Chapter1Page() {
       setIsFeedbackCorrect(false)
       setMinigameFeedback("Not quite. " + question.hint)
       setTimeout(() => {
-        setSelectedPart(null)
+        setSelectedPoints([])
         setMinigameFeedback("")
         setIsFeedbackCorrect(null)
       }, 2500)
     }
   }
 
-  const renderCirclePart = (partType: string | undefined, isHighlighted: boolean = false) => {
-    const centerX = stageSize.width / 2
-    const centerY = stageSize.height / 2
-    const radius = 120
-    const color = isHighlighted ? "#FFD700" : "#DAA520"
-    const strokeWidth = isHighlighted ? 4 : 2
+  const getScaledPoints = () => {
+    if (!minigame || !minigame.game_config.questions[currentQuestion]) return []
     
-    const parts: React.ReactElement[] = []
+    const question = minigame.game_config.questions[currentQuestion]
+    if (!question.points) return []
     
-    parts.push(
-      <Circle
-        key="circle-outline"
-        x={centerX}
-        y={centerY}
-        radius={radius}
-        stroke={isHighlighted && partType === 'arc' ? "#FFD700" : "#DAA520"}
-        strokeWidth={isHighlighted && partType === 'arc' ? 5 : 2}
-        listening={partType === 'arc'}
-        onClick={() => partType === 'arc' && handlePartClick('arc')}
+    const scaleX = stageSize.width / 700
+    const scaleY = stageSize.height / 250
+    
+    return question.points.map((p: MinigamePoint) => ({
+      ...p,
+      x: p.x * scaleX,
+      y: p.y * scaleY
+    }))
+  }
+
+  const renderConnection = () => {
+    if (selectedPoints.length !== 2 || !minigame || !minigame.game_config.questions[currentQuestion]) return null
+
+    const question = minigame.game_config.questions[currentQuestion]
+    const scaledPoints = getScaledPoints()
+    const p1 = scaledPoints.find((p: any) => p.id === selectedPoints[0])
+    const p2 = scaledPoints.find((p: any) => p.id === selectedPoints[1])
+    
+    if (!p1 || !p2) return null
+
+    const elements = []
+
+    elements.push(
+      <Line
+        key="main-line"
+        points={[p1.x, p1.y, p2.x, p2.y]}
+        stroke="#66BBFF"
+        strokeWidth={3}
+        lineCap="round"
       />
     )
-    
-    if (partType === 'center' || !partType) {
-      parts.push(
-        <Circle
-          key="center"
-          x={centerX}
-          y={centerY}
-          radius={isHighlighted ? 10 : 6}
-          fill={color}
-          stroke="#FFFACD"
-          strokeWidth={strokeWidth}
-          listening={partType === 'center'}
-          onClick={() => partType === 'center' && handlePartClick('center')}
-          shadowColor={isHighlighted ? "rgba(255, 215, 0, 0.8)" : "rgba(218, 165, 32, 0.5)"}
-          shadowBlur={isHighlighted ? 15 : 5}
+
+    if (question.showType === 'segment') {
+      elements.push(
+        <Circle key="endpoint1" x={p1.x} y={p1.y} radius={6} fill="#66BBFF" />,
+        <Circle key="endpoint2" x={p2.x} y={p2.y} radius={6} fill="#66BBFF" />
+      )
+    } else if (question.showType === 'ray') {
+      elements.push(
+        <Circle key="endpoint-start" x={p1.x} y={p1.y} radius={6} fill="#66BBFF" />,
+        <Arrow
+          key="arrow-end"
+          points={[p1.x, p1.y, p2.x, p2.y]}
+          stroke="#66BBFF"
+          fill="#66BBFF"
+          strokeWidth={3}
+          pointerLength={15}
+          pointerWidth={15}
         />
       )
-      parts.push(
-        <Text
-          key="center-label"
-          x={centerX - 8}
-          y={centerY - 25}
-          text="O"
-          fontSize={16}
-          fill="#FFFACD"
-          fontStyle="bold"
-          listening={false}
-        />
-      )
-    }
-    
-    if (partType === 'radius' || !partType) {
-      parts.push(
-        <Line
-          key="radius"
-          points={[centerX, centerY, centerX + radius, centerY]}
-          stroke={color}
-          strokeWidth={strokeWidth}
-          listening={partType === 'radius'}
-          onClick={() => partType === 'radius' && handlePartClick('radius')}
-          shadowColor={isHighlighted ? "rgba(255, 215, 0, 0.8)" : "transparent"}
-          shadowBlur={isHighlighted ? 10 : 0}
-        />
-      )
-      parts.push(
-        <Text
-          key="radius-label"
-          x={centerX + radius / 2 - 8}
-          y={centerY - 20}
-          text="r"
-          fontSize={14}
-          fill="#FFFACD"
-          fontStyle="italic"
-          listening={false}
-        />
-      )
-      parts.push(
-        <Circle
-          key="radius-end"
-          x={centerX + radius}
-          y={centerY}
-          radius={5}
-          fill={color}
-          listening={false}
+    } else if (question.showType === 'line') {
+      elements.push(
+        <Arrow
+          key="arrow-line"
+          points={[p1.x, p1.y, p2.x, p2.y]}
+          stroke="#66BBFF"
+          fill="#66BBFF"
+          strokeWidth={3}
+          pointerLength={15}
+          pointerWidth={15}
+          pointerAtBeginning={true}
         />
       )
     }
-    
-    if (partType === 'diameter' || !partType) {
-      parts.push(
-        <Line
-          key="diameter"
-          points={[centerX - radius, centerY, centerX + radius, centerY]}
-          stroke={color}
-          strokeWidth={strokeWidth}
-          listening={partType === 'diameter'}
-          onClick={() => partType === 'diameter' && handlePartClick('diameter')}
-          shadowColor={isHighlighted ? "rgba(255, 215, 0, 0.8)" : "transparent"}
-          shadowBlur={isHighlighted ? 10 : 0}
-        />
-      )
-      parts.push(
-        <Circle
-          key="diameter-start"
-          x={centerX - radius}
-          y={centerY}
-          radius={5}
-          fill={color}
-          listening={false}
-        />
-      )
-      parts.push(
-        <Circle
-          key="diameter-end"
-          x={centerX + radius}
-          y={centerY}
-          radius={5}
-          fill={color}
-          listening={false}
-        />
-      )
-      parts.push(
-        <Text
-          key="diameter-label-a"
-          x={centerX - radius - 20}
-          y={centerY - 5}
-          text="A"
-          fontSize={14}
-          fill="#FFFACD"
-          fontStyle="bold"
-          listening={false}
-        />
-      )
-      parts.push(
-        <Text
-          key="diameter-label-b"
-          x={centerX + radius + 10}
-          y={centerY - 5}
-          text="B"
-          fontSize={14}
-          fill="#FFFACD"
-          fontStyle="bold"
-          listening={false}
-        />
-      )
-    }
-    
-    if (partType === 'chord' || !partType) {
-      const chordAngle1 = 30
-      const chordAngle2 = 150
-      const x1 = centerX + radius * Math.cos((chordAngle1 * Math.PI) / 180)
-      const y1 = centerY + radius * Math.sin((chordAngle1 * Math.PI) / 180)
-      const x2 = centerX + radius * Math.cos((chordAngle2 * Math.PI) / 180)
-      const y2 = centerY + radius * Math.sin((chordAngle2 * Math.PI) / 180)
-      
-      parts.push(
-        <Line
-          key="chord"
-          points={[x1, y1, x2, y2]}
-          stroke={color}
-          strokeWidth={strokeWidth}
-          listening={partType === 'chord'}
-          onClick={() => partType === 'chord' && handlePartClick('chord')}
-          shadowColor={isHighlighted ? "rgba(255, 215, 0, 0.8)" : "transparent"}
-          shadowBlur={isHighlighted ? 10 : 0}
-        />
-      )
-      parts.push(
-        <Circle key="chord-p1" x={x1} y={y1} radius={5} fill={color} listening={false} />
-      )
-      parts.push(
-        <Circle key="chord-p2" x={x2} y={y2} radius={5} fill={color} listening={false} />
-      )
-      parts.push(
-        <Text
-          key="chord-label-c"
-          x={x1 + 10}
-          y={y1 - 20}
-          text="C"
-          fontSize={14}
-          fill="#FFFACD"
-          fontStyle="bold"
-          listening={false}
-        />
-      )
-      parts.push(
-        <Text
-          key="chord-label-d"
-          x={x2 - 25}
-          y={y2 - 20}
-          text="D"
-          fontSize={14}
-          fill="#FFFACD"
-          fontStyle="bold"
-          listening={false}
-        />
-      )
-    }
-    
-    if (partType === 'sector' || !partType) {
-      const sectorAngle1 = 200
-      const sectorAngle2 = 280
-      const x1 = centerX + radius * Math.cos((sectorAngle1 * Math.PI) / 180)
-      const y1 = centerY + radius * Math.sin((sectorAngle1 * Math.PI) / 180)
-      const x2 = centerX + radius * Math.cos((sectorAngle2 * Math.PI) / 180)
-      const y2 = centerY + radius * Math.sin((sectorAngle2 * Math.PI) / 180)
-      
-      parts.push(
-        <Group
-          key="sector-group"
-          listening={partType === 'sector'}
-          onClick={() => partType === 'sector' && handlePartClick('sector')}
-        >
-          <Arc
-            x={centerX}
-            y={centerY}
-            innerRadius={0}
-            outerRadius={radius}
-            angle={sectorAngle2 - sectorAngle1}
-            rotation={sectorAngle1}
-            fill={isHighlighted ? "rgba(255, 215, 0, 0.3)" : "rgba(218, 165, 32, 0.2)"}
-            stroke={color}
-            strokeWidth={strokeWidth}
-          />
-          <Line
-            points={[centerX, centerY, x1, y1]}
-            stroke={color}
-            strokeWidth={strokeWidth}
-          />
-          <Line
-            points={[centerX, centerY, x2, y2]}
-            stroke={color}
-            strokeWidth={strokeWidth}
-          />
-        </Group>
-      )
-    }
-    
-    return parts
+
+    return elements
   }
 
   const handleAnswerSelect = async (answer: string, correctAnswer: string, quizNumber: number) => {
@@ -705,13 +556,16 @@ export default function Castle3Chapter1Page() {
     setIsCorrect(correct)
     setShowFeedback(true)
     
+    // Store the answer - create updated answers object immediately
     const updatedAnswers = { ...quizAnswers, [`question${quizNumber}`]: answer }
     setQuizAnswers(updatedAnswers)
     
     if (correct) {
+      // Mark as passed
       setCompletedTasks(prev => ({ ...prev, [`passQuiz${quizNumber}` as keyof typeof completedTasks]: true }))
       setFailedTasks(prev => ({ ...prev, [`passQuiz${quizNumber}` as keyof typeof failedTasks]: false }))
       
+      // Award XP
       const xpKey = `quiz${quizNumber}` as keyof typeof XP_VALUES
       setEarnedXP(prev => ({ ...prev, quiz: prev.quiz + XP_VALUES[xpKey] }))
       setWizardMessage(`Correct! +${XP_VALUES[xpKey]} XP`)
@@ -722,11 +576,12 @@ export default function Castle3Chapter1Page() {
         
         if (quizNumber === 1) {
           setCurrentScene('quiz2')
-          setWizardMessage("Next: Which part is a line segment from the center to any point on the circle?")
+          setWizardMessage("Next challenge: What geometric shape has exactly two endpoints?")
         } else if (quizNumber === 2) {
           setCurrentScene('quiz3')
-          setWizardMessage("Final question: What is the relationship between diameter and radius?")
+          setWizardMessage("Final question: Which shape starts at one point and extends infinitely?")
         } else if (quizNumber === 3) {
+          // Submit all quiz answers with the updated answers including question3
           if (quiz?.id) {
             submitQuizAttempt(quiz.id, updatedAnswers).then(() => {
               setQuizAttempts(prev => prev + 1)
@@ -735,10 +590,11 @@ export default function Castle3Chapter1Page() {
           }
           setCanRetakeQuiz(true)
           setCurrentScene('reward')
-          setWizardMessage("The Pearl of the Center is yours. May it illuminate your journey!")
+          setWizardMessage("The first spark of geometry is yours. Carry it, for it will guide you through the paths ahead.")
         }
       }, 2000)
     } else {
+      // Mark as failed (red)
       setFailedTasks(prev => ({ ...prev, [`passQuiz${quizNumber}` as keyof typeof failedTasks]: true }))
       setWizardMessage("⚠️ Not quite right. Think carefully about the definition.")
       
@@ -746,13 +602,15 @@ export default function Castle3Chapter1Page() {
         setShowFeedback(false)
         setSelectedAnswer(null)
         
+        // Move to next question without awarding XP
         if (quizNumber === 1) {
           setCurrentScene('quiz2')
-          setWizardMessage("Next: Which part is a line segment from the center to any point on the circle?")
+          setWizardMessage("Next challenge: What geometric shape has exactly two endpoints?")
         } else if (quizNumber === 2) {
           setCurrentScene('quiz3')
-          setWizardMessage("Final question: What is the relationship between diameter and radius?")
+          setWizardMessage("Final question: Which shape starts at one point and extends infinitely?")
         } else if (quizNumber === 3) {
+          // Submit quiz attempt even if wrong - use updatedAnswers to include question3
           if (quiz?.id) {
             submitQuizAttempt(quiz.id, updatedAnswers).then(() => {
               setQuizAttempts(prev => prev + 1)
@@ -770,19 +628,21 @@ export default function Castle3Chapter1Page() {
   const handleComplete = async () => {
     if (audioRef.current) audioRef.current.pause()
     
+    // Mark chapter as completed
     if (chapterId) {
       try {
         await completeChapter(chapterId)
-        console.log('[Castle3-Ch1] Chapter marked as completed')
+        console.log('[Chapter1] Chapter marked as completed')
       } catch (error) {
-        console.error('[Castle3-Ch1] Failed to mark chapter as completed:', error)
+        console.error('[Chapter1] Failed to mark chapter as completed:', error)
       }
     }
     
-    router.push('/student/worldmap/castle3')
+    router.push('/student/worldmap/castle1')
   }
 
   const handleRetakeQuiz = () => {
+    // Reset quiz state
     setQuizAnswers({})
     setSelectedAnswer(null)
     setShowFeedback(false)
@@ -791,20 +651,22 @@ export default function Castle3Chapter1Page() {
       passQuiz2: false,
       passQuiz3: false
     })
+    // Reset completed quiz tasks to allow re-attempting
     setCompletedTasks(prev => ({
       ...prev,
       passQuiz1: false,
       passQuiz2: false,
       passQuiz3: false
     }))
+    // Reset quiz XP to 0 for retake
     setEarnedXP(prev => ({ ...prev, quiz: 0 }))
     setCurrentScene('quiz1')
-    setWizardMessage("Let's try the quiz again! What is the center of a circle?")
+    setWizardMessage("Let's try the quiz again! Which shape extends forever in both directions?")
   }
 
   const handleExit = () => {
     if (audioRef.current) audioRef.current.pause()
-    router.push('/student/worldmap/castle3')
+    router.push('/student/worldmap/castle1')
   }
 
   const toggleAutoAdvance = (e: React.MouseEvent) => {
@@ -817,41 +679,14 @@ export default function Castle3Chapter1Page() {
     setIsMuted(!isMuted)
   }
 
-  if (authLoading) {
-    return (
-      <div className={styles.chapterContainer}>
-        <div className={styles.backgroundOverlay}></div>
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', color: 'white', flexDirection: 'column', gap: '1rem' }}>
-          <p>Authenticating...</p>
-        </div>
-      </div>
-    )
-  }
+  const scaledPoints = getScaledPoints()
 
-  if (loadError) {
+  if (loading || !quiz || !minigame) {
     return (
       <div className={styles.chapterContainer}>
         <div className={styles.backgroundOverlay}></div>
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', color: 'white', flexDirection: 'column', gap: '1rem' }}>
-          <p style={{ color: '#ff6b6b' }}>{loadError}</p>
-          <button 
-            onClick={() => router.push('/student/worldmap/castle3')}
-            style={{ padding: '0.5rem 1rem', background: '#4CAF50', border: 'none', borderRadius: '4px', color: 'white', cursor: 'pointer' }}
-          >
-            Return to Castle
-          </button>
-        </div>
-      </div>
-    )
-  }
-
-  if (loading) {
-    return (
-      <div className={styles.chapterContainer}>
-        <div className={styles.backgroundOverlay}></div>
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', color: 'white', flexDirection: 'column', gap: '1rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', color: 'white' }}>
           <p>Loading chapter...</p>
-          <p style={{ fontSize: '0.875rem', opacity: 0.7 }}>Please wait...</p>
         </div>
       </div>
     )
@@ -865,8 +700,8 @@ export default function Castle3Chapter1Page() {
         <div className={styles.chapterInfo}>
           <Sparkles className={styles.titleIcon} />
           <div>
-            <h1 className={styles.chapterTitle}>Chapter 1: The Tide of Shapes</h1>
-            <p className={styles.chapterSubtitle}>Circle Sanctuary • Castle III</p>
+            <h1 className={styles.chapterTitle}>Chapter 1: The Point of Origin</h1>
+            <p className={styles.chapterSubtitle}>The Euclidean Spire • Castle I</p>
           </div>
         </div>
         
@@ -896,18 +731,16 @@ export default function Castle3Chapter1Page() {
           <div className={styles.taskPanelHeader}>
             <span className={styles.taskPanelTitle}>Learning Objectives</span>
             <div className={styles.progressText}>
-              {Object.values(completedTasks).filter(Boolean).length} / 10 Complete
+              {Object.values(completedTasks).filter(Boolean).length} / 8 Complete
             </div>
           </div>
           <div className={styles.taskList} ref={taskListRef}>
             {[
-              { key: 'learnCenter', label: 'Learn: Center' },
-              { key: 'learnRadius', label: 'Learn: Radius' },
-              { key: 'learnDiameter', label: 'Learn: Diameter' },
-              { key: 'learnChord', label: 'Learn: Chord' },
-              { key: 'learnArc', label: 'Learn: Arc' },
-              { key: 'learnSector', label: 'Learn: Sector' },
-              { key: 'completeMinigame', label: 'Complete Ripple Reveal' },
+              { key: 'learnPoint', label: 'Learn: Point' },
+              { key: 'learnLineSegment', label: 'Learn: Line Segment' },
+              { key: 'learnRay', label: 'Learn: Ray' },
+              { key: 'learnLine', label: 'Learn: Line' },
+              { key: 'completeMinigame', label: 'Complete Practice' },
               { key: 'passQuiz1', label: 'Pass Quiz 1' },
               { key: 'passQuiz2', label: 'Pass Quiz 2' },
               { key: 'passQuiz3', label: 'Pass Quiz 3' }
@@ -932,37 +765,37 @@ export default function Castle3Chapter1Page() {
             <div className={styles.sceneContent}>
               <div className={styles.observatoryView}>
                 <div className={styles.doorPreview}>
-                  <h2 className={styles.doorTitle}>The Sacred Pools of Knowledge</h2>
+                  <h2 className={styles.doorTitle}>The Three Paths of Geometry</h2>
                   <div className={styles.doorGrid}>
                     <div className={styles.doorCard}>
                       <div className={styles.doorImageWrapper}>
                         <img 
-                          src="/images/castle3-door1.png" 
+                          src="/images/castle1-door1.png" 
                           alt="Chapter 1" 
                           className={styles.doorImage}
                         />
                       </div>
-                      <span className={styles.doorLabel}>Chapter I: Tide of Shapes</span>
+                      <span className={styles.doorLabel}>Chapter I: Foundations</span>
                     </div>
                     <div className={styles.doorCard}>
                       <div className={styles.doorImageWrapper}>
                         <img 
-                          src="/images/castle3-door2.png" 
+                          src="/images/castle1-door2.png" 
                           alt="Chapter 2" 
                           className={styles.doorImage}
                         />
                       </div>
-                      <span className={styles.doorLabel}>Chapter II: Path of Perimeter</span>
+                      <span className={styles.doorLabel}>Chapter II: Angles</span>
                     </div>
                     <div className={styles.doorCard}>
                       <div className={styles.doorImageWrapper}>
                         <img 
-                          src="/images/castle3-door3.png" 
+                          src="/images/castle1-door3.png" 
                           alt="Chapter 3" 
                           className={styles.doorImage}
                         />
                       </div>
-                      <span className={styles.doorLabel}>Chapter III: Chamber of Space</span>
+                      <span className={styles.doorLabel}>Chapter III: Constructions</span>
                     </div>
                   </div>
                 </div>
@@ -973,86 +806,64 @@ export default function Castle3Chapter1Page() {
           {currentScene === 'lesson' && (
             <div className={styles.lessonContent}>
               <div className={styles.conceptGrid}>
-                <div className={`${styles.conceptCard} ${completedTasks.learnCenter ? styles.revealed : styles.hidden}`}>
-                  <h3>Center (O)</h3>
+                <div className={`${styles.conceptCard} ${completedTasks.learnPoint ? styles.revealed : styles.hidden}`}>
+                  <h3>Point</h3>
                   <div className={styles.visualDemo}>
-                    <svg width="100%" height="100" viewBox="0 0 200 100">
-                      <circle cx="100" cy="50" r="40" fill="none" stroke="#DAA520" strokeWidth="2" />
-                      <circle cx="100" cy="50" r="6" fill="#FFD700" />
-                      <text x="100" y="38" textAnchor="middle" fill="#FFFACD" fontSize="14" fontWeight="bold">O</text>
+                    <svg width="100%" height="80" viewBox="0 0 200 80">
+                      <circle cx="100" cy="40" r="5" fill="#FFD700" />
+                      <text x="100" y="65" textAnchor="middle" fill="#FFD700" fontSize="14">A</text>
                     </svg>
                   </div>
-                  <p>The heart of the circle. All points on the edge are equidistant from it.</p>
+                  <p>A point is a location. It has no size, only position.</p>
                 </div>
                 
-                <div className={`${styles.conceptCard} ${completedTasks.learnRadius ? styles.revealed : styles.hidden}`}>
-                  <h3>Radius (r)</h3>
+                <div className={`${styles.conceptCard} ${completedTasks.learnLineSegment ? styles.revealed : styles.hidden}`}>
+                  <h3>Line Segment</h3>
                   <div className={styles.visualDemo}>
-                    <svg width="100%" height="100" viewBox="0 0 200 100">
-                      <circle cx="100" cy="50" r="40" fill="none" stroke="#DAA520" strokeWidth="2" />
-                      <line x1="100" y1="50" x2="140" y2="50" stroke="#FFD700" strokeWidth="3" />
-                      <circle cx="100" cy="50" r="4" fill="#FFD700" />
-                      <circle cx="140" cy="50" r="4" fill="#FFD700" />
-                      <text x="120" y="42" textAnchor="middle" fill="#FFFACD" fontSize="12" fontStyle="italic">r</text>
+                    <svg width="100%" height="80" viewBox="0 0 200 80">
+                      <line x1="40" y1="40" x2="160" y2="40" stroke="#66BBFF" strokeWidth="3" />
+                      <circle cx="40" cy="40" r="5" fill="#66BBFF" />
+                      <circle cx="160" cy="40" r="5" fill="#66BBFF" />
+                      <text x="40" y="60" textAnchor="middle" fill="#66BBFF" fontSize="14">A</text>
+                      <text x="160" y="60" textAnchor="middle" fill="#66BBFF" fontSize="14">B</text>
                     </svg>
                   </div>
-                  <p>Line from center to any point on the circle.</p>
+                  <p>Two endpoints. Fixed length. AB or BA.</p>
                 </div>
                 
-                <div className={`${styles.conceptCard} ${completedTasks.learnDiameter ? styles.revealed : styles.hidden}`}>
-                  <h3>Diameter (d)</h3>
+                <div className={`${styles.conceptCard} ${completedTasks.learnRay ? styles.revealed : styles.hidden}`}>
+                  <h3>Ray</h3>
                   <div className={styles.visualDemo}>
-                    <svg width="100%" height="100" viewBox="0 0 200 100">
-                      <circle cx="100" cy="50" r="40" fill="none" stroke="#DAA520" strokeWidth="2" />
-                      <line x1="60" y1="50" x2="140" y2="50" stroke="#FFD700" strokeWidth="3" />
-                      <circle cx="60" cy="50" r="4" fill="#FFD700" />
-                      <circle cx="140" cy="50" r="4" fill="#FFD700" />
-                      <text x="58" y="66" textAnchor="middle" fill="#FFFACD" fontSize="12" fontWeight="bold">A</text>
-                      <text x="142" y="66" textAnchor="middle" fill="#FFFACD" fontSize="12" fontWeight="bold">B</text>
+                    <svg width="100%" height="80" viewBox="0 0 200 80">
+                      <defs>
+                        <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                          <polygon points="0 0, 10 3.5, 0 7" fill="#FF6B6B" />
+                        </marker>
+                      </defs>
+                      <line x1="40" y1="40" x2="180" y2="40" stroke="#FF6B6B" strokeWidth="3" markerEnd="url(#arrowhead)" />
+                      <circle cx="40" cy="40" r="5" fill="#FF6B6B" />
+                      <text x="40" y="60" textAnchor="middle" fill="#FF6B6B" fontSize="14">C</text>
                     </svg>
                   </div>
-                  <p>Line through center connecting two edge points. d = 2r</p>
+                  <p>One endpoint. Extends infinitely in one direction.</p>
                 </div>
                 
-                <div className={`${styles.conceptCard} ${completedTasks.learnChord ? styles.revealed : styles.hidden}`}>
-                  <h3>Chord</h3>
+                <div className={`${styles.conceptCard} ${completedTasks.learnLine ? styles.revealed : styles.hidden}`}>
+                  <h3>Line</h3>
                   <div className={styles.visualDemo}>
-                    <svg width="100%" height="100" viewBox="0 0 200 100">
-                      <circle cx="100" cy="50" r="40" fill="none" stroke="#DAA520" strokeWidth="2" />
-                      <line x1="80" y1="26" x2="120" y2="74" stroke="#FFD700" strokeWidth="3" />
-                      <circle cx="80" cy="26" r="4" fill="#FFD700" />
-                      <circle cx="120" cy="74" r="4" fill="#FFD700" />
-                      <text x="78" y="20" textAnchor="middle" fill="#FFFACD" fontSize="12" fontWeight="bold">C</text>
-                      <text x="122" y="88" textAnchor="middle" fill="#FFFACD" fontSize="12" fontWeight="bold">D</text>
+                    <svg width="100%" height="80" viewBox="0 0 200 80">
+                      <defs>
+                        <marker id="arrow-left" markerWidth="10" markerHeight="7" refX="1" refY="3.5" orient="auto">
+                          <polygon points="10 0, 0 3.5, 10 7" fill="#4ECDC4" />
+                        </marker>
+                        <marker id="arrow-right" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                          <polygon points="0 0, 10 3.5, 0 7" fill="#4ECDC4" />
+                        </marker>
+                      </defs>
+                      <line x1="10" y1="40" x2="190" y2="40" stroke="#4ECDC4" strokeWidth="3" markerStart="url(#arrow-left)" markerEnd="url(#arrow-right)" />
                     </svg>
                   </div>
-                  <p>Line connecting two points on the circle (not through center).</p>
-                </div>
-                
-                <div className={`${styles.conceptCard} ${completedTasks.learnArc ? styles.revealed : styles.hidden}`}>
-                  <h3>Arc</h3>
-                  <div className={styles.visualDemo}>
-                    <svg width="100%" height="100" viewBox="0 0 200 100">
-                      <circle cx="100" cy="50" r="40" fill="none" stroke="#DAA520" strokeWidth="2" />
-                      <path d="M 100 10 A 40 40 0 0 1 140 50" fill="none" stroke="#FFD700" strokeWidth="5" />
-                      <circle cx="100" cy="10" r="4" fill="#FFD700" />
-                      <circle cx="140" cy="50" r="4" fill="#FFD700" />
-                    </svg>
-                  </div>
-                  <p>A curved portion of the circle between two points.</p>
-                </div>
-                
-                <div className={`${styles.conceptCard} ${completedTasks.learnSector ? styles.revealed : styles.hidden}`}>
-                  <h3>Sector</h3>
-                  <div className={styles.visualDemo}>
-                    <svg width="100%" height="100" viewBox="0 0 200 100">
-                      <circle cx="100" cy="50" r="40" fill="none" stroke="#DAA520" strokeWidth="2" />
-                      <path d="M 100 50 L 100 10 A 40 40 0 0 1 140 50 Z" fill="rgba(255, 215, 0, 0.3)" stroke="#FFD700" strokeWidth="2" />
-                      <line x1="100" y1="50" x2="100" y2="10" stroke="#FFD700" strokeWidth="2" />
-                      <line x1="100" y1="50" x2="140" y2="50" stroke="#FFD700" strokeWidth="2" />
-                    </svg>
-                  </div>
-                  <p>Pie-shaped region between two radii and an arc.</p>
+                  <p>No endpoints. Extends infinitely in both directions.</p>
                 </div>
               </div>
             </div>
@@ -1067,12 +878,80 @@ export default function Castle3Chapter1Page() {
                 </p>
                 
                 <div className={styles.canvasContainer} ref={canvasContainerRef}>
-                  <Stage width={stageSize.width} height={stageSize.height}>
+                  <Stage
+                    width={stageSize.width}
+                    height={stageSize.height}
+                    onMouseMove={handleMouseMove}
+                    onTouchMove={handleMouseMove}
+                    onMouseUp={() => {
+                      setIsDragging(false)
+                      setDragStart(null)
+                      setMousePos(null)
+                    }}
+                    onTouchEnd={() => {
+                      setIsDragging(false)
+                      setDragStart(null)
+                      setMousePos(null)
+                    }}
+                  >
                     <Layer>
-                      {renderCirclePart(
-                        minigame.game_config.questions[currentQuestion]?.partType,
-                        selectedPart === minigame.game_config.questions[currentQuestion]?.partType
-                      )}
+                      {/* Draw temporary drag line */}
+                      {isDragging && dragStart && mousePos && (() => {
+                        const startPoint = scaledPoints.find((p: any) => p.id === dragStart)
+                        if (startPoint) {
+                          return (
+                            <Line
+                              key="drag-line"
+                              points={[startPoint.x, startPoint.y, mousePos.x, mousePos.y]}
+                              stroke="#66BBFF"
+                              strokeWidth={2}
+                              dash={[10, 5]}
+                              opacity={0.6}
+                            />
+                          )
+                        }
+                        return null
+                      })()}
+                      
+                      {renderConnection()}
+                      
+                      {scaledPoints.map((point: any) => (
+                        <React.Fragment key={point.id}>
+                          <Circle
+                            x={point.x}
+                            y={point.y}
+                            radius={12}
+                            fill={selectedPoints.includes(point.id) ? "#4FC3F7" : "#66BBFF"}
+                            stroke="#E8F4FD"
+                            strokeWidth={3}
+                            onMouseDown={() => handlePointMouseDown(point.id)}
+                            onMouseUp={() => handlePointMouseUp(point.id)}
+                            onTouchStart={() => handlePointMouseDown(point.id)}
+                            onTouchEnd={() => handlePointMouseUp(point.id)}
+                            shadowColor="rgba(102, 187, 255, 0.8)"
+                            shadowBlur={10}
+                            shadowOpacity={0.8}
+                            listening={true}
+                          />
+                          <Text
+                            key={`text-${point.id}`}
+                            x={point.x}
+                            y={point.y + 25}
+                            text={point.label}
+                            fontSize={18}
+                            fontStyle="bold"
+                            fill="#E8F4FD"
+                            align="center"
+                            verticalAlign="middle"
+                            offsetX={9}
+                            offsetY={9}
+                            shadowColor="rgba(0, 0, 0, 0.8)"
+                            shadowBlur={4}
+                            shadowOpacity={1}
+                            listening={false}
+                          />
+                        </React.Fragment>
+                      ))}
                     </Layer>
                   </Stage>
                 </div>
@@ -1170,14 +1049,14 @@ export default function Castle3Chapter1Page() {
               <div className={styles.rewardCard}>
                 <div className={styles.relicDisplay}>
                   <img 
-                    src="/images/pearl-center.png" 
-                    alt="Pearl of the Center" 
+                    src="/images/pointlight-crystal.png" 
+                    alt="Pointlight Crystal" 
                     className={styles.relicIcon}
                   />
                 </div>
-                <h3 className={styles.rewardName}>Pearl of the Center</h3>
+                <h3 className={styles.rewardName}>The Pointlight Crystal</h3>
                 <p className={styles.rewardDescription}>
-                  You have mastered the sacred parts of the circle! The heart of the sanctuary's magic is yours.
+                  You have mastered the foundations of geometry! The first relic of the Euclidean Spire is yours.
                 </p>
               </div>
               <div className={styles.rewardStats}>
@@ -1201,7 +1080,7 @@ export default function Castle3Chapter1Page() {
                   </button>
                 )}
                 <button className={styles.returnButton} onClick={handleComplete}>
-                  Return to Sanctuary
+                  Return to Castle
                   <ChevronRight size={20} />
                 </button>
               </div>
