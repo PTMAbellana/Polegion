@@ -230,6 +230,101 @@ const castle1Chapter2Minigames = [
 ];
 
 // ============================================================================
+// CASTLE 1 - CHAPTER 3 - QUIZZES
+// ============================================================================
+
+const castle1Chapter3Quizzes = [
+    {
+        id: 'c3d4e5f6-7890-abcd-ef01-234567890123',
+        chapter_id: 'c9b7a976-d466-4831-aacf-f8e0476f5153',
+        title: 'Shape Mastery Quiz',
+        description: 'Test your knowledge of geometric shapes',
+        xp_reward: 60,
+        passing_score: 70,
+        time_limit: null,
+        quiz_config: {
+            questions: [
+                {
+                    id: 'q1',
+                    question: 'Which shape has exactly 3 sides?',
+                    options: ['Square', 'Triangle', 'Circle', 'Pentagon'],
+                    correctAnswer: 'Triangle',
+                    points: 20
+                },
+                {
+                    id: 'q2',
+                    question: 'Which shape has 4 equal sides and 4 right angles?',
+                    options: ['Rectangle', 'Triangle', 'Square', 'Circle'],
+                    correctAnswer: 'Square',
+                    points: 20
+                },
+                {
+                    id: 'q3',
+                    question: 'Which shape has no sides and is perfectly round?',
+                    options: ['Triangle', 'Square', 'Circle', 'Rectangle'],
+                    correctAnswer: 'Circle',
+                    points: 20
+                }
+            ]
+        }
+    }
+];
+
+// ============================================================================
+// CASTLE 1 - CHAPTER 3 - MINIGAMES
+// ============================================================================
+
+const castle1Chapter3Minigames = [
+    {
+        id: 'c3d1d2e3-5678-90ab-cdef-123456789012',
+        chapter_id: 'c9b7a976-d466-4831-aacf-f8e0476f5153',
+        title: 'Shape Summoner',
+        description: 'Identify triangles, squares, rectangles, circles, and polygons',
+        game_type: 'interactive',
+        xp_reward: 60,
+        time_limit: null,
+        order_index: 1,
+        game_config: {
+            questions: [
+                {
+                    id: 'mg1',
+                    instruction: 'Identify all TRIANGLES: Shapes with exactly 3 sides and 3 vertices.',
+                    shapes: [
+                        { id: 'S1', type: 'triangle', points: [350, 50, 250, 150, 450, 150], color: '#FFD700', label: 'Shape A' },
+                        { id: 'S2', type: 'square', x: 100, y: 50, size: 100, color: '#66BBFF', label: 'Shape B' },
+                        { id: 'S3', type: 'triangle', points: [550, 100, 500, 180, 600, 180], color: '#FFD700', label: 'Shape C' }
+                    ],
+                    correctAnswer: ['S1', 'S3'],
+                    hint: 'Triangles have 3 straight sides. Look for shapes with three corners!'
+                },
+                {
+                    id: 'mg2',
+                    instruction: 'Identify all RECTANGLES: Shapes with 4 sides, opposite sides equal, and 4 right angles.',
+                    shapes: [
+                        { id: 'S1', type: 'rectangle', x: 150, y: 60, width: 150, height: 100, color: '#66BBFF', label: 'Shape A' },
+                        { id: 'S2', type: 'circle', cx: 400, cy: 110, r: 50, color: '#FF6B6B', label: 'Shape B' },
+                        { id: 'S3', type: 'rectangle', x: 500, y: 80, width: 120, height: 80, color: '#66BBFF', label: 'Shape C' }
+                    ],
+                    correctAnswer: ['S1', 'S3'],
+                    hint: 'Rectangles have 4 right angles with opposite sides equal. Like a stretched square!'
+                },
+                {
+                    id: 'mg3',
+                    instruction: 'Identify the CIRCLE: A round shape with no sides or vertices.',
+                    shapes: [
+                        { id: 'S1', type: 'square', x: 100, y: 70, size: 90, color: '#4ECDC4', label: 'Shape A' },
+                        { id: 'S2', type: 'circle', cx: 350, cy: 120, r: 60, color: '#FF6B6B', label: 'Shape B' },
+                        { id: 'S3', type: 'pentagon', points: [550, 60, 600, 100, 570, 160, 480, 160, 450, 100], color: '#9B59B6', label: 'Shape C' }
+                    ],
+                    correctAnswer: ['S2'],
+                    hint: 'Circles are perfectly round with no corners or straight edges!'
+                }
+            ]
+        }
+    }
+];
+
+// ============================================================================
 // CASTLE 2 - CHAPTER SEED DATA
 // ============================================================================
 
@@ -459,6 +554,112 @@ const castle2Chapter2Minigames = [
                     correctAnswer: 20,
                     unit: 'cm',
                     hint: 'A regular pentagon: 5 sides of 4 cm each'
+                }
+            ]
+        }
+    }
+];
+
+// ============================================================================
+// CASTLE 2 - CHAPTER 3 - QUIZZES
+// ============================================================================
+
+const castle2Chapter3Quizzes = [
+    {
+        id: 'e5f6a7b8-9abc-def0-1234-567890000003',
+        chapter_id: 'e5f6a7b8-9c0d-1e2f-3a4b-5c6d7e8f9a0b',
+        title: 'Area Mastery Quiz',
+        description: 'Test your understanding of area formulas',
+        xp_reward: 100,
+        passing_score: 70,
+        time_limit: null,
+        quiz_config: {
+            questions: [
+                {
+                    id: 'q1',
+                    question: 'What is the area of a rectangle with length 6 cm and width 4 cm?',
+                    options: ['10 cm²', '20 cm²', '24 cm²', '28 cm²'],
+                    correctAnswer: '24 cm²',
+                    points: 20,
+                    hint: 'Area = length × width'
+                },
+                {
+                    id: 'q2',
+                    question: 'What is the area of a square with side length 7 cm?',
+                    options: ['14 cm²', '28 cm²', '49 cm²', '56 cm²'],
+                    correctAnswer: '49 cm²',
+                    points: 30,
+                    hint: 'Area = side × side'
+                },
+                {
+                    id: 'q3',
+                    question: 'What is the area of a triangle with base 10 cm and height 6 cm?',
+                    options: ['16 cm²', '30 cm²', '60 cm²', '20 cm²'],
+                    correctAnswer: '30 cm²',
+                    points: 50,
+                    hint: 'Area = ½ × base × height'
+                }
+            ]
+        }
+    }
+];
+
+// ============================================================================
+// CASTLE 2 - CHAPTER 3 - MINIGAMES
+// ============================================================================
+
+const castle2Chapter3Minigames = [
+    {
+        id: 'f6a7b8c9-0def-1234-5678-900000000003',
+        chapter_id: 'e5f6a7b8-9c0d-1e2f-3a4b-5c6d7e8f9a0b',
+        title: 'Courtyard of Area',
+        description: 'Restore ancient tiles by calculating areas',
+        game_type: 'interactive',
+        xp_reward: 50,
+        time_limit: null,
+        order_index: 1,
+        game_config: {
+            instructions: 'Calculate the area using the correct formula!',
+            questions: [
+                {
+                    id: 'mg1',
+                    instruction: 'Find the area of this rectangle',
+                    shape: 'rectangle',
+                    dimensions: { length: 8, width: 5 },
+                    correctAnswer: 40,
+                    unit: 'cm²',
+                    formula: 'Area = length × width',
+                    hint: '8 × 5 = 40'
+                },
+                {
+                    id: 'mg2',
+                    instruction: 'Find the area of this square',
+                    shape: 'square',
+                    dimensions: { side: 6 },
+                    correctAnswer: 36,
+                    unit: 'cm²',
+                    formula: 'Area = side × side',
+                    hint: '6 × 6 = 36'
+                },
+                {
+                    id: 'mg3',
+                    instruction: 'Find the area of this triangle',
+                    shape: 'triangle',
+                    dimensions: { base: 10, height: 8 },
+                    correctAnswer: 40,
+                    unit: 'cm²',
+                    formula: 'Area = ½ × base × height',
+                    hint: '½ × 10 × 8 = 40'
+                },
+                {
+                    id: 'mg4',
+                    instruction: 'Find the area of this parallelogram',
+                    shape: 'parallelogram',
+                    dimensions: { base: 9, height: 5 },
+                    correctAnswer: 45,
+                    unit: 'cm²',
+                    formula: 'Area = base × height',
+                    hint: '9 × 5 = 45'
                 }
             ]
         }
@@ -911,12 +1112,16 @@ module.exports = {
     castle1Chapter1Minigames,
     castle1Chapter2Quizzes,
     castle1Chapter2Minigames,
+    castle1Chapter3Quizzes,
+    castle1Chapter3Minigames,
     // Castle 2
     castle2Chapters,
     castle2Chapter1Quizzes,
     castle2Chapter1Minigames,
     castle2Chapter2Quizzes,
     castle2Chapter2Minigames,
+    castle2Chapter3Quizzes,
+    castle2Chapter3Minigames,
     // Castle 3
     castle3Chapters,
     castle3Chapter1Quizzes,

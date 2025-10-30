@@ -27,14 +27,34 @@ export interface MinigamePoint {
     label: string
 }
 
+export interface MinigameLine {
+    id: string
+    x1: number
+    y1: number
+    x2: number
+    y2: number
+    label: string
+}
+
 export interface MinigameQuestion {
     id: string
     instruction: string
-    points: MinigamePoint[]
-    correctAnswer: string[]
-    type: string
-    showType: 'segment' | 'ray' | 'line'
-    hint: string
+    points?: MinigamePoint[]
+    lines?: MinigameLine[]
+    shapes?: any[]
+    sides?: number[]
+    dimensions?: any
+    shape?: string
+    correctAnswer: string[] | string | number
+    type?: string
+    showType?: 'segment' | 'ray' | 'line'
+    hint?: string
+    unit?: string
+    formula?: string
+    radius?: number
+    diameter?: number
+    base?: number
+    height?: number
 }
 
 export interface Minigame {

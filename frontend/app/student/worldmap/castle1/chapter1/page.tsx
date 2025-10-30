@@ -406,14 +406,19 @@ export default function Chapter1Page() {
     
     const question = minigame.game_config.questions[currentQuestion]
     
+    // Convert correctAnswer to array if needed
+    const correctAnswer = Array.isArray(question.correctAnswer) 
+      ? question.correctAnswer 
+      : [String(question.correctAnswer)]
+    
     let isCorrect = false
     
     if (question.showType === 'ray') {
-      isCorrect = (points[0] === question.correctAnswer[0] && points[1] === question.correctAnswer[1])
+      isCorrect = (points[0] === correctAnswer[0] && points[1] === correctAnswer[1])
     } else if (question.showType === 'line') {
-      isCorrect = (points.includes(question.correctAnswer[0]) && points.includes(question.correctAnswer[1]))
+      isCorrect = (points.includes(correctAnswer[0]) && points.includes(correctAnswer[1]))
     } else {
-      isCorrect = (points.includes(question.correctAnswer[0]) && points.includes(question.correctAnswer[1]))
+      isCorrect = (points.includes(correctAnswer[0]) && points.includes(correctAnswer[1]))
     }
 
     if (isCorrect) {
@@ -475,6 +480,8 @@ export default function Chapter1Page() {
     if (!minigame || !minigame.game_config.questions[currentQuestion]) return []
     
     const question = minigame.game_config.questions[currentQuestion]
+    if (!question.points) return []
+    
     const scaleX = stageSize.width / 700
     const scaleY = stageSize.height / 250
     

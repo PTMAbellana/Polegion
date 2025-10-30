@@ -173,6 +173,63 @@ class UserChapterProgressService {
             }
         } else {
             console.log(`[UserChapterProgressService] No next chapter to unlock (last chapter or not found)`);
+            
+            // This is the last chapter - check if castle should be marked as completed and unlock next castle
+            console.log(`[UserChapterProgressService] Last chapter completed - checking if all chapters are done`);
+            
+            // Check if all chapters in this castle are completed
+            const allChapterProgress = await Promise.all(
+                sortedChapters.map(ch => this.userChapterProgressRepo.getUserChapterProgressByUserAndChapter(userId, ch.id))
+            );
+            
+            const allCompleted = allChapterProgress.every(prog => prog && prog.completed);
+            console.log(`[UserChapterProgressService] All chapters completed: ${allCompleted}`);
+            
+            if (allCompleted && castleProgress) {
+                // Mark castle as completed
+                await this.userCastleProgressRepo.updateUserCastleProgress(castleProgress.id, {
+                    completed: true
+                });
+                console.log(`[UserChapterProgressService] Castle marked as completed`);
+                
+                // Get the current castle details
+                const CastleRepo = require('../../infrastructure/repository/CastleRepo');
+                const castleRepo = new CastleRepo();
+                const currentCastle = await castleRepo.getCastleById(currentChapter.castleId);
+                
+                if (currentCastle && currentCastle.unlockOrder) {
+                    // Find the next castle by unlock order
+                    const allCastles = await castleRepo.getAllCastles();
+                    const nextCastle = allCastles.find(c => c.unlockOrder === currentCastle.unlockOrder + 1);
+                    
+                    if (nextCastle) {
+                        console.log(`[UserChapterProgressService] Found next castle: ${nextCastle.title} (unlock order: ${nextCastle.unlockOrder})`);
+                        
+                        // Check if user already has progress for next castle
+                        let nextCastleProgress = await this.userCastleProgressRepo.getUserCastleProgressByUserAndCastle(userId, nextCastle.id);
+                        
+                        if (nextCastleProgress) {
+                            // Update existing progress to unlock
+                            await this.userCastleProgressRepo.updateUserCastleProgress(nextCastleProgress.id, {
+                                unlocked: true
+                            });
+                            console.log(`[UserChapterProgressService] Unlocked next castle: ${nextCastle.title}`);
+                        } else {
+                            // Create new progress record for next castle
+                            await this.userCastleProgressRepo.createUserCastleProgress({
+                                user_id: userId,
+                                castle_id: nextCastle.id,
+                                unlocked: true,
+                                completed: false,
+                                total_xp_earned: 0
+                            });
+                            console.log(`[UserChapterProgressService] Created and unlocked next castle: ${nextCastle.title}`);
+                        }
+                    } else {
+                        console.log(`[UserChapterProgressService] No next castle found - this was the final castle`);
+                    }
+                }
+            }
         }
         
         this._invalidateUserChapterProgressCache(progress?.id);
