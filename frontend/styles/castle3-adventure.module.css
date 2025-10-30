@@ -1,0 +1,953 @@
+@import url('https://fonts.googleapis.com/css2?family=UnifrakturMaguntia&family=Cinzel:wght@400;600&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap');
+
+/* CASTLE 3: GOLDEN SHORES THEME
+   Adapted from Castle 1 structure with golden/yellow color scheme */
+
+/* Chapter Selection Page Styles */
+.chapterSelectionContainer {
+  height: 100vh;
+  background-image: url('/images/castles/castle3-background.png');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  position: relative;
+  overflow: hidden;
+  font-family: 'Cinzel', serif;
+  display: flex;
+  flex-direction: column;
+}
+
+.backgroundOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(184, 134, 11, 0.3) 0%,
+    rgba(218, 165, 32, 0.4) 50%,
+    rgba(184, 134, 11, 0.3) 100%
+  );
+  backdrop-filter: blur(1px);
+}
+
+/* Introduction Overlay */
+.introOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(184, 134, 11, 0.95);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  animation: fadeOut 3s ease-in-out forwards;
+}
+
+@keyframes fadeOut {
+  0%, 70% { opacity: 1; }
+  100% { opacity: 0; visibility: hidden; }
+}
+
+.introContent {
+  text-align: center;
+  color: #FFFACD;
+}
+
+.introTitle {
+  font-size: 2.5rem;
+  font-weight: bold;
+  margin-bottom: 0.75rem;
+  text-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+  animation: glow 2s ease-in-out infinite alternate;
+}
+
+@keyframes glow {
+  from { text-shadow: 0 0 20px rgba(255, 215, 0, 0.5); }
+  to { text-shadow: 0 0 30px rgba(255, 215, 0, 1); }
+}
+
+.introText {
+  font-size: 1rem;
+  margin-bottom: 1.5rem;
+  opacity: 0.9;
+}
+
+.introSpinner {
+  width: 35px;
+  height: 35px;
+  border: 3px solid rgba(255, 215, 0, 0.3);
+  border-top: 3px solid #FFD700;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Back Button */
+.backButton {
+  position: fixed;
+  top: 1.5rem;
+  right: 1.5rem;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  z-index: 1000;
+  padding: 0.5rem;
+}
+
+.backButtonContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.backButtonImage {
+  width: 70px;
+  height: 70px;
+  object-fit: contain;
+  transition: transform 0.3s ease, filter 0.3s ease;
+  filter: drop-shadow(0 3px 10px rgba(255, 215, 0, 0.5));
+}
+
+.backButtonText {
+  color: #FFFACD;
+  font-weight: 700;
+  font-size: 0.85rem;
+  text-align: center;
+  white-space: nowrap;
+  text-shadow: 
+    0 2px 4px rgba(0, 0, 0, 0.8),
+    0 0 10px rgba(255, 215, 0, 0.5);
+  transition: all 0.3s ease;
+}
+
+.backButton:hover .backButtonImage {
+  transform: scale(1.15) rotate(-5deg);
+  filter: drop-shadow(0 4px 15px rgba(255, 215, 0, 0.8));
+}
+
+.backButton:hover .backButtonText {
+  color: #FFD700;
+  text-shadow: 
+    0 2px 4px rgba(0, 0, 0, 0.8),
+    0 0 15px rgba(255, 215, 0, 0.8);
+  transform: translateY(-2px);
+}
+
+.backButton:active .backButtonImage {
+  transform: scale(1.1);
+}
+
+.backButton:active .backButtonText {
+  transform: translateY(0);
+}
+
+/* Title Panel */
+.titlePanel {
+  background: rgba(184, 134, 11, 0.8);
+  border: 2px solid #FFD700;
+  border-radius: 12px;
+  padding: 1rem 1.5rem;
+  text-align: center;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+  margin: 1rem auto 0.5rem auto;
+  width: fit-content;
+  min-width: 300px;
+  position: relative;
+  z-index: 10;
+}
+
+.castleTitle h1 {
+  font-family: 'UnifrakturMaguntia', serif;
+  font-size: 1.8rem;
+  color: #FFD700;
+  margin-bottom: 0.15rem;
+  text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+}
+
+.castleSubtitle {
+  color: #F0E68C;
+  font-size: 0.9rem;
+  margin-bottom: 0;
+  margin-top: 0;
+  opacity: 0.8;
+}
+
+.castleTheme {
+  color: #FFFACD;
+  font-size: 0.85rem;
+  margin-top: 0.5rem;
+  font-style: italic;
+  opacity: 0.9;
+}
+
+/* Progress Section */
+.progressSection {
+  margin-top: 0;
+  margin-bottom: 0.75rem;
+}
+
+.progressHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.4rem;
+}
+
+.progressLabel {
+  color: #FFFACD;
+  font-weight: 600;
+  font-size: 0.8rem;
+}
+
+.progressValue {
+  color: #FFD700;
+  font-weight: bold;
+  font-size: 0.8rem;
+}
+
+.progressBar {
+  width: 100%;
+  height: 5px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  background: linear-gradient(90deg, #FFD700, #FFA500);
+  border-radius: 3px;
+  transition: width 0.5s ease;
+  box-shadow: 0 0 8px rgba(255, 215, 0, 0.5);
+}
+
+/* Main Content */
+.mainContent {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+  padding: 0 2rem;
+}
+
+/* Chapter Panel */
+.chapterPanel {
+  background: rgba(184, 134, 11, 0.8);
+  border: 2px solid #FFD700;
+  border-radius: 12px;
+  padding: 1.2rem;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+  width: 100%;
+  max-width: 600px;
+  height: fit-content;
+  max-height: 500px;
+  overflow: hidden;
+}
+
+.chapterHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: #FFD700;
+  font-size: 1rem;
+  font-weight: bold;
+  margin-bottom: 0.75rem;
+  text-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
+}
+
+.chapterIcon {
+  color: #FFD700;
+  width: 18px;
+  height: 18px;
+}
+
+.chapterList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-bottom: 1rem;
+  overflow-x: visible;
+}
+
+/* Chapter Item */
+.chapterItem {  
+  background: rgba(139, 90, 0, 0.4);
+  border: 2px solid rgba(255, 215, 0, 0.3);
+  border-radius: 12px;
+  padding: 0.8rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  gap: 0.8rem;
+  position: relative;
+  min-height: 90px;
+  max-height: 100px;
+}
+
+.chapterItem:hover:not(.locked) {
+  background: rgba(255, 215, 0, 0.1);
+  border-left-color: #FFD700;
+  border-left-width: 4px;
+  transform: translateX(4px);
+}
+
+.chapterItem.selected {
+  background: rgba(255, 215, 0, 0.15);
+  border-left-color: #FFD700;
+  border-left-width: 4px;
+  box-shadow: 0 0 12px rgba(255, 215, 0, 0.3);
+}
+
+.chapterItem.locked {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: transparent;
+}
+
+.chapterItem.completed {
+  border-left-color: #4CAF50;
+  background: rgba(76, 175, 80, 0.05);
+}
+
+.chapterItem.completed .chapterTitle {
+  color: #4CAF50;
+}
+
+.chapterIconContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  background: rgba(255, 215, 0, 0.2);
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.chapterEmoji {
+  font-size: 1rem;
+}
+
+.lockIcon {
+  color: #999;
+  width: 14px;
+  height: 14px;
+}
+
+.completedIcon {
+  color: #4CAF50;
+  width: 14px;
+  height: 14px;
+}
+
+/* Chapter Content */
+.chapterContent {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  min-width: 0;
+  justify-content: center;
+}
+
+.chapterTitle {
+  color: #FFFACD;
+  font-size: clamp(0.85rem, 1.1vw, 0.95rem);
+  margin: 0;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  line-height: 1.2;
+}
+
+.chapterObjective {
+  color: #FFD700;
+  font-size: clamp(0.75rem, 0.95vw, 0.85rem);
+  margin: 0;
+  opacity: 0.9;
+  font-style: italic;
+}
+
+/* Chapter Status */
+.chapterStatus {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.rewardBadge {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  background: rgba(76, 175, 80, 0.2);
+  padding: 0.3rem 0.6rem;
+  border-radius: 15px;
+  border: 1px solid #4CAF50;
+}
+
+.rewardBadge span {
+  color: #4CAF50;
+  font-size: clamp(0.7rem, 0.85vw, 0.75rem);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.rewardBadge svg {
+  color: #FFD700;
+  width: 16px;
+  height: 16px;
+}
+
+.chapterArrow {
+  color: #FFD700;
+  width: 20px;
+  height: 20px;
+  transition: transform 0.3s ease;
+}
+
+.chapterItem:hover .chapterArrow {
+  transform: translateX(3px);
+}
+
+/* Action Section */
+.actionSection {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  justify-content: center;
+  padding: 1.5rem 2rem 2rem 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.startButton {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: linear-gradient(135deg, #FFD700 0%, #FFA500 50%, #FF8C00 100%);
+  color: white;
+  border: none;
+  padding: 1rem 2.5rem;
+  border-radius: 30px;
+  font-size: 1.15rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 
+    0 4px 15px rgba(255, 215, 0, 0.4),
+    0 0 20px rgba(255, 215, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  min-width: 280px;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+/* Animated gradient effect */
+.startButton::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.3),
+    transparent
+  );
+  transition: left 0.5s ease;
+}
+
+.startButton:hover::before {
+  left: 100%;
+}
+
+.startButton:hover:not(.disabled) {
+  background: linear-gradient(135deg, #FFA500 0%, #FF8C00 50%, #FFD700 100%);
+  box-shadow: 
+    0 6px 25px rgba(255, 215, 0, 0.6),
+    0 0 30px rgba(255, 215, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  transform: translateY(-3px) scale(1.02);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+.startButton:active:not(.disabled) {
+  transform: translateY(-1px) scale(0.98);
+  box-shadow: 
+    0 3px 15px rgba(255, 215, 0, 0.5),
+    0 0 20px rgba(255, 215, 0, 0.3);
+}
+
+.startButton.disabled {
+  background: linear-gradient(135deg, #666 0%, #888 50%, #666 100%);
+  cursor: not-allowed;
+  opacity: 0.6;
+  box-shadow: 
+    0 2px 8px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  transform: none;
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.startButton.disabled:hover {
+  transform: none;
+}
+
+/* Icon animations */
+.sparkleIcon {
+  animation: sparkle 2s ease-in-out infinite;
+}
+
+@keyframes sparkle {
+  0%, 100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.2) rotate(180deg);
+    opacity: 0.8;
+  }
+}
+
+.arrowIcon {
+  transition: transform 0.3s ease;
+}
+
+.startButton:hover:not(.disabled) .arrowIcon {
+  transform: translateX(5px);
+  animation: pulse 1s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: translateX(5px);
+  }
+  50% {
+    transform: translateX(8px);
+  }
+}
+
+/* Glow effect on hover */
+.startButton:hover:not(.disabled) {
+  animation: buttonGlow 1.5s ease-in-out infinite;
+}
+
+@keyframes buttonGlow {
+  0%, 100% {
+    box-shadow: 
+      0 6px 25px rgba(255, 215, 0, 0.6),
+      0 0 30px rgba(255, 215, 0, 0.4),
+      inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  }
+  50% {
+    box-shadow: 
+      0 8px 30px rgba(255, 215, 0, 0.8),
+      0 0 40px rgba(255, 215, 0, 0.6),
+      inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  }
+}
+
+/* Wizard Container */
+.wizardContainer {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.wizardCard {
+  background: rgba(184, 134, 11, 0.8);
+  border: 2px solid #FFD700;
+  border-radius: 15px;
+  padding: 1.5rem;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+  text-align: center;
+  width: 100%;
+  max-width: 320px;
+}
+
+.wizardAvatar {
+  position: relative;
+  width: 160px;
+  height: 160px;
+  margin: 0 auto 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.castleImageCircle {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+  box-shadow: 0 8px 20px rgba(255, 215, 0, 0.4);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 4px solid rgba(255, 255, 255, 0.2);
+  z-index: 1;
+  transition: transform 0.3s ease;
+}
+
+.wizardImageCircle {
+  position: absolute;
+  bottom: -10px;
+  right: -10px;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #FFA500 0%, #FF8C00 100%);
+  box-shadow: 0 6px 15px rgba(255, 165, 0, 0.4);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  z-index: 2;
+  transition: transform 0.3s ease;
+}
+
+.castleImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.wizardImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.wizardEmoji {
+  font-size: 3.5rem;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.wizardEmojiSmall {
+  font-size: 2.5rem;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.hidden {
+  display: none;
+}
+
+.wizardAvatar:hover .castleImageCircle {
+  transform: scale(1.05);
+}
+
+.wizardAvatar:hover .wizardImageCircle {
+  transform: scale(1.1);
+}
+
+.wizardName {
+  color: #FFD700;
+  font-size: 1.3rem;
+  margin: 0 0 0.5rem 0;
+  font-weight: 600;
+  text-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+}
+
+.wizardQuote {
+  color: #FFFACD;
+  font-size: 0.85rem;
+  font-style: italic;
+  margin: 0 0 1rem 0;
+  opacity: 0.9;
+  line-height: 1.4;
+}
+
+.wizardStats {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.wizardStat {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #F0E68C;
+  font-size: 0.85rem;
+  justify-content: center;
+}
+
+.statIcon {
+  color: #FFD700;
+  width: 18px;
+  height: 18px;
+}
+
+.chapterTooltip {
+  min-width: 300px;
+  max-width: 400px;
+  width: max-content;
+  background: rgba(184, 134, 11, 0.95);
+  backdrop-filter: blur(15px);
+  border: 2px solid #FFD700;
+  border-radius: 15px;
+  padding: 1.25rem;
+  box-shadow: 0 10px 30px rgba(255, 215, 0, 0.4);
+  pointer-events: none;
+  animation: tooltipSlideIn 0.2s ease;
+}
+
+.chapterTooltip p {
+  margin: 0 0 1rem 0;
+  color: #FFFACD;
+  line-height: 1.6;
+  word-wrap: break-word;
+  white-space: normal;
+  font-size: 0.9rem;
+}
+
+.tooltipTopics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.topicTag {
+  display: inline-block;
+  padding: 0.35rem 0.75rem;
+  background: rgba(255, 215, 0, 0.2);
+  border: 1px solid rgba(255, 215, 0, 0.4);
+  border-radius: 12px;
+  font-size: 0.85rem;
+  color: #FFD700;
+  white-space: nowrap;
+  font-weight: 600;
+}
+
+@keyframes tooltipSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Particles Effect */
+.particlesContainer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.particle {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  background: rgba(255, 215, 0, 0.5);
+  border-radius: 50%;
+  animation: float linear infinite;
+  opacity: 0.3;
+}
+
+@keyframes float {
+  0% {
+    transform: translateY(100vh) scale(0);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.3;
+  }
+  90% {
+    opacity: 0.3;
+  }
+  100% {
+    transform: translateY(-10vh) scale(1);
+    opacity: 0;
+  }
+}
+
+/* Loading and Error States */
+.loading_container,
+.error_container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background: linear-gradient(135deg, rgba(184, 134, 11, 0.95) 0%, rgba(139, 90, 0, 0.95) 100%);
+  color: #FFFACD;
+  text-align: center;
+  padding: 2rem;
+}
+
+.error_container h2 {
+  color: #FFD700;
+  margin-bottom: 1rem;
+  font-size: 1.8rem;
+}
+
+.error_container p {
+  color: #F0E68C;
+  margin-bottom: 1.5rem;
+  font-size: 1rem;
+}
+
+.errorButton {
+  background: linear-gradient(135deg, #FFD700, #FFA500);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 20px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 3px 10px rgba(255, 215, 0, 0.3);
+}
+
+.errorButton:hover {
+  background: linear-gradient(135deg, #FFA500, #FF8C00);
+  box-shadow: 0 5px 18px rgba(255, 215, 0, 0.4);
+  transform: translateY(-2px);
+}
+
+/* Responsive Design */
+@media (max-width: 1400px) {
+  .mainContent {
+    padding: 0 1.5rem 1rem 1.5rem;
+    gap: 1.5rem;
+  }
+  
+  .chapterPanel {
+    width: 580px;
+  }
+}
+
+@media (max-width: 1200px) {
+  .mainContent {
+    flex-direction: column;
+    align-items: center;
+    padding: 0 1.5rem;
+  }
+
+  .chapterPanel {
+    max-width: 100%;
+    width: 100%;
+  }
+
+  .wizardCard {
+    max-width: 100%;
+    width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .chapterSelectionContainer {
+    height: auto;
+    min-height: 100vh;
+  }
+  
+  .mainContent {
+    flex-direction: column;
+    padding: 0.5rem;
+    gap: 1rem;
+    height: auto;
+  }
+  
+  .titlePanel {
+    min-width: auto;
+    width: 90%;
+    margin: 0.5rem auto;
+  }
+  
+  .chapterPanel {
+    width: 100%;
+    max-width: 400px;
+    max-height: none;
+  }
+  
+  .wizardCard {
+    max-width: 250px;
+  }
+  
+  .chapterItem {
+    flex-direction: row;
+    text-align: left;
+    gap: 0.6rem;
+  }
+  
+  .backButton {
+    top: 0.75rem;
+    right: 0.75rem;
+    padding: 0.4rem 0.8rem;
+  }
+
+  .startButton {
+    min-width: 200px;
+    font-size: 1rem;
+    padding: 0.75rem 1.5rem;
+  }
+}
+
+.chapterNumber {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+  border-radius: 50%;
+  font-size: 0.85rem;
+  font-weight: 900;
+  color: white;
+  box-shadow: 0 3px 12px rgba(255, 215, 0, 0.5);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  border: 2px solid rgba(255, 255, 255, 0.5);
+}
+
+/* Make it glow on hover */
+.chapterItem:hover .chapterNumber {
+  box-shadow: 0 4px 16px rgba(255, 215, 0, 0.7);
+  transform: scale(1.1);
+  transition: all 0.3s ease;
+}

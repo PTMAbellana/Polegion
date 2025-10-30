@@ -1,0 +1,41 @@
+{
+  "name": "frontend",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@hookform/resolvers": "^5.0.1",
+    "@supabase/supabase-js": "^2.50.0",
+    "autoprefixer": "^10.4.21",
+    "axios": "^1.9.0",
+    "axios-cache-interceptor": "^1.8.3",
+    "bootstrap": "^5.3.6",
+    "canvas": "^3.1.2",
+    "lucide-react": "^0.508.0",
+    "next": "15.3.2",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "react-hook-form": "^7.56.3",
+    "react-hot-toast": "^2.5.2",
+    "react-icons": "^5.5.0",
+    "react-konva": "^19.0.7",
+    "sweetalert2": "^11.21.0",
+    "yup": "^1.6.1"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3",
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "20.17.47",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "15.3.2",
+    "tailwindcss": "^4",
+    "typescript": "5.8.3"
+  }
+}

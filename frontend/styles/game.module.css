@@ -1,0 +1,514 @@
+/* Add to your global CSS or create game.module.css */
+.gameContainer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  overflow: hidden;
+  z-index: 1000;
+}
+
+/* Full-screen game layout */
+.gameContainer .root {
+  height: 100vh;
+  width: 100vw;
+  padding: 0;
+  margin: 0;
+}
+
+/* Hide dashboard elements in game mode */
+.gameContainer .header,
+.gameContainer .leaderboard-sidebar {
+  display: none;
+}
+
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  color: #4a5568;
+}
+
+.loadingText {
+  margin-top: 1rem;
+  font-size: 1.1rem;
+  font-weight: 500;
+}
+
+.errorContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background: linear-gradient(135deg, #fc466b 0%, #3f5efb 100%);
+  color: white;
+}
+
+.errorContent {
+  text-align: center;
+  padding: 2rem;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  backdrop-filter: blur(10px);
+}
+
+.errorContent h2 {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+}
+
+.errorContent p {
+  font-size: 1.1rem;
+  margin-bottom: 2rem;
+  opacity: 0.9;
+}
+
+.errorContent button {
+  padding: 0.75rem 1.5rem;
+  background: white;
+  color: #3f5efb;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.errorContent button:hover {
+  transform: translateY(-2px);
+}
+
+.gameOverlay {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  right: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  pointer-events: none;
+  z-index: 1001;
+}
+
+.gameInfo {
+  background: rgba(255, 255, 255, 0.95);
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  backdrop-filter: blur(10px);
+}
+
+.competitionTitle {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #2d3748;
+  margin-bottom: 0.25rem;
+}
+
+.problemNumber {
+  font-size: 0.8rem;
+  color: #4a5568;
+  font-weight: 500;
+}
+
+.connectionStatus {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(0, 0, 0, 0.8);
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  color: white;
+}
+
+.connectionDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  transition: background-color 0.3s;
+}
+
+.connected {
+  background-color: #10b981;
+}
+
+.disconnected {
+  background-color: #ef4444;
+  animation: pulse 2s infinite;
+}
+
+.connectionText {
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.pauseOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  backdrop-filter: blur(5px);
+}
+
+.pauseContent {
+  background: white;
+  padding: 3rem;
+  border-radius: 20px;
+  text-align: center;
+  max-width: 500px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+
+.pauseIcon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+}
+
+.pauseContent h2 {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+  color: #2d3748;
+}
+
+.pauseContent p {
+  font-size: 1.2rem;
+  color: #4a5568;
+  margin-bottom: 2rem;
+}
+
+.pausedTimer {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #667eea;
+  font-family: 'Courier New', monospace;
+}
+
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.5; }
+  100% { opacity: 1; }
+}
+
+/* Hide dashboard elements when in full-screen game mode */
+.gameContainer :global(.header),
+.gameContainer :global(.leaderboard-sidebar),
+.gameContainer :global(.dashboard-section) {
+  display: none !important;
+}
+
+/* Make game interface fill the screen */
+.gameContainer :global(.root) {
+  height: 100vh !important;
+  width: 100vw !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+/* Game-specific responsive design */
+@media (max-width: 768px) {
+  .gameOverlay {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .gameInfo {
+    align-self: flex-start;
+  }
+  
+  .connectionStatus {
+    align-self: flex-end;
+  }
+}
+
+/* Add these to game.module.css */
+
+/* Enhanced Error Container */
+.errorActions {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+  justify-content: center;
+}
+
+.errorButton {
+  background: #4f46e5;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background 0.2s ease;
+}
+
+.errorButton:hover {
+  background: #4338ca;
+}
+
+/* Enhanced Loading */
+.loadingDetails {
+  margin-top: 16px;
+  font-size: 14px;
+  color: #666;
+  line-height: 1.5;
+}
+
+/* Floating Controls */
+.floatingControls {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1000;
+}
+
+.floatingReturnButton {
+  background: rgba(16, 185, 129, 0.9);
+  color: white;
+  border: none;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  font-size: 20px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+.floatingReturnButton:hover {
+  background: rgba(5, 150, 105, 0.9);
+  transform: scale(1.1);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+}
+
+/* Enhanced Game Overlay */
+.roomInfo {
+  font-size: 12px;
+  color: #888;
+  margin-top: 4px;
+}
+
+/* Completion Actions */
+.completionActions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 24px;
+  width: 100%;
+}
+
+.viewResultsButton {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  padding: 14px 24px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.viewResultsButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+}
+
+.returnToRoomButton {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  border: none;
+  padding: 14px 24px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.returnToRoomButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(16, 185, 129, 0.3);
+  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+}
+
+.buttonIcon {
+  font-size: 18px;
+}
+
+/* Pause Actions */
+.pauseActions {
+  margin-top: 24px;
+}
+
+.pauseReturnButton {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.pauseReturnButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(16, 185, 129, 0.3);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .floatingControls {
+    top: 10px;
+    right: 10px;
+  }
+  
+  .floatingReturnButton {
+    width: 44px;
+    height: 44px;
+    font-size: 18px;
+  }
+  
+  .completionActions {
+    flex-direction: column;
+  }
+}
+
+/* ✅ Rubik's Cube Loading Animation */
+.rubiksCube {
+  position: relative;
+  width: 80px;
+  height: 80px;
+  margin: 0 auto;
+  transform-style: preserve-3d;
+  animation: rotateCube 3s infinite linear;
+}
+
+@keyframes rotateCube {
+  0% {
+    transform: rotateX(0deg) rotateY(0deg);
+  }
+  25% {
+    transform: rotateX(90deg) rotateY(0deg);
+  }
+  50% {
+    transform: rotateX(90deg) rotateY(90deg);
+  }
+  75% {
+    transform: rotateX(0deg) rotateY(90deg);
+  }
+  100% {
+    transform: rotateX(0deg) rotateY(0deg);
+  }
+}
+
+.face {
+  position: absolute;
+  width: 80px;
+  height: 80px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  gap: 2px;
+  padding: 4px;
+  box-sizing: border-box;
+}
+
+.face.front {
+  transform: translateZ(40px);
+}
+
+.face.back {
+  transform: translateZ(-40px) rotateY(180deg);
+}
+
+.face.right {
+  transform: rotateY(90deg) translateZ(40px);
+}
+
+.face.left {
+  transform: rotateY(-90deg) translateZ(40px);
+}
+
+.face.top {
+  transform: rotateX(90deg) translateZ(40px);
+}
+
+.face.bottom {
+  transform: rotateX(-90deg) translateZ(40px);
+}
+
+.square {
+  border-radius: 2px;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+}
+
+.square.red {
+  background-color: #dc2626;
+}
+
+.square.orange {
+  background-color: #ea580c;
+}
+
+.square.yellow {
+  background-color: #facc15;
+}
+
+.square.green {
+  background-color: #16a34a;
+}
+
+.square.blue {
+  background-color: #2563eb;
+}
+
+.square.white {
+  background-color: #f8fafc;
+}
+
+/* Loading Container */
+.loadingContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  font-family: 'Inter', sans-serif;
+}
+
+.loadingContent {
+  text-align: center;
+  background: white;
+  padding: 40px;
+  border-radius: 16px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  max-width: 400px;
+  width: 90%;
+}
+
+/* Remove old spinner styles if they exist */
+.spinner {
+  display: none;
+}

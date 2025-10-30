@@ -1,0 +1,644 @@
+@import url('https://fonts.googleapis.com/css2?family=UnifrakturMaguntia&family=Cinzel:wght@400;600&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap');
+
+/* Chapter Selection Page Styles */
+.chapterSelectionContainer {
+  height: 100vh; /* Fixed height instead of min-height */
+  background-image: url('/images/castle4-background.png');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  position: relative;
+  overflow: hidden;
+  font-family: 'Cinzel', serif;
+  display: flex;
+  flex-direction: column;
+}
+
+.backgroundOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(16, 35, 70, 0.3) 0%,
+    rgba(44, 24, 63, 0.4) 50%,
+    rgba(16, 35, 70, 0.3) 100%
+  );
+  backdrop-filter: blur(1px);
+}
+
+/* Introduction Overlay */
+.introOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(16, 35, 70, 0.95);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  animation: fadeOut 3s ease-in-out forwards;
+}
+
+@keyframes fadeOut {
+  0%, 70% { opacity: 1; }
+  100% { opacity: 0; visibility: hidden; }
+}
+
+.introContent {
+  text-align: center;
+  color: #E8F4FD;
+}
+
+.introTitle {
+  font-size: 2.5rem; /* Reduced from 3rem */
+  font-weight: bold;
+  margin-bottom: 0.75rem; /* Reduced from 1rem */
+  text-shadow: 0 0 20px rgba(102, 187, 255, 0.8);
+  animation: glow 2s ease-in-out infinite alternate;
+}
+
+@keyframes glow {
+  from { text-shadow: 0 0 20px rgba(102, 187, 255, 0.5); }
+  to { text-shadow: 0 0 30px rgba(102, 187, 255, 1); }
+}
+
+.introText {
+  font-size: 1rem; /* Reduced from 1.2rem */
+  margin-bottom: 1.5rem; /* Reduced from 2rem */
+  opacity: 0.9;
+}
+
+.introSpinner {
+  width: 35px; /* Reduced from 40px */
+  height: 35px;
+  border: 3px solid rgba(102, 187, 255, 0.3);
+  border-top: 3px solid #66BBFF;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Back Button */
+.backButton {
+  position: fixed;
+  top: 1.5rem;
+  right: 1.5rem;
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.backButtonImage {
+  height: clamp(70px, 8vw, 100px);
+  width: auto;
+  transition: all 0.3s ease;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.5)) drop-shadow(0 0 10px rgba(205, 164, 94, 0.4));
+}
+
+.backButtonText {
+  color: #E8F4FD;
+  font-size: clamp(0.8rem, 1vw, 0.9rem);
+  font-weight: 600;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6), 0 0 8px rgba(205, 164, 94, 0.3);
+  opacity: 0.9;
+  transition: all 0.3s ease;
+}
+
+.backButton:hover .backButtonImage {
+  transform: scale(1.1);
+  filter: drop-shadow(0 6px 12px rgba(205, 164, 94, 0.8));
+}
+
+.backButton:hover .backButtonText {
+  opacity: 1;
+  text-shadow: 0 2px 8px rgba(205, 164, 94, 0.8);
+}
+
+/* Title Panel - Positioned at top - COMPACT */
+.titlePanel {
+  background: rgba(16, 35, 70, 0.8);
+  border: 2px solid #66BBFF;
+  border-radius: 12px; /* Reduced from 15px */
+  padding: 1rem 1.5rem; /* Reduced from 1.5rem */
+  text-align: center;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3); /* Reduced shadow */
+  margin: 1rem auto 0.5rem auto; /* Reduced margins */
+  width: fit-content;
+  min-width: 300px; /* Reduced from 350px */
+  position: relative;
+  z-index: 10;
+}
+
+.castleTitle h1 {
+  font-family: 'UnifrakturMaguntia', serif;
+  font-size: 1.8rem; /* Reduced from 2.2rem */
+  color: #66BBFF;
+  margin-bottom: 0.15rem; /* Reduced from 0.25rem */
+  text-shadow: 0 0 10px rgba(102, 187, 255, 0.5);
+}
+
+.castleSubtitle {
+  color: #B8D4F0;
+  font-size: 0.9rem; /* Reduced from 1rem */
+  margin-bottom: 0;
+  margin-top: 0;
+  opacity: 0.8;
+}
+
+/* Progress Section */
+.progressSection {
+  margin-top: 0;
+  margin-bottom: 0.75rem; /* Reduced from 1rem */
+}
+
+.progressHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.4rem; /* Reduced from 0.5rem */
+}
+
+.progressLabel {
+  color: #E8F4FD;
+  font-weight: 600;
+  font-size: 0.8rem; /* Reduced from 0.9rem */
+}
+
+.progressValue {
+  color: #66BBFF;
+  font-weight: bold;
+  font-size: 0.8rem; /* Reduced from 0.9rem */
+}
+
+.progressBar {
+  width: 100%;
+  height: 5px; /* Reduced from 6px */
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  background: linear-gradient(90deg, #66BBFF, #4FC3F7);
+  border-radius: 3px;
+  transition: width 0.5s ease;
+  box-shadow: 0 0 8px rgba(102, 187, 255, 0.5);
+}
+
+/* Main Content - Horizontal Layout - COMPACT */
+.mainContent {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center; /* Changed to center */
+  flex: 1;
+  padding: 0 2rem 1rem 2rem; /* Reduced padding */
+  gap: 2rem; /* Reduced from 3rem */
+  max-width: 1200px; /* Reduced from 1400px */
+  margin: 0 auto;
+  width: 100%;
+  height: calc(100vh - 120px); /* Fixed height calculation */
+}
+
+/* Wizard Container - Right Side - CENTERED */
+.wizardContainer {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  height: 100%; /* Take full height of parent */
+}
+
+.wizardImage {
+  width: 270px; /* Reduced from 200px */
+  height: auto;
+  filter: drop-shadow(0 12px 20px rgba(0, 0, 0, 0.4)); /* Reduced shadow */
+  animation: wizardFloat 4s ease-in-out infinite;
+}
+
+@keyframes wizardFloat {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-12px); } /* Reduced from -15px */
+}
+
+/* Chapter Panel - Compact Left Side - OPTIMIZED */
+.chapterPanel {
+  background: rgba(16, 35, 70, 0.8);
+  border: 2px solid #66BBFF;
+  border-radius: 12px;
+  padding: 1.2rem;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+  width: 620px; /* Increased from 520px */
+  height: fit-content;
+  max-height: calc(100vh - 140px); /* Ensure it fits in viewport */
+}
+
+.chapterHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem; /* Reduced from 0.5rem */
+  color: #66BBFF;
+  font-size: 1rem; /* Reduced from 1.1rem */
+  font-weight: bold;
+  margin-bottom: 0.75rem; /* Reduced from 1rem */
+  text-shadow: 0 0 5px rgba(102, 187, 255, 0.5);
+}
+
+.chapterIcon {
+  color: #66BBFF;
+  width: 18px; /* Reduced from 20px */
+  height: 18px;
+}
+
+.chapterList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem; /* Reduced from 0.5rem */
+  margin-bottom: 1rem; /* Reduced from 1.5rem */
+}
+
+/* Chapter Item - More Compact */
+.chapterItem {
+  background: rgba(44, 24, 63, 0.4);
+  border: 2px solid rgba(102, 187, 255, 0.3);
+  border-radius: 12px;
+  padding: 0.8rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  gap: 0.8rem;
+  position: relative;
+  min-height: 90px;
+  max-height: 100px;
+}
+
+.chapterItem:hover:not(.locked) {
+  background: rgba(102, 187, 255, 0.1);
+  border-left-color: #66BBFF;
+  border-left-width: 4px;
+  transform: translateX(4px); /* Reduced from 5px */
+}
+
+.chapterItem.selected {
+  background: rgba(102, 187, 255, 0.15);
+  border-left-color: #66BBFF;
+  border-left-width: 4px;
+  box-shadow: 0 0 12px rgba(102, 187, 255, 0.3); /* Reduced shadow */
+}
+
+.chapterItem.locked {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: transparent;
+}
+
+.chapterItem.completed {
+  border-left-color: #4CAF50;
+  background: rgba(76, 175, 80, 0.05);
+}
+
+.chapterItem.completed .chapterTitle {
+  color: #4CAF50;
+}
+
+.chapterIconContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px; /* Reduced from 35px */
+  height: 30px;
+  background: rgba(102, 187, 255, 0.2);
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.chapterEmoji {
+  font-size: 1rem; /* Reduced from 1.2rem */
+}
+
+.lockIcon {
+  color: #999;
+  width: 14px; /* Reduced from 16px */
+  height: 14px;
+}
+
+.completedIcon {
+  color: #4CAF50;
+  width: 14px; /* Reduced from 16px */
+  height: 14px;
+}
+
+/* Chapter Content - Simplified */
+.chapterContent {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  min-width: 0;
+  justify-content: center;
+}
+
+.chapterTitle {
+  color: #E8F4FD;
+  font-size: clamp(0.85rem, 1.1vw, 0.95rem);
+  margin: 0;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  line-height: 1.2;
+}
+
+.chapterObjective {
+  color: #66BBFF;
+  font-size: clamp(0.75rem, 0.95vw, 0.85rem);
+  margin: 0;
+  opacity: 0.9;
+  font-style: italic;
+}
+
+/* Action Section */
+.actionSection {
+  display: flex;
+  justify-content: center;
+}
+
+.startButton {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem; /* Reduced from 0.5rem */
+  background: linear-gradient(135deg, #66BBFF, #4FC3F7);
+  color: white;
+  border: none;
+  padding: 0.6rem 1.2rem; /* Reduced from 0.75rem 1.5rem */
+  border-radius: 18px; /* Reduced from 20px */
+  font-size: 0.9rem; /* Reduced from 1rem */
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 3px 10px rgba(102, 187, 255, 0.3); /* Reduced shadow */
+}
+
+.startButton:hover:not(.disabled) {
+  background: linear-gradient(135deg, #4FC3F7, #29B6F6);
+  box-shadow: 0 5px 18px rgba(102, 187, 255, 0.4); /* Reduced shadow */
+  transform: translateY(-1px); /* Reduced from -2px */
+}
+
+.startButton.disabled {
+  background: #666;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* Particles Effect - REDUCED */
+.particlesContainer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.particle {
+  position: absolute;
+  width: 2px; /* Reduced from 3px */
+  height: 2px;
+  background: rgba(102, 187, 255, 0.5); /* Reduced opacity */
+  border-radius: 50%;
+  animation: float linear infinite;
+  opacity: 0.3; /* Reduced from 0.4 */
+}
+
+@keyframes float {
+  0% {
+    transform: translateY(100vh) scale(0);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.3; /* Reduced from 0.4 */
+  }
+  90% {
+    opacity: 0.3;
+  }
+  100% {
+    transform: translateY(-10vh) scale(1);
+    opacity: 0;
+  }
+}
+
+/* Chapter Status */
+.chapterStatus {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.rewardBadge {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  background: rgba(76, 175, 80, 0.2);
+  padding: 0.3rem 0.6rem;
+  border-radius: 15px;
+  border: 1px solid #4CAF50;
+}
+
+.rewardBadge span {
+  color: #4CAF50;
+  font-size: clamp(0.7rem, 0.85vw, 0.75rem);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.rewardBadge svg {
+  color: #FFD700;
+  width: 16px;
+  height: 16px;
+}
+
+.chapterArrow {
+  color: #66BBFF;
+  width: 20px;
+  height: 20px;
+  transition: transform 0.3s ease;
+}
+
+.chapterItem:hover .chapterArrow {
+  transform: translateX(3px);
+}
+
+/* Tooltip - Better Positioning */
+.chapterTooltip {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(16, 35, 70, 0.95);
+  border: 2px solid #66BBFF;
+  border-radius: 10px;
+  padding: 0.6rem 0.8rem;
+  margin-bottom: 0.5rem;
+  z-index: 100;
+  white-space: normal;
+  max-width: 320px; /* Increased from 280px */
+  width: max-content;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
+  animation: tooltipAppear 0.3s ease;
+}
+
+@keyframes tooltipAppear {
+  from { opacity: 0; transform: translateX(-50%) translateY(-5px); }
+  to { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+.chapterTooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-top: 8px solid #66BBFF;
+}
+
+.chapterTooltip p {
+  color: #E8F4FD;
+  font-size: clamp(0.75rem, 0.9vw, 0.8rem);
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* Responsive Design - OPTIMIZED */
+@media (max-width: 1400px) {
+  .mainContent {
+    padding: 0 1.5rem 1rem 1.5rem;
+    gap: 1.5rem;
+  }
+  
+  .chapterPanel {
+    width: 580px; /* Adjusted */
+  }
+}
+
+@media (max-width: 1200px) {
+  .mainContent {
+    padding: 0 1rem 1rem 1rem;
+    gap: 1.5rem;
+  }
+  
+  .chapterPanel {
+    width: 540px; /* Adjusted */
+  }
+  
+  .wizardImage {
+    width: 140px;
+  }
+}
+
+@media (max-width: 768px) {
+  .chapterSelectionContainer {
+    height: auto;
+    min-height: 100vh;
+  }
+  
+  .mainContent {
+    flex-direction: column;
+    padding: 0.5rem;
+    gap: 1rem;
+    height: auto;
+  }
+  
+  .titlePanel {
+    min-width: auto;
+    width: 90%;
+    margin: 0.5rem auto;
+  }
+  
+  .chapterPanel {
+    width: 100%;
+    max-width: 400px;
+    max-height: none;
+  }
+  
+  .chapterItem {
+    flex-direction: row;
+    text-align: left;
+    gap: 0.6rem;
+  }
+  
+  .chapterTitle {
+    white-space: normal;
+  }
+  
+  .chapterObjective {
+    white-space: normal;
+  }
+  
+  .backButton {
+    top: 0.75rem;
+    right: 0.75rem;
+    padding: 0.4rem 0.8rem;
+  }
+  
+  .wizardImage {
+    width: 100px;
+  }
+  
+  .chapterTooltip {
+    max-width: 250px;
+  }
+}
+
+@media (max-width: 480px) {
+  .mainContent {
+    padding: 0.25rem;
+  }
+  
+  .introTitle {
+    font-size: 1.8rem;
+  }
+  
+  .castleTitle h1 {
+    font-size: 1.4rem;
+  }
+  
+  .chapterPanel {
+    padding: 0.8rem;
+  }
+  
+  .chapterTitle {
+    font-size: 0.8rem;
+  }
+  
+  .chapterTooltip {
+    max-width: 200px;
+  }
+}

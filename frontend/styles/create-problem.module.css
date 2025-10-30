@@ -1,0 +1,1669 @@
+.root {
+  width: 100vw;
+  height: 100vh;
+  background: #f6f6f6;
+  overflow-x: hidden;
+  overflow-y: auto;
+  position: relative;
+  box-sizing: border-box;
+  padding-left: 60px;
+}
+
+/* Flexible grid layout for the workspace */
+.scalableWorkspace {
+  display: grid;
+  grid-template-columns: 280px 1fr 320px;
+  grid-template-rows: auto auto 1fr auto;
+  grid-template-areas:
+    "sidebar header rightSidebar"
+    "sidebar prompt rightSidebar"
+    "sidebar main rightSidebar"
+    "sidebar controls rightSidebar";
+  gap: 20px;
+  width: 100vw;
+  min-height: 100vh;
+  background: #fff;
+  box-sizing: border-box;
+  padding: 0px 20px 8px 20px;
+  overflow-x: hidden;
+}
+
+.mainColumn {
+  width: 100%;
+  max-width: 1000px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Difficulty box (header) */
+.difficultyBox {
+  width: 100%;
+  grid-area: header;
+  height: 64px;
+  background: #8FFFC2;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Poppins';
+  font-size: 24px;
+  font-weight: 500;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+  user-select: none;
+  transition: background 0.2s;
+  position: relative;
+  margin-bottom: 16px;
+}
+
+.difficultyText {
+  color: #2c514c;
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 600;
+  font-size: 24px;
+  line-height: 36px;
+  text-align: center;
+}
+
+.difficultyDropdownMenu {
+  width: 100%;
+  border-radius: 0 0 20px 20px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+  overflow: hidden;
+  margin-bottom: 0;
+}
+
+.difficultyDropdownItem {
+  padding: 14px 0;
+  text-align: center;
+  font-size: 20px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.difficultyDropdownItem:hover {
+  filter: brightness(0.95);
+}
+
+/* Main Area */
+.mainArea {
+  grid-area: main;
+  width: 100%;
+  min-height: 400px;
+  background: #6d8a72; /* ✅ Keep the green background */
+  border-radius: 20px;
+  margin: 0 auto;
+  position: relative;
+  overflow: hidden;
+  /* ✅ Remove any padding that might interfere */
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.mainAreaHeader {
+  user-select: none; 
+  width: 100%;
+  height: 48px; /* ✅ Exact height for calculations */
+  background: #2c514c;
+  border-radius: 20px 20px 0 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-family: 'Poppins', sans-serif;
+  font-size: 24px;
+  font-weight: 600;
+  /* ✅ Remove margin */
+  margin: 0;
+  /* ✅ Ensure it doesn't shrink */
+  flex-shrink: 0;
+}
+
+/* Buttons */
+.saveBtn, .addTimerBtn, .addHintBtn, .limitedAttemptsBtn, .setVisibilityBtn {
+  background: #fabc60;
+  border-radius: 20px;
+  font-family: 'Poppins';
+  font-size: 24px;
+  color: #000;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background 0.2s;
+  min-width: 160px;
+  min-height: 56px;
+  padding: 0 32px;
+  margin: 0;
+  box-sizing: border-box;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+.limitedAttemptsBtn,
+.addTimerBtn,
+.addHintBtn,
+.setVisibilityBtn {
+  font-size: 0.9rem;
+  font-weight: normal;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+.saveBtn:hover,
+.addTimerBtn:hover,
+.addHintBtn:hover,
+.limitedAttemptsBtn:hover,
+.setVisibilityBtn:hover {
+  background: #f9a825;
+}
+
+.saveBtnFloating {
+  position: absolute;
+  bottom: 24px;
+  right: 24px;
+  z-index: 20;
+}
+
+.hintInput {
+  min-width: 160px;
+  min-height: 36px;
+  padding: 0 16px;
+  margin: 0 8px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 0.9rem;
+}
+
+/* ✅ TOOLBOX STYLES */
+.toolbox {
+  margin-top: 8px;
+  grid-area: sidebar;
+  background: #6d8a72;
+  border-radius: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  height: 540px;
+  transition: margin-top 0.3s cubic-bezier(0.4,0,0.2,1), height 0.3s cubic-bezier(0.4,0,0.2,1);
+  box-sizing: border-box;
+  overflow: hidden; /* Hide scrollbar */
+}
+
+.toolboxHeader {
+  user-select: none; 
+  width: 100%;
+  height: 53px;
+  background: #2c514c;
+  border-radius: 20px 20px 0 0;
+  margin-bottom: 16px;
+  color: #fff;
+  font-family: 'Poppins', sans-serif;
+  font-size: 24px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ✅ Single Column Layout Styles */
+.toolboxSingleColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 16px;
+  height: 100%;
+  overflow-y: auto;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+/* Hide scrollbar for webkit browsers (Chrome, Safari, Opera) */
+.toolboxSingleColumn::-webkit-scrollbar {
+  display: none;
+}
+
+.toolboxSection {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.sectionHeader {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #fff;
+  text-align: center;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #e3dcc2;
+  margin-bottom: 8px;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+/* ✅ Shapes Grid - 2x2 layout */
+.shapesGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 8px;
+  aspect-ratio: 1;
+  width: 100%;
+  max-width: 200px;
+  margin: 0 auto;
+}
+
+.shapesGrid > div {
+  aspect-ratio: 1;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+/* ✅ UPDATED SHAPE STYLES - Remove all box backgrounds and borders */
+.toolboxCircle,
+.toolboxSquare,
+.toolboxTriangle {
+  background: transparent; /* Remove background */
+  border: none; /* Remove border */
+  border-radius: 0; /* Remove border radius */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: visible; /* Allow content to show outside */
+  cursor: pointer;
+  padding: 8px; /* Add some padding for better click area */
+}
+
+.toolboxCircle:hover,
+.toolboxSquare:hover,
+.toolboxTriangle:hover {
+  background: rgba(255, 255, 255, 0.1); /* Very subtle hover background */
+  border-radius: 8px; /* Only show rounded corners on hover */
+}
+
+.toolboxCircle.selected,
+.toolboxSquare.selected,
+.toolboxTriangle.selected {
+  background: rgba(255, 255, 255, 0.2); /* Subtle selected background */
+  border-radius: 8px; /* Only show rounded corners when selected */
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.3); /* White glow instead of green */
+}
+
+.toolboxCircle svg,
+.toolboxSquare svg,
+.toolboxTriangle svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* Update empty slot to be more subtle too */
+.emptyShapeSlot {
+  border: 2px dashed rgba(255, 255, 255, 0.3); /* More subtle border */
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.emptyShapeSlot:hover {
+  border-color: rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.plusIcon {
+  font-size: 1.5rem;
+  color: rgba(255, 255, 255, 0.6);
+  font-weight: bold;
+}
+
+.shapeLimitIndicator {
+  text-align: center;
+  color: #ff6b35;
+  font-size: 0.8rem;
+  padding: 6px 8px;
+  background: rgba(255, 107, 53, 0.1);
+  border-radius: 4px;
+  border: 1px solid rgba(255, 107, 53, 0.3);
+  margin-top: 8px;
+}
+
+.propertiesToggle {
+  padding: 8px 0;
+  display: flex;
+  justify-content: center;
+}
+
+.filtersContainer {
+  flex: 1;
+  overflow-y: auto;
+  max-height: 200px;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+.filtersContainer::-webkit-scrollbar {
+  display: none;
+}
+
+/* Go Back */
+.goBackGroup {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.arrowLeft {
+  width: 48px;
+  height: 48px;
+  border-radius: 20px 20px 0 0;
+  border: none;
+  background: #d9d9d9;
+  font-size: 32px;
+  cursor: pointer;
+}
+
+.goBackText {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 400;
+  font-size: 24px;
+  line-height: 36px;
+  color: #000;
+}
+
+/* Problem Prompt */
+.promptGroup {
+  grid-area: prompt;
+  width: 100%;
+  min-height: 100px;
+  margin-bottom: 0px;
+}
+
+.promptBox {
+  background: #d9d9d9;
+  border-radius: 16px;
+  padding: 16px 20px;
+  height: 100px;
+  min-height: 100px;
+  max-height: 100px;
+  overflow: auto;
+  width: 100%;
+  box-sizing: border-box;
+  font-family: 'Poppins', sans-serif;
+  font-size: 24px;
+  font-weight: 300;
+  color: #000;
+  transition: background 0.2s;
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+.promptText {
+  height: 100%;
+  min-height: 100px;
+  max-height: 100px;
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 300;
+  font-size: 24px;
+  line-height: 36px;
+  color: #000;
+  display: block;
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  overflow: auto;
+  resize: none;
+  text-overflow: ellipsis;
+}
+
+.promptTextarea {
+  width: 100%;
+  height: 100%;
+  font-family: 'Poppins';
+  font-size: 24px;
+  font-weight: 300;
+  color: #000;
+  background: transparent;
+  border: none;
+  outline: none;
+  resize: none;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.controlsRow {
+  grid-area: controls;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 24px;
+  margin-top: 24px;
+  margin-bottom: 16px;
+}
+
+/* ✅ IMPROVED FILTERS STYLING */
+
+/* Empty State */
+.filtersEmptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 16px;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.7);
+  min-height: 120px;
+}
+
+.emptyStateIcon {
+  font-size: 2.5rem;
+  margin-bottom: 12px;
+  opacity: 0.8;
+}
+
+.emptyStateText {
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin: 0;
+}
+
+/* Quick Actions Row */
+.quickActions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 16px;
+  padding: 0 4px;
+}
+
+.quickActionBtn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-height: 36px;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+.quickActionBtn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.3);
+  transform: translateY(-1px);
+}
+
+.quickActionBtn:active {
+  transform: translateY(0);
+}
+
+.showAllBtn:hover {
+  background: rgba(76, 175, 80, 0.2);
+  border-color: rgba(76, 175, 80, 0.4);
+}
+
+.hideAllBtn:hover {
+  background: rgba(244, 67, 54, 0.2);
+  border-color: rgba(244, 67, 54, 0.4);
+}
+
+.btnIcon {
+  font-size: 1rem;
+}
+
+.btnText {
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.activeCount {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.countBadge {
+  background: #4CAF50;
+  color: white;
+  font-size: 0.7rem;
+  font-weight: bold;
+  padding: 4px 8px;
+  border-radius: 12px;
+  min-width: 20px;
+  text-align: center;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+/* Filter Sections */
+.filterSections {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.filterSection {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.2s ease;
+}
+
+.filterSection:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.globalSection {
+  border-left: 3px solid #2196F3;
+}
+
+.squareSection {
+  border-left: 3px solid #FF9800;
+}
+
+.triangleSection {
+  border-left: 3px solid #9C27B0;
+}
+
+.circleSection {
+  border-left: 3px solid #E91E63;
+}
+
+/* Section Header */
+.filterSectionHeader {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background: transparent;
+  border: none;
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+}
+
+.filterSectionHeader:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.filterSectionHeader.expanded {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.sectionIcon {
+  font-size: 1.1rem;
+  width: 20px;
+  text-align: center;
+}
+
+.sectionTitle {
+  flex: 1;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.expandIcon {
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.7);
+  transition: transform 0.2s ease;
+}
+
+.filterSectionHeader.expanded .expandIcon {
+  transform: rotate(0deg);
+}
+
+/* Section Content */
+.filterSectionContent {
+  padding: 0 16px 16px 16px;
+  background: rgba(0, 0, 0, 0.1);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.filterOption {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 12px;
+  padding: 8px 0;
+}
+
+.filterOption:last-child {
+  margin-bottom: 0;
+}
+
+.optionDescription {
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.6);
+  margin-left: 24px;
+  font-style: italic;
+}
+
+/* ✅ IMPROVED TOGGLE SWITCH STYLES */
+
+.toggleSwitchContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 8px 0;
+}
+
+.toggleSwitchContainer.disabled {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.toggleSwitchMain {
+  display: flex;
+  align-items: center;
+}
+
+.toggleSwitchLabel {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.2s ease;
+  padding: 4px;
+  border-radius: 8px;
+}
+
+.toggleSwitchLabel:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.toggleSwitchInput {
+  display: none;
+}
+
+/* ✅ Toggle Slider */
+.toggleSwitchSlider {
+  position: relative;
+  display: flex;
+  align-items: center;
+  border-radius: 20px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* ✅ Toggle Orb */
+.toggleSwitchOrb {
+  position: absolute;
+  background: white;
+  border-radius: 50%;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+/* ✅ Size Variants */
+.size-small.toggleSwitchSlider {
+  width: 40px;
+  height: 20px;
+  background: #ccc;
+}
+
+.size-small .toggleSwitchOrb {
+  width: 16px;
+  height: 16px;
+  left: 2px;
+}
+
+.size-small.checked .toggleSwitchOrb {
+  left: 22px;
+}
+
+.size-medium.toggleSwitchSlider {
+  width: 50px;
+  height: 24px;
+  background: #ccc;
+}
+
+.size-medium .toggleSwitchOrb {
+  width: 20px;
+  height: 20px;
+  left: 2px;
+}
+
+.size-medium.checked .toggleSwitchOrb {
+  left: 28px;
+}
+
+.size-large.toggleSwitchSlider {
+  width: 60px;
+  height: 30px;
+  background: #ccc;
+}
+
+.size-large .toggleSwitchOrb {
+  width: 26px;
+  height: 26px;
+  left: 2px;
+}
+
+.size-large.checked .toggleSwitchOrb {
+  left: 32px;
+}
+
+/* ✅ Color Variants */
+.color-blue.toggleSwitchSlider.checked {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  box-shadow: 0 0 20px rgba(102, 126, 234, 0.3);
+}
+
+.color-green.toggleSwitchSlider.checked {
+  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+  box-shadow: 0 0 20px rgba(76, 175, 80, 0.3);
+}
+
+.color-purple.toggleSwitchSlider.checked {
+  background: linear-gradient(135deg, #9C27B0 0%, #7B1FA2 100%);
+  box-shadow: 0 0 20px rgba(156, 39, 176, 0.3);
+}
+
+.color-orange.toggleSwitchSlider.checked {
+  background: linear-gradient(135deg, #FF9800 0%, #F57C00 100%);
+  box-shadow: 0 0 20px rgba(255, 152, 0, 0.3);
+}
+
+/* ✅ Toggle Text */
+.toggleSwitchText {
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 500;
+  flex: 1;
+  transition: color 0.2s ease;
+}
+
+.toggleSwitchLabel:hover .toggleSwitchText {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* ✅ Description */
+.toggleSwitchDescription {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.6);
+  margin-left: 62px;
+  font-style: italic;
+  line-height: 1.3;
+}
+
+/* ✅ Hover Effects */
+.toggleSwitchSlider:hover {
+  transform: scale(1.02);
+}
+
+.toggleSwitchSlider:active {
+  transform: scale(0.98);
+}
+
+.toggleSwitchOrb:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* ✅ Focus States */
+.toggleSwitchLabel:focus-within {
+  outline: 2px solid rgba(255, 255, 255, 0.3);
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+
+/* ✅ Animation on State Change */
+.toggleSwitchSlider.checked .toggleSwitchOrb {
+  animation: toggleBounce 0.3s ease;
+}
+
+@keyframes toggleBounce {
+  0% { transform: translateY(-50%) scale(1); }
+  50% { transform: translateY(-50%) scale(1.1); }
+  100% { transform: translateY(-50%) scale(1); }
+}
+
+/* Popup Styles */
+.popupOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.popupBox {
+  background: white;
+  padding: 24px 32px;
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+  text-align: center;
+}
+
+.okButton {
+  margin-top: 16px;
+  padding: 8px 20px;
+  font-weight: bold;
+  background: #1e90ff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+.okButton:hover {
+  background: #0e70d1;
+}
+
+/* Simple Title Input */
+.input {
+  width: 100%;
+  background: #d9d9d9;
+  border: none;
+  border-radius: 16px;
+  padding: 16px 20px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 24px;
+  font-weight: 300;
+  color: #000;
+  outline: none;
+  box-sizing: border-box;
+  height: 60px;
+}
+
+.input::placeholder {
+  color: #666;
+  font-weight: 300;
+}
+
+.formRow {
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+/* Existing Problems Section - Right Sidebar */
+.problemsSection {
+  grid-area: rightSidebar;
+  background: #6d8a72;
+  border-radius: 20px;
+  padding: 0;
+  width: 100%;
+  min-width: 200px;
+  max-width: 255px;
+  min-height: 400px;
+  max-height: calc(100vh - 120px);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+  position: sticky;
+  top: 24px;
+  box-sizing: border-box;
+}
+
+.problemsSectionHeader {
+  width: 100%;
+  height: 53px;
+  background: #2c514c;
+  border-radius: 20px 20px 0 0;
+  color: #fff;
+  font-family: 'Poppins', sans-serif;
+  font-size: 20px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.problemsContent {
+  flex: 1;
+  padding: 16px 12px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+
+.problemList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.problemItem {
+  background: #fff;
+  border-radius: 12px;
+  padding: 12px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  transition: all 0.2s ease;
+  position: relative;
+  border: 2px solid transparent;
+  box-sizing: border-box;
+  min-width: 0;
+  min-height: 80px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.problemItem:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+  border-color: #2c514c;
+}
+
+.problemItemHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.problemTitle {
+  flex: 1;
+  font-weight: 600;
+  color: #2c3e50;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.buttonGroup {
+  display: flex;
+  gap: 4px;
+}
+
+.editButton {
+  background: linear-gradient(135deg, #3498db, #2980b9);
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(52, 152, 219, 0.2);
+  min-width: 50px;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+.editButton:hover {
+  background: linear-gradient(135deg, #2980b9, #1f4e79);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(52, 152, 219, 0.3);
+}
+
+.deleteButton {
+  background: linear-gradient(135deg, #e74c3c, #c0392b);
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(231, 76, 60, 0.2);
+  min-width: 60px;
+}
+
+.deleteButton:hover {
+  background: linear-gradient(135deg, #c0392b, #a93226);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(231, 76, 60, 0.3);
+}
+
+.problemDetails {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+
+.problemDifficulty {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 10px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  color: #2c514c;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  flex-shrink: 0;
+}
+
+.problemVisibility {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 10px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  color: #666;
+  background: #f0f0f0;
+  text-transform: capitalize;
+  flex-shrink: 0;
+}
+
+.problemVisibility.show {
+  background: #e8f5e8;
+  color: #2e7d32;
+}
+
+.problemVisibility.hide {
+  background: #ffebee;
+  color: #c62828;
+}
+
+.problemMeta {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.problemAttempts,
+.problemXp {
+  font-family: 'Poppins', sans-serif;
+  font-size: 10px;
+  color: #666;
+  background: #f8f8f8;
+  padding: 2px 5px;
+  border-radius: 6px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.noProblems {
+  text-align: center;
+  color: #fff;
+  font-family: 'Poppins', sans-serif;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+}
+
+.noProblemsIcon {
+  font-size: 48px;
+  margin-bottom: 16px;
+  opacity: 0.8;
+}
+
+.noProblemsText {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.noProblemsSubtext {
+  font-size: 14px;
+  opacity: 0.8;
+}
+
+/* Dropdown States */
+.dropdownActive .limitedAttemptsBtn,
+.dropdownActive .addTimerBtn,
+.dropdownActive .addHintBtn,
+.dropdownActive .setVisibilityBtn {
+  border-radius: 0 !important;
+}
+
+.dropdownActive .difficultyBox {
+  border-top-left-radius: 20px !important;
+  border-top-right-radius: 20px !important;
+  border-bottom-left-radius: 0 !important;
+  border-bottom-right-radius: 0 !important;
+  margin-bottom: 0 !important;
+}
+
+.dropdownActive .difficultyDropdownMenu {
+  border-top-left-radius: 0 !important;
+  border-top-right-radius: 0 !important;
+}
+
+.dropdownActive .toolbox {
+  margin-top: 64px;
+  height: 300px !important;
+}
+
+/* Pause Overlay */
+.pauseOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  backdrop-filter: blur(5px);
+}
+
+.pauseContent {
+  background: white;
+  padding: 3rem;
+  border-radius: 20px;
+  text-align: center;
+  max-width: 500px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+
+.pauseIcon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+}
+
+.pauseContent h2 {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+  color: #2d3748;
+}
+
+.pauseContent p {
+  font-size: 1.2rem;
+  color: #4a5568;
+  margin-bottom: 2rem;
+}
+
+.pausedTimer {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #667eea;
+  font-family: 'Courier New', monospace;
+}
+
+/* Responsive Design */
+@media (max-width: 1400px) {
+  .scalableWorkspace {
+    grid-template-columns: 260px 1fr 300px;
+    gap: 16px;
+    padding: 0px 16px 8px 16px;
+  }
+  
+  .problemsSection {
+    max-width: 300px;
+    min-width: 280px;
+  }
+}
+
+@media (max-width: 1200px) {
+  .scalableWorkspace {
+    grid-template-columns: 240px 1fr 280px;
+    gap: 12px;
+    padding: 0px 12px 8px 12px;
+  }
+  
+  .problemsSection {
+    max-width: 280px;
+    min-width: 260px;
+  }
+
+  .toolboxSingleColumn {
+    gap: 16px;
+    padding: 12px;
+  }
+  
+  .shapesGrid {
+    max-width: 180px;
+  }
+}
+
+@media (max-width: 900px) {
+  .scalableWorkspace {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "header"
+      "sidebar"
+      "prompt"
+      "main"
+      "rightSidebar"
+      "controls";
+    gap: 16px;
+    padding: 0 4vw 8px 4vw;
+  }
+  
+  .mainColumn, .toolbox {
+    max-width: 100%;
+    width: 100%;
+  }
+  
+  .mainArea {
+    min-width: 0;
+    width: 100%;
+    min-height: 240px;
+    border-radius: 16px;
+  }
+  
+  .toolbox {
+    transition: margin-top 0.3s cubic-bezier(0.4,0,0.2,1), height 0.3s cubic-bezier(0.4,0,0.2,1);
+    min-width: 0;
+    width: 100%;
+    height: auto;
+    margin-bottom: 16px;
+    border-radius: 16px;
+    padding: 12px 0;
+  }
+  
+  .difficultyBox {
+    font-size: 18px;
+    height: 48px;
+    border-radius: 16px;
+  }
+  
+  .saveBtn, .addTimerBtn, .addHintBtn, .limitedAttemptsBtn, .setVisibilityBtn {
+    min-width: 100px;
+    min-height: 36px;
+    font-size: 1rem;
+    padding: 0 10px;
+    border-radius: 12px;
+  }
+  
+  .controlsRow {
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+  }
+  
+  .promptBox, .promptText, .promptTextarea {
+    font-size: 18px;
+    min-height: 60px;
+    max-height: 60px;
+    height: 60px;
+  }
+  
+  .problemsSection {
+    border-radius: 16px;
+    min-height: 250px;
+    max-height: 400px;
+    position: static;
+    max-width: 100%;
+    min-width: 0;
+  }
+  
+  .problemsSectionHeader {
+    height: 48px;
+    font-size: 18px;
+    border-radius: 16px 16px 0 0;
+  }
+
+  .quickActions {
+    flex-direction: column;
+    gap: 6px;
+  }
+  
+  .quickActionBtn {
+    width: 100%;
+    justify-content: center;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+  }
+  
+  .filterSectionHeader {
+    padding: 10px 12px;
+    font-size: 0.8rem;
+  }
+  
+  .filterSectionContent {
+    padding: 0 12px 12px 12px;
+  }
+  
+  .sectionTitle {
+    font-size: 0.8rem;
+  }
+  
+  .optionDescription {
+    font-size: 0.65rem;
+    margin-left: 20px;
+  }
+
+  .toggleSwitchLabel {
+    gap: 10px;
+  }
+  
+  .toggleSwitchText {
+    font-size: 0.8rem;
+  }
+  
+  .toggleSwitchDescription {
+    font-size: 0.7rem;
+    margin-left: 52px;
+  }
+}
+
+@media (max-width: 768px) {
+  .toolboxSingleColumn {
+    gap: 12px;
+    padding: 8px;
+  }
+  
+  .shapesGrid {
+    max-width: 160px;
+  }
+  
+  .sectionHeader {
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .scalableWorkspace {
+    padding: 0 2vw 4px 2vw;
+    gap: 8px;
+  }
+  
+  .mainAreaHeader {
+    font-size: 14px;
+    height: 32px;
+    border-radius: 12px 12px 0 0;
+  }
+  
+  .difficultyBox {
+    font-size: 14px;
+    height: 40px;
+    border-radius: 12px;
+  }
+  
+  .saveBtn, .addTimerBtn, .addHintBtn, .limitedAttemptsBtn, .setVisibilityBtn {
+    min-width: 70px;
+    min-height: 28px;
+    font-size: 0.9rem;
+    padding: 0 4px;
+    border-radius: 8px;
+  }
+  
+  .toolbox {
+    border-radius: 12px;
+    padding: 6px 0;
+  }
+  
+  .promptBox, .promptText, .promptTextarea {
+    font-size: 14px;
+    min-height: 40px;
+    max-height: 40px;
+    height: 40px;
+    border-radius: 8px;
+  }
+  
+  .input {
+    font-size: 18px;
+    height: 45px;
+    border-radius: 12px;
+  }
+  
+  .problemsSection {
+    border-radius: 12px;
+    min-height: 200px;
+    max-height: 300px;
+  }
+  
+  .problemsSectionHeader {
+    height: 40px;
+    font-size: 16px;
+    border-radius: 12px 12px 0 0;
+  }
+}
+
+/* Scrollbar styling for webkit browsers */
+.problemsContent::-webkit-scrollbar {
+  width: 6px;
+}
+
+.problemsContent::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+}
+
+.problemsContent::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 3px;
+}
+
+.problemsContent::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+/* Add these to your create-problem.module.css if missing */
+.competitionTimerContainer {
+  margin: 16px 0;
+  padding: 16px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+}
+
+.timerDisplay {
+  text-align: center;
+}
+
+.timerHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.timerLabel {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.timerTime {
+  font-size: 24px;
+  font-weight: bold;
+  margin: 8px 0;
+}
+
+.timerProgress {
+  position: relative;
+  width: 100%;
+  height: 8px;
+  background-color: #e5e7eb;
+  border-radius: 4px;
+  overflow: hidden;
+  margin: 8px 0;
+}
+
+.progressBar {
+  height: 100%;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+  position: relative;
+  z-index: 1;
+}
+
+/* ✅ NEW: Progress percentage display */
+.progressPercentage {
+  position: absolute;
+  top: -20px;
+  right: 0;
+  font-size: 11px;
+  font-weight: 600;
+  color: #6b7280;
+}
+
+.expiredIndicator {
+  color: #ef4444;
+  font-size: 12px;
+}
+
+.activeIndicator {
+  color: #10b981;
+  font-size: 12px;
+}
+
+/* Add these to create-problem.module.css if they're missing */
+.gameplayStatus {
+  margin-top: 8px;
+  font-size: 12px;
+  color: #666;
+}
+
+.statusValue {
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.timerStatus {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.attemptsDisplay,
+.timerDisplayControl {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: #f5f5f5;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.attemptsLabel,
+.timerLabel {
+  font-weight: 500;
+  color: #666;
+}
+
+.attemptsValue,
+.timerValue {
+  font-weight: 600;
+  color: #333;
+}
+
+.difficultyDisplay {
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+.difficultyLabel {
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 4px;
+}
+
+.difficultyValue {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* ✅ ADD: Pulse animation for critical time */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.02);
+  }
+}
+
+/* ✅ Enhanced timer progress container */
+.timerProgress {
+  position: relative;
+  width: 100%;
+  height: 8px;
+  background-color: #e5e7eb;
+  border-radius: 4px;
+  overflow: hidden;
+  margin: 8px 0;
+}
+
+/* ✅ Progress bar with better styling */
+.progressBar {
+  height: 100%;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+  position: relative;
+  z-index: 1;
+}
+
+/* ✅ NEW: Progress percentage display */
+.progressPercentage {
+  position: absolute;
+  top: -20px;
+  right: 0;
+  font-size: 11px;
+  font-weight: 600;
+  color: #6b7280;
+}
+
+/* ✅ Enhanced timer container */
+.competitionTimerContainer {
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 16px;
+  margin: 16px 0;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+/* ✅ Timer states */
+.timerTime.expired {
+  color: #dc2626;
+  animation: pulse 1s infinite;
+}
+
+.timerTime.paused {
+  color: #f59e0b;
+}
