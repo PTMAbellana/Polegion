@@ -9,9 +9,18 @@ import {
   ChapterRewardScreen,
 } from '@/components/chapters/shared';
 import { PointBasedMinigame, GeometryPhysicsGame } from '@/components/chapters/minigames';
-import type { GeometryLevel } from '@/components/chapters/minigames/GeometryPhysicsGame';
 import { ConceptCard, LessonGrid, VisualDemo } from '@/components/chapters/lessons';
 import { useChapterData, useChapterDialogue, useChapterAudio } from '@/hooks/chapters';
+import {
+  CHAPTER1_CASTLE_ID,
+  CHAPTER1_NUMBER,
+  CHAPTER1_OPENING_DIALOGUE,
+  CHAPTER1_LESSON_DIALOGUE,
+  CHAPTER1_MINIGAME_DIALOGUE,
+  CHAPTER1_MINIGAME_LEVELS,
+  CHAPTER1_LEARNING_OBJECTIVES,
+  CHAPTER1_XP_VALUES,
+} from '@/constants/chapters/castle1/chapter1';
 import Image from 'next/image';
 import { awardLessonXP, completeChapter } from '@/api/chapters';
 import { submitQuizAttempt } from '@/api/chapterQuizzes';
@@ -20,84 +29,9 @@ import baseStyles from '@/styles/chapters/chapter-base.module.css';
 import minigameStyles from '@/styles/chapters/minigame-shared.module.css';
 import lessonStyles from '@/styles/chapters/lesson-shared.module.css';
 
-const CASTLE_ID = 'cd5ddb70-b4ba-46cb-85fd-d66e5735619f';
-const CHAPTER_NUMBER = 1;
-
 type SceneType = 'opening' | 'lesson' | 'minigame' | 'quiz1' | 'quiz2' | 'quiz3' | 'reward';
 
-// Dialogue data
-const openingDialogue = [
-  'Ah, a new seeker of shapes has arrived! Welcome, traveler.',
-  'I am Archim, Keeper of the Euclidean Spire — where all geometry was born.',
-  'These are Points — the seeds of all geometry. Touch one, and it comes alive!',
-  'From these points, we shall unlock the tower\'s ancient power!',
-];
-
-const lessonDialogue = [
-  'Every shape begins with a Point — small, yet mighty.',
-  'Two points form a connection — that is the beginning of a Line Segment.',
-  'If the path stretches endlessly in one direction — it is a Ray.',
-  'And if it continues in both directions — it becomes a Line, infinite and eternal.',
-  'Watch closely as these fundamental forms reveal themselves.',
-  'Now, let us put your knowledge to practice!',
-];
-
-const minigameDialogue = [
-  'Excellent! Now let\'s put your knowledge into practice with a fun challenge!',
-  'Help the ball reach the trash can by creating geometric shapes.',
-  'Think carefully about where to place your points!',
-];
-
-// Minigame levels
-const minigameLevels: GeometryLevel[] = [
-  {
-    id: 1,
-    type: 'line-segment',
-    title: 'Level 1: Line Segment',
-    instruction: 'Create a line segment to guide the ball into the box. Click two points to create the segment.',
-    ballStartX: 20,
-    ballStartY: 10,
-  },
-  {
-    id: 2,
-    type: 'ray',
-    title: 'Level 2: Ray',
-    instruction: 'Create a ray starting near the box. Place the first point carefully, then the second point to set the direction.',
-    ballStartX: 15,
-    ballStartY: 15,
-  },
-  {
-    id: 3,
-    type: 'line',
-    title: 'Level 3: Line',
-    instruction: 'Create a line to guide the ball. Remember, a line extends infinitely in both directions!',
-    ballStartX: 10,
-    ballStartY: 20,
-  },
-];
-
-// Learning objectives
-const learningObjectives = [
-  { key: 'task-0', label: 'Understand what a point represents in geometry' },
-  { key: 'task-1', label: 'Learn about line segments and their properties' },
-  { key: 'task-2', label: 'Understand what rays are and how they differ from lines' },
-  { key: 'task-3', label: 'Master the concept of infinite lines' },
-  { key: 'task-4', label: 'Complete the minigame challenge' },
-  { key: 'task-5', label: 'Pass Quiz 1: Points' },
-  { key: 'task-6', label: 'Pass Quiz 2: Lines and Segments' },
-  { key: 'task-7', label: 'Pass Quiz 3: Comprehensive Review' },
-];
-
-const XP_VALUES = {
-  lesson: 20,
-  minigame: 30,
-  quiz1: 15,
-  quiz2: 15,
-  quiz3: 20,
-  total: 100,
-};
-
-export default function Chapter1PageRefactored() {
+export default function Chapter1Page() {
   const router = useRouter();
   
   // Scene and state management
@@ -128,8 +62,8 @@ export default function Chapter1PageRefactored() {
 
   // Custom hooks
   const { chapterId, quiz, minigame, loading, error, authLoading, userProfile } = useChapterData({
-    castleId: CASTLE_ID,
-    chapterNumber: CHAPTER_NUMBER,
+    castleId: CHAPTER1_CASTLE_ID,
+    chapterNumber: CHAPTER1_NUMBER,
   });
 
   const {
@@ -140,9 +74,9 @@ export default function Chapter1PageRefactored() {
     handleNextMessage,
     resetDialogue,
   } = useChapterDialogue({
-    dialogue: currentScene === 'opening' ? openingDialogue : 
-             currentScene === 'lesson' ? lessonDialogue : 
-             minigameDialogue,
+    dialogue: currentScene === 'opening' ? CHAPTER1_OPENING_DIALOGUE : 
+             currentScene === 'lesson' ? CHAPTER1_LESSON_DIALOGUE : 
+             CHAPTER1_MINIGAME_DIALOGUE,
     autoAdvance: autoAdvanceEnabled,
     autoAdvanceDelay: 3000,
     typingSpeed: 30,
@@ -212,7 +146,7 @@ export default function Chapter1PageRefactored() {
       previousMessageIndexRef.current = -1; // Reset previous message index
       setCurrentScene('lesson');
       playNarration('chapter1-lesson-intro');
-    } else if (currentScene === 'lesson' && messageIndex >= lessonDialogue.length - 1) {
+    } else if (currentScene === 'lesson' && messageIndex >= CHAPTER1_LESSON_DIALOGUE.length - 1) {
       // All lesson tasks should be marked by now through the useEffect above
       awardXP('lesson');
       setCurrentScene('minigame');
@@ -241,9 +175,9 @@ export default function Chapter1PageRefactored() {
 
   const awardXP = async (type: 'lesson' | 'minigame' | 'quiz') => {
     let xp = 0;
-    if (type === 'lesson') xp = XP_VALUES.lesson;
-    else if (type === 'minigame') xp = XP_VALUES.minigame;
-    else if (type === 'quiz') xp = XP_VALUES.quiz1 + XP_VALUES.quiz2 + XP_VALUES.quiz3;
+    if (type === 'lesson') xp = CHAPTER1_XP_VALUES.lesson;
+    else if (type === 'minigame') xp = CHAPTER1_XP_VALUES.minigame;
+    else if (type === 'quiz') xp = CHAPTER1_XP_VALUES.quiz1 + CHAPTER1_XP_VALUES.quiz2 + CHAPTER1_XP_VALUES.quiz3;
 
     setEarnedXP((prev) => ({ ...prev, [type]: xp }));
 
@@ -260,7 +194,7 @@ export default function Chapter1PageRefactored() {
   const handleMinigameComplete = async (isCorrect: boolean) => {
     if (isCorrect) {
       // Move to next level or complete minigame
-      if (currentMinigameLevel < minigameLevels.length - 1) {
+      if (currentMinigameLevel < CHAPTER1_MINIGAME_LEVELS.length - 1) {
         setCurrentMinigameLevel(currentMinigameLevel + 1);
       } else {
         // All levels complete
@@ -273,7 +207,7 @@ export default function Chapter1PageRefactored() {
             await submitMinigameAttempt(minigame.id, {
               score: 100,
               time_taken: 60,
-              attempt_data: { completedLevels: minigameLevels.length },
+              attempt_data: { completedLevels: CHAPTER1_MINIGAME_LEVELS.length },
             });
           } catch (error) {
             console.error('Failed to submit minigame:', error);
@@ -452,7 +386,7 @@ export default function Chapter1PageRefactored() {
       <div className={baseStyles.mainContent}>
         {/* Task Panel */}
         <ChapterTaskPanel
-          tasks={learningObjectives}
+          tasks={CHAPTER1_LEARNING_OBJECTIVES}
           completedTasks={completedTasks}
           failedTasks={failedTasks}
           styleModule={baseStyles}
@@ -507,7 +441,7 @@ export default function Chapter1PageRefactored() {
           {/* Minigame Scene */}
           {currentScene === 'minigame' && (
             <GeometryPhysicsGame
-              level={minigameLevels[currentMinigameLevel]}
+              level={CHAPTER1_MINIGAME_LEVELS[currentMinigameLevel]}
               onComplete={handleMinigameComplete}
               styleModule={minigameStyles}
             />

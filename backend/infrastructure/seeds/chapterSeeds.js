@@ -126,7 +126,7 @@ const castle1Chapter2Quizzes = [
         chapter_id: '69d21734-679b-45ea-9203-1dd15194e5cf',
         title: 'Lines & Relationships Quiz',
         description: 'Test your understanding of parallel, intersecting, and perpendicular lines',
-        xp_reward: 50,
+        xp_reward: 75,
         passing_score: 70,
         time_limit: null,
         quiz_config: {
@@ -136,21 +136,21 @@ const castle1Chapter2Quizzes = [
                     question: 'Two lines that never meet and are always the same distance apart are called?',
                     options: ['Intersecting', 'Parallel', 'Perpendicular', 'Skew'],
                     correctAnswer: 'Parallel',
-                    points: 15
+                    points: 20
                 },
                 {
                     id: 'q2',
                     question: 'When two lines meet at 90°, they are called?',
                     options: ['Parallel', 'Intersecting', 'Perpendicular', 'Adjacent'],
                     correctAnswer: 'Perpendicular',
-                    points: 15
+                    points: 25
                 },
                 {
                     id: 'q3',
                     question: 'Lines that cross paths but not at a right angle are called?',
                     options: ['Parallel', 'Perpendicular', 'Intersecting', 'Skew'],
                     correctAnswer: 'Intersecting',
-                    points: 20
+                    points: 30
                 }
             ]
         }
@@ -169,46 +169,44 @@ const castle1Chapter2Minigames = [
         title: 'Paths of Power',
         description: 'Identify parallel, intersecting, and perpendicular lines',
         game_type: 'interactive',
-        xp_reward: 30,
+        xp_reward: 45,
         time_limit: null,
         order_index: 1,
         game_config: {
             questions: [
                 {
-                    id: 'mg1',
-                    instruction: 'Identify the PARALLEL lines: Lines that travel side by side, never touching, always the same distance apart.',
+                    id: 'level-1-parallel',
+                    instruction: 'Select BOTH parallel lines: Lines that travel side by side, never touching, always the same distance apart.',
                     lines: [
-                        { id: 'L1', x1: 100, y1: 50, x2: 600, y2: 50, label: 'Line A' },
-                        { id: 'L2', x1: 100, y1: 150, x2: 600, y2: 150, label: 'Line B' },
-                        { id: 'L3', x1: 100, y1: 100, x2: 400, y2: 200, label: 'Line C' }
+                        { id: 'line-a', x1: 20, y1: 80, x2: 780, y2: 80, label: 'A' },
+                        { id: 'line-b', x1: 20, y1: 150, x2: 780, y2: 150, label: 'B' },
+                        { id: 'line-c', x1: 170, y1: 270, x2: 470, y2: 340, label: 'C' },
+                        { id: 'line-d', x1: 200, y1: 370, x2: 500, y2: 300, label: 'D' }
                     ],
-                    correctAnswer: ['L1', 'L2'],
-                    type: 'Parallel Lines',
-                    hint: 'Parallel lines never meet and maintain equal distance. Look for lines that run in the same direction!'
+                    correctAnswer: 'line-a,line-b',
+                    hint: 'Parallel lines never meet and maintain equal distance. Look for TWO lines that run in the same direction!'
                 },
                 {
-                    id: 'mg2',
-                    instruction: 'Identify the PERPENDICULAR lines: Lines that meet at exactly 90° (a right angle).',
+                    id: 'level-2-intersecting',
+                    instruction: 'Select the line that intersects with BOTH parallel lines.',
                     lines: [
-                        { id: 'L1', x1: 350, y1: 50, x2: 350, y2: 200, label: 'Line A' },
-                        { id: 'L2', x1: 200, y1: 125, x2: 500, y2: 125, label: 'Line B' },
-                        { id: 'L3', x1: 150, y1: 80, x2: 450, y2: 180, label: 'Line C' }
+                        { id: 'line-a', x1: 50, y1: 120, x2: 750, y2: 120, label: 'A' },
+                        { id: 'line-b', x1: 50, y1: 280, x2: 750, y2: 280, label: 'B' },
+                        { id: 'line-c', x1: 100, y1: 50, x2: 700, y2: 350, label: 'C' }
                     ],
-                    correctAnswer: ['L1', 'L2'],
-                    type: 'Perpendicular Lines',
-                    hint: 'Perpendicular lines form a perfect right angle (90°). Look for lines that form a corner like the letter L!'
+                    correctAnswer: 'line-c',
+                    hint: 'Look for the line that crosses through both of the parallel lines.'
                 },
                 {
-                    id: 'mg3',
-                    instruction: 'Identify the INTERSECTING lines: Lines that cross but NOT at a right angle.',
+                    id: 'level-3-perpendicular',
+                    instruction: 'Select ALL lines that form a 90° angle (perpendicular) with each other.',
                     lines: [
-                        { id: 'L1', x1: 100, y1: 50, x2: 600, y2: 50, label: 'Line A' },
-                        { id: 'L2', x1: 150, y1: 30, x2: 550, y2: 220, label: 'Line B' },
-                        { id: 'L3', x1: 100, y1: 150, x2: 600, y2: 150, label: 'Line C' }
+                        { id: 'line-a', x1: 300, y1: 50, x2: 300, y2: 350, label: 'A' },
+                        { id: 'line-b', x1: 100, y1: 200, x2: 500, y2: 200, label: 'B' },
+                        { id: 'line-c', x1: 150, y1: 100, x2: 450, y2: 300, label: 'C' }
                     ],
-                    correctAnswer: ['L1', 'L2'],
-                    type: 'Intersecting Lines',
-                    hint: 'Intersecting lines cross each other at any angle except 90°. They meet like an X!'
+                    correctAnswer: 'line-a,line-b',
+                    hint: 'Perpendicular lines intersect at exactly 90 degrees, forming a perfect right angle. Look for a vertical and horizontal line!'
                 }
             ]
         }
@@ -225,7 +223,7 @@ const castle1Chapter3Quizzes = [
         chapter_id: 'c9b7a976-d466-4831-aacf-f8e0476f5153',
         title: 'Shape Mastery Quiz',
         description: 'Test your knowledge of geometric shapes',
-        xp_reward: 60,
+        xp_reward: 100,
         passing_score: 70,
         time_limit: null,
         quiz_config: {
@@ -235,21 +233,21 @@ const castle1Chapter3Quizzes = [
                     question: 'Which shape has exactly 3 sides?',
                     options: ['Square', 'Triangle', 'Circle', 'Pentagon'],
                     correctAnswer: 'Triangle',
-                    points: 20
+                    points: 30
                 },
                 {
                     id: 'q2',
                     question: 'Which shape has 4 equal sides and 4 right angles?',
                     options: ['Rectangle', 'Triangle', 'Square', 'Circle'],
                     correctAnswer: 'Square',
-                    points: 20
+                    points: 35
                 },
                 {
                     id: 'q3',
                     question: 'Which shape has no sides and is perfectly round?',
                     options: ['Triangle', 'Square', 'Circle', 'Rectangle'],
                     correctAnswer: 'Circle',
-                    points: 20
+                    points: 35
                 }
             ]
         }
@@ -265,7 +263,7 @@ const castle1Chapter3Minigames = [
         id: 'c3d1d2e3-5678-90ab-cdef-123456789012',
         chapter_id: 'c9b7a976-d466-4831-aacf-f8e0476f5153',
         title: 'Shape Summoner',
-        description: 'Identify triangles, squares, rectangles, circles, and polygons',
+        description: 'Identify polygons: triangle, quadrilateral, pentagon, hexagon, heptagon, octagon, nonagon, decagon, hendecagon, dodecagon',
         game_type: 'interactive',
         xp_reward: 60,
         time_limit: null,
@@ -273,37 +271,114 @@ const castle1Chapter3Minigames = [
         game_config: {
             questions: [
                 {
-                    id: 'mg1',
-                    instruction: 'Identify all TRIANGLES: Shapes with exactly 3 sides and 3 vertices.',
+                    id: 'level-1-triangle',
+                    instruction: 'Identify the TRIANGLE: A polygon with 3 sides and 3 angles.',
                     shapes: [
-                        { id: 'S1', type: 'triangle', points: [350, 50, 250, 150, 450, 150], color: '#FFD700', label: 'Shape A' },
-                        { id: 'S2', type: 'square', x: 100, y: 50, size: 100, color: '#66BBFF', label: 'Shape B' },
-                        { id: 'S3', type: 'triangle', points: [550, 100, 500, 180, 600, 180], color: '#FFD700', label: 'Shape C' }
+                        { id: 'triangle', type: 'triangle', sides: 3, label: 'Triangle' },
+                        { id: 'square', type: 'square', sides: 4, label: 'Square' },
+                        { id: 'pentagon', type: 'pentagon', sides: 5, label: 'Pentagon' }
                     ],
-                    correctAnswer: ['S1', 'S3'],
-                    hint: 'Triangles have 3 straight sides. Look for shapes with three corners!'
+                    correctAnswer: 'triangle',
+                    hint: 'Triangles have 3 sides.'
                 },
                 {
-                    id: 'mg2',
-                    instruction: 'Identify all RECTANGLES: Shapes with 4 sides, opposite sides equal, and 4 right angles.',
+                    id: 'level-2-quadrilateral',
+                    instruction: 'Identify the QUADRILATERAL: A polygon with 4 sides.',
                     shapes: [
-                        { id: 'S1', type: 'rectangle', x: 150, y: 60, width: 150, height: 100, color: '#66BBFF', label: 'Shape A' },
-                        { id: 'S2', type: 'circle', cx: 400, cy: 110, r: 50, color: '#FF6B6B', label: 'Shape B' },
-                        { id: 'S3', type: 'rectangle', x: 500, y: 80, width: 120, height: 80, color: '#66BBFF', label: 'Shape C' }
+                        { id: 'quadrilateral', type: 'square', sides: 4, label: 'Quadrilateral' },
+                        { id: 'hexagon', type: 'hexagon', sides: 6, label: 'Hexagon' },
+                        { id: 'triangle', type: 'triangle', sides: 3, label: 'Triangle' }
                     ],
-                    correctAnswer: ['S1', 'S3'],
-                    hint: 'Rectangles have 4 right angles with opposite sides equal. Like a stretched square!'
+                    correctAnswer: 'quadrilateral',
+                    hint: 'Quadrilaterals have 4 sides.'
                 },
                 {
-                    id: 'mg3',
-                    instruction: 'Identify the CIRCLE: A round shape with no sides or vertices.',
+                    id: 'level-3-pentagon',
+                    instruction: 'Identify the PENTAGON: A polygon with 5 sides.',
                     shapes: [
-                        { id: 'S1', type: 'square', x: 100, y: 70, size: 90, color: '#4ECDC4', label: 'Shape A' },
-                        { id: 'S2', type: 'circle', cx: 350, cy: 120, r: 60, color: '#FF6B6B', label: 'Shape B' },
-                        { id: 'S3', type: 'pentagon', points: [550, 60, 600, 100, 570, 160, 480, 160, 450, 100], color: '#9B59B6', label: 'Shape C' }
+                        { id: 'pentagon', type: 'pentagon', sides: 5, label: 'Pentagon' },
+                        { id: 'octagon', type: 'octagon', sides: 8, label: 'Octagon' },
+                        { id: 'hexagon', type: 'hexagon', sides: 6, label: 'Hexagon' }
                     ],
-                    correctAnswer: ['S2'],
-                    hint: 'Circles are perfectly round with no corners or straight edges!'
+                    correctAnswer: 'pentagon',
+                    hint: 'Pentagons have 5 sides.'
+                },
+                {
+                    id: 'level-4-hexagon',
+                    instruction: 'Identify the HEXAGON: A polygon with 6 sides.',
+                    shapes: [
+                        { id: 'hexagon', type: 'hexagon', sides: 6, label: 'Hexagon' },
+                        { id: 'heptagon', type: 'heptagon', sides: 7, label: 'Heptagon' },
+                        { id: 'nonagon', type: 'nonagon', sides: 9, label: 'Nonagon' }
+                    ],
+                    correctAnswer: 'hexagon',
+                    hint: 'Hexagons have 6 sides.'
+                },
+                {
+                    id: 'level-5-heptagon',
+                    instruction: 'Identify the HEPTAGON: A polygon with 7 sides.',
+                    shapes: [
+                        { id: 'heptagon', type: 'heptagon', sides: 7, label: 'Heptagon' },
+                        { id: 'octagon', type: 'octagon', sides: 8, label: 'Octagon' },
+                        { id: 'decagon', type: 'decagon', sides: 10, label: 'Decagon' }
+                    ],
+                    correctAnswer: 'heptagon',
+                    hint: 'Heptagons have 7 sides.'
+                },
+                {
+                    id: 'level-6-octagon',
+                    instruction: 'Identify the OCTAGON: A polygon with 8 sides.',
+                    shapes: [
+                        { id: 'octagon', type: 'octagon', sides: 8, label: 'Octagon' },
+                        { id: 'nonagon', type: 'nonagon', sides: 9, label: 'Nonagon' },
+                        { id: 'dodecagon', type: 'dodecagon', sides: 12, label: 'Dodecagon' }
+                    ],
+                    correctAnswer: 'octagon',
+                    hint: 'Octagons have 8 sides.'
+                },
+                {
+                    id: 'level-7-nonagon',
+                    instruction: 'Identify the NONAGON: A polygon with 9 sides.',
+                    shapes: [
+                        { id: 'nonagon', type: 'nonagon', sides: 9, label: 'Nonagon' },
+                        { id: 'decagon', type: 'decagon', sides: 10, label: 'Decagon' },
+                        { id: 'hendecagon', type: 'hendecagon', sides: 11, label: 'Hendecagon' }
+                    ],
+                    correctAnswer: 'nonagon',
+                    hint: 'Nonagons have 9 sides.'
+                },
+                {
+                    id: 'level-8-decagon',
+                    instruction: 'Identify the DECAGON: A polygon with 10 sides.',
+                    shapes: [
+                        { id: 'decagon', type: 'decagon', sides: 10, label: 'Decagon' },
+                        { id: 'hendecagon', type: 'hendecagon', sides: 11, label: 'Hendecagon' },
+                        { id: 'dodecagon', type: 'dodecagon', sides: 12, label: 'Dodecagon' }
+                    ],
+                    correctAnswer: 'decagon',
+                    hint: 'Decagons have 10 sides.'
+                },
+                {
+                    id: 'level-9-hendecagon',
+                    instruction: 'Identify the HENDECAGON: A polygon with 11 sides.',
+                    shapes: [
+                        { id: 'hendecagon', type: 'hendecagon', sides: 11, label: 'Hendecagon' },
+                        { id: 'dodecagon', type: 'dodecagon', sides: 12, label: 'Dodecagon' },
+                        { id: 'triangle', type: 'triangle', sides: 3, label: 'Triangle' }
+                    ],
+                    correctAnswer: 'hendecagon',
+                    hint: 'Hendecagons have 11 sides.'
+                },
+                {
+                    id: 'level-10-dodecagon',
+                    instruction: 'Identify the DODECAGON: A polygon with 12 sides.',
+                    shapes: [
+                        { id: 'dodecagon', type: 'dodecagon', sides: 12, label: 'Dodecagon' },
+                        { id: 'triangle', type: 'triangle', sides: 3, label: 'Triangle' },
+                        { id: 'square', type: 'square', sides: 4, label: 'Square' }
+                    ],
+                    correctAnswer: 'dodecagon',
+                    hint: 'Dodecagons have 12 sides.'
                 }
             ]
         }

@@ -7,13 +7,13 @@
 .conceptCard {
   display: flex;
   flex-direction: row;
-  padding: 1rem;
+  padding: 0.75rem;
   background: rgba(33, 53, 85, 0.5);
   border: 2px solid rgba(216, 196, 182, 0.3);
   border-radius: 10px;
   transition: all 0.3s ease;
   overflow: hidden;
-  height: 100%;
+  min-height: 180px;
   min-width: 0;
   word-wrap: break-word;
   gap: 1rem;
@@ -21,8 +21,10 @@
 
 .conceptCard:hover {
   background: rgba(62, 88, 121, 0.5);
-  transform: translateY(-2px);
+  transform: scale(1.02);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  border-color: rgba(216, 196, 182, 0.5);
+  z-index: 1;
 }
 
 .conceptCardHighlighted {
@@ -40,10 +42,10 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  min-width: 120px;
-  max-width: 120px;
-  min-height: 100px;
-  padding: 0.25rem;
+  min-width: 160px;
+  max-width: 160px;
+  min-height: 120px;
+  padding: 0.5rem;
   background: rgba(245, 239, 231, 0.9);
   border-radius: 6px;
   overflow: hidden;
@@ -83,7 +85,7 @@
 }
 
 .conceptTitle {
-  font-size: 1.1rem;
+  font-size: 1.2rem;
   font-weight: 600;
   color: #F5EFE7;
   margin: 0 0 0.5rem 0;
@@ -92,9 +94,9 @@
 }
 
 .conceptDescription {
-  font-size: 0.85rem;
+  font-size: 0.95rem;
   color: #D8C4B6;
-  line-height: 1.4;
+  line-height: 1.5;
   margin: 0;
   text-align: left;
 }
@@ -107,6 +109,7 @@
   width: 100%;
   overflow-y: auto;
   overflow-x: hidden;
+  padding: 0.5rem;
 }
 
 .lessonGrid1Col {
@@ -116,6 +119,7 @@
   width: 100%;
   overflow-y: auto;
   overflow-x: hidden;
+  padding: 0.5rem;
 }
 
 .lessonGrid2Col {
@@ -125,15 +129,55 @@
   width: 100%;
   overflow-y: auto;
   overflow-x: hidden;
+  padding: 0.5rem;
 }
 
 .lessonGrid3Col {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(180px, 100%), 1fr));
-  gap: 1rem;
+  grid-template-columns: repeat(3, minmax(300px, 1fr));
+  gap: 1.5rem;
   width: 100%;
-  overflow-y: auto;
+  height: auto;
+  max-height: none;
+  overflow-y: visible;
   overflow-x: hidden;
+  padding: 1rem;
+}
+
+/* Custom Scrollbar for Lesson Grids */
+.lessonGrid::-webkit-scrollbar,
+.lessonGrid1Col::-webkit-scrollbar,
+.lessonGrid2Col::-webkit-scrollbar,
+.lessonGrid3Col::-webkit-scrollbar,
+.lessonGrid4Col::-webkit-scrollbar {
+  width: 10px;
+}
+
+.lessonGrid::-webkit-scrollbar-track,
+.lessonGrid1Col::-webkit-scrollbar-track,
+.lessonGrid2Col::-webkit-scrollbar-track,
+.lessonGrid3Col::-webkit-scrollbar-track,
+.lessonGrid4Col::-webkit-scrollbar-track {
+  background: rgba(33, 53, 85, 0.3);
+  border-radius: 5px;
+}
+
+.lessonGrid::-webkit-scrollbar-thumb,
+.lessonGrid1Col::-webkit-scrollbar-thumb,
+.lessonGrid2Col::-webkit-scrollbar-thumb,
+.lessonGrid3Col::-webkit-scrollbar-thumb,
+.lessonGrid4Col::-webkit-scrollbar-thumb {
+  background: rgba(216, 196, 182, 0.5);
+  border-radius: 5px;
+  transition: background 0.3s ease;
+}
+
+.lessonGrid::-webkit-scrollbar-thumb:hover,
+.lessonGrid1Col::-webkit-scrollbar-thumb:hover,
+.lessonGrid2Col::-webkit-scrollbar-thumb:hover,
+.lessonGrid3Col::-webkit-scrollbar-thumb:hover,
+.lessonGrid4Col::-webkit-scrollbar-thumb:hover {
+  background: rgba(216, 196, 182, 0.7);
 }
 
 .lessonGrid4Col {
@@ -143,6 +187,7 @@
   width: 100%;
   overflow-y: auto;
   overflow-x: hidden;
+  padding: 0.5rem;
 }
 
 .gapSmall {

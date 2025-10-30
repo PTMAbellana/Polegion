@@ -943,7 +943,9 @@ export default function GeometryPhysicsGame({
               textAlign: 'center',
               fontWeight: '700',
             }}>
-            Success! The ball reached the box!
+            {level.type === 'line' 
+              ? 'Success! You kept the ball balanced on the line!' 
+              : 'Success! The ball reached the box!'}
             </div>
           )}
 
@@ -960,7 +962,9 @@ export default function GeometryPhysicsGame({
               textAlign: 'center',
               fontWeight: '700',
             }}>
-            Try again! The ball missed the box!
+            {level.type === 'line' 
+              ? 'Try again! The ball fell off the line or hit a wall!' 
+              : 'Try again! The ball missed the box!'}
             </div>
           )}
         </div>
