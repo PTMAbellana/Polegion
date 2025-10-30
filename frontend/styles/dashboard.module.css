@@ -1,0 +1,532 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
+
+/* ========================================
+   TOP SECTION LAYOUT (PROFILE + ACTIONS)
+   ======================================== */
+
+.topSection {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+/* ========================================
+   MINI PROFILE CARD
+   ======================================== */
+
+.miniProfileCard {
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.1) 0%, rgba(132, 204, 22, 0.05) 100%);
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba(34, 197, 94, 0.3);
+  border-radius: 1.5rem;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.miniProfileCard::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, #22c55e, #84cc16, #eab308, #f59e0b);
+  z-index: -1;
+  padding: 2px;
+  border-radius: 1.5rem;
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.miniProfileCard:hover::before {
+  opacity: 1;
+}
+
+/* .miniProfileAvatar {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 4px solid rgba(34, 197, 94, 0.3);
+  box-shadow: 0 8px 24px rgba(34, 197, 94, 0.3);
+  transition: all 0.3s ease;
+} */
+
+.miniProfileCard:hover .miniProfileAvatar {
+  transform: scale(1.1);
+  border-color: rgba(34, 197, 94, 0.6);
+}
+
+.miniProfileImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.miniProfileLetter {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Poppins', sans-serif;
+  font-size: 3rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #22c55e 0%, #84cc16 100%);
+  color: white;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.miniProfileInfo {
+  text-align: center;
+}
+
+.miniProfileName {
+  font-family: 'Poppins', sans-serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #2C514C 0%, #22c55e 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: 0 0 0.5rem 0;
+}
+
+.miniProfileRole {
+  font-family: 'Poppins', sans-serif;
+  font-size: 1rem;
+  color: #6b7280;
+  font-weight: 500;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.roleIcon {
+  font-size: 1.2rem;
+}
+
+.viewProfileButton {
+  font-family: 'Poppins', sans-serif;
+  margin-top: 1rem;
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+  color: white;
+  border: none;
+  border-radius: 50px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+  font-size: 0.9rem;
+}
+
+.viewProfileButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(34, 197, 94, 0.4);
+  background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+}
+
+/* ========================================
+   QUICK ACTIONS GRID
+   ======================================== */
+
+.quickActionsGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+
+.quickActionCard {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(247, 254, 231, 0.95) 100%);
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba(34, 197, 94, 0.2);
+  border-radius: 1.5rem;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.quickActionCard::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: radial-gradient(circle, rgba(34, 197, 94, 0.1) 0%, transparent 70%);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: all 0.5s ease;
+}
+
+.quickActionCard:hover::before {
+  width: 300%;
+  height: 300%;
+}
+
+.quickActionCard:hover {
+  transform: translateY(-8px);
+  border-color: rgba(34, 197, 94, 0.5);
+  box-shadow: 0 12px 40px rgba(34, 197, 94, 0.3);
+}
+
+.quickActionIcon {
+  font-size: 3rem;
+  width: 80px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.1) 0%, rgba(132, 204, 22, 0.1) 100%);
+  border-radius: 1.5rem;
+  transition: all 0.3s ease;
+}
+
+.quickActionCard:hover .quickActionIcon {
+  transform: scale(1.1) rotate(5deg);
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.2) 0%, rgba(132, 204, 22, 0.2) 100%);
+}
+
+.quickActionContent {
+  text-align: center;
+}
+
+.quickActionContent h4 {
+  font-family: 'Poppins', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #2C514C;
+  margin: 0 0 0.25rem 0;
+}
+
+.quickActionContent p {
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.85rem;
+  color: #6b7280;
+  margin: 0;
+  font-weight: 500;
+}
+
+/* ========================================
+   SECTION HEADERS
+   ======================================== */
+
+.sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.sectionHeader h2 {
+  font-family: 'Poppins', sans-serif;
+  font-size: 1.8rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #2C514C 0%, #22c55e 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: 0;
+}
+
+.viewAllButton {
+  font-family: 'Poppins', sans-serif;
+  padding: 0.65rem 1.5rem;
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.15) 0%, rgba(22, 163, 74, 0.15) 100%);
+  border: 2px solid rgba(34, 197, 94, 0.3);
+  border-radius: 50px;
+  color: #16a34a;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 0.9rem;
+}
+
+.viewAllButton:hover {
+  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+  color: white;
+  transform: translateX(4px);
+  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+}
+
+/* ========================================
+   LEADERBOARDS SECTION
+   ======================================== */
+
+.leaderboardsSection {
+  margin-bottom: 2.5rem;
+}
+
+.leaderboardsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 1.5rem;
+}
+
+.leaderboardCard {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(254, 252, 232, 0.95) 100%);
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba(234, 179, 8, 0.3);
+  border-radius: 1.5rem;
+  padding: 1.5rem;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.leaderboardCard::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, #eab308, #f59e0b, #84cc16, #22c55e);
+  z-index: -1;
+  padding: 2px;
+  border-radius: 1.5rem;
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.leaderboardCard:hover::before {
+  opacity: 1;
+}
+
+.leaderboardCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(234, 179, 8, 0.3);
+}
+
+.leaderboardTitle {
+  font-family: 'Poppins', sans-serif;
+  font-size: 1.2rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #92400e 0%, #eab308 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: 0 0 1rem 0;
+}
+
+.leaderboardList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.leaderboardItem {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem;
+  background: linear-gradient(135deg, rgba(234, 179, 8, 0.05) 0%, rgba(245, 158, 11, 0.05) 100%);
+  border-radius: 0.75rem;
+  border: 1px solid rgba(234, 179, 8, 0.2);
+  transition: all 0.3s ease;
+}
+
+.leaderboardItem:hover {
+  background: linear-gradient(135deg, rgba(234, 179, 8, 0.1) 0%, rgba(245, 158, 11, 0.1) 100%);
+  border-color: rgba(234, 179, 8, 0.4);
+  transform: translateX(4px);
+}
+
+.leaderboardRank {
+  font-family: 'Poppins', sans-serif;
+  font-size: 1.5rem;
+  font-weight: 800;
+  min-width: 50px;
+  text-align: center;
+}
+
+.leaderboardUser {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.leaderboardUserAvatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #eab308 0%, #f59e0b 100%);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 700;
+  font-size: 1rem;
+  box-shadow: 0 4px 12px rgba(234, 179, 8, 0.3);
+}
+
+.leaderboardUserName {
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.leaderboardScore {
+  font-family: 'Poppins', sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #eab308 0%, #f59e0b 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ========================================
+   ROOMS SECTION
+   ======================================== */
+
+.roomsSection {
+  margin-bottom: 2.5rem;
+}
+
+/* ========================================
+   RESPONSIVE DESIGN
+   ======================================== */
+
+@media (max-width: 1200px) {
+  .topSection {
+    grid-template-columns: 1fr;
+  }
+
+  .quickActionsGrid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .topSection {
+    gap: 1rem;
+  }
+
+  .quickActionsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .leaderboardsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .miniProfileCard {
+    padding: 1.5rem;
+  }
+
+  .miniProfileAvatar {
+    width: 80px;
+    height: 80px;
+  }
+
+  .miniProfileLetter {
+    font-size: 2.5rem;
+  }
+
+  .miniProfileName {
+    font-size: 1.3rem;
+  }
+
+  .quickActionCard {
+    padding: 1.25rem;
+  }
+
+  .quickActionIcon {
+    width: 60px;
+    height: 60px;
+    font-size: 2.5rem;
+  }
+
+  .sectionHeader h2 {
+    font-size: 1.5rem;
+  }
+
+  .viewAllButton {
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .sectionHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .viewAllButton {
+    width: 100%;
+    text-align: center;
+  }
+
+  .leaderboardRank {
+    font-size: 1.2rem;
+    min-width: 40px;
+  }
+
+  .leaderboardUserAvatar {
+    width: 35px;
+    height: 35px;
+    font-size: 0.9rem;
+  }
+
+  .leaderboardUserName {
+    font-size: 0.85rem;
+  }
+
+  .leaderboardScore {
+    font-size: 0.9rem;
+  }
+}
+
+/* ========================================
+   ANIMATIONS
+   ======================================== */
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.topSection {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.leaderboardsSection {
+  animation: fadeInUp 0.6s ease-out 0.1s both;
+}
+
+.roomsSection {
+  animation: fadeInUp 0.6s ease-out 0.2s both;
+}

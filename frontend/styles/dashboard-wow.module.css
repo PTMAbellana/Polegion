@@ -229,7 +229,7 @@
   justify-content: center;
   gap: 6rem;
   padding: 2.5rem;
-  background: rgba(255, 255, 255, 0.5);
+  /* background: rgba(256, 255, 255, 0.5); */
   backdrop-filter: blur(10px);
   flex-wrap: wrap;
   position: relative;

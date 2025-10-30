@@ -54,7 +54,10 @@ console.log("RoomDetailsPage - currentRoom:", currentRoom)
             // If the next pathname does NOT start with `/teacher/virtual-rooms/${roomCode}`
             // then clear, otherwise keep
             const nextPath = window.location.pathname;
-            if (!nextPath.startsWith(`${TEACHER_ROUTES.VIRTUAL_ROOMS}/${roomCode}`)) {
+            if (
+                !nextPath.startsWith(`${TEACHER_ROUTES.VIRTUAL_ROOMS}/${roomCode}`) || 
+                !nextPath.startsWith(`${TEACHER_ROUTES.COMPETITION}/`)
+            ) {
                 clearCurrentRoom();
             }
         }

@@ -1,0 +1,736 @@
+/* Competition Teacher Styles - Inspired by Leaderboard */
+
+/* Container */
+.container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #2C514C 0%, #122932 50%, #1a3a3a 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: 
+    radial-gradient(circle at 20% 20%, rgba(250, 188, 96, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(44, 81, 76, 0.15) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+.mainContainer {
+  position: relative;
+  z-index: 1;
+}
+
+/* Header */
+.header {
+  padding: 2rem 2rem 1.5rem;
+}
+
+.headerContent {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.headerTop {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.backButton {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba(44, 81, 76, 0.2);
+  border-radius: 25px;
+  padding: 0.75rem 1.5rem;
+  color: #2C514C;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+}
+
+.backButton:hover {
+  background: rgba(44, 81, 76, 0.9);
+  color: white;
+  transform: translateY(-2px);
+}
+
+.title {
+  font-size: 2.5rem;
+  font-weight: 900;
+  color: white;
+  margin: 0;
+  text-shadow: 0 0 20px rgba(250, 188, 96, 0.3);
+  flex: 1;
+}
+
+.description {
+  font-size: 1.1rem;
+  color: rgba(255, 255, 255, 0.9);
+  margin: 0.5rem 0 0 0;
+  text-align: center;
+}
+
+/* Competition Controls */
+.competitionControls {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 1.5rem;
+}
+
+.controlButton {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.startButton {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+}
+
+.startButton:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
+}
+
+.pauseButton {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: white;
+}
+
+.nextButton {
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  color: white;
+}
+
+.finishButton {
+  background: linear-gradient(135deg, #ec4899, #db2777);
+  color: white;
+}
+
+.controlButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.problemStatus {
+  padding: 0.75rem 1rem;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  border-radius: 12px;
+  color: white;
+  font-weight: 600;
+}
+
+.competitionStatus {
+  padding: 0.75rem 1.5rem;
+  background: rgba(16, 185, 129, 0.2);
+  backdrop-filter: blur(10px);
+  border-radius: 12px;
+  color: #10b981;
+  font-weight: 700;
+}
+
+/* Main Content */
+.roomContent {
+  background: rgba(255, 255, 255, 0.95);
+  margin: 0 2rem;
+  border-radius: 30px 30px 0 0;
+  padding: 2rem;
+  min-height: calc(100vh - 400px);
+  display: grid;
+  grid-template-columns: 1fr 400px;
+  gap: 2rem;
+}
+
+/* Left Column (Problems) */
+.leftColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Right Column (Participants) */
+.rightColumn {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Section */
+.section {
+  background: rgba(255, 255, 255, 0.8);
+  border: 2px solid rgba(44, 81, 76, 0.1);
+  border-radius: 20px;
+  padding: 1.5rem;
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid rgba(44, 81, 76, 0.1);
+}
+
+.sectionTitle {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #2C514C;
+  margin: 0;
+}
+
+.badge {
+  background: linear-gradient(135deg, #FABC60, #E8A83B);
+  color: #122932;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+/* Problems List */
+.problemsList {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  max-height: 500px;
+  overflow-y: auto;
+}
+
+.problemCard {
+  background: white;
+  border: 2px solid rgba(44, 81, 76, 0.1);
+  border-radius: 12px;
+  padding: 1rem;
+  transition: all 0.3s ease;
+}
+
+.problemCard:hover {
+  border-color: rgba(44, 81, 76, 0.3);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.problemContent {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.problemLeft {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex: 1;
+}
+
+.problemRank {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #2C514C, #122932);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.problemInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.problemTitle {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #2d3748;
+  margin: 0 0 0.25rem 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.problemMeta {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.problemDifficulty {
+  padding: 0.2rem 0.5rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.problemDifficulty[data-difficulty="easy"] {
+  background: rgba(16, 185, 129, 0.15);
+  color: #059669;
+}
+
+.problemDifficulty[data-difficulty="medium"] {
+  background: rgba(245, 158, 11, 0.15);
+  color: #d97706;
+}
+
+.problemDifficulty[data-difficulty="hard"] {
+  background: rgba(239, 68, 68, 0.15);
+  color: #dc2626;
+}
+
+.problemXp {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #6b7280;
+}
+
+.problemRight {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.problemTimer {
+  padding: 0.4rem 0.8rem;
+  background: rgba(44, 81, 76, 0.1);
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: #2C514C;
+}
+
+.noTimer {
+  color: #ef4444;
+}
+
+/* Timer Input */
+.timerInput {
+  width: 80px;
+  padding: 0.4rem 0.6rem;
+  border: 2px solid rgba(44, 81, 76, 0.2);
+  border-radius: 6px;
+  font-weight: 600;
+}
+
+/* Buttons */
+.addButton,
+.removeButton,
+.editButton,
+.saveButton,
+.cancelButton {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 8px;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.addButton {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+.addButton:hover:not(:disabled) {
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.addButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.removeButton {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  color: white;
+}
+
+.removeButton:hover {
+  transform: scale(1.1);
+}
+
+.editButton {
+  background: rgba(59, 130, 246, 0.1);
+  color: #3b82f6;
+}
+
+.editButton:hover {
+  background: rgba(59, 130, 246, 0.2);
+}
+
+.saveButton {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+}
+
+.cancelButton {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+
+/* Participants List */
+.participantsList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  max-height: 600px;
+  overflow-y: auto;
+}
+
+.participantCard {
+  background: white;
+  border: 2px solid rgba(44, 81, 76, 0.1);
+  border-radius: 12px;
+  padding: 0.75rem;
+  transition: all 0.2s ease;
+}
+
+.participantCard:hover {
+  border-color: rgba(44, 81, 76, 0.3);
+}
+
+.participantCard.rank1 {
+  background: linear-gradient(135deg, rgba(250, 188, 96, 0.15), rgba(240, 181, 85, 0.1));
+  border-color: #FABC60;
+}
+
+.participantContent {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.participantLeft {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.participantRank {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #2C514C;
+}
+
+.participantInfo {
+  flex: 1;
+}
+
+.participantName {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #2d3748;
+  margin: 0;
+}
+
+.participantRole {
+  font-size: 0.75rem;
+  color: #6b7280;
+  margin: 0.25rem 0 0 0;
+}
+
+.participantRight {
+  display: flex;
+  align-items: center;
+}
+
+.participantXp {
+  padding: 0.4rem 0.8rem;
+  background: linear-gradient(135deg, #2C514C, #122932);
+  color: white;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+.participantCard.rank1 .participantXp {
+  background: linear-gradient(135deg, #FABC60, #E8A83B);
+  color: #122932;
+}
+
+/* Sort Controls */
+.sortControls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.sortButton {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.8rem;
+  background: rgba(44, 81, 76, 0.1);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.sortButton:hover {
+  background: rgba(44, 81, 76, 0.2);
+}
+
+.sortIcons {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.sortActive {
+  color: #3b82f6;
+}
+
+.sortInactive {
+  color: #d1d5db;
+}
+
+.sortText {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #2C514C;
+}
+
+/* Empty State */
+.emptyState {
+  text-align: center;
+  padding: 2rem;
+  color: #9ca3af;
+}
+
+.emptyIcon {
+  font-size: 2rem;
+  margin-bottom: 0.75rem;
+  opacity: 0.5;
+}
+
+.emptyText {
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.emptySubtext {
+  font-size: 0.85rem;
+  margin: 0.25rem 0 0 0;
+}
+
+/* Competition Grid */
+.competitionGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.competitionCard {
+  background: white;
+  border: 2px solid rgba(44, 81, 76, 0.1);
+  border-radius: 16px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.competitionCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+}
+
+.competitionBanner {
+  height: 120px;
+  background: linear-gradient(135deg, #2C514C, #122932);
+  position: relative;
+  overflow: hidden;
+}
+
+.competitionBannerOverlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(45deg, transparent 30%, rgba(250, 188, 96, 0.2) 50%, transparent 70%);
+}
+
+.competitionBannerContent {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 1rem;
+}
+
+.competitionBannerTitle {
+  color: white;
+  font-size: 1.3rem;
+  font-weight: 700;
+  text-align: center;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.competitionContent {
+  padding: 1rem;
+}
+
+.competitionFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.competitionStatus {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+}
+
+.statusLabel {
+  color: #6b7280;
+  font-weight: 600;
+}
+
+.statusBadge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+}
+
+.statusBadge[data-status="new"] {
+  background: rgba(59, 130, 246, 0.15);
+  color: #2563eb;
+}
+
+.statusBadge[data-status="ongoing"] {
+  background: rgba(16, 185, 129, 0.15);
+  color: #059669;
+}
+
+.statusBadge[data-status="done"] {
+  background: rgba(107, 114, 128, 0.15);
+  color: #4b5563;
+}
+
+.manageButton {
+  padding: 0.5rem 1rem;
+  background: linear-gradient(135deg, #FABC60, #E8A83B);
+  color: #122932;
+  border: none;
+  border-radius: 8px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.manageButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(250, 188, 96, 0.3);
+}
+
+/* Create Form */
+.createForm {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 2px solid rgba(44, 81, 76, 0.2);
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 1rem;
+  resize: vertical;
+  transition: all 0.3s ease;
+}
+
+.textarea:focus {
+  outline: none;
+  border-color: #FABC60;
+  box-shadow: 0 0 0 3px rgba(250, 188, 96, 0.1);
+}
+
+.createButton {
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(135deg, #2C514C, #122932);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.createButton:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(44, 81, 76, 0.3);
+}
+
+.createButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .roomContent {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .title {
+    font-size: 2rem;
+  }
+
+  .roomContent {
+    margin: 0 1rem;
+    padding: 1.5rem;
+  }
+
+  .competitionControls {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .controlButton {
+    width: 100%;
+  }
+}
