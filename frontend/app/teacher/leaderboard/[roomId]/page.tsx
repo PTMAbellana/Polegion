@@ -79,5 +79,9 @@ export default function RecordPage({ params }: { params: Promise<{ roomId: numbe
         </div>
       )}
     </LoadingOverlay>
+          </div>
+        </div>
+      )}
+    </LoadingOverlay>
   )
 }
