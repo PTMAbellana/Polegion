@@ -1,0 +1,939 @@
+/* ===================================================================
+   CASTLE 1 RESPONSIVE STYLES
+   Comprehensive responsive design for all device types and orientations
+   =================================================================== */
+
+/* ===================================================================
+   DESKTOP - Large Screens (1920x1080 and above)
+   =================================================================== */
+@media only screen and (min-width: 1920px) {
+  .chapterSelectionContainer {
+    font-size: 18px;
+  }
+
+  .mainContent {
+    max-width: 1600px;
+    gap: 3rem;
+  }
+
+  .titlePanel {
+    padding: 1.5rem 2rem;
+  }
+
+  .castleTitle h1 {
+    font-size: 2.2rem;
+  }
+
+  .chapterPanel {
+    max-width: 700px;
+  }
+
+  .chapterItem {
+    padding: 1.25rem;
+  }
+
+  .chapterTitle {
+    font-size: 1.1rem;
+  }
+
+  .castleInfoCard {
+    max-width: 380px;
+  }
+
+  .startButton {
+    font-size: 1.3rem;
+    padding: 1.2rem 3rem;
+  }
+}
+
+/* ===================================================================
+   DESKTOP - Standard (1366x768 - 1919x1080)
+   =================================================================== */
+@media only screen and (min-width: 1366px) and (max-width: 1919px) {
+  .mainContent {
+    max-width: 1400px;
+    gap: 2rem;
+  }
+
+  .chapterPanel {
+    max-width: 600px;
+  }
+
+  .castleInfoCard {
+    max-width: 320px;
+  }
+}
+
+/* ===================================================================
+   DESKTOP - Compact (1200px width)
+   Optimized for 1200xN resolutions
+   =================================================================== */
+@media only screen and (min-width: 1200px) and (max-width: 1365px) {
+  .chapterSelectionContainer {
+    font-size: 14px;
+  }
+
+  .mainContent {
+    max-width: 1100px;
+    gap: 1.5rem;
+    padding: 1rem 1.5rem;
+  }
+
+  .titlePanel {
+    padding: 0.8rem 1.2rem;
+    width: 85%;
+  }
+
+  .castleTitle h1 {
+    font-size: 1.6rem;
+  }
+
+  .castleSubtitle {
+    font-size: 0.85rem;
+  }
+
+  .progressBarContainer {
+    height: 8px;
+  }
+
+  .chapterPanel {
+    max-width: 480px;
+    padding: 1rem;
+  }
+
+  .chapterList {
+    gap: 0.7rem;
+    max-height: 400px;
+  }
+
+  .chapterItem {
+    padding: 0.8rem;
+    min-height: 85px;
+  }
+
+  .chapterNumberContainer {
+    width: 38px;
+    height: 38px;
+  }
+
+  .chapterNumber {
+    font-size: 1.3rem;
+  }
+
+  .chapterTitle {
+    font-size: 0.95rem;
+  }
+
+  .chapterDescription {
+    font-size: 0.8rem;
+  }
+
+  .chapterXp {
+    font-size: 0.75rem;
+  }
+
+  .castleInfoCard {
+    max-width: 280px;
+    padding: 1rem;
+  }
+
+  .castleInfoAvatar {
+    width: 80px;
+    height: 80px;
+  }
+
+  .castleInfoName {
+    font-size: 1.1rem;
+  }
+
+  .castleInfoQuote {
+    font-size: 0.8rem;
+  }
+
+  .castleInfoStat {
+    font-size: 0.8rem;
+  }
+
+  .startButton {
+    font-size: 1rem;
+    padding: 0.85rem 2rem;
+    min-width: 240px;
+  }
+
+  .backButton {
+    top: 1rem;
+    left: 1rem;
+    padding: 0.6rem 1rem;
+    font-size: 0.85rem;
+  }
+}
+
+/* ===================================================================
+   LAPTOP - Medium Screens (1024x768 - 1365x768)
+   =================================================================== */
+@media only screen and (min-width: 1024px) and (max-width: 1365px) {
+  .mainContent {
+    gap: 1.5rem;
+    padding: 1rem 1.5rem;
+  }
+
+  .chapterPanel {
+    max-width: 550px;
+  }
+
+  .castleInfoCard {
+    max-width: 300px;
+  }
+
+  .chapterItem {
+    padding: 0.9rem;
+  }
+
+  .startButton {
+    font-size: 1.05rem;
+    padding: 0.9rem 2rem;
+    min-width: 250px;
+  }
+}
+
+/* ===================================================================
+   TABLET - LANDSCAPE (1024x768, 1280x800, 1536x2048 rotated)
+   Aspect ratio: 4:3 or 16:9
+   =================================================================== */
+@media only screen and (min-width: 768px) and (max-width: 1023px) and (orientation: landscape) {
+  .chapterSelectionContainer {
+    height: auto;
+    min-height: 100vh;
+  }
+
+  .mainContent {
+    flex-direction: row;
+    gap: 1.5rem;
+    padding: 1rem;
+  }
+
+  .titlePanel {
+    width: 80%;
+    min-width: auto;
+    padding: 0.9rem 1.2rem;
+  }
+
+  .castleTitle h1 {
+    font-size: 1.6rem;
+  }
+
+  .castleSubtitle {
+    font-size: 0.85rem;
+  }
+
+  .chapterPanel {
+    width: 100%;
+    max-width: 450px;
+    max-height: 400px;
+  }
+
+  .chapterList {
+    max-height: 280px;
+    overflow-y: auto;
+  }
+
+  .chapterItem {
+    padding: 0.8rem;
+    min-height: 80px;
+    max-height: 90px;
+  }
+
+  .chapterNumberContainer {
+    width: 36px;
+    height: 36px;
+  }
+
+  .chapterNumber {
+    font-size: 1.3rem;
+  }
+
+  .chapterTitle {
+    font-size: 0.9rem;
+  }
+
+  .chapterObjective {
+    font-size: 0.75rem;
+  }
+
+  .castleInfoCard {
+    max-width: 280px;
+  }
+
+  .castleInfoAvatar {
+    width: 140px;
+    height: 140px;
+  }
+
+  .castleImageCircle {
+    width: 100px;
+    height: 100px;
+  }
+
+  .castleIconCircle {
+    width: 70px;
+    height: 70px;
+  }
+
+  .startButton {
+    font-size: 1rem;
+    padding: 0.85rem 2rem;
+    min-width: 240px;
+  }
+
+  .backButtonImage {
+    width: 55px;
+    height: 55px;
+  }
+}
+
+/* ===================================================================
+   TABLET - PORTRAIT (768x1024, 1536x2048, 800x1280)
+   Aspect ratio: 4:3
+   =================================================================== */
+@media only screen and (min-width: 768px) and (max-width: 1023px) and (orientation: portrait) {
+  .chapterSelectionContainer {
+    height: auto;
+    min-height: 100vh;
+  }
+
+  .mainContent {
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 1rem;
+  }
+
+  .titlePanel {
+    width: 85%;
+    min-width: auto;
+  }
+
+  .chapterPanel {
+    width: 90%;
+    max-width: 600px;
+    max-height: 450px;
+  }
+
+  .chapterList {
+    max-height: 350px;
+    overflow-y: auto;
+  }
+
+  .castleInfoCard {
+    max-width: 350px;
+    width: 85%;
+  }
+
+  .startButton {
+    min-width: 280px;
+  }
+}
+
+/* ===================================================================
+   MOBILE - LANDSCAPE (640x360, 1920x1080, 2560x1440 rotated)
+   Aspect ratio: 16:9
+   =================================================================== */
+@media only screen and (max-width: 767px) and (orientation: landscape) {
+  .chapterSelectionContainer {
+    height: auto;
+    min-height: 100vh;
+    overflow-y: auto;
+  }
+
+  .backgroundOverlay {
+    position: fixed;
+  }
+
+  .titlePanel {
+    width: 90%;
+    min-width: auto;
+    padding: 0.6rem 1rem;
+    margin: 0.5rem auto;
+  }
+
+  .castleTitle h1 {
+    font-size: 1.3rem;
+    margin-bottom: 0.1rem;
+  }
+
+  .castleSubtitle {
+    font-size: 0.75rem;
+  }
+
+  .castleTheme {
+    font-size: 0.7rem;
+    margin-top: 0.3rem;
+  }
+
+  .progressSection {
+    margin-bottom: 0.5rem;
+  }
+
+  .mainContent {
+    flex-direction: row;
+    gap: 1rem;
+    padding: 0.5rem;
+    align-items: flex-start;
+  }
+
+  .chapterPanel {
+    width: 55%;
+    max-width: none;
+    max-height: 280px;
+    padding: 0.8rem;
+  }
+
+  .chapterHeader {
+    font-size: 0.85rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .chapterList {
+    max-height: 200px;
+    overflow-y: auto;
+    gap: 0.3rem;
+  }
+
+  .chapterItem {
+    padding: 0.6rem;
+    min-height: 70px;
+    max-height: 80px;
+    gap: 0.7rem;
+  }
+
+  .chapterNumberContainer {
+    width: 32px;
+    height: 32px;
+  }
+
+  .chapterNumber {
+    font-size: 1.1rem;
+  }
+
+  .lockIcon {
+    width: 16px;
+    height: 16px;
+  }
+
+  .chapterTitle {
+    font-size: 0.8rem;
+  }
+
+  .chapterObjective {
+    font-size: 0.7rem;
+  }
+
+  .chapterArrow {
+    width: 16px;
+    height: 16px;
+  }
+
+  .castleInfoCard {
+    width: 40%;
+    max-width: none;
+    padding: 0.8rem;
+  }
+
+  .castleInfoAvatar {
+    width: 100px;
+    height: 100px;
+    margin-bottom: 0.8rem;
+  }
+
+  .castleImageCircle {
+    width: 80px;
+    height: 80px;
+    border: 3px solid rgba(216, 196, 182, 0.2);
+  }
+
+  .castleIconCircle {
+    width: 50px;
+    height: 50px;
+    border: 2px solid rgba(216, 196, 182, 0.3);
+    bottom: -5px;
+    right: -5px;
+  }
+
+  .castleEmoji {
+    font-size: 2.5rem;
+  }
+
+  .castleEmojiSmall {
+    font-size: 1.8rem;
+  }
+
+  .castleInfoName {
+    font-size: 1rem;
+    margin-bottom: 0.3rem;
+  }
+
+  .castleInfoQuote {
+    font-size: 0.7rem;
+    margin-bottom: 0.6rem;
+  }
+
+  .castleInfoStats {
+    gap: 0.5rem;
+  }
+
+  .castleInfoStat {
+    font-size: 0.7rem;
+  }
+
+  .statIcon {
+    width: 14px;
+    height: 14px;
+  }
+
+  .actionSection {
+    padding: 0.8rem 1rem;
+  }
+
+  .startButton {
+    font-size: 0.85rem;
+    padding: 0.7rem 1.5rem;
+    min-width: 200px;
+  }
+
+  .backButton {
+    top: 0.5rem;
+    right: 0.5rem;
+    padding: 0.3rem;
+  }
+
+  .backButtonImage {
+    width: 45px;
+    height: 45px;
+  }
+
+  .backButtonText {
+    font-size: 0.7rem;
+  }
+
+  /* Tooltip adjustments */
+  .chapterTooltip {
+    min-width: 250px;
+    max-width: 300px;
+    padding: 0.9rem;
+    font-size: 0.8rem;
+  }
+}
+
+/* ===================================================================
+   MOBILE - PORTRAIT (360x640, 1080x1920, 1440x2560)
+   Aspect ratio: 9:16
+   =================================================================== */
+@media only screen and (max-width: 767px) and (orientation: portrait) {
+  .chapterSelectionContainer {
+    height: auto;
+    min-height: 100vh;
+  }
+
+  .titlePanel {
+    width: 90%;
+    min-width: auto;
+    margin: 0.5rem auto;
+    padding: 0.8rem 1rem;
+  }
+
+  .castleTitle h1 {
+    font-size: 1.5rem;
+  }
+
+  .castleSubtitle {
+    font-size: 0.8rem;
+  }
+
+  .castleTheme {
+    font-size: 0.75rem;
+  }
+
+  .mainContent {
+    flex-direction: column;
+    padding: 0.5rem;
+    gap: 1rem;
+    align-items: center;
+  }
+
+  .chapterPanel {
+    width: 95%;
+    max-width: 500px;
+    max-height: none;
+    padding: 1rem;
+  }
+
+  .chapterList {
+    gap: 0.4rem;
+  }
+
+  .chapterItem {
+    padding: 0.8rem;
+    min-height: 85px;
+    max-height: 95px;
+  }
+
+  .chapterNumberContainer {
+    width: 38px;
+    height: 38px;
+  }
+
+  .chapterNumber {
+    font-size: 1.3rem;
+  }
+
+  .chapterTitle {
+    font-size: 0.9rem;
+  }
+
+  .chapterObjective {
+    font-size: 0.75rem;
+  }
+
+  .castleInfoCard {
+    width: 85%;
+    max-width: 320px;
+  }
+
+  .castleInfoAvatar {
+    width: 140px;
+    height: 140px;
+  }
+
+  .castleImageCircle {
+    width: 110px;
+    height: 110px;
+  }
+
+  .castleIconCircle {
+    width: 70px;
+    height: 70px;
+  }
+
+  .startButton {
+    min-width: 250px;
+    font-size: 1rem;
+    padding: 0.9rem 2rem;
+  }
+
+  .backButton {
+    top: 0.75rem;
+    right: 0.75rem;
+  }
+
+  .backButtonImage {
+    width: 55px;
+    height: 55px;
+  }
+
+  .backButtonText {
+    font-size: 0.75rem;
+  }
+
+  /* Tooltip for mobile portrait */
+  .chapterTooltip {
+    min-width: 280px;
+    max-width: 350px;
+    padding: 1rem;
+  }
+}
+
+/* ===================================================================
+   SMALL MOBILE - PORTRAIT (360x640 and smaller)
+   =================================================================== */
+@media only screen and (max-width: 480px) and (orientation: portrait) {
+  .titlePanel {
+    width: 95%;
+    padding: 0.7rem 0.8rem;
+  }
+
+  .castleTitle h1 {
+    font-size: 1.3rem;
+  }
+
+  .castleSubtitle {
+    font-size: 0.75rem;
+  }
+
+  .castleTheme {
+    font-size: 0.7rem;
+  }
+
+  .progressLabel,
+  .progressValue {
+    font-size: 0.7rem;
+  }
+
+  .chapterPanel {
+    width: 98%;
+    padding: 0.8rem;
+  }
+
+  .chapterHeader {
+    font-size: 0.9rem;
+  }
+
+  .chapterItem {
+    padding: 0.7rem;
+    gap: 0.6rem;
+  }
+
+  .chapterNumberContainer {
+    width: 34px;
+    height: 34px;
+  }
+
+  .chapterNumber {
+    font-size: 1.2rem;
+  }
+
+  .chapterTitle {
+    font-size: 0.85rem;
+  }
+
+  .chapterObjective {
+    font-size: 0.7rem;
+  }
+
+  .castleInfoCard {
+    width: 90%;
+    max-width: 280px;
+    padding: 1rem;
+  }
+
+  .startButton {
+    min-width: 200px;
+    font-size: 0.9rem;
+    padding: 0.8rem 1.5rem;
+  }
+}
+
+/* ===================================================================
+   EXTRA SMALL MOBILE - All orientations (Below 360px)
+   =================================================================== */
+@media only screen and (max-width: 359px) {
+  .titlePanel {
+    width: 98%;
+    padding: 0.6rem;
+  }
+
+  .castleTitle h1 {
+    font-size: 1.1rem;
+  }
+
+  .chapterPanel {
+    width: 100%;
+    padding: 0.7rem;
+  }
+
+  .chapterItem {
+    padding: 0.6rem;
+    min-height: 75px;
+  }
+
+  .chapterNumberContainer {
+    width: 30px;
+    height: 30px;
+  }
+
+  .chapterNumber {
+    font-size: 1rem;
+  }
+
+  .castleInfoCard {
+    width: 95%;
+    padding: 0.8rem;
+  }
+
+  .startButton {
+    min-width: 180px;
+    font-size: 0.85rem;
+    padding: 0.7rem 1.2rem;
+  }
+}
+
+/* ===================================================================
+   SQUARE ASPECT RATIO - Optimized for near-square screens
+   Aspect ratio between 0.9:1 and 1.1:1 (e.g., 1024x1024, 1200x1080)
+   =================================================================== */
+@media only screen and (min-aspect-ratio: 9/10) and (max-aspect-ratio: 11/10) {
+  .chapterSelectionContainer {
+    font-size: 14px;
+  }
+
+  .mainContent {
+    flex-direction: column;
+    gap: 1.2rem;
+    padding: 1rem;
+    align-items: center;
+  }
+
+  .titlePanel {
+    width: 90%;
+    max-width: 700px;
+    padding: 0.8rem 1.2rem;
+  }
+
+  .castleTitle h1 {
+    font-size: 1.5rem;
+  }
+
+  .castleSubtitle {
+    font-size: 0.85rem;
+  }
+
+  .progressBarContainer {
+    height: 8px;
+  }
+
+  .chapterPanel {
+    width: 90%;
+    max-width: 650px;
+    padding: 1rem;
+  }
+
+  .chapterList {
+    gap: 0.7rem;
+    max-height: 350px;
+  }
+
+  .chapterItem {
+    padding: 0.8rem;
+    min-height: 80px;
+  }
+
+  .chapterNumberContainer {
+    width: 36px;
+    height: 36px;
+  }
+
+  .chapterNumber {
+    font-size: 1.2rem;
+  }
+
+  .chapterTitle {
+    font-size: 0.9rem;
+  }
+
+  .chapterDescription {
+    font-size: 0.78rem;
+  }
+
+  .chapterXp {
+    font-size: 0.72rem;
+  }
+
+  .castleInfoCard {
+    width: 90%;
+    max-width: 650px;
+    padding: 1rem;
+  }
+
+  .castleInfoAvatar {
+    width: 70px;
+    height: 70px;
+  }
+
+  .castleInfoName {
+    font-size: 1rem;
+  }
+
+  .castleInfoQuote {
+    font-size: 0.8rem;
+  }
+
+  .castleInfoStats {
+    gap: 1.5rem;
+  }
+
+  .castleInfoStat {
+    font-size: 0.78rem;
+  }
+
+  .startButton {
+    font-size: 0.95rem;
+    padding: 0.8rem 2rem;
+    min-width: 220px;
+    margin-bottom: 1rem;
+  }
+
+  .backButton {
+    top: 0.8rem;
+    left: 0.8rem;
+    padding: 0.6rem 0.9rem;
+    font-size: 0.82rem;
+  }
+}
+
+/* ===================================================================
+   HIGH RESOLUTION DISPLAYS (Retina, 4K)
+   =================================================================== */
+@media only screen and (min-resolution: 192dpi),
+       only screen and (min-resolution: 2dppx) {
+  .chapterItem {
+    border-width: 1.5px;
+  }
+
+  .castleInfoCard {
+    border-width: 1.5px;
+  }
+
+  .startButton {
+    border-width: 1.5px;
+  }
+
+  /* Sharper shadows for high DPI */
+  .chapterItem {
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+  }
+}
+
+/* ===================================================================
+   PRINT STYLES (Optional - for printing castle progress)
+   =================================================================== */
+@media print {
+  .chapterSelectionContainer {
+    background: white;
+  }
+
+  .backgroundOverlay {
+    display: none;
+  }
+
+  .backButton {
+    display: none;
+  }
+
+  .startButton {
+    display: none;
+  }
+
+  .chapterPanel,
+  .castleInfoCard {
+    border: 1px solid #000;
+    box-shadow: none;
+  }
+}
+
+/* ===================================================================
+   ACCESSIBILITY - Reduced Motion
+   Note: For reduced motion, apply via global styles or use :global() in CSS Modules
+   =================================================================== */
+@media (prefers-reduced-motion: reduce) {
+  .chapterSelectionContainer,
+  .chapterItem,
+  .startButton,
+  .backButton,
+  .castleInfoCard,
+  .chapterNumberContainer,
+  .titlePanel,
+  .chapterTooltip {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

@@ -41,7 +41,31 @@ class UserQuizAttemptRepo extends BaseRepo {
     async getAllUserQuizAttempts() {
         const { data, error } = await this.supabase
             .from('user_quiz_attempts')
-            .select('*');
+            .select('*')
+            .order('created_at', { ascending: false });
+        
+        if (error) throw error;
+        return data.map(UserQuizAttempt.fromDatabase);
+    }
+
+    async getUserQuizAttemptsByUser(userId) {
+        const { data, error } = await this.supabase
+            .from('user_quiz_attempts')
+            .select('*')
+            .eq('user_id', userId)
+            .order('created_at', { ascending: false });
+        
+        if (error) throw error;
+        return data.map(UserQuizAttempt.fromDatabase);
+    }
+
+    async getUserQuizAttemptsByQuizAndUser(chapterQuizId, userId) {
+        const { data, error } = await this.supabase
+            .from('user_quiz_attempts')
+            .select('*')
+            .eq('chapter_quiz_id', chapterQuizId)
+            .eq('user_id', userId)
+            .order('created_at', { ascending: false });
         
         if (error) throw error;
         return data.map(UserQuizAttempt.fromDatabase);

@@ -136,20 +136,31 @@ const LineBasedMinigame: React.FC<LineBasedMinigameProps> = ({
     const extendedY2 = y2 + dirY * extension;
 
     return (
-      <KonvaLine
-        key={line.id}
-        points={[extendedX1, extendedY1, extendedX2, extendedY2]}
-        stroke={color}
-        strokeWidth={isSelected ? 6 : isHovered ? 5 : 4}
-        onClick={() => handleLineClick(line.id)}
-        onMouseEnter={() => selectedLines.length === 0 && setHoveredLine(line.id)}
-        onMouseLeave={() => setHoveredLine(null)}
-        shadowColor="black"
-        shadowBlur={isSelected ? 12 : 6}
-        shadowOpacity={0.5}
-        lineCap="round"
-        lineJoin="round"
-      />
+      <React.Fragment key={line.id}>
+        {/* Extended line for visual effect */}
+        <KonvaLine
+          points={[extendedX1, extendedY1, extendedX2, extendedY2]}
+          stroke={color}
+          strokeWidth={isSelected ? 6 : isHovered ? 5 : 4}
+          shadowColor="black"
+          shadowBlur={isSelected ? 12 : 6}
+          shadowOpacity={0.5}
+          lineCap="round"
+          lineJoin="round"
+          listening={false} // Don't listen to mouse events on extended line
+        />
+        {/* Invisible thicker hit area on the actual line segment for better click detection */}
+        <KonvaLine
+          points={[x1, y1, x2, y2]}
+          stroke="transparent"
+          strokeWidth={30} // Much thicker for easier clicking
+          onClick={() => handleLineClick(line.id)}
+          onMouseEnter={() => selectedLines.length === 0 && setHoveredLine(line.id)}
+          onMouseLeave={() => setHoveredLine(null)}
+          lineCap="round"
+          lineJoin="round"
+        />
+      </React.Fragment>
     );
   };
 
@@ -226,7 +237,7 @@ const LineBasedMinigame: React.FC<LineBasedMinigameProps> = ({
               {lines.map((line: MinigameLine) => renderLine(line))}
 
               {/* Draw endpoint circles and labels */}
-              {lines.map((line: MinigameLine) => {
+              {lines.map((line: MinigameLine, index: number) => {
                 const scaleX = canvasSize.width / canvasWidth;
                 const scaleY = canvasSize.height / canvasHeight;
                 const x1 = line.x1 * scaleX;
@@ -234,26 +245,105 @@ const LineBasedMinigame: React.FC<LineBasedMinigameProps> = ({
                 const x2 = line.x2 * scaleX;
                 const y2 = line.y2 * scaleY;
                 
+                // Calculate midpoint
+                const midX = (x1 + x2) / 2;
+                const midY = (y1 + y2) / 2;
+                
+                // Calculate line direction
+                const dx = x2 - x1;
+                const dy = y2 - y1;
+                const length = Math.sqrt(dx * dx + dy * dy);
+                
+                // Determine if line is horizontal, vertical, or diagonal
+                const angle = Math.atan2(dy, dx) * (180 / Math.PI);
+                const isHorizontal = Math.abs(angle) < 15 || Math.abs(angle) > 165;
+                const isVertical = Math.abs(angle - 90) < 15 || Math.abs(angle + 90) < 15;
+                
+                // Debug logging
+                console.log(`Label ${line.label}: dx=${dx.toFixed(2)}, dy=${dy.toFixed(2)}, angle=${angle.toFixed(2)}°, isVertical=${isVertical}, isHorizontal=${isHorizontal}`);
+                
+                // Count how many lines of each type we have so far to alternate positions
+                const linesBeforeThis = lines.slice(0, index);
+                
+                let labelX, labelY;
+                
+                if (isVertical) {
+                  // For VERTICAL lines, alternate between left and right
+                  const verticalLinesBefore = linesBeforeThis.filter(l => {
+                    const ldx = l.x2 - l.x1;
+                    const ldy = l.y2 - l.y1;
+                    const langle = Math.atan2(ldy, ldx) * (180 / Math.PI);
+                    return Math.abs(langle - 90) < 15 || Math.abs(langle + 90) < 15;
+                  }).length;
+                  const horizontalOffset = verticalLinesBefore % 2 === 0 ? -50 : 50;
+                  labelX = midX + horizontalOffset - 15;
+                  labelY = midY - 12;
+                } else if (isHorizontal) {
+                  // For HORIZONTAL lines, alternate between above and below
+                  const horizontalLinesBefore = linesBeforeThis.filter(l => {
+                    const ldx = l.x2 - l.x1;
+                    const ldy = l.y2 - l.y1;
+                    const langle = Math.atan2(ldy, ldx) * (180 / Math.PI);
+                    return Math.abs(langle) < 15 || Math.abs(langle) > 165;
+                  }).length;
+                  const verticalOffset = horizontalLinesBefore % 2 === 0 ? -35 : 35;
+                  labelX = midX - 15;
+                  labelY = midY + verticalOffset;
+                } else {
+                  // For diagonal lines, alternate between 1/4 and 3/4 position
+                  const diagonalLinesBefore = linesBeforeThis.filter(l => {
+                    const ldx = l.x2 - l.x1;
+                    const ldy = l.y2 - l.y1;
+                    const langle = Math.atan2(ldy, ldx) * (180 / Math.PI);
+                    const lHorizontal = Math.abs(langle) < 15 || Math.abs(langle) > 165;
+                    const lVertical = Math.abs(langle - 90) < 15 || Math.abs(langle + 90) < 15;
+                    return !lHorizontal && !lVertical;
+                  }).length;
+                  const position = diagonalLinesBefore % 2 === 0 ? 0.25 : 0.75;
+                  const posX = x1 + dx * position;
+                  const posY = y1 + dy * position;
+                  
+                  // Offset perpendicular to line (much closer)
+                  const perpX = -dy / length;
+                  const perpY = dx / length;
+                  const perpOffset = 10;
+                  
+                  labelX = posX + perpX * perpOffset - 15;
+                  labelY = posY + perpY * perpOffset - 12;
+                }
+                
                 return (
                   <React.Fragment key={`points-${line.id}`}>
                     <Circle x={x1} y={y1} radius={5} fill="#fff" opacity={0.7} />
                     <Circle x={x2} y={y2} radius={5} fill="#fff" opacity={0.7} />
                     
-                    {/* Label */}
+                    {/* Label background circle for better visibility - make it clickable */}
                     {line.label && (
-                      <Text
-                        x={(x1 + x2) / 2 - 15}
-                        y={(y1 + y2) / 2 - 25}
-                        text={line.label}
-                        fontSize={18}
-                        fontStyle="bold"
-                        fill={selectedLines.includes(line.id) ? '#FFD700' : '#E8F4FD'}
-                        align="center"
-                        width={30}
-                        shadowColor="black"
-                        shadowBlur={4}
-                        shadowOpacity={0.8}
-                      />
+                      <>
+                        <Circle
+                          x={labelX + 15}
+                          y={labelY + 12}
+                          // radius={20}
+                          fill="rgba(0, 0, 0, 0.8)"
+                          strokeEnabled={false}
+                          onClick={() => handleLineClick(line.id)}
+                          onMouseEnter={() => selectedLines.length === 0 && setHoveredLine(line.id)}
+                          onMouseLeave={() => setHoveredLine(null)}
+                        />
+                        <Text
+                          x={labelX}
+                          y={labelY}
+                          text={line.label}
+                          fontSize={24}
+                          fontStyle="bold"
+                          fill={selectedLines.includes(line.id) ? '#FFD700' : '#FFFFFF'}
+                          align="center"
+                          width={30}
+                          onClick={() => handleLineClick(line.id)}
+                          onMouseEnter={() => selectedLines.length === 0 && setHoveredLine(line.id)}
+                          onMouseLeave={() => setHoveredLine(null)}
+                        />
+                      </>
                     )}
                   </React.Fragment>
                 );

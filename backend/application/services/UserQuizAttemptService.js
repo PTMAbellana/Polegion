@@ -40,7 +40,12 @@ class UserQuizAttemptService {
                 const questionKey = `question${index + 1}`;
                 const userAnswer = data.answers[questionKey] || data.answers[question.id];
                 
-                console.log(`[UserQuizAttemptService] Q${index + 1}: user="${userAnswer}", correct="${question.correctAnswer}", match=${userAnswer === question.correctAnswer}`);
+                console.log(`[UserQuizAttemptService] Q${index + 1} (ID: ${question.id}):`);
+                console.log(`  - Looking for answer with key "${questionKey}" or "${question.id}"`);
+                console.log(`  - User answer: "${userAnswer}"`);
+                console.log(`  - Correct answer: "${question.correctAnswer}"`);
+                console.log(`  - Points: ${question.points}`);
+                console.log(`  - Match: ${userAnswer === question.correctAnswer}`);
                 
                 if (userAnswer === question.correctAnswer) {
                     score += question.points || 0;
@@ -105,6 +110,26 @@ class UserQuizAttemptService {
         if (cached) return cached;
 
         const attempts = await this.userQuizAttemptRepo.getAllUserQuizAttempts();
+        cache.set(cacheKey, attempts);
+        return attempts;
+    }
+
+    async getUserQuizAttemptsByUser(userId) {
+        const cacheKey = cache.generateKey('user_quiz_attempts_by_user', userId);
+        const cached = cache.get(cacheKey);
+        if (cached) return cached;
+
+        const attempts = await this.userQuizAttemptRepo.getUserQuizAttemptsByUser(userId);
+        cache.set(cacheKey, attempts);
+        return attempts;
+    }
+
+    async getUserQuizAttemptsByQuizAndUser(chapterQuizId, userId) {
+        const cacheKey = cache.generateKey('user_quiz_attempts_by_quiz_user', chapterQuizId, userId);
+        const cached = cache.get(cacheKey);
+        if (cached) return cached;
+
+        const attempts = await this.userQuizAttemptRepo.getUserQuizAttemptsByQuizAndUser(chapterQuizId, userId);
         cache.set(cacheKey, attempts);
         return attempts;
     }

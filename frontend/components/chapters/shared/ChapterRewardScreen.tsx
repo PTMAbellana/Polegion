@@ -12,6 +12,7 @@ export interface ChapterRewardScreenProps {
     minigame: number
     quiz: number
   }
+  quizScore?: number | null
   canRetakeQuiz: boolean
   onRetakeQuiz: () => void
   onComplete: () => void
@@ -23,6 +24,7 @@ export default function ChapterRewardScreen({
   relicImage,
   relicDescription,
   earnedXP,
+  quizScore,
   canRetakeQuiz,
   onRetakeQuiz,
   onComplete,
@@ -57,6 +59,12 @@ export default function ChapterRewardScreen({
           <span className={styles.statLabel}>Quiz XP</span>
           <span className={styles.statValue}>{earnedXP.quiz}</span>
         </div>
+        {quizScore !== null && quizScore !== undefined && (
+          <div className={styles.statBox}>
+            <span className={styles.statLabel}>Quiz Score</span>
+            <span className={styles.statValue}>{quizScore}%</span>
+          </div>
+        )}
       </div>
       <div className={styles.rewardActions}>
         {canRetakeQuiz && (

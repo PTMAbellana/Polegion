@@ -742,7 +742,7 @@ export default function GeometryPhysicsGame({
   return (
     <div className={styles.minigameContainer}>
       {/* Level Info - Horizontal Layout */}
-      <div style={{
+      <div className={styles.levelInfoContainer} style={{
         display: 'flex',
         gap: '1rem',
         marginBottom: '1rem',
@@ -766,18 +766,9 @@ export default function GeometryPhysicsGame({
       </div>
 
       {/* Game Area - Canvas Left, Controls Right */}
-      <div style={{
-        display: 'flex',
-        gap: '1rem',
-        alignItems: 'flex-start',
-        flexWrap: 'wrap',
-      }}>
+      <div className={styles.gameAreaWrapper}>
         {/* Canvas Container */}
-        <div style={{ 
-          flex: '1 1 500px', 
-          minWidth: '300px', 
-          maxWidth: '100%',
-        }}>
+        <div className={styles.canvasContainer}>
           <canvas
             ref={canvasRef}
             width={canvasSize.width}
@@ -792,20 +783,13 @@ export default function GeometryPhysicsGame({
               height: 'auto',
               display: 'block',
               maxWidth: '100%',
+              maxHeight: 'calc(100vh - 450px)', /* Ensure canvas fits in viewport */
             }}
           />
         </div>
 
         {/* Controls Container */}
-        <div style={{
-          flex: '0 1 auto',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '1rem',
-          minWidth: '160px',
-          maxWidth: '200px',
-          width: '100%',
-        }}>
+        <div className={styles.controlsContainer}>
           <button
             onClick={handlePlay}
             disabled={!canPlay}
@@ -876,28 +860,11 @@ export default function GeometryPhysicsGame({
             Clear
           </button>
 
-          {/* Hints and Messages */}
-          {needsMorePoints && !isSimulating && (
-            <div className={styles.hint} style={{ 
-              margin: 0,
-              padding: '10px 12px',
-              fontSize: '13px',
-              background: 'linear-gradient(135deg, rgba(216, 196, 182, 0.3) 0%, rgba(245, 239, 231, 0.2) 100%)',
-              border: '2px solid rgba(216, 196, 182, 0.4)',
-              borderRadius: '8px',
-              color: '#F5EFE7',
-              textAlign: 'center',
-              backdropFilter: 'blur(5px)',
-              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2)',
-            }}>
-              Click on the grid to place {2 - points.length} more point(s)
-            </div>
-          )}
-
+          {/* Status Messages Area - Timer, Success, or Failure (same position) */}
           {/* Timer Countdown Indicator */}
           {((level.type === 'line' && timeOnLine > 0) || (level.type !== 'line' && timeInBox > 0)) && isSimulating && (
             <div style={{
-              padding: '16px',
+              padding: '12px',
               background: 'linear-gradient(135deg, rgba(33, 150, 243, 0.9) 0%, rgba(30, 136, 229, 0.9) 100%)',
               color: 'white',
               borderRadius: '10px',
@@ -906,10 +873,12 @@ export default function GeometryPhysicsGame({
               border: '2px solid #2196F3',
               boxShadow: '0 4px 12px rgba(33, 150, 243, 0.4)',
               backdropFilter: 'blur(5px)',
+              minWidth: '140px',
+              maxWidth: '100%',
             }}>
               <div style={{ 
-                marginBottom: '8px',
-                fontSize: '14px',
+                marginBottom: '6px',
+                fontSize: '12px',
                 textTransform: 'uppercase',
                 letterSpacing: '0.5px',
                 color: '#F5EFE7',
@@ -917,11 +886,12 @@ export default function GeometryPhysicsGame({
                 {level.type === 'line' ? 'On the Line!' : 'Ball in Box!'}
               </div>
               <div style={{ 
-                fontSize: '48px',
+                fontSize: '36px',
                 fontWeight: '700',
                 letterSpacing: '2px',
                 textShadow: '0 2px 4px rgba(0, 0, 0, 0.3)',
                 color: '#FFD700',
+                lineHeight: '1',
               }}>
                 {level.type === 'line' 
                   ? Math.ceil((SUCCESS_TIMER_DURATION - timeOnLine) / 1000)
@@ -930,6 +900,7 @@ export default function GeometryPhysicsGame({
             </div>
           )}
 
+          {/* Success Message */}
           {gameResult === 'success' && (
             <div className={styles.successMessage} style={{ 
               margin: 0,
@@ -942,6 +913,7 @@ export default function GeometryPhysicsGame({
               backdropFilter: 'blur(5px)',
               textAlign: 'center',
               fontWeight: '700',
+              color: 'white',
             }}>
             {level.type === 'line' 
               ? 'Success! You kept the ball balanced on the line!' 
@@ -949,6 +921,7 @@ export default function GeometryPhysicsGame({
             </div>
           )}
 
+          {/* Failure Message */}
           {gameResult === 'failure' && (
             <div className={styles.failureMessage} style={{ 
               margin: 0,
@@ -961,12 +934,30 @@ export default function GeometryPhysicsGame({
               backdropFilter: 'blur(5px)',
               textAlign: 'center',
               fontWeight: '700',
+              color: 'white',
             }}>
             {level.type === 'line' 
               ? 'Try again! The ball fell off the line or hit a wall!' 
               : 'Try again! The ball missed the box!'}
             </div>
           )}
+
+          {/* Hints and Messages */}
+          <div className={styles.hint} style={{ 
+            margin: 0,
+            padding: '10px 12px',
+            fontSize: '13px',
+            background: 'linear-gradient(135deg, rgba(216, 196, 182, 0.3) 0%, rgba(245, 239, 231, 0.2) 100%)',
+            border: '2px solid rgba(216, 196, 182, 0.4)',
+            borderRadius: '8px',
+            color: '#F5EFE7',
+            textAlign: 'center',
+            backdropFilter: 'blur(5px)',
+            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2)',
+            visibility: needsMorePoints && !isSimulating ? 'visible' : 'hidden',
+          }}>
+            Click on the grid to place {2 - points.length} more point(s)
+          </div>
         </div>
       </div>
     </div>

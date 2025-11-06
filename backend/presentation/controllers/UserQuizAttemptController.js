@@ -30,7 +30,18 @@ class UserQuizAttemptController {
 
     async getAll(req, res) {
         try {
-            const attempts = await this.userQuizAttemptService.getAllUserQuizAttempts();
+            const { chapter_quiz_id } = req.query;
+            const userId = req.user.id; // Get from auth middleware
+            
+            let attempts;
+            if (chapter_quiz_id) {
+                // Filter by quiz and user
+                attempts = await this.userQuizAttemptService.getUserQuizAttemptsByQuizAndUser(chapter_quiz_id, userId);
+            } else {
+                // Get all for current user
+                attempts = await this.userQuizAttemptService.getUserQuizAttemptsByUser(userId);
+            }
+            
             res.json(attempts);
         } catch (err) {
             res.status(400).json({ error: err.message });

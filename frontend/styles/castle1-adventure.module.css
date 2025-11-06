@@ -1,5 +1,8 @@
 @import url('https://fonts.googleapis.com/css2?family=UnifrakturMaguntia&family=Cinzel:wght@400;600&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap');
 
+/* Import responsive styles for all device types and orientations */
+@import './castle1-responsive.module.css';
+
 /* Chapter Selection Page Styles */
 .chapterSelectionContainer {
   height: 100vh;
@@ -12,6 +15,8 @@
   font-family: 'Cinzel', serif;
   display: flex;
   flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 
 .backgroundOverlay {
@@ -22,9 +27,9 @@
   bottom: 0;
   background: linear-gradient(
     135deg,
-    rgba(16, 35, 70, 0.3) 0%,
-    rgba(44, 24, 63, 0.4) 50%,
-    rgba(16, 35, 70, 0.3) 100%
+    rgba(33, 53, 85, 0.4) 0%,
+    rgba(62, 88, 121, 0.5) 50%,
+    rgba(33, 53, 85, 0.4) 100%
   );
   backdrop-filter: blur(1px);
 }
@@ -36,7 +41,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(16, 35, 70, 0.95);
+  background: rgba(33, 53, 85, 0.95);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -51,33 +56,34 @@
 
 .introContent {
   text-align: center;
-  color: #E8F4FD;
+  color: #F5EFE7;
 }
 
 .introTitle {
   font-size: 2.5rem;
   font-weight: bold;
   margin-bottom: 0.75rem;
-  text-shadow: 0 0 20px rgba(102, 187, 255, 0.8);
+  text-shadow: 0 0 20px rgba(216, 196, 182, 0.8);
   animation: glow 2s ease-in-out infinite alternate;
 }
 
 @keyframes glow {
-  from { text-shadow: 0 0 20px rgba(102, 187, 255, 0.5); }
-  to { text-shadow: 0 0 30px rgba(102, 187, 255, 1); }
+  from { text-shadow: 0 0 20px rgba(216, 196, 182, 0.5); }
+  to { text-shadow: 0 0 30px rgba(216, 196, 182, 1); }
 }
 
 .introText {
   font-size: 1rem;
   margin-bottom: 1.5rem;
   opacity: 0.9;
+  color: #D8C4B6;
 }
 
 .introSpinner {
   width: 35px;
   height: 35px;
-  border: 3px solid rgba(102, 187, 255, 0.3);
-  border-top: 3px solid #66BBFF;
+  border: 3px solid rgba(216, 196, 182, 0.3);
+  border-top: 3px solid #D8C4B6;
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin: 0 auto;
@@ -109,35 +115,35 @@
 }
 
 .backButtonImage {
-  width: 70px; /* Increased from 50px */
-  height: 70px; /* Increased from 50px */
+  width: 70px;
+  height: 70px;
   object-fit: contain;
   transition: transform 0.3s ease, filter 0.3s ease;
-  filter: drop-shadow(0 3px 10px rgba(102, 187, 255, 0.5));
+  filter: drop-shadow(0 3px 10px rgba(216, 196, 182, 0.5));
 }
 
 .backButtonText {
-  color: #E8F4FD;
+  color: #F5EFE7;
   font-weight: 700;
-  font-size: 0.85rem; /* Increased from 0.75rem */
+  font-size: 0.85rem;
   text-align: center;
   white-space: nowrap;
   text-shadow: 
     0 2px 4px rgba(0, 0, 0, 0.8),
-    0 0 10px rgba(102, 187, 255, 0.5);
+    0 0 10px rgba(216, 196, 182, 0.5);
   transition: all 0.3s ease;
 }
 
 .backButton:hover .backButtonImage {
   transform: scale(1.15) rotate(-5deg);
-  filter: drop-shadow(0 4px 15px rgba(102, 187, 255, 0.8));
+  filter: drop-shadow(0 4px 15px rgba(216, 196, 182, 0.8));
 }
 
 .backButton:hover .backButtonText {
-  color: #66BBFF;
+  color: #D8C4B6;
   text-shadow: 
     0 2px 4px rgba(0, 0, 0, 0.8),
-    0 0 15px rgba(102, 187, 255, 0.8);
+    0 0 15px rgba(216, 196, 182, 0.8);
   transform: translateY(-2px);
 }
 
@@ -151,8 +157,8 @@
 
 /* Title Panel */
 .titlePanel {
-  background: rgba(16, 35, 70, 0.8);
-  border: 2px solid #66BBFF;
+  background: rgba(33, 53, 85, 0.8);
+  border: 2px solid #D8C4B6;
   border-radius: 12px;
   padding: 1rem 1.5rem;
   text-align: center;
@@ -168,21 +174,21 @@
 .castleTitle h1 {
   font-family: 'UnifrakturMaguntia', serif;
   font-size: 1.8rem;
-  color: #66BBFF;
+  color: #F5EFE7;
   margin-bottom: 0.15rem;
-  text-shadow: 0 0 10px rgba(102, 187, 255, 0.5);
+  text-shadow: 0 0 10px rgba(245, 239, 231, 0.5);
 }
 
 .castleSubtitle {
-  color: #B8D4F0;
+  color: #D8C4B6;
   font-size: 0.9rem;
   margin-bottom: 0;
   margin-top: 0;
-  opacity: 0.8;
+  opacity: 0.9;
 }
 
 .castleTheme {
-  color: #E8F4FD;
+  color: #F5EFE7;
   font-size: 0.85rem;
   margin-top: 0.5rem;
   font-style: italic;
@@ -203,13 +209,13 @@
 }
 
 .progressLabel {
-  color: #E8F4FD;
+  color: #F5EFE7;
   font-weight: 600;
   font-size: 0.8rem;
 }
 
 .progressValue {
-  color: #66BBFF;
+  color: #D8C4B6;
   font-weight: bold;
   font-size: 0.8rem;
 }
@@ -217,17 +223,17 @@
 .progressBar {
   width: 100%;
   height: 5px;
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(216, 196, 182, 0.2);
   border-radius: 3px;
   overflow: hidden;
 }
 
 .progressFill {
   height: 100%;
-  background: linear-gradient(90deg, #66BBFF, #4FC3F7);
+  background: linear-gradient(90deg, #D8C4B6, #F5EFE7);
   border-radius: 3px;
   transition: width 0.5s ease;
-  box-shadow: 0 0 8px rgba(102, 187, 255, 0.5);
+  box-shadow: 0 0 8px rgba(216, 196, 182, 0.5);
 }
 
 /* Main Content */
@@ -246,8 +252,8 @@
 
 /* Chapter Panel */
 .chapterPanel {
-  background: rgba(16, 35, 70, 0.8);
-  border: 2px solid #66BBFF;
+  background: rgba(33, 53, 85, 0.8);
+  border: 2px solid #D8C4B6;
   border-radius: 12px;
   padding: 1.2rem;
   backdrop-filter: blur(10px);
@@ -264,15 +270,15 @@
   display: flex;
   align-items: center;
   gap: 0.4rem;
-  color: #66BBFF;
+  color: #F5EFE7;
   font-size: 1rem;
   font-weight: bold;
   margin-bottom: 0.75rem;
-  text-shadow: 0 0 5px rgba(102, 187, 255, 0.5);
+  text-shadow: 0 0 5px rgba(245, 239, 231, 0.5);
 }
 
 .chapterIcon {
-  color: #66BBFF;
+  color: #D8C4B6;
   width: 18px;
   height: 18px;
 }
@@ -288,100 +294,218 @@
 
 /* Chapter Item */
 .chapterItem {  
-  background: rgba(44, 24, 63, 0.4);
-  border: 2px solid rgba(102, 187, 255, 0.3);
+  background: rgba(33, 53, 85, 0.4);
+  border: 2px solid rgba(216, 196, 182, 0.25);
   border-radius: 12px;
-  padding: 0.8rem;
+  padding: 1rem;
   cursor: pointer;
   transition: all 0.3s ease;
   display: flex;
-  gap: 0.8rem;
+  gap: 1rem;
   position: relative;
   min-height: 90px;
   max-height: 100px;
 }
 
+/* Hover state - for tooltip/description */
 .chapterItem:hover:not(.locked) {
-  background: rgba(102, 187, 255, 0.1);
-  border-left-color: #66BBFF;
-  border-left-width: 4px;
-  transform: translateX(4px);
+  background: rgba(62, 88, 121, 0.6);
+  border-color: rgba(216, 196, 182, 0.5);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
 }
 
-.chapterItem.selected {
-  background: rgba(102, 187, 255, 0.15);
-  border-left-color: #66BBFF;
-  border-left-width: 4px;
-  box-shadow: 0 0 12px rgba(102, 187, 255, 0.3);
-}
-
+/* LOCKED STATE - Gray and disabled */
 .chapterItem.locked {
   opacity: 0.5;
   cursor: not-allowed;
-  background: transparent;
+  background: rgba(33, 53, 85, 0.2);
+  border-color: rgba(150, 150, 150, 0.15);
 }
 
-.chapterItem.completed {
-  border-left-color: #4CAF50;
-  background: rgba(76, 175, 80, 0.05);
+.chapterItem.locked:hover {
+  transform: none;
+  box-shadow: none;
+  background: rgba(33, 53, 85, 0.2);
+  border-color: rgba(150, 150, 150, 0.15);
 }
 
-.chapterItem.completed .chapterTitle {
-  color: #4CAF50;
+/* COMPLETED STATE - Lighter beige accent (when not selected) */
+.chapterItem.completed:not(.selected) {
+  background: rgba(33, 53, 85, 0.4);
+  border-left: 4px solid #F5EFE7;
+  padding-left: calc(1rem - 2px);
 }
 
-.chapterIconContainer {
+.chapterItem.completed:not(.selected):hover {
+  background: rgba(62, 88, 121, 0.6);
+  border-left-color: #F5EFE7;
+  box-shadow: 0 6px 16px rgba(245, 239, 231, 0.1);
+}
+
+/* SELECTED STATE - Castle blue highlight */
+.chapterItem.selected {
+  background: linear-gradient(
+    90deg, 
+    rgba(62, 88, 121, 0.6) 0%, 
+    rgba(33, 53, 85, 0.5) 100%
+  );
+  border: 2px solid #D8C4B6;
+  border-left: 4px solid #F5EFE7;
+  padding-left: calc(1rem - 2px);
+  box-shadow: 
+    0 0 20px rgba(216, 196, 182, 0.3),
+    0 4px 16px rgba(0, 0, 0, 0.5);
+  transform: translateX(6px);
+}
+
+.chapterItem.selected:hover {
+  box-shadow: 
+    0 0 25px rgba(216, 196, 182, 0.4),
+    0 6px 20px rgba(0, 0, 0, 0.6);
+}
+
+/* Chapter Number Container */
+.chapterNumberContainer {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 30px;
-  height: 30px;
-  background: rgba(102, 187, 255, 0.2);
-  border-radius: 50%;
+  width: 44px;
+  height: 44px;
   flex-shrink: 0;
+  transition: all 0.3s ease;
+  border: none;
+  outline: none;
+  background: transparent;
+  box-shadow: none;
 }
 
-.chapterEmoji {
-  font-size: 1rem;
+/* Default/Unlocked chapter number styling */
+.chapterNumber {
+  color: #F5EFE7;
+  font-size: 1.5rem;
+  font-weight: 700;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  border: none;
+  outline: none;
+  background: transparent;
+  box-shadow: none;
+}
+
+/* Hover state for unlocked chapters */
+.chapterItem:hover:not(.locked) .chapterNumberContainer {
+  transform: scale(1.05);
+}
+
+/* LOCKED - Gray styling */
+.chapterItem.locked .chapterNumberContainer {
+  opacity: 0.5;
+}
+
+.chapterItem.locked .chapterNumber {
+  color: #666;
+  text-shadow: none;
 }
 
 .lockIcon {
   color: #999;
-  width: 14px;
-  height: 14px;
+  width: 20px;
+  height: 20px;
+}
+
+/* COMPLETED - Bright beige number (when not selected) */
+.chapterItem.completed:not(.selected) .chapterNumber {
+  color: #F5EFE7;
+  text-shadow: 0 0 10px rgba(245, 239, 231, 0.6);
+  font-weight: 800;
+}
+
+/* SELECTED - Bright beige with glow */
+.chapterItem.selected .chapterNumberContainer {
+  transform: scale(1.1);
+}
+
+.chapterItem.selected .chapterNumber {
+  color: #F5EFE7;
+  font-weight: 800;
+  text-shadow: 0 0 16px rgba(245, 239, 231, 0.8);
 }
 
 .completedIcon {
-  color: #4CAF50;
-  width: 14px;
-  height: 14px;
+  color: #FFD700;
+  width: 18px;
+  height: 18px;
 }
 
-/* Chapter Content */
+.chapterItem.selected .completedIcon {
+  color: #FFF;
+  filter: drop-shadow(0 0 6px rgba(255, 215, 0, 0.6));
+}
+
+.chapterEmoji {
+  font-size: 1.1rem;
+}
+
+/* Chapter Content - Text */
 .chapterContent {
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 0.4rem;
+  gap: 0.5rem;
   min-width: 0;
   justify-content: center;
 }
 
 .chapterTitle {
-  color: #E8F4FD;
-  font-size: clamp(0.85rem, 1.1vw, 0.95rem);
+  color: #F5EFE7;
+  font-size: clamp(0.9rem, 1.1vw, 1rem);
   margin: 0;
   font-weight: 600;
   letter-spacing: 0.3px;
-  line-height: 1.2;
+  line-height: 1.3;
+  transition: all 0.3s ease;
 }
 
 .chapterObjective {
-  color: #66BBFF;
+  color: #D8C4B6;
   font-size: clamp(0.75rem, 0.95vw, 0.85rem);
   margin: 0;
-  opacity: 0.9;
-  font-style: italic;
+  line-height: 1.4;
+  opacity: 0.85;
+  transition: all 0.3s ease;
+}
+
+/* LOCKED - Grayed out text */
+.chapterItem.locked .chapterTitle {
+  color: #888;
+}
+
+.chapterItem.locked .chapterObjective {
+  color: #666;
+  opacity: 0.7;
+}
+
+/* COMPLETED - Bright beige text (when not selected) */
+.chapterItem.completed:not(.selected) .chapterTitle {
+  color: #F5EFE7;
+  font-weight: 700;
+}
+
+.chapterItem.completed:not(.selected) .chapterObjective {
+  color: #D8C4B6;
+  opacity: 0.95;
+}
+
+/* SELECTED - Bright beige with glow (overrides completed) */
+.chapterItem.selected .chapterTitle {
+  color: #F5EFE7;
+  font-weight: 700;
+  text-shadow: 0 0 10px rgba(245, 239, 231, 0.5);
+}
+
+.chapterItem.selected .chapterObjective {
+  color: #D8C4B6;
+  opacity: 1;
 }
 
 /* Chapter Status */
@@ -415,15 +539,82 @@
   height: 16px;
 }
 
-.chapterArrow {
-  color: #66BBFF;
-  width: 20px;
-  height: 20px;
-  transition: transform 0.3s ease;
+/* Chapter Status - Right side arrow/badge */
+.chapterStatus {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.chapterItem:hover .chapterArrow {
-  transform: translateX(3px);
+.rewardBadge {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  background: rgba(216, 196, 182, 0.2);
+  padding: 0.4rem 0.75rem;
+  border-radius: 20px;
+  border: 1px solid #D8C4B6;
+}
+
+.rewardBadge span {
+  color: #F5EFE7;
+  font-size: clamp(0.7rem, 0.85vw, 0.75rem);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.rewardBadge svg {
+  color: #F5EFE7;
+  width: 16px;
+  height: 16px;
+}
+
+.chapterItem.selected .rewardBadge {
+  background: rgba(245, 239, 231, 0.25);
+  border-color: #F5EFE7;
+  box-shadow: 0 0 8px rgba(245, 239, 231, 0.3);
+}
+
+.chapterItem.selected .rewardBadge span {
+  color: #F5EFE7;
+  text-shadow: 0 0 6px rgba(245, 239, 231, 0.4);
+}
+
+.chapterItem.selected .rewardBadge svg {
+  color: #F5EFE7;
+  filter: drop-shadow(0 0 4px rgba(245, 239, 231, 0.5));
+}
+
+.chapterArrow {
+  color: #D8C4B6;
+  width: 20px;
+  height: 20px;
+  transition: all 0.3s ease;
+  opacity: 0.6;
+}
+
+.chapterItem:hover:not(.locked) .chapterArrow {
+  transform: translateX(4px);
+  opacity: 1;
+  color: #F5EFE7;
+}
+
+.chapterItem.locked .chapterArrow {
+  color: #666;
+  opacity: 0.3;
+}
+
+.chapterItem.completed:not(.selected) .chapterArrow {
+  color: #D8C4B6;
+  opacity: 0.8;
+}
+
+.chapterItem.selected .chapterArrow {
+  color: #F5EFE7;
+  opacity: 1;
+  transform: translateX(5px);
+  filter: drop-shadow(0 0 4px rgba(245, 239, 231, 0.5));
 }
 
 /* Action Section */
@@ -442,8 +633,8 @@
   display: flex;
   align-items: center;
   gap: 0.6rem;
-  background: linear-gradient(135deg, #66BBFF 0%, #4FC3F7 50%, #29B6F6 100%);
-  color: white;
+  background: linear-gradient(135deg, #3E5879 0%, #213555 50%, #3E5879 100%);
+  color: #F5EFE7;
   border: none;
   padding: 1rem 2.5rem;
   border-radius: 30px;
@@ -452,16 +643,16 @@
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: 
-    0 4px 15px rgba(102, 187, 255, 0.4),
-    0 0 20px rgba(102, 187, 255, 0.2),
-    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    0 4px 15px rgba(216, 196, 182, 0.4),
+    0 0 20px rgba(216, 196, 182, 0.2),
+    inset 0 1px 0 rgba(245, 239, 231, 0.2);
   min-width: 280px;
   justify-content: center;
   position: relative;
   overflow: hidden;
   text-transform: uppercase;
   letter-spacing: 1px;
-  border: 2px solid rgba(255, 255, 255, 0.3);
+  border: 2px solid rgba(216, 196, 182, 0.4);
 }
 
 /* Animated gradient effect */
@@ -475,7 +666,7 @@
   background: linear-gradient(
     90deg,
     transparent,
-    rgba(255, 255, 255, 0.3),
+    rgba(245, 239, 231, 0.2),
     transparent
   );
   transition: left 0.5s ease;
@@ -486,20 +677,21 @@
 }
 
 .startButton:hover:not(.disabled) {
-  background: linear-gradient(135deg, #4FC3F7 0%, #29B6F6 50%, #66BBFF 100%);
+  background: linear-gradient(135deg, #3E5879 0%, #213555 50%, #3E5879 100%);
   box-shadow: 
-    0 6px 25px rgba(102, 187, 255, 0.6),
-    0 0 30px rgba(102, 187, 255, 0.4),
-    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+    0 6px 25px rgba(216, 196, 182, 0.6),
+    0 0 30px rgba(216, 196, 182, 0.4),
+    inset 0 1px 0 rgba(245, 239, 231, 0.3);
   transform: translateY(-3px) scale(1.02);
-  border-color: rgba(255, 255, 255, 0.5);
+  border-color: #D8C4B6;
+  color: #F5EFE7;
 }
 
 .startButton:active:not(.disabled) {
   transform: translateY(-1px) scale(0.98);
   box-shadow: 
-    0 3px 15px rgba(102, 187, 255, 0.5),
-    0 0 20px rgba(102, 187, 255, 0.3);
+    0 3px 15px rgba(216, 196, 182, 0.5),
+    0 0 20px rgba(216, 196, 182, 0.3);
 }
 
 .startButton.disabled {
@@ -571,8 +763,8 @@
   }
 }
 
-/* Wizard Container - NEW STYLES */
-.wizardContainer {
+/* Castle Info Card Container */
+.castleInfoContainer {
   position: relative;
   display: flex;
   align-items: center;
@@ -580,9 +772,9 @@
   flex-shrink: 0;
 }
 
-.wizardCard {
-  background: rgba(16, 35, 70, 0.8);
-  border: 2px solid #66BBFF;
+.castleInfoCard {
+  background: rgba(33, 53, 85, 0.8);
+  border: 2px solid #D8C4B6;
   border-radius: 15px;
   padding: 1.5rem;
   backdrop-filter: blur(10px);
@@ -592,7 +784,7 @@
   max-width: 320px;
 }
 
-.wizardAvatar {
+.castleInfoAvatar {
   position: relative;
   width: 160px;
   height: 160px;
@@ -607,31 +799,31 @@
   width: 120px;
   height: 120px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #66BBFF 0%, #4FC3F7 100%);
-  box-shadow: 0 8px 20px rgba(102, 187, 255, 0.4);
+  background: linear-gradient(135deg, #3E5879 0%, #213555 100%);
+  box-shadow: 0 8px 20px rgba(216, 196, 182, 0.4);
   overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 4px solid rgba(255, 255, 255, 0.2);
+  border: 4px solid rgba(216, 196, 182, 0.2);
   z-index: 1;
   transition: transform 0.3s ease;
 }
 
-.wizardImageCircle {
+.castleIconCircle {
   position: absolute;
   bottom: -10px;
   right: -10px;
   width: 80px;
   height: 80px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #4FC3F7 0%, #29B6F6 100%);
-  box-shadow: 0 6px 15px rgba(79, 195, 247, 0.4);
+  background: linear-gradient(135deg, #D8C4B6 0%, #F5EFE7 100%);
+  box-shadow: 0 6px 15px rgba(216, 196, 182, 0.4);
   overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 3px solid rgba(255, 255, 255, 0.3);
+  border: 3px solid rgba(216, 196, 182, 0.3);
   z-index: 2;
   transition: transform 0.3s ease;
 }
@@ -642,13 +834,13 @@
   object-fit: cover;
 }
 
-.wizardImage {
+.castleIconImage {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
-.wizardEmoji {
+.castleEmoji {
   font-size: 3.5rem;
   position: absolute;
   top: 50%;
@@ -656,7 +848,7 @@
   transform: translate(-50%, -50%);
 }
 
-.wizardEmojiSmall {
+.castleEmojiSmall {
   font-size: 2.5rem;
   position: absolute;
   top: 50%;
@@ -668,24 +860,24 @@
   display: none;
 }
 
-.wizardAvatar:hover .castleImageCircle {
+.castleInfoAvatar:hover .castleImageCircle {
   transform: scale(1.05);
 }
 
-.wizardAvatar:hover .wizardImageCircle {
+.castleInfoAvatar:hover .castleIconCircle {
   transform: scale(1.1);
 }
 
-.wizardName {
-  color: #66BBFF;
+.castleInfoName {
+  color: #F5EFE7;
   font-size: 1.3rem;
   margin: 0 0 0.5rem 0;
   font-weight: 600;
-  text-shadow: 0 0 10px rgba(102, 187, 255, 0.3);
+  text-shadow: 0 0 10px rgba(245, 239, 231, 0.3);
 }
 
-.wizardQuote {
-  color: #E8F4FD;
+.castleInfoQuote {
+  color: #D8C4B6;
   font-size: 0.85rem;
   font-style: italic;
   margin: 0 0 1rem 0;
@@ -693,23 +885,23 @@
   line-height: 1.4;
 }
 
-.wizardStats {
+.castleInfoStats {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
 }
 
-.wizardStat {
+.castleInfoStat {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  color: #B8D4F0;
+  color: #D8C4B6;
   font-size: 0.85rem;
   justify-content: center;
 }
 
 .statIcon {
-  color: #66BBFF;
+  color: #F5EFE7;
   width: 18px;
   height: 18px;
 }
@@ -718,23 +910,25 @@
   min-width: 300px;
   max-width: 400px;
   width: max-content;
-  background: rgba(16, 35, 70, 0.95); /* CHANGE - matches castle page */
-  backdrop-filter: blur(15px);
-  border: 2px solid #66BBFF; /* CHANGE - matches castle blue theme */
-  border-radius: 15px;
+  background: linear-gradient(135deg, rgba(33, 53, 85, 0.98) 0%, rgba(62, 88, 121, 0.98) 100%);
+  backdrop-filter: blur(12px);
+  border: 2px solid rgba(216, 196, 182, 0.4);
+  border-radius: 12px;
   padding: 1.25rem;
-  box-shadow: 0 10px 30px rgba(102, 187, 255, 0.4); /* CHANGE - blue glow */
+  box-shadow: 
+    0 8px 24px rgba(0, 0, 0, 0.5),
+    0 0 15px rgba(216, 196, 182, 0.2);
   pointer-events: none;
   animation: tooltipSlideIn 0.2s ease;
 }
 
 .chapterTooltip p {
   margin: 0 0 1rem 0;
-  color: #E8F4FD; /* CHANGE - matches castle text color */
+  color: #F5EFE7;
   line-height: 1.6;
   word-wrap: break-word;
   white-space: normal;
-  font-size: 0.9rem; /* ADD - consistent size */
+  font-size: 0.9rem;
 }
 
 .tooltipTopics {
@@ -747,13 +941,13 @@
 .topicTag {
   display: inline-block;
   padding: 0.35rem 0.75rem;
-  background: rgba(102, 187, 255, 0.2); /* CHANGE - blue theme */
-  border: 1px solid rgba(102, 187, 255, 0.4); /* CHANGE - blue border */
-  border-radius: 12px;
+  background: rgba(216, 196, 182, 0.2);
+  border: 1px solid rgba(216, 196, 182, 0.4);
+  border-radius: 8px;
   font-size: 0.85rem;
-  color: #66BBFF; /* CHANGE - blue text */
+  color: #D8C4B6;
   white-space: nowrap;
-  font-weight: 600; /* ADD - match badge style */
+  font-weight: 500;
 }
 
 @keyframes tooltipSlideIn {
@@ -874,7 +1068,7 @@
     width: 100%;
   }
 
-  .wizardCard {
+  .castleInfoCard {
     max-width: 100%;
     width: 100%;
   }
@@ -905,7 +1099,7 @@
     max-height: none;
   }
   
-  .wizardCard {
+  .castleInfoCard {
     max-width: 250px;
   }
   
@@ -928,25 +1122,4 @@
   }
 }
 
-.chapterNumber {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  background: linear-gradient(135deg, #66BBFF 0%, #4FC3F7 100%);
-  border-radius: 50%;
-  font-size: 0.85rem;
-  font-weight: 900;
-  color: white;
-  box-shadow: 0 3px 12px rgba(102, 187, 255, 0.5);
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-  border: 2px solid rgba(255, 255, 255, 0.5);
-}
-
-/* Make it glow on hover */
-.chapterItem:hover .chapterNumber {
-  box-shadow: 0 4px 16px rgba(102, 187, 255, 0.7);
-  transform: scale(1.1);
-  transition: all 0.3s ease;
-}
+/* Removed duplicate chapterNumber styles - now defined earlier in the file with Castle 1 theme */

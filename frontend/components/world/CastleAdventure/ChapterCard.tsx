@@ -1,5 +1,5 @@
 import React from 'react';
-import { Lock, CheckCircle, ChevronRight, Star } from 'lucide-react';
+import { Lock, ChevronRight, Star, Award } from 'lucide-react';
 
 export interface Chapter {
   id: number;
@@ -39,13 +39,11 @@ const ChapterCard: React.FC<ChapterCardProps> = ({
       onMouseEnter={() => onHover(chapter.id)}
       onMouseLeave={() => onHover(null)}
     >
-      <div className={styles.chapterIconContainer}>
+      <div className={styles.chapterNumberContainer}>
         {chapter.locked ? (
           <Lock className={styles.lockIcon} />
-        ) : chapter.completed ? (
-          <CheckCircle className={styles.completedIcon} />
         ) : (
-          <span className={styles.chapterEmoji}>{chapter.emoji}</span>
+          <span className={styles.chapterNumber}>{chapter.id}</span>
         )}
       </div>
 

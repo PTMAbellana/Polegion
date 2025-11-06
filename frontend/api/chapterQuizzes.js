@@ -27,3 +27,8 @@ export const submitQuizAttempt = async (quizId, answers) => {
   });
   return res.data;
 };
+
+export const getUserQuizAttempts = async (quizId) => {
+  const res = await api.get(`/user-quiz-attempts?chapter_quiz_id=${quizId}`);
+  return res.data;
+};

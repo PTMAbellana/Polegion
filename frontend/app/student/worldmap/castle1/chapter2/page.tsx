@@ -1,6 +1,6 @@
 ﻿'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   ChapterTopBar,
@@ -10,6 +10,7 @@ import {
 } from '@/components/chapters/shared';
 import { LineBasedMinigame } from '@/components/chapters/minigames';
 import { ConceptCard, LessonGrid } from '@/components/chapters/lessons';
+import ChapterProgressModal from '@/components/chapters/ChapterProgressModal';
 import { useChapterData, useChapterDialogue, useChapterAudio } from '@/hooks/chapters';
 import {
   CHAPTER2_CASTLE_ID,
@@ -22,37 +23,78 @@ import {
   CHAPTER2_MINIGAME_LEVELS,
 } from '@/constants/chapters/castle1/chapter2';
 import { awardLessonXP, completeChapter } from '@/api/chapters';
-import { submitQuizAttempt } from '@/api/chapterQuizzes';
+import { submitQuizAttempt, getUserQuizAttempts } from '@/api/chapterQuizzes';
 import { submitMinigameAttempt } from '@/api/minigames';
+import { useChapterStore } from '@/store/chapterStore';
 import baseStyles from '@/styles/chapters/chapter-base.module.css';
 import minigameStyles from '@/styles/chapters/minigame-shared.module.css';
 import lessonStyles from '@/styles/chapters/lesson-shared.module.css';
 
 type SceneType = 'opening' | 'lesson' | 'minigame' | 'quiz1' | 'quiz2' | 'quiz3' | 'reward';
 
+const CHAPTER_KEY = 'castle1-chapter2';
+
 export default function Chapter2Page() {
   const router = useRouter();
   
-  const [currentScene, setCurrentScene] = useState<SceneType>('opening');
-  const [isMuted, setIsMuted] = useState(false);
-  const [autoAdvanceEnabled, setAutoAdvanceEnabled] = useState(false);
-  const [currentMinigameQuestion, setCurrentMinigameQuestion] = useState(0);
+  // Zustand store
+  const chapterStore = useChapterStore();
+  const savedProgress = chapterStore.getChapterProgress(CHAPTER_KEY);
+  
+  // Progress modal state
+  const [showProgressModal, setShowProgressModal] = useState(false);
+  const [hasCheckedProgress, setHasCheckedProgress] = useState(false);
+  
+  // Initialize chapter in store if not exists and check for existing progress
+  useEffect(() => {
+    chapterStore.initializeChapter(CHAPTER_KEY);
+    
+    // Check if user has disabled this modal for this chapter
+    const dontShowAgain = localStorage.getItem(`${CHAPTER_KEY}-dont-show-modal`);
+    
+    // Check if there's saved progress and it's not at the start
+    if (!hasCheckedProgress && savedProgress && savedProgress.currentScene !== 'opening' && dontShowAgain !== 'true') {
+      setShowProgressModal(true);
+      setHasCheckedProgress(true);
+    } else {
+      setHasCheckedProgress(true);
+    }
+  }, []);
+  
+  const [currentScene, setCurrentScene] = useState<SceneType>(
+    (savedProgress?.currentScene as SceneType) || 'opening'
+  );
+  const [isMuted, setIsMuted] = useState(savedProgress?.isMuted || false);
+  const [autoAdvanceEnabled, setAutoAdvanceEnabled] = useState(savedProgress?.autoAdvanceEnabled || false);
+  const [currentMinigameQuestion, setCurrentMinigameQuestion] = useState(savedProgress?.currentMinigameLevel || 0);
+  
+  // Track minigame score
+  const minigameScoreRef = React.useRef<number>(0);
   
   const checkedLessonTasksRef = React.useRef<Set<number>>(new Set());
   const previousMessageIndexRef = React.useRef<number>(-1);
   
-  const [completedTasks, setCompletedTasks] = useState<Record<string, boolean>>({});
-  const [failedTasks, setFailedTasks] = useState<Record<string, boolean>>({});
+  const [completedTasks, setCompletedTasks] = useState<Record<string, boolean>>(
+    savedProgress?.completedTasks || {}
+  );
+  const [failedTasks, setFailedTasks] = useState<Record<string, boolean>>(
+    savedProgress?.failedTasks || {}
+  );
   
-  const [quizAnswers, setQuizAnswers] = useState<Record<string, string>>({});
-  const [quizAttempts, setQuizAttempts] = useState(0);
+  const [quizAnswers, setQuizAnswers] = useState<Record<string, string>>(
+    savedProgress?.quizAnswers || {}
+  );
+  const [quizAttempts, setQuizAttempts] = useState(savedProgress?.quizAttempts || 0);
   const [quizFeedback, setQuizFeedback] = useState<'correct' | 'incorrect' | null>(null);
   
   const [earnedXP, setEarnedXP] = useState({
-    lesson: 0,
-    minigame: 0,
-    quiz: 0,
+    lesson: savedProgress?.earnedXP.lesson || 0,
+    minigame: savedProgress?.earnedXP.minigame || 0,
+    quiz: savedProgress?.earnedXP.quiz || 0,
   });
+
+  // Quiz score tracking
+  const [quizScore, setQuizScore] = useState<number | null>(null);
 
   const { chapterId, quiz, minigame, loading, error, authLoading, userProfile } = useChapterData({
     castleId: CHAPTER2_CASTLE_ID,
@@ -77,6 +119,97 @@ export default function Chapter2Page() {
   });
 
   const { playNarration, stopAudio } = useChapterAudio({ isMuted });
+
+  // Sync state changes to store
+  useEffect(() => {
+    chapterStore.setScene(CHAPTER_KEY, currentScene);
+  }, [currentScene]);
+
+  useEffect(() => {
+    chapterStore.setMinigameLevel(CHAPTER_KEY, currentMinigameQuestion);
+  }, [currentMinigameQuestion]);
+
+  useEffect(() => {
+    chapterStore.setAudioSettings(CHAPTER_KEY, isMuted, autoAdvanceEnabled);
+  }, [isMuted, autoAdvanceEnabled]);
+
+  // Sync completed tasks to store
+  useEffect(() => {
+    Object.entries(completedTasks).forEach(([taskId, completed]) => {
+      if (completed) {
+        const savedProgress = chapterStore.getChapterProgress(CHAPTER_KEY);
+        if (!savedProgress?.completedTasks[taskId]) {
+          chapterStore.setTaskComplete(CHAPTER_KEY, taskId);
+        }
+      }
+    });
+  }, [completedTasks]);
+
+  // Sync failed tasks to store
+  useEffect(() => {
+    Object.entries(failedTasks).forEach(([taskId, failed]) => {
+      if (failed) {
+        const savedProgress = chapterStore.getChapterProgress(CHAPTER_KEY);
+        if (!savedProgress?.failedTasks[taskId]) {
+          chapterStore.setTaskFailed(CHAPTER_KEY, taskId);
+        }
+      }
+    });
+  }, [failedTasks]);
+
+  // Sync quiz answers to store
+  useEffect(() => {
+    Object.entries(quizAnswers).forEach(([questionId, answer]) => {
+      const savedProgress = chapterStore.getChapterProgress(CHAPTER_KEY);
+      if (savedProgress?.quizAnswers[questionId] !== answer) {
+        chapterStore.setQuizAnswer(CHAPTER_KEY, questionId, answer);
+      }
+    });
+  }, [quizAnswers]);
+
+  // Sync earned XP to store
+  useEffect(() => {
+    if (earnedXP.lesson > 0) {
+      chapterStore.setEarnedXP(CHAPTER_KEY, 'lesson', earnedXP.lesson);
+    }
+    if (earnedXP.minigame > 0) {
+      chapterStore.setEarnedXP(CHAPTER_KEY, 'minigame', earnedXP.minigame);
+    }
+    if (earnedXP.quiz > 0) {
+      chapterStore.setEarnedXP(CHAPTER_KEY, 'quiz', earnedXP.quiz);
+    }
+  }, [earnedXP]);
+
+  // Fetch quiz score when entering reward scene
+  useEffect(() => {
+    const fetchQuizScore = async () => {
+      if (currentScene === 'reward' && quiz?.id) {
+        try {
+          // Add a small delay to ensure the backend has finished processing
+          await new Promise(resolve => setTimeout(resolve, 500));
+          
+          const attempts = await getUserQuizAttempts(quiz.id);
+          console.log('[Chapter2] Fetched quiz attempts:', attempts);
+          
+          if (attempts && attempts.length > 0) {
+            // Get the most recent attempt (assuming attempts are ordered by creation date)
+            const sortedAttempts = attempts.sort((a: any, b: any) => {
+              return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+            });
+            const mostRecentScore = sortedAttempts[0]?.score || 0;
+            console.log('[Chapter2] Most recent quiz score:', mostRecentScore);
+            setQuizScore(mostRecentScore);
+          }
+        } catch (error) {
+          console.error('Failed to fetch quiz score:', error);
+          // Fallback to null
+          setQuizScore(null);
+        }
+      }
+    };
+    
+    fetchQuizScore();
+  }, [currentScene, quiz?.id]);
 
   React.useEffect(() => {
     if (currentScene === 'lesson') {
@@ -171,17 +304,35 @@ export default function Chapter2Page() {
   };
 
   const handleMinigameComplete = async (isCorrect: boolean) => {
+    console.log(`[Chapter2] Question ${currentMinigameQuestion + 1}/${CHAPTER2_MINIGAME_LEVELS.length} - Correct: ${isCorrect}, Current Score: ${minigameScoreRef.current}`);
+    
     if (isCorrect) {
+      // Award points based on correctness
+      const pointsPerQuestion = 100 / CHAPTER2_MINIGAME_LEVELS.length; // Distribute 100 points across all questions
+      minigameScoreRef.current += pointsPerQuestion;
+      console.log(`[Chapter2] Points awarded: ${pointsPerQuestion}, New Score: ${minigameScoreRef.current}`);
+      
+      // Move to next question or complete minigame
       if (currentMinigameQuestion < CHAPTER2_MINIGAME_LEVELS.length - 1) {
         setCurrentMinigameQuestion(currentMinigameQuestion + 1);
       } else {
+        // All questions answered correctly
         markTaskComplete('task-4');
         awardXP('minigame');
         
         if (minigame && userProfile?.id) {
           try {
+            const finalScore = Math.round(minigameScoreRef.current);
+            console.log(`[Chapter2] ALL QUESTIONS COMPLETED - Final Score: ${finalScore}`);
+            console.log(`[Chapter2] Submitting to backend:`, {
+              minigame_id: minigame.id,
+              score: finalScore,
+              completed: finalScore >= 100,
+              expected_xp: finalScore >= 100 ? 45 : 0
+            });
+            
             await submitMinigameAttempt(minigame.id, {
-              score: 100,
+              score: finalScore,
               time_taken: 60,
               attempt_data: { completedQuestions: CHAPTER2_MINIGAME_LEVELS.length },
             });
@@ -192,6 +343,9 @@ export default function Chapter2Page() {
         
         setCurrentScene('quiz1');
       }
+    } else {
+      // Incorrect answer - user can try again (no progression)
+      console.log(`[Chapter2] Incorrect answer - user can retry the same question`);
     }
   };
 
@@ -258,6 +412,7 @@ export default function Chapter2Page() {
           setQuizAnswers((prev) => {
             const updated = { ...prev };
             delete updated[nextQuestion.id];
+            chapterStore.clearQuizAnswer(CHAPTER_KEY, nextQuestion.id);
             return updated;
           });
         } else if (quizNumber === 2) {
@@ -266,6 +421,7 @@ export default function Chapter2Page() {
           setQuizAnswers((prev) => {
             const updated = { ...prev };
             delete updated[nextQuestion.id];
+            chapterStore.clearQuizAnswer(CHAPTER_KEY, nextQuestion.id);
             return updated;
           });
         } else {
@@ -292,6 +448,10 @@ export default function Chapter2Page() {
     setQuizAttempts(0);
     setFailedTasks({});
     setQuizFeedback(null);
+    setQuizScore(null); // Reset quiz score when retaking
+    
+    // Clear quiz data from store
+    chapterStore.clearAllQuizData(CHAPTER_KEY);
     
     setCompletedTasks((prev) => {
       const updated = { ...prev };
@@ -302,6 +462,42 @@ export default function Chapter2Page() {
     });
     
     setCurrentScene('quiz1');
+  };
+
+  const handleContinueProgress = () => {
+    setShowProgressModal(false);
+    // Continue with saved progress (already loaded)
+  };
+
+  const handleDontShowAgain = () => {
+    localStorage.setItem(`${CHAPTER_KEY}-dont-show-modal`, 'true');
+    setShowProgressModal(false);
+  };
+
+  const handleRestartChapter = () => {
+    setShowProgressModal(false);
+    
+    // Reset all state to initial values
+    setCurrentScene('opening');
+    setCompletedTasks({});
+    setFailedTasks({});
+    setQuizAnswers({});
+    setQuizAttempts(0);
+    setEarnedXP({ lesson: 0, minigame: 0, quiz: 0 });
+    setCurrentMinigameQuestion(0);
+    setQuizFeedback(null);
+    
+    // Clear all data from store for this chapter
+    chapterStore.clearAllQuizData(CHAPTER_KEY);
+    chapterStore.setScene(CHAPTER_KEY, 'opening');
+    chapterStore.setMinigameLevel(CHAPTER_KEY, 0);
+    
+    // Reset lesson tracking
+    checkedLessonTasksRef.current = new Set();
+    previousMessageIndexRef.current = -1;
+    
+    // Reset dialogue
+    resetDialogue();
   };
 
   const handleReturnToCastle = () => {
@@ -328,6 +524,17 @@ export default function Chapter2Page() {
   return (
     <div className={`${baseStyles.chapterContainer} ${baseStyles.castle1Theme}`}>
       <div className={baseStyles.backgroundOverlay}></div>
+
+      {/* Progress Modal */}
+      {showProgressModal && (
+        <ChapterProgressModal
+          chapterTitle="Chapter 2: The Paths of Power"
+          currentScene={savedProgress?.currentScene || 'opening'}
+          onContinue={handleContinueProgress}
+          onRestart={handleRestartChapter}
+          onDontShowAgain={handleDontShowAgain}
+        />
+      )}
 
       <ChapterTopBar
         chapterTitle="Chapter 2: The Paths of Power"
@@ -414,12 +621,10 @@ export default function Chapter2Page() {
                         ? minigameStyles.answerOptionSelected
                         : ''
                     }`}
-                    onClick={() =>
-                      setQuizAnswers((prev) => ({
-                        ...prev,
-                        [quiz.quiz_config.questions[currentScene === 'quiz1' ? 0 : currentScene === 'quiz2' ? 1 : 2].id]: option,
-                      }))
-                    }
+                    onClick={() => {
+                      const questionId = quiz.quiz_config.questions[currentScene === 'quiz1' ? 0 : currentScene === 'quiz2' ? 1 : 2].id;
+                      setQuizAnswers((prev) => ({ ...prev, [questionId]: option }));
+                    }}
                   >
                     {option}
                   </div>
@@ -448,6 +653,7 @@ export default function Chapter2Page() {
               relicImage="/images/relics/mirror-reflection.png"
               relicDescription="You have uncovered the paths of power! The lines of geometry bend to your understanding."
               earnedXP={earnedXP}
+              quizScore={quizScore}
               canRetakeQuiz={true}
               onRetakeQuiz={handleRetakeQuiz}
               onComplete={handleReturnToCastle}

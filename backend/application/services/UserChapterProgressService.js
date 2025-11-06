@@ -69,6 +69,112 @@ class UserChapterProgressService {
         return progress;
     }
 
+    async recalculateChapterXP(userId, chapterId) {
+        // Calculate total XP from lesson, minigame, and quiz
+        let totalXP = 0;
+        let quizPassed = false;
+        
+        // 1. Get the chapter details
+        const currentChapter = await this.chapterRepo.getChapterById(chapterId);
+        if (!currentChapter) {
+            throw new Error('Chapter not found');
+        }
+        
+        // 2. Get minigame and quiz XP rewards to calculate lesson XP
+        // Lesson XP = Total Chapter XP - Sum of All Minigame Rewards - Sum of All Quiz Rewards
+        let minigameReward = 0;
+        let quizReward = 0;
+        
+        // Get all minigame rewards for this chapter
+        const { data: minigames, error: minigameError } = await this.userMinigameAttemptRepo.supabase
+            .from('minigames')
+            .select('xp_reward')
+            .eq('chapter_id', chapterId);
+        
+        if (minigameError) {
+            console.error('[UserChapterProgressService] Error fetching minigames:', minigameError);
+        }
+        
+        if (minigames && minigames.length > 0) {
+            minigameReward = minigames.reduce((sum, m) => sum + (m.xp_reward || 0), 0);
+            console.log(`[UserChapterProgressService] Found ${minigames.length} minigames, total reward: ${minigameReward}`);
+        } else {
+            console.log(`[UserChapterProgressService] No minigames found for chapter ${chapterId}`);
+        }
+        
+        // Get all quiz rewards for this chapter
+        const { data: quizzes, error: quizError } = await this.userQuizAttemptRepo.supabase
+            .from('chapter_quizzes')
+            .select('xp_reward')
+            .eq('chapter_id', chapterId);
+        
+        if (quizError) {
+            console.error('[UserChapterProgressService] Error fetching quizzes:', quizError);
+        }
+        
+        if (quizzes && quizzes.length > 0) {
+            quizReward = quizzes.reduce((sum, q) => sum + (q.xp_reward || 0), 0);
+            console.log(`[UserChapterProgressService] Found ${quizzes.length} quizzes, total reward: ${quizReward}`);
+        } else {
+            console.log(`[UserChapterProgressService] No quizzes found for chapter ${chapterId}`);
+        }
+        
+        // Calculate lesson XP
+        const lessonXP = (currentChapter.xpReward || 0) - minigameReward - quizReward;
+        totalXP += lessonXP;
+        console.log(`[UserChapterProgressService] Lesson XP: ${lessonXP} (Total: ${currentChapter.xpReward} - Minigame: ${minigameReward} - Quiz: ${quizReward})`);
+        
+        // 3. Get highest minigame XP for this chapter
+        if (this.userMinigameAttemptRepo) {
+            const { data: minigameAttempts, error: minigameAttemptError } = await this.userMinigameAttemptRepo.supabase
+                .from('user_minigame_attempts')
+                .select('xp_earned, minigames!inner(chapter_id)')
+                .eq('user_id', userId)
+                .eq('minigames.chapter_id', chapterId)
+                .order('xp_earned', { ascending: false })
+                .limit(1);
+            
+            if (minigameAttemptError) {
+                console.error('[UserChapterProgressService] Error fetching minigame attempts:', minigameAttemptError);
+            }
+            
+            if (minigameAttempts && minigameAttempts.length > 0) {
+                const highestMinigameXP = minigameAttempts[0].xp_earned || 0;
+                totalXP += highestMinigameXP;
+                console.log(`[UserChapterProgressService] Highest minigame XP: ${highestMinigameXP}`);
+            } else {
+                console.log(`[UserChapterProgressService] No minigame attempts found for user ${userId}, chapter ${chapterId}`);
+            }
+        }
+        
+        // 4. Get highest quiz XP for this chapter
+        if (this.userQuizAttemptRepo) {
+            const { data: quizAttempts, error: quizAttemptError } = await this.userQuizAttemptRepo.supabase
+                .from('user_quiz_attempts')
+                .select('xp_earned, passed, chapter_quizzes!inner(chapter_id)')
+                .eq('user_id', userId)
+                .eq('chapter_quizzes.chapter_id', chapterId)
+                .order('xp_earned', { ascending: false })
+                .limit(1);
+            
+            if (quizAttemptError) {
+                console.error('[UserChapterProgressService] Error fetching quiz attempts:', quizAttemptError);
+            }
+            
+            if (quizAttempts && quizAttempts.length > 0) {
+                const highestQuizXP = quizAttempts[0].xp_earned || 0;
+                quizPassed = quizAttempts[0].passed || false;
+                totalXP += highestQuizXP;
+                console.log(`[UserChapterProgressService] Highest quiz XP: ${highestQuizXP}, Passed: ${quizPassed}`);
+            } else {
+                console.log(`[UserChapterProgressService] No quiz attempts found for user ${userId}, chapter ${chapterId}`);
+            }
+        }
+        
+        console.log(`[UserChapterProgressService] Total XP for chapter ${chapterId}: ${totalXP}`);
+        return { totalXP, quizPassed };
+    }
+
     async markChapterCompleted(userId, chapterId) {
         // Get or create user chapter progress
         let progress = await this.userChapterProgressRepo.getUserChapterProgressByUserAndChapter(userId, chapterId);
@@ -77,71 +183,60 @@ class UserChapterProgressService {
             throw new Error('Chapter progress not found');
         }
         
-        // Calculate total XP earned from attempts
-        let totalXP = 0;
+        // Recalculate XP from highest attempts
+        const { totalXP, quizPassed } = await this.recalculateChapterXP(userId, chapterId);
         
-        // 1. Get the chapter details to find associated quizzes and minigames
+        // Get the chapter details for castle information
         const currentChapter = await this.chapterRepo.getChapterById(chapterId);
         if (!currentChapter) {
             throw new Error('Chapter not found');
         }
         
-        // 2. Lesson XP (always awarded when chapter is completed)
-        const lessonXP = 20; // Fixed lesson XP
-        totalXP += lessonXP;
-        
-        // 3. Get highest minigame XP for this chapter
-        if (this.userMinigameAttemptRepo) {
-            const { data: minigameAttempts } = await this.userMinigameAttemptRepo.supabase
-                .from('user_minigame_attempts')
-                .select('*, minigames!inner(chapter_id)')
-                .eq('user_id', userId)
-                .eq('minigames.chapter_id', chapterId)
-                .order('xp_earned', { ascending: false })
-                .limit(1);
-            
-            if (minigameAttempts && minigameAttempts.length > 0) {
-                const highestMinigameXP = minigameAttempts[0].xp_earned || 0;
-                totalXP += highestMinigameXP;
-                console.log(`[UserChapterProgressService] Highest minigame XP: ${highestMinigameXP}`);
-            }
-        }
-        
-        // 4. Get highest quiz XP for this chapter
-        if (this.userQuizAttemptRepo) {
-            const { data: quizAttempts } = await this.userQuizAttemptRepo.supabase
-                .from('user_quiz_attempts')
-                .select('*, chapter_quizzes!inner(chapter_id)')
-                .eq('user_id', userId)
-                .eq('chapter_quizzes.chapter_id', chapterId)
-                .order('xp_earned', { ascending: false })
-                .limit(1);
-            
-            if (quizAttempts && quizAttempts.length > 0) {
-                const highestQuizXP = quizAttempts[0].xp_earned || 0;
-                totalXP += highestQuizXP;
-                console.log(`[UserChapterProgressService] Highest quiz XP: ${highestQuizXP}`);
-            }
-        }
-        
-        console.log(`[UserChapterProgressService] Total XP for chapter: ${totalXP} (Lesson: ${lessonXP} + Minigame + Quiz)`);
-        
-        // Mark as completed with calculated XP
+        // Mark as completed with calculated XP and quiz status
         progress = await this.userChapterProgressRepo.updateUserChapterProgress(progress.id, {
             completed: true,
             lesson_completed: true,
             minigame_completed: true,
             quiz_completed: true,
+            quiz_passed: quizPassed,
             xp_earned: totalXP
         });
         
-        // Update castle progress XP
+        // Update castle progress XP by recalculating from all chapters
         const castleProgress = await this.userCastleProgressRepo.getUserCastleProgressByUserAndCastle(userId, currentChapter.castleId);
         if (castleProgress) {
-            const newXP = (castleProgress.total_xp_earned || 0) + totalXP;
-            console.log(`[UserChapterProgressService] Updating castle XP: ${castleProgress.total_xp_earned} + ${totalXP} = ${newXP}`);
+            // Get all chapter progress for this castle to recalculate total XP
+            const { data: allChapterProgress, error } = await this.userChapterProgressRepo.supabase
+                .from('user_chapter_progress')
+                .select('*, chapters!inner(castle_id)')
+                .eq('user_id', userId)
+                .eq('chapters.castle_id', currentChapter.castleId);
+            
+            if (error) {
+                console.error('[UserChapterProgressService] Error fetching chapter progress:', error);
+            }
+            
+            // Calculate total XP from all completed chapters in this castle
+            const totalCastleXP = allChapterProgress?.reduce((sum, progress) => {
+                return sum + (progress.xp_earned || 0);
+            }, 0) || 0;
+            
+            // Count completed chapters
+            const completedChaptersCount = allChapterProgress?.filter(progress => progress.completed).length || 0;
+            
+            // Get total chapters in this castle
+            const allChapters = await this.chapterRepo.getChaptersByCastleId(currentChapter.castleId);
+            const totalChapters = allChapters.length;
+            const isCastleCompleted = completedChaptersCount === totalChapters;
+            
+            console.log(`[UserChapterProgressService] Recalculated castle XP from all chapters: ${totalCastleXP}`);
+            console.log(`[UserChapterProgressService] Completed chapters: ${completedChaptersCount}/${totalChapters}`);
+            console.log(`[UserChapterProgressService] Castle completed: ${isCastleCompleted}`);
+            
             await this.userCastleProgressRepo.updateUserCastleProgress(castleProgress.id, {
-                total_xp_earned: newXP
+                total_xp_earned: totalCastleXP,
+                completed_chapters: completedChaptersCount,
+                completed: isCastleCompleted
             });
         }
         

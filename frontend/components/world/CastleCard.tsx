@@ -21,9 +21,9 @@ export default function CastleCard({
   styleModule
 }: CastleCardProps) {
   return (
-    <div className={styleModule.wizardContainer}>
-      <div className={styleModule.wizardCard}>
-        <div className={styleModule.wizardAvatar}>
+    <div className={styleModule.castleInfoContainer}>
+      <div className={styleModule.castleInfoCard}>
+        <div className={styleModule.castleInfoAvatar}>
           <img 
             src={`/images/castles/castle${imageNumber}.png`}
             alt={castleName}
@@ -33,16 +33,16 @@ export default function CastleCard({
               e.currentTarget.nextElementSibling?.classList.remove(styleModule.hidden);
             }}
           />
-          <span className={`${styleModule.wizardEmoji} ${styleModule.hidden}`}>🏰</span>
+          <span className={`${styleModule.castleEmoji} ${styleModule.hidden}`}>🏰</span>
         </div>
-        <h2 className={styleModule.wizardName}>{castleName}</h2>
-        <p className={styleModule.wizardQuote}>"{description}"</p>
-        <div className={styleModule.wizardStats}>
-          <div className={styleModule.wizardStat}>
+        <h2 className={styleModule.castleInfoName}>{castleName}</h2>
+        <p className={styleModule.castleInfoQuote}>"{description}"</p>
+        <div className={styleModule.castleInfoStats}>
+          <div className={styleModule.castleInfoStat}>
             <Star className={styleModule.statIcon} />
             <span>{totalXpEarned} XP Earned</span>
           </div>
-          <div className={styleModule.wizardStat}>
+          <div className={styleModule.castleInfoStat}>
             <Zap className={styleModule.statIcon} />
             <span>{chaptersRemaining} Chapters Remaining</span>
           </div>

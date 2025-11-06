@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   ChapterTopBar,
@@ -10,6 +10,7 @@ import {
 } from '@/components/chapters/shared';
 import { ConceptCard, LessonGrid } from '@/components/chapters/lessons';
 import { ShapeBasedMinigame } from '@/components/chapters/minigames';
+import ChapterProgressModal from '@/components/chapters/ChapterProgressModal';
 import { useChapterData, useChapterDialogue, useChapterAudio } from '@/hooks/chapters';
 import {
   CHAPTER3_CASTLE_ID,
@@ -23,41 +24,77 @@ import {
 } from '@/constants/chapters/castle1/chapter3';
 import Image from 'next/image';
 import { awardLessonXP, completeChapter } from '@/api/chapters';
-import { submitQuizAttempt } from '@/api/chapterQuizzes';
+import { submitQuizAttempt, getUserQuizAttempts } from '@/api/chapterQuizzes';
 import { submitMinigameAttempt } from '@/api/minigames';
+import { useChapterStore } from '@/store/chapterStore';
 import baseStyles from '@/styles/chapters/chapter-base.module.css';
 import minigameStyles from '@/styles/chapters/minigame-shared.module.css';
 import lessonStyles from '@/styles/chapters/lesson-shared.module.css';
 
 type SceneType = 'opening' | 'lesson' | 'minigame' | 'quiz1' | 'quiz2' | 'quiz3' | 'reward';
 
+const CHAPTER_KEY = 'castle1-chapter3';
+
 export default function Chapter3Page() {
   const router = useRouter();
   
-  // Scene and state management
-  const [currentScene, setCurrentScene] = useState<SceneType>('opening');
-  const [isMuted, setIsMuted] = useState(false);
-  const [autoAdvanceEnabled, setAutoAdvanceEnabled] = useState(false);
-  const [currentMinigameLevel, setCurrentMinigameLevel] = useState(0);
+  // Zustand store
+  const chapterStore = useChapterStore();
+  const savedProgress = chapterStore.getChapterProgress(CHAPTER_KEY);
+  
+  // Progress modal state
+  const [showProgressModal, setShowProgressModal] = useState(false);
+  const [hasCheckedProgress, setHasCheckedProgress] = useState(false);
+  
+  // Initialize chapter in store if not exists and check for existing progress
+  useEffect(() => {
+    chapterStore.initializeChapter(CHAPTER_KEY);
+    
+    // Check if user has disabled this modal for this chapter
+    const dontShowAgain = localStorage.getItem(`${CHAPTER_KEY}-dont-show-modal`);
+    
+    // Check if there's saved progress and it's not at the start
+    if (!hasCheckedProgress && savedProgress && savedProgress.currentScene !== 'opening' && dontShowAgain !== 'true') {
+      setShowProgressModal(true);
+      setHasCheckedProgress(true);
+    } else {
+      setHasCheckedProgress(true);
+    }
+  }, []);
+  
+  // Scene and state management - initialize from store or defaults
+  const [currentScene, setCurrentScene] = useState<SceneType>(
+    (savedProgress?.currentScene as SceneType) || 'opening'
+  );
+  const [isMuted, setIsMuted] = useState(savedProgress?.isMuted || false);
+  const [autoAdvanceEnabled, setAutoAdvanceEnabled] = useState(savedProgress?.autoAdvanceEnabled || false);
+  const [currentMinigameLevel, setCurrentMinigameLevel] = useState(savedProgress?.currentMinigameLevel || 0);
   
   // Track which lesson tasks have been checked
   const checkedLessonTasksRef = useRef<Set<number>>(new Set());
   const previousMessageIndexRef = useRef<number>(-1);
   
-  // Task tracking
-  const [completedTasks, setCompletedTasks] = useState<Record<string, boolean>>({});
-  const [failedTasks, setFailedTasks] = useState<Record<string, boolean>>({});
+  // Task tracking - initialize from store or defaults
+  const [completedTasks, setCompletedTasks] = useState<Record<string, boolean>>(
+    savedProgress?.completedTasks || {}
+  );
+  const [failedTasks, setFailedTasks] = useState<Record<string, boolean>>(
+    savedProgress?.failedTasks || {}
+  );
   
-  // Quiz state
-  const [quizAnswers, setQuizAnswers] = useState<Record<string, string>>({});
-  const [quizAttempts, setQuizAttempts] = useState(0);
+  // Quiz state - initialize from store or defaults
+  const [quizAnswers, setQuizAnswers] = useState<Record<string, string>>(
+    savedProgress?.quizAnswers || {}
+  );
+  const [quizAttempts, setQuizAttempts] = useState(savedProgress?.quizAttempts || 0);
   const [quizFeedback, setQuizFeedback] = useState<'correct' | 'incorrect' | null>(null);
+  const [quizScore, setQuizScore] = useState<number | null>(null);
   
-  // XP tracking
+  // XP tracking - initialize from store or defaults
   const [earnedXP, setEarnedXP] = useState({
-    lesson: 0,
-    minigame: 0,
-    quiz: 0,
+    lesson: savedProgress?.earnedXP.lesson || 0,
+    minigame: savedProgress?.earnedXP.minigame || 0,
+    quiz: savedProgress?.earnedXP.quiz || 0,
   });
 
   // Custom hooks
@@ -85,24 +122,130 @@ export default function Chapter3Page() {
 
   const { playNarration, stopAudio } = useChapterAudio({ isMuted });
 
-  // Track lesson progress (6 lesson messages, tasks 0-5)
+  // Fetch quiz score when entering reward scene
   React.useEffect(() => {
-    if (currentScene === 'lesson' && messageIndex >= 0 && messageIndex <= 5) {
+    const fetchQuizScore = async () => {
+      if (currentScene === 'reward' && quiz?.id) {
+        try {
+          // Add a small delay to ensure the backend has finished processing
+          await new Promise(resolve => setTimeout(resolve, 500));
+          
+          const attempts = await getUserQuizAttempts(quiz.id);
+          console.log('[Chapter3] Fetched quiz attempts:', attempts);
+          console.log('[Chapter3] Number of attempts:', attempts?.length);
+          
+          if (attempts && attempts.length > 0) {
+            // Get the most recent attempt (assuming attempts are ordered by creation date)
+            const sortedAttempts = attempts.sort((a: any, b: any) => {
+              return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+            });
+            console.log('[Chapter3] Sorted attempts:', sortedAttempts.map((a: any) => ({
+              id: a.id.substring(0, 8),
+              score: a.score,
+              createdAt: a.createdAt
+            })));
+            const mostRecentScore = sortedAttempts[0]?.score || 0;
+            console.log('[Chapter3] Most recent quiz score:', mostRecentScore);
+            setQuizScore(mostRecentScore);
+          }
+        } catch (error) {
+          console.error('Failed to fetch quiz score:', error);
+          // Fallback to null
+          setQuizScore(null);
+        }
+      }
+    };
+    
+    fetchQuizScore();
+  }, [currentScene, quiz?.id]);
+
+  // Sync state changes to store
+  useEffect(() => {
+    chapterStore.setScene(CHAPTER_KEY, currentScene);
+  }, [currentScene]);
+
+  useEffect(() => {
+    chapterStore.setMinigameLevel(CHAPTER_KEY, currentMinigameLevel);
+  }, [currentMinigameLevel]);
+
+  useEffect(() => {
+    chapterStore.setAudioSettings(CHAPTER_KEY, isMuted, autoAdvanceEnabled);
+  }, [isMuted, autoAdvanceEnabled]);
+
+  // Sync completedTasks to store
+  useEffect(() => {
+    Object.entries(completedTasks).forEach(([taskKey, isComplete]) => {
+      if (isComplete) {
+        const savedTask = savedProgress?.completedTasks?.[taskKey];
+        if (!savedTask) {
+          chapterStore.setTaskComplete(CHAPTER_KEY, taskKey);
+        }
+      }
+    });
+  }, [completedTasks]);
+
+  // Sync failedTasks to store
+  useEffect(() => {
+    Object.entries(failedTasks).forEach(([taskKey, isFailed]) => {
+      if (isFailed) {
+        const savedTask = savedProgress?.failedTasks?.[taskKey];
+        if (!savedTask) {
+          chapterStore.setTaskFailed(CHAPTER_KEY, taskKey);
+        }
+      }
+    });
+  }, [failedTasks]);
+
+  // Sync quizAnswers to store
+  useEffect(() => {
+    Object.entries(quizAnswers).forEach(([questionId, answer]) => {
+      const savedAnswer = savedProgress?.quizAnswers?.[questionId];
+      if (savedAnswer !== answer) {
+        chapterStore.setQuizAnswer(CHAPTER_KEY, questionId, answer);
+      }
+    });
+  }, [quizAnswers]);
+
+  // Sync earnedXP to store
+  useEffect(() => {
+    if (earnedXP.lesson > 0 && earnedXP.lesson !== savedProgress?.earnedXP.lesson) {
+      chapterStore.setEarnedXP(CHAPTER_KEY, 'lesson', earnedXP.lesson);
+    }
+  }, [earnedXP.lesson]);
+
+  useEffect(() => {
+    if (earnedXP.minigame > 0 && earnedXP.minigame !== savedProgress?.earnedXP.minigame) {
+      chapterStore.setEarnedXP(CHAPTER_KEY, 'minigame', earnedXP.minigame);
+    }
+  }, [earnedXP.minigame]);
+
+  useEffect(() => {
+    if (earnedXP.quiz > 0 && earnedXP.quiz !== savedProgress?.earnedXP.quiz) {
+      chapterStore.setEarnedXP(CHAPTER_KEY, 'quiz', earnedXP.quiz);
+    }
+  }, [earnedXP.quiz]);
+
+  // Track lesson progress (7 lesson messages: indices 0-6, tasks 0-5)
+  // Message index 1 completes task-0, index 2 completes task-1, etc.
+  React.useEffect(() => {
+    if (currentScene === 'lesson' && messageIndex >= 1 && messageIndex <= 6) {
+      const taskIndex = messageIndex - 1; // Convert message index to task index
+      
       if (previousMessageIndexRef.current > messageIndex) {
-        previousMessageIndexRef.current = -1;
+        previousMessageIndexRef.current = 0; // Reset to start of lesson (not -1)
       }
       
-      if (checkedLessonTasksRef.current.has(messageIndex)) {
+      if (checkedLessonTasksRef.current.has(taskIndex)) {
         previousMessageIndexRef.current = messageIndex;
         return;
       }
       
-      const isValidFirstMessage = previousMessageIndexRef.current === -1 && messageIndex === 0;
+      const isValidFirstMessage = previousMessageIndexRef.current === 0 && messageIndex === 1;
       const isSequentialProgression = messageIndex === previousMessageIndexRef.current + 1;
       
       if (isValidFirstMessage || isSequentialProgression) {
-        markTaskComplete(`task-${messageIndex}`);
-        checkedLessonTasksRef.current.add(messageIndex);
+        markTaskComplete(`task-${taskIndex}`);
+        checkedLessonTasksRef.current.add(taskIndex);
       }
       
       previousMessageIndexRef.current = messageIndex;
@@ -113,7 +256,7 @@ export default function Chapter3Page() {
   function handleDialogueComplete() {
     if (currentScene === 'opening') {
       checkedLessonTasksRef.current = new Set();
-      previousMessageIndexRef.current = -1;
+      previousMessageIndexRef.current = 0; // Start at beginning of lesson dialogue
       setCurrentScene('lesson');
       playNarration('chapter3-lesson-intro');
     } else if (currentScene === 'lesson' && messageIndex >= CHAPTER3_LESSON_DIALOGUE.length - 1) {
@@ -135,7 +278,9 @@ export default function Chapter3Page() {
   };
 
   const markTaskFailed = (taskKey: string) => {
-    setFailedTasks((prev) => ({ ...prev, [taskKey]: true }));
+    setFailedTasks((prev) => {
+      return { ...prev, [taskKey]: true };
+    });
   };
 
   const awardXP = async (type: 'lesson' | 'minigame' | 'quiz') => {
@@ -144,7 +289,10 @@ export default function Chapter3Page() {
     else if (type === 'minigame') xp = CHAPTER3_XP_VALUES.minigame;
     else if (type === 'quiz') xp = CHAPTER3_XP_VALUES.quiz1 + CHAPTER3_XP_VALUES.quiz2 + CHAPTER3_XP_VALUES.quiz3;
 
-    setEarnedXP((prev) => ({ ...prev, [type]: xp }));
+    setEarnedXP((prev) => {
+      const updated = { ...prev, [type]: xp };
+      return updated;
+    });
 
     if (chapterId && userProfile?.id) {
       try {
@@ -219,6 +367,8 @@ export default function Chapter3Page() {
           awardXP('quiz');
           
           try {
+            console.log('[Chapter3] Submitting quiz with answers:', quizAnswers);
+            console.log('[Chapter3] Quiz config:', quiz.quiz_config);
             submitQuizAttempt(quiz.id, quizAnswers);
           } catch (error) {
             console.error('Failed to submit quiz:', error);
@@ -247,6 +397,7 @@ export default function Chapter3Page() {
           setQuizAnswers((prev) => {
             const updated = { ...prev };
             delete updated[nextQuestion.id];
+            chapterStore.clearQuizAnswer(CHAPTER_KEY, nextQuestion.id);
             return updated;
           });
         } else if (quizNumber === 2) {
@@ -255,6 +406,7 @@ export default function Chapter3Page() {
           setQuizAnswers((prev) => {
             const updated = { ...prev };
             delete updated[nextQuestion.id];
+            chapterStore.clearQuizAnswer(CHAPTER_KEY, nextQuestion.id);
             return updated;
           });
         } else {
@@ -281,6 +433,10 @@ export default function Chapter3Page() {
     setQuizAttempts(0);
     setFailedTasks({});
     setQuizFeedback(null);
+    setQuizScore(null); // Reset quiz score when retaking
+    
+    // Clear quiz data from store
+    chapterStore.clearAllQuizData(CHAPTER_KEY);
     
     setCompletedTasks((prev) => {
       const updated = { ...prev };
@@ -291,6 +447,42 @@ export default function Chapter3Page() {
     });
     
     setCurrentScene('quiz1');
+  };
+
+  const handleContinueProgress = () => {
+    setShowProgressModal(false);
+    // Continue with saved progress (already loaded)
+  };
+
+  const handleDontShowAgain = () => {
+    localStorage.setItem(`${CHAPTER_KEY}-dont-show-modal`, 'true');
+    setShowProgressModal(false);
+  };
+
+  const handleRestartChapter = () => {
+    setShowProgressModal(false);
+    
+    // Reset all state to initial values
+    setCurrentScene('opening');
+    setCompletedTasks({});
+    setFailedTasks({});
+    setQuizAnswers({});
+    setQuizAttempts(0);
+    setEarnedXP({ lesson: 0, minigame: 0, quiz: 0 });
+    setCurrentMinigameLevel(0);
+    setQuizFeedback(null);
+    
+    // Clear all data from store for this chapter
+    chapterStore.clearAllQuizData(CHAPTER_KEY);
+    chapterStore.setScene(CHAPTER_KEY, 'opening');
+    chapterStore.setMinigameLevel(CHAPTER_KEY, 0);
+    
+    // Reset lesson tracking
+    checkedLessonTasksRef.current = new Set();
+    previousMessageIndexRef.current = 0; // Start at beginning of lesson dialogue
+    
+    // Reset dialogue
+    resetDialogue();
   };
 
   const handleExit = () => {
@@ -319,6 +511,17 @@ export default function Chapter3Page() {
   return (
     <div className={`${baseStyles.chapterContainer} ${baseStyles.castle1Theme}`}>
       <div className={baseStyles.backgroundOverlay}></div>
+
+      {/* Progress Modal */}
+      {showProgressModal && (
+        <ChapterProgressModal
+          chapterTitle="Chapter 3: Shapes of the Spire"
+          currentScene={savedProgress?.currentScene || 'opening'}
+          onContinue={handleContinueProgress}
+          onRestart={handleRestartChapter}
+          onDontShowAgain={handleDontShowAgain}
+        />
+      )}
 
       {/* Top Bar */}
       <ChapterTopBar
@@ -362,14 +565,14 @@ export default function Chapter3Page() {
                 title="Triangle"
                 description="A polygon with three sides and three angles."
                 icon={<Image src="/images/castle1/chapter3/triangle.png" alt="Triangle" width={180} height={120} />}
-                highlighted={messageIndex >= 0}
+                highlighted={messageIndex >= 1}
                 styleModule={lessonStyles}
               />
               <ConceptCard
                 title="Circle"
                 description="A perfectly round shape where all points are equidistant from the center."
                 icon={<Image src="/images/castle1/chapter3/circle.png" alt="Circle" width={180} height={120} />}
-                highlighted={messageIndex >= 0}
+                highlighted={messageIndex >= 1}
                 styleModule={lessonStyles}
               />
               
@@ -378,14 +581,14 @@ export default function Chapter3Page() {
                 title="Square"
                 description="A quadrilateral with four equal sides and four right angles."
                 icon={<Image src="/images/castle1/chapter3/square.png" alt="Square" width={180} height={120} />}
-                highlighted={messageIndex >= 1}
+                highlighted={messageIndex >= 2}
                 styleModule={lessonStyles}
               />
               <ConceptCard
                 title="Rectangle"
                 description="A quadrilateral with opposite sides equal and four right angles."
                 icon={<Image src="/images/castle1/chapter3/rectangle.png" alt="Rectangle" width={180} height={120} />}
-                highlighted={messageIndex >= 1}
+                highlighted={messageIndex >= 2}
                 styleModule={lessonStyles}
               />
               
@@ -394,28 +597,28 @@ export default function Chapter3Page() {
                 title="Rhombus"
                 description="A quadrilateral with all four sides of equal length."
                 icon={<Image src="/images/castle1/chapter3/rhombus.png" alt="Rhombus" width={180} height={120} />}
-                highlighted={messageIndex >= 2}
+                highlighted={messageIndex >= 3}
                 styleModule={lessonStyles}
               />
               <ConceptCard
                 title="Parallelogram"
                 description="A quadrilateral with opposite sides parallel and equal in length."
                 icon={<Image src="/images/castle1/chapter3/parallelogram.png" alt="Parallelogram" width={180} height={120} />}
-                highlighted={messageIndex >= 2}
+                highlighted={messageIndex >= 3}
                 styleModule={lessonStyles}
               />
               <ConceptCard
                 title="Trapezoid"
                 description="A quadrilateral with at least one pair of parallel sides."
                 icon={<Image src="/images/castle1/chapter3/trapezoid.png" alt="Trapezoid" width={180} height={120} />}
-                highlighted={messageIndex >= 2}
+                highlighted={messageIndex >= 3}
                 styleModule={lessonStyles}
               />
               <ConceptCard
                 title="Kite"
                 description="A quadrilateral with two pairs of adjacent sides equal."
                 icon={<Image src="/images/castle1/chapter3/kite.png" alt="Kite" width={180} height={120} />}
-                highlighted={messageIndex >= 2}
+                highlighted={messageIndex >= 3}
                 styleModule={lessonStyles}
               />
               
@@ -424,28 +627,28 @@ export default function Chapter3Page() {
                 title="Pentagon"
                 description="A polygon with five sides and five angles."
                 icon={<Image src="/images/castle1/chapter3/pentagon.png" alt="Pentagon" width={180} height={120} />}
-                highlighted={messageIndex >= 3}
+                highlighted={messageIndex >= 4}
                 styleModule={lessonStyles}
               />
               <ConceptCard
                 title="Hexagon"
                 description="A polygon with six sides and six angles."
                 icon={<Image src="/images/castle1/chapter3/hexagon.png" alt="Hexagon" width={180} height={120} />}
-                highlighted={messageIndex >= 3}
+                highlighted={messageIndex >= 4}
                 styleModule={lessonStyles}
               />
               <ConceptCard
                 title="Heptagon"
                 description="A polygon with seven sides and seven angles."
                 icon={<Image src="/images/castle1/chapter3/heptagon.png" alt="Heptagon" width={180} height={120} />}
-                highlighted={messageIndex >= 3}
+                highlighted={messageIndex >= 4}
                 styleModule={lessonStyles}
               />
               <ConceptCard
                 title="Octagon"
                 description="A polygon with eight sides and eight angles."
                 icon={<Image src="/images/castle1/chapter3/octagon.png" alt="Octagon" width={180} height={120} />}
-                highlighted={messageIndex >= 3}
+                highlighted={messageIndex >= 4}
                 styleModule={lessonStyles}
               />
               
@@ -454,28 +657,28 @@ export default function Chapter3Page() {
                 title="Nonagon"
                 description="A polygon with nine sides and nine angles."
                 icon={<Image src="/images/castle1/chapter3/nonagon.png" alt="Nonagon" width={180} height={120} />}
-                highlighted={messageIndex >= 4}
+                highlighted={messageIndex >= 5}
                 styleModule={lessonStyles}
               />
               <ConceptCard
                 title="Decagon"
                 description="A polygon with ten sides and ten angles."
                 icon={<Image src="/images/castle1/chapter3/decagon.png" alt="Decagon" width={180} height={120} />}
-                highlighted={messageIndex >= 4}
+                highlighted={messageIndex >= 5}
                 styleModule={lessonStyles}
               />
               <ConceptCard
                 title="Hendecagon"
                 description="A polygon with eleven sides and eleven angles."
                 icon={<Image src="/images/castle1/chapter3/hendecagon.png" alt="Hendecagon" width={180} height={120} />}
-                highlighted={messageIndex >= 4}
+                highlighted={messageIndex >= 5}
                 styleModule={lessonStyles}
               />
               <ConceptCard
                 title="Dodecagon"
                 description="A polygon with twelve sides and twelve angles."
                 icon={<Image src="/images/castle1/chapter3/dodecagon.png" alt="Dodecagon" width={180} height={120} />}
-                highlighted={messageIndex >= 4}
+                highlighted={messageIndex >= 5}
                 styleModule={lessonStyles}
               />
             </LessonGrid>
@@ -493,9 +696,6 @@ export default function Chapter3Page() {
           {/* Quiz Scenes */}
           {(currentScene === 'quiz1' || currentScene === 'quiz2' || currentScene === 'quiz3') && quiz && (
             <div className={minigameStyles.minigameContainer}>
-              <div className={minigameStyles.questionText}>
-                Quiz {currentScene === 'quiz1' ? '1' : currentScene === 'quiz2' ? '2' : '3'}
-              </div>
               {quiz.quiz_config.questions && quiz.quiz_config.questions[currentScene === 'quiz1' ? 0 : currentScene === 'quiz2' ? 1 : 2] && (
                 <>
                   <div className={minigameStyles.questionText}>
@@ -503,27 +703,27 @@ export default function Chapter3Page() {
                   </div>
                   
                   <div className={minigameStyles.answerOptions}>
-                    {quiz.quiz_config.questions[currentScene === 'quiz1' ? 0 : currentScene === 'quiz2' ? 1 : 2].options.map((option: string) => (
-                      <div
-                        key={option}
-                        className={`${minigameStyles.answerOption} ${
-                          quizFeedback && quizAnswers[`question${currentScene === 'quiz1' ? 1 : currentScene === 'quiz2' ? 2 : 3}`] === option
-                            ? quizFeedback === 'correct'
-                              ? minigameStyles.answerOptionCorrect
-                              : minigameStyles.answerOptionIncorrect
-                            : quizAnswers[`question${currentScene === 'quiz1' ? 1 : currentScene === 'quiz2' ? 2 : 3}`] === option
-                            ? minigameStyles.answerOptionSelected
-                            : ''
-                        }`}
-                        onClick={() => handleQuizAnswer(
-                          currentScene === 'quiz1' ? 1 : currentScene === 'quiz2' ? 2 : 3,
-                          option,
-                          quiz.quiz_config.questions[currentScene === 'quiz1' ? 0 : currentScene === 'quiz2' ? 1 : 2].correctAnswer
-                        )}
-                      >
-                        {option}
-                      </div>
-                    ))}
+                    {quiz.quiz_config.questions[currentScene === 'quiz1' ? 0 : currentScene === 'quiz2' ? 1 : 2].options.map((option: string) => {
+                      const currentQuestion = quiz.quiz_config.questions[currentScene === 'quiz1' ? 0 : currentScene === 'quiz2' ? 1 : 2];
+                      const questionId = currentQuestion.id;
+                      return (
+                        <div
+                          key={option}
+                          className={`${minigameStyles.answerOption} ${
+                            quizFeedback && quizAnswers[questionId] === option
+                              ? quizFeedback === 'correct'
+                                ? minigameStyles.answerOptionCorrect
+                                : minigameStyles.answerOptionIncorrect
+                              : quizAnswers[questionId] === option
+                              ? minigameStyles.answerOptionSelected
+                              : ''
+                          }`}
+                          onClick={() => handleQuizAnswer(questionId, option, currentQuestion.correctAnswer)}
+                        >
+                          {option}
+                        </div>
+                      );
+                    })}
                   </div>
 
                   <button
@@ -535,7 +735,7 @@ export default function Chapter3Page() {
                         : ''
                     }`}
                     onClick={() => handleQuizSubmit(currentScene === 'quiz1' ? 1 : currentScene === 'quiz2' ? 2 : 3)}
-                    disabled={!quizAnswers[`question${currentScene === 'quiz1' ? 1 : currentScene === 'quiz2' ? 2 : 3}`] || quizFeedback !== null}
+                    disabled={!quizAnswers[quiz.quiz_config.questions[currentScene === 'quiz1' ? 0 : currentScene === 'quiz2' ? 1 : 2].id] || quizFeedback !== null}
                   >
                     {quizFeedback === 'correct' ? '✓ Correct!' : quizFeedback === 'incorrect' ? '✗ Incorrect' : 'Submit Answer'}
                   </button>
@@ -551,6 +751,7 @@ export default function Chapter3Page() {
               relicImage="/images/relics/shape-crystal.png"
               relicDescription="You have mastered the geometric shapes! The Shape Summoner Crystal allows you to summon and manipulate shapes at will."
               earnedXP={earnedXP}
+              quizScore={quizScore}
               canRetakeQuiz={true}
               onRetakeQuiz={handleRetakeQuiz}
               onComplete={handleExit}
@@ -576,12 +777,12 @@ export default function Chapter3Page() {
   );
   
   // Helper function for quiz answer selection
-  function handleQuizAnswer(quizNumber: number, answer: string, correctAnswer: string) {
+  function handleQuizAnswer(questionId: string, answer: string, correctAnswer: string) {
     if (quizFeedback !== null) return; // Don't allow answer changes after submission
     
-    setQuizAnswers((prev) => ({
-      ...prev,
-      [`question${quizNumber}`]: answer,
-    }));
+    setQuizAnswers((prev) => {
+      const updated = { ...prev, [questionId]: answer };
+      return updated;
+    });
   }
 }

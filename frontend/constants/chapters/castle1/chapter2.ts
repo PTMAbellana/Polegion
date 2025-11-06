@@ -3,19 +3,19 @@ import type { MinigameLine, MinigameQuestion } from '@/types/common/quiz';
 // Dialogue data
 export const CHAPTER2_OPENING_DIALOGUE = [
   "Ah, Apprentice! You've brought life back to the Points and Paths of the Spire.",
-  "But our journey continues deeper — into the Paths of Power!",
+  "But our journey continues deeper, into the Paths of Power!",
   "These radiant lines you see… they do not all behave the same.",
   "Some walk side by side, never meeting. Others collide and part ways.",
-  "And a few meet with perfect balance — forming right angles!",
+  "And a few meet with perfect balance, forming right angles!",
   "Let us explore the dance of direction together!",
 ];
 
 export const CHAPTER2_LESSON_DIALOGUE = [
   "When two lines travel side by side, never touching, they share parallel harmony!",
-  "Parallel lines — forever apart, yet always equal in distance. A lesson in quiet companionship!",
+  "Parallel lines, forever apart, yet always equal in distance. A lesson in quiet companionship!",
   "Some lines meet and then diverge. These are intersecting lines.",
-  "When two paths meet like travelers at a crossroads, they intersect. No balance, no order — only direction and destiny!",
-  "Ah! The rarest bond of all — perpendicular lines! When they meet at 90°, their energy forms perfect symmetry.",
+  "When two paths meet like travelers at a crossroads, they intersect. No balance, no order, only direction and destiny!",
+  "Ah! The rarest bond of all, perpendicular lines! When they meet at 90°, their energy forms perfect symmetry.",
   "Your eyes are sharp! Skew lines dwell in different planes, never crossing nor aligning. Like stars that shine apart in the vast sky.",
   "Now let us test your understanding!",
 ];

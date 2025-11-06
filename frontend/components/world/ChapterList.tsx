@@ -2,7 +2,7 @@
 
 import React, { useRef, useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { ChevronRight, Lock, CheckCircle, Star, Zap } from 'lucide-react';
+import { ChevronRight, Lock, Star, Zap } from 'lucide-react';
 import type { ChapterWithProgress } from '@/types/castle.types';
 
 interface ChapterListProps {
@@ -65,11 +65,9 @@ export default function ChapterList({
                 onMouseEnter={(e) => handleMouseEnter(e, chapter.id)}
                 onMouseLeave={onHoverLeave}
               >
-                <div className={styleModule.chapterIconContainer}>
+                <div className={styleModule.chapterNumberContainer}>
                   {!isUnlocked ? (
                     <Lock className={styleModule.lockIcon} />
-                  ) : isCompleted ? (
-                    <CheckCircle className={styleModule.completedIcon} />
                   ) : (
                     <span className={styleModule.chapterNumber}>{chapter.chapter_number}</span>
                   )}

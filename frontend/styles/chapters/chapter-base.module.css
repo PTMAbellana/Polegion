@@ -237,7 +237,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: center;
   background: rgba(33, 53, 85, 0.5);
   border: 2px solid #D8C4B6;
   border-radius: 10px;
@@ -358,16 +358,17 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1.5rem;
-  padding: 1.5rem;
+  gap: 1rem;
+  padding: 1rem;
   max-width: 700px;
   margin: 0 auto;
-  max-height: 100%;
-  overflow: hidden; /* Prevent scrollbar */
+  width: 100%;
+  overflow: hidden;
+  max-height: calc(100vh - 300px); /* Ensure it fits within viewport */
 }
 
 .rewardTitle {
-  font-size: 2.5rem;
+  font-size: 1.8rem;
   font-weight: 700;
   color: #D8C4B6;
   text-shadow: 0 0 20px rgba(216, 196, 182, 0.6);
@@ -379,7 +380,7 @@
   background: linear-gradient(135deg, rgba(62, 88, 121, 0.5) 0%, rgba(33, 53, 85, 0.5) 100%);
   border: 2px solid #D8C4B6;
   border-radius: 12px;
-  padding: 1.5rem;
+  padding: 1rem;
   text-align: center;
   width: 100%;
   backdrop-filter: blur(10px);
@@ -387,45 +388,45 @@
 }
 
 .relicDisplay {
-  margin-bottom: 1rem;
+  margin-bottom: 0.75rem;
   animation: float 3s ease-in-out infinite;
 }
 
 .relicIcon {
-  width: 100px;
-  height: 100px;
+  width: 80px;
+  height: 80px;
   filter: drop-shadow(0 0 20px rgba(216, 196, 182, 0.6));
 }
 
 .rewardName {
-  font-size: 1.5rem;
+  font-size: 1.2rem;
   font-weight: 600;
   color: #F5EFE7;
-  margin: 0 0 0.75rem 0;
+  margin: 0 0 0.5rem 0;
   text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
 }
 
 .rewardDescription {
-  font-size: 1rem;
+  font-size: 0.85rem;
   color: #D8C4B6;
-  line-height: 1.5;
+  line-height: 1.4;
   margin: 0;
 }
 
 .rewardStats {
   display: flex;
-  gap: 1rem;
+  gap: 0.75rem;
   width: 100%;
   flex-wrap: wrap;
 }
 
 .statBox {
   flex: 1;
-  min-width: 120px;
+  min-width: 100px;
   background: linear-gradient(135deg, rgba(216, 196, 182, 0.2) 0%, rgba(245, 239, 231, 0.1) 100%);
   border: 2px solid rgba(216, 196, 182, 0.4);
   border-radius: 10px;
-  padding: 1rem;
+  padding: 0.75rem;
   text-align: center;
   backdrop-filter: blur(5px);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
@@ -433,15 +434,15 @@
 
 .statLabel {
   display: block;
-  font-size: 0.85rem;
+  font-size: 0.75rem;
   color: #D8C4B6;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.35rem;
   font-weight: 500;
 }
 
 .statValue {
   display: block;
-  font-size: 1.75rem;
+  font-size: 1.4rem;
   font-weight: 700;
   color: #F5EFE7;
   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
@@ -449,7 +450,7 @@
 
 .rewardActions {
   display: flex;
-  gap: 1rem;
+  gap: 0.75rem;
   width: 100%;
   flex-wrap: wrap;
 }
@@ -457,11 +458,11 @@
 .retakeButton,
 .returnButton {
   flex: 1;
-  min-width: 150px;
-  padding: 0.875rem 1.5rem;
+  min-width: 130px;
+  padding: 0.7rem 1.2rem;
   border: 2px solid #D8C4B6;
   border-radius: 10px;
-  font-size: 1rem;
+  font-size: 0.9rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -737,5 +738,449 @@
 
   .chapterSubtitle {
     font-size: 0.8rem;
+  }
+}
+
+/* ============================================
+   PROGRESS MODAL STYLES
+   ============================================ */
+
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  padding: 1rem;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.modalContent {
+  background: linear-gradient(145deg, rgba(33, 53, 85, 0.98) 0%, rgba(62, 88, 121, 0.98) 100%);
+  backdrop-filter: blur(15px);
+  border: 3px solid rgba(216, 196, 182, 0.5);
+  border-radius: 16px;
+  width: 100%;
+  max-width: 420px;
+  padding: 2rem 1.75rem;
+  position: relative;
+  box-shadow: 
+    0 20px 60px rgba(0, 0, 0, 0.8),
+    0 0 0 1px rgba(255, 255, 255, 0.1) inset,
+    0 0 40px rgba(33, 53, 85, 0.5);
+  animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.modalContent::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, 
+    transparent,
+    rgba(216, 196, 182, 0.5) 25%,
+    rgba(255, 215, 0, 0.3) 50%,
+    rgba(216, 196, 182, 0.5) 75%,
+    transparent
+  );
+  border-radius: 16px 16px 0 0;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.modalTitle {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #F5EFE7;
+  text-align: center;
+  margin: 0 0 1.25rem 0;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  letter-spacing: 0.5px;
+}
+
+.modalBody {
+  margin-bottom: 1.5rem;
+}
+
+.modalText {
+  font-size: 0.9rem;
+  color: #D8C4B6;
+  text-align: center;
+  margin: 0 0 0.4rem 0;
+}
+
+.modalChapterName {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #F5EFE7;
+  text-align: center;
+  margin: 0 0 1.25rem 0;
+}
+
+.modalProgress {
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.2));
+  border: 2px solid rgba(216, 196, 182, 0.3);
+  border-radius: 10px;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  align-items: center;
+  box-shadow: 
+    inset 0 2px 4px rgba(0, 0, 0, 0.3),
+    0 1px 0 rgba(255, 255, 255, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+.modalProgress::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, 
+    transparent,
+    rgba(255, 215, 0, 0.1),
+    transparent
+  );
+  animation: shimmer 3s infinite;
+}
+
+@keyframes shimmer {
+  0% { left: -100%; }
+  50% { left: 100%; }
+  100% { left: 100%; }
+}
+
+.modalLabel {
+  font-size: 0.8rem;
+  color: #D8C4B6;
+  opacity: 0.8;
+}
+
+.modalScene {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #FFD700;
+  text-shadow: 
+    0 0 10px rgba(255, 215, 0, 0.5),
+    0 0 20px rgba(255, 215, 0, 0.3),
+    0 2px 4px rgba(0, 0, 0, 0.5);
+  letter-spacing: 0.5px;
+  position: relative;
+  padding: 0.25rem 0.75rem;
+  background: linear-gradient(90deg, 
+    transparent,
+    rgba(255, 215, 0, 0.1),
+    transparent
+  );
+  border-radius: 4px;
+}
+
+.modalActions {
+  display: flex;
+  gap: 0.875rem;
+  margin-bottom: 1.25rem;
+}
+
+.modalButton {
+  flex: 1;
+  padding: 0.75rem 1.25rem;
+  border: 2px solid;
+  border-radius: 10px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  position: relative;
+  overflow: hidden;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.modalButton::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s;
+}
+
+.modalButton:hover::before {
+  left: 100%;
+}
+
+.modalButtonContinue {
+  background: linear-gradient(135deg, #4CAF50 0%, #388E3C 100%);
+  border-color: #66BB6A;
+  color: #ffffff;
+  box-shadow: 
+    0 4px 6px rgba(76, 175, 80, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.2);
+}
+
+.modalButtonContinue:hover {
+  background: linear-gradient(135deg, #66BB6A 0%, #4CAF50 100%);
+  border-color: #81C784;
+  transform: translateY(-2px);
+  box-shadow: 
+    0 6px 12px rgba(76, 175, 80, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.2);
+}
+
+.modalButtonContinue:active {
+  transform: translateY(0);
+  box-shadow: 
+    0 2px 4px rgba(76, 175, 80, 0.3),
+    inset 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.modalButtonRestart {
+  background: linear-gradient(135deg, #FF9800 0%, #F57C00 100%);
+  border-color: #FFB74D;
+  color: #ffffff;
+  box-shadow: 
+    0 4px 6px rgba(255, 152, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.2);
+}
+
+.modalButtonRestart:hover {
+  background: linear-gradient(135deg, #FFB74D 0%, #FF9800 100%);
+  border-color: #FFCC80;
+  transform: translateY(-2px);
+  box-shadow: 
+    0 6px 12px rgba(255, 152, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.2);
+}
+
+.modalButtonRestart:active {
+  transform: translateY(0);
+  box-shadow: 
+    0 2px 4px rgba(255, 152, 0, 0.3),
+    inset 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.modalFooter {
+  border-top: 1px solid rgba(216, 196, 182, 0.2);
+  padding-top: 0.875rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.modalNote {
+  font-size: 0.75rem;
+  color: rgba(216, 196, 182, 0.6);
+  text-align: center;
+  margin: 0;
+  font-style: italic;
+}
+
+.modalLinkButton {
+  background: none;
+  border: none;
+  color: #D8C4B6;
+  font-size: 0.8rem;
+  cursor: pointer;
+  text-decoration: none;
+  opacity: 0.8;
+  transition: all 0.3s ease;
+  padding: 0.4rem 0.875rem;
+  border-radius: 4px;
+  position: relative;
+}
+
+.modalLinkButton::after {
+  content: '';
+  position: absolute;
+  bottom: 0.25rem;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 1px;
+  background: #D8C4B6;
+  transition: width 0.3s ease;
+}
+
+.modalLinkButton:hover {
+  opacity: 1;
+  color: #F5EFE7;
+}
+
+.modalLinkButton:hover::after {
+  width: 80%;
+}
+
+.modalConfirm {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+  animation: fadeIn 0.3s ease;
+}
+
+.modalWarning {
+  font-size: 0.8rem;
+  color: #ff9800;
+  text-align: center;
+  margin: 0;
+  font-weight: 500;
+}
+
+.modalConfirmActions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.modalConfirmButton,
+.modalCancelButton {
+  flex: 1;
+  padding: 0.7rem 0.875rem;
+  border: 2px solid;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  position: relative;
+  overflow: hidden;
+}
+
+.modalConfirmButton {
+  background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
+  border-color: #ef5350;
+  color: #ffffff;
+  box-shadow: 
+    0 3px 5px rgba(244, 67, 54, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.2);
+}
+
+.modalConfirmButton:hover {
+  background: linear-gradient(135deg, #ef5350 0%, #f44336 100%);
+  border-color: #ff5252;
+  transform: translateY(-2px);
+  box-shadow: 
+    0 5px 10px rgba(244, 67, 54, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.2);
+}
+
+.modalConfirmButton:active {
+  transform: translateY(0);
+  box-shadow: 
+    0 2px 3px rgba(244, 67, 54, 0.3),
+    inset 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.modalCancelButton {
+  background: linear-gradient(135deg, rgba(96, 125, 139, 0.4), rgba(69, 90, 100, 0.5));
+  border-color: #78909C;
+  color: #CFD8DC;
+  box-shadow: 
+    0 3px 5px rgba(96, 125, 139, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.modalCancelButton:hover {
+  background: linear-gradient(135deg, rgba(96, 125, 139, 0.6), rgba(69, 90, 100, 0.7));
+  border-color: #90A4AE;
+  color: #ECEFF1;
+  transform: translateY(-2px);
+  box-shadow: 
+    0 5px 10px rgba(96, 125, 139, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+.modalCancelButton:active {
+  transform: translateY(0);
+  box-shadow: 
+    0 2px 3px rgba(96, 125, 139, 0.2),
+    inset 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+/* Mobile responsiveness for modal */
+@media (max-width: 768px) {
+  .modalContent {
+    padding: 1.75rem 1.25rem;
+    max-width: 90%;
+  }
+
+  .modalTitle {
+    font-size: 1.25rem;
+  }
+
+  .modalActions {
+    flex-direction: column;
+  }
+
+  .modalButton {
+    width: 100%;
+    padding: 0.75rem;
+  }
+
+  .modalConfirmActions {
+    flex-direction: column;
+  }
+
+  .modalConfirmButton,
+  .modalCancelButton {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .modalContent {
+    padding: 1.5rem 1rem;
+  }
+
+  .modalTitle {
+    font-size: 1.15rem;
+  }
+
+  .modalButton {
+    font-size: 0.8rem;
+    padding: 0.7rem;
+  }
+
+  .modalScene {
+    font-size: 0.95rem;
+  }
+  
+  .modalText,
+  .modalChapterName {
+    font-size: 0.85rem;
   }
 }
