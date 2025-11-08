@@ -1,0 +1,116 @@
+// Castle 3 - Chapter 3: The Chamber of Space
+// Theme: Area of circles using A = πr²
+
+export const CHAPTER3_OPENING_DIALOGUE = [
+  "Marvelous work! You have measured the circle's edge.",
+  "Now we enter the Chamber of Space, where a circular pool glows with starlight.",
+  "The AREA of a circle measures the space inside its boundary.",
+  "Let us discover the formula that reveals this inner realm!"
+];
+
+export const CHAPTER3_LESSON_DIALOGUE = [
+  { key: 'intro', text: "The AREA is the amount of space inside the circle.", taskId: 'task-0' },
+  { key: 'formula', text: "The formula for the area of a circle is: A = πr²", taskId: 'task-1' },
+  { key: 'squared', text: "Notice: We SQUARE the radius (r²), meaning r × r!", taskId: 'task-2' },
+  { key: 'example1', text: "Example: If radius = 4 cm, then A = π(4²) = π(16) = 16π ≈ 50.3 cm²", taskId: 'task-3' },
+  { key: 'semicircle', text: "A SEMI-CIRCLE is half of a circle. Its area is: A = πr²/2", taskId: 'task-4' },
+  { key: 'example2', text: "Example: Semi-circle with radius 6 cm has area = π(36)/2 = 18π ≈ 56.5 cm²", taskId: 'task-5' },
+  { key: 'sector-intro', text: "A SECTOR is a portion of the circle, like a slice of pie.", taskId: 'task-6' },
+  { key: 'practice', text: "Now calculate areas and illuminate the Chamber of Space!" }
+];
+
+export const CHAPTER3_MINIGAME_DIALOGUE = [
+  "The starlight pool presents circular challenges!",
+  "Calculate the area of each circle or semi-circle.",
+  "Use A = πr² or A = πr²/2. Round to 1 decimal place!"
+];
+
+export const CHAPTER3_MINIGAME_LEVELS = [
+  { id: 1, radius: 3, isSemiCircle: false, correctAnswer: 28.3, instruction: 'Find area (radius = 3 cm)', hint: 'Use A = πr²' },
+  { id: 2, radius: 5, isSemiCircle: false, correctAnswer: 78.5, instruction: 'Find area (radius = 5 cm)', hint: 'Use A = πr²' },
+  { id: 3, radius: 4, isSemiCircle: true, correctAnswer: 25.1, instruction: 'Find semi-circle area (radius = 4 cm)', hint: 'Use A = πr²/2' },
+  { id: 4, radius: 7, isSemiCircle: false, correctAnswer: 153.9, instruction: 'Find area (radius = 7 cm)', hint: 'Use A = πr²' },
+  { id: 5, radius: 6, isSemiCircle: true, correctAnswer: 56.5, instruction: 'Find semi-circle area (radius = 6 cm)', hint: 'Use A = πr²/2' },
+  { id: 6, radius: 10, isSemiCircle: false, correctAnswer: 314.2, instruction: 'Find area (radius = 10 cm)', hint: 'Use A = πr²' }
+];
+
+export const CHAPTER3_CONCEPTS = [
+  {
+    key: 'area',
+    title: 'Area of Circle',
+    summary: 'The amount of space inside the circle'
+  },
+  {
+    key: 'formula',
+    title: 'Area Formula',
+    summary: 'A = πr² (pi times radius squared)'
+  },
+  {
+    key: 'squared',
+    title: 'Squaring the Radius',
+    summary: 'r² means r × r (multiply radius by itself)'
+  },
+  {
+    key: 'example1',
+    title: 'Example: Full Circle',
+    summary: 'If r = 4, then A = π(16) ≈ 50.3 cm²'
+  },
+  {
+    key: 'semicircle',
+    title: 'Semi-Circle',
+    summary: 'Half of a circle, area = πr²/2'
+  },
+  {
+    key: 'example2',
+    title: 'Example: Semi-Circle',
+    summary: 'If r = 6, then A = 18π ≈ 56.5 cm²'
+  },
+  {
+    key: 'sector',
+    title: 'Sector',
+    summary: 'A pie-shaped portion of the circle'
+  }
+];
+
+export const CHAPTER3_LEARNING_OBJECTIVES = [
+  { id: 'task-0', key: 'area', label: 'Learn: Circle Area', type: 'lesson' as const },
+  { id: 'task-1', key: 'formula', label: 'Learn: A = πr²', type: 'lesson' as const },
+  { id: 'task-2', key: 'squared', label: 'Learn: Squaring Radius', type: 'lesson' as const },
+  { id: 'task-3', key: 'example1', label: 'Learn: Full Circle Example', type: 'lesson' as const },
+  { id: 'task-4', key: 'semicircle', label: 'Learn: Semi-Circle', type: 'lesson' as const },
+  { id: 'task-5', key: 'example2', label: 'Learn: Semi-Circle Example', type: 'lesson' as const },
+  { id: 'task-6', key: 'sector', label: 'Learn: Sector', type: 'lesson' as const },
+  { id: 'task-7', key: 'minigame', label: 'Complete Area Calculations', type: 'minigame' as const },
+  { id: 'task-8', key: 'quiz1', label: 'Pass Quiz Question 1', type: 'quiz' as const },
+  { id: 'task-9', key: 'quiz2', label: 'Pass Quiz Question 2', type: 'quiz' as const },
+  { id: 'task-10', key: 'quiz3', label: 'Pass Quiz Question 3', type: 'quiz' as const },
+  { id: 'task-11', key: 'quiz4', label: 'Pass Quiz Question 4', type: 'quiz' as const },
+  { id: 'task-12', key: 'quiz5', label: 'Pass Quiz Question 5', type: 'quiz' as const },
+];
+
+export const CHAPTER3_XP_VALUES = {
+  lesson: 60,
+  minigame: 70,
+  quiz1: 60,
+  total: 250,
+};
+
+export const CHAPTER3_CASTLE_ID = '3d4e5f6a-7b8c-9d0e-1f2a-3b4c5d6e7f8a';
+export const CHAPTER3_NUMBER = 3;
+
+export const CHAPTER3_RELIC = {
+  name: "Orb of Space",
+  image: "/images/relics/orb-space.png",
+  description: "You have mastered circle area! The Orb of Space reveals the inner dimensions of any circular realm."
+};
+
+export const CHAPTER3_WIZARD = {
+  name: "Archim, Keeper of the Curved Path",
+  image: "/images/archim-wizard.png"
+};
+
+export const CHAPTER3_METADATA = {
+  title: "The Chamber of Space",
+  subtitle: "Castle 3 - The Circle Sanctuary",
+  description: "Calculate the area of circles and semi-circles using A = πr²."
+};

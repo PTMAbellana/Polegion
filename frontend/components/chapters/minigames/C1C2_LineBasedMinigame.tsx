@@ -237,117 +237,150 @@ const LineBasedMinigame: React.FC<LineBasedMinigameProps> = ({
               {lines.map((line: MinigameLine) => renderLine(line))}
 
               {/* Draw endpoint circles and labels */}
-              {lines.map((line: MinigameLine, index: number) => {
-                const scaleX = canvasSize.width / canvasWidth;
-                const scaleY = canvasSize.height / canvasHeight;
-                const x1 = line.x1 * scaleX;
-                const y1 = line.y1 * scaleY;
-                const x2 = line.x2 * scaleX;
-                const y2 = line.y2 * scaleY;
+              {(() => {
+                // Calculate label positions on lines with guaranteed no overlap
+                const labelPositions: Array<{ 
+                  x: number; 
+                  y: number; 
+                  label: string; 
+                  lineId: string;
+                  lineIndex: number;
+                }> = [];
                 
-                // Calculate midpoint
-                const midX = (x1 + x2) / 2;
-                const midY = (y1 + y2) / 2;
-                
-                // Calculate line direction
-                const dx = x2 - x1;
-                const dy = y2 - y1;
-                const length = Math.sqrt(dx * dx + dy * dy);
-                
-                // Determine if line is horizontal, vertical, or diagonal
-                const angle = Math.atan2(dy, dx) * (180 / Math.PI);
-                const isHorizontal = Math.abs(angle) < 15 || Math.abs(angle) > 165;
-                const isVertical = Math.abs(angle - 90) < 15 || Math.abs(angle + 90) < 15;
-                
-                // Debug logging
-                console.log(`Label ${line.label}: dx=${dx.toFixed(2)}, dy=${dy.toFixed(2)}, angle=${angle.toFixed(2)}°, isVertical=${isVertical}, isHorizontal=${isHorizontal}`);
-                
-                // Count how many lines of each type we have so far to alternate positions
-                const linesBeforeThis = lines.slice(0, index);
-                
-                let labelX, labelY;
-                
-                if (isVertical) {
-                  // For VERTICAL lines, alternate between left and right
-                  const verticalLinesBefore = linesBeforeThis.filter(l => {
-                    const ldx = l.x2 - l.x1;
-                    const ldy = l.y2 - l.y1;
-                    const langle = Math.atan2(ldy, ldx) * (180 / Math.PI);
-                    return Math.abs(langle - 90) < 15 || Math.abs(langle + 90) < 15;
-                  }).length;
-                  const horizontalOffset = verticalLinesBefore % 2 === 0 ? -50 : 50;
-                  labelX = midX + horizontalOffset - 15;
-                  labelY = midY - 12;
-                } else if (isHorizontal) {
-                  // For HORIZONTAL lines, alternate between above and below
-                  const horizontalLinesBefore = linesBeforeThis.filter(l => {
-                    const ldx = l.x2 - l.x1;
-                    const ldy = l.y2 - l.y1;
-                    const langle = Math.atan2(ldy, ldx) * (180 / Math.PI);
-                    return Math.abs(langle) < 15 || Math.abs(langle) > 165;
-                  }).length;
-                  const verticalOffset = horizontalLinesBefore % 2 === 0 ? -35 : 35;
-                  labelX = midX - 15;
-                  labelY = midY + verticalOffset;
-                } else {
-                  // For diagonal lines, alternate between 1/4 and 3/4 position
-                  const diagonalLinesBefore = linesBeforeThis.filter(l => {
-                    const ldx = l.x2 - l.x1;
-                    const ldy = l.y2 - l.y1;
-                    const langle = Math.atan2(ldy, ldx) * (180 / Math.PI);
-                    const lHorizontal = Math.abs(langle) < 15 || Math.abs(langle) > 165;
-                    const lVertical = Math.abs(langle - 90) < 15 || Math.abs(langle + 90) < 15;
-                    return !lHorizontal && !lVertical;
-                  }).length;
-                  const position = diagonalLinesBefore % 2 === 0 ? 0.25 : 0.75;
-                  const posX = x1 + dx * position;
-                  const posY = y1 + dy * position;
+                // First pass: Calculate initial positions on lines
+                lines.forEach((line: MinigameLine, index: number) => {
+                  const scaleX = canvasSize.width / canvasWidth;
+                  const scaleY = canvasSize.height / canvasHeight;
+                  const x1 = line.x1 * scaleX;
+                  const y1 = line.y1 * scaleY;
+                  const x2 = line.x2 * scaleX;
+                  const y2 = line.y2 * scaleY;
                   
-                  // Offset perpendicular to line (much closer)
-                  const perpX = -dy / length;
-                  const perpY = dx / length;
-                  const perpOffset = 10;
+                  // Start at midpoint of line
+                  const midX = (x1 + x2) / 2;
+                  const midY = (y1 + y2) / 2;
                   
-                  labelX = posX + perpX * perpOffset - 15;
-                  labelY = posY + perpY * perpOffset - 12;
+                  labelPositions.push({ 
+                    x: midX, 
+                    y: midY, 
+                    label: line.label || '', 
+                    lineId: line.id,
+                    lineIndex: index
+                  });
+                });
+                
+                // Second pass: Check for overlaps and move labels along their lines
+                const labelRadius = 18; // Circle radius for collision detection
+                const minDistance = labelRadius * 2 + 10; // Minimum safe distance between labels
+                
+                for (let i = 0; i < labelPositions.length; i++) {
+                  let hasOverlap = true;
+                  let attempts = 0;
+                  const maxAttempts = 8;
+                  
+                  while (hasOverlap && attempts < maxAttempts) {
+                    hasOverlap = false;
+                    
+                    // Check against all previous labels
+                    for (let j = 0; j < i; j++) {
+                      const dx = labelPositions[i].x - labelPositions[j].x;
+                      const dy = labelPositions[i].y - labelPositions[j].y;
+                      const distance = Math.sqrt(dx * dx + dy * dy);
+                      
+                      if (distance < minDistance) {
+                        hasOverlap = true;
+                        
+                        // Move label along its line
+                        const line = lines[i];
+                        const scaleX = canvasSize.width / canvasWidth;
+                        const scaleY = canvasSize.height / canvasHeight;
+                        const x1 = line.x1 * scaleX;
+                        const y1 = line.y1 * scaleY;
+                        const x2 = line.x2 * scaleX;
+                        const y2 = line.y2 * scaleY;
+                        
+                        // Calculate different positions along the line
+                        const positions = [0.3, 0.7, 0.2, 0.8, 0.15, 0.85, 0.1, 0.9];
+                        const ratio = positions[attempts % positions.length];
+                        
+                        labelPositions[i].x = x1 + (x2 - x1) * ratio;
+                        labelPositions[i].y = y1 + (y2 - y1) * ratio;
+                        
+                        break;
+                      }
+                    }
+                    
+                    attempts++;
+                  }
                 }
                 
-                return (
-                  <React.Fragment key={`points-${line.id}`}>
-                    <Circle x={x1} y={y1} radius={5} fill="#fff" opacity={0.7} />
-                    <Circle x={x2} y={y2} radius={5} fill="#fff" opacity={0.7} />
-                    
-                    {/* Label background circle for better visibility - make it clickable */}
-                    {line.label && (
-                      <>
-                        <Circle
-                          x={labelX + 15}
-                          y={labelY + 12}
-                          // radius={20}
-                          fill="rgba(0, 0, 0, 0.8)"
-                          strokeEnabled={false}
-                          onClick={() => handleLineClick(line.id)}
-                          onMouseEnter={() => selectedLines.length === 0 && setHoveredLine(line.id)}
-                          onMouseLeave={() => setHoveredLine(null)}
-                        />
-                        <Text
-                          x={labelX}
-                          y={labelY}
-                          text={line.label}
-                          fontSize={24}
-                          fontStyle="bold"
-                          fill={selectedLines.includes(line.id) ? '#FFD700' : '#FFFFFF'}
-                          align="center"
-                          width={30}
-                          onClick={() => handleLineClick(line.id)}
-                          onMouseEnter={() => selectedLines.length === 0 && setHoveredLine(line.id)}
-                          onMouseLeave={() => setHoveredLine(null)}
-                        />
-                      </>
-                    )}
-                  </React.Fragment>
-                );
-              })}
+                // Render all lines with their labels
+                return lines.map((line: MinigameLine, index: number) => {
+                  const scaleX = canvasSize.width / canvasWidth;
+                  const scaleY = canvasSize.height / canvasHeight;
+                  const x1 = line.x1 * scaleX;
+                  const y1 = line.y1 * scaleY;
+                  const x2 = line.x2 * scaleX;
+                  const y2 = line.y2 * scaleY;
+                  
+                  // Get calculated label position on the line
+                  const labelPos = labelPositions[index];
+                  const labelX = labelPos.x;
+                  const labelY = labelPos.y;
+                
+                  return (
+                    <React.Fragment key={`points-${line.id}`}>
+                      <Circle x={x1} y={y1} radius={5} fill="#fff" opacity={0.7} />
+                      <Circle x={x2} y={y2} radius={5} fill="#fff" opacity={0.7} />
+                      
+                      {/* Label circle ON the line */}
+                      {line.label && (
+                        <>
+                          {/* Outer glow for better visibility */}
+                          <Circle
+                            x={labelX}
+                            y={labelY}
+                            radius={20}
+                            fill="rgba(0, 0, 0, 0.4)"
+                            listening={false}
+                          />
+                          {/* Main label circle */}
+                          <Circle
+                            x={labelX}
+                            y={labelY}
+                            radius={16}
+                            fill="rgba(0, 0, 0, 0.95)"
+                            stroke={selectedLines.includes(line.id) ? '#FFD700' : '#FFFFFF'}
+                            strokeWidth={selectedLines.includes(line.id) ? 3 : 2}
+                            shadowColor="black"
+                            shadowBlur={8}
+                            shadowOpacity={0.8}
+                            onClick={() => handleLineClick(line.id)}
+                            onMouseEnter={() => selectedLines.length === 0 && setHoveredLine(line.id)}
+                            onMouseLeave={() => setHoveredLine(null)}
+                          />
+                          {/* Label text */}
+                          <Text
+                            x={labelX - 10}
+                            y={labelY - 10}
+                            text={line.label}
+                            fontSize={18}
+                            fontStyle="bold"
+                            fill={selectedLines.includes(line.id) ? '#FFD700' : '#FFFFFF'}
+                            align="center"
+                            width={20}
+                            height={20}
+                            verticalAlign="middle"
+                            onClick={() => handleLineClick(line.id)}
+                            onMouseEnter={() => selectedLines.length === 0 && setHoveredLine(line.id)}
+                            onMouseLeave={() => setHoveredLine(null)}
+                          />
+                        </>
+                      )}
+                    </React.Fragment>
+                  );
+                });
+              })()}
             </Layer>
           </Stage>
         </div>

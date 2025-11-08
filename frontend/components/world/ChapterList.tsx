@@ -3,7 +3,7 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { ChevronRight, Lock, Star, Zap } from 'lucide-react';
-import type { ChapterWithProgress } from '@/types/castle.types';
+import type { ChapterWithProgress } from '@/types/common/chapter';
 
 interface ChapterListProps {
   chapters: ChapterWithProgress[];

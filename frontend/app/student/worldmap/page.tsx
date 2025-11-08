@@ -1,22 +1,22 @@
-"use client"
+'use client';
 
-import React, { useState, useEffect, useCallback, useRef } from 'react'
-import { useRouter } from 'next/navigation'
-import { useAuthStore } from '@/store/authStore'
-import { useCastleStore } from '@/store/castleStore'
-import { AuthProtection } from '@/context/AuthProtection'
-import Loader from '@/components/Loader'
-import WorldMapIntro from '@/components/world/WorldMapIntro'
-import CastleMarker from '@/components/worldmap/CastleMarker'
-import CastleModal from '@/components/worldmap/CastleModal'
-import CastleStats from '@/components/worldmap/CastleStats'
-import styles from '@/styles/world-map.module.css'
-import { CastleWithProgress } from '@/types/common/castle'
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { useRouter } from 'next/navigation';
+import { useAuthStore } from '@/store/authStore';
+import { useCastleStore } from '@/store/castleStore';
+import { AuthProtection } from '@/context/AuthProtection';
+import Loader from '@/components/Loader';
+import WorldMapIntro from '@/components/world/WorldMapIntro';
+import CastleMarker from '@/components/worldmap/CastleMarker';
+import CastleModal from '@/components/worldmap/CastleModal';
+import CastleStats from '@/components/worldmap/CastleStats';
+import styles from '@/styles/world-map.module.css';
+import { CastleWithProgress } from '@/types/common/castle';
 
 export default function WorldMapPage() {
-  const router = useRouter()
-  const { userProfile } = useAuthStore()
-  const { isLoading: authLoading } = AuthProtection()
+  const router = useRouter();
+  const { userProfile } = useAuthStore();
+  const { isLoading: authLoading } = AuthProtection();
 
   // Zustand store
   const {
@@ -32,205 +32,194 @@ export default function WorldMapPage() {
     setHoveredCastle,
     setShowIntro,
     getCastleStats,
-    fetchCastles
-  } = useCastleStore()
+    fetchCastles,
+  } = useCastleStore();
 
   // Local UI state
-  const [isNavExpanded, setIsNavExpanded] = useState(false)
-  const [backgroundError, setBackgroundError] = useState(false)
-  const [direction, setDirection] = useState<'' | 'left' | 'right'>('')
+  const [isNavExpanded, setIsNavExpanded] = useState(false);
+  const [backgroundError, setBackgroundError] = useState(false);
 
-  // Refs for touch/swipe
-  const touchStartX = useRef<number>(0)
-  const touchEndX = useRef<number>(0)
-  const hasFetchedRef = useRef<boolean>(false)
-  const lastUserIdRef = useRef<string | null>(null)
+  // Refs for touch/swipe and fetching
+  const touchStartX = useRef<number>(0);
+  const touchEndX = useRef<number>(0);
+  const hasFetchedRef = useRef<boolean>(false);
+  const lastUserIdRef = useRef<string | null>(null);
 
-  // Fetch castles on mount or when user changes - always refresh to get latest progress
+  // Fetch castles on mount or when user changes
   useEffect(() => {
-    const userId = userProfile?.id
+    const userId = userProfile?.id;
     
-    // Only fetch if:
-    // 1. We have a userId
-    // 2. Haven't fetched yet OR user changed
     if (userId && (!hasFetchedRef.current || lastUserIdRef.current !== userId)) {
-      console.log('[WorldMap] Fetching castles for user:', userId)
-      hasFetchedRef.current = true
-      lastUserIdRef.current = userId
-      fetchCastles(userId)
+      console.log('[WorldMap] Fetching castles for user:', userId);
+      hasFetchedRef.current = true;
+      lastUserIdRef.current = userId;
+      fetchCastles(userId);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [userProfile?.id])
+  }, [userProfile?.id, fetchCastles]);
 
   // Navbar expansion listener
   useEffect(() => {
     const checkNavbarHover = (e: MouseEvent) => {
       if (window.innerWidth > 968) {
-        const isNearNavbar = e.clientX <= 70
-        setIsNavExpanded(isNearNavbar)
+        const isNearNavbar = e.clientX <= 70;
+        setIsNavExpanded(isNearNavbar);
       } else {
-        setIsNavExpanded(false)
+        setIsNavExpanded(false);
       }
-    }
+    };
 
     const handleResize = () => {
       if (window.innerWidth <= 968) {
-        setIsNavExpanded(false)
+        setIsNavExpanded(false);
       }
-    }
+    };
 
-    window.addEventListener('mousemove', checkNavbarHover)
-    window.addEventListener('resize', handleResize)
+    window.addEventListener('mousemove', checkNavbarHover);
+    window.addEventListener('resize', handleResize);
 
     return () => {
-      window.removeEventListener('mousemove', checkNavbarHover)
-      window.removeEventListener('resize', handleResize)
-    }
-  }, [])
+      window.removeEventListener('mousemove', checkNavbarHover);
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
 
   // Intro display - use user-specific localStorage key
   useEffect(() => {
     if (!authLoading && userProfile) {
-      // Use user-specific key so each user sees intro on their first visit
-      const introKey = `hasSeenMapIntro_${userProfile.id}`
-      const hasSeenIntro = localStorage.getItem(introKey)
+      const introKey = `hasSeenMapIntro_${userProfile.id}`;
+      const hasSeenIntro = localStorage.getItem(introKey);
       
       if (!hasSeenIntro && !showIntro) {
-        setShowIntro(true)
+        setShowIntro(true);
       }
     }
-  }, [authLoading, userProfile, showIntro, setShowIntro])
+  }, [authLoading, userProfile, showIntro, setShowIntro]);
 
   // Background preload
   useEffect(() => {
-    if (castles.length === 0) return
+    if (castles.length === 0) return;
     
-    const currentCastle = castles[currentCastleIndex]
-    if (!currentCastle) return
+    const currentCastle = castles[currentCastleIndex];
+    if (!currentCastle) return;
 
-    const currentBackgroundImage = `/images/castles/castle${currentCastle.image_number}-background.png`
+    const currentBackgroundImage = `/images/castles/castle${currentCastle.image_number}-background.png`;
     
-    setBackgroundError(false)
+    setBackgroundError(false);
     
-    const img = new Image()
-    img.src = currentBackgroundImage
+    const img = new Image();
+    img.src = currentBackgroundImage;
     
     img.onerror = () => {
-      console.warn(`Background image not found: ${currentBackgroundImage}`)
-      setBackgroundError(true)
-    }
-  }, [currentCastleIndex, castles])
+      console.warn(`Background image not found: ${currentBackgroundImage}`);
+      setBackgroundError(true);
+    };
+  }, [currentCastleIndex, castles]);
 
   // Touch/Swipe handlers
   const handleTouchStart = (e: React.TouchEvent) => {
-    touchStartX.current = e.targetTouches[0].clientX
-  }
+    touchStartX.current = e.targetTouches[0].clientX;
+  };
 
   const handleTouchMove = (e: React.TouchEvent) => {
-    touchEndX.current = e.targetTouches[0].clientX
-  }
+    touchEndX.current = e.targetTouches[0].clientX;
+  };
 
   const handleTouchEnd = () => {
-    if (!touchStartX.current || !touchEndX.current) return
+    if (!touchStartX.current || !touchEndX.current) return;
     
-    const distance = touchStartX.current - touchEndX.current
-    const isLeftSwipe = distance > 50
-    const isRightSwipe = distance < -50
+    const distance = touchStartX.current - touchEndX.current;
+    const isLeftSwipe = distance > 50;
+    const isRightSwipe = distance < -50;
 
     if (isLeftSwipe) {
-      goNext()
+      goNext();
     }
     if (isRightSwipe) {
-      goPrev()
+      goPrev();
     }
 
-    touchStartX.current = 0
-    touchEndX.current = 0
-  }
+    touchStartX.current = 0;
+    touchEndX.current = 0;
+  };
 
   // Callbacks
   const handleIntroComplete = () => {
-    setShowIntro(false)
-    // Store with user-specific key
+    setShowIntro(false);
     if (userProfile) {
-      localStorage.setItem(`hasSeenMapIntro_${userProfile.id}`, 'true')
+      localStorage.setItem(`hasSeenMapIntro_${userProfile.id}`, 'true');
     }
-  }
+  };
 
   const goNext = useCallback(() => {
-    if (castles.length === 0) return
-    setDirection('right')
-    setCurrentCastleIndex((currentCastleIndex + 1) % castles.length)
-    setSelectedCastle(null)
-  }, [castles.length, currentCastleIndex, setCurrentCastleIndex, setSelectedCastle])
+    if (castles.length === 0) return;
+    setCurrentCastleIndex((currentCastleIndex + 1) % castles.length);
+    setSelectedCastle(null);
+  }, [castles.length, currentCastleIndex, setCurrentCastleIndex, setSelectedCastle]);
 
   const goPrev = useCallback(() => {
-    if (castles.length === 0) return
-    setDirection('left')
-    setCurrentCastleIndex((currentCastleIndex - 1 + castles.length) % castles.length)
-    setSelectedCastle(null)
-  }, [castles.length, currentCastleIndex, setCurrentCastleIndex, setSelectedCastle])
+    if (castles.length === 0) return;
+    setCurrentCastleIndex((currentCastleIndex - 1 + castles.length) % castles.length);
+    setSelectedCastle(null);
+  }, [castles.length, currentCastleIndex, setCurrentCastleIndex, setSelectedCastle]);
 
   // Keyboard navigation
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (selectedCastle) return
+      if (selectedCastle) return;
       
       if (e.key === 'ArrowLeft') {
-        goPrev()
+        goPrev();
       } else if (e.key === 'ArrowRight') {
-        goNext()
+        goNext();
       }
-    }
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [goPrev, goNext, selectedCastle])
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [goPrev, goNext, selectedCastle]);
 
   const handleCastleClick = (castle: CastleWithProgress) => {
     if (!castle.progress?.unlocked) {
-      return
+      return;
     }
     
     if (castles[currentCastleIndex].id !== castle.id) {
-      const newIndex = castles.findIndex(c => c.id === castle.id)
+      const newIndex = castles.findIndex(c => c.id === castle.id);
       if (newIndex !== -1) {
-        setCurrentCastleIndex(newIndex)
-        setSelectedCastle(null)
+        setCurrentCastleIndex(newIndex);
+        setSelectedCastle(null);
       }
     } else {
-      setSelectedCastle(selectedCastle?.id === castle.id ? null : castle)
+      setSelectedCastle(selectedCastle?.id === castle.id ? null : castle);
     }
-  }
+  };
 
   const handleEnterCastle = async (castle: CastleWithProgress) => {
     if (!castle.progress?.unlocked) {
-      alert('🔒 This castle is locked! Complete previous castles to unlock.')
-      return
+      return;
     }
 
     try {
-      router.push(`/student/worldmap/${castle.route}`)
+      router.push(`/student/worldmap/${castle.route}`);
     } catch (err) {
-      console.error('Failed to enter castle:', err)
-      alert('Failed to load castle details.')
+      console.error('Failed to enter castle:', err);
     }
-  }
+  };
 
   // Background style helper
   const getBackgroundStyle = () => {
     if (castles.length === 0) {
       return {
         backgroundImage: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-      }
+      };
     }
 
-    const currentCastle = castles[currentCastleIndex]
-    const currentBackgroundImage = `/images/castles/castle${currentCastle.image_number}-background.png`
+    const currentCastle = castles[currentCastleIndex];
+    const currentBackgroundImage = `/images/castles/castle${currentCastle.image_number}-background.png`;
 
     if (!backgroundError) {
       return {
         backgroundImage: `url('${currentBackgroundImage}')`,
-      }
+      };
     }
 
     const gradients: Record<number, string> = {
@@ -239,16 +228,16 @@ export default function WorldMapPage() {
       3: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
       4: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
       5: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
-    }
+    };
 
     return {
       backgroundImage: gradients[currentCastle.image_number] || gradients[1],
-    }
-  }
+    };
+  };
 
   // Loading states
   if (authLoading || loading) {
-    return <Loader />
+    return <Loader />;
   }
 
   if (!userProfile) {
@@ -257,19 +246,19 @@ export default function WorldMapPage() {
         <h2>Access Denied</h2>
         <p>Please log in to access the World Map.</p>
       </div>
-    )
+    );
   }
 
   if (error) {
     return (
       <div className={styles.error_container}>
-        <h2>⚠️ Error Loading Map</h2>
+        <h2>Error Loading Map</h2>
         <p>{error}</p>
         <button onClick={() => userProfile?.id && fetchCastles(userProfile.id)}>
           Reload Page
         </button>
       </div>
-    )
+    );
   }
 
   if (castles.length === 0) {
@@ -281,20 +270,20 @@ export default function WorldMapPage() {
           Retry
         </button>
       </div>
-    )
+    );
   }
 
   // Calculate carousel data
-  const prevIndex = (currentCastleIndex - 1 + castles.length) % castles.length
-  const nextIndex = (currentCastleIndex + 1) % castles.length
+  const prevIndex = (currentCastleIndex - 1 + castles.length) % castles.length;
+  const nextIndex = (currentCastleIndex + 1) % castles.length;
 
   const castlesToDisplay = [
     { castle: castles[prevIndex], type: 'prev' as const },
     { castle: castles[currentCastleIndex], type: 'current' as const },
     { castle: castles[nextIndex], type: 'next' as const },
-  ]
+  ];
 
-  const stats = getCastleStats()
+  const stats = getCastleStats();
 
   return (
     <div className={`${styles.world_map_page_container} ${isNavExpanded ? styles.expanded : ''}`}>
@@ -327,8 +316,8 @@ export default function WorldMapPage() {
                 }`}
                 onClick={() => {
                   if (castle.progress?.unlocked) {
-                    setCurrentCastleIndex(index)
-                    setSelectedCastle(null)
+                    setCurrentCastleIndex(index);
+                    setSelectedCastle(null);
                   }
                 }}
                 aria-label={`Go to ${castle.name}`}
@@ -394,5 +383,5 @@ export default function WorldMapPage() {
         />
       )}
     </div>
-  )
+  );
 }

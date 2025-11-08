@@ -50,19 +50,19 @@ class UserChapterProgressService {
         let progress = await this.userChapterProgressRepo.getUserChapterProgressByUserAndChapter(userId, chapterId);
         
         if (!progress) {
-            // Create new progress record
+            // Create new progress record with 0 XP
+            // XP will be calculated correctly when markChapterCompleted is called
             progress = await this.userChapterProgressRepo.createUserChapterProgress({
                 user_id: userId,
                 chapter_id: chapterId,
-                xp_earned: xpAmount,
+                xp_earned: 0,
                 is_completed: false
             });
+            console.log(`[UserChapterProgressService] Created new chapter progress for user ${userId}, chapter ${chapterId}`);
         } else {
-            // Update existing progress
-            const newXP = (progress.xp_earned || 0) + xpAmount;
-            progress = await this.userChapterProgressRepo.updateUserChapterProgress(progress.id, {
-                xp_earned: newXP
-            });
+            // Progress already exists - DON'T modify xp_earned
+            // The XP will be recalculated correctly by markChapterCompleted
+            console.log(`[UserChapterProgressService] Chapter progress already exists - XP will be recalculated on completion`);
         }
         
         this._invalidateUserChapterProgressCache(progress?.id);
@@ -229,13 +229,22 @@ class UserChapterProgressService {
             const totalChapters = allChapters.length;
             const isCastleCompleted = completedChaptersCount === totalChapters;
             
+            // Calculate completion percentage
+            const completionPercentage = totalChapters > 0 
+                ? Math.round((completedChaptersCount / totalChapters) * 100) 
+                : 0;
+            
             console.log(`[UserChapterProgressService] Recalculated castle XP from all chapters: ${totalCastleXP}`);
             console.log(`[UserChapterProgressService] Completed chapters: ${completedChaptersCount}/${totalChapters}`);
+            console.log(`[UserChapterProgressService] Completion percentage: ${completionPercentage}%`);
             console.log(`[UserChapterProgressService] Castle completed: ${isCastleCompleted}`);
             
+            // Update castle progress
+            // Note: completion_percentage is also calculated automatically by database trigger
+            // when chapters are marked complete, but we update it here for immediate consistency
             await this.userCastleProgressRepo.updateUserCastleProgress(castleProgress.id, {
                 total_xp_earned: totalCastleXP,
-                completed_chapters: completedChaptersCount,
+                completion_percentage: completionPercentage,
                 completed: isCastleCompleted
             });
         }

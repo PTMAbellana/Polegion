@@ -59,6 +59,7 @@ class UserCastleProgressRepo extends BaseRepo {
         const updateObj = {};
         if (updateData.unlocked !== undefined) updateObj.unlocked = updateData.unlocked;
         if (updateData.completed !== undefined) updateObj.completed = updateData.completed;
+        // Use total_xp_earned (correct database column name)
         if (updateData.total_xp_earned !== undefined) updateObj.total_xp_earned = updateData.total_xp_earned;
         if (updateData.completion_percentage !== undefined) updateObj.completion_percentage = updateData.completion_percentage;
         if (updateData.started_at !== undefined) updateObj.started_at = updateData.started_at;
@@ -83,6 +84,7 @@ class UserCastleProgressRepo extends BaseRepo {
                 castle_id: castleId,
                 unlocked: updateData.unlocked,
                 completed: updateData.completed,
+                // Use total_xp_earned (correct database column name)
                 total_xp_earned: updateData.total_xp_earned,
                 completion_percentage: updateData.completion_percentage,
                 started_at: updateData.started_at,

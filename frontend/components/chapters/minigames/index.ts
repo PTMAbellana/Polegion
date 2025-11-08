@@ -5,3 +5,4 @@ export { default as AreaCalculationMinigame } from './AreaCalculationMinigame';
 export { default as CirclePartsMinigame } from './CirclePartsMinigame';
 export { default as PerimeterMinigame } from './PerimeterMinigame';
 export { default as GeometryPhysicsGame } from './C1C1_GeometryPhysicsGame';
+export { default as AngleIdentificationMinigame } from './AngleIdentificationMinigame';

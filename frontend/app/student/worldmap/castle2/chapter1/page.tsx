@@ -1,977 +1,798 @@
-﻿﻿"use client"
+'use client';
 
-import React, { useState, useEffect, useRef } from 'react'
-import { useRouter } from 'next/navigation'
-import { Sparkles, Volume2, VolumeX, Play, Pause, X, ChevronRight } from 'lucide-react'
-import { useAuthStore } from '@/store/authStore'
-import { AuthProtection } from '@/context/AuthProtection'
-import styles from '@/styles/castle2-chapter1.module.css'
-import { getChaptersByCastle, awardLessonXP, completeChapter } from '@/api/chapters'
-import { getChapterQuizzesByChapter, submitQuizAttempt } from '@/api/chapterQuizzes'
-import { getMinigamesByChapter, submitMinigameAttempt } from '@/api/minigames'
-import type { ChapterQuiz, Minigame } from '@/types/common'
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import {
+  ChapterTopBar,
+  ChapterTaskPanel,
+  ChapterDialogueBox,
+  ChapterRewardScreen,
+} from '@/components/chapters/shared';
+import { AngleIdentificationMinigame } from '@/components/chapters/minigames';
+import { ConceptCard, LessonGrid } from '@/components/chapters/lessons';
+import ChapterProgressModal from '@/components/chapters/ChapterProgressModal';
+import { useChapterData, useChapterDialogue, useChapterAudio } from '@/hooks/chapters';
+import {
+  CHAPTER1_CASTLE_ID,
+  CHAPTER1_NUMBER,
+  CHAPTER1_OPENING_DIALOGUE,
+  CHAPTER1_LESSON_DIALOGUE,
+  CHAPTER1_MINIGAME_DIALOGUE,
+  CHAPTER1_MINIGAME_LEVELS,
+  CHAPTER1_LEARNING_OBJECTIVES,
+  CHAPTER1_CONCEPTS,
+  CHAPTER1_XP_VALUES,
+  CHAPTER1_RELIC,
+  CHAPTER1_WIZARD,
+} from '@/constants/chapters/castle2/chapter1';
+import Image from 'next/image';
+import { awardLessonXP, completeChapter } from '@/api/chapters';
+import { submitQuizAttempt, getUserQuizAttempts } from '@/api/chapterQuizzes';
+import { submitMinigameAttempt } from '@/api/minigames';
+import { useChapterStore } from '@/store/chapterStore';
+import baseStyles from '@/styles/chapters/chapter-base.module.css';
+import minigameStyles from '@/styles/chapters/minigame-shared.module.css';
+import lessonStyles from '@/styles/chapters/lesson-shared.module.css';
 
-const CASTLE_ID = 'bdfc1a9f-cd2a-4c1a-9062-9f99ec41e008' // Castle 2 (Polygon Citadel)
-const CHAPTER_NUMBER = 1
+type SceneType = 'opening' | 'lesson' | 'minigame' | 'quiz1' | 'quiz2' | 'quiz3' | 'quiz4' | 'quiz5' | 'reward';
 
-type SceneType = 'opening' | 'lesson' | 'minigame' | 'quiz1' | 'quiz2' | 'quiz3' | 'reward'
-type ShapeType = 'triangle' | 'square' | 'pentagon' | 'hexagon' | 'heptagon' | 'octagon'
+const CHAPTER_KEY = 'castle2-chapter1';
 
-export default function Chapter1Page() {
-  const router = useRouter()
-  const { userProfile } = useAuthStore()
-  const { isLoading: authLoading } = AuthProtection()
-
-  const [chapterId, setChapterId] = useState<string | null>(null)
-  const [quiz, setQuiz] = useState<ChapterQuiz | null>(null)
-  const [minigame, setMinigame] = useState<Minigame | null>(null)
-  const [loading, setLoading] = useState(true)
-
-  const [currentScene, setCurrentScene] = useState<SceneType>('opening')
-  const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null)
-  const [showFeedback, setShowFeedback] = useState(false)
-  const [isCorrect, setIsCorrect] = useState(false)
-  const [wizardMessage, setWizardMessage] = useState("")
-  const [messageIndex, setMessageIndex] = useState(0)
-  const [isTyping, setIsTyping] = useState(false)
-  const [autoAdvance, setAutoAdvance] = useState(false)
-  const [displayedText, setDisplayedText] = useState("")
-  const [isMuted, setIsMuted] = useState(false)
+export default function Castle2Chapter1Page() {
+  const router = useRouter();
   
-  const [currentShapeRound, setCurrentShapeRound] = useState(0)
-  const [clickedShape, setClickedShape] = useState<ShapeType | null>(null)
-  const [shapeFeedback, setShapeFeedback] = useState<string>("")
-  const [isShapeFeedbackCorrect, setIsShapeFeedbackCorrect] = useState<boolean | null>(null)
+  // Zustand store
+  const chapterStore = useChapterStore();
+  const savedProgress = chapterStore.getChapterProgress(CHAPTER_KEY);
   
-  const audioRef = useRef<HTMLAudioElement | null>(null)
-  const typingIntervalRef = useRef<NodeJS.Timeout | null>(null)
-  const autoAdvanceTimeoutRef = useRef<NodeJS.Timeout | null>(null)
-  const taskListRef = useRef<HTMLDivElement | null>(null)
-  const gameAreaRef = useRef<HTMLDivElement | null>(null)
+  // Progress modal state
+  const [showProgressModal, setShowProgressModal] = useState(false);
+  const [hasCheckedProgress, setHasCheckedProgress] = useState(false);
   
-  const [completedTasks, setCompletedTasks] = useState({
-    learnTriangle: false,
-    learnQuadrilateral: false,
-    learnPentagon: false,
-    learnHexagon: false,
-    completeMinigame: false,
-    passQuiz1: false,
-    passQuiz2: false,
-    passQuiz3: false
-  })
+  // Initialize chapter in store if not exists and check for existing progress
+  useEffect(() => {
+    // Get existing progress BEFORE initializing (to check if it's truly new)
+    const existingProgress = chapterStore.getChapterProgress(CHAPTER_KEY);
+    const hasRealProgress = existingProgress && (
+      existingProgress.currentScene !== 'opening' ||
+      Object.keys(existingProgress.completedTasks || {}).length > 0 ||
+      existingProgress.earnedXP.lesson > 0 ||
+      existingProgress.earnedXP.minigame > 0 ||
+      existingProgress.earnedXP.quiz > 0
+    );
+    
+    chapterStore.initializeChapter(CHAPTER_KEY);
+    
+    // Clean up lesson tasks from store (remove old corrupted data)
+    if (existingProgress?.completedTasks) {
+      const lessonTasks = ['task-0', 'task-1', 'task-2', 'task-3', 'task-4', 'task-5'];
+      lessonTasks.forEach(taskId => {
+        if (existingProgress.completedTasks[taskId]) {
+          const progress = chapterStore.getChapterProgress(CHAPTER_KEY);
+          if (progress && progress.completedTasks) {
+            const cleaned = { ...progress.completedTasks };
+            delete cleaned[taskId];
+            chapterStore.chapters[CHAPTER_KEY].completedTasks = cleaned;
+          }
+        }
+      });
+    }
+    
+    // Check if user has disabled this modal for this chapter
+    const dontShowAgain = localStorage.getItem(`${CHAPTER_KEY}-dont-show-modal`);
+    const modalExpiration = localStorage.getItem(`${CHAPTER_KEY}-modal-expiration`);
+    
+    // Check if the "don't show again" has expired
+    let shouldShowModal = true;
+    if (dontShowAgain === 'true' && modalExpiration) {
+      const expirationTime = parseInt(modalExpiration, 10);
+      if (Date.now() < expirationTime) {
+        // Still within the 5-minute window, don't show modal
+        shouldShowModal = false;
+      } else {
+        // Expired, clear the flags
+        localStorage.removeItem(`${CHAPTER_KEY}-dont-show-modal`);
+        localStorage.removeItem(`${CHAPTER_KEY}-modal-expiration`);
+      }
+    }
+    
+    // Only show modal if there's REAL progress (not just initialization)
+    if (!hasCheckedProgress && hasRealProgress && shouldShowModal) {
+      setShowProgressModal(true);
+      setHasCheckedProgress(true);
+    } else {
+      setHasCheckedProgress(true);
+    }
+  }, []);
   
-  const [failedTasks, setFailedTasks] = useState({
-    passQuiz1: false,
-    passQuiz2: false,
-    passQuiz3: false
-  })
+  // Scene and state management - initialize from store or defaults
+  const [currentScene, setCurrentScene] = useState<SceneType>(
+    (savedProgress?.currentScene as SceneType) || 'opening'
+  );
+  const [isMuted, setIsMuted] = useState(savedProgress?.isMuted || false);
+  const [autoAdvanceEnabled, setAutoAdvanceEnabled] = useState(savedProgress?.autoAdvanceEnabled || false);
+  const [currentMinigameLevel, setCurrentMinigameLevel] = useState(savedProgress?.currentMinigameLevel || 0);
   
-  const [quizAnswers, setQuizAnswers] = useState<Record<string, string>>({})
-  const [quizAttempts, setQuizAttempts] = useState(0)
-  const [canRetakeQuiz, setCanRetakeQuiz] = useState(false)
+  // Track which lesson tasks have been checked to prevent duplicates (using ref to avoid re-renders)
+  const checkedLessonTasksRef = React.useRef<Set<string>>(new Set()); // Changed from number to string for semantic keys
+  const previousMessageIndexRef = React.useRef<number>(-1);
   
+  // Task tracking - initialize from store but filter out lesson tasks
+  const [completedTasks, setCompletedTasks] = useState<Record<string, boolean>>(() => {
+    const saved = savedProgress?.completedTasks || {};
+    const filtered = { ...saved };
+    // Remove lesson tasks - they will be re-tracked by the new system
+    delete filtered['task-0'];
+    delete filtered['task-1'];
+    delete filtered['task-2'];
+    delete filtered['task-3'];
+    delete filtered['task-4'];
+    delete filtered['task-5'];
+    return filtered;
+  });
+  const [failedTasks, setFailedTasks] = useState<Record<string, boolean>>(
+    savedProgress?.failedTasks || {}
+  );
+  
+  // Quiz state - initialize from store or defaults
+  const [quizAnswers, setQuizAnswers] = useState<Record<string, string>>(
+    savedProgress?.quizAnswers || {}
+  );
+  const [quizAttempts, setQuizAttempts] = useState(savedProgress?.quizAttempts || 0);
+  const [quizFeedback, setQuizFeedback] = useState<'correct' | 'incorrect' | null>(null);
+  
+  // XP tracking - initialize from store or defaults
   const [earnedXP, setEarnedXP] = useState({
-    lesson: 0,
-    minigame: 0,
-    quiz: 0
-  })
+    lesson: savedProgress?.earnedXP.lesson || 0,
+    minigame: savedProgress?.earnedXP.minigame || 0,
+    quiz: savedProgress?.earnedXP.quiz || 0,
+  });
 
-  const XP_VALUES = {
-    lesson: 30,
-    minigame: 40,
-    quiz1: 20,
-    quiz2: 20,
-    quiz3: 40,
-    total: 150
-  }
+  // Quiz score tracking
+  const [quizScore, setQuizScore] = useState<number | null>(null);
 
-  const openingDialogue = [
-    "Welcome, young traveler! I am Sylvan, Guardian of the Shapewood Forest.",
-    "Within these enchanted woods, nature's patterns reveal themselves as geometric forms.",
-    "These are Polygons — shapes bounded by straight sides, each with its own unique beauty.",
-    "Come, let us explore the magical world of shapes together!"
-  ]
+  // Custom hooks
+  const { chapterId, quiz, minigame, loading, error, authLoading, userProfile } = useChapterData({
+    castleId: CHAPTER1_CASTLE_ID,
+    chapterNumber: CHAPTER1_NUMBER,
+  });
 
-  const lessonDialogue = [
-    "Every polygon has a special number of sides that defines it.",
-    "A Triangle has 3 sides and 3 corners — the simplest polygon of all.",
-    "A Quadrilateral has 4 sides — like a square, rectangle, or diamond shape.",
-    "A Pentagon has 5 sides — like the pattern of a forest starflower.",
-    "A Hexagon has 6 sides — seen in honeycomb patterns throughout nature.",
-    "Now, let us test your ability to recognize these shapes in the wild!"
-  ]
+  const {
+    displayedText,
+    isTyping,
+    messageIndex,
+    handleDialogueClick,
+    handleNextMessage,
+    resetDialogue,
+  } = useChapterDialogue({
+    dialogue: currentScene === 'opening' ? CHAPTER1_OPENING_DIALOGUE : 
+             currentScene === 'lesson' ? CHAPTER1_LESSON_DIALOGUE.map(d => d.text) : 
+             CHAPTER1_MINIGAME_DIALOGUE,
+    autoAdvance: autoAdvanceEnabled,
+    autoAdvanceDelay: 3000,
+    typingSpeed: 30,
+    onDialogueComplete: handleDialogueComplete,
+  });
 
-  const minigameDialogue = [
-    "Excellent! Now identify each shape by clicking on it.",
-    "Click on the correct polygon when I call its name.",
-    "Choose wisely, young shape-seeker!"
-  ]
+  const { playNarration, stopAudio } = useChapterAudio({ isMuted });
 
-  const shapeRounds: { shape: ShapeType; name: string; sides: number }[] = [
-    { shape: 'triangle', name: 'Triangle', sides: 3 },
-    { shape: 'square', name: 'Square (Quadrilateral)', sides: 4 },
-    { shape: 'pentagon', name: 'Pentagon', sides: 5 },
-    { shape: 'hexagon', name: 'Hexagon', sides: 6 },
-    { shape: 'heptagon', name: 'Heptagon', sides: 7 },
-    { shape: 'octagon', name: 'Octagon', sides: 8 }
-  ]
+  // Sync state changes to store
+  useEffect(() => {
+    chapterStore.setScene(CHAPTER_KEY, currentScene);
+  }, [currentScene]);
 
   useEffect(() => {
-    const loadChapterData = async () => {
-      if (!authLoading && userProfile?.id) {
+    chapterStore.setMinigameLevel(CHAPTER_KEY, currentMinigameLevel);
+  }, [currentMinigameLevel]);
+
+  useEffect(() => {
+    chapterStore.setAudioSettings(CHAPTER_KEY, isMuted, autoAdvanceEnabled);
+  }, [isMuted, autoAdvanceEnabled]);
+
+  // Sync completed tasks to store
+  useEffect(() => {
+    Object.entries(completedTasks).forEach(([taskId, completed]) => {
+      if (completed) {
+        const savedProgress = chapterStore.getChapterProgress(CHAPTER_KEY);
+        if (!savedProgress?.completedTasks[taskId]) {
+          chapterStore.setTaskComplete(CHAPTER_KEY, taskId);
+        }
+      }
+    });
+  }, [completedTasks]);
+
+  // Sync failed tasks to store
+  useEffect(() => {
+    Object.entries(failedTasks).forEach(([taskId, failed]) => {
+      if (failed) {
+        const savedProgress = chapterStore.getChapterProgress(CHAPTER_KEY);
+        if (!savedProgress?.failedTasks[taskId]) {
+          chapterStore.setTaskFailed(CHAPTER_KEY, taskId);
+        }
+      }
+    });
+  }, [failedTasks]);
+
+  // Sync quiz answers to store
+  useEffect(() => {
+    Object.entries(quizAnswers).forEach(([questionId, answer]) => {
+      const savedProgress = chapterStore.getChapterProgress(CHAPTER_KEY);
+      if (savedProgress?.quizAnswers[questionId] !== answer) {
+        chapterStore.setQuizAnswer(CHAPTER_KEY, questionId, answer);
+      }
+    });
+  }, [quizAnswers]);
+
+  // Sync earned XP to store
+  useEffect(() => {
+    if (earnedXP.lesson > 0) {
+      chapterStore.setEarnedXP(CHAPTER_KEY, 'lesson', earnedXP.lesson);
+    }
+    if (earnedXP.minigame > 0) {
+      chapterStore.setEarnedXP(CHAPTER_KEY, 'minigame', earnedXP.minigame);
+    }
+    if (earnedXP.quiz > 0) {
+      chapterStore.setEarnedXP(CHAPTER_KEY, 'quiz', earnedXP.quiz);
+    }
+  }, [earnedXP]);
+
+  // Fetch quiz score when entering reward scene
+  useEffect(() => {
+    const fetchQuizScore = async () => {
+      if (currentScene === 'reward' && quiz?.id) {
         try {
-          setLoading(true)
+          // Add a small delay to ensure the backend has finished processing
+          await new Promise(resolve => setTimeout(resolve, 500));
           
-          console.log('[Castle2-Chapter1] Loading data for castle:', CASTLE_ID)
-          const chaptersRes = await getChaptersByCastle(CASTLE_ID)
-          console.log('[Castle2-Chapter1] Chapters response:', chaptersRes)
-          console.log('[Castle2-Chapter1] All chapters:', chaptersRes.data)
+          const attempts = await getUserQuizAttempts(quiz.id);
+          console.log('[Castle2-Chapter1] Fetched quiz attempts:', attempts);
           
-          const chapter1 = chaptersRes.data?.find((ch: any) => ch.chapter_number === CHAPTER_NUMBER)
-          
-          console.log('[Castle2-Chapter1] Looking for chapter number:', CHAPTER_NUMBER)
-          console.log('[Castle2-Chapter1] Found chapter1:', chapter1)
-          
-          if (!chapter1) {
-            console.error('[Castle2-Chapter1] Available chapters:', chaptersRes.data?.map((ch: any) => ({ 
-              id: ch.id, 
-              number: ch.chapter_number, 
-              title: ch.title 
-            })))
-            throw new Error('Chapter 1 not found - check if chapters were seeded properly')
+          if (attempts && attempts.length > 0) {
+            // Get the most recent attempt (assuming attempts are ordered by creation date)
+            const sortedAttempts = attempts.sort((a: any, b: any) => {
+              return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+            });
+            const mostRecentScore = sortedAttempts[0]?.score || 0;
+            console.log('[Castle2-Chapter1] Most recent quiz score:', mostRecentScore);
+            setQuizScore(mostRecentScore);
           }
-          
-          console.log('[Castle2-Chapter1] Found chapter 1:', chapter1)
-          setChapterId(chapter1.id)
-          
-          const [quizzesRes, minigamesRes] = await Promise.all([
-            getChapterQuizzesByChapter(chapter1.id),
-            getMinigamesByChapter(chapter1.id)
-          ])
-          
-          console.log('[Castle2-Chapter1] Quizzes response:', quizzesRes)
-          console.log('[Castle2-Chapter1] Quizzes data:', quizzesRes.data)
-          console.log('[Castle2-Chapter1] Minigames response:', minigamesRes)
-          console.log('[Castle2-Chapter1] Minigames data:', minigamesRes.data)
-          
-          if (quizzesRes.data && quizzesRes.data.length > 0) {
-            console.log('[Castle2-Chapter1] Setting quiz:', quizzesRes.data[0])
-            setQuiz(quizzesRes.data[0])
-          } else {
-            console.warn('[Castle2-Chapter1] No quizzes found! Response:', quizzesRes)
-          }
-          
-          if (minigamesRes.data && minigamesRes.data.length > 0) {
-            console.log('[Castle2-Chapter1] Setting minigame:', minigamesRes.data[0])
-            setMinigame(minigamesRes.data[0])
-          } else {
-            console.warn('[Castle2-Chapter1] No minigames found! Response:', minigamesRes)
-          }
-          
         } catch (error) {
-          console.error('[Castle2-Chapter1] Failed to load chapter data:', error)
-        } finally {
-          setLoading(false)
+          console.error('Failed to fetch quiz score:', error);
+          // Fallback to calculating score from earnedXP
+          setQuizScore(null);
         }
       }
+    };
+    
+    fetchQuizScore();
+  }, [currentScene, quiz?.id]);
+
+  // Track lesson progress and mark tasks as dialogue progresses
+  React.useEffect(() => {
+    // Castle 2 Chapter 1 has 6 lesson concepts with semantic keys
+    if (currentScene === 'lesson' && messageIndex >= 0 && messageIndex < CHAPTER1_LESSON_DIALOGUE.length) {
+      const currentDialogue = CHAPTER1_LESSON_DIALOGUE[messageIndex];
+      
+      // Skip if no taskId (intro/conclusion messages)
+      if (!currentDialogue.taskId) return;
+      
+      const dialogueKey = currentDialogue.key;
+      
+      console.log('Lesson scene - dialogueKey:', dialogueKey, 'taskId:', currentDialogue.taskId);
+      
+      // Only process if we haven't checked this concept yet
+      if (checkedLessonTasksRef.current.has(dialogueKey)) {
+        console.log('Skipping - already checked:', dialogueKey);
+        return;
+      }
+      
+      // Mark the task complete based on dialogue key
+      console.log('Marking task complete:', currentDialogue.taskId, 'for concept:', dialogueKey);
+      markTaskComplete(currentDialogue.taskId);
+      checkedLessonTasksRef.current.add(dialogueKey);
+      
+      // Update previous messageIndex for backward detection
+      previousMessageIndexRef.current = messageIndex;
     }
     
-    loadChapterData()
-  }, [authLoading, userProfile])
+    // Detect if we're jumping backward (dialogue reset) - reset the tracking
+    if (previousMessageIndexRef.current > messageIndex) {
+      console.log('Detected backward jump - user may have restarted dialogue');
+      previousMessageIndexRef.current = messageIndex;
+    }
+  }, [currentScene, messageIndex]);
 
-  const playNarration = (filename: string) => {
-    // Skip audio playback if muted or no filename
-    if (isMuted || !filename) return
-    
-    try {
-      if (audioRef.current) {
-        audioRef.current.pause()
-      }
-      
-      const audio = new Audio(`/audio/narration/castle2/${filename}.mp3`)
-      
-      audio.onerror = () => {
-        // Silently fail - audio files will be added later
-        console.log(`[Audio] File not found (optional): ${filename}.mp3`)
-      }
-      
-      audio.play().catch(err => {
-        // Silently fail - audio is optional
-        console.log(`[Audio] Playback skipped (optional): ${filename}.mp3`)
-      })
-      
-      audioRef.current = audio
-    } catch (error) {
-      // Silently fail - audio is optional
-      console.log('[Audio] Audio playback is optional, continuing without sound')
+  // Handlers
+  function handleDialogueComplete() {
+    if (currentScene === 'opening') {
+      checkedLessonTasksRef.current = new Set(); // Reset checked tasks when entering lesson scene
+      previousMessageIndexRef.current = -1; // Reset previous message index
+      resetDialogue(); // Reset dialogue BEFORE changing scene to prevent messageIndex carryover
+      setCurrentScene('lesson');
+      playNarration('castle2-chapter1-lesson-intro');
+    } else if (currentScene === 'lesson' && messageIndex >= CHAPTER1_LESSON_DIALOGUE.length - 1) {
+      // All lesson tasks should be marked by now through the useEffect above
+      awardXP('lesson');
+      resetDialogue(); // Reset dialogue BEFORE changing scene
+      setCurrentScene('minigame');
     }
   }
 
-  useEffect(() => {
-    if (isMuted && audioRef.current) {
-      audioRef.current.pause()
-      audioRef.current.currentTime = 0
+  // Reset dialogue when scene changes (backup, in case direct calls are missed)
+  React.useEffect(() => {
+    resetDialogue();
+  }, [currentScene]);
+
+  const markTaskComplete = (taskKey: string) => {
+    setCompletedTasks((prev) => {
+      if (prev[taskKey]) {
+        console.log(`Task ${taskKey} already completed, skipping`);
+        return prev; // Already completed, don't update
+      }
+      console.log(`Marking task ${taskKey} as complete`);
+      return { ...prev, [taskKey]: true };
+    });
+  };
+
+  const markTaskFailed = (taskKey: string) => {
+    setFailedTasks((prev) => ({ ...prev, [taskKey]: true }));
+  };
+
+  const awardXP = async (type: 'lesson' | 'minigame' | 'quiz') => {
+    let xp = 0;
+    if (type === 'lesson') xp = CHAPTER1_XP_VALUES.lesson;
+    else if (type === 'minigame') xp = CHAPTER1_XP_VALUES.minigame;
+    else if (type === 'quiz') xp = CHAPTER1_XP_VALUES.quiz1 + CHAPTER1_XP_VALUES.quiz2 + CHAPTER1_XP_VALUES.quiz3 + CHAPTER1_XP_VALUES.quiz4 + CHAPTER1_XP_VALUES.quiz5;
+
+    setEarnedXP((prev) => ({ ...prev, [type]: xp }));
+
+    // Award to backend
+    if (chapterId && userProfile?.id) {
+      try {
+        await awardLessonXP(chapterId, xp);
+      } catch (error) {
+        console.error('Failed to award XP:', error);
+      }
     }
-  }, [isMuted])
+  };
 
-  useEffect(() => {
-    if (!wizardMessage) return
-    
-    setIsTyping(true)
-    setDisplayedText("")
-    let currentIndex = 0
-    
-    let audioToPlay = ""
-    if (currentScene === 'opening') audioToPlay = `opening-${messageIndex + 1}`
-    else if (currentScene === 'lesson') audioToPlay = `lesson-${messageIndex + 1}`
-    else if (currentScene === 'minigame') audioToPlay = `minigame-${messageIndex + 1}`
-    else if (currentScene.startsWith('quiz')) {
-      if (wizardMessage.includes("Splendid!") || wizardMessage.includes("Correct!")) audioToPlay = 'quiz-correct'
-      else if (wizardMessage.includes("Careful") || wizardMessage.includes("Not quite")) audioToPlay = 'quiz-incorrect'
-      else audioToPlay = 'quiz-intro'
-    } else if (currentScene === 'reward') audioToPlay = 'reward-intro'
-    
-    if (audioToPlay) playNarration(audioToPlay)
-
-    typingIntervalRef.current = setInterval(() => {
-      if (currentIndex < wizardMessage.length) {
-        setDisplayedText(wizardMessage.substring(0, currentIndex + 1))
-        currentIndex++
+  const handleMinigameComplete = async (isCorrect: boolean) => {
+    if (isCorrect) {
+      // Move to next level or complete minigame
+      if (currentMinigameLevel < CHAPTER1_MINIGAME_LEVELS.length - 1) {
+        setCurrentMinigameLevel(currentMinigameLevel + 1);
       } else {
-        setIsTyping(false)
-        clearInterval(typingIntervalRef.current!)
-        if (autoAdvance && (currentScene === 'opening' || currentScene === 'lesson' || currentScene === 'minigame')) {
-          autoAdvanceTimeoutRef.current = setTimeout(() => handleNextMessage(), 2500)
-        }
-      }
-    }, 15)
-
-    return () => {
-      if (typingIntervalRef.current) clearInterval(typingIntervalRef.current)
-      if (autoAdvanceTimeoutRef.current) clearTimeout(autoAdvanceTimeoutRef.current)
-      if (audioRef.current) audioRef.current.pause()
-    }
-  }, [wizardMessage])
-
-  useEffect(() => {
-    if (!isTyping && autoAdvance && (currentScene === 'opening' || currentScene === 'lesson' || currentScene === 'minigame')) {
-      if (autoAdvanceTimeoutRef.current) clearTimeout(autoAdvanceTimeoutRef.current)
-      autoAdvanceTimeoutRef.current = setTimeout(() => handleNextMessage(), 2500)
-    }
-    return () => {
-      if (autoAdvanceTimeoutRef.current) clearTimeout(autoAdvanceTimeoutRef.current)
-    }
-  }, [isTyping, autoAdvance, currentScene])
-
-  useEffect(() => {
-    if (currentScene === 'opening') {
-      setWizardMessage(openingDialogue[0])
-      setMessageIndex(0)
-    } else if (currentScene === 'lesson') {
-      setWizardMessage(lessonDialogue[0])
-      setMessageIndex(0)
-    } else if (currentScene === 'minigame') {
-      setWizardMessage(minigameDialogue[0])
-      setMessageIndex(0)
-    }
-  }, [currentScene])
-
-  useEffect(() => {
-    if (taskListRef.current) {
-      const completedCount = Object.values(completedTasks).filter(Boolean).length
-      if (completedCount > 0) {
-        const taskItems = taskListRef.current.querySelectorAll(`.${styles.taskItem}`)
-        if (taskItems[completedCount - 1]) {
-          setTimeout(() => {
-            taskItems[completedCount - 1].scrollIntoView({
-              behavior: 'smooth',
-              block: 'nearest',
-              inline: 'nearest'
-            })
-          }, 300)
-        }
-      }
-    }
-  }, [completedTasks])
-
-  useEffect(() => {
-    if (gameAreaRef.current && currentScene === 'lesson') {
-      setTimeout(() => {
-        const conceptCards = gameAreaRef.current?.querySelectorAll(`.${styles.conceptCard}`)
-        if (conceptCards && conceptCards.length > 0) {
-          const lastCard = conceptCards[conceptCards.length - 1]
-          lastCard.scrollIntoView({
-            behavior: 'smooth',
-            block: 'nearest',
-            inline: 'nearest'
-          })
-        }
-      }, 400)
-    }
-  }, [completedTasks.learnTriangle, completedTasks.learnQuadrilateral, completedTasks.learnPentagon, completedTasks.learnHexagon])
-
-  const handleDialogueClick = () => {
-    if (autoAdvanceTimeoutRef.current) clearTimeout(autoAdvanceTimeoutRef.current)
-    if (isTyping) {
-      if (typingIntervalRef.current) clearInterval(typingIntervalRef.current)
-      setDisplayedText(wizardMessage)
-      setIsTyping(false)
-    } else {
-      handleNextMessage()
-    }
-  }
-
-  const handleNextMessage = async () => {
-    if (currentScene === 'opening') {
-      if (messageIndex < openingDialogue.length - 1) {
-        setMessageIndex(prev => prev + 1)
-        setWizardMessage(openingDialogue[messageIndex + 1])
-      } else {
-        setCurrentScene('lesson')
-        setMessageIndex(0)
-        setCompletedTasks(prev => ({ ...prev, learnTriangle: true }))
-      }
-    } else if (currentScene === 'lesson') {
-      if (messageIndex < lessonDialogue.length - 1) {
-        setMessageIndex(prev => prev + 1)
-        setWizardMessage(lessonDialogue[messageIndex + 1])
+        // All levels complete
+        markTaskComplete('task-6'); // Complete minigame task
+        awardXP('minigame');
         
-        if (messageIndex === 1) setCompletedTasks(prev => ({ ...prev, learnQuadrilateral: true }))
-        if (messageIndex === 2) setCompletedTasks(prev => ({ ...prev, learnPentagon: true }))
-        if (messageIndex === 3) setCompletedTasks(prev => ({ ...prev, learnHexagon: true }))
-      } else {
-        if (chapterId) {
+        // Submit minigame attempt
+        if (minigame && userProfile?.id) {
           try {
-            await awardLessonXP(chapterId, XP_VALUES.lesson)
-            setEarnedXP(prev => ({ ...prev, lesson: XP_VALUES.lesson }))
+            await submitMinigameAttempt(minigame.id, {
+              score: 100,
+              time_taken: 60,
+              attempt_data: { completedLevels: CHAPTER1_MINIGAME_LEVELS.length },
+            });
           } catch (error) {
-            console.error('Failed to award lesson XP:', error)
+            console.error('Failed to submit minigame:', error);
           }
         }
         
-        setCurrentScene('minigame')
-        setMessageIndex(0)
-      }
-    } else if (currentScene === 'minigame') {
-      if (messageIndex < minigameDialogue.length - 1) {
-        setMessageIndex(prev => prev + 1)
-        setWizardMessage(minigameDialogue[messageIndex + 1])
+        setCurrentScene('quiz1');
       }
     }
-  }
+  };
 
-  const handleShapeClick = async (shape: ShapeType) => {
-    if (!minigame) return
-    
-    const currentRound = shapeRounds[currentShapeRound]
-    setClickedShape(shape)
-    
-    const isCorrect = shape === currentRound.shape
-    
-    if (isCorrect) {
-      setIsShapeFeedbackCorrect(true)
-      setShapeFeedback(`Perfect! This is a ${currentRound.name} with ${currentRound.sides} sides!`)
+  const handleQuizSubmit = async (quizNumber: 1 | 2 | 3 | 4 | 5) => {
+    if (!quiz || !userProfile?.id) return;
+
+    const taskKey = quizNumber === 1 ? 'task-7' : quizNumber === 2 ? 'task-8' : quizNumber === 3 ? 'task-9' : quizNumber === 4 ? 'task-10' : 'task-11';
+    const questionIndex = quizNumber - 1;
+    const question = quiz.quiz_config.questions[questionIndex];
+    const userAnswer = quizAnswers[question.id];
+
+    if (userAnswer === question.correctAnswer) {
+      setQuizFeedback('correct');
+      markTaskComplete(taskKey);
       
-      setTimeout(async () => {
-        if (currentShapeRound < shapeRounds.length - 1) {
-          setCurrentShapeRound(prev => prev + 1)
-          setClickedShape(null)
-          setShapeFeedback("")
-          setIsShapeFeedbackCorrect(null)
-          setWizardMessage(`Great! Now find the ${shapeRounds[currentShapeRound + 1].name}!`)
+      // Delay moving to next scene to show feedback
+      setTimeout(() => {
+        setQuizFeedback(null);
+        
+        // Move to next quiz or reward
+        if (quizNumber === 1) {
+          setCurrentScene('quiz2');
+          const nextQuestion = quiz.quiz_config.questions[1];
+          setQuizAnswers((prev) => {
+            const updated = { ...prev };
+            delete updated[nextQuestion.id];
+            return updated;
+          });
+        } else if (quizNumber === 2) {
+          setCurrentScene('quiz3');
+          const nextQuestion = quiz.quiz_config.questions[2];
+          setQuizAnswers((prev) => {
+            const updated = { ...prev };
+            delete updated[nextQuestion.id];
+            return updated;
+          });
+        } else if (quizNumber === 3) {
+          setCurrentScene('quiz4');
+          const nextQuestion = quiz.quiz_config.questions[3];
+          setQuizAnswers((prev) => {
+            const updated = { ...prev };
+            delete updated[nextQuestion.id];
+            return updated;
+          });
+        } else if (quizNumber === 4) {
+          setCurrentScene('quiz5');
+          const nextQuestion = quiz.quiz_config.questions[4];
+          setQuizAnswers((prev) => {
+            const updated = { ...prev };
+            delete updated[nextQuestion.id];
+            return updated;
+          });
         } else {
-          if (minigame.id) {
-            try {
-              await submitMinigameAttempt(minigame.id, {
-                score: 100,
-                time_taken: 0,
-                attempt_data: { completedShapes: shapeRounds.length }
-              })
-              
-              setEarnedXP(prev => ({ ...prev, minigame: XP_VALUES.minigame }))
-              setCompletedTasks(prev => ({ ...prev, completeMinigame: true }))
-            } catch (error) {
-              console.error('Failed to submit minigame:', error)
-            }
+          // All quizzes complete
+          awardXP('quiz');
+          
+          // Submit quiz attempt
+          try {
+            console.log('[Castle2-Chapter1] Submitting quiz with answers:', quizAnswers);
+            console.log('[Castle2-Chapter1] Quiz config:', quiz.quiz_config);
+            submitQuizAttempt(quiz.id, quizAnswers);
+          } catch (error) {
+            console.error('Failed to submit quiz:', error);
           }
           
-          setWizardMessage("Excellent! You can identify all the polygon shapes!")
-          setTimeout(() => {
-            setCurrentScene('quiz1')
-            setWizardMessage("Now let's test your polygon knowledge!")
-          }, 3000)
-        }
-      }, 2500)
-    } else {
-      setIsShapeFeedbackCorrect(false)
-      setShapeFeedback(`Not quite! Look for a shape with ${currentRound.sides} sides.`)
-      setTimeout(() => {
-        setClickedShape(null)
-        setShapeFeedback("")
-        setIsShapeFeedbackCorrect(null)
-      }, 2500)
-    }
-  }
-
-  const renderPolygon = (shape: ShapeType, centerX: number, centerY: number, size: number) => {
-    const sidesMap: Record<ShapeType, number> = {
-      triangle: 3,
-      square: 4,
-      pentagon: 5,
-      hexagon: 6,
-      heptagon: 7,
-      octagon: 8
-    }
-    
-    const sides = sidesMap[shape]
-    const points: string[] = []
-    
-    for (let i = 0; i < sides; i++) {
-      const angle = (i * 2 * Math.PI) / sides - Math.PI / 2
-      const x = centerX + size * Math.cos(angle)
-      const y = centerY + size * Math.sin(angle)
-      points.push(`${x},${y}`)
-    }
-    
-    return points.join(' ')
-  }
-
-  const handleAnswerSelect = async (answer: string, correctAnswer: string, quizNumber: number) => {
-    setSelectedAnswer(answer)
-    const correct = answer === correctAnswer
-    setIsCorrect(correct)
-    setShowFeedback(true)
-    
-    // Store the answer - create updated answers object immediately
-    const updatedAnswers = { ...quizAnswers, [`question${quizNumber}`]: answer }
-    setQuizAnswers(updatedAnswers)
-    
-    if (correct) {
-      // Mark as passed
-      setCompletedTasks(prev => ({ ...prev, [`passQuiz${quizNumber}` as keyof typeof completedTasks]: true }))
-      setFailedTasks(prev => ({ ...prev, [`passQuiz${quizNumber}` as keyof typeof failedTasks]: false }))
-      
-      // Award XP
-      const xpKey = `quiz${quizNumber}` as keyof typeof XP_VALUES
-      setEarnedXP(prev => ({ ...prev, quiz: prev.quiz + XP_VALUES[xpKey] }))
-      setWizardMessage(`Correct! +${XP_VALUES[xpKey]} XP`)
-      
-      setTimeout(() => {
-        setSelectedAnswer(null)
-        setShowFeedback(false)
-        
-        if (quizNumber === 1) {
-          setCurrentScene('quiz2')
-          setWizardMessage("Next question: How many sides does a hexagon have?")
-        } else if (quizNumber === 2) {
-          setCurrentScene('quiz3')
-          setWizardMessage("Final question: Which polygon has the most sides?")
-        } else if (quizNumber === 3) {
-          // Submit all quiz answers with the updated answers including question3
-          if (quiz?.id) {
-            submitQuizAttempt(quiz.id, updatedAnswers).then(() => {
-              setQuizAttempts(prev => prev + 1)
-              setCanRetakeQuiz(true)
-            }).catch(err => console.error('Failed to submit quiz:', err))
+          // Complete chapter
+          try {
+            completeChapter(chapterId!);
+          } catch (error) {
+            console.error('Failed to complete chapter:', error);
           }
-          setCanRetakeQuiz(true)
-          setCurrentScene('reward')
-          setWizardMessage("The wisdom of shapes is yours. You have earned the Gem of Sides!")
+          
+          setCurrentScene('reward');
         }
-      }, 2000)
+      }, 1000); // 1 second delay to show green feedback
     } else {
-      // Mark as failed (red)
-      setFailedTasks(prev => ({ ...prev, [`passQuiz${quizNumber}` as keyof typeof failedTasks]: true }))
-      setWizardMessage("⚠️ Not quite right. Remember what you learned about polygon sides.")
+      setQuizFeedback('incorrect');
+      markTaskFailed(taskKey);
+      setQuizAttempts(quizAttempts + 1);
       
+      // Reset feedback and move to next question after delay
       setTimeout(() => {
-        setShowFeedback(false)
-        setSelectedAnswer(null)
+        setQuizFeedback(null);
         
-        // Move to next question without awarding XP
+        // Move to next quiz even if incorrect
         if (quizNumber === 1) {
-          setCurrentScene('quiz2')
-          setWizardMessage("Next question: How many sides does a hexagon have?")
+          setCurrentScene('quiz2');
+          const nextQuestion = quiz.quiz_config.questions[1];
+          setQuizAnswers((prev) => {
+            const updated = { ...prev };
+            delete updated[nextQuestion.id];
+            return updated;
+          });
         } else if (quizNumber === 2) {
-          setCurrentScene('quiz3')
-          setWizardMessage("Final question: Which polygon has the most sides?")
+          setCurrentScene('quiz3');
+          const nextQuestion = quiz.quiz_config.questions[2];
+          setQuizAnswers((prev) => {
+            const updated = { ...prev };
+            delete updated[nextQuestion.id];
+            return updated;
+          });
         } else if (quizNumber === 3) {
-          // Submit quiz attempt even if wrong - use updatedAnswers to include question3
-          if (quiz?.id) {
-            submitQuizAttempt(quiz.id, updatedAnswers).then(() => {
-              setQuizAttempts(prev => prev + 1)
-              setCanRetakeQuiz(true)
-            }).catch(err => console.error('Failed to submit quiz:', err))
+          setCurrentScene('quiz4');
+          const nextQuestion = quiz.quiz_config.questions[3];
+          setQuizAnswers((prev) => {
+            const updated = { ...prev };
+            delete updated[nextQuestion.id];
+            return updated;
+          });
+        } else if (quizNumber === 4) {
+          setCurrentScene('quiz5');
+          const nextQuestion = quiz.quiz_config.questions[4];
+          setQuizAnswers((prev) => {
+            const updated = { ...prev };
+            delete updated[nextQuestion.id];
+            return updated;
+          });
+        } else {
+          // All quizzes answered (even if some wrong)
+          // Submit quiz attempt
+          try {
+            submitQuizAttempt(quiz.id, quizAnswers);
+          } catch (error) {
+            console.error('Failed to submit quiz:', error);
           }
-          setCanRetakeQuiz(true)
-          setCurrentScene('reward')
-          setWizardMessage("You've completed the chapter. Review and retake the quiz to improve your score!")
+          
+          // Complete chapter (even with wrong answers)
+          try {
+            completeChapter(chapterId!);
+          } catch (error) {
+            console.error('Failed to complete chapter:', error);
+          }
+          
+          setCurrentScene('reward');
         }
-      }, 2500)
+      }, 1000);
     }
-  }
-
-  const handleComplete = async () => {
-    if (audioRef.current) audioRef.current.pause()
-    
-    // Mark chapter as completed
-    if (chapterId) {
-      try {
-        await completeChapter(chapterId)
-        console.log('[Castle2-Chapter1] Chapter marked as completed')
-      } catch (error) {
-        console.error('[Castle2-Chapter1] Failed to mark chapter as completed:', error)
-      }
-    }
-    
-    router.push('/student/worldmap/castle2')
-  }
+  };
 
   const handleRetakeQuiz = () => {
-    // Reset quiz state
-    setQuizAnswers({})
-    setSelectedAnswer(null)
-    setShowFeedback(false)
-    setFailedTasks({
-      passQuiz1: false,
-      passQuiz2: false,
-      passQuiz3: false
-    })
-    // Reset completed quiz tasks to allow re-attempting
-    setCompletedTasks(prev => ({
-      ...prev,
-      passQuiz1: false,
-      passQuiz2: false,
-      passQuiz3: false
-    }))
-    // Reset quiz XP to 0 for retake
-    setEarnedXP(prev => ({ ...prev, quiz: 0 }))
-    setCurrentScene('quiz1')
-    setWizardMessage("Let's try the quiz again! How many sides does a triangle have?")
-  }
+    setQuizAnswers({});
+    setQuizAttempts(0);
+    setFailedTasks({});
+    setQuizFeedback(null);
+    setQuizScore(null); // Reset quiz score when retaking
+    
+    // Clear quiz data from store
+    chapterStore.clearAllQuizData(CHAPTER_KEY);
+    
+    // Clear quiz task completions (task-7 through task-11)
+    setCompletedTasks((prev) => {
+      const updated = { ...prev };
+      delete updated['task-7'];
+      delete updated['task-8'];
+      delete updated['task-9'];
+      delete updated['task-10'];
+      delete updated['task-11'];
+      return updated;
+    });
+    
+    setCurrentScene('quiz1');
+  };
 
-  const handleExit = () => {
-    if (audioRef.current) audioRef.current.pause()
-    router.push('/student/worldmap/castle2')
-  }
+  const handleContinueProgress = () => {
+    setShowProgressModal(false);
+    // Continue with saved progress (already loaded)
+  };
 
-  const toggleAutoAdvance = (e: React.MouseEvent) => {
-    e.stopPropagation()
-    setAutoAdvance(!autoAdvance)
-  }
+  const handleDontShowAgain = () => {
+    const expirationTime = Date.now() + 5 * 60 * 1000; // 5 minutes
+    localStorage.setItem(`${CHAPTER_KEY}-dont-show-modal`, 'true');
+    localStorage.setItem(`${CHAPTER_KEY}-modal-expiration`, expirationTime.toString());
+    setShowProgressModal(false);
+  };
 
-  const toggleMute = (e: React.MouseEvent) => {
-    e.stopPropagation()
-    setIsMuted(!isMuted)
-  }
+  const handleRestartChapter = () => {
+    setShowProgressModal(false);
+    
+    // Reset all state to initial values
+    setCurrentScene('opening');
+    setCompletedTasks({});
+    setFailedTasks({});
+    setQuizAnswers({});
+    setQuizAttempts(0);
+    setEarnedXP({ lesson: 0, minigame: 0, quiz: 0 });
+    setCurrentMinigameLevel(0);
+    setQuizFeedback(null);
+    
+    // Clear all data from store for this chapter
+    chapterStore.clearAllQuizData(CHAPTER_KEY);
+    chapterStore.setScene(CHAPTER_KEY, 'opening');
+    chapterStore.setMinigameLevel(CHAPTER_KEY, 0);
+    chapterStore.setEarnedXP(CHAPTER_KEY, 'lesson', 0);
+    chapterStore.setEarnedXP(CHAPTER_KEY, 'minigame', 0);
+    chapterStore.setEarnedXP(CHAPTER_KEY, 'quiz', 0);
+    
+    // Reset lesson tracking
+    checkedLessonTasksRef.current = new Set();
+    previousMessageIndexRef.current = -1;
+    
+    // Reset dialogue
+    resetDialogue();
+  };
 
-  if (loading) {
+  const handleReturnToCastle = () => {
+    router.push('/student/worldmap/castle2');
+  };
+
+  // Loading and error states
+  if (authLoading || loading) {
     return (
-      <div className={styles.chapterContainer}>
-        <div className={styles.backgroundOverlay}></div>
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', color: 'white', flexDirection: 'column', gap: '1rem' }}>
-          <p style={{ fontSize: '1.5rem' }}>Loading chapter...</p>
-          <p style={{ fontSize: '0.9rem', opacity: 0.7 }}>Castle ID: {CASTLE_ID}</p>
-        </div>
+      <div className={baseStyles.loading_container}>
+        <p>Loading Chapter 1...</p>
       </div>
-    )
+    );
   }
 
-  if (!quiz || !minigame) {
-    console.warn('[Castle2-Chapter1] Missing data - Quiz:', quiz, 'Minigame:', minigame)
+  if (error) {
     return (
-      <div className={styles.chapterContainer}>
-        <div className={styles.backgroundOverlay}></div>
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', color: 'white', flexDirection: 'column', gap: '1rem' }}>
-          <p style={{ fontSize: '1.5rem' }}>⚠️ Chapter data not found</p>
-          <p style={{ fontSize: '0.9rem' }}>Quiz loaded: {quiz ? '✓' : '✗'}</p>
-          <p style={{ fontSize: '0.9rem' }}>Minigame loaded: {minigame ? '✓' : '✗'}</p>
-          <button 
-            onClick={() => router.push('/student/worldmap/castle2')}
-            style={{ 
-              padding: '0.75rem 1.5rem', 
-              fontSize: '1rem', 
-              background: '#4CAF50', 
-              color: 'white', 
-              border: 'none', 
-              borderRadius: '8px', 
-              cursor: 'pointer',
-              marginTop: '1rem'
-            }}
-          >
-            Return to Castle 2
-          </button>
-        </div>
+      <div className={baseStyles.loading_container}>
+        <p>Error: {error}</p>
+        <button onClick={handleReturnToCastle}>Return to Castle</button>
       </div>
-    )
+    );
   }
 
+  // Main render
   return (
-    <div className={styles.chapterContainer}>
-      <div className={styles.backgroundOverlay}></div>
+    <div className={`${baseStyles.chapterContainer} ${baseStyles.castle2Theme}`}>
+      <div className={baseStyles.backgroundOverlay}></div>
 
-      <div className={styles.topBar}>
-        <div className={styles.chapterInfo}>
-          <Sparkles className={styles.titleIcon} />
-          <div>
-            <h1 className={styles.chapterTitle}>Chapter 1: The Shapewood Path</h1>
-            <p className={styles.chapterSubtitle}>The Forest Castle • Castle II</p>
-          </div>
-        </div>
-        
-        <div className={styles.topBarActions}>
-          <button
-            className={`${styles.controlButton} ${isMuted ? styles.controlButtonActive : ''}`}
-            onClick={toggleMute}
-            title={isMuted ? "Audio: OFF" : "Audio: ON"}
-          >
-            {isMuted ? <VolumeX size={20} /> : <Volume2 size={20} />}
-          </button>
-          <button
-            className={`${styles.controlButton} ${autoAdvance ? styles.controlButtonActive : ''}`}
-            onClick={toggleAutoAdvance}
-            title={autoAdvance ? "Auto: ON" : "Auto: OFF"}
-          >
-            {autoAdvance ? <Pause size={20} /> : <Play size={20} />}
-          </button>
-          <button className={styles.exitButton} onClick={handleExit}>
-            <X size={20} />
-          </button>
-        </div>
-      </div>
+      {/* Progress Modal */}
+      {showProgressModal && (
+        <ChapterProgressModal
+          chapterTitle="Chapter 1: The Hall of Rays"
+          currentScene={savedProgress?.currentScene || 'opening'}
+          onContinue={handleContinueProgress}
+          onRestart={handleRestartChapter}
+          onDontShowAgain={handleDontShowAgain}
+        />
+      )}
 
-      <div className={styles.mainContent}>
-        <div className={styles.taskPanel}>
-          <div className={styles.taskPanelHeader}>
-            <span className={styles.taskPanelTitle}>Learning Objectives</span>
-            <div className={styles.progressText}>
-              {Object.values(completedTasks).filter(Boolean).length} / 8 Complete
-            </div>
-          </div>
-          <div className={styles.taskList} ref={taskListRef}>
-            {[
-              { key: 'learnTriangle', label: 'Learn: Triangle' },
-              { key: 'learnQuadrilateral', label: 'Learn: Quadrilateral' },
-              { key: 'learnPentagon', label: 'Learn: Pentagon' },
-              { key: 'learnHexagon', label: 'Learn: Hexagon' },
-              { key: 'completeMinigame', label: 'Complete Practice' },
-              { key: 'passQuiz1', label: 'Pass Quiz 1' },
-              { key: 'passQuiz2', label: 'Pass Quiz 2' },
-              { key: 'passQuiz3', label: 'Pass Quiz 3' }
-            ].map(task => (
-              <div key={task.key} className={`${styles.taskItem} ${
-                completedTasks[task.key as keyof typeof completedTasks] ? styles.taskCompleted : ''
-              } ${
-                failedTasks[task.key as keyof typeof failedTasks] ? styles.taskFailed : ''
-              }`}>
-                <div className={styles.taskCheckbox}>
-                  {completedTasks[task.key as keyof typeof completedTasks] && <span>✓</span>}
-                  {failedTasks[task.key as keyof typeof failedTasks] && <span>✗</span>}
-                </div>
-                <span className={styles.taskLabel}>{task.label}</span>
-              </div>
-            ))}
-          </div>
-        </div>
+      {/* Top Bar */}
+      <ChapterTopBar
+        chapterTitle="Chapter 1: The Hall of Rays"
+        chapterSubtitle="Castle 2 - Angles Sanctuary"
+        isMuted={isMuted}
+        autoAdvance={autoAdvanceEnabled}
+        onToggleMute={() => setIsMuted(!isMuted)}
+        onToggleAutoAdvance={() => setAutoAdvanceEnabled(!autoAdvanceEnabled)}
+        onExit={handleReturnToCastle}
+        styleModule={baseStyles}
+      />
 
-        <div className={styles.gameArea} ref={gameAreaRef}>
+      {/* Main Content */}
+      <div className={baseStyles.mainContent}>
+        {/* Task Panel */}
+        <ChapterTaskPanel
+          tasks={CHAPTER1_LEARNING_OBJECTIVES}
+          completedTasks={completedTasks}
+          failedTasks={failedTasks}
+          styleModule={baseStyles}
+        />
+
+        {/* Game Area */}
+        <div className={baseStyles.gameArea}>
+          {/* Opening Scene */}
           {currentScene === 'opening' && (
-            <div className={styles.sceneContent}>
-              <div className={styles.observatoryView}>
-                <div className={styles.doorPreview}>
-                  <h2 className={styles.doorTitle}>The Three Paths of Measurement</h2>
-                  <div className={styles.doorGrid}>
-                    <div className={styles.doorCard}>
-                      <div className={styles.doorImageWrapper}>
-                        <img 
-                          src="/images/castle2-door1.png" 
-                          alt="Chapter 1" 
-                          className={styles.doorImage}
-                        />
-                      </div>
-                      <span className={styles.doorLabel}>Chapter I: Shapes</span>
-                    </div>
-                    <div className={styles.doorCard}>
-                      <div className={styles.doorImageWrapper}>
-                        <img 
-                          src="/images/castle2-door2.png" 
-                          alt="Chapter 2" 
-                          className={styles.doorImage}
-                        />
-                      </div>
-                      <span className={styles.doorLabel}>Chapter II: Perimeter</span>
-                    </div>
-                    <div className={styles.doorCard}>
-                      <div className={styles.doorImageWrapper}>
-                        <img 
-                          src="/images/castle2-door3.png" 
-                          alt="Chapter 3" 
-                          className={styles.doorImage}
-                        />
-                      </div>
-                      <span className={styles.doorLabel}>Chapter III: Area</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
+            <div style={{ textAlign: 'center', padding: '2rem' }}>
+              <h2 style={{ color: '#FFFD8F', fontSize: '2rem' }}>Welcome to the Hall of Rays!</h2>
+              <p style={{ color: '#B0CE88', fontSize: '1.2rem', marginTop: '1rem' }}>
+                Click the dialogue box to begin your journey...
+              </p>
             </div>
           )}
 
+          {/* Lesson Scene */}
           {currentScene === 'lesson' && (
-            <div className={styles.lessonContent}>
-              <div className={styles.conceptGrid}>
-                <div className={`${styles.conceptCard} ${completedTasks.learnTriangle ? styles.revealed : styles.hidden}`}>
-                  <h3>Triangle</h3>
-                  <div className={styles.visualDemo}>
-                    <svg width="100%" height="100" viewBox="0 0 200 100">
-                      <polygon 
-                        points={renderPolygon('triangle', 100, 60, 35)} 
-                        fill="none" 
-                        stroke="#4CAF50" 
-                        strokeWidth="3"
-                      />
-                      <text x="100" y="85" textAnchor="middle" fill="#4CAF50" fontSize="14" fontWeight="bold">3 sides</text>
-                    </svg>
-                  </div>
-                  <p>A polygon with 3 straight sides and 3 angles.</p>
-                </div>
+            <LessonGrid columns={3} gap="medium" styleModule={lessonStyles}>
+              {CHAPTER1_CONCEPTS.map((concept, index) => {
+                // Find the corresponding dialogue to determine if it's been reached
+                const dialogueIndex = CHAPTER1_LESSON_DIALOGUE.findIndex(d => d.key === concept.key);
+                const isHighlighted = messageIndex >= dialogueIndex;
                 
-                <div className={`${styles.conceptCard} ${completedTasks.learnQuadrilateral ? styles.revealed : styles.hidden}`}>
-                  <h3>Quadrilateral</h3>
-                  <div className={styles.visualDemo}>
-                    <svg width="100%" height="100" viewBox="0 0 200 100">
-                      <polygon 
-                        points={renderPolygon('square', 100, 50, 30)} 
-                        fill="none" 
-                        stroke="#66BB6A" 
-                        strokeWidth="3"
-                      />
-                      <text x="100" y="90" textAnchor="middle" fill="#66BB6A" fontSize="14" fontWeight="bold">4 sides</text>
-                    </svg>
-                  </div>
-                  <p>A polygon with 4 sides. Includes squares and rectangles.</p>
-                </div>
-                
-                <div className={`${styles.conceptCard} ${completedTasks.learnPentagon ? styles.revealed : styles.hidden}`}>
-                  <h3>Pentagon</h3>
-                  <div className={styles.visualDemo}>
-                    <svg width="100%" height="100" viewBox="0 0 200 100">
-                      <polygon 
-                        points={renderPolygon('pentagon', 100, 55, 32)} 
-                        fill="none" 
-                        stroke="#81C784" 
-                        strokeWidth="3"
-                      />
-                      <text x="100" y="92" textAnchor="middle" fill="#81C784" fontSize="14" fontWeight="bold">5 sides</text>
-                    </svg>
-                  </div>
-                  <p>A polygon with 5 sides and 5 angles.</p>
-                </div>
-                
-                <div className={`${styles.conceptCard} ${completedTasks.learnHexagon ? styles.revealed : styles.hidden}`}>
-                  <h3>Hexagon</h3>
-                  <div className={styles.visualDemo}>
-                    <svg width="100%" height="100" viewBox="0 0 200 100">
-                      <polygon 
-                        points={renderPolygon('hexagon', 100, 50, 30)} 
-                        fill="none" 
-                        stroke="#A5D6A7" 
-                        strokeWidth="3"
-                      />
-                      <text x="100" y="87" textAnchor="middle" fill="#A5D6A7" fontSize="14" fontWeight="bold">6 sides</text>
-                    </svg>
-                  </div>
-                  <p>A polygon with 6 sides. Found in honeycombs!</p>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {currentScene === 'minigame' && minigame && (
-            <div className={styles.minigameContent}>
-              <div className={styles.minigameCard}>
-                <h3>Click on the {shapeRounds[currentShapeRound].name}!</h3>
-                <p className={styles.minigameHint}>
-                  Look for a shape with {shapeRounds[currentShapeRound].sides} sides
-                </p>
-                
-                <div className={styles.shapeGrid}>
-                  {(['triangle', 'square', 'pentagon', 'hexagon', 'heptagon', 'octagon'] as ShapeType[]).map((shape) => (
-                    <div 
-                      key={shape}
-                      className={`${styles.shapeOption} ${clickedShape === shape ? (isShapeFeedbackCorrect ? styles.correct : styles.incorrect) : ''}`}
-                      onClick={() => !clickedShape && handleShapeClick(shape)}
-                      style={{ cursor: clickedShape ? 'not-allowed' : 'pointer' }}
-                    >
-                      <svg width="100%" height="120" viewBox="0 0 200 120">
-                        <polygon 
-                          points={renderPolygon(shape, 100, 60, 40)} 
-                          fill="rgba(76, 175, 80, 0.2)" 
-                          stroke="#4CAF50" 
-                          strokeWidth="3"
-                        />
-                      </svg>
-                    </div>
-                  ))}
-                </div>
-                
-                {shapeFeedback && (
-                  <div className={`${styles.feedback} ${isShapeFeedbackCorrect ? styles.correct : styles.incorrect}`}>
-                    {shapeFeedback}
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-
-          {currentScene === 'quiz1' && quiz && quiz.quiz_config.questions[0] && (
-            <div className={styles.quizContent}>
-              <div className={styles.quizCard}>
-                <h3 className={styles.quizQuestion}>{quiz.quiz_config.questions[0].question}</h3>
-                <div className={styles.quizOptions}>
-                  {quiz.quiz_config.questions[0].options.map((option) => (
-                    <button
-                      key={option}
-                      className={`${styles.quizOption} ${
-                        selectedAnswer === option
-                          ? isCorrect
-                            ? styles.correct
-                            : styles.incorrect
-                          : ''
-                      }`}
-                      onClick={() => handleAnswerSelect(option, quiz.quiz_config.questions[0].correctAnswer, 1)}
-                      disabled={showFeedback}
-                    >
-                      {option}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-          )}
-
-          {currentScene === 'quiz2' && quiz && quiz.quiz_config.questions[1] && (
-            <div className={styles.quizContent}>
-              <div className={styles.quizCard}>
-                <h3 className={styles.quizQuestion}>{quiz.quiz_config.questions[1].question}</h3>
-                <div className={styles.quizOptions}>
-                  {quiz.quiz_config.questions[1].options.map((option) => (
-                    <button
-                      key={option}
-                      className={`${styles.quizOption} ${
-                        selectedAnswer === option
-                          ? isCorrect
-                            ? styles.correct
-                            : styles.incorrect
-                          : ''
-                      }`}
-                      onClick={() => handleAnswerSelect(option, quiz.quiz_config.questions[1].correctAnswer, 2)}
-                      disabled={showFeedback}
-                    >
-                      {option}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-          )}
-
-          {currentScene === 'quiz3' && quiz && quiz.quiz_config.questions[2] && (
-            <div className={styles.quizContent}>
-              <div className={styles.quizCard}>
-                <h3 className={styles.quizQuestion}>{quiz.quiz_config.questions[2].question}</h3>
-                <div className={styles.quizOptions}>
-                  {quiz.quiz_config.questions[2].options.map((option) => (
-                    <button
-                      key={option}
-                      className={`${styles.quizOption} ${
-                        selectedAnswer === option
-                          ? isCorrect
-                            ? styles.correct
-                            : styles.incorrect
-                          : ''
-                      }`}
-                      onClick={() => handleAnswerSelect(option, quiz.quiz_config.questions[2].correctAnswer, 3)}
-                      disabled={showFeedback}
-                    >
-                      {option}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-          )}
-
-          {currentScene === 'reward' && (
-            <div className={styles.rewardContent}>
-              <h2 className={styles.rewardTitle}>Chapter Complete!</h2>
-              <div className={styles.rewardCard}>
-                <div className={styles.relicDisplay}>
-                  <img 
-                    src="/images/gem-of-sides.png" 
-                    alt="Gem of Sides" 
-                    className={styles.relicIcon}
+                return (
+                  <ConceptCard
+                    key={`${concept.key}-${index}`}
+                    title={concept.title}
+                    description={concept.description}
+                    icon={<Image src={concept.image} alt={concept.title} width={150} height={150} />}
+                    highlighted={isHighlighted}
+                    styleModule={lessonStyles}
                   />
-                </div>
-                <h3 className={styles.rewardName}>The Gem of Sides</h3>
-                <p className={styles.rewardDescription}>
-                  You have mastered the art of polygon identification! The Gem of Sides glows with your geometric wisdom.
-                </p>
+                );
+              })}
+            </LessonGrid>
+          )}
+
+          {/* Minigame Scene */}
+          {currentScene === 'minigame' && (
+            <AngleIdentificationMinigame
+              question={{
+                id: `minigame-${currentMinigameLevel}`,
+                instruction: `Identify this angle: ${CHAPTER1_MINIGAME_LEVELS[currentMinigameLevel].name}`,
+                correctAnswer: CHAPTER1_MINIGAME_LEVELS[currentMinigameLevel].angleType,
+              }}
+              onComplete={handleMinigameComplete}
+              styleModule={minigameStyles}
+            />
+          )}
+
+          {/* Quiz Scenes */}
+          {(currentScene === 'quiz1' || currentScene === 'quiz2' || currentScene === 'quiz3' || currentScene === 'quiz4' || currentScene === 'quiz5') && quiz && (
+            <div className={minigameStyles.minigameContainer}>
+              <div className={minigameStyles.questionText}>
+                {quiz.quiz_config.questions[
+                  currentScene === 'quiz1' ? 0 : 
+                  currentScene === 'quiz2' ? 1 : 
+                  currentScene === 'quiz3' ? 2 : 
+                  currentScene === 'quiz4' ? 3 : 4
+                ]?.question}
               </div>
-              <div className={styles.rewardStats}>
-                <div className={styles.statBox}>
-                  <span className={styles.statLabel}>Lesson XP</span>
-                  <span className={styles.statValue}>{earnedXP.lesson}</span>
-                </div>
-                <div className={styles.statBox}>
-                  <span className={styles.statLabel}>Minigame XP</span>
-                  <span className={styles.statValue}>{earnedXP.minigame}</span>
-                </div>
-                <div className={styles.statBox}>
-                  <span className={styles.statLabel}>Quiz XP</span>
-                  <span className={styles.statValue}>{earnedXP.quiz}</span>
-                </div>
+              
+              <div className={minigameStyles.answerOptions}>
+                {quiz.quiz_config.questions[
+                  currentScene === 'quiz1' ? 0 : 
+                  currentScene === 'quiz2' ? 1 : 
+                  currentScene === 'quiz3' ? 2 : 
+                  currentScene === 'quiz4' ? 3 : 4
+                ]?.options.map((option, idx) => (
+                  <div
+                    key={idx}
+                    className={`${minigameStyles.answerOption} ${
+                      quizAnswers[quiz.quiz_config.questions[
+                        currentScene === 'quiz1' ? 0 : 
+                        currentScene === 'quiz2' ? 1 : 
+                        currentScene === 'quiz3' ? 2 : 
+                        currentScene === 'quiz4' ? 3 : 4
+                      ].id] === option
+                        ? minigameStyles.answerOptionSelected
+                        : ''
+                    }`}
+                    onClick={() => {
+                      const questionId = quiz.quiz_config.questions[
+                        currentScene === 'quiz1' ? 0 : 
+                        currentScene === 'quiz2' ? 1 : 
+                        currentScene === 'quiz3' ? 2 : 
+                        currentScene === 'quiz4' ? 3 : 4
+                      ].id;
+                      setQuizAnswers((prev) => ({ ...prev, [questionId]: option }));
+                    }}
+                  >
+                    {option}
+                  </div>
+                ))}
               </div>
-              <div className={styles.rewardActions}>
-                {canRetakeQuiz && (
-                  <button className={styles.retakeButton} onClick={handleRetakeQuiz}>
-                    Retake Quiz
-                  </button>
+
+              <button
+                className={`${minigameStyles.submitButton} ${
+                  quizFeedback === 'correct' 
+                    ? minigameStyles.submitButtonCorrect 
+                    : quizFeedback === 'incorrect' 
+                    ? minigameStyles.submitButtonIncorrect 
+                    : ''
+                }`}
+                onClick={() => handleQuizSubmit(
+                  currentScene === 'quiz1' ? 1 : 
+                  currentScene === 'quiz2' ? 2 : 
+                  currentScene === 'quiz3' ? 3 : 
+                  currentScene === 'quiz4' ? 4 : 5
                 )}
-                <button className={styles.returnButton} onClick={handleComplete}>
-                  Return to Castle
-                  <ChevronRight size={20} />
-                </button>
-              </div>
+                disabled={!quizAnswers[quiz.quiz_config.questions[
+                  currentScene === 'quiz1' ? 0 : 
+                  currentScene === 'quiz2' ? 1 : 
+                  currentScene === 'quiz3' ? 2 : 
+                  currentScene === 'quiz4' ? 3 : 4
+                ].id] || quizFeedback !== null}
+              >
+                {quizFeedback === 'correct' ? '✓ Correct!' : quizFeedback === 'incorrect' ? '✗ Incorrect' : 'Submit Answer'}
+              </button>
             </div>
+          )}
+
+          {/* Reward Scene */}
+          {currentScene === 'reward' && (
+            <ChapterRewardScreen
+              relicName={CHAPTER1_RELIC.name}
+              relicImage={CHAPTER1_RELIC.image}
+              relicDescription={CHAPTER1_RELIC.description}
+              earnedXP={earnedXP}
+              quizScore={quizScore}
+              canRetakeQuiz={true}
+              onRetakeQuiz={handleRetakeQuiz}
+              onComplete={handleReturnToCastle}
+              styleModule={baseStyles}
+            />
           )}
         </div>
       </div>
 
+      {/* Dialogue Box */}
       {currentScene !== 'reward' && (
-        <div className={styles.dialogueWrapper}>
-          <div className={styles.dialogueContainer} onClick={handleDialogueClick}>
-            <div className={styles.characterSection}>
-              <div className={styles.portraitFrame}>
-                <img src="/images/sylvan-wizard.png" alt="Sylvan" className={styles.wizardPortrait} />
-              </div>
-            </div>
-            <div className={styles.messageSection}>
-              <div className={styles.dialogueTextWrapper}>
-                <div className={styles.dialogueSpeaker}>Sylvan</div>
-                <div className={styles.dialogueText}>
-                  {displayedText}
-                </div>
-              </div>
-              {!isTyping && currentScene !== 'minigame' && (
-                <div className={styles.continuePrompt}>
-                  Click to continue →
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
+        <ChapterDialogueBox
+          wizardName={CHAPTER1_WIZARD.name}
+          wizardImage={CHAPTER1_WIZARD.image}
+          displayedText={displayedText}
+          isTyping={isTyping}
+          showContinuePrompt={!isTyping}
+          onClick={handleDialogueClick}
+          styleModule={baseStyles}
+        />
       )}
     </div>
-  )
+  );
 }

@@ -21,6 +21,7 @@ import {
   CHAPTER2_LEARNING_OBJECTIVES,
   CHAPTER2_XP_VALUES,
   CHAPTER2_MINIGAME_LEVELS,
+  CHAPTER2_CONCEPTS,
 } from '@/constants/chapters/castle1/chapter2';
 import { awardLessonXP, completeChapter } from '@/api/chapters';
 import { submitQuizAttempt, getUserQuizAttempts } from '@/api/chapterQuizzes';
@@ -47,13 +48,38 @@ export default function Chapter2Page() {
   
   // Initialize chapter in store if not exists and check for existing progress
   useEffect(() => {
+    // Get existing progress BEFORE initializing (to check if it's truly new)
+    const existingProgress = chapterStore.getChapterProgress(CHAPTER_KEY);
+    const hasRealProgress = existingProgress && (
+      existingProgress.currentScene !== 'opening' ||
+      Object.keys(existingProgress.completedTasks || {}).length > 0 ||
+      existingProgress.earnedXP.lesson > 0 ||
+      existingProgress.earnedXP.minigame > 0 ||
+      existingProgress.earnedXP.quiz > 0
+    );
+    
     chapterStore.initializeChapter(CHAPTER_KEY);
+    
+    // Clean up lesson tasks from store (remove old corrupted data)
+    if (existingProgress?.completedTasks) {
+      const lessonTasks = ['task-0', 'task-1', 'task-2', 'task-3', 'task-4'];
+      lessonTasks.forEach(taskId => {
+        if (existingProgress.completedTasks[taskId]) {
+          const progress = chapterStore.getChapterProgress(CHAPTER_KEY);
+          if (progress && progress.completedTasks) {
+            const cleaned = { ...progress.completedTasks };
+            delete cleaned[taskId];
+            chapterStore.chapters[CHAPTER_KEY].completedTasks = cleaned;
+          }
+        }
+      });
+    }
     
     // Check if user has disabled this modal for this chapter
     const dontShowAgain = localStorage.getItem(`${CHAPTER_KEY}-dont-show-modal`);
     
-    // Check if there's saved progress and it's not at the start
-    if (!hasCheckedProgress && savedProgress && savedProgress.currentScene !== 'opening' && dontShowAgain !== 'true') {
+    // Only show modal if there's REAL progress (not just initialization)
+    if (!hasCheckedProgress && hasRealProgress && dontShowAgain !== 'true') {
       setShowProgressModal(true);
       setHasCheckedProgress(true);
     } else {
@@ -71,12 +97,21 @@ export default function Chapter2Page() {
   // Track minigame score
   const minigameScoreRef = React.useRef<number>(0);
   
-  const checkedLessonTasksRef = React.useRef<Set<number>>(new Set());
+  const checkedLessonTasksRef = React.useRef<Set<string>>(new Set());
   const previousMessageIndexRef = React.useRef<number>(-1);
   
-  const [completedTasks, setCompletedTasks] = useState<Record<string, boolean>>(
-    savedProgress?.completedTasks || {}
-  );
+  // Task tracking - initialize from store but filter out lesson tasks
+  const [completedTasks, setCompletedTasks] = useState<Record<string, boolean>>(() => {
+    const saved = savedProgress?.completedTasks || {};
+    const filtered = { ...saved };
+    // Remove lesson tasks - they will be re-tracked by the new system
+    delete filtered['task-0'];
+    delete filtered['task-1'];
+    delete filtered['task-2'];
+    delete filtered['task-3'];
+    delete filtered['task-4'];
+    return filtered;
+  });
   const [failedTasks, setFailedTasks] = useState<Record<string, boolean>>(
     savedProgress?.failedTasks || {}
   );
@@ -110,7 +145,7 @@ export default function Chapter2Page() {
     resetDialogue,
   } = useChapterDialogue({
     dialogue: currentScene === 'opening' ? CHAPTER2_OPENING_DIALOGUE : 
-             currentScene === 'lesson' ? CHAPTER2_LESSON_DIALOGUE : 
+             currentScene === 'lesson' ? CHAPTER2_LESSON_DIALOGUE.map(d => d.text) : 
              CHAPTER2_MINIGAME_DIALOGUE,
     autoAdvance: autoAdvanceEnabled,
     autoAdvanceDelay: 3000,
@@ -211,51 +246,34 @@ export default function Chapter2Page() {
     fetchQuizScore();
   }, [currentScene, quiz?.id]);
 
+  // Track lesson progress using semantic keys
   React.useEffect(() => {
-    if (currentScene === 'lesson') {
-      // Detect if we're jumping backward (dialogue reset) - reset the previous index
-      if (previousMessageIndexRef.current > messageIndex) {
-        previousMessageIndexRef.current = -1;
-      }
+    if (currentScene === 'lesson' && messageIndex >= 0 && messageIndex < CHAPTER2_LESSON_DIALOGUE.length) {
+      const currentDialogue = CHAPTER2_LESSON_DIALOGUE[messageIndex];
       
-      // Only process if we haven't checked this task yet
-      if (checkedLessonTasksRef.current.has(messageIndex)) {
-        previousMessageIndexRef.current = messageIndex;
+      // Skip if already processed this dialogue
+      if (checkedLessonTasksRef.current.has(currentDialogue.key)) {
         return;
       }
       
-      // Check if this is a valid progression:
-      // - First message should be 0 (when previous is -1, only accept messageIndex 0)
-      // - Otherwise, should be moving forward by 1 (sequential progression)
-      const isValidFirstMessage = previousMessageIndexRef.current === -1 && messageIndex === 0;
-      const isSequentialProgression = messageIndex === previousMessageIndexRef.current + 1;
-      
-      if (isValidFirstMessage || isSequentialProgression) {
-        // Mark the task based on messageIndex and track it
-        // Parallel Lines - dialogue index 0
-        if (messageIndex === 0) {
-          markTaskComplete('task-0');
-          checkedLessonTasksRef.current.add(0);
-        } 
-        // Intersecting Lines - dialogue index 2
-        else if (messageIndex === 2) {
-          markTaskComplete('task-1');
-          checkedLessonTasksRef.current.add(2);
-        } 
-        // Perpendicular Lines - dialogue index 4
-        else if (messageIndex === 4) {
-          markTaskComplete('task-2');
-          checkedLessonTasksRef.current.add(4);
-        } 
-        // Skew Lines - dialogue index 5
-        else if (messageIndex === 5) {
-          markTaskComplete('task-3');
-          checkedLessonTasksRef.current.add(5);
+      // If this dialogue has an associated task, mark it complete
+      if (currentDialogue.taskId) {
+        markTaskComplete(currentDialogue.taskId);
+        checkedLessonTasksRef.current.add(currentDialogue.key);
+        
+        // Scroll to make the Skew Lines card visible when it's unlocked
+        if (currentDialogue.key === 'skew') {
+          setTimeout(() => {
+            const lessonGrid = document.querySelector(`.${lessonStyles.lessonGrid2Col}`);
+            if (lessonGrid) {
+              lessonGrid.scrollTo({
+                top: lessonGrid.scrollHeight,
+                behavior: 'smooth'
+              });
+            }
+          }, 100);
         }
       }
-      
-      // Update previous messageIndex
-      previousMessageIndexRef.current = messageIndex;
     }
   }, [currentScene, messageIndex]);
 
@@ -263,17 +281,21 @@ export default function Chapter2Page() {
     if (currentScene === 'opening') {
       checkedLessonTasksRef.current = new Set();
       previousMessageIndexRef.current = -1;
+      resetDialogue(); // Reset dialogue BEFORE changing scene to prevent messageIndex carryover
       setCurrentScene('lesson');
       playNarration('chapter2-lesson-intro');
     } else if (currentScene === 'lesson' && messageIndex >= CHAPTER2_LESSON_DIALOGUE.length - 1) {
       awardXP('lesson');
+      resetDialogue(); // Reset dialogue BEFORE changing scene
       setCurrentScene('minigame');
     }
   }
 
+  // Reset dialogue when scene changes (backup, in case direct calls are missed)
   React.useEffect(() => {
     resetDialogue();
-  }, [currentScene, resetDialogue]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentScene]);
 
   const markTaskComplete = (taskKey: string) => {
     setCompletedTasks((prev) => {
@@ -317,7 +339,7 @@ export default function Chapter2Page() {
         setCurrentMinigameQuestion(currentMinigameQuestion + 1);
       } else {
         // All questions answered correctly
-        markTaskComplete('task-4');
+        markTaskComplete('task-5');
         awardXP('minigame');
         
         if (minigame && userProfile?.id) {
@@ -352,7 +374,7 @@ export default function Chapter2Page() {
   const handleQuizSubmit = async (quizNumber: 1 | 2 | 3) => {
     if (!quiz || !userProfile?.id) return;
 
-    const taskKey = quizNumber === 1 ? 'task-5' : quizNumber === 2 ? 'task-6' : 'task-7';
+    const taskKey = quizNumber === 1 ? 'task-6' : quizNumber === 2 ? 'task-7' : 'task-8';
     const questionIndex = quizNumber - 1;
     const question = quiz.quiz_config.questions[questionIndex];
     const userAnswer = quizAnswers[question.id];
@@ -455,9 +477,9 @@ export default function Chapter2Page() {
     
     setCompletedTasks((prev) => {
       const updated = { ...prev };
-      delete updated['task-5'];
       delete updated['task-6'];
       delete updated['task-7'];
+      delete updated['task-8'];
       return updated;
     });
     
@@ -567,34 +589,22 @@ export default function Chapter2Page() {
 
           {currentScene === 'lesson' && (
             <LessonGrid columns={2} gap="medium" styleModule={lessonStyles}>
-              <ConceptCard
-                title="Parallel Lines"
-                description="Lines that never meet, no matter how far extended. They maintain the same distance apart."
-                imageSrc="/images/castle1/parallel-lines.png"
-                highlighted={messageIndex >= 0}
-                styleModule={lessonStyles}
-              />
-              <ConceptCard
-                title="Intersecting Lines"
-                description="Lines that cross at exactly one point."
-                imageSrc="/images/castle1/intersecting-lines.png"
-                highlighted={messageIndex >= 2}
-                styleModule={lessonStyles}
-              />
-              <ConceptCard
-                title="Perpendicular Lines"
-                description="Lines that intersect at a 90° angle (right angle)."
-                imageSrc="/images/castle1/perpendicular-lines.png"
-                highlighted={messageIndex >= 4}
-                styleModule={lessonStyles}
-              />
-              <ConceptCard
-                title="Skew Lines"
-                description="Lines in 3D space that don't intersect and aren't parallel."
-                imageSrc="/images/castle1/skew-lines.png"
-                highlighted={messageIndex >= 5}
-                styleModule={lessonStyles}
-              />
+              {CHAPTER2_CONCEPTS.map((concept, index) => {
+                // Find the dialogue index for this concept to determine if it should be highlighted
+                const dialogueIndex = CHAPTER2_LESSON_DIALOGUE.findIndex(d => d.key === concept.key);
+                const isHighlighted = dialogueIndex !== -1 && messageIndex >= dialogueIndex;
+                
+                return (
+                  <ConceptCard
+                    key={`${concept.key}-${index}`}
+                    title={concept.title}
+                    description={concept.description}
+                    imageSrc={concept.image}
+                    highlighted={isHighlighted}
+                    styleModule={lessonStyles}
+                  />
+                );
+              })}
             </LessonGrid>
           )}
 

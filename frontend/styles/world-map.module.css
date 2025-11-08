@@ -1,5 +1,5 @@
 /* ========================================
-   BASE CONTAINER & LAYOUT - FIXED
+   BASE CONTAINER & LAYOUT
    ======================================== */
 
 .world_map_page_container {
@@ -9,7 +9,7 @@
   width: 100vw;
   overflow: hidden;
   position: relative;
-  font-family: 'Nunito', sans-serif;
+  font-family: 'Cinzel', serif;
   transition: margin-left 0.3s ease;
 }
 
@@ -415,8 +415,6 @@
   justify-content: center;
   min-height: 100vh;
   max-height: 100vh;
-  /* width: 100%; */
-  /* padding: 2rem; */
   gap: 1rem;
 }
 
@@ -430,7 +428,6 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  /* width: 100%; */
   gap: 1.5rem;
 }
 
@@ -486,9 +483,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  /* width: 100%; */
   user-select: none;
-  /* padding: 0 2rem;s */
 }
 
 .carousel_track {
@@ -624,29 +619,6 @@
   }
 }
 
-/* Lock Overlay */
-.lock_overlay {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  font-size: 4rem;
-  animation: lockPulse 2s ease-in-out infinite;
-  filter: drop-shadow(0 4px 15px rgba(0, 0, 0, 0.9));
-  z-index: 5;
-}
-
-@keyframes lockPulse {
-  0%, 100% {
-    transform: translate(-50%, -50%) scale(1);
-    opacity: 0.9;
-  }
-  50% {
-    transform: translate(-50%, -50%) scale(1.1);
-    opacity: 1;
-  }
-}
-
 /* Castle Name Plate */
 .castle_name_plate {
   background: linear-gradient(145deg, rgba(20, 20, 20, 0.9), rgba(40, 30, 20, 0.9));
@@ -656,6 +628,7 @@
   border: 2px solid rgba(139, 69, 19, 0.6);
   font-size: 1.1rem;
   font-weight: 700;
+  font-family: 'Cinzel', serif;
   color: #daa520;
   text-shadow: 0 2px 6px rgba(0, 0, 0, 0.7);
   letter-spacing: 1px;
@@ -692,10 +665,6 @@
     font-size: 2.5rem;
     top: -12px;
   }
-
-  .lock_overlay {
-    font-size: 3.5rem;
-  }
 }
 
 @media (max-width: 1200px) {
@@ -723,10 +692,6 @@
   .completion_crown {
     font-size: 2.25rem;
     top: -10px;
-  }
-
-  .lock_overlay {
-    font-size: 3rem;
   }
 }
 
@@ -770,10 +735,6 @@
     font-size: 2rem;
     top: -8px;
   }
-
-  .lock_overlay {
-    font-size: 2.75rem;
-  }
 }
 
 @media (max-width: 768px) {
@@ -811,10 +772,6 @@
 @media (max-width: 600px) {
   .current_castle {
     width: 200px;
-  }
-
-  .lock_overlay {
-    font-size: 2.75rem;
   }
 }
 
@@ -884,7 +841,8 @@
   background: rgba(20, 20, 20, 0.7);
   backdrop-filter: blur(10px);
   border-radius: 20px;
-  border: 2px solid rgba(139, 69, 19, 0.5);  
+  border: 2px solid rgba(139, 69, 19, 0.5);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
 }
 
 .stat_item {
@@ -896,6 +854,7 @@
 
 .stat_label {
   font-size: 0.85rem;
+  font-family: 'Cinzel', serif;
   color: rgba(218, 165, 32, 0.8);
   text-transform: uppercase;
   letter-spacing: 1px;
@@ -905,6 +864,7 @@
 .stat_value {
   font-size: 1.5rem;
   font-weight: 700;
+  font-family: 'Cinzel', serif;
   color: #daa520;
   text-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
 }
@@ -984,6 +944,7 @@
 .modal_content h2 {
   font-size: 2rem;
   font-weight: 700;
+  font-family: 'Cinzel', serif;
   color: #daa520;
   margin: 0 0 1rem 0;
   text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
@@ -1030,6 +991,7 @@
 
 .progress_label {
   font-size: 0.9rem;
+  font-family: 'Cinzel', serif;
   color: rgba(218, 165, 32, 0.9);
   margin-bottom: 0.5rem;
   font-weight: 600;
@@ -1059,6 +1021,7 @@
   color: #1a1a1a;
   font-size: 1.1rem;
   font-weight: 700;
+  font-family: 'Cinzel', serif;
   border: 2px solid rgba(139, 69, 19, 0.6);
   border-radius: 10px;
   cursor: pointer;
@@ -1081,6 +1044,7 @@
 .locked_message {
   text-align: center;
   font-size: 1rem;
+  font-family: 'Cinzel', serif;
   color: rgba(218, 165, 32, 0.7);
   padding: 1rem;
   background: rgba(0, 0, 0, 0.3);
@@ -1103,10 +1067,8 @@
   color: #daa520;
   padding: 2rem;
   text-align: center;
-  padding: 20px;
   margin-left: 70px;
   transition: margin-left 0.3s ease;
-  margin-left: 70px;
 }
 
 .loading_container.expanded,
@@ -1118,18 +1080,20 @@
   margin-top: 20px;
   font-size: 18px;
   font-family: 'Cinzel', serif;
-  color: #f4e4c1;
+  color: #daa520;
 }
 
 .error_container h2 {
   font-size: 2rem;
   margin: 0;
+  font-family: 'Cinzel', serif;
   color: #daa520;
   text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
 }
 
 .error_container p {
   font-size: 1.1rem;
+  font-family: 'Cinzel', serif;
   color: rgba(218, 165, 32, 0.8);
   max-width: 500px;
 }
@@ -1140,6 +1104,7 @@
   color: #1a1a1a;
   font-size: 1rem;
   font-weight: 600;
+  font-family: 'Cinzel', serif;
   border: 2px solid rgba(139, 69, 19, 0.6);
   border-radius: 10px;
   cursor: pointer;

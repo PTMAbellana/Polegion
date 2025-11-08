@@ -21,6 +21,7 @@ import {
   CHAPTER1_MINIGAME_LEVELS,
   CHAPTER1_LEARNING_OBJECTIVES,
   CHAPTER1_XP_VALUES,
+  CHAPTER1_CONCEPTS,
 } from '@/constants/chapters/castle1/chapter1';
 import Image from 'next/image';
 import { awardLessonXP, completeChapter } from '@/api/chapters';
@@ -48,6 +49,16 @@ export default function Chapter1Page() {
   
   // Initialize chapter in store if not exists and check for existing progress
   useEffect(() => {
+    // Get existing progress BEFORE initializing (to check if it's truly new)
+    const existingProgress = chapterStore.getChapterProgress(CHAPTER_KEY);
+    const hasRealProgress = existingProgress && (
+      existingProgress.currentScene !== 'opening' ||
+      Object.keys(existingProgress.completedTasks || {}).length > 0 ||
+      existingProgress.earnedXP.lesson > 0 ||
+      existingProgress.earnedXP.minigame > 0 ||
+      existingProgress.earnedXP.quiz > 0
+    );
+    
     chapterStore.initializeChapter(CHAPTER_KEY);
     
     // Check if user has disabled this modal for this chapter
@@ -68,8 +79,8 @@ export default function Chapter1Page() {
       }
     }
     
-    // Check if there's saved progress and it's not at the start
-    if (!hasCheckedProgress && savedProgress && savedProgress.currentScene !== 'opening' && shouldShowModal) {
+    // Only show modal if there's REAL progress (not just initialization)
+    if (!hasCheckedProgress && hasRealProgress && shouldShowModal) {
       setShowProgressModal(true);
       setHasCheckedProgress(true);
     } else {
@@ -85,8 +96,8 @@ export default function Chapter1Page() {
   const [autoAdvanceEnabled, setAutoAdvanceEnabled] = useState(savedProgress?.autoAdvanceEnabled || false);
   const [currentMinigameLevel, setCurrentMinigameLevel] = useState(savedProgress?.currentMinigameLevel || 0);
   
-  // Track which lesson tasks have been checked to prevent duplicates (using ref to avoid re-renders)
-  const checkedLessonTasksRef = React.useRef<Set<number>>(new Set());
+  // Track which lesson tasks have been checked to prevent duplicates (using semantic keys)
+  const checkedLessonTasksRef = React.useRef<Set<string>>(new Set());
   const previousMessageIndexRef = React.useRef<number>(-1);
   
   // Task tracking - initialize from store or defaults
@@ -129,7 +140,7 @@ export default function Chapter1Page() {
     resetDialogue,
   } = useChapterDialogue({
     dialogue: currentScene === 'opening' ? CHAPTER1_OPENING_DIALOGUE : 
-             currentScene === 'lesson' ? CHAPTER1_LESSON_DIALOGUE : 
+             currentScene === 'lesson' ? CHAPTER1_LESSON_DIALOGUE.map(d => d.text) : 
              CHAPTER1_MINIGAME_DIALOGUE,
     autoAdvance: autoAdvanceEnabled,
     autoAdvanceDelay: 3000,
@@ -232,55 +243,19 @@ export default function Chapter1Page() {
 
   // Track lesson progress and mark tasks as dialogue progresses
   React.useEffect(() => {
-    if (currentScene === 'lesson' && messageIndex >= 0 && messageIndex <= 3) {
-      console.log('Lesson scene - messageIndex:', messageIndex, 'previous:', previousMessageIndexRef.current);
+    if (currentScene === 'lesson' && messageIndex >= 0 && messageIndex < CHAPTER1_LESSON_DIALOGUE.length) {
+      const currentDialogue = CHAPTER1_LESSON_DIALOGUE[messageIndex];
       
-      // Detect if we're jumping backward (dialogue reset) - reset the previous index
-      if (previousMessageIndexRef.current > messageIndex) {
-        console.log('Detected backward jump - resetting previous index');
-        previousMessageIndexRef.current = -1;
-      }
-      
-      // Only process if we haven't checked this task yet
-      if (checkedLessonTasksRef.current.has(messageIndex)) {
-        console.log('Skipping - already checked');
-        previousMessageIndexRef.current = messageIndex;
+      // Skip if already processed this dialogue
+      if (checkedLessonTasksRef.current.has(currentDialogue.key)) {
         return;
       }
       
-      // Check if this is a valid progression:
-      // - First message should be 0 (when previous is -1, only accept messageIndex 0)
-      // - Otherwise, should be moving forward by 1 (sequential progression)
-      const isValidFirstMessage = previousMessageIndexRef.current === -1 && messageIndex === 0;
-      const isSequentialProgression = messageIndex === previousMessageIndexRef.current + 1;
-      
-      if (isValidFirstMessage || isSequentialProgression) {
-        console.log('Processing task for messageIndex:', messageIndex);
-        
-        // Mark the task based on messageIndex and track it
-        if (messageIndex === 0) {
-          console.log('Marking task-0 complete');
-          markTaskComplete('task-0'); // Learn about Point
-          checkedLessonTasksRef.current.add(0);
-        } else if (messageIndex === 1) {
-          console.log('Marking task-1 complete');
-          markTaskComplete('task-1'); // Learn about Line Segment
-          checkedLessonTasksRef.current.add(1);
-        } else if (messageIndex === 2) {
-          console.log('Marking task-2 complete');
-          markTaskComplete('task-2'); // Learn about Ray
-          checkedLessonTasksRef.current.add(2);
-        } else if (messageIndex === 3) {
-          console.log('Marking task-3 complete');
-          markTaskComplete('task-3'); // Learn about Line
-          checkedLessonTasksRef.current.add(3);
-        }
-      } else {
-        console.log('Skipping - invalid sequence (expected', previousMessageIndexRef.current + 1, 'got', messageIndex, ')');
+      // If this dialogue has an associated task, mark it complete
+      if (currentDialogue.taskId) {
+        markTaskComplete(currentDialogue.taskId);
+        checkedLessonTasksRef.current.add(currentDialogue.key);
       }
-      
-      // Update previous messageIndex
-      previousMessageIndexRef.current = messageIndex;
     }
   }, [currentScene, messageIndex]);
 
@@ -289,16 +264,18 @@ export default function Chapter1Page() {
     if (currentScene === 'opening') {
       checkedLessonTasksRef.current = new Set(); // Reset checked tasks when entering lesson scene
       previousMessageIndexRef.current = -1; // Reset previous message index
+      resetDialogue(); // Reset dialogue BEFORE changing scene to prevent messageIndex carryover
       setCurrentScene('lesson');
       playNarration('chapter1-lesson-intro');
     } else if (currentScene === 'lesson' && messageIndex >= CHAPTER1_LESSON_DIALOGUE.length - 1) {
       // All lesson tasks should be marked by now through the useEffect above
       awardXP('lesson');
+      resetDialogue(); // Reset dialogue BEFORE changing scene
       setCurrentScene('minigame');
     }
   }
 
-  // Reset dialogue when scene changes
+  // Reset dialogue when scene changes (backup, in case direct calls are missed)
   React.useEffect(() => {
     resetDialogue();
   }, [currentScene]);
@@ -306,10 +283,8 @@ export default function Chapter1Page() {
   const markTaskComplete = (taskKey: string) => {
     setCompletedTasks((prev) => {
       if (prev[taskKey]) {
-        console.log(`Task ${taskKey} already completed, skipping`);
         return prev; // Already completed, don't update
       }
-      console.log(`Marking task ${taskKey} as complete`);
       return { ...prev, [taskKey]: true };
     });
   };
@@ -605,34 +580,22 @@ export default function Chapter1Page() {
           {/* Lesson Scene */}
           {currentScene === 'lesson' && (
             <LessonGrid columns={2} gap="medium" styleModule={lessonStyles}>
-              <ConceptCard
-                title="Point"
-                description="A point is a location in space. It has no size, no width, no length - just a position marked by a dot."
-                icon={<Image src="/images/castle1/point.png" alt="Point" width={200} height={80} />}
-                highlighted={messageIndex >= 0}
-                styleModule={lessonStyles}
-              />
-              <ConceptCard
-                title="Line Segment"
-                description="A line segment connects two points. It has a definite beginning and end, with measurable length."
-                icon={<Image src="/images/castle1/line-segment.png" alt="Line Segment" width={200} height={80} />}
-                highlighted={messageIndex >= 1}
-                styleModule={lessonStyles}
-              />
-              <ConceptCard
-                title="Ray"
-                description="A ray starts at one point and extends infinitely in one direction, like a beam of light."
-                icon={<Image src="/images/castle1/ray.png" alt="Ray" width={200} height={80} />}
-                highlighted={messageIndex >= 2}
-                styleModule={lessonStyles}
-              />
-              <ConceptCard
-                title="Line"
-                description="A line extends infinitely in both directions. It has no endpoints and continues forever."
-                icon={<Image src="/images/castle1/line.png" alt="Line" width={200} height={80} />}
-                highlighted={messageIndex >= 3}
-                styleModule={lessonStyles}
-              />
+              {CHAPTER1_CONCEPTS.map((concept, index) => {
+                // Find the dialogue index for this concept to determine if it should be highlighted
+                const dialogueIndex = CHAPTER1_LESSON_DIALOGUE.findIndex(d => d.key === concept.key);
+                const isHighlighted = dialogueIndex !== -1 && messageIndex >= dialogueIndex;
+                
+                return (
+                  <ConceptCard
+                    key={`${concept.key}-${index}`}
+                    title={concept.title}
+                    description={concept.description}
+                    icon={<Image src={concept.image} alt={concept.title} width={200} height={80} />}
+                    highlighted={isHighlighted}
+                    styleModule={lessonStyles}
+                  />
+                );
+              })}
             </LessonGrid>
           )}
 

@@ -53,14 +53,6 @@ export default function CastleMarker({
           draggable={false}
           onError={handleImageError}
         />
-
-        {castle.progress?.completed && (
-          <div className={styles.completion_crown}>👑</div>
-        )}
-
-        {!castle.progress?.unlocked && (
-          <div className={styles.lock_overlay}>🔒</div>
-        )}
       </div>
 
       {type === 'current' && (

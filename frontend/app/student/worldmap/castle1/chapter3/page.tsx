@@ -21,6 +21,7 @@ import {
   CHAPTER3_MINIGAME_LEVELS,
   CHAPTER3_LEARNING_OBJECTIVES,
   CHAPTER3_XP_VALUES,
+  CHAPTER3_CONCEPTS,
 } from '@/constants/chapters/castle1/chapter3';
 import Image from 'next/image';
 import { awardLessonXP, completeChapter } from '@/api/chapters';
@@ -48,13 +49,38 @@ export default function Chapter3Page() {
   
   // Initialize chapter in store if not exists and check for existing progress
   useEffect(() => {
+    // Get existing progress BEFORE initializing (to check if it's truly new)
+    const existingProgress = chapterStore.getChapterProgress(CHAPTER_KEY);
+    const hasRealProgress = existingProgress && (
+      existingProgress.currentScene !== 'opening' ||
+      Object.keys(existingProgress.completedTasks || {}).length > 0 ||
+      existingProgress.earnedXP.lesson > 0 ||
+      existingProgress.earnedXP.minigame > 0 ||
+      existingProgress.earnedXP.quiz > 0
+    );
+    
     chapterStore.initializeChapter(CHAPTER_KEY);
+    
+    // Clean up lesson tasks from store (remove old corrupted data)
+    if (existingProgress?.completedTasks) {
+      const lessonTasks = ['task-0', 'task-1', 'task-2', 'task-3', 'task-4', 'task-5', 'task-6', 'task-7'];
+      lessonTasks.forEach(taskId => {
+        if (existingProgress.completedTasks[taskId]) {
+          const progress = chapterStore.getChapterProgress(CHAPTER_KEY);
+          if (progress && progress.completedTasks) {
+            const cleaned = { ...progress.completedTasks };
+            delete cleaned[taskId];
+            chapterStore.chapters[CHAPTER_KEY].completedTasks = cleaned;
+          }
+        }
+      });
+    }
     
     // Check if user has disabled this modal for this chapter
     const dontShowAgain = localStorage.getItem(`${CHAPTER_KEY}-dont-show-modal`);
     
-    // Check if there's saved progress and it's not at the start
-    if (!hasCheckedProgress && savedProgress && savedProgress.currentScene !== 'opening' && dontShowAgain !== 'true') {
+    // Only show modal if there's REAL progress (not just initialization)
+    if (!hasCheckedProgress && hasRealProgress && dontShowAgain !== 'true') {
       setShowProgressModal(true);
       setHasCheckedProgress(true);
     } else {
@@ -70,14 +96,25 @@ export default function Chapter3Page() {
   const [autoAdvanceEnabled, setAutoAdvanceEnabled] = useState(savedProgress?.autoAdvanceEnabled || false);
   const [currentMinigameLevel, setCurrentMinigameLevel] = useState(savedProgress?.currentMinigameLevel || 0);
   
-  // Track which lesson tasks have been checked
-  const checkedLessonTasksRef = useRef<Set<number>>(new Set());
+  // Track which lesson tasks have been checked (using semantic keys)
+  const checkedLessonTasksRef = useRef<Set<string>>(new Set());
   const previousMessageIndexRef = useRef<number>(-1);
   
-  // Task tracking - initialize from store or defaults
-  const [completedTasks, setCompletedTasks] = useState<Record<string, boolean>>(
-    savedProgress?.completedTasks || {}
-  );
+  // Task tracking - initialize from store but filter out lesson tasks
+  const [completedTasks, setCompletedTasks] = useState<Record<string, boolean>>(() => {
+    const saved = savedProgress?.completedTasks || {};
+    const filtered = { ...saved };
+    // Remove lesson tasks - they will be re-tracked by the new system
+    delete filtered['task-0'];
+    delete filtered['task-1'];
+    delete filtered['task-2'];
+    delete filtered['task-3'];
+    delete filtered['task-4'];
+    delete filtered['task-5'];
+    delete filtered['task-6'];
+    delete filtered['task-7'];
+    return filtered;
+  });
   const [failedTasks, setFailedTasks] = useState<Record<string, boolean>>(
     savedProgress?.failedTasks || {}
   );
@@ -112,7 +149,7 @@ export default function Chapter3Page() {
     resetDialogue,
   } = useChapterDialogue({
     dialogue: currentScene === 'opening' ? CHAPTER3_OPENING_DIALOGUE : 
-             currentScene === 'lesson' ? CHAPTER3_LESSON_DIALOGUE : 
+             currentScene === 'lesson' ? CHAPTER3_LESSON_DIALOGUE.map(d => d.text) : 
              CHAPTER3_MINIGAME_DIALOGUE,
     autoAdvance: autoAdvanceEnabled,
     autoAdvanceDelay: 3000,
@@ -225,27 +262,41 @@ export default function Chapter3Page() {
     }
   }, [earnedXP.quiz]);
 
-  // Track lesson progress (7 lesson messages: indices 0-6, tasks 0-5)
-  // Message index 1 completes task-0, index 2 completes task-1, etc.
+  // Track lesson progress using semantic keys
   React.useEffect(() => {
-    if (currentScene === 'lesson' && messageIndex >= 1 && messageIndex <= 6) {
-      const taskIndex = messageIndex - 1; // Convert message index to task index
+    if (currentScene === 'lesson' && messageIndex >= 0 && messageIndex < CHAPTER3_LESSON_DIALOGUE.length) {
+      const currentDialogue = CHAPTER3_LESSON_DIALOGUE[messageIndex];
       
-      if (previousMessageIndexRef.current > messageIndex) {
-        previousMessageIndexRef.current = 0; // Reset to start of lesson (not -1)
-      }
-      
-      if (checkedLessonTasksRef.current.has(taskIndex)) {
-        previousMessageIndexRef.current = messageIndex;
+      // Skip if already processed this dialogue
+      if (checkedLessonTasksRef.current.has(currentDialogue.key)) {
         return;
       }
       
-      const isValidFirstMessage = previousMessageIndexRef.current === 0 && messageIndex === 1;
-      const isSequentialProgression = messageIndex === previousMessageIndexRef.current + 1;
-      
-      if (isValidFirstMessage || isSequentialProgression) {
-        markTaskComplete(`task-${taskIndex}`);
-        checkedLessonTasksRef.current.add(taskIndex);
+      // If this dialogue has an associated task, mark it complete
+      if (currentDialogue.taskId) {
+        markTaskComplete(currentDialogue.taskId);
+        checkedLessonTasksRef.current.add(currentDialogue.key);
+        
+        // Scroll to make new cards visible - only scroll when completing a row (every 2 cards in 2-column layout)
+        // Cards: [angles, polygons] [polygon-def, triangle] [circle, square] [rectangle, rhombus] [parallelogram, trapezoid] [kite, pentagon] [hexagon, heptagon] [octagon, nonagon] [decagon, hendecagon] [dodecagon, summary]
+        const scrollKeys = ['polygons', 'triangle', 'square', 'rhombus', 'trapezoid', 'pentagon', 'heptagon', 'nonagon', 'hendecagon', 'summary'];
+        
+        if (scrollKeys.includes(currentDialogue.key)) {
+          setTimeout(() => {
+            const lessonGrid = document.querySelector(`.${lessonStyles.lessonGrid2Col}`);
+            if (lessonGrid) {
+              // Calculate which row we're on (0-indexed)
+              const rowIndex = scrollKeys.indexOf(currentDialogue.key);
+              const totalRows = 10; // 20 cards / 2 columns = 10 rows
+              const scrollRatio = Math.min((rowIndex + 1) / totalRows, 1.0);
+              
+              lessonGrid.scrollTo({
+                top: lessonGrid.scrollHeight * scrollRatio,
+                behavior: 'smooth'
+              });
+            }
+          }, 100);
+        }
       }
       
       previousMessageIndexRef.current = messageIndex;
@@ -257,15 +308,17 @@ export default function Chapter3Page() {
     if (currentScene === 'opening') {
       checkedLessonTasksRef.current = new Set();
       previousMessageIndexRef.current = 0; // Start at beginning of lesson dialogue
+      resetDialogue(); // Reset dialogue BEFORE changing scene to prevent messageIndex carryover
       setCurrentScene('lesson');
       playNarration('chapter3-lesson-intro');
     } else if (currentScene === 'lesson' && messageIndex >= CHAPTER3_LESSON_DIALOGUE.length - 1) {
       awardXP('lesson');
+      resetDialogue(); // Reset dialogue BEFORE changing scene
       setCurrentScene('minigame');
     }
   }
 
-  // Reset dialogue when scene changes
+  // Reset dialogue when scene changes (backup, in case direct calls are missed)
   React.useEffect(() => {
     resetDialogue();
   }, [currentScene]);
@@ -311,7 +364,7 @@ export default function Chapter3Page() {
         setCurrentMinigameLevel(currentMinigameLevel + 1);
       } else {
         // All levels complete
-        markTaskComplete('task-6');
+        markTaskComplete('task-8');
         awardXP('minigame');
         
         // Submit minigame attempt
@@ -335,7 +388,7 @@ export default function Chapter3Page() {
   const handleQuizSubmit = async (quizNumber: 1 | 2 | 3) => {
     if (!quiz || !userProfile?.id) return;
 
-    const taskKey = `task-${6 + quizNumber}`;
+    const taskKey = `task-${8 + quizNumber}`;
     const questionIndex = quizNumber - 1;
     const question = quiz.quiz_config.questions[questionIndex];
     const userAnswer = quizAnswers[question.id];
@@ -440,13 +493,36 @@ export default function Chapter3Page() {
     
     setCompletedTasks((prev) => {
       const updated = { ...prev };
-      delete updated['task-7'];
-      delete updated['task-8'];
       delete updated['task-9'];
+      delete updated['task-10'];
+      delete updated['task-11'];
       return updated;
     });
     
     setCurrentScene('quiz1');
+  };
+
+  const handleRetakeLesson = () => {
+    // Reset lesson-related state
+    checkedLessonTasksRef.current = new Set();
+    previousMessageIndexRef.current = 0;
+    
+    // Clear lesson tasks from completed tasks
+    setCompletedTasks((prev) => {
+      const updated = { ...prev };
+      delete updated['task-0'];
+      delete updated['task-1'];
+      delete updated['task-2'];
+      delete updated['task-3'];
+      delete updated['task-4'];
+      delete updated['task-5'];
+      delete updated['task-6'];
+      delete updated['task-7'];
+      return updated;
+    });
+    
+    // Go back to lesson scene
+    setCurrentScene('lesson');
   };
 
   const handleContinueProgress = () => {
@@ -559,128 +635,23 @@ export default function Chapter3Page() {
 
           {/* Lesson Scene - Using LessonGrid and ConceptCard */}
           {currentScene === 'lesson' && (
-            <LessonGrid columns={3} gap="medium" styleModule={lessonStyles}>
-              {/* Basic Shapes */}
-              <ConceptCard
-                title="Triangle"
-                description="A polygon with three sides and three angles."
-                icon={<Image src="/images/castle1/chapter3/triangle.png" alt="Triangle" width={180} height={120} />}
-                highlighted={messageIndex >= 1}
-                styleModule={lessonStyles}
-              />
-              <ConceptCard
-                title="Circle"
-                description="A perfectly round shape where all points are equidistant from the center."
-                icon={<Image src="/images/castle1/chapter3/circle.png" alt="Circle" width={180} height={120} />}
-                highlighted={messageIndex >= 1}
-                styleModule={lessonStyles}
-              />
-              
-              {/* Quadrilaterals Part 1 */}
-              <ConceptCard
-                title="Square"
-                description="A quadrilateral with four equal sides and four right angles."
-                icon={<Image src="/images/castle1/chapter3/square.png" alt="Square" width={180} height={120} />}
-                highlighted={messageIndex >= 2}
-                styleModule={lessonStyles}
-              />
-              <ConceptCard
-                title="Rectangle"
-                description="A quadrilateral with opposite sides equal and four right angles."
-                icon={<Image src="/images/castle1/chapter3/rectangle.png" alt="Rectangle" width={180} height={120} />}
-                highlighted={messageIndex >= 2}
-                styleModule={lessonStyles}
-              />
-              
-              {/* Quadrilaterals Part 2 */}
-              <ConceptCard
-                title="Rhombus"
-                description="A quadrilateral with all four sides of equal length."
-                icon={<Image src="/images/castle1/chapter3/rhombus.png" alt="Rhombus" width={180} height={120} />}
-                highlighted={messageIndex >= 3}
-                styleModule={lessonStyles}
-              />
-              <ConceptCard
-                title="Parallelogram"
-                description="A quadrilateral with opposite sides parallel and equal in length."
-                icon={<Image src="/images/castle1/chapter3/parallelogram.png" alt="Parallelogram" width={180} height={120} />}
-                highlighted={messageIndex >= 3}
-                styleModule={lessonStyles}
-              />
-              <ConceptCard
-                title="Trapezoid"
-                description="A quadrilateral with at least one pair of parallel sides."
-                icon={<Image src="/images/castle1/chapter3/trapezoid.png" alt="Trapezoid" width={180} height={120} />}
-                highlighted={messageIndex >= 3}
-                styleModule={lessonStyles}
-              />
-              <ConceptCard
-                title="Kite"
-                description="A quadrilateral with two pairs of adjacent sides equal."
-                icon={<Image src="/images/castle1/chapter3/kite.png" alt="Kite" width={180} height={120} />}
-                highlighted={messageIndex >= 3}
-                styleModule={lessonStyles}
-              />
-              
-              {/* Pentagon to Octagon */}
-              <ConceptCard
-                title="Pentagon"
-                description="A polygon with five sides and five angles."
-                icon={<Image src="/images/castle1/chapter3/pentagon.png" alt="Pentagon" width={180} height={120} />}
-                highlighted={messageIndex >= 4}
-                styleModule={lessonStyles}
-              />
-              <ConceptCard
-                title="Hexagon"
-                description="A polygon with six sides and six angles."
-                icon={<Image src="/images/castle1/chapter3/hexagon.png" alt="Hexagon" width={180} height={120} />}
-                highlighted={messageIndex >= 4}
-                styleModule={lessonStyles}
-              />
-              <ConceptCard
-                title="Heptagon"
-                description="A polygon with seven sides and seven angles."
-                icon={<Image src="/images/castle1/chapter3/heptagon.png" alt="Heptagon" width={180} height={120} />}
-                highlighted={messageIndex >= 4}
-                styleModule={lessonStyles}
-              />
-              <ConceptCard
-                title="Octagon"
-                description="A polygon with eight sides and eight angles."
-                icon={<Image src="/images/castle1/chapter3/octagon.png" alt="Octagon" width={180} height={120} />}
-                highlighted={messageIndex >= 4}
-                styleModule={lessonStyles}
-              />
-              
-              {/* Nonagon to Dodecagon */}
-              <ConceptCard
-                title="Nonagon"
-                description="A polygon with nine sides and nine angles."
-                icon={<Image src="/images/castle1/chapter3/nonagon.png" alt="Nonagon" width={180} height={120} />}
-                highlighted={messageIndex >= 5}
-                styleModule={lessonStyles}
-              />
-              <ConceptCard
-                title="Decagon"
-                description="A polygon with ten sides and ten angles."
-                icon={<Image src="/images/castle1/chapter3/decagon.png" alt="Decagon" width={180} height={120} />}
-                highlighted={messageIndex >= 5}
-                styleModule={lessonStyles}
-              />
-              <ConceptCard
-                title="Hendecagon"
-                description="A polygon with eleven sides and eleven angles."
-                icon={<Image src="/images/castle1/chapter3/hendecagon.png" alt="Hendecagon" width={180} height={120} />}
-                highlighted={messageIndex >= 5}
-                styleModule={lessonStyles}
-              />
-              <ConceptCard
-                title="Dodecagon"
-                description="A polygon with twelve sides and twelve angles."
-                icon={<Image src="/images/castle1/chapter3/dodecagon.png" alt="Dodecagon" width={180} height={120} />}
-                highlighted={messageIndex >= 5}
-                styleModule={lessonStyles}
-              />
+            <LessonGrid columns={2} gap="medium" styleModule={lessonStyles}>
+              {CHAPTER3_CONCEPTS.map((concept, index) => {
+                // Find the dialogue index for this concept to determine if it should be highlighted
+                const dialogueIndex = CHAPTER3_LESSON_DIALOGUE.findIndex(d => d.key === concept.key);
+                const isHighlighted = dialogueIndex !== -1 && messageIndex >= dialogueIndex;
+                
+                return (
+                  <ConceptCard
+                    key={`${concept.key}-${index}`}
+                    title={concept.title}
+                    description={concept.description}
+                    icon={<Image src={concept.image} alt={concept.title} width={180} height={120} />}
+                    highlighted={isHighlighted}
+                    styleModule={lessonStyles}
+                  />
+                );
+              })}
             </LessonGrid>
           )}
 
@@ -754,6 +725,7 @@ export default function Chapter3Page() {
               quizScore={quizScore}
               canRetakeQuiz={true}
               onRetakeQuiz={handleRetakeQuiz}
+              onRetakeLesson={handleRetakeLesson}
               onComplete={handleExit}
               styleModule={baseStyles}
             />

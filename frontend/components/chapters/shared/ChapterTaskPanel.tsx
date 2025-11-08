@@ -3,7 +3,8 @@
 import React, { useRef, useEffect } from 'react'
 
 export interface TaskItem {
-  key: string
+  id?: string
+  key?: string
   label: string
 }
 
@@ -11,6 +12,12 @@ export interface ChapterTaskPanelProps {
   tasks: TaskItem[]
   completedTasks: Record<string, boolean>
   failedTasks?: Record<string, boolean>
+  earnedXP?: {
+    lesson: number
+    minigame: number
+    quiz: number
+  }
+  totalXP?: number
   styleModule: any
 }
 
@@ -18,6 +25,8 @@ export default function ChapterTaskPanel({
   tasks,
   completedTasks,
   failedTasks = {},
+  earnedXP,
+  totalXP,
   styleModule: styles
 }: ChapterTaskPanelProps) {
   const taskListRef = useRef<HTMLDivElement | null>(null)
@@ -28,7 +37,8 @@ export default function ChapterTaskPanel({
       let lastCompletedIndex = -1
       
       for (let i = 0; i < tasks.length; i++) {
-        if (completedTasks[tasks[i].key]) {
+        const taskKey = tasks[i].id || tasks[i].key || ''
+        if (completedTasks[taskKey]) {
           lastCompletedIndex = i
         } else {
           // Stop at the first incomplete task
@@ -61,23 +71,27 @@ export default function ChapterTaskPanel({
           {completedCount} / {tasks.length} Complete
         </div>
       </div>
+      
       <div className={styles.taskList} ref={taskListRef}>
-        {tasks.map(task => (
-          <div 
-            key={task.key} 
-            className={`${styles.taskItem} ${
-              completedTasks[task.key] ? styles.taskCompleted : ''
-            } ${
-              failedTasks[task.key] ? styles.taskFailed : ''
-            }`}
-          >
-            <div className={styles.taskCheckbox}>
-              {completedTasks[task.key] && <span>✓</span>}
-              {failedTasks[task.key] && <span>✗</span>}
+        {tasks.map((task, index) => {
+          const taskKey = task.id || task.key || `task-${index}`
+          return (
+            <div 
+              key={taskKey}
+              className={`${styles.taskItem} ${
+                completedTasks[taskKey] ? styles.taskCompleted : ''
+              } ${
+                failedTasks[taskKey] ? styles.taskFailed : ''
+              }`}
+            >
+              <div className={styles.taskCheckbox}>
+                {completedTasks[taskKey] && <span>✓</span>}
+                {failedTasks[taskKey] && <span>✗</span>}
+              </div>
+              <span className={styles.taskLabel}>{task.label}</span>
             </div>
-            <span className={styles.taskLabel}>{task.label}</span>
-          </div>
-        ))}
+          )
+        })}
       </div>
     </div>
   )

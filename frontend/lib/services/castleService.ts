@@ -1,16 +1,22 @@
 import { supabase } from '@/lib/supabaseClient';
-import {
-  Castle,
-  CastleProgress,
-  CastleWithProgress,
-  Chapter,
-  ChapterProgress,
-  ChapterWithProgress,
-  Minigame,
-  MinigameAttempt,
-  ChapterQuiz,
-  QuizAttempt,
-} from '@/types/castle.types';
+import type { Castle, CastleWithProgress } from '@/types/common/castle';
+import type { Chapter, ChapterWithProgress } from '@/types/common/chapter';
+import type { Minigame, MinigameAttempt, ChapterQuiz, QuizAttempt } from '@/types/common/quiz';
+
+// Type aliases for compatibility
+type CastleProgress = {
+  unlocked: boolean;
+  completed: boolean;
+  total_xp_earned: number;
+  completion_percentage: number;
+};
+
+type ChapterProgress = {
+  unlocked: boolean;
+  completed: boolean;
+  xp_earned: number;
+  quiz_passed: boolean;
+};
 
 /**
  * Frontend Castle Service - Calls Backend API Routes

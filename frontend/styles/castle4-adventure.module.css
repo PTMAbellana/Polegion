@@ -1,6 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=UnifrakturMaguntia&family=Cinzel:wght@400;600&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap');
 
-/* Chapter Selection Page Styles */
+/* Chapter Selection Page Styles - Desert Theme */
+/* Theme Colors: #B77466 (terracotta), #FFE1AF (sand), #E2B59A (beige), #957C62 (brown) */
 .chapterSelectionContainer {
   height: 100vh; /* Fixed height instead of min-height */
   background-image: url('/images/castle4-background.png');
@@ -22,9 +23,9 @@
   bottom: 0;
   background: linear-gradient(
     135deg,
-    rgba(16, 35, 70, 0.3) 0%,
-    rgba(44, 24, 63, 0.4) 50%,
-    rgba(16, 35, 70, 0.3) 100%
+    rgba(183, 116, 102, 0.2) 0%,
+    rgba(149, 124, 98, 0.25) 50%,
+    rgba(183, 116, 102, 0.2) 100%
   );
   backdrop-filter: blur(1px);
 }
@@ -36,7 +37,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(16, 35, 70, 0.95);
+  background: rgba(149, 124, 98, 0.95);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -51,20 +52,20 @@
 
 .introContent {
   text-align: center;
-  color: #E8F4FD;
+  color: #FFE1AF;
 }
 
 .introTitle {
   font-size: 2.5rem; /* Reduced from 3rem */
   font-weight: bold;
   margin-bottom: 0.75rem; /* Reduced from 1rem */
-  text-shadow: 0 0 20px rgba(102, 187, 255, 0.8);
+  text-shadow: 0 0 20px rgba(226, 181, 154, 0.8);
   animation: glow 2s ease-in-out infinite alternate;
 }
 
 @keyframes glow {
-  from { text-shadow: 0 0 20px rgba(102, 187, 255, 0.5); }
-  to { text-shadow: 0 0 30px rgba(102, 187, 255, 1); }
+  from { text-shadow: 0 0 20px rgba(226, 181, 154, 0.5); }
+  to { text-shadow: 0 0 30px rgba(226, 181, 154, 1); }
 }
 
 .introText {
@@ -76,8 +77,8 @@
 .introSpinner {
   width: 35px; /* Reduced from 40px */
   height: 35px;
-  border: 3px solid rgba(102, 187, 255, 0.3);
-  border-top: 3px solid #66BBFF;
+  border: 3px solid rgba(226, 181, 154, 0.3);
+  border-top: 3px solid #E2B59A;
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin: 0 auto;
@@ -109,32 +110,32 @@
   height: clamp(70px, 8vw, 100px);
   width: auto;
   transition: all 0.3s ease;
-  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.5)) drop-shadow(0 0 10px rgba(205, 164, 94, 0.4));
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.5)) drop-shadow(0 0 10px rgba(183, 116, 102, 0.4));
 }
 
 .backButtonText {
-  color: #E8F4FD;
+  color: #FFE1AF;
   font-size: clamp(0.8rem, 1vw, 0.9rem);
   font-weight: 600;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6), 0 0 8px rgba(205, 164, 94, 0.3);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6), 0 0 8px rgba(183, 116, 102, 0.3);
   opacity: 0.9;
   transition: all 0.3s ease;
 }
 
 .backButton:hover .backButtonImage {
   transform: scale(1.1);
-  filter: drop-shadow(0 6px 12px rgba(205, 164, 94, 0.8));
+  filter: drop-shadow(0 6px 12px rgba(183, 116, 102, 0.8));
 }
 
 .backButton:hover .backButtonText {
   opacity: 1;
-  text-shadow: 0 2px 8px rgba(205, 164, 94, 0.8);
+  text-shadow: 0 2px 8px rgba(183, 116, 102, 0.8);
 }
 
-/* Title Panel - Positioned at top - COMPACT */
+/* Title Panel - Positioned at top - COMPACT - Desert Theme */
 .titlePanel {
-  background: rgba(16, 35, 70, 0.8);
-  border: 2px solid #66BBFF;
+  background: rgba(149, 124, 98, 0.8);
+  border: 2px solid #E2B59A;
   border-radius: 12px; /* Reduced from 15px */
   padding: 1rem 1.5rem; /* Reduced from 1.5rem */
   text-align: center;
@@ -150,13 +151,13 @@
 .castleTitle h1 {
   font-family: 'UnifrakturMaguntia', serif;
   font-size: 1.8rem; /* Reduced from 2.2rem */
-  color: #66BBFF;
+  color: #E2B59A;
   margin-bottom: 0.15rem; /* Reduced from 0.25rem */
-  text-shadow: 0 0 10px rgba(102, 187, 255, 0.5);
+  text-shadow: 0 0 10px rgba(226, 181, 154, 0.5);
 }
 
 .castleSubtitle {
-  color: #B8D4F0;
+  color: #FFE1AF;
   font-size: 0.9rem; /* Reduced from 1rem */
   margin-bottom: 0;
   margin-top: 0;
@@ -177,13 +178,13 @@
 }
 
 .progressLabel {
-  color: #E8F4FD;
+  color: #FFE1AF;
   font-weight: 600;
   font-size: 0.8rem; /* Reduced from 0.9rem */
 }
 
 .progressValue {
-  color: #66BBFF;
+  color: #E2B59A;
   font-weight: bold;
   font-size: 0.8rem; /* Reduced from 0.9rem */
 }
@@ -198,10 +199,10 @@
 
 .progressFill {
   height: 100%;
-  background: linear-gradient(90deg, #66BBFF, #4FC3F7);
+  background: linear-gradient(90deg, #E2B59A, #B77466);
   border-radius: 3px;
   transition: width 0.5s ease;
-  box-shadow: 0 0 8px rgba(102, 187, 255, 0.5);
+  box-shadow: 0 0 8px rgba(226, 181, 154, 0.5);
 }
 
 /* Main Content - Horizontal Layout - COMPACT */
@@ -242,10 +243,10 @@
   50% { transform: translateY(-12px); } /* Reduced from -15px */
 }
 
-/* Chapter Panel - Compact Left Side - OPTIMIZED */
+/* Chapter Panel - Compact Left Side - OPTIMIZED - Desert Theme */
 .chapterPanel {
-  background: rgba(16, 35, 70, 0.8);
-  border: 2px solid #66BBFF;
+  background: rgba(149, 124, 98, 0.8);
+  border: 2px solid #E2B59A;
   border-radius: 12px;
   padding: 1.2rem;
   backdrop-filter: blur(10px);
@@ -259,15 +260,15 @@
   display: flex;
   align-items: center;
   gap: 0.4rem; /* Reduced from 0.5rem */
-  color: #66BBFF;
+  color: #E2B59A;
   font-size: 1rem; /* Reduced from 1.1rem */
   font-weight: bold;
   margin-bottom: 0.75rem; /* Reduced from 1rem */
-  text-shadow: 0 0 5px rgba(102, 187, 255, 0.5);
+  text-shadow: 0 0 5px rgba(226, 181, 154, 0.5);
 }
 
 .chapterIcon {
-  color: #66BBFF;
+  color: #E2B59A;
   width: 18px; /* Reduced from 20px */
   height: 18px;
 }
@@ -279,10 +280,10 @@
   margin-bottom: 1rem; /* Reduced from 1.5rem */
 }
 
-/* Chapter Item - More Compact */
+/* Chapter Item - More Compact - Desert Theme */
 .chapterItem {
-  background: rgba(44, 24, 63, 0.4);
-  border: 2px solid rgba(102, 187, 255, 0.3);
+  background: rgba(183, 116, 102, 0.4);
+  border: 2px solid rgba(226, 181, 154, 0.3);
   border-radius: 12px;
   padding: 0.8rem;
   cursor: pointer;
@@ -295,17 +296,17 @@
 }
 
 .chapterItem:hover:not(.locked) {
-  background: rgba(102, 187, 255, 0.1);
-  border-left-color: #66BBFF;
+  background: rgba(226, 181, 154, 0.1);
+  border-left-color: #E2B59A;
   border-left-width: 4px;
   transform: translateX(4px); /* Reduced from 5px */
 }
 
 .chapterItem.selected {
-  background: rgba(102, 187, 255, 0.15);
-  border-left-color: #66BBFF;
+  background: rgba(226, 181, 154, 0.15);
+  border-left-color: #E2B59A;
   border-left-width: 4px;
-  box-shadow: 0 0 12px rgba(102, 187, 255, 0.3); /* Reduced shadow */
+  box-shadow: 0 0 12px rgba(226, 181, 154, 0.3); /* Reduced shadow */
 }
 
 .chapterItem.locked {
@@ -329,7 +330,7 @@
   justify-content: center;
   width: 30px; /* Reduced from 35px */
   height: 30px;
-  background: rgba(102, 187, 255, 0.2);
+  background: rgba(226, 181, 154, 0.2);
   border-radius: 50%;
   flex-shrink: 0;
 }
@@ -361,7 +362,7 @@
 }
 
 .chapterTitle {
-  color: #E8F4FD;
+  color: #FFE1AF;
   font-size: clamp(0.85rem, 1.1vw, 0.95rem);
   margin: 0;
   font-weight: 600;
@@ -370,7 +371,7 @@
 }
 
 .chapterObjective {
-  color: #66BBFF;
+  color: #E2B59A;
   font-size: clamp(0.75rem, 0.95vw, 0.85rem);
   margin: 0;
   opacity: 0.9;
@@ -387,8 +388,8 @@
   display: flex;
   align-items: center;
   gap: 0.4rem; /* Reduced from 0.5rem */
-  background: linear-gradient(135deg, #66BBFF, #4FC3F7);
-  color: white;
+  background: linear-gradient(135deg, #E2B59A, #B77466);
+  color: #FFE1AF;
   border: none;
   padding: 0.6rem 1.2rem; /* Reduced from 0.75rem 1.5rem */
   border-radius: 18px; /* Reduced from 20px */
@@ -396,12 +397,12 @@
   font-weight: bold;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 3px 10px rgba(102, 187, 255, 0.3); /* Reduced shadow */
+  box-shadow: 0 3px 10px rgba(226, 181, 154, 0.3); /* Reduced shadow */
 }
 
 .startButton:hover:not(.disabled) {
-  background: linear-gradient(135deg, #4FC3F7, #29B6F6);
-  box-shadow: 0 5px 18px rgba(102, 187, 255, 0.4); /* Reduced shadow */
+  background: linear-gradient(135deg, #B77466, #957C62);
+  box-shadow: 0 5px 18px rgba(226, 181, 154, 0.4); /* Reduced shadow */
   transform: translateY(-1px); /* Reduced from -2px */
 }
 
@@ -411,7 +412,7 @@
   opacity: 0.6;
 }
 
-/* Particles Effect - REDUCED */
+/* Particles Effect - REDUCED - Desert Theme */
 .particlesContainer {
   position: fixed;
   top: 0;
@@ -426,7 +427,7 @@
   position: absolute;
   width: 2px; /* Reduced from 3px */
   height: 2px;
-  background: rgba(102, 187, 255, 0.5); /* Reduced opacity */
+  background: rgba(226, 181, 154, 0.5); /* Reduced opacity */
   border-radius: 50%;
   animation: float linear infinite;
   opacity: 0.3; /* Reduced from 0.4 */
@@ -475,13 +476,13 @@
 }
 
 .rewardBadge svg {
-  color: #FFD700;
+  color: #E2B59A;
   width: 16px;
   height: 16px;
 }
 
 .chapterArrow {
-  color: #66BBFF;
+  color: #E2B59A;
   width: 20px;
   height: 20px;
   transition: transform 0.3s ease;

@@ -1,8 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=UnifrakturMaguntia&family=Cinzel:wght@400;600&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap');
 
-/* Import responsive styles for all device types and orientations */
-@import './castle1-responsive.module.css';
-
 /* Chapter Selection Page Styles */
 .chapterSelectionContainer {
   height: 100vh;

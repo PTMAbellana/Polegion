@@ -150,6 +150,7 @@ class CastleRepo extends BaseRepo {
                         castle_id: castleProgress.castle_id,
                         unlocked: castleProgress.unlocked,
                         completed: castleProgress.completed,
+                        // Map total_xp_earned from database
                         total_xp_earned: castleProgress.total_xp_earned,
                         completion_percentage: castleProgress.completion_percentage,
                         started_at: castleProgress.started_at,
@@ -196,6 +197,7 @@ class CastleRepo extends BaseRepo {
                     castle_id: progress.castle_id,
                     unlocked: progress.unlocked,
                     completed: progress.completed,
+                    // Map total_xp_earned from database
                     total_xp_earned: progress.total_xp_earned,
                     completion_percentage: progress.completion_percentage,
                     started_at: progress.started_at,

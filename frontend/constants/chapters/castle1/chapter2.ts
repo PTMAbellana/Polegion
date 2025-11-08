@@ -11,13 +11,14 @@ export const CHAPTER2_OPENING_DIALOGUE = [
 ];
 
 export const CHAPTER2_LESSON_DIALOGUE = [
-  "When two lines travel side by side, never touching, they share parallel harmony!",
-  "Parallel lines, forever apart, yet always equal in distance. A lesson in quiet companionship!",
-  "Some lines meet and then diverge. These are intersecting lines.",
-  "When two paths meet like travelers at a crossroads, they intersect. No balance, no order, only direction and destiny!",
-  "Ah! The rarest bond of all, perpendicular lines! When they meet at 90°, their energy forms perfect symmetry.",
-  "Your eyes are sharp! Skew lines dwell in different planes, never crossing nor aligning. Like stars that shine apart in the vast sky.",
-  "Now let us test your understanding!",
+  { key: 'plane', text: "Before we explore lines, let us understand the canvas they rest upon: the PLANE! A plane is a flat surface that extends infinitely, like an endless sheet of paper.", taskId: 'task-0' },
+  { key: 'parallel', text: "When two lines travel side by side on a plane, never touching, they share parallel harmony!", taskId: 'task-1' },
+  { key: 'parallel-detail', text: "Parallel lines, forever apart, yet always equal in distance. A lesson in quiet companionship!" },
+  { key: 'intersecting', text: "Some lines meet and then diverge. These are intersecting lines.", taskId: 'task-2' },
+  { key: 'intersecting-detail', text: "When two paths meet like travelers at a crossroads, they intersect. No balance, no order, only direction and destiny!" },
+  { key: 'perpendicular', text: "Ah! The rarest bond of all, perpendicular lines! When they meet at 90°, their energy forms perfect symmetry.", taskId: 'task-3' },
+  { key: 'skew', text: "Your eyes are sharp! Skew lines dwell in different planes, never crossing nor aligning. Like stars that shine apart in the vast sky.", taskId: 'task-4' },
+  { key: 'practice', text: "Now let us test your understanding!" },
 ];
 
 export const CHAPTER2_MINIGAME_DIALOGUE = [
@@ -34,10 +35,13 @@ export const CHAPTER2_MINIGAME_LEVELS: MinigameQuestion[] = [
     hint: 'Parallel lines never meet and maintain equal distance. Look for TWO lines that run in the same direction!',
     correctAnswer: 'line-a,line-b',
     lines: [
-      { id: 'line-a', x1: 20, y1: 80, x2: 780, y2: 80, label: 'A' },
-      { id: 'line-b', x1: 20, y1: 150, x2: 780, y2: 150, label: 'B' },
-      { id: 'line-c', x1: 170, y1: 270, x2: 470, y2: 340, label: 'C' },
-      { id: 'line-d', x1: 200, y1: 370, x2: 500, y2: 300, label: 'D' },
+      // Two horizontal parallel lines (A and B)
+      { id: 'line-a', x1: 50, y1: 100, x2: 750, y2: 100, label: 'A' },
+      { id: 'line-b', x1: 50, y1: 200, x2: 750, y2: 200, label: 'B' },
+      // One diagonal line (C) - clearly NOT parallel
+      { id: 'line-c', x1: 100, y1: 280, x2: 700, y2: 360, label: 'C' },
+      // One vertical line (D) - clearly NOT parallel to A or B
+      { id: 'line-d', x1: 400, y1: 250, x2: 400, y2: 380, label: 'D' },
     ],
   },
   {
@@ -46,12 +50,12 @@ export const CHAPTER2_MINIGAME_LEVELS: MinigameQuestion[] = [
     hint: 'Look for the line that crosses through both of the parallel lines.',
     correctAnswer: 'line-c',
     lines: [
-      // First parallel horizontal line
-      { id: 'line-a', x1: 50, y1: 120, x2: 750, y2: 120, label: 'A' },
-      // Second parallel horizontal line
-      { id: 'line-b', x1: 50, y1: 280, x2: 750, y2: 280, label: 'B' },
+      // First parallel horizontal line at top
+      { id: 'line-a', x1: 50, y1: 100, x2: 750, y2: 100, label: 'A' },
+      // Second parallel horizontal line at bottom
+      { id: 'line-b', x1: 50, y1: 300, x2: 750, y2: 300, label: 'B' },
       // Diagonal line that intersects both A and B
-      { id: 'line-c', x1: 100, y1: 50, x2: 700, y2: 350, label: 'C' },
+      { id: 'line-c', x1: 150, y1: 50, x2: 650, y2: 350, label: 'C' },
     ],
   },
   {
@@ -60,23 +64,66 @@ export const CHAPTER2_MINIGAME_LEVELS: MinigameQuestion[] = [
     hint: 'Perpendicular lines intersect at exactly 90 degrees, forming a perfect right angle. Look for a vertical and horizontal line!',
     correctAnswer: 'line-a,line-b',
     lines: [
-      { id: 'line-a', x1: 300, y1: 50, x2: 300, y2: 350, label: 'A' },
-      { id: 'line-b', x1: 100, y1: 200, x2: 500, y2: 200, label: 'B' },
-      { id: 'line-c', x1: 150, y1: 100, x2: 450, y2: 300, label: 'C' },
+      // Vertical line (A)
+      { id: 'line-a', x1: 400, y1: 50, x2: 400, y2: 350, label: 'A' },
+      // Horizontal line (B) - intersects A at 90°
+      { id: 'line-b', x1: 100, y1: 200, x2: 700, y2: 200, label: 'B' },
+      // Diagonal line (C) - NOT perpendicular
+      { id: 'line-c', x1: 150, y1: 100, x2: 650, y2: 300, label: 'C' },
     ],
+  },
+];
+
+// Concept cards for lesson scene
+export const CHAPTER2_CONCEPTS = [
+  {
+    key: 'plane',
+    title: 'Plane',
+    description: 'A plane is a flat surface that extends infinitely in all directions, like an endless sheet of paper. It has no thickness.',
+    image: '/images/geometry/plane.png',
+    taskId: 'task-0',
+  },
+  {
+    key: 'parallel',
+    title: 'Parallel Lines',
+    description: 'Parallel lines travel side by side on the same plane, never touching. They maintain equal distance forever.',
+    image: '/images/geometry/parallel-lines.png',
+    taskId: 'task-1',
+  },
+  {
+    key: 'intersecting',
+    title: 'Intersecting Lines',
+    description: 'Intersecting lines cross each other at a point. They meet and then diverge in different directions.',
+    image: '/images/geometry/intersecting-lines.png',
+    taskId: 'task-2',
+  },
+  {
+    key: 'perpendicular',
+    title: 'Perpendicular Lines',
+    description: 'Perpendicular lines intersect at exactly 90°, forming a perfect right angle. They create perfect symmetry.',
+    image: '/images/geometry/perpendicular-lines.png',
+    taskId: 'task-3',
+  },
+  {
+    key: 'skew',
+    title: 'Skew Lines',
+    description: 'Skew lines exist in different planes. They never cross and are not parallel. Like stars shining apart in the vast sky.',
+    image: '/images/geometry/skew-lines.png',
+    taskId: 'task-4',
   },
 ];
 
 // Learning objectives
 export const CHAPTER2_LEARNING_OBJECTIVES = [
-  { key: 'task-0', label: 'Learn: Parallel Lines' },
-  { key: 'task-1', label: 'Learn: Intersecting Lines' },
-  { key: 'task-2', label: 'Learn: Perpendicular Lines' },
-  { key: 'task-3', label: 'Learn: Skew Lines' },
-  { key: 'task-4', label: 'Minigame' },
-  { key: 'task-5', label: 'Pass Quiz 1' },
-  { key: 'task-6', label: 'Pass Quiz 2' },
-  { key: 'task-7', label: 'Pass Quiz 3' },
+  { id: 'task-0', key: 'plane', label: 'Learn: Plane', type: 'lesson' },
+  { id: 'task-1', key: 'parallel', label: 'Learn: Parallel Lines', type: 'lesson' },
+  { id: 'task-2', key: 'intersecting', label: 'Learn: Intersecting Lines', type: 'lesson' },
+  { id: 'task-3', key: 'perpendicular', label: 'Learn: Perpendicular Lines', type: 'lesson' },
+  { id: 'task-4', key: 'skew', label: 'Learn: Skew Lines', type: 'lesson' },
+  { id: 'task-5', key: 'minigame', label: 'Minigame', type: 'minigame' },
+  { id: 'task-6', key: 'quiz1', label: 'Pass Quiz 1', type: 'quiz' },
+  { id: 'task-7', key: 'quiz2', label: 'Pass Quiz 2', type: 'quiz' },
+  { id: 'task-8', key: 'quiz3', label: 'Pass Quiz 3', type: 'quiz' },
 ];
 
 // XP Values

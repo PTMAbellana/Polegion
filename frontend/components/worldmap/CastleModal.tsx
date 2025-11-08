@@ -1,10 +1,17 @@
 "use client"
 
-import React from 'react'
+import React, { useEffect } from 'react'
 import { CastleModalProps } from '@/types/props/castle'
 import styles from '@/styles/world-map.module.css'
 
 export default function CastleModal({ castle, onClose, onEnter }: CastleModalProps) {
+  // Debug logging to check data
+  useEffect(() => {
+    console.log('[CastleModal] Castle data:', castle);
+    console.log('[CastleModal] Castle progress:', castle.progress);
+    console.log('[CastleModal] Completion percentage:', castle.progress?.completion_percentage);
+  }, [castle]);
+
   return (
     <div className={styles.modal_overlay} onClick={onClose}>
       <div className={styles.modal_content} onClick={(e) => e.stopPropagation()}>
@@ -25,6 +32,9 @@ export default function CastleModal({ castle, onClose, onEnter }: CastleModalPro
           <p><strong>Difficulty:</strong> {castle.difficulty || 'Easy'}</p>
           <p><strong>Region:</strong> {castle.region || 'Unknown'}</p>
           <p><strong>Total XP:</strong> {castle.total_xp || 0}</p>
+          {castle.progress && (
+            <p><strong>XP Earned:</strong> {castle.progress.total_xp_earned || 0} / {castle.total_xp || 0}</p>
+          )}
         </div>
 
         {castle.progress?.unlocked && (
@@ -52,7 +62,7 @@ export default function CastleModal({ castle, onClose, onEnter }: CastleModalPro
 
         {!castle.progress?.unlocked && (
           <p className={styles.locked_message}>
-            🔒 Complete previous castles to unlock
+            Complete previous castles to unlock
           </p>
         )}
       </div>

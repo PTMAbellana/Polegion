@@ -60,18 +60,8 @@ export default function CastlePage() {
     }
   }, [authLoading, userProfile?.id])
 
-  // Reload castle data when navigating back (to show newly unlocked chapters)
-  useEffect(() => {
-    const handleFocus = () => {
-      if (userProfile?.id && !loading) {
-        console.log('[CastlePage] Page focused, reloading castle data')
-        initializeCastle()
-      }
-    }
-    
-    window.addEventListener('focus', handleFocus)
-    return () => window.removeEventListener('focus', handleFocus)
-  }, [userProfile?.id, loading])
+  // Note: Removed auto-reload on focus to prevent unnecessary page reloads
+  // Data will be fresh on navigation since component remounts
 
   const initializeCastle = async () => {
     try {
@@ -97,8 +87,11 @@ export default function CastlePage() {
       setCastleData(castle)
       setCastleProgress(progress)
       setChapters(chapterData || [])
+      
+      // Select first available chapter (unlocked but not completed)
       const firstAvailable = chapterData?.find((c) => c.progress?.unlocked && !c.progress?.completed) || chapterData?.[0]
       if (firstAvailable) setSelectedChapter(firstAvailable.chapter_number)
+      
     } catch (error: any) {
       console.error('[CastlePage] Error:', error)
       console.error('[CastlePage] Error details:', error.response?.data || error.message)

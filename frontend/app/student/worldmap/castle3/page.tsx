@@ -1,188 +1,173 @@
-"use client";
-import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { useAuthStore } from '@/store/authStore';
-import {
-  CastleIntro,
-  CastleHeader,
-  ChapterList,
-  WizardCharacter,
-  ParticleEffect,
-  type Chapter
-} from '@/components/world/CastleAdventure';
-import { WorldMapButton } from '@/components/world/shared';
-import styles from '@/styles/castle3-adventure.module.css';
+"use client"
 
-const CircleSanctuaryChapterSelection = () => {
-  const router = useRouter();
-  const { userProfile } = useAuthStore();
-  const [selectedChapter, setSelectedChapter] = useState(1);
-  const [completedChapters, setCompletedChapters] = useState<number[]>([]);
-  const [showIntro, setShowIntro] = useState(false);
+import React, { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+import { useAuthStore } from '@/store/authStore'
+import { AuthProtection } from '@/context/AuthProtection'
+import Loader from '@/components/Loader'
+import CastleIntro from '@/components/world/CastleIntro'
+import CastleHeader from '@/components/world/CastleHeader'
+import ChapterList from '@/components/world/ChapterList'
+import CastleCard from '@/components/world/CastleCard'
+import CastleActionButton from '@/components/world/CastleActionButton'
+import ParticleEffect from '@/components/world/ParticleEffect'
+import styles from '@/styles/castle3-adventure.module.css'
+import { initializeCastleProgress } from '@/api/castles'
+import type { 
+  ChapterWithProgress, 
+  CastleInitializeResponse,
+  CastleData,
+  CastleProgress
+} from '@/types/common'
 
-  // Chapter data for Circle Sanctuary
-  const chapters: Chapter[] = [
-    {
-      id: 1,
-      title: "The Tide of Shapes",
-      objective: "Identify the parts of a circle — center, radius, diameter, chord, arc, and sector",
-      reward: "Pearl of the Center",
-      locked: false,
-      completed: false,
-      emoji: "🌊"
-    },
-    {
-      id: 2,
-      title: "The Path of the Perimeter",
-      objective: "Understand and compute circumference of a circle using C = 2πr or C = πd",
-      reward: "Shell of Motion",
-      locked: false,
-      completed: false,
-      emoji: "🐚"
-    },
-    {
-      id: 3,
-      title: "The Chamber of Space",
-      objective: "Calculate the area of a circle and recognize semi-circles and sectors",
-      reward: "Orb of Infinity",
-      locked: false,
-      completed: false,
-      emoji: "⭐"
-    }
-  ];
+const CASTLE_ROUTE = 'castle3'
 
-  const [chaptersState, setChaptersState] = useState(chapters);
+export default function CastlePage() {
+  const router = useRouter()
+  const { userProfile } = useAuthStore()
+  const { isLoading: authLoading } = AuthProtection()
 
-  // Check completion status and unlock logic
+  const [loading, setLoading] = useState(true)
+  const [selectedChapter, setSelectedChapter] = useState<number | null>(null)
+  const [hoveredChapter, setHoveredChapter] = useState<string | null>(null)
+  const [showIntro, setShowIntro] = useState(false)
+  const [castleData, setCastleData] = useState<CastleData | null>(null)
+  const [castleProgress, setCastleProgress] = useState<CastleProgress | null>(null)
+  const [chapters, setChapters] = useState<ChapterWithProgress[]>([])
+  const [error, setError] = useState<string | null>(null)
+
+  // Check if user has seen castle intro - user-specific key
   useEffect(() => {
-    // Load progress from localStorage
-    const chapter1Complete = localStorage.getItem('castle3-chapter1-completed') === 'true';
-    const chapter2Complete = localStorage.getItem('castle3-chapter2-completed') === 'true';
-    const chapter3Complete = localStorage.getItem('castle3-chapter3-completed') === 'true';
-
-    const completed: number[] = [];
-    if (chapter1Complete) completed.push(1);
-    if (chapter2Complete) completed.push(2);
-    if (chapter3Complete) completed.push(3);
-
-    setCompletedChapters(completed);
-
-    // Update chapters state with completion and unlock status
-    setChaptersState(prevChapters => 
-      prevChapters.map(chapter => {
-        let locked = chapter.locked;
-        const isCompleted = completed.includes(chapter.id);
-
-        // Chapter 2 unlocks when Chapter 1 is complete
-        if (chapter.id === 2) {
-          locked = !chapter1Complete;
-        }
-        
-        // Chapter 3 unlocks when Chapter 2 is complete
-        if (chapter.id === 3) {
-          locked = !chapter2Complete;
-        }
-
-        return {
-          ...chapter,
-          locked,
-          completed: isCompleted
-        };
-      })
-    );
-  }, []);
-
-  // Handle chapter selection
-  const handleChapterSelect = (chapterId: number) => {
-    const chapter = chaptersState.find(c => c.id === chapterId);
-    if (chapter && !chapter.locked) {
-      setSelectedChapter(chapterId);
-    }
-  };
-
-  // Handle chapter start
-  const handleStartChapter = () => {
-    const chapter = chaptersState.find(c => c.id === selectedChapter);
-    if (chapter && !chapter.locked) {
-      router.push(`/student/worldmap/castle3/chapter${selectedChapter}`);
-    }
-  };
-
-  // Handle back to world map
-  const handleBackToWorldMap = () => {
-    router.push('/student/worldmap');
-  };
-
-  useEffect(() => {
-    // Check if user has seen castle intro - user-specific key
     if (userProfile?.id) {
-      const introKey = `hasSeenCastle3Intro_${userProfile.id}`;
-      const hasSeenIntro = localStorage.getItem(introKey);
+      const introKey = `hasSeenCastle3Intro_${userProfile.id}`
+      const hasSeenIntro = localStorage.getItem(introKey)
       
       if (!hasSeenIntro) {
-        setShowIntro(true);
-        // Auto-dismiss intro after 3 seconds and mark as seen
+        setShowIntro(true)
+        // Hide intro after 3 seconds and mark as seen
         const timer = setTimeout(() => {
-          setShowIntro(false);
-          localStorage.setItem(introKey, 'true');
-        }, 3000);
-
-        return () => clearTimeout(timer);
+          setShowIntro(false)
+          localStorage.setItem(introKey, 'true')
+        }, 3000)
+        return () => clearTimeout(timer)
       }
     }
-  }, [userProfile?.id]);
+  }, [userProfile?.id])
+
+  useEffect(() => {
+    if (!authLoading && userProfile?.id) {
+      initializeCastle()
+    }
+  }, [authLoading, userProfile?.id])
+
+  // Note: Removed auto-reload on focus to prevent unnecessary page reloads
+  // Data will be fresh on navigation since component remounts
+
+  const initializeCastle = async () => {
+    try {
+      setLoading(true)
+      setError(null)
+      const userId = userProfile?.id
+      if (!userId) throw new Error('User not authenticated')
+      
+      console.log('[CastlePage] Calling initializeCastleProgress with:', { userId, CASTLE_ROUTE })
+      const response = await initializeCastleProgress(userId, CASTLE_ROUTE) as CastleInitializeResponse
+      console.log('[CastlePage] Initialize response:', response)
+      
+      if (!response.success || !response.data) {
+        throw new Error(response.error || 'Failed to initialize castle')
+      }
+      
+      const { castle, castleProgress: progress, chapters: chapterData } = response.data
+      
+      if (!castle || !progress) {
+        throw new Error('Invalid response: missing castle or progress data')
+      }
+      
+      setCastleData(castle)
+      setCastleProgress(progress)
+      setChapters(chapterData || [])
+      
+      // Select first available chapter (unlocked but not completed)
+      const firstAvailable = chapterData?.find((c) => c.progress?.unlocked && !c.progress?.completed) || chapterData?.[0]
+      if (firstAvailable) setSelectedChapter(firstAvailable.chapter_number)
+      
+    } catch (error: any) {
+      console.error('[CastlePage] Error:', error)
+      console.error('[CastlePage] Error details:', error.response?.data || error.message)
+      setError(error.response?.data?.error || error.message || 'Failed to load castle data')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleChapterSelect = (chapterNumber: number) => {
+    const chapter = chapters.find(c => c.chapter_number === chapterNumber)
+    if (chapter?.progress?.unlocked) setSelectedChapter(chapterNumber)
+  }
+
+  const handleStartChapter = () => {
+    const chapter = chapters.find(c => c.chapter_number === selectedChapter)
+    if (chapter?.progress?.unlocked && castleData) {
+      router.push(`/student/worldmap/${CASTLE_ROUTE}/chapter${chapter.chapter_number}`)
+    }
+  }
+
+  const getChapterButtonText = () => {
+    if (!selectedChapterData) return 'Select a Chapter'
+    if (!selectedChapterData.progress?.unlocked) return 'Locked'
+    if (selectedChapterData.progress?.completed) return 'Replay Chapter'
+    return 'Start Chapter'
+  }
+
+  const handleBackToWorldMap = () => router.push('/student/worldmap')
+
+  if (authLoading || loading) {
+    return (
+      <div className={styles.loading_container}>
+        <Loader />
+        <p>Loading {castleData?.name || 'Castle'}...</p>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className={styles.error_container}>
+        <h2>Error Loading Castle</h2>
+        <p>{error}</p>
+        <button onClick={handleBackToWorldMap} className={styles.errorButton}>Return to World Map</button>
+      </div>
+    )
+  }
+
+  if (!userProfile || !castleData) {
+    return (
+      <div className={styles.error_container}>
+        <h2>Access Denied</h2>
+        <p>Please log in to access this castle.</p>
+        <button onClick={() => router.push('/auth/login')} className={styles.errorButton}>Go to Login</button>
+      </div>
+    )
+  }
+
+  const completedChaptersCount = chapters.filter(c => c.progress?.completed).length
+  const overallProgress = chapters.length > 0 ? Math.round((completedChaptersCount / chapters.length) * 100) : 0
+  const totalXpEarned = chapters.reduce((sum, c) => sum + (c.progress?.xp_earned || 0), 0)
+  const selectedChapterData = chapters.find(c => c.chapter_number === selectedChapter)
 
   return (
     <div className={styles.chapterSelectionContainer}>
-      {/* Background */}
       <div className={styles.backgroundOverlay}></div>
-      
-      {/* Introduction Overlay */}
-      <CastleIntro 
-        show={showIntro}
-        castleName="Circle Sanctuary"
-        subtitle="Where waves trace perfect arcs and circles rule the tides..."
-        styles={styles}
-      />
-
-      {/* Back to World Map Button */}
-      <WorldMapButton 
-        onClick={handleBackToWorldMap}
-        styles={styles}
-      />
-
-      {/* Castle Title - Positioned at top center */}
-      <CastleHeader
-        castleName="Circle Sanctuary"
-        location="Golden Shores"
-        completedChapters={completedChapters.length}
-        totalChapters={chapters.length}
-        styles={styles}
-      />
-
-      {/* Main Content - Left Panel and Right Wizard */}
+      <CastleIntro show={showIntro} castleName={castleData.name} description={castleData.description} styleModule={styles} />
+      <CastleHeader castleName={castleData.name} region={castleData.region} description={castleData.description} completedChapters={completedChaptersCount} totalChapters={chapters.length} overallProgress={overallProgress} onBack={handleBackToWorldMap} styleModule={styles} isLoading={loading} />
       <div className={styles.mainContent}>
-        {/* Chapter Selection Panel - Left Side */}
-        <ChapterList
-          chapters={chaptersState}
-          selectedChapter={selectedChapter}
-          onSelectChapter={handleChapterSelect}
-          onStartChapter={handleStartChapter}
-          styles={styles}
-        />
-
-        {/* Wizard Character - Right Side */}
-        <WizardCharacter 
-          imagePath="/images/wizard.png"
-          alt="Archimedes the Wise"
-          styles={styles}
-        />
+        <ChapterList chapters={chapters} selectedChapter={selectedChapter} hoveredChapter={hoveredChapter} onChapterSelect={handleChapterSelect} onHoverEnter={setHoveredChapter} onHoverLeave={() => setHoveredChapter(null)} styleModule={styles} />
+        <CastleCard castleName={castleData.name} description={castleData.description} imageNumber={castleData.image_number} totalXpEarned={totalXpEarned} chaptersRemaining={chapters.length - completedChaptersCount} styleModule={styles} />
       </div>
-
-      {/* Floating particles effect */}
-      <ParticleEffect count={15} styles={styles} />
+      <CastleActionButton selectedChapter={selectedChapter} isUnlocked={selectedChapterData?.progress?.unlocked || false} isCompleted={selectedChapterData?.progress?.completed || false} onStart={handleStartChapter} styleModule={styles} />
+      <ParticleEffect styleModule={styles} count={15} />
     </div>
-  );
-};
+  )
+}
 
-export default CircleSanctuaryChapterSelection;

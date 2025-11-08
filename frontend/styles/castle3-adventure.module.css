@@ -1,6 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=UnifrakturMaguntia&family=Cinzel:wght@400;600&display=swap');
 
-/* Chapter Selection Page Styles - Golden Shores Theme */
+/* Chapter Selection Page Styles - Seaside Theme */
+/* Theme Colors: #DDEB9D (light green), #A0C878 (medium green), #27667B (teal), #143D60 (dark blue) */
 .chapterSelectionContainer {
   height: 100vh;
   background-image: url('/images/castle3-background.png');
@@ -22,9 +23,9 @@
   bottom: 0;
   background: linear-gradient(
     135deg,
-    rgba(218, 165, 32, 0.2) 0%,
-    rgba(255, 215, 0, 0.25) 50%,
-    rgba(218, 165, 32, 0.2) 100%
+    rgba(39, 102, 123, 0.2) 0%,
+    rgba(20, 61, 96, 0.25) 50%,
+    rgba(39, 102, 123, 0.2) 100%
   );
   backdrop-filter: blur(1px);
 }
@@ -36,7 +37,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(184, 134, 11, 0.95);
+  background: rgba(20, 61, 96, 0.95);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -51,20 +52,20 @@
 
 .introContent {
   text-align: center;
-  color: #FFFACD;
+  color: #DDEB9D;
 }
 
 .introTitle {
   font-size: 2.5rem;
   font-weight: bold;
   margin-bottom: 0.75rem;
-  text-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+  text-shadow: 0 0 20px rgba(160, 200, 120, 0.8);
   animation: glow 2s ease-in-out infinite alternate;
 }
 
 @keyframes glow {
-  from { text-shadow: 0 0 20px rgba(255, 215, 0, 0.5); }
-  to { text-shadow: 0 0 30px rgba(255, 215, 0, 1); }
+  from { text-shadow: 0 0 20px rgba(160, 200, 120, 0.5); }
+  to { text-shadow: 0 0 30px rgba(160, 200, 120, 1); }
 }
 
 .introText {
@@ -76,8 +77,8 @@
 .introSpinner {
   width: 35px;
   height: 35px;
-  border: 3px solid rgba(255, 215, 0, 0.3);
-  border-top: 3px solid #FFD700;
+  border: 3px solid rgba(160, 200, 120, 0.3);
+  border-top: 3px solid #A0C878;
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin: 0 auto;
@@ -109,32 +110,32 @@
   height: clamp(70px, 8vw, 100px);
   width: auto;
   transition: all 0.3s ease;
-  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.5)) drop-shadow(0 0 10px rgba(218, 165, 32, 0.4));
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.5)) drop-shadow(0 0 10px rgba(39, 102, 123, 0.4));
 }
 
 .backButtonText {
-  color: #FFFACD;
+  color: #DDEB9D;
   font-size: clamp(0.8rem, 1vw, 0.9rem);
   font-weight: 600;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6), 0 0 8px rgba(218, 165, 32, 0.3);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6), 0 0 8px rgba(39, 102, 123, 0.3);
   opacity: 0.9;
   transition: all 0.3s ease;
 }
 
 .backButton:hover .backButtonImage {
   transform: scale(1.1);
-  filter: drop-shadow(0 6px 12px rgba(218, 165, 32, 0.8));
+  filter: drop-shadow(0 6px 12px rgba(39, 102, 123, 0.8));
 }
 
 .backButton:hover .backButtonText {
   opacity: 1;
-  text-shadow: 0 2px 8px rgba(218, 165, 32, 0.8);
+  text-shadow: 0 2px 8px rgba(39, 102, 123, 0.8);
 }
 
-/* Title Panel - Golden Theme */
+/* Title Panel - Seaside Theme */
 .titlePanel {
-  background: rgba(139, 69, 19, 0.8);
-  border: 2px solid #FFD700;
+  background: rgba(20, 61, 96, 0.8);
+  border: 2px solid #A0C878;
   border-radius: 12px;
   padding: 1rem 1.5rem;
   text-align: center;
@@ -150,13 +151,13 @@
 .castleTitle h1 {
   font-family: 'UnifrakturMaguntia', serif;
   font-size: 1.8rem;
-  color: #FFD700;
+  color: #A0C878;
   margin-bottom: 0.15rem;
-  text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+  text-shadow: 0 0 10px rgba(160, 200, 120, 0.5);
 }
 
 .castleSubtitle {
-  color: #F4E4C1;
+  color: #DDEB9D;
   font-size: 0.9rem;
   margin-bottom: 0;
   margin-top: 0;
@@ -177,13 +178,13 @@
 }
 
 .progressLabel {
-  color: #FFFACD;
+  color: #DDEB9D;
   font-weight: 600;
   font-size: 0.8rem;
 }
 
 .progressValue {
-  color: #FFD700;
+  color: #A0C878;
   font-weight: bold;
   font-size: 0.8rem;
 }
@@ -198,10 +199,10 @@
 
 .progressFill {
   height: 100%;
-  background: linear-gradient(90deg, #FFD700, #FFA500);
+  background: linear-gradient(90deg, #A0C878, #27667B);
   border-radius: 3px;
   transition: width 0.5s ease;
-  box-shadow: 0 0 8px rgba(255, 215, 0, 0.5);
+  box-shadow: 0 0 8px rgba(160, 200, 120, 0.5);
 }
 
 /* Main Content - Horizontal Layout */
@@ -242,10 +243,10 @@
   50% { transform: translateY(-12px); }
 }
 
-/* Chapter Panel - Golden Theme */
+/* Chapter Panel - Seaside Theme */
 .chapterPanel {
-  background: rgba(139, 69, 19, 0.8);
-  border: 2px solid #FFD700;
+  background: rgba(20, 61, 96, 0.8);
+  border: 2px solid #A0C878;
   border-radius: 12px;
   padding: 1.2rem;
   backdrop-filter: blur(10px);
@@ -259,15 +260,15 @@
   display: flex;
   align-items: center;
   gap: 0.4rem;
-  color: #FFD700;
+  color: #A0C878;
   font-size: 1rem;
   font-weight: bold;
   margin-bottom: 0.75rem;
-  text-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
+  text-shadow: 0 0 5px rgba(160, 200, 120, 0.5);
 }
 
 .chapterIcon {
-  color: #FFD700;
+  color: #A0C878;
   width: 18px;
   height: 18px;
 }
@@ -279,10 +280,10 @@
   margin-bottom: 1rem;
 }
 
-/* Chapter Item - Golden/Coastal Theme */
+/* Chapter Item - Seaside Theme */
 .chapterItem {
-  background: rgba(160, 82, 45, 0.4);
-  border: 2px solid rgba(255, 215, 0, 0.3);
+  background: rgba(39, 102, 123, 0.4);
+  border: 2px solid rgba(160, 200, 120, 0.3);
   border-radius: 12px;
   padding: 0.8rem;
   cursor: pointer;
@@ -295,17 +296,17 @@
 }
 
 .chapterItem:hover:not(.locked) {
-  background: rgba(255, 215, 0, 0.1);
-  border-left-color: #FFD700;
+  background: rgba(160, 200, 120, 0.1);
+  border-left-color: #A0C878;
   border-left-width: 4px;
   transform: translateX(4px);
 }
 
 .chapterItem.selected {
-  background: rgba(255, 215, 0, 0.15);
-  border-left-color: #FFD700;
+  background: rgba(160, 200, 120, 0.15);
+  border-left-color: #A0C878;
   border-left-width: 4px;
-  box-shadow: 0 0 12px rgba(255, 215, 0, 0.3);
+  box-shadow: 0 0 12px rgba(160, 200, 120, 0.3);
 }
 
 .chapterItem.locked {
@@ -329,7 +330,7 @@
   justify-content: center;
   width: 30px;
   height: 30px;
-  background: rgba(255, 215, 0, 0.2);
+  background: rgba(160, 200, 120, 0.2);
   border-radius: 50%;
   flex-shrink: 0;
 }
@@ -361,7 +362,7 @@
 }
 
 .chapterTitle {
-  color: #FFFACD;
+  color: #DDEB9D;
   font-size: clamp(0.85rem, 1.1vw, 0.95rem);
   margin: 0;
   font-weight: 600;
@@ -370,7 +371,7 @@
 }
 
 .chapterObjective {
-  color: #FFD700;
+  color: #A0C878;
   font-size: clamp(0.75rem, 0.95vw, 0.85rem);
   margin: 0;
   opacity: 0.9;
@@ -387,8 +388,8 @@
   display: flex;
   align-items: center;
   gap: 0.4rem;
-  background: linear-gradient(135deg, #FFD700, #FFA500);
-  color: #8B4513;
+  background: linear-gradient(135deg, #A0C878, #27667B);
+  color: #DDEB9D;
   border: none;
   padding: 0.6rem 1.2rem;
   border-radius: 18px;
@@ -396,12 +397,12 @@
   font-weight: bold;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 3px 10px rgba(255, 215, 0, 0.3);
+  box-shadow: 0 3px 10px rgba(160, 200, 120, 0.3);
 }
 
 .startButton:hover:not(.disabled) {
-  background: linear-gradient(135deg, #FFA500, #FF8C00);
-  box-shadow: 0 5px 18px rgba(255, 215, 0, 0.4);
+  background: linear-gradient(135deg, #27667B, #143D60);
+  box-shadow: 0 5px 18px rgba(160, 200, 120, 0.4);
   transform: translateY(-1px);
 }
 
@@ -412,7 +413,7 @@
   color: white;
 }
 
-/* Particles Effect - Golden particles */
+/* Particles Effect - Seaside particles */
 .particlesContainer {
   position: fixed;
   top: 0;
@@ -427,7 +428,7 @@
   position: absolute;
   width: 2px;
   height: 2px;
-  background: rgba(255, 215, 0, 0.5);
+  background: rgba(160, 200, 120, 0.5);
   border-radius: 50%;
   animation: float linear infinite;
   opacity: 0.3;
@@ -476,13 +477,13 @@
 }
 
 .rewardBadge svg {
-  color: #FFD700;
+  color: #A0C878;
   width: 16px;
   height: 16px;
 }
 
 .chapterArrow {
-  color: #FFD700;
+  color: #A0C878;
   width: 20px;
   height: 20px;
   transition: transform 0.3s ease;

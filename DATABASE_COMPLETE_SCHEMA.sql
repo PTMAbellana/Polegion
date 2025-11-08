@@ -260,6 +260,7 @@ RETURNS TRIGGER AS $$
 DECLARE
   total_chapters INTEGER;
   completed_chapters INTEGER;
+  total_xp INTEGER;
   castle_id_val UUID;
 BEGIN
   -- Get the castle_id from the chapter
@@ -280,6 +281,13 @@ BEGIN
     AND ucp.user_id = NEW.user_id
     AND ucp.completed = true;
 
+  -- Sum total XP earned from all chapters in this castle
+  SELECT COALESCE(SUM(ucp.xp_earned), 0) INTO total_xp
+  FROM user_chapter_progress ucp
+  JOIN chapters c ON ucp.chapter_id = c.id
+  WHERE c.castle_id = castle_id_val
+    AND ucp.user_id = NEW.user_id;
+
   -- Update castle progress
   UPDATE user_castle_progress
   SET 
@@ -288,6 +296,7 @@ BEGIN
       ELSE 0
     END,
     completed = (completed_chapters = total_chapters),
+    total_xp_earned = total_xp,
     updated_at = NOW()
   WHERE user_id = NEW.user_id
     AND castle_id = castle_id_val;

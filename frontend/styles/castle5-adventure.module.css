@@ -1,0 +1,513 @@
+@import url('https://fonts.googleapis.com/css2?family=UnifrakturMaguntia&family=Cinzel:wght@400;600&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap');
+
+/* 
+ * CASTLE 5: ARCANE OBSERVATORY
+ * Theme Colors: Celestial/Cosmic theme
+ * Primary: #0B1D51 (Deep Blue)
+ * Secondary: #725CAD (Purple)
+ * Accent: #8CCDEB (Sky Blue)
+ * Highlight: #FFE3A9 (Golden Star)
+ */
+
+/* Chapter Selection Page Styles - Celestial Theme */
+.chapterSelectionContainer {
+  height: 100vh;
+  background: linear-gradient(135deg, #0B1D51 0%, #725CAD 50%, #0B1D51 100%);
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  position: relative;
+  overflow: hidden;
+  font-family: 'Cinzel', serif;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.backgroundOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(114, 92, 173, 0.15) 0%,
+    rgba(140, 205, 235, 0.15) 50%,
+    rgba(11, 29, 81, 0.4) 100%
+  );
+  backdrop-filter: blur(1px);
+}
+
+/* Introduction Overlay */
+.introOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(11, 29, 81, 0.95);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  animation: fadeOut 3s ease-in-out forwards;
+}
+
+@keyframes fadeOut {
+  0% { opacity: 1; }
+  60% { opacity: 1; }
+  100% { opacity: 0; visibility: hidden; }
+}
+
+.introContent {
+  text-align: center;
+  color: #FFE3A9;
+  animation: slideUp 1.5s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(50px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.introContent h1 {
+  font-family: 'UnifrakturMaguntia', cursive;
+  font-size: 4rem;
+  margin-bottom: 1rem;
+  color: #8CCDEB;
+  text-shadow: 0 0 20px rgba(140, 205, 235, 0.8), 0 0 40px rgba(140, 205, 235, 0.4);
+}
+
+.introContent p {
+  font-size: 1.5rem;
+  font-style: italic;
+  color: #FFE3A9;
+}
+
+/* Castle Header */
+.castleHeader {
+  position: absolute;
+  top: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  text-align: center;
+  width: 90%;
+  max-width: 800px;
+}
+
+.castleTitle {
+  font-family: 'UnifrakturMaguntia', cursive;
+  font-size: 3rem;
+  color: #8CCDEB;
+  text-shadow: 0 0 20px rgba(140, 205, 235, 0.8), 0 2px 4px rgba(0, 0, 0, 0.5);
+  margin-bottom: 0.5rem;
+  letter-spacing: 2px;
+}
+
+.castleRegion {
+  font-size: 1.2rem;
+  color: #FFE3A9;
+  font-style: italic;
+  margin-bottom: 1rem;
+}
+
+.castleDescription {
+  font-size: 1rem;
+  color: #8CCDEB;
+  max-width: 600px;
+  margin: 0 auto 1rem auto;
+  line-height: 1.6;
+}
+
+.progressInfo {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1.5rem;
+  font-size: 0.9rem;
+  color: #FFE3A9;
+}
+
+.progressBarContainer {
+  width: 300px;
+  height: 12px;
+  background: rgba(11, 29, 81, 0.3);
+  border-radius: 10px;
+  overflow: hidden;
+  border: 2px solid #725CAD;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.progressBarFill {
+  height: 100%;
+  background: linear-gradient(90deg, #8CCDEB 0%, #FFE3A9 100%);
+  border-radius: 8px;
+  transition: width 0.5s ease;
+  box-shadow: 0 0 10px rgba(140, 205, 235, 0.6);
+}
+
+/* Back Button */
+.backButton {
+  position: absolute;
+  top: 2rem;
+  left: 2rem;
+  background: rgba(114, 92, 173, 0.8);
+  color: #FFE3A9;
+  border: 2px solid #8CCDEB;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: 'Cinzel', serif;
+  font-size: 1rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  z-index: 10;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.backButton:hover {
+  background: rgba(140, 205, 235, 0.9);
+  border-color: #FFE3A9;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(140, 205, 235, 0.4);
+}
+
+/* Main Content Area */
+.mainContent {
+  display: flex;
+  gap: 3rem;
+  align-items: flex-start;
+  justify-content: center;
+  z-index: 5;
+  max-width: 1400px;
+  width: 90%;
+  margin-top: 8rem;
+}
+
+/* Chapter List */
+.chapterList {
+  background: rgba(11, 29, 81, 0.25);
+  border: 3px solid #8CCDEB;
+  border-radius: 15px;
+  padding: 2rem;
+  width: 450px;
+  box-shadow: 0 8px 32px rgba(140, 205, 235, 0.3);
+  backdrop-filter: blur(10px);
+}
+
+.chapterListTitle {
+  font-size: 1.8rem;
+  color: #8CCDEB;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  font-family: 'Cinzel', serif;
+  text-shadow: 0 0 10px rgba(140, 205, 235, 0.6);
+}
+
+.chapterItem {
+  background: rgba(11, 29, 81, 0.6);
+  border: 2px solid #725CAD;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.chapterItem:hover {
+  border-color: #8CCDEB;
+  background: rgba(140, 205, 235, 0.15);
+  transform: translateX(5px);
+  box-shadow: 0 4px 16px rgba(140, 205, 235, 0.3);
+}
+
+.chapterItem.selected {
+  background: rgba(140, 205, 235, 0.25);
+  border-color: #FFE3A9;
+  box-shadow: 0 0 20px rgba(140, 205, 235, 0.5);
+}
+
+.chapterItem.locked {
+  opacity: 0.5;
+  cursor: not-allowed;
+  filter: grayscale(50%);
+}
+
+.chapterItem.completed {
+  border-color: #FFE3A9;
+  background: rgba(255, 227, 169, 0.1);
+}
+
+.chapterHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.chapterNumber {
+  font-size: 1.2rem;
+  color: #8CCDEB;
+  font-weight: 600;
+}
+
+.chapterStatus {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.statusIcon {
+  font-size: 1.2rem;
+}
+
+.chapterTitle {
+  font-size: 1.3rem;
+  color: #FFE3A9;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+.chapterDescription {
+  font-size: 0.9rem;
+  color: #8CCDEB;
+  line-height: 1.5;
+  margin-bottom: 0.75rem;
+}
+
+.chapterReward {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: #725CAD;
+  font-style: italic;
+}
+
+.chapterXP {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  color: #FFE3A9;
+  font-weight: 600;
+  margin-top: 0.5rem;
+}
+
+/* Castle Card */
+.castleCard {
+  background: rgba(11, 29, 81, 0.25);
+  border: 3px solid #8CCDEB;
+  border-radius: 15px;
+  padding: 2rem;
+  width: 400px;
+  box-shadow: 0 8px 32px rgba(140, 205, 235, 0.3);
+  backdrop-filter: blur(10px);
+  text-align: center;
+}
+
+.castleImage {
+  width: 100%;
+  height: 250px;
+  object-fit: cover;
+  border-radius: 10px;
+  margin-bottom: 1.5rem;
+  border: 2px solid #8CCDEB;
+  box-shadow: 0 4px 16px rgba(140, 205, 235, 0.4);
+}
+
+.castleCardTitle {
+  font-size: 2rem;
+  color: #8CCDEB;
+  margin-bottom: 1rem;
+  font-family: 'Cinzel', serif;
+  text-shadow: 0 0 10px rgba(140, 205, 235, 0.6);
+}
+
+.castleCardDescription {
+  font-size: 1rem;
+  color: #FFE3A9;
+  margin-bottom: 1.5rem;
+  line-height: 1.6;
+}
+
+.castleStats {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.statItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem;
+  background: rgba(11, 29, 81, 0.6);
+  border-radius: 8px;
+  border: 2px solid #725CAD;
+}
+
+.statLabel {
+  color: #8CCDEB;
+  font-size: 0.95rem;
+}
+
+.statValue {
+  color: #FFE3A9;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.statValue.xp {
+  color: #FFE3A9;
+}
+
+/* Action Button */
+.actionButton {
+  position: absolute;
+  bottom: 3rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+}
+
+.startButton {
+  background: linear-gradient(135deg, #8CCDEB 0%, #725CAD 100%);
+  color: #FFE3A9;
+  border: 3px solid #FFE3A9;
+  padding: 1rem 3rem;
+  font-size: 1.3rem;
+  font-family: 'Cinzel', serif;
+  font-weight: 600;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 6px 20px rgba(140, 205, 235, 0.4);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.startButton:hover:not(:disabled) {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(140, 205, 235, 0.6);
+  border-color: #FFE3A9;
+}
+
+.startButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: rgba(11, 29, 81, 0.3);
+}
+
+/* Particle Effects */
+.particleContainer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+  overflow: hidden;
+}
+
+.particle {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: radial-gradient(circle, #FFE3A9 0%, transparent 70%);
+  border-radius: 50%;
+  opacity: 0;
+  animation: float 8s infinite ease-in-out;
+  box-shadow: 0 0 10px rgba(140, 205, 235, 0.8);
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0) translateX(0);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.8;
+  }
+  50% {
+    transform: translateY(-100vh) translateX(50px);
+    opacity: 0.5;
+  }
+  90% {
+    opacity: 0.8;
+  }
+}
+
+/* Loading States */
+.loading_container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background: linear-gradient(135deg, #0B1D51 0%, #725CAD 50%, #0B1D51 100%);
+  color: #8CCDEB;
+  font-family: 'Cinzel', serif;
+}
+
+.loading_container p {
+  margin-top: 1rem;
+  font-size: 1.2rem;
+}
+
+/* Error States */
+.error_container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background: linear-gradient(135deg, #0B1D51 0%, #725CAD 50%, #0B1D51 100%);
+  color: #8CCDEB;
+  font-family: 'Cinzel', serif;
+  text-align: center;
+  padding: 2rem;
+}
+
+.error_container h2 {
+  color: #FFE3A9;
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+}
+
+.error_container p {
+  font-size: 1.2rem;
+  margin-bottom: 2rem;
+  max-width: 600px;
+}
+
+.errorButton {
+  background: linear-gradient(135deg, #8CCDEB 0%, #725CAD 100%);
+  color: #FFE3A9;
+  border: 2px solid #FFE3A9;
+  padding: 0.75rem 2rem;
+  font-size: 1.1rem;
+  font-family: 'Cinzel', serif;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.errorButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(140, 205, 235, 0.4);
+}
