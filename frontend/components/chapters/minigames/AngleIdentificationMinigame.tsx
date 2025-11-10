@@ -23,38 +23,11 @@ const AngleIdentificationMinigame: React.FC<AngleIdentificationMinigameProps> = 
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<string>('');
   const [showFeedback, setShowFeedback] = useState(false);
-  const [canvasSize, setCanvasSize] = useState({ width: 800, height: 400 });
+  
+  // Use fixed canvas size to prevent zoom/resize issues
+  const canvasSize = { width: canvasWidth, height: canvasHeight };
 
   const correctAnswer = question.correctAnswer?.toString() || '';
-
-  // Update canvas size based on container
-  useEffect(() => {
-    const updateSize = () => {
-      const container = canvasRef.current;
-      if (container) {
-        const containerWidth = container.clientWidth;
-        const width = Math.min(containerWidth, 800);
-        const height = Math.floor(width * (canvasHeight / canvasWidth));
-        setCanvasSize({ width, height });
-      }
-    };
-
-    updateSize();
-    window.addEventListener('resize', updateSize);
-    
-    let resizeObserver: ResizeObserver | null = null;
-    if (canvasRef.current) {
-      resizeObserver = new ResizeObserver(updateSize);
-      resizeObserver.observe(canvasRef.current);
-    }
-    
-    return () => {
-      window.removeEventListener('resize', updateSize);
-      if (resizeObserver) {
-        resizeObserver.disconnect();
-      }
-    };
-  }, [canvasWidth, canvasHeight]);
 
   const handleAnswerClick = (answer: string) => {
     if (showFeedback) return;
@@ -64,7 +37,11 @@ const AngleIdentificationMinigame: React.FC<AngleIdentificationMinigameProps> = 
   };
 
   const checkAnswer = (answer: string) => {
-    const isCorrect = answer === correctAnswer;
+    // Normalize both answers for comparison
+    const normalizedAnswer = answer.toLowerCase().replace(' angle', '');
+    const normalizedCorrect = correctAnswer.toString().toLowerCase().replace(' angle', '');
+    
+    const isCorrect = normalizedAnswer === normalizedCorrect;
 
     setFeedback(isCorrect ? '✓ Correct! Well done!' : '✗ Incorrect. Try again!');
     setShowFeedback(true);
@@ -79,109 +56,141 @@ const AngleIdentificationMinigame: React.FC<AngleIdentificationMinigameProps> = 
   // Draw an angle at the center of the canvas
   const renderAngle = () => {
     const centerX = canvasSize.width / 2;
-    const centerY = canvasSize.height / 2;
-    const rayLength = Math.min(canvasSize.width, canvasSize.height) * 0.35;
+    const centerY = canvasSize.height / 2 + 20; // Shift down slightly for better vertical centering
+    const rayLength = Math.min(canvasSize.width, canvasSize.height) * 0.32;
 
-    // Determine angle type and visual representation
-    let angleValue = 0;
-    const answerLower = correctAnswer.toLowerCase();
-    
-    if (answerLower === 'acute' || answerLower === 'acute angle') {
-      angleValue = 45; // Example acute angle
-    } else if (answerLower === 'right' || answerLower === 'right angle') {
-      angleValue = 90;
-    } else if (answerLower === 'obtuse' || answerLower === 'obtuse angle') {
-      angleValue = 135; // Example obtuse angle
-    } else if (answerLower === 'straight' || answerLower === 'straight angle') {
-      angleValue = 180;
-    } else {
-      // Try to parse as number if provided
-      angleValue = parseInt(correctAnswer) || 45;
-    }
+    // Get the actual angle measure from question data
+    const angleValue = question.angleMeasure || 45;
 
-    // Calculate ray endpoints
+    // Ray 1: Horizontal baseline extending left and right through center
+    const ray1StartX = centerX - rayLength * 0.5;
     const ray1EndX = centerX + rayLength;
-    const ray1EndY = centerY;
+    const ray1Y = centerY;
     
-    const angleRad = (angleValue * Math.PI) / 180;
-    const ray2EndX = centerX + rayLength * Math.cos(angleRad);
-    const ray2EndY = centerY - rayLength * Math.sin(angleRad); // Negative because canvas Y is inverted
+    // Ray 2: Rotates counter-clockwise from the horizontal ray
+    const angleInRadians = (angleValue * Math.PI) / 180;
+    const ray2EndX = centerX + rayLength * Math.cos(angleInRadians);
+    const ray2EndY = centerY - rayLength * Math.sin(angleInRadians);
 
-    // Arc radius for angle indicator
-    const arcRadius = 50;
+    // Arc settings
+    const arcRadius = 70;
 
     return (
       <>
-        {/* First ray (horizontal) */}
+        {/* Ray 1 - Horizontal baseline */}
         <KonvaLine
-          points={[centerX - rayLength * 0.3, centerY, ray1EndX, ray1EndY]}
-          stroke="#FFFD8F"
-          strokeWidth={4}
+          points={[ray1StartX, ray1Y, ray1EndX, ray1Y]}
+          stroke="#FFD700"
+          strokeWidth={6}
           lineCap="round"
-          shadowColor="black"
-          shadowBlur={8}
-          shadowOpacity={0.5}
         />
         
-        {/* Second ray */}
+        {/* Ray 2 - Angled ray from center */}
         <KonvaLine
           points={[centerX, centerY, ray2EndX, ray2EndY]}
-          stroke="#FFFD8F"
-          strokeWidth={4}
+          stroke="#FFD700"
+          strokeWidth={6}
           lineCap="round"
-          shadowColor="black"
-          shadowBlur={8}
-          shadowOpacity={0.5}
         />
 
-        {/* Vertex point */}
-        <Circle
-          x={centerX}
-          y={centerY}
-          radius={6}
-          fill="#B0CE88"
-          stroke="#4C763B"
-          strokeWidth={2}
-        />
+        {/* Arc showing the angle (filled area) - NOT for right angles */}
+        {angleValue < 180 && angleValue !== 90 && (
+          <Arc
+            x={centerX}
+            y={centerY}
+            innerRadius={0}
+            outerRadius={arcRadius}
+            angle={angleValue}
+            rotation={-angleValue}
+            fill="rgba(76, 175, 80, 0.35)"
+          />
+        )}
 
-        {/* Angle arc indicator */}
-        {angleValue !== 180 && (
+        {/* Arc border for clarity - NOT for right angles */}
+        {angleValue <= 180 && angleValue !== 90 && (
           <Arc
             x={centerX}
             y={centerY}
             innerRadius={arcRadius - 3}
-            outerRadius={arcRadius}
+            outerRadius={arcRadius + 3}
             angle={angleValue}
             rotation={-angleValue}
-            fill="#B0CE88"
-            opacity={0.6}
+            fill="#4CAF50"
+            opacity={0.8}
           />
         )}
 
-        {/* Angle label */}
-        <Text
-          x={centerX + 15}
-          y={centerY - 30}
-          text={`${angleValue}°`}
-          fontSize={24}
-          fontStyle="bold"
-          fill="#FFFD8F"
-          align="center"
-        />
-
-        {/* Right angle square indicator if 90 degrees */}
+        {/* Special right angle square indicator */}
         {angleValue === 90 && (
           <KonvaLine
             points={[
-              centerX + 20, centerY,
-              centerX + 20, centerY - 20,
-              centerX, centerY - 20
+              centerX + 35, centerY,
+              centerX + 35, centerY - 35,
+              centerX, centerY - 35
             ]}
-            stroke="#B0CE88"
-            strokeWidth={2}
+            stroke="#4CAF50"
+            strokeWidth={4}
             closed={false}
           />
         )}
+
+        {/* Vertex point at the center */}
+        <Circle
+          x={centerX}
+          y={centerY}
+          radius={8}
+          fill="#FFD700"
+          stroke="#FFA000"
+          strokeWidth={3}
+        />
+
+        {/* Angle degree measurement label */}
+        <Text
+          x={centerX + 85}
+          y={centerY - (angleValue === 180 ? 85 : angleValue >= 120 ? 65 : 50)}
+          text={`${angleValue}°`}
+          fontSize={38}
+          fontStyle="bold"
+          fill="#FFD700"
+          stroke="#000"
+          strokeWidth={2}
+        />
+
+        {/* Vertex label A (left end of ray 1) */}
+        <Text
+          x={ray1StartX - 25}
+          y={ray1Y - 10}
+          text="A"
+          fontSize={26}
+          fontStyle="bold"
+          fill="#FFF"
+          stroke="#000"
+          strokeWidth={1}
+        />
+        
+        {/* Vertex label B (center/vertex) */}
+        <Text
+          x={centerX - 15}
+          y={centerY + 30}
+          text="B"
+          fontSize={26}
+          fontStyle="bold"
+          fill="#FFF"
+          stroke="#000"
+          strokeWidth={1}
+        />
+        
+        {/* Vertex label C (end of ray 2) */}
+        <Text
+          x={ray2EndX + (angleValue > 90 ? -30 : 10)}
+          y={ray2EndY - 15}
+          text="C"
+          fontSize={26}
+          fontStyle="bold"
+          fill="#FFF"
+          stroke="#000"
+          strokeWidth={1}
+        />
       </>
     );
   };
@@ -206,7 +215,7 @@ const AngleIdentificationMinigame: React.FC<AngleIdentificationMinigameProps> = 
           fontSize: '1.1rem',
           fontWeight: '600',
         }}>
-          {question.instruction}
+          What type of angle is shown above?
         </p>
       </div>
 
@@ -233,8 +242,9 @@ const AngleIdentificationMinigame: React.FC<AngleIdentificationMinigameProps> = 
               width: '100%',
               height: 'auto',
               display: 'block',
-              maxWidth: '100%',
             }}
+            scaleX={1}
+            scaleY={1}
           >
             <Layer>
               {/* Draw subtle grid lines */}
@@ -271,32 +281,6 @@ const AngleIdentificationMinigame: React.FC<AngleIdentificationMinigameProps> = 
           maxWidth: '250px',
           width: '100%',
         }}>
-          {/* Hint Box */}
-          <div className={styleModule.hint} style={{ 
-            margin: 0,
-            padding: '8px 12px',
-            fontSize: '0.75rem',
-            background: 'linear-gradient(135deg, rgba(255, 253, 143, 0.15) 0%, rgba(176, 206, 136, 0.1) 100%)',
-            border: '1.5px solid rgba(176, 206, 136, 0.3)',
-            borderRadius: '6px',
-            color: '#FFFD8F',
-            lineHeight: '1.4',
-            backdropFilter: 'blur(8px)',
-            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
-          }}>
-            <strong style={{ 
-              display: 'block', 
-              marginBottom: '0.35rem', 
-              color: '#B0CE88',
-              fontSize: '0.7rem',
-              textTransform: 'uppercase',
-              letterSpacing: '0.5px',
-            }}>Hint</strong>
-            <span style={{ fontSize: '0.75rem' }}>
-              {question.hint || 'Select the correct angle type.'}
-            </span>
-          </div>
-
           {/* Answer Options */}
           <div style={{
             display: 'flex',

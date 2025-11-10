@@ -44,6 +44,8 @@ export interface MinigameQuestion {
     lines?: MinigameLine[]          // Chapter 2: line-based minigames
     shapes?: any[]                  // Chapter 3: shape-based minigames
     partType?: string               // Castle 3 Chapter 1: circle parts (center, radius, diameter, chord, arc, sector)
+    angleMeasure?: number           // Castle 2 Chapter 1: angle measurement in degrees
+    angleType?: string              // Castle 2 Chapter 1: type of angle (acute, right, obtuse, straight)
     // Answer and metadata
     correctAnswer: string | number | string[]
     type?: string

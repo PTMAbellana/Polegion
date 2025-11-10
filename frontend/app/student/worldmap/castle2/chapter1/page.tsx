@@ -686,6 +686,8 @@ export default function Castle2Chapter1Page() {
                 id: `minigame-${currentMinigameLevel}`,
                 instruction: `Identify this angle: ${CHAPTER1_MINIGAME_LEVELS[currentMinigameLevel].name}`,
                 correctAnswer: CHAPTER1_MINIGAME_LEVELS[currentMinigameLevel].angleType,
+                angleMeasure: CHAPTER1_MINIGAME_LEVELS[currentMinigameLevel].angleMeasure,
+                angleType: CHAPTER1_MINIGAME_LEVELS[currentMinigameLevel].angleType,
               }}
               onComplete={handleMinigameComplete}
               styleModule={minigameStyles}

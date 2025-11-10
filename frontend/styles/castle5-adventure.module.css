@@ -1,18 +1,10 @@
 @import url('https://fonts.googleapis.com/css2?family=UnifrakturMaguntia&family=Cinzel:wght@400;600&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap');
 
-/* 
- * CASTLE 5: ARCANE OBSERVATORY
- * Theme Colors: Celestial/Cosmic theme
- * Primary: #0B1D51 (Deep Blue)
- * Secondary: #725CAD (Purple)
- * Accent: #8CCDEB (Sky Blue)
- * Highlight: #FFE3A9 (Golden Star)
- */
-
-/* Chapter Selection Page Styles - Celestial Theme */
+/* Chapter Selection Page Styles - Mystic/Violet Theme */
+/* Theme Colors: #D4BEE4 (light purple), #9B7EBD (purple), #6A4C93 (dark purple), #2D1B4E (deep purple) */
 .chapterSelectionContainer {
   height: 100vh;
-  background: linear-gradient(135deg, #0B1D51 0%, #725CAD 50%, #0B1D51 100%);
+  background-image: url('/images/castles/castle5-background.png');
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
@@ -31,11 +23,11 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: radial-gradient(
-    ellipse at center,
-    rgba(114, 92, 173, 0.15) 0%,
-    rgba(140, 205, 235, 0.15) 50%,
-    rgba(11, 29, 81, 0.4) 100%
+  background: linear-gradient(
+    135deg,
+    rgba(45, 27, 78, 0.4) 0%,
+    rgba(106, 76, 147, 0.5) 50%,
+    rgba(45, 27, 78, 0.4) 100%
   );
   backdrop-filter: blur(1px);
 }
@@ -47,7 +39,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(11, 29, 81, 0.95);
+  background: rgba(45, 27, 78, 0.95);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -56,458 +48,1101 @@
 }
 
 @keyframes fadeOut {
-  0% { opacity: 1; }
-  60% { opacity: 1; }
+  0%, 70% { opacity: 1; }
   100% { opacity: 0; visibility: hidden; }
 }
 
 .introContent {
   text-align: center;
-  color: #FFE3A9;
-  animation: slideUp 1.5s ease-out;
+  color: #D4BEE4;
 }
 
-@keyframes slideUp {
-  from {
-    transform: translateY(50px);
-    opacity: 0;
-  }
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
+.introTitle {
+  font-size: 2rem;
+  font-weight: bold;
+  margin-bottom: 0.75rem;
+  text-shadow: 0 0 15px rgba(155, 126, 189, 0.8);
+  animation: glow 2s ease-in-out infinite alternate;
 }
 
-.introContent h1 {
-  font-family: 'UnifrakturMaguntia', cursive;
-  font-size: 4rem;
-  margin-bottom: 1rem;
-  color: #8CCDEB;
-  text-shadow: 0 0 20px rgba(140, 205, 235, 0.8), 0 0 40px rgba(140, 205, 235, 0.4);
+@keyframes glow {
+  from { text-shadow: 0 0 15px rgba(155, 126, 189, 0.5); }
+  to { text-shadow: 0 0 25px rgba(155, 126, 189, 1); }
 }
 
-.introContent p {
-  font-size: 1.5rem;
-  font-style: italic;
-  color: #FFE3A9;
+.introText {
+  font-size: 0.8rem;
+  margin-bottom: 1.15rem;
+  opacity: 0.9;
+  color: #9B7EBD;
 }
 
-/* Castle Header */
-.castleHeader {
-  position: absolute;
-  top: 2rem;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 10;
-  text-align: center;
-  width: 90%;
-  max-width: 800px;
+.introSpinner {
+  width: 28px;
+  height: 28px;
+  border: 2.5px solid rgba(155, 126, 189, 0.3);
+  border-top: 2.5px solid #9B7EBD;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto;
 }
 
-.castleTitle {
-  font-family: 'UnifrakturMaguntia', cursive;
-  font-size: 3rem;
-  color: #8CCDEB;
-  text-shadow: 0 0 20px rgba(140, 205, 235, 0.8), 0 2px 4px rgba(0, 0, 0, 0.5);
-  margin-bottom: 0.5rem;
-  letter-spacing: 2px;
-}
-
-.castleRegion {
-  font-size: 1.2rem;
-  color: #FFE3A9;
-  font-style: italic;
-  margin-bottom: 1rem;
-}
-
-.castleDescription {
-  font-size: 1rem;
-  color: #8CCDEB;
-  max-width: 600px;
-  margin: 0 auto 1rem auto;
-  line-height: 1.6;
-}
-
-.progressInfo {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 1.5rem;
-  font-size: 0.9rem;
-  color: #FFE3A9;
-}
-
-.progressBarContainer {
-  width: 300px;
-  height: 12px;
-  background: rgba(11, 29, 81, 0.3);
-  border-radius: 10px;
-  overflow: hidden;
-  border: 2px solid #725CAD;
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
-}
-
-.progressBarFill {
-  height: 100%;
-  background: linear-gradient(90deg, #8CCDEB 0%, #FFE3A9 100%);
-  border-radius: 8px;
-  transition: width 0.5s ease;
-  box-shadow: 0 0 10px rgba(140, 205, 235, 0.6);
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 /* Back Button */
 .backButton {
-  position: absolute;
-  top: 2rem;
-  left: 2rem;
-  background: rgba(114, 92, 173, 0.8);
-  color: #FFE3A9;
-  border: 2px solid #8CCDEB;
-  padding: 0.75rem 1.5rem;
-  border-radius: 8px;
+  position: fixed;
+  top: 1.15rem;
+  right: 1.15rem;
+  background: transparent; /* Removed background */
+  border: none; /* Removed border */
   cursor: pointer;
-  font-family: 'Cinzel', serif;
-  font-size: 1rem;
-  font-weight: 600;
   transition: all 0.3s ease;
+  z-index: 1000;
+  padding: 0.4rem;
+}
+
+.backButtonContent {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 0.5rem;
-  z-index: 10;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  gap: 0.4rem;
 }
 
-.backButton:hover {
-  background: rgba(140, 205, 235, 0.9);
-  border-color: #FFE3A9;
+.backButtonImage {
+  width: 55px;
+  height: 55px;
+  object-fit: contain;
+  transition: transform 0.3s ease, filter 0.3s ease;
+  filter: drop-shadow(0 2.5px 8px rgba(155, 126, 189, 0.5));
+}
+
+.backButtonText {
+  color: #D4BEE4;
+  font-weight: 700;
+  font-size: 0.75rem;
+  text-align: center;
+  white-space: nowrap;
+  text-shadow: 
+    0 2px 3.5px rgba(0, 0, 0, 0.8),
+    0 0 8px rgba(155, 126, 189, 0.5);
+  transition: all 0.3s ease;
+}
+
+.backButton:hover .backButtonImage {
+  transform: scale(1.15) rotate(-5deg);
+  filter: drop-shadow(0 3.5px 12px rgba(155, 126, 189, 0.8));
+}
+
+.backButton:hover .backButtonText {
+  color: #9B7EBD;
+  text-shadow: 
+    0 2px 3.5px rgba(0, 0, 0, 0.8),
+    0 0 12px rgba(155, 126, 189, 0.8);
   transform: translateY(-2px);
-  box-shadow: 0 6px 12px rgba(140, 205, 235, 0.4);
 }
 
-/* Main Content Area */
-.mainContent {
+.backButton:active .backButtonImage {
+  transform: scale(1.1);
+}
+
+.backButton:active .backButtonText {
+  transform: translateY(0);
+}
+
+/* Title Panel */
+.titlePanel {
+  background: rgba(45, 27, 78, 0.8);
+  border: 2px solid #9B7EBD;
+  border-radius: 10px;
+  padding: 0.75rem 1.15rem;
+  text-align: center;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 6.5px 20px rgba(0, 0, 0, 0.3);
+  margin: 0.75rem auto 0.4rem auto;
+  width: fit-content;
+  min-width: 250px;
+  position: relative;
+  z-index: 10;
+}
+
+.castleTitle h1 {
+  font-family: 'UnifrakturMaguntia', serif;
+  font-size: 1.4rem;
+  color: #D4BEE4;
+  margin-bottom: 0.12rem;
+  text-shadow: 0 0 8px rgba(212, 190, 228, 0.5);
+}
+
+.castleSubtitle {
+  color: #9B7EBD;
+  font-size: 0.8rem;
+  margin-bottom: 0;
+  margin-top: 0;
+  opacity: 0.9;
+}
+
+.castleTheme {
+  color: #D4BEE4;
+  font-size: 0.75rem;
+  margin-top: 0.4rem;
+  font-style: italic;
+  opacity: 0.9;
+}
+
+/* Progress Section */
+.progressSection {
+  margin-top: 0;
+  margin-bottom: 0.6rem;
+}
+
+.progressHeader {
   display: flex;
-  gap: 3rem;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.3rem;
+}
+
+.progressLabel {
+  color: #D4BEE4;
+  font-weight: 600;
+  font-size: 0.7rem;
+}
+
+.progressValue {
+  color: #9B7EBD;
+  font-weight: bold;
+  font-size: 0.7rem;
+}
+
+.progressBar {
+  width: 100%;
+  height: 4px;
+  background: rgba(155, 126, 189, 0.2);
+  border-radius: 2.5px;
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  background: linear-gradient(90deg, #9B7EBD, #D4BEE4);
+  border-radius: 2.5px;
+  transition: width 0.5s ease;
+  box-shadow: 0 0 6.5px rgba(155, 126, 189, 0.5);
+}
+
+/* Main Content */
+.mainContent {
+  position: relative;
+  z-index: 10;
+  display: flex;
   align-items: flex-start;
   justify-content: center;
-  z-index: 5;
-  max-width: 1400px;
-  width: 90%;
-  margin-top: 8rem;
+  gap: 1.5rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+  padding: 1.15rem 1.5rem;
 }
 
-/* Chapter List */
-.chapterList {
-  background: rgba(11, 29, 81, 0.25);
-  border: 3px solid #8CCDEB;
-  border-radius: 15px;
-  padding: 2rem;
-  width: 450px;
-  box-shadow: 0 8px 32px rgba(140, 205, 235, 0.3);
-  backdrop-filter: blur(10px);
-}
-
-.chapterListTitle {
-  font-size: 1.8rem;
-  color: #8CCDEB;
-  margin-bottom: 1.5rem;
-  text-align: center;
-  font-family: 'Cinzel', serif;
-  text-shadow: 0 0 10px rgba(140, 205, 235, 0.6);
-}
-
-.chapterItem {
-  background: rgba(11, 29, 81, 0.6);
-  border: 2px solid #725CAD;
-  border-radius: 12px;
-  padding: 1.5rem;
-  margin-bottom: 1rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  position: relative;
-}
-
-.chapterItem:hover {
-  border-color: #8CCDEB;
-  background: rgba(140, 205, 235, 0.15);
-  transform: translateX(5px);
-  box-shadow: 0 4px 16px rgba(140, 205, 235, 0.3);
-}
-
-.chapterItem.selected {
-  background: rgba(140, 205, 235, 0.25);
-  border-color: #FFE3A9;
-  box-shadow: 0 0 20px rgba(140, 205, 235, 0.5);
-}
-
-.chapterItem.locked {
-  opacity: 0.5;
-  cursor: not-allowed;
-  filter: grayscale(50%);
-}
-
-.chapterItem.completed {
-  border-color: #FFE3A9;
-  background: rgba(255, 227, 169, 0.1);
+/* Chapter Panel */
+.chapterPanel {
+  background: rgba(45, 27, 78, 0.8);
+  border: 2px solid #9B7EBD;
+  border-radius: 10px;
+  padding: 1rem;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 6.5px 20px rgba(0, 0, 0, 0.3);
+  width: 100%;
+  max-width: 500px;
+  height: 400px;
+  max-height: 400px;
+  /* overflow-y: auto; */
+  overflow: hidden;
 }
 
 .chapterHeader {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  margin-bottom: 0.75rem;
+  gap: 0.3rem;
+  color: #D4BEE4;
+  font-size: 0.8rem;
+  font-weight: bold;
+  margin-bottom: 0.6rem;
+  text-shadow: 0 0 4px rgba(212, 190, 228, 0.5);
 }
 
-.chapterNumber {
-  font-size: 1.2rem;
-  color: #8CCDEB;
-  font-weight: 600;
+.chapterIcon {
+  color: #9B7EBD;
+  width: 15px;
+  height: 15px;
 }
 
-.chapterStatus {
+.chapterList {
   display: flex;
-  gap: 0.5rem;
-  align-items: center;
+  flex-direction: column;
+  gap: 0.3rem;
+  margin-bottom: 0.75rem;
+  max-height: 295px; /* Limit to exactly 4 chapters visible (70px each + gaps) */
+  overflow-y: auto;
+  overflow-x: visible;
+  padding-right: 0.4rem;
 }
 
-.statusIcon {
+.chapterList::-webkit-scrollbar {
+  width: 6.5px;
+}
+
+.chapterList::-webkit-scrollbar-track {
+  background: rgba(45, 27, 78, 0.3);
+  border-radius: 3.5px;
+}
+
+.chapterList::-webkit-scrollbar-thumb {
+  background: rgba(155, 126, 189, 0.5);
+  border-radius: 3.5px;
+}
+
+.chapterList::-webkit-scrollbar-thumb:hover {
+  background: rgba(155, 126, 189, 0.7);
+}
+
+/* Chapter Item */
+.chapterItem {  
+  background: rgba(45, 27, 78, 0.4);
+  border: 2px solid rgba(155, 126, 189, 0.25);
+  border-radius: 10px;
+  padding: 0.75rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  gap: 0.75rem;
+  position: relative;
+  min-height: 70px;
+  max-height: 80px;
+}
+
+/* Hover state - for tooltip/description */
+.chapterItem:hover:not(.locked) {
+  background: rgba(106, 76, 147, 0.6);
+  border-color: rgba(155, 126, 189, 0.5);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 13px rgba(0, 0, 0, 0.4);
+}
+
+/* LOCKED STATE - Gray and disabled */
+.chapterItem.locked {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: rgba(45, 27, 78, 0.2);
+  border-color: rgba(150, 150, 150, 0.15);
+}
+
+.chapterItem.locked:hover {
+  transform: none;
+  box-shadow: none;
+  background: rgba(45, 27, 78, 0.2);
+  border-color: rgba(150, 150, 150, 0.15);
+}
+
+/* COMPLETED STATE - Lighter purple accent (when not selected) */
+.chapterItem.completed:not(.selected) {
+  background: rgba(45, 27, 78, 0.4);
+  border-left: 3px solid #D4BEE4;
+  padding-left: calc(0.75rem - 1.5px);
+}
+
+.chapterItem.completed:not(.selected):hover {
+  background: rgba(106, 76, 147, 0.6);
+  border-left-color: #D4BEE4;
+  box-shadow: 0 5px 13px rgba(212, 190, 228, 0.1);
+}
+
+/* SELECTED STATE - Castle purple highlight */
+.chapterItem.selected {
+  background: linear-gradient(
+    90deg, 
+    rgba(106, 76, 147, 0.6) 0%, 
+    rgba(45, 27, 78, 0.5) 100%
+  );
+  border: 2px solid #9B7EBD;
+  border-left: 3px solid #D4BEE4;
+  padding-left: calc(0.75rem - 1.5px);
+  box-shadow: 
+    0 0 16px rgba(155, 126, 189, 0.3),
+    0 3.5px 13px rgba(0, 0, 0, 0.5);
+  transform: translateX(5px);
+}
+
+.chapterItem.selected:hover {
+  box-shadow: 
+    0 0 20px rgba(155, 126, 189, 0.4),
+    0 5px 16px rgba(0, 0, 0, 0.6);
+}
+
+/* Chapter Number Container */
+.chapterNumberContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  transition: all 0.3s ease;
+  border: none;
+  outline: none;
+  background: transparent;
+  box-shadow: none;
+}
+
+/* Default/Unlocked chapter number styling */
+.chapterNumber {
+  color: #D4BEE4;
   font-size: 1.2rem;
+  font-weight: 700;
+  text-shadow: 0 2px 3.5px rgba(0, 0, 0, 0.3);
+  border: none;
+  outline: none;
+  background: transparent;
+  box-shadow: none;
+}
+
+/* Hover state for unlocked chapters */
+.chapterItem:hover:not(.locked) .chapterNumberContainer {
+  transform: scale(1.05);
+}
+
+/* LOCKED - Gray styling */
+.chapterItem.locked .chapterNumberContainer {
+  opacity: 0.5;
+}
+
+.chapterItem.locked .chapterNumber {
+  color: #2D1B4E;
+  text-shadow: none;
+}
+
+.lockIcon {
+  color: #9B7EBD;
+  width: 17px;
+  height: 20px;
+}
+
+/* COMPLETED - Bright purple number (when not selected) */
+.chapterItem.completed:not(.selected) .chapterNumber {
+  color: #D4BEE4;
+  text-shadow: 0 0 8px rgba(212, 190, 228, 0.6);
+  font-weight: 800;
+}
+
+/* SELECTED - Bright purple with glow */
+.chapterItem.selected .chapterNumberContainer {
+  transform: scale(1.1);
+}
+
+.chapterItem.selected .chapterNumber {
+  color: #D4BEE4;
+  font-weight: 800;
+  text-shadow: 0 0 13px rgba(212, 190, 228, 0.8);
+}
+
+.completedIcon {
+  color: #FFD700;
+  width: 15px;
+  height: 15px;
+}
+
+.chapterItem.selected .completedIcon {
+  color: #FFF;
+  filter: drop-shadow(0 0 5px rgba(255, 215, 0, 0.6));
+}
+
+.chapterEmoji {
+  font-size: 0.9rem;
+}
+
+/* Chapter Content - Text */
+.chapterContent {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  min-width: 0;
+  justify-content: center;
 }
 
 .chapterTitle {
-  font-size: 1.3rem;
-  color: #FFE3A9;
-  margin-bottom: 0.5rem;
+  color: #D4BEE4;
+  font-size: clamp(0.75rem, 1vw, 0.85rem);
+  margin: 0;
   font-weight: 600;
+  letter-spacing: 0.25px;
+  line-height: 1.3;
+  transition: all 0.3s ease;
 }
 
-.chapterDescription {
-  font-size: 0.9rem;
-  color: #8CCDEB;
-  line-height: 1.5;
-  margin-bottom: 0.75rem;
+.chapterObjective {
+  color: #9B7EBD;
+  font-size: clamp(0.65rem, 0.85vw, 0.75rem);
+  margin: 0;
+  line-height: 1.4;
+  opacity: 0.85;
+  transition: all 0.3s ease;
 }
 
-.chapterReward {
+/* LOCKED - Grayed out text */
+.chapterItem.locked .chapterTitle {
+  color: #6A4C93;
+}
+
+.chapterItem.locked .chapterObjective {
+  color: #2D1B4E;
+  opacity: 0.7;
+}
+
+/* COMPLETED - Bright purple text (when not selected) */
+.chapterItem.completed:not(.selected) .chapterTitle {
+  color: #D4BEE4;
+  font-weight: 700;
+}
+
+.chapterItem.completed:not(.selected) .chapterObjective {
+  color: #9B7EBD;
+  opacity: 0.95;
+}
+
+/* SELECTED - Bright purple with glow (overrides completed) */
+.chapterItem.selected .chapterTitle {
+  color: #D4BEE4;
+  font-weight: 700;
+  text-shadow: 0 0 8px rgba(212, 190, 228, 0.5);
+}
+
+.chapterItem.selected .chapterObjective {
+  color: #9B7EBD;
+  opacity: 1;
+}
+
+/* Chapter Status */
+.chapterStatus {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.rewardBadge {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  background: rgba(76, 175, 80, 0.2);
+  padding: 0.25rem 0.5rem;
+  border-radius: 12px;
+  border: 1px solid #4CAF50;
+}
+
+.rewardBadge span {
+  color: #4CAF50;
+  font-size: clamp(0.6rem, 0.75vw, 0.65rem);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.rewardBadge svg {
+  color: #FFD700;
+  width: 13px;
+  height: 13px;
+}
+
+/* Chapter Status - Right side arrow/badge */
+.chapterStatus {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.rewardBadge {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  background: rgba(155, 126, 189, 0.2);
+  padding: 0.3rem 0.6rem;
+  border-radius: 16px;
+  border: 1px solid #9B7EBD;
+}
+
+.rewardBadge span {
+  color: #D4BEE4;
+  font-size: clamp(0.6rem, 0.75vw, 0.65rem);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.rewardBadge svg {
+  color: #D4BEE4;
+  width: 13px;
+  height: 13px;
+}
+
+.chapterItem.selected .rewardBadge {
+  background: rgba(212, 190, 228, 0.25);
+  border-color: #D4BEE4;
+  box-shadow: 0 0 6.5px rgba(212, 190, 228, 0.3);
+}
+
+.chapterItem.selected .rewardBadge span {
+  color: #D4BEE4;
+  text-shadow: 0 0 5px rgba(212, 190, 228, 0.4);
+}
+
+.chapterItem.selected .rewardBadge svg {
+  color: #D4BEE4;
+  filter: drop-shadow(0 0 3.5px rgba(212, 190, 228, 0.5));
+}
+
+.chapterArrow {
+  color: #9B7EBD;
+  width: 17px;
+  height: 17px;
+  transition: all 0.3s ease;
+  opacity: 0.6;
+}
+
+.chapterItem:hover:not(.locked) .chapterArrow {
+  transform: translateX(3.5px);
+  opacity: 1;
+  color: #D4BEE4;
+}
+
+.chapterItem.locked .chapterArrow {
+  color: #2D1B4E;
+  opacity: 0.3;
+}
+
+.chapterItem.completed:not(.selected) .chapterArrow {
+  color: #9B7EBD;
+  opacity: 0.8;
+}
+
+.chapterItem.selected .chapterArrow {
+  color: #D4BEE4;
+  opacity: 1;
+  transform: translateX(4px);
+  filter: drop-shadow(0 0 3.5px rgba(212, 190, 228, 0.5));
+}
+
+/* Action Section */
+.actionSection {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  justify-content: center;
+  padding: 1.15rem 1.5rem 1.5rem 1.5rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.startButton {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  font-size: 0.85rem;
-  color: #725CAD;
-  font-style: italic;
+  background: linear-gradient(135deg, #6A4C93 0%, #2D1B4E 50%, #6A4C93 100%);
+  color: #D4BEE4;
+  border: none;
+  padding: 0.75rem 2rem;
+  border-radius: 24px;
+  font-size: 0.95rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 
+    0 3.5px 12px rgba(155, 126, 189, 0.4),
+    0 0 16px rgba(155, 126, 189, 0.2),
+    inset 0 1px 0 rgba(212, 190, 228, 0.2);
+  min-width: 230px;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  border: 2px solid rgba(155, 126, 189, 0.4);
 }
 
-.chapterXP {
+/* Animated gradient effect */
+.startButton::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(212, 190, 228, 0.2),
+    transparent
+  );
+  transition: left 0.5s ease;
+}
+
+.startButton:hover::before {
+  left: 100%;
+}
+
+.startButton:hover:not(.disabled) {
+  background: linear-gradient(135deg, #6A4C93 0%, #2D1B4E 50%, #6A4C93 100%);
+  box-shadow: 
+    0 5px 20px rgba(155, 126, 189, 0.6),
+    0 0 25px rgba(155, 126, 189, 0.4),
+    inset 0 1px 0 rgba(212, 190, 228, 0.3);
+  transform: translateY(-2.5px) scale(1.02);
+  border-color: #9B7EBD;
+  color: #D4BEE4;
+}
+
+.startButton:active:not(.disabled) {
+  transform: translateY(-1px) scale(0.98);
+  box-shadow: 
+    0 2.5px 12px rgba(155, 126, 189, 0.5),
+    0 0 16px rgba(155, 126, 189, 0.3);
+}
+
+.startButton.disabled {
+  background: linear-gradient(135deg, #2D1B4E 0%, #6A4C93 50%, #2D1B4E 100%);
+  cursor: not-allowed;
+  opacity: 0.6;
+  box-shadow: 
+    0 2px 6.5px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  transform: none;
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.startButton.disabled:hover {
+  transform: none;
+}
+
+/* Icon animations */
+.sparkleIcon {
+  animation: sparkle 2s ease-in-out infinite;
+}
+
+@keyframes sparkle {
+  0%, 100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.2) rotate(180deg);
+    opacity: 0.8;
+  }
+}
+
+.arrowIcon {
+  transition: transform 0.3s ease;
+}
+
+.startButton:hover:not(.disabled) .arrowIcon {
+  transform: translateX(4px);
+  animation: pulse 1s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: translateX(4px);
+  }
+  50% {
+    transform: translateX(6.5px);
+  }
+}
+
+/* Glow effect on hover */
+.startButton:hover:not(.disabled) {
+  animation: buttonGlow 1.5s ease-in-out infinite;
+}
+
+@keyframes buttonGlow {
+  0%, 100% {
+    box-shadow: 
+      0 5px 20px rgba(155, 126, 189, 0.6),
+      0 0 25px rgba(155, 126, 189, 0.4),
+      inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  }
+  50% {
+    box-shadow: 
+      0 6.5px 25px rgba(155, 126, 189, 0.8),
+      0 0 33px rgba(155, 126, 189, 0.6),
+      inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  }
+}
+
+/* Castle Info Card Container */
+.castleInfoContainer {
+  position: relative;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  font-size: 0.9rem;
-  color: #FFE3A9;
-  font-weight: 600;
-  margin-top: 0.5rem;
+  justify-content: center;
+  flex-shrink: 0;
 }
 
-/* Castle Card */
-.castleCard {
-  background: rgba(11, 29, 81, 0.25);
-  border: 3px solid #8CCDEB;
-  border-radius: 15px;
-  padding: 2rem;
-  width: 400px;
-  box-shadow: 0 8px 32px rgba(140, 205, 235, 0.3);
-  backdrop-filter: blur(10px);
+.castleInfoCard {
+  background: rgba(45, 27, 78, 0.8);
+  border: 2px solid #9B7EBD;
+  border-radius: 12px;
+  padding: 1.15rem;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 6.5px 20px rgba(0, 0, 0, 0.3);
   text-align: center;
+  width: 100%;
+  max-width: 270px;
+  height: 400px;
+  max-height: 400px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.castleInfoAvatar {
+  position: relative;
+  width: 130px;
+  height: 130px;
+  margin: 0 auto 1.15rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.castleImageCircle {
+  position: relative;
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #6A4C93 0%, #2D1B4E 100%);
+  box-shadow: 0 6.5px 16px rgba(155, 126, 189, 0.4);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 3px solid rgba(155, 126, 189, 0.2);
+  z-index: 1;
+  transition: transform 0.3s ease;
+}
+
+.castleIconCircle {
+  position: absolute;
+  bottom: -8px;
+  right: -8px;
+  width: 65px;
+  height: 65px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #9B7EBD 0%, #D4BEE4 100%);
+  box-shadow: 0 5px 12px rgba(155, 126, 189, 0.4);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2.5px solid rgba(155, 126, 189, 0.3);
+  z-index: 2;
+  transition: transform 0.3s ease;
 }
 
 .castleImage {
   width: 100%;
-  height: 250px;
+  height: 100%;
   object-fit: cover;
-  border-radius: 10px;
-  margin-bottom: 1.5rem;
-  border: 2px solid #8CCDEB;
-  box-shadow: 0 4px 16px rgba(140, 205, 235, 0.4);
 }
 
-.castleCardTitle {
+.castleIconImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.castleEmoji {
+  font-size: 2.8rem;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.castleEmojiSmall {
   font-size: 2rem;
-  color: #8CCDEB;
-  margin-bottom: 1rem;
-  font-family: 'Cinzel', serif;
-  text-shadow: 0 0 10px rgba(140, 205, 235, 0.6);
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }
 
-.castleCardDescription {
-  font-size: 1rem;
-  color: #FFE3A9;
-  margin-bottom: 1.5rem;
-  line-height: 1.6;
+.hidden {
+  display: none;
 }
 
-.castleStats {
+.castleInfoAvatar:hover .castleImageCircle {
+  transform: scale(1.05);
+}
+
+.castleInfoAvatar:hover .castleIconCircle {
+  transform: scale(1.1);
+}
+
+.castleInfoName {
+  color: #D4BEE4;
+  font-size: 1.05rem;
+  margin: 0 0 0.4rem 0;
+  font-weight: 600;
+  text-shadow: 0 0 8px rgba(212, 190, 228, 0.3);
+}
+
+.castleInfoQuote {
+  color: #9B7EBD;
+  font-size: 0.75rem;
+  font-style: italic;
+  margin: 0 0 0.75rem 0;
+  opacity: 0.9;
+  line-height: 1.4;
+}
+
+.castleInfoStats {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 0.6rem;
 }
 
-.statItem {
+.castleInfoStat {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding: 0.75rem;
-  background: rgba(11, 29, 81, 0.6);
-  border-radius: 8px;
-  border: 2px solid #725CAD;
+  gap: 0.4rem;
+  color: #9B7EBD;
+  font-size: 0.75rem;
+  justify-content: center;
 }
 
-.statLabel {
-  color: #8CCDEB;
-  font-size: 0.95rem;
+.statIcon {
+  color: #D4BEE4;
+  width: 15px;
+  height: 15px;
 }
 
-.statValue {
-  color: #FFE3A9;
-  font-size: 1.1rem;
-  font-weight: 600;
+.chapterTooltip {
+  min-width: 250px;
+  max-width: 330px;
+  width: max-content;
+  background: linear-gradient(135deg, rgba(45, 27, 78, 0.98) 0%, rgba(106, 76, 147, 0.98) 100%);
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba(155, 126, 189, 0.4);
+  border-radius: 10px;
+  padding: 1rem;
+  box-shadow: 
+    0 6.5px 20px rgba(0, 0, 0, 0.5),
+    0 0 12px rgba(155, 126, 189, 0.2);
+  pointer-events: none;
+  animation: tooltipSlideIn 0.2s ease;
 }
 
-.statValue.xp {
-  color: #FFE3A9;
+.chapterTooltip p {
+  margin: 0 0 0.75rem 0;
+  color: #D4BEE4;
+  line-height: 1.6;
+  word-wrap: break-word;
+  white-space: normal;
+  font-size: 0.75rem;
 }
 
-/* Action Button */
-.actionButton {
-  position: absolute;
-  bottom: 3rem;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 10;
+.tooltipTopics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.6rem;
 }
 
-.startButton {
-  background: linear-gradient(135deg, #8CCDEB 0%, #725CAD 100%);
-  color: #FFE3A9;
-  border: 3px solid #FFE3A9;
-  padding: 1rem 3rem;
-  font-size: 1.3rem;
-  font-family: 'Cinzel', serif;
-  font-weight: 600;
-  border-radius: 12px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 6px 20px rgba(140, 205, 235, 0.4);
-  text-transform: uppercase;
-  letter-spacing: 1px;
+.topicTag {
+  display: inline-block;
+  padding: 0.3rem 0.6rem;
+  background: rgba(155, 126, 189, 0.2);
+  border: 1px solid rgba(155, 126, 189, 0.4);
+  border-radius: 6.5px;
+  font-size: 0.75rem;
+  color: #9B7EBD;
+  white-space: nowrap;
+  font-weight: 500;
 }
 
-.startButton:hover:not(:disabled) {
-  transform: translateY(-3px);
-  box-shadow: 0 8px 25px rgba(140, 205, 235, 0.6);
-  border-color: #FFE3A9;
+@keyframes tooltipSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
-.startButton:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  background: rgba(11, 29, 81, 0.3);
-}
-
-/* Particle Effects */
-.particleContainer {
-  position: absolute;
+/* Particles Effect */
+.particlesContainer {
+  position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
   pointer-events: none;
   z-index: 1;
-  overflow: hidden;
 }
 
 .particle {
   position: absolute;
-  width: 4px;
-  height: 4px;
-  background: radial-gradient(circle, #FFE3A9 0%, transparent 70%);
+  width: 1.6px;
+  height: 1.6px;
+  background: rgba(155, 126, 189, 0.5);
   border-radius: 50%;
-  opacity: 0;
-  animation: float 8s infinite ease-in-out;
-  box-shadow: 0 0 10px rgba(140, 205, 235, 0.8);
+  animation: float linear infinite;
+  opacity: 0.3;
 }
 
 @keyframes float {
-  0%, 100% {
-    transform: translateY(0) translateX(0);
+  0% {
+    transform: translateY(100vh) scale(0);
     opacity: 0;
   }
   10% {
-    opacity: 0.8;
-  }
-  50% {
-    transform: translateY(-100vh) translateX(50px);
-    opacity: 0.5;
+    opacity: 0.3;
   }
   90% {
-    opacity: 0.8;
+    opacity: 0.3;
+  }
+  100% {
+    transform: translateY(-10vh) scale(1);
+    opacity: 0;
   }
 }
 
-/* Loading States */
-.loading_container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100vh;
-  background: linear-gradient(135deg, #0B1D51 0%, #725CAD 50%, #0B1D51 100%);
-  color: #8CCDEB;
-  font-family: 'Cinzel', serif;
-}
-
-.loading_container p {
-  margin-top: 1rem;
-  font-size: 1.2rem;
-}
-
-/* Error States */
+/* Loading and Error States */
+.loading_container,
 .error_container {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   height: 100vh;
-  background: linear-gradient(135deg, #0B1D51 0%, #725CAD 50%, #0B1D51 100%);
-  color: #8CCDEB;
-  font-family: 'Cinzel', serif;
+  background: linear-gradient(135deg, rgba(45, 27, 78, 0.95) 0%, rgba(106, 76, 147, 0.95) 100%);
+  color: #E8F4FD;
   text-align: center;
-  padding: 2rem;
+  padding: 1.5rem;
 }
 
 .error_container h2 {
-  color: #FFE3A9;
-  font-size: 2.5rem;
-  margin-bottom: 1rem;
+  color: #9B7EBD;
+  margin-bottom: 0.75rem;
+  font-size: 1.4rem;
 }
 
 .error_container p {
-  font-size: 1.2rem;
-  margin-bottom: 2rem;
-  max-width: 600px;
+  color: #D4BEE4;
+  margin-bottom: 1.15rem;
+  font-size: 0.8rem;
 }
 
 .errorButton {
-  background: linear-gradient(135deg, #8CCDEB 0%, #725CAD 100%);
-  color: #FFE3A9;
-  border: 2px solid #FFE3A9;
-  padding: 0.75rem 2rem;
-  font-size: 1.1rem;
-  font-family: 'Cinzel', serif;
-  border-radius: 8px;
+  background: linear-gradient(135deg, #9B7EBD, #6A4C93);
+  color: white;
+  border: none;
+  padding: 0.6rem 1.15rem;
+  border-radius: 16px;
+  font-size: 0.8rem;
+  font-weight: bold;
   cursor: pointer;
   transition: all 0.3s ease;
+  box-shadow: 0 2.5px 8px rgba(155, 126, 189, 0.3);
 }
 
 .errorButton:hover {
+  background: linear-gradient(135deg, #6A4C93, #2D1B4E);
+  box-shadow: 0 4px 15px rgba(155, 126, 189, 0.4);
   transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(140, 205, 235, 0.4);
 }
+
+/* Responsive Design */
+@media (max-width: 1400px) {
+  .mainContent {
+    padding: 0 1.15rem 0.75rem 1.15rem;
+    gap: 1.15rem;
+  }
+  
+  .chapterPanel {
+    width: 480px;
+  }
+}
+
+@media (max-width: 1200px) {
+  .mainContent {
+    flex-direction: column;
+    align-items: center;
+    padding: 0 1.15rem;
+  }
+
+  .chapterPanel {
+    max-width: 100%;
+    width: 100%;
+  }
+
+  .castleInfoCard {
+    max-width: 100%;
+    width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .chapterSelectionContainer {
+    height: auto;
+    min-height: 100vh;
+  }
+  
+  .mainContent {
+    flex-direction: column;
+    padding: 0.4rem;
+    gap: 0.75rem;
+    height: auto;
+  }
+  
+  .titlePanel {
+    min-width: auto;
+    width: 90%;
+    margin: 0.4rem auto;
+  }
+  
+  .chapterPanel {
+    width: 100%;
+    max-width: 330px;
+    max-height: none;
+  }
+  
+  .castleInfoCard {
+    max-width: 210px;
+  }
+  
+  .chapterItem {
+    flex-direction: row;
+    text-align: left;
+    gap: 0.5rem;
+  }
+  
+  .backButton {
+    top: 0.6rem;
+    right: 0.6rem;
+    padding: 0.3rem 0.6rem;
+  }
+
+  .startButton {
+    min-width: 165px;
+    font-size: 0.8rem;
+    padding: 0.6rem 1.15rem;
+  }
+}
+
+/* Removed duplicate chapterNumber styles - now defined earlier in the file with purple/violet theme */

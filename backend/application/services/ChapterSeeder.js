@@ -1,4 +1,10 @@
-const { castle1Chapters, castle2Chapters } = require('../../infrastructure/seeds/chapterSeeds');
+const { 
+    castle1Chapters, 
+    castle2Chapters, 
+    castle3Chapters, 
+    castle4Chapters, 
+    castle5Chapters 
+} = require('../../infrastructure/seeds/chapterSeeds');
 
 class ChapterSeeder {
     constructor(chapterRepo) {
@@ -29,11 +35,13 @@ class ChapterSeeder {
                 seedData = castle1Chapters;
             } else if (castleRoute === 'castle2') {
                 seedData = castle2Chapters;
+            } else if (castleRoute === 'castle3') {
+                seedData = castle3Chapters;
+            } else if (castleRoute === 'castle4') {
+                seedData = castle4Chapters;
+            } else if (castleRoute === 'castle5') {
+                seedData = castle5Chapters;
             }
-            // Add more castles here in the future
-            // else if (castleRoute === 'castle3') {
-            //     seedData = castle3Chapters;
-            // }
 
             if (seedData.length === 0) {
                 console.log(`[ChapterSeeder] No seed data found for ${castleRoute}`);

@@ -493,43 +493,43 @@ const castle2Chapter1Minigames = [
         time_limit: null,
         order_index: 1,
         game_config: {
-            instructions: 'Measure each angle and identify its type!',
+            instructions: 'Look at the angle and identify what type it is!',
             rounds: [
                 {
                     id: 'round1',
                     angleMeasure: 45,
                     angleType: 'acute',
-                    hint: 'This angle is less than 90°'
+                    hint: 'Think about how many degrees this angle has'
                 },
                 {
                     id: 'round2',
                     angleMeasure: 90,
                     angleType: 'right',
-                    hint: 'This angle forms a perfect L-shape'
+                    hint: 'Look carefully at the corner formed by these two rays'
                 },
                 {
                     id: 'round3',
-                    angleMeasure: 120,
+                    angleMeasure: 135,
                     angleType: 'obtuse',
-                    hint: 'This angle is between 90° and 180°'
+                    hint: 'Compare this angle to a right angle'
                 },
                 {
                     id: 'round4',
                     angleMeasure: 180,
                     angleType: 'straight',
-                    hint: 'This angle forms a straight line'
+                    hint: 'What do you notice about how the two rays are positioned?'
                 },
                 {
                     id: 'round5',
-                    angleMeasure: 30,
+                    angleMeasure: 60,
                     angleType: 'acute',
-                    hint: 'A small acute angle'
+                    hint: 'Is this angle smaller or larger than a right angle?'
                 },
                 {
                     id: 'round6',
-                    angleMeasure: 150,
+                    angleMeasure: 120,
                     angleType: 'obtuse',
-                    hint: 'A large obtuse angle'
+                    hint: 'Compare the size of this angle opening'
                 }
             ]
         }

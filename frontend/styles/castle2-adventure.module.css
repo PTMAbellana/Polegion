@@ -57,30 +57,30 @@
 }
 
 .introTitle {
-  font-size: 2.5rem;
+  font-size: 2rem;
   font-weight: bold;
-  margin-bottom: 0.75rem;
-  text-shadow: 0 0 20px rgba(255, 253, 143, 0.8);
+  margin-bottom: 0.6rem;
+  text-shadow: 0 0 16px rgba(255, 253, 143, 0.8);
   animation: glow 2s ease-in-out infinite alternate;
 }
 
 @keyframes glow {
-  from { text-shadow: 0 0 20px rgba(255, 253, 143, 0.5); }
-  to { text-shadow: 0 0 30px rgba(255, 253, 143, 1); }
+  from { text-shadow: 0 0 16px rgba(255, 253, 143, 0.5); }
+  to { text-shadow: 0 0 24px rgba(255, 253, 143, 1); }
 }
 
 .introText {
-  font-size: 1rem;
-  margin-bottom: 1.5rem;
+  font-size: 0.85rem;
+  margin-bottom: 1.15rem;
   opacity: 0.9;
   color: #B0CE88;
 }
 
 .introSpinner {
-  width: 35px;
-  height: 35px;
-  border: 3px solid rgba(176, 206, 136, 0.3);
-  border-top: 3px solid #B0CE88;
+  width: 28px;
+  height: 28px;
+  border: 2px solid rgba(176, 206, 136, 0.3);
+  border-top: 2px solid #B0CE88;
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin: 0 auto;
@@ -94,40 +94,40 @@
 /* Back Button */
 .backButton {
   position: fixed;
-  top: 1.5rem;
-  right: 1.5rem;
+  top: 1.15rem;
+  right: 1.15rem;
   background: transparent;
   border: none;
   cursor: pointer;
   transition: all 0.3s ease;
   z-index: 1000;
-  padding: 0.5rem;
+  padding: 0.4rem;
 }
 
 .backButtonContent {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.4rem;
 }
 
 .backButtonImage {
-  width: 70px;
-  height: 70px;
+  width: 55px;
+  height: 55px;
   object-fit: contain;
   transition: transform 0.3s ease, filter 0.3s ease;
-  filter: drop-shadow(0 3px 10px rgba(176, 206, 136, 0.5));
+  filter: drop-shadow(0 2px 8px rgba(176, 206, 136, 0.5));
 }
 
 .backButtonText {
   color: #FFFD8F;
   font-weight: 700;
-  font-size: 0.85rem;
+  font-size: 0.75rem;
   text-align: center;
   white-space: nowrap;
   text-shadow: 
     0 2px 4px rgba(0, 0, 0, 0.8),
-    0 0 10px rgba(176, 206, 136, 0.5);
+    0 0 8px rgba(176, 206, 136, 0.5);
   transition: all 0.3s ease;
 }
 
@@ -156,29 +156,29 @@
 .titlePanel {
   background: rgba(4, 57, 21, 0.8);
   border: 2px solid #B0CE88;
-  border-radius: 12px;
-  padding: 1rem 1.5rem;
+  border-radius: 10px;
+  padding: 0.75rem 1.15rem;
   text-align: center;
   backdrop-filter: blur(10px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
-  margin: 1rem auto 0.5rem auto;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+  margin: 0.75rem auto 0.4rem auto;
   width: fit-content;
-  min-width: 300px;
+  min-width: 250px;
   position: relative;
   z-index: 10;
 }
 
 .castleTitle h1 {
   font-family: 'UnifrakturMaguntia', serif;
-  font-size: 1.8rem;
+  font-size: 1.4rem;
   color: #FFFD8F;
-  margin-bottom: 0.15rem;
-  text-shadow: 0 0 10px rgba(255, 253, 143, 0.5);
+  margin-bottom: 0.12rem;
+  text-shadow: 0 0 8px rgba(255, 253, 143, 0.5);
 }
 
 .castleSubtitle {
   color: #B0CE88;
-  font-size: 0.9rem;
+  font-size: 0.8rem;
   margin-bottom: 0;
   margin-top: 0;
   opacity: 0.9;
@@ -186,8 +186,8 @@
 
 .castleTheme {
   color: #FFFD8F;
-  font-size: 0.85rem;
-  margin-top: 0.5rem;
+  font-size: 0.75rem;
+  margin-top: 0.4rem;
   font-style: italic;
   opacity: 0.9;
 }
@@ -195,42 +195,42 @@
 /* Progress Section */
 .progressSection {
   margin-top: 0;
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.6rem;
 }
 
 .progressHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 0.4rem;
+  margin-bottom: 0.3rem;
 }
 
 .progressLabel {
   color: #FFFD8F;
   font-weight: 600;
-  font-size: 0.8rem;
+  font-size: 0.7rem;
 }
 
 .progressValue {
   color: #B0CE88;
   font-weight: bold;
-  font-size: 0.8rem;
+  font-size: 0.7rem;
 }
 
 .progressBar {
   width: 100%;
-  height: 5px;
+  height: 4px;
   background: rgba(176, 206, 136, 0.2);
-  border-radius: 3px;
+  border-radius: 2px;
   overflow: hidden;
 }
 
 .progressFill {
   height: 100%;
   background: linear-gradient(90deg, #B0CE88, #FFFD8F);
-  border-radius: 3px;
+  border-radius: 2px;
   transition: width 0.5s ease;
-  box-shadow: 0 0 8px rgba(176, 206, 136, 0.5);
+  box-shadow: 0 0 6px rgba(176, 206, 136, 0.5);
 }
 
 /* Main Content */
@@ -240,66 +240,87 @@
   display: flex;
   align-items: flex-start;
   justify-content: center;
-  gap: 2rem;
-  max-width: 1400px;
+  gap: 1.5rem;
+  max-width: 1200px;
   margin: 0 auto;
   width: 100%;
-  padding: 1.5rem 2rem;
+  padding: 1.15rem 1.5rem;
 }
 
 /* Chapter Panel */
 .chapterPanel {
   background: rgba(4, 57, 21, 0.8);
   border: 2px solid #B0CE88;
-  border-radius: 12px;
-  padding: 1.2rem;
+  border-radius: 10px;
+  padding: 0.95rem;
   backdrop-filter: blur(10px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
   width: 100%;
-  max-width: 600px;
-  height: fit-content;
-  max-height: 500px;
+  max-width: 500px;
+  height: 400px;
+  max-height: 400px;
   overflow: hidden;
 }
 
 .chapterHeader {
   display: flex;
   align-items: center;
-  gap: 0.4rem;
+  gap: 0.3rem;
   color: #FFFD8F;
-  font-size: 1rem;
+  font-size: 0.85rem;
   font-weight: bold;
-  margin-bottom: 0.75rem;
-  text-shadow: 0 0 5px rgba(255, 253, 143, 0.5);
+  margin-bottom: 0.6rem;
+  text-shadow: 0 0 4px rgba(255, 253, 143, 0.5);
 }
 
 .chapterIcon {
   color: #B0CE88;
-  width: 18px;
-  height: 18px;
+  width: 15px;
+  height: 15px;
 }
 
 .chapterList {
   display: flex;
   flex-direction: column;
-  gap: 0.4rem;
-  margin-bottom: 1rem;
+  gap: 0.3rem;
+  margin-bottom: 0.75rem;
+  max-height: 295px; /* Limit to exactly 4 chapters visible (70px each + gaps) */
+  overflow-y: auto;
   overflow-x: visible;
+  padding-right: 0.4rem;
+}
+
+.chapterList::-webkit-scrollbar {
+  width: 8px;
+}
+
+.chapterList::-webkit-scrollbar-track {
+  background: rgba(146, 78, 71, 0.3);
+  border-radius: 4px;
+}
+
+.chapterList::-webkit-scrollbar-thumb {
+  background: rgba(229, 138, 116, 0.5);
+  border-radius: 4px;
+}
+
+.chapterList::-webkit-scrollbar-thumb:hover {
+  background: rgba(229, 138, 116, 0.7);
 }
 
 /* Chapter Item */
 .chapterItem {  
   background: rgba(4, 57, 21, 0.4);
   border: 2px solid rgba(176, 206, 136, 0.25);
-  border-radius: 12px;
-  padding: 1rem;
+  border-radius: 10px;
+  padding: 0.75rem;
   cursor: pointer;
   transition: all 0.3s ease;
   display: flex;
-  gap: 1rem;
+  gap: 0.75rem;
   position: relative;
-  min-height: 90px;
-  max-height: 100px;
+  min-height: 70px;
+  max-height: 80px;
 }
 
 /* Hover state - for tooltip/description */
@@ -365,8 +386,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 44px;
-  height: 44px;
+  width: 36px;
+  height: 36px;
   flex-shrink: 0;
   transition: all 0.3s ease;
   border: none;
@@ -378,7 +399,7 @@
 /* Default/Unlocked chapter number styling */
 .chapterNumber {
   color: #FFFD8F;
-  font-size: 1.5rem;
+  font-size: 1.2rem;
   font-weight: 700;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
   border: none;
@@ -404,41 +425,41 @@
 
 .lockIcon {
   color: #999;
-  width: 20px;
-  height: 20px;
+  width: 16px;
+  height: 16px;
 }
 
 /* COMPLETED - Bright yellow number (when not selected) */
 .chapterItem.completed:not(.selected) .chapterNumber {
   color: #FFFD8F;
-  text-shadow: 0 0 10px rgba(255, 253, 143, 0.6);
+  text-shadow: 0 0 8px rgba(255, 253, 143, 0.6);
   font-weight: 800;
 }
 
 /* SELECTED - Bright yellow with glow */
 .chapterItem.selected .chapterNumberContainer {
-  transform: scale(1.1);
+  transform: scale(1.08);
 }
 
 .chapterItem.selected .chapterNumber {
   color: #FFFD8F;
   font-weight: 800;
-  text-shadow: 0 0 16px rgba(255, 253, 143, 0.8);
+  text-shadow: 0 0 12px rgba(255, 253, 143, 0.8);
 }
 
 .completedIcon {
   color: #FFD700;
-  width: 18px;
-  height: 18px;
+  width: 15px;
+  height: 15px;
 }
 
 .chapterItem.selected .completedIcon {
   color: #FFFD8F;
-  filter: drop-shadow(0 0 6px rgba(255, 253, 143, 0.6));
+  filter: drop-shadow(0 0 5px rgba(255, 253, 143, 0.6));
 }
 
 .chapterEmoji {
-  font-size: 1.1rem;
+  font-size: 0.95rem;
 }
 
 /* Chapter Content - Text */
@@ -446,26 +467,26 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.4rem;
   min-width: 0;
   justify-content: center;
 }
 
 .chapterTitle {
   color: #FFFD8F;
-  font-size: clamp(0.9rem, 1.1vw, 1rem);
+  font-size: clamp(0.8rem, 1vw, 0.9rem);
   margin: 0;
   font-weight: 600;
-  letter-spacing: 0.3px;
-  line-height: 1.3;
+  letter-spacing: 0.25px;
+  line-height: 1.25;
   transition: all 0.3s ease;
 }
 
 .chapterObjective {
   color: #B0CE88;
-  font-size: clamp(0.75rem, 0.95vw, 0.85rem);
+  font-size: clamp(0.68rem, 0.9vw, 0.78rem);
   margin: 0;
-  line-height: 1.4;
+  line-height: 1.35;
   opacity: 0.85;
   transition: all 0.3s ease;
 }
@@ -514,24 +535,24 @@
 .rewardBadge {
   display: flex;
   align-items: center;
-  gap: 0.3rem;
+  gap: 0.25rem;
   background: rgba(176, 206, 136, 0.2);
-  padding: 0.4rem 0.75rem;
-  border-radius: 20px;
+  padding: 0.3rem 0.6rem;
+  border-radius: 16px;
   border: 1px solid #B0CE88;
 }
 
 .rewardBadge span {
   color: #FFFD8F;
-  font-size: clamp(0.7rem, 0.85vw, 0.75rem);
+  font-size: clamp(0.6rem, 0.75vw, 0.65rem);
   font-weight: 600;
   white-space: nowrap;
 }
 
 .rewardBadge svg {
   color: #FFFD8F;
-  width: 16px;
-  height: 16px;
+  width: 13px;
+  height: 13px;
 }
 
 .chapterItem.selected .rewardBadge {
@@ -552,8 +573,8 @@
 
 .chapterArrow {
   color: #B0CE88;
-  width: 20px;
-  height: 20px;
+  width: 17px;
+  height: 17px;
   transition: all 0.3s ease;
   opacity: 0.6;
 }
@@ -587,7 +608,7 @@
   z-index: 10;
   display: flex;
   justify-content: center;
-  padding: 1.5rem 2rem 2rem 2rem;
+  padding: 1.15rem 1.5rem 1.5rem 1.5rem;
   max-width: 1400px;
   margin: 0 auto;
   width: 100%;
@@ -596,26 +617,26 @@
 .startButton {
   display: flex;
   align-items: center;
-  gap: 0.6rem;
+  gap: 0.5rem;
   background: linear-gradient(135deg, #4C763B 0%, #043915 50%, #4C763B 100%);
   color: #FFFD8F;
   border: none;
-  padding: 1rem 2.5rem;
-  border-radius: 30px;
-  font-size: 1.15rem;
+  padding: 0.75rem 2rem;
+  border-radius: 24px;
+  font-size: 0.95rem;
   font-weight: 800;
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: 
-    0 4px 15px rgba(176, 206, 136, 0.4),
-    0 0 20px rgba(176, 206, 136, 0.2),
+    0 3px 12px rgba(176, 206, 136, 0.4),
+    0 0 16px rgba(176, 206, 136, 0.2),
     inset 0 1px 0 rgba(255, 253, 143, 0.2);
-  min-width: 280px;
+  min-width: 230px;
   justify-content: center;
   position: relative;
   overflow: hidden;
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: 0.8px;
   border: 2px solid rgba(176, 206, 136, 0.4);
 }
 
@@ -739,20 +760,25 @@
 .castleInfoCard {
   background: rgba(4, 57, 21, 0.8);
   border: 2px solid #B0CE88;
-  border-radius: 15px;
-  padding: 1.5rem;
+  border-radius: 12px;
+  padding: 1.15rem;
   backdrop-filter: blur(10px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
   text-align: center;
   width: 100%;
-  max-width: 320px;
+  max-width: 270px;
+  height: 400px;
+  max-height: 400px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
 .castleInfoAvatar {
   position: relative;
-  width: 160px;
-  height: 160px;
-  margin: 0 auto 1.5rem;
+  width: 130px;
+  height: 130px;
+  margin: 0 auto 1.15rem;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -760,34 +786,34 @@
 
 .castleImageCircle {
   position: relative;
-  width: 120px;
-  height: 120px;
+  width: 100px;
+  height: 100px;
   border-radius: 50%;
   background: linear-gradient(135deg, #4C763B 0%, #043915 100%);
-  box-shadow: 0 8px 20px rgba(176, 206, 136, 0.4);
+  box-shadow: 0 6px 16px rgba(176, 206, 136, 0.4);
   overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 4px solid rgba(176, 206, 136, 0.2);
+  border: 3px solid rgba(176, 206, 136, 0.2);
   z-index: 1;
   transition: transform 0.3s ease;
 }
 
 .castleIconCircle {
   position: absolute;
-  bottom: -10px;
-  right: -10px;
-  width: 80px;
-  height: 80px;
+  bottom: -8px;
+  right: -8px;
+  width: 65px;
+  height: 65px;
   border-radius: 50%;
   background: linear-gradient(135deg, #B0CE88 0%, #FFFD8F 100%);
-  box-shadow: 0 6px 15px rgba(176, 206, 136, 0.4);
+  box-shadow: 0 5px 12px rgba(176, 206, 136, 0.4);
   overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 3px solid rgba(176, 206, 136, 0.3);
+  border: 2.5px solid rgba(176, 206, 136, 0.3);
   z-index: 2;
   transition: transform 0.3s ease;
 }
@@ -805,7 +831,7 @@
 }
 
 .castleEmoji {
-  font-size: 3.5rem;
+  font-size: 2.8rem;
   position: absolute;
   top: 50%;
   left: 50%;
@@ -813,7 +839,7 @@
 }
 
 .castleEmojiSmall {
-  font-size: 2.5rem;
+  font-size: 2rem;
   position: absolute;
   top: 50%;
   left: 50%;
@@ -834,81 +860,81 @@
 
 .castleInfoName {
   color: #FFFD8F;
-  font-size: 1.3rem;
-  margin: 0 0 0.5rem 0;
+  font-size: 1.1rem;
+  margin: 0 0 0.4rem 0;
   font-weight: 600;
-  text-shadow: 0 0 10px rgba(255, 253, 143, 0.3);
+  text-shadow: 0 0 8px rgba(255, 253, 143, 0.3);
 }
 
 .castleInfoQuote {
   color: #B0CE88;
-  font-size: 0.85rem;
+  font-size: 0.75rem;
   font-style: italic;
-  margin: 0 0 1rem 0;
+  margin: 0 0 0.8rem 0;
   opacity: 0.9;
-  line-height: 1.4;
+  line-height: 1.35;
 }
 
 .castleInfoStats {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 0.6rem;
 }
 
 .castleInfoStat {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.4rem;
   color: #B0CE88;
-  font-size: 0.85rem;
+  font-size: 0.75rem;
   justify-content: center;
 }
 
 .statIcon {
   color: #FFFD8F;
-  width: 18px;
-  height: 18px;
+  width: 15px;
+  height: 15px;
 }
 
 .chapterTooltip {
-  min-width: 300px;
-  max-width: 400px;
+  min-width: 250px;
+  max-width: 350px;
   width: max-content;
   background: linear-gradient(135deg, rgba(4, 57, 21, 0.98) 0%, rgba(76, 118, 59, 0.98) 100%);
   backdrop-filter: blur(12px);
   border: 2px solid rgba(176, 206, 136, 0.4);
-  border-radius: 12px;
-  padding: 1.25rem;
+  border-radius: 10px;
+  padding: 1rem;
   box-shadow: 
-    0 8px 24px rgba(0, 0, 0, 0.5),
-    0 0 15px rgba(176, 206, 136, 0.2);
+    0 6px 20px rgba(0, 0, 0, 0.5),
+    0 0 12px rgba(176, 206, 136, 0.2);
   pointer-events: none;
   animation: tooltipSlideIn 0.2s ease;
 }
 
 .chapterTooltip p {
-  margin: 0 0 1rem 0;
+  margin: 0 0 0.8rem 0;
   color: #FFFD8F;
-  line-height: 1.6;
+  line-height: 1.5;
   word-wrap: break-word;
   white-space: normal;
-  font-size: 0.9rem;
+  font-size: 0.8rem;
 }
 
 .tooltipTopics {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
-  margin-top: 0.75rem;
+  gap: 0.4rem;
+  margin-top: 0.6rem;
 }
 
 .topicTag {
   display: inline-block;
-  padding: 0.35rem 0.75rem;
+  padding: 0.3rem 0.6rem;
   background: rgba(176, 206, 136, 0.2);
   border: 1px solid rgba(176, 206, 136, 0.4);
-  border-radius: 8px;
-  font-size: 0.85rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
   color: #B0CE88;
   white-space: nowrap;
   font-weight: 500;

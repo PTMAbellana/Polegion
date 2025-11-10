@@ -21,8 +21,8 @@ export const CHAPTER1_LESSON_DIALOGUE = [
 ];
 
 export const CHAPTER1_MINIGAME_DIALOGUE = [
-  "Excellent! Now use your protractor to measure each angle.",
-  "Identify the type of angle based on its measurement.",
+  "Excellent! Now let's test your knowledge of angles.",
+  "Look at each angle carefully and identify its type.",
   "Choose wisely, young angle-seeker!"
 ];
 
@@ -36,10 +36,10 @@ export const CHAPTER1_MINIGAME_LEVELS: Array<{
 }> = [
   { angleMeasure: 45, angleType: 'acute', name: 'Acute Angle', description: 'Less than 90°' },
   { angleMeasure: 90, angleType: 'right', name: 'Right Angle', description: 'Exactly 90°' },
-  { angleMeasure: 120, angleType: 'obtuse', name: 'Obtuse Angle', description: 'Between 90° and 180°' },
+  { angleMeasure: 135, angleType: 'obtuse', name: 'Obtuse Angle', description: 'Between 90° and 180°' },
   { angleMeasure: 180, angleType: 'straight', name: 'Straight Angle', description: 'Exactly 180°' },
-  { angleMeasure: 30, angleType: 'acute', name: 'Acute Angle', description: 'A small acute angle' },
-  { angleMeasure: 150, angleType: 'obtuse', name: 'Obtuse Angle', description: 'A large obtuse angle' }
+  { angleMeasure: 60, angleType: 'acute', name: 'Acute Angle', description: 'Less than 90°' },
+  { angleMeasure: 120, angleType: 'obtuse', name: 'Obtuse Angle', description: 'Between 90° and 180°' }
 ];
 
 // Concept cards with semantic keys matching dialogue

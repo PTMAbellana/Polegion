@@ -62,9 +62,10 @@
 
 /* Canvas Container */
 .canvasContainer {
-  flex: 1 1 500px;
+  flex: 0 0 auto;
   min-width: 300px;
-  max-width: 100%;
+  max-width: 800px;
+  width: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -106,7 +107,8 @@
   cursor: crosshair;
   flex-shrink: 0;
   overflow: hidden;
-  max-width: 100%;
+  width: 100%;
+  max-width: 800px;
   display: flex;
   justify-content: center;
   align-items: center;
