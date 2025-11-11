@@ -84,8 +84,12 @@ export const CHAPTER1_LEARNING_OBJECTIVES = [
 export const CHAPTER1_XP_VALUES = {
   lesson: 50,
   minigame: 50,
-  quiz1: 100,
-  total: 200,
+  quiz1: 12,
+  quiz2: 12,
+  quiz3: 12,
+  quiz4: 12,
+  quiz5: 12,
+  total: 160,
 };
 
 export const CHAPTER1_CASTLE_ID = '4e5f6a7b-8c9d-0e1f-2a3b-4c5d6e7f8a9b'; // Castle 4 (Polygon Citadel)

@@ -99,7 +99,11 @@ export const CHAPTER3_LEARNING_OBJECTIVES = [
 export const CHAPTER3_XP_VALUES = {
   lesson: 100,
   minigame: 90,
-  quiz1: 60,
+  quiz1: 12,
+  quiz2: 12,
+  quiz3: 12,
+  quiz4: 12,
+  quiz5: 12,
   total: 250,
 };
 

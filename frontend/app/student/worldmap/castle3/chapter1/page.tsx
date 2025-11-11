@@ -1,1239 +1,825 @@
-﻿"use client"
+'use client';
 
-import React, { useState, useEffect, useRef } from 'react'
-import { useRouter } from 'next/navigation'
-import { Stage, Layer, Circle, Line, Arc, Text, Group } from 'react-konva'
-import { Sparkles, Volume2, VolumeX, Play, Pause, X, ChevronRight } from 'lucide-react'
-import { useAuthStore } from '@/store/authStore'
-import { AuthProtection } from '@/context/AuthProtection'
-import styles from '@/styles/castle3-chapter1.module.css'
-import { getChaptersByCastle, awardLessonXP, completeChapter } from '@/api/chapters'
-import { getChapterQuizzesByChapter, submitQuizAttempt } from '@/api/chapterQuizzes'
-import { getMinigamesByChapter, submitMinigameAttempt } from '@/api/minigames'
-import type { 
-  ChapterQuiz, 
-  Minigame
-} from '@/types/common'
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import {
+  ChapterTopBar,
+  ChapterTaskPanel,
+  ChapterDialogueBox,
+  ChapterRewardScreen,
+} from '@/components/chapters/shared';
+import { CirclePartsMinigame } from '@/components/chapters/minigames';
+import { ConceptCard, LessonGrid } from '@/components/chapters/lessons';
+import ChapterProgressModal from '@/components/chapters/ChapterProgressModal';
+import { useChapterData, useChapterDialogue, useChapterAudio } from '@/hooks/chapters';
+import {
+  CHAPTER1_CASTLE_ID,
+  CHAPTER1_NUMBER,
+  CHAPTER1_OPENING_DIALOGUE,
+  CHAPTER1_LESSON_DIALOGUE,
+  CHAPTER1_MINIGAME_DIALOGUE,
+  CHAPTER1_MINIGAME_LEVELS,
+  CHAPTER1_LEARNING_OBJECTIVES,
+  CHAPTER1_CONCEPTS,
+  CHAPTER1_XP_VALUES,
+  CHAPTER1_RELIC,
+  CHAPTER1_WIZARD,
+} from '@/constants/chapters/castle3/chapter1';
+import Image from 'next/image';
+import { awardLessonXP, completeChapter } from '@/api/chapters';
+import { submitQuizAttempt, getUserQuizAttempts } from '@/api/chapterQuizzes';
+import { submitMinigameAttempt } from '@/api/minigames';
+import { useChapterStore } from '@/store/chapterStore';
+import baseStyles from '@/styles/chapters/chapter-base.module.css';
+import minigameStyles from '@/styles/chapters/minigame-shared.module.css';
+import lessonStyles from '@/styles/chapters/lesson-shared.module.css';
 
-const CASTLE_ID = 'd6e7a642-5d4c-4f9e-8b3a-1c2d3e4f5a6b'
-const CHAPTER_NUMBER = 1
+type SceneType = 'opening' | 'lesson' | 'minigame' | 'quiz1' | 'quiz2' | 'quiz3' | 'quiz4' | 'quiz5' | 'quiz6' | 'reward';
 
-type SceneType = 'opening' | 'lesson' | 'minigame' | 'quiz1' | 'quiz2' | 'quiz3' | 'reward'
+const CHAPTER_KEY = 'castle3-chapter1';
 
-export default function Castle3Chapter1Page() {
-  const router = useRouter()
-  const { userProfile } = useAuthStore()
-  const { isLoading: authLoading } = AuthProtection()
-
-  const [chapterId, setChapterId] = useState<string | null>(null)
-  const [quiz, setQuiz] = useState<ChapterQuiz | null>(null)
-  const [minigame, setMinigame] = useState<Minigame | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [loadError, setLoadError] = useState<string | null>(null)
-
-  const [currentScene, setCurrentScene] = useState<SceneType>('opening')
-  const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null)
-  const [showFeedback, setShowFeedback] = useState(false)
-  const [isCorrect, setIsCorrect] = useState(false)
-  const [wizardMessage, setWizardMessage] = useState("")
-  const [messageIndex, setMessageIndex] = useState(0)
-  const [isTyping, setIsTyping] = useState(false)
-  const [autoAdvance, setAutoAdvance] = useState(false)
-  const [displayedText, setDisplayedText] = useState("")
-  const [isMuted, setIsMuted] = useState(false)
+export default function Castle2Chapter1Page() {
+  const router = useRouter();
+  
+  // Zustand store
+  const chapterStore = useChapterStore();
+  const savedProgress = chapterStore.getChapterProgress(CHAPTER_KEY);
+  
+  // Progress modal state
+  const [showProgressModal, setShowProgressModal] = useState(false);
+  const [hasCheckedProgress, setHasCheckedProgress] = useState(false);
+  
+  // Initialize chapter in store if not exists and check for existing progress
+  useEffect(() => {
+    // Get existing progress BEFORE initializing (to check if it's truly new)
+    const existingProgress = chapterStore.getChapterProgress(CHAPTER_KEY);
+    const hasRealProgress = existingProgress && (
+      existingProgress.currentScene !== 'opening' ||
+      Object.keys(existingProgress.completedTasks || {}).length > 0 ||
+      existingProgress.earnedXP.lesson > 0 ||
+      existingProgress.earnedXP.minigame > 0 ||
+      existingProgress.earnedXP.quiz > 0
+    );
     
-  const [selectedPart, setSelectedPart] = useState<string | null>(null)
-  const [currentQuestion, setCurrentQuestion] = useState(0)
-  const [minigameFeedback, setMinigameFeedback] = useState<string>("")
-  const [isFeedbackCorrect, setIsFeedbackCorrect] = useState<boolean | null>(null)
-  const [stageSize, setStageSize] = useState({ width: 700, height: 400 })
+    chapterStore.initializeChapter(CHAPTER_KEY);
     
-  const audioRef = useRef<HTMLAudioElement | null>(null)
-  const typingIntervalRef = useRef<NodeJS.Timeout | null>(null)
-  const autoAdvanceTimeoutRef = useRef<NodeJS.Timeout | null>(null)
-  const taskListRef = useRef<HTMLDivElement | null>(null)
-  const gameAreaRef = useRef<HTMLDivElement | null>(null)
-  const canvasContainerRef = useRef<HTMLDivElement | null>(null)
+    // Clean up lesson tasks from store (remove old corrupted data)
+    if (existingProgress?.completedTasks) {
+      const lessonTasks = ['task-0', 'task-1', 'task-2', 'task-3', 'task-4', 'task-5'];
+      lessonTasks.forEach(taskId => {
+        if (existingProgress.completedTasks[taskId]) {
+          const progress = chapterStore.getChapterProgress(CHAPTER_KEY);
+          if (progress && progress.completedTasks) {
+            const cleaned = { ...progress.completedTasks };
+            delete cleaned[taskId];
+            chapterStore.chapters[CHAPTER_KEY].completedTasks = cleaned;
+          }
+        }
+      });
+    }
     
-  const [completedTasks, setCompletedTasks] = useState({
-    learnCenter: false,
-    learnRadius: false,
-    learnDiameter: false,
-    learnChord: false,
-    learnArc: false,
-    learnSector: false,
-    completeMinigame: false,
-    passQuiz1: false,
-    passQuiz2: false,
-    passQuiz3: false
-  })
+    // Check if user has disabled this modal for this chapter
+    const dontShowAgain = localStorage.getItem(`${CHAPTER_KEY}-dont-show-modal`);
+    const modalExpiration = localStorage.getItem(`${CHAPTER_KEY}-modal-expiration`);
     
-  const [failedTasks, setFailedTasks] = useState({
-    passQuiz1: false,
-    passQuiz2: false,
-    passQuiz3: false
-  })
+    // Check if the "don't show again" has expired
+    let shouldShowModal = true;
+    if (dontShowAgain === 'true' && modalExpiration) {
+      const expirationTime = parseInt(modalExpiration, 10);
+      if (Date.now() < expirationTime) {
+        // Still within the 5-minute window, don't show modal
+        shouldShowModal = false;
+      } else {
+        // Expired, clear the flags
+        localStorage.removeItem(`${CHAPTER_KEY}-dont-show-modal`);
+        localStorage.removeItem(`${CHAPTER_KEY}-modal-expiration`);
+      }
+    }
     
-  const [quizAnswers, setQuizAnswers] = useState<Record<string, string>>({})
-  const [quizAttempts, setQuizAttempts] = useState(0)
-  const [canRetakeQuiz, setCanRetakeQuiz] = useState(false)
-    
+    // Only show modal if there's REAL progress (not just initialization)
+    if (!hasCheckedProgress && hasRealProgress && shouldShowModal) {
+      setShowProgressModal(true);
+      setHasCheckedProgress(true);
+    } else {
+      setHasCheckedProgress(true);
+    }
+  }, []);
+  
+  // Scene and state management - initialize from store or defaults
+  const [currentScene, setCurrentScene] = useState<SceneType>(
+    (savedProgress?.currentScene as SceneType) || 'opening'
+  );
+  const [isMuted, setIsMuted] = useState(savedProgress?.isMuted || false);
+  const [autoAdvanceEnabled, setAutoAdvanceEnabled] = useState(savedProgress?.autoAdvanceEnabled || false);
+  const [currentMinigameLevel, setCurrentMinigameLevel] = useState(savedProgress?.currentMinigameLevel || 0);
+  
+  // Track which lesson tasks have been checked to prevent duplicates (using ref to avoid re-renders)
+  const checkedLessonTasksRef = React.useRef<Set<string>>(new Set()); // Changed from number to string for semantic keys
+  const previousMessageIndexRef = React.useRef<number>(-1);
+  
+  // Task tracking - initialize from store but filter out lesson tasks
+  const [completedTasks, setCompletedTasks] = useState<Record<string, boolean>>(() => {
+    const saved = savedProgress?.completedTasks || {};
+    const filtered = { ...saved };
+    // Remove lesson tasks - they will be re-tracked by the new system
+    delete filtered['task-0'];
+    delete filtered['task-1'];
+    delete filtered['task-2'];
+    delete filtered['task-3'];
+    delete filtered['task-4'];
+    delete filtered['task-5'];
+    return filtered;
+  });
+  const [failedTasks, setFailedTasks] = useState<Record<string, boolean>>(
+    savedProgress?.failedTasks || {}
+  );
+  
+  // Quiz state - initialize from store or defaults
+  const [quizAnswers, setQuizAnswers] = useState<Record<string, string>>(
+    savedProgress?.quizAnswers || {}
+  );
+  const [quizAttempts, setQuizAttempts] = useState(savedProgress?.quizAttempts || 0);
+  const [quizFeedback, setQuizFeedback] = useState<'correct' | 'incorrect' | null>(null);
+  
+  // XP tracking - initialize from store or defaults
   const [earnedXP, setEarnedXP] = useState({
-    lesson: 0,
-    minigame: 0,
-    quiz: 0
-  })
+    lesson: savedProgress?.earnedXP.lesson || 0,
+    minigame: savedProgress?.earnedXP.minigame || 0,
+    quiz: savedProgress?.earnedXP.quiz || 0,
+  });
 
-  const XP_VALUES = {
-    lesson: 20,
-    minigame: 40,
-    quiz1: 20,
-    quiz2: 15,
-    quiz3: 15,
-    total: 150
-  }
+  // Quiz score tracking
+  const [quizScore, setQuizScore] = useState<number | null>(null);
 
-  const openingDialogue = [
-    "Welcome, seeker of sacred curves, to the Circle Sanctuary!",
-    "I am Archim, Guardian of the Golden Shores — where eternal shapes dwell.",
-    "Behold! These are Circles — the most perfect of all forms, with no beginning and no end.",
-    "From these sacred rings, we shall unlock the mysteries of the sanctuary!"
-  ]
+  // Custom hooks
+  const { chapterId, quiz, minigame, loading, error, authLoading, userProfile } = useChapterData({
+    castleId: CHAPTER1_CASTLE_ID,
+    chapterNumber: CHAPTER1_NUMBER,
+  });
 
-  const lessonDialogue = [
-    "Every circle has a heart — the CENTER, from which all distances are equal.",
-    "From the center to the edge flows the RADIUS — the measure of a circle's reach.",
-    "Twice the radius forms the DIAMETER — a path straight through the center.",
-    "Any line connecting two points on the edge is a CHORD — like a bridge across water.",
-    "The curved path along the edge is an ARC — a portion of the eternal ring.",
-    "Between two radii and an arc lies the SECTOR — a slice of the circle's soul.",
-    "Now, let us put your knowledge to practice!"
-  ]
+  const {
+    displayedText,
+    isTyping,
+    messageIndex,
+    handleDialogueClick,
+    handleNextMessage,
+    resetDialogue,
+  } = useChapterDialogue({
+    dialogue: currentScene === 'opening' ? CHAPTER1_OPENING_DIALOGUE : 
+             currentScene === 'lesson' ? CHAPTER1_LESSON_DIALOGUE.map(d => d.text) : 
+             CHAPTER1_MINIGAME_DIALOGUE,
+    autoAdvance: autoAdvanceEnabled,
+    autoAdvanceDelay: 3000,
+    typingSpeed: 30,
+    onDialogueComplete: handleDialogueComplete,
+  });
 
-  const minigameDialogue = [
-    "Excellent! The ripples reveal the circle's secrets.",
-    "Touch each part as I call for it — let the waters guide you.",
-    "Choose wisely, young scholar of curves!"
-  ]
+  const { playNarration, stopAudio } = useChapterAudio({ isMuted });
+
+  // Sync state changes to store
+  useEffect(() => {
+    chapterStore.setScene(CHAPTER_KEY, currentScene);
+  }, [currentScene]);
 
   useEffect(() => {
-    const loadChapterData = async () => {
-      if (!authLoading && userProfile?.id) {
+    chapterStore.setMinigameLevel(CHAPTER_KEY, currentMinigameLevel);
+  }, [currentMinigameLevel]);
+
+  useEffect(() => {
+    chapterStore.setAudioSettings(CHAPTER_KEY, isMuted, autoAdvanceEnabled);
+  }, [isMuted, autoAdvanceEnabled]);
+
+  // Sync completed tasks to store
+  useEffect(() => {
+    Object.entries(completedTasks).forEach(([taskId, completed]) => {
+      if (completed) {
+        const savedProgress = chapterStore.getChapterProgress(CHAPTER_KEY);
+        if (!savedProgress?.completedTasks[taskId]) {
+          chapterStore.setTaskComplete(CHAPTER_KEY, taskId);
+        }
+      }
+    });
+  }, [completedTasks]);
+
+  // Sync failed tasks to store
+  useEffect(() => {
+    Object.entries(failedTasks).forEach(([taskId, failed]) => {
+      if (failed) {
+        const savedProgress = chapterStore.getChapterProgress(CHAPTER_KEY);
+        if (!savedProgress?.failedTasks[taskId]) {
+          chapterStore.setTaskFailed(CHAPTER_KEY, taskId);
+        }
+      }
+    });
+  }, [failedTasks]);
+
+  // Sync quiz answers to store
+  useEffect(() => {
+    Object.entries(quizAnswers).forEach(([questionId, answer]) => {
+      const savedProgress = chapterStore.getChapterProgress(CHAPTER_KEY);
+      if (savedProgress?.quizAnswers[questionId] !== answer) {
+        chapterStore.setQuizAnswer(CHAPTER_KEY, questionId, answer);
+      }
+    });
+  }, [quizAnswers]);
+
+  // Sync earned XP to store
+  useEffect(() => {
+    if (earnedXP.lesson > 0) {
+      chapterStore.setEarnedXP(CHAPTER_KEY, 'lesson', earnedXP.lesson);
+    }
+    if (earnedXP.minigame > 0) {
+      chapterStore.setEarnedXP(CHAPTER_KEY, 'minigame', earnedXP.minigame);
+    }
+    if (earnedXP.quiz > 0) {
+      chapterStore.setEarnedXP(CHAPTER_KEY, 'quiz', earnedXP.quiz);
+    }
+  }, [earnedXP]);
+
+  // Fetch quiz score when entering reward scene
+  useEffect(() => {
+    const fetchQuizScore = async () => {
+      if (currentScene === 'reward' && quiz?.id) {
         try {
-          setLoading(true)
-          setLoadError(null)
+          // Add a small delay to ensure the backend has finished processing
+          await new Promise(resolve => setTimeout(resolve, 500));
           
-          console.log('[Castle3-Ch1] Loading data for castle:', CASTLE_ID)
-          const chaptersRes = await getChaptersByCastle(CASTLE_ID)
-          console.log('[Castle3-Ch1] Chapters response:', chaptersRes)
+          const attempts = await getUserQuizAttempts(quiz.id);
+          console.log('[castle3-chapter1] Fetched quiz attempts:', attempts);
           
-          const chapter1 = chaptersRes.data?.find((ch: any) => ch.chapter_number === CHAPTER_NUMBER)
-          
-          if (!chapter1) {
-            console.error('[Castle3-Ch1] Chapter 1 not found')
-            setLoadError('Chapter 1 not found. Please contact support.')
-            setLoading(false)
-            return
+          if (attempts && attempts.length > 0) {
+            // Get the most recent attempt (assuming attempts are ordered by creation date)
+            const sortedAttempts = attempts.sort((a: any, b: any) => {
+              return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+            });
+            const mostRecentScore = sortedAttempts[0]?.score || 0;
+            console.log('[castle3-chapter1] Most recent quiz score:', mostRecentScore);
+            setQuizScore(mostRecentScore);
           }
-          
-          console.log('[Castle3-Ch1] Found chapter 1:', chapter1)
-          setChapterId(chapter1.id)
-          
-          const [quizzesRes, minigamesRes] = await Promise.all([
-            getChapterQuizzesByChapter(chapter1.id),
-            getMinigamesByChapter(chapter1.id)
-          ])
-          
-          console.log('[Castle3-Ch1] Quizzes response:', quizzesRes)
-          console.log('[Castle3-Ch1] Minigames response:', minigamesRes)
-          
-          // Set quiz or use fallback
-          if (quizzesRes.data && quizzesRes.data.length > 0) {
-            console.log('[Castle3-Ch1] Setting quiz:', quizzesRes.data[0])
-            setQuiz(quizzesRes.data[0])
-          } else {
-            console.warn('[Castle3-Ch1] No quizzes found, using fallback')
-            setQuiz({
-              id: 'fallback-quiz',
-              chapter_id: chapter1.id,
-              quiz_config: {
-                questions: [
-                  {
-                    question: "What is the center of a circle?",
-                    options: ["The point equidistant from all edge points", "Any point on the circle", "The largest diameter", "The smallest radius"],
-                    correctAnswer: "The point equidistant from all edge points"
-                  },
-                  {
-                    question: "Which part is a line segment from the center to any point on the circle?",
-                    options: ["Diameter", "Chord", "Radius", "Arc"],
-                    correctAnswer: "Radius"
-                  },
-                  {
-                    question: "What is the relationship between diameter and radius?",
-                    options: ["Diameter = 2 × Radius", "Diameter = Radius", "Diameter = Radius ÷ 2", "Diameter = Radius²"],
-                    correctAnswer: "Diameter = 2 × Radius"
-                  }
-                ]
-              }
-            } as any)
-          }
-          
-          // Set minigame or use fallback
-          if (minigamesRes.data && minigamesRes.data.length > 0) {
-            console.log('[Castle3-Ch1] Setting minigame:', minigamesRes.data[0])
-            setMinigame(minigamesRes.data[0])
-          } else {
-            console.warn('[Castle3-Ch1] No minigames found, using fallback')
-            setMinigame({
-              id: 'fallback-minigame',
-              chapter_id: chapter1.id,
-              game_config: {
-                questions: [
-                  { partType: 'center', instruction: 'Click on the CENTER of the circle', hint: 'The center is the point in the middle.' },
-                  { partType: 'radius', instruction: 'Click on the RADIUS', hint: 'The radius goes from center to edge.' },
-                  { partType: 'diameter', instruction: 'Click on the DIAMETER', hint: 'The diameter passes through the center.' },
-                  { partType: 'chord', instruction: 'Click on the CHORD', hint: 'A chord connects two points on the circle.' },
-                  { partType: 'arc', instruction: 'Click on the ARC', hint: 'The arc is the curved edge of the circle.' },
-                  { partType: 'sector', instruction: 'Click on the SECTOR', hint: 'A sector is a pie-shaped region.' }
-                ]
-              }
-            } as any)
-          }
-          
         } catch (error) {
-          console.error('[Castle3-Ch1] Failed to load chapter data:', error)
-          setLoadError('Failed to load chapter data. Please try again.')
-        } finally {
-          setLoading(false)
+          console.error('Failed to fetch quiz score:', error);
+          // Fallback to calculating score from earnedXP
+          setQuizScore(null);
         }
       }
+    };
+    
+    fetchQuizScore();
+  }, [currentScene, quiz?.id]);
+
+  // Track lesson progress and mark tasks as dialogue progresses
+  React.useEffect(() => {
+    // Castle 3 Chapter 1 has 6 lesson concepts with semantic keys
+    if (currentScene === 'lesson' && messageIndex >= 0 && messageIndex < CHAPTER1_LESSON_DIALOGUE.length) {
+      const currentDialogue = CHAPTER1_LESSON_DIALOGUE[messageIndex];
+      
+      // Skip if no taskId (intro/conclusion messages)
+      if (!currentDialogue.taskId) return;
+      
+      const dialogueKey = currentDialogue.key;
+      
+      console.log('Lesson scene - dialogueKey:', dialogueKey, 'taskId:', currentDialogue.taskId);
+      
+      // Only process if we haven't checked this concept yet
+      if (checkedLessonTasksRef.current.has(dialogueKey)) {
+        console.log('Skipping - already checked:', dialogueKey);
+        return;
+      }
+      
+      // Mark the task complete based on dialogue key
+      console.log('Marking task complete:', currentDialogue.taskId, 'for concept:', dialogueKey);
+      markTaskComplete(currentDialogue.taskId);
+      checkedLessonTasksRef.current.add(dialogueKey);
+      
+      // Update previous messageIndex for backward detection
+      previousMessageIndexRef.current = messageIndex;
     }
     
-    loadChapterData()
-  }, [authLoading, userProfile])
+    // Detect if we're jumping backward (dialogue reset) - reset the tracking
+    if (previousMessageIndexRef.current > messageIndex) {
+      console.log('Detected backward jump - user may have restarted dialogue');
+      previousMessageIndexRef.current = messageIndex;
+    }
+  }, [currentScene, messageIndex]);
 
-  const playNarration = (filename: string) => {
-    if (isMuted || !filename) return
-    
-    try {
-      if (audioRef.current) {
-        audioRef.current.pause()
-      }
-      
-      const audio = new Audio(`/audio/narration/${filename}.mp3`)
-      
-      audio.onerror = () => {
-        console.log(`[Audio] File not found (optional): ${filename}.mp3`)
-      }
-      
-      audio.play().catch(err => {
-        console.log(`[Audio] Playback skipped (optional): ${filename}.mp3`)
-      })
-      
-      audioRef.current = audio
-    } catch (error) {
-      console.log('[Audio] Audio playback is optional, continuing without sound')
+  // Handlers
+  function handleDialogueComplete() {
+    if (currentScene === 'opening') {
+      checkedLessonTasksRef.current = new Set(); // Reset checked tasks when entering lesson scene
+      previousMessageIndexRef.current = -1; // Reset previous message index
+      resetDialogue(); // Reset dialogue BEFORE changing scene to prevent messageIndex carryover
+      setCurrentScene('lesson');
+      playNarration('castle3-chapter1-lesson-intro');
+    } else if (currentScene === 'lesson' && messageIndex >= CHAPTER1_LESSON_DIALOGUE.length - 1) {
+      // All lesson tasks should be marked by now through the useEffect above
+      awardXP('lesson');
+      resetDialogue(); // Reset dialogue BEFORE changing scene
+      setCurrentScene('minigame');
     }
   }
 
-  useEffect(() => {
-    if (isMuted && audioRef.current) {
-      audioRef.current.pause()
-      audioRef.current.currentTime = 0
-    }
-  }, [isMuted])
+  // Reset dialogue when scene changes (backup, in case direct calls are missed)
+  React.useEffect(() => {
+    resetDialogue();
+  }, [currentScene]);
 
-  useEffect(() => {
-    const handleResize = () => {
-      if (canvasContainerRef.current) {
-        const width = canvasContainerRef.current.offsetWidth
-        setStageSize({ width: width, height: 400 })
+  const markTaskComplete = (taskKey: string) => {
+    setCompletedTasks((prev) => {
+      if (prev[taskKey]) {
+        console.log(`Task ${taskKey} already completed, skipping`);
+        return prev; // Already completed, don't update
+      }
+      console.log(`Marking task ${taskKey} as complete`);
+      return { ...prev, [taskKey]: true };
+    });
+  };
+
+  const markTaskFailed = (taskKey: string) => {
+    setFailedTasks((prev) => ({ ...prev, [taskKey]: true }));
+  };
+
+  const awardXP = async (type: 'lesson' | 'minigame' | 'quiz') => {
+    let xp = 0;
+    if (type === 'lesson') xp = CHAPTER1_XP_VALUES.lesson;
+    else if (type === 'minigame') xp = CHAPTER1_XP_VALUES.minigame;
+    else if (type === 'quiz') xp = CHAPTER1_XP_VALUES.quiz1 + CHAPTER1_XP_VALUES.quiz2 + CHAPTER1_XP_VALUES.quiz3 + CHAPTER1_XP_VALUES.quiz4 + CHAPTER1_XP_VALUES.quiz5 + CHAPTER1_XP_VALUES.quiz6;
+
+    setEarnedXP((prev) => ({ ...prev, [type]: xp }));
+
+    // Award to backend
+    if (chapterId && userProfile?.id) {
+      try {
+        await awardLessonXP(chapterId, xp);
+      } catch (error) {
+        console.error('Failed to award XP:', error);
       }
     }
+  };
 
-    handleResize()
-    window.addEventListener('resize', handleResize)
-    return () => window.removeEventListener('resize', handleResize)
-  }, [])
-
-  useEffect(() => {
-    if (!wizardMessage) return
-    
-    setIsTyping(true)
-    setDisplayedText("")
-    let currentIndex = 0
-    
-    let audioToPlay = ""
-    if (currentScene === 'opening') audioToPlay = `castle3-opening-${messageIndex + 1}`
-    else if (currentScene === 'lesson') audioToPlay = `castle3-lesson-${messageIndex + 1}`
-    else if (currentScene === 'minigame') audioToPlay = `castle3-minigame-${messageIndex + 1}`
-    else if (currentScene.startsWith('quiz')) {
-      if (wizardMessage.includes("Correct!")) audioToPlay = 'castle3-quiz-correct'
-      else if (wizardMessage.includes("Not quite")) audioToPlay = 'castle3-quiz-incorrect'
-      else audioToPlay = 'castle3-quiz-intro'
-    } else if (currentScene === 'reward') audioToPlay = 'castle3-reward-intro'
-    
-    if (audioToPlay) playNarration(audioToPlay)
-
-    typingIntervalRef.current = setInterval(() => {
-      if (currentIndex < wizardMessage.length) {
-        setDisplayedText(wizardMessage.substring(0, currentIndex + 1))
-        currentIndex++
+  const handleMinigameComplete = async (isCorrect: boolean) => {
+    if (isCorrect) {
+      // Move to next level or complete minigame
+      if (currentMinigameLevel < CHAPTER1_MINIGAME_LEVELS.length - 1) {
+        setCurrentMinigameLevel(currentMinigameLevel + 1);
       } else {
-        setIsTyping(false)
-        clearInterval(typingIntervalRef.current!)
-        if (autoAdvance && (currentScene === 'opening' || currentScene === 'lesson' || currentScene === 'minigame')) {
-          autoAdvanceTimeoutRef.current = setTimeout(() => handleNextMessage(), 2500)
-        }
-      }
-    }, 15)
-
-    return () => {
-      if (typingIntervalRef.current) clearInterval(typingIntervalRef.current)
-      if (autoAdvanceTimeoutRef.current) clearTimeout(autoAdvanceTimeoutRef.current)
-      if (audioRef.current) audioRef.current.pause()
-    }
-  }, [wizardMessage])
-
-  useEffect(() => {
-    if (!isTyping && autoAdvance && (currentScene === 'opening' || currentScene === 'lesson' || currentScene === 'minigame')) {
-      if (autoAdvanceTimeoutRef.current) clearTimeout(autoAdvanceTimeoutRef.current)
-      autoAdvanceTimeoutRef.current = setTimeout(() => handleNextMessage(), 2500)
-    }
-    return () => {
-      if (autoAdvanceTimeoutRef.current) clearTimeout(autoAdvanceTimeoutRef.current)
-    }
-  }, [isTyping, autoAdvance, currentScene])
-
-  useEffect(() => {
-    if (currentScene === 'opening') {
-      setWizardMessage(openingDialogue[0])
-      setMessageIndex(0)
-    } else if (currentScene === 'lesson') {
-      setWizardMessage(lessonDialogue[0])
-      setMessageIndex(0)
-    } else if (currentScene === 'minigame') {
-      setWizardMessage(minigameDialogue[0])
-      setMessageIndex(0)
-    }
-  }, [currentScene])
-
-  useEffect(() => {
-    if (taskListRef.current) {
-      const completedCount = Object.values(completedTasks).filter(Boolean).length
-      if (completedCount > 0) {
-        const taskItems = taskListRef.current.querySelectorAll(`.${styles.taskItem}`)
-        if (taskItems[completedCount - 1]) {
-          setTimeout(() => {
-            taskItems[completedCount - 1].scrollIntoView({
-              behavior: 'smooth',
-              block: 'nearest',
-              inline: 'nearest'
-            })
-          }, 300)
-        }
-      }
-    }
-  }, [completedTasks])
-
-  useEffect(() => {
-    if (gameAreaRef.current && currentScene === 'lesson') {
-      setTimeout(() => {
-        const conceptCards = gameAreaRef.current?.querySelectorAll(`.${styles.conceptCard}`)
-        if (conceptCards && conceptCards.length > 0) {
-          const lastCard = conceptCards[conceptCards.length - 1]
-          lastCard.scrollIntoView({
-            behavior: 'smooth',
-            block: 'nearest',
-            inline: 'nearest'
-          })
-        }
-      }, 400)
-    }
-  }, [completedTasks.learnCenter, completedTasks.learnRadius, completedTasks.learnDiameter, completedTasks.learnChord, completedTasks.learnArc, completedTasks.learnSector])
-
-  const handleDialogueClick = () => {
-    if (autoAdvanceTimeoutRef.current) clearTimeout(autoAdvanceTimeoutRef.current)
-    if (isTyping) {
-      if (typingIntervalRef.current) clearInterval(typingIntervalRef.current)
-      setDisplayedText(wizardMessage)
-      setIsTyping(false)
-    } else {
-      handleNextMessage()
-    }
-  }
-
-  const handleNextMessage = async () => {
-    if (currentScene === 'opening') {
-      if (messageIndex < openingDialogue.length - 1) {
-        setMessageIndex(prev => prev + 1)
-        setWizardMessage(openingDialogue[messageIndex + 1])
-      } else {
-        setCurrentScene('lesson')
-        setMessageIndex(0)
-        setCompletedTasks(prev => ({ ...prev, learnCenter: true }))
-      }
-    } else if (currentScene === 'lesson') {
-      if (messageIndex < lessonDialogue.length - 1) {
-        setMessageIndex(prev => prev + 1)
-        setWizardMessage(lessonDialogue[messageIndex + 1])
+        // All levels complete
+        markTaskComplete('task-6'); // Complete minigame task
+        awardXP('minigame');
         
-        if (messageIndex === 1) setCompletedTasks(prev => ({ ...prev, learnRadius: true }))
-        if (messageIndex === 2) setCompletedTasks(prev => ({ ...prev, learnDiameter: true }))
-        if (messageIndex === 3) setCompletedTasks(prev => ({ ...prev, learnChord: true }))
-        if (messageIndex === 4) setCompletedTasks(prev => ({ ...prev, learnArc: true }))
-        if (messageIndex === 5) setCompletedTasks(prev => ({ ...prev, learnSector: true }))
-      } else {
-        if (chapterId) {
+        // Submit minigame attempt
+        if (minigame && userProfile?.id) {
           try {
-            await awardLessonXP(chapterId, XP_VALUES.lesson)
-            setEarnedXP(prev => ({ ...prev, lesson: XP_VALUES.lesson }))
+            await submitMinigameAttempt(minigame.id, {
+              score: 100,
+              time_taken: 60,
+              attempt_data: { completedLevels: CHAPTER1_MINIGAME_LEVELS.length },
+            });
           } catch (error) {
-            console.error('Failed to award lesson XP:', error)
+            console.error('Failed to submit minigame:', error);
           }
         }
         
-        setCurrentScene('minigame')
-        setMessageIndex(0)
-      }
-    } else if (currentScene === 'minigame') {
-      if (messageIndex < minigameDialogue.length - 1) {
-        setMessageIndex(prev => prev + 1)
-        setWizardMessage(minigameDialogue[messageIndex + 1])
+        setCurrentScene('quiz1');
       }
     }
-  }
+  };
 
-  const handlePartClick = async (partType: string) => {
-    if (!minigame || !minigame.game_config.questions[currentQuestion]) return
-    
-    const question = minigame.game_config.questions[currentQuestion]
-    setSelectedPart(partType)
-    
-    const isCorrect = partType === question.partType
-    
-    if (isCorrect) {
-      setIsFeedbackCorrect(true)
-      setMinigameFeedback("Perfect! The ripples have revealed the truth.")
+  const handleQuizSubmit = async (quizNumber: 1 | 2 | 3 | 4 | 5 | 6) => {
+    if (!quiz || !userProfile?.id) return;
+
+    const taskKey = quizNumber === 1 ? 'task-7' : quizNumber === 2 ? 'task-8' : quizNumber === 3 ? 'task-9' : quizNumber === 4 ? 'task-10' : quizNumber === 5 ? 'task-11' : 'task-12';
+    const questionIndex = quizNumber - 1;
+    const question = quiz.quiz_config.questions[questionIndex];
+    const userAnswer = quizAnswers[question.id];
+
+    if (userAnswer === question.correctAnswer) {
+      setQuizFeedback('correct');
+      markTaskComplete(taskKey);
       
-      setTimeout(async () => {
-        if (currentQuestion < minigame.game_config.questions.length - 1) {
-          setCurrentQuestion(prev => prev + 1)
-          setSelectedPart(null)
-          setMinigameFeedback("")
-          setIsFeedbackCorrect(null)
-          setWizardMessage("Well done! Now find the next part.")
+      // Delay moving to next scene to show feedback
+      setTimeout(() => {
+        setQuizFeedback(null);
+        
+        // Move to next quiz or reward
+        if (quizNumber === 1) {
+          setCurrentScene('quiz2');
+          const nextQuestion = quiz.quiz_config.questions[1];
+          setQuizAnswers((prev) => {
+            const updated = { ...prev };
+            delete updated[nextQuestion.id];
+            return updated;
+          });
+        } else if (quizNumber === 2) {
+          setCurrentScene('quiz3');
+          const nextQuestion = quiz.quiz_config.questions[2];
+          setQuizAnswers((prev) => {
+            const updated = { ...prev };
+            delete updated[nextQuestion.id];
+            return updated;
+          });
+        } else if (quizNumber === 3) {
+          setCurrentScene('quiz4');
+          const nextQuestion = quiz.quiz_config.questions[3];
+          setQuizAnswers((prev) => {
+            const updated = { ...prev };
+            delete updated[nextQuestion.id];
+            return updated;
+          });
+        } else if (quizNumber === 4) {
+          setCurrentScene('quiz5');
+          const nextQuestion = quiz.quiz_config.questions[4];
+          setQuizAnswers((prev) => {
+            const updated = { ...prev };
+            delete updated[nextQuestion.id];
+            return updated;
+          });
+        } else if (quizNumber === 5) {
+          setCurrentScene('quiz6');
+          const nextQuestion = quiz.quiz_config.questions[5];
+          setQuizAnswers((prev) => {
+            const updated = { ...prev };
+            delete updated[nextQuestion.id];
+            return updated;
+          });
         } else {
-          if (minigame.id) {
-            try {
-              await submitMinigameAttempt(minigame.id, {
-                score: 100,
-                time_taken: 0,
-                attempt_data: { completedQuestions: minigame.game_config.questions.length }
-              })
-              
-              setEarnedXP(prev => ({ ...prev, minigame: XP_VALUES.minigame }))
-              setCompletedTasks(prev => ({ ...prev, completeMinigame: true }))
-            } catch (error) {
-              console.error('Failed to submit minigame:', error)
-            }
+          // All quizzes complete
+          awardXP('quiz');
+          
+          // Submit quiz attempt
+          try {
+            console.log('[castle3-chapter1] Submitting quiz with answers:', quizAnswers);
+            console.log('[castle3-chapter1] Quiz config:', quiz.quiz_config);
+            submitQuizAttempt(quiz.id, quizAnswers);
+          } catch (error) {
+            console.error('Failed to submit quiz:', error);
           }
           
-          setWizardMessage("Magnificent! You understand the circle's sacred parts!")
-          setTimeout(() => {
-            setCurrentScene('quiz1')
-            setWizardMessage("Now let's test your knowledge!")
-          }, 3000)
-        }
-      }, 2500)
-    } else {
-      setIsFeedbackCorrect(false)
-      setMinigameFeedback("Not quite. " + question.hint)
-      setTimeout(() => {
-        setSelectedPart(null)
-        setMinigameFeedback("")
-        setIsFeedbackCorrect(null)
-      }, 2500)
-    }
-  }
-
-  const renderCirclePart = (partType: string | undefined, isHighlighted: boolean = false) => {
-    const centerX = stageSize.width / 2
-    const centerY = stageSize.height / 2
-    const radius = 120
-    const color = isHighlighted ? "#FFD700" : "#DAA520"
-    const strokeWidth = isHighlighted ? 4 : 2
-    
-    const parts: React.ReactElement[] = []
-    
-    parts.push(
-      <Circle
-        key="circle-outline"
-        x={centerX}
-        y={centerY}
-        radius={radius}
-        stroke={isHighlighted && partType === 'arc' ? "#FFD700" : "#DAA520"}
-        strokeWidth={isHighlighted && partType === 'arc' ? 5 : 2}
-        listening={partType === 'arc'}
-        onClick={() => partType === 'arc' && handlePartClick('arc')}
-      />
-    )
-    
-    if (partType === 'center' || !partType) {
-      parts.push(
-        <Circle
-          key="center"
-          x={centerX}
-          y={centerY}
-          radius={isHighlighted ? 10 : 6}
-          fill={color}
-          stroke="#FFFACD"
-          strokeWidth={strokeWidth}
-          listening={partType === 'center'}
-          onClick={() => partType === 'center' && handlePartClick('center')}
-          shadowColor={isHighlighted ? "rgba(255, 215, 0, 0.8)" : "rgba(218, 165, 32, 0.5)"}
-          shadowBlur={isHighlighted ? 15 : 5}
-        />
-      )
-      parts.push(
-        <Text
-          key="center-label"
-          x={centerX - 8}
-          y={centerY - 25}
-          text="O"
-          fontSize={16}
-          fill="#FFFACD"
-          fontStyle="bold"
-          listening={false}
-        />
-      )
-    }
-    
-    if (partType === 'radius' || !partType) {
-      parts.push(
-        <Line
-          key="radius"
-          points={[centerX, centerY, centerX + radius, centerY]}
-          stroke={color}
-          strokeWidth={strokeWidth}
-          listening={partType === 'radius'}
-          onClick={() => partType === 'radius' && handlePartClick('radius')}
-          shadowColor={isHighlighted ? "rgba(255, 215, 0, 0.8)" : "transparent"}
-          shadowBlur={isHighlighted ? 10 : 0}
-        />
-      )
-      parts.push(
-        <Text
-          key="radius-label"
-          x={centerX + radius / 2 - 8}
-          y={centerY - 20}
-          text="r"
-          fontSize={14}
-          fill="#FFFACD"
-          fontStyle="italic"
-          listening={false}
-        />
-      )
-      parts.push(
-        <Circle
-          key="radius-end"
-          x={centerX + radius}
-          y={centerY}
-          radius={5}
-          fill={color}
-          listening={false}
-        />
-      )
-    }
-    
-    if (partType === 'diameter' || !partType) {
-      parts.push(
-        <Line
-          key="diameter"
-          points={[centerX - radius, centerY, centerX + radius, centerY]}
-          stroke={color}
-          strokeWidth={strokeWidth}
-          listening={partType === 'diameter'}
-          onClick={() => partType === 'diameter' && handlePartClick('diameter')}
-          shadowColor={isHighlighted ? "rgba(255, 215, 0, 0.8)" : "transparent"}
-          shadowBlur={isHighlighted ? 10 : 0}
-        />
-      )
-      parts.push(
-        <Circle
-          key="diameter-start"
-          x={centerX - radius}
-          y={centerY}
-          radius={5}
-          fill={color}
-          listening={false}
-        />
-      )
-      parts.push(
-        <Circle
-          key="diameter-end"
-          x={centerX + radius}
-          y={centerY}
-          radius={5}
-          fill={color}
-          listening={false}
-        />
-      )
-      parts.push(
-        <Text
-          key="diameter-label-a"
-          x={centerX - radius - 20}
-          y={centerY - 5}
-          text="A"
-          fontSize={14}
-          fill="#FFFACD"
-          fontStyle="bold"
-          listening={false}
-        />
-      )
-      parts.push(
-        <Text
-          key="diameter-label-b"
-          x={centerX + radius + 10}
-          y={centerY - 5}
-          text="B"
-          fontSize={14}
-          fill="#FFFACD"
-          fontStyle="bold"
-          listening={false}
-        />
-      )
-    }
-    
-    if (partType === 'chord' || !partType) {
-      const chordAngle1 = 30
-      const chordAngle2 = 150
-      const x1 = centerX + radius * Math.cos((chordAngle1 * Math.PI) / 180)
-      const y1 = centerY + radius * Math.sin((chordAngle1 * Math.PI) / 180)
-      const x2 = centerX + radius * Math.cos((chordAngle2 * Math.PI) / 180)
-      const y2 = centerY + radius * Math.sin((chordAngle2 * Math.PI) / 180)
-      
-      parts.push(
-        <Line
-          key="chord"
-          points={[x1, y1, x2, y2]}
-          stroke={color}
-          strokeWidth={strokeWidth}
-          listening={partType === 'chord'}
-          onClick={() => partType === 'chord' && handlePartClick('chord')}
-          shadowColor={isHighlighted ? "rgba(255, 215, 0, 0.8)" : "transparent"}
-          shadowBlur={isHighlighted ? 10 : 0}
-        />
-      )
-      parts.push(
-        <Circle key="chord-p1" x={x1} y={y1} radius={5} fill={color} listening={false} />
-      )
-      parts.push(
-        <Circle key="chord-p2" x={x2} y={y2} radius={5} fill={color} listening={false} />
-      )
-      parts.push(
-        <Text
-          key="chord-label-c"
-          x={x1 + 10}
-          y={y1 - 20}
-          text="C"
-          fontSize={14}
-          fill="#FFFACD"
-          fontStyle="bold"
-          listening={false}
-        />
-      )
-      parts.push(
-        <Text
-          key="chord-label-d"
-          x={x2 - 25}
-          y={y2 - 20}
-          text="D"
-          fontSize={14}
-          fill="#FFFACD"
-          fontStyle="bold"
-          listening={false}
-        />
-      )
-    }
-    
-    if (partType === 'sector' || !partType) {
-      const sectorAngle1 = 200
-      const sectorAngle2 = 280
-      const x1 = centerX + radius * Math.cos((sectorAngle1 * Math.PI) / 180)
-      const y1 = centerY + radius * Math.sin((sectorAngle1 * Math.PI) / 180)
-      const x2 = centerX + radius * Math.cos((sectorAngle2 * Math.PI) / 180)
-      const y2 = centerY + radius * Math.sin((sectorAngle2 * Math.PI) / 180)
-      
-      parts.push(
-        <Group
-          key="sector-group"
-          listening={partType === 'sector'}
-          onClick={() => partType === 'sector' && handlePartClick('sector')}
-        >
-          <Arc
-            x={centerX}
-            y={centerY}
-            innerRadius={0}
-            outerRadius={radius}
-            angle={sectorAngle2 - sectorAngle1}
-            rotation={sectorAngle1}
-            fill={isHighlighted ? "rgba(255, 215, 0, 0.3)" : "rgba(218, 165, 32, 0.2)"}
-            stroke={color}
-            strokeWidth={strokeWidth}
-          />
-          <Line
-            points={[centerX, centerY, x1, y1]}
-            stroke={color}
-            strokeWidth={strokeWidth}
-          />
-          <Line
-            points={[centerX, centerY, x2, y2]}
-            stroke={color}
-            strokeWidth={strokeWidth}
-          />
-        </Group>
-      )
-    }
-    
-    return parts
-  }
-
-  const handleAnswerSelect = async (answer: string, correctAnswer: string, quizNumber: number) => {
-    setSelectedAnswer(answer)
-    const correct = answer === correctAnswer
-    setIsCorrect(correct)
-    setShowFeedback(true)
-    
-    const updatedAnswers = { ...quizAnswers, [`question${quizNumber}`]: answer }
-    setQuizAnswers(updatedAnswers)
-    
-    if (correct) {
-      setCompletedTasks(prev => ({ ...prev, [`passQuiz${quizNumber}` as keyof typeof completedTasks]: true }))
-      setFailedTasks(prev => ({ ...prev, [`passQuiz${quizNumber}` as keyof typeof failedTasks]: false }))
-      
-      const xpKey = `quiz${quizNumber}` as keyof typeof XP_VALUES
-      setEarnedXP(prev => ({ ...prev, quiz: prev.quiz + XP_VALUES[xpKey] }))
-      setWizardMessage(`Correct! +${XP_VALUES[xpKey]} XP`)
-      
-      setTimeout(() => {
-        setSelectedAnswer(null)
-        setShowFeedback(false)
-        
-        if (quizNumber === 1) {
-          setCurrentScene('quiz2')
-          setWizardMessage("Next: Which part is a line segment from the center to any point on the circle?")
-        } else if (quizNumber === 2) {
-          setCurrentScene('quiz3')
-          setWizardMessage("Final question: What is the relationship between diameter and radius?")
-        } else if (quizNumber === 3) {
-          if (quiz?.id) {
-            submitQuizAttempt(quiz.id, updatedAnswers).then(() => {
-              setQuizAttempts(prev => prev + 1)
-              setCanRetakeQuiz(true)
-            }).catch(err => console.error('Failed to submit quiz:', err))
+          // Complete chapter
+          try {
+            completeChapter(chapterId!);
+          } catch (error) {
+            console.error('Failed to complete chapter:', error);
           }
-          setCanRetakeQuiz(true)
-          setCurrentScene('reward')
-          setWizardMessage("The Pearl of the Center is yours. May it illuminate your journey!")
+          
+          setCurrentScene('reward');
         }
-      }, 2000)
+      }, 1000); // 1 second delay to show green feedback
     } else {
-      setFailedTasks(prev => ({ ...prev, [`passQuiz${quizNumber}` as keyof typeof failedTasks]: true }))
-      setWizardMessage("⚠️ Not quite right. Think carefully about the definition.")
+      setQuizFeedback('incorrect');
+      markTaskFailed(taskKey);
+      setQuizAttempts(quizAttempts + 1);
       
+      // Reset feedback and move to next question after delay
       setTimeout(() => {
-        setShowFeedback(false)
-        setSelectedAnswer(null)
+        setQuizFeedback(null);
         
+        // Move to next quiz even if incorrect
         if (quizNumber === 1) {
-          setCurrentScene('quiz2')
-          setWizardMessage("Next: Which part is a line segment from the center to any point on the circle?")
+          setCurrentScene('quiz2');
+          const nextQuestion = quiz.quiz_config.questions[1];
+          setQuizAnswers((prev) => {
+            const updated = { ...prev };
+            delete updated[nextQuestion.id];
+            return updated;
+          });
         } else if (quizNumber === 2) {
-          setCurrentScene('quiz3')
-          setWizardMessage("Final question: What is the relationship between diameter and radius?")
+          setCurrentScene('quiz3');
+          const nextQuestion = quiz.quiz_config.questions[2];
+          setQuizAnswers((prev) => {
+            const updated = { ...prev };
+            delete updated[nextQuestion.id];
+            return updated;
+          });
         } else if (quizNumber === 3) {
-          if (quiz?.id) {
-            submitQuizAttempt(quiz.id, updatedAnswers).then(() => {
-              setQuizAttempts(prev => prev + 1)
-              setCanRetakeQuiz(true)
-            }).catch(err => console.error('Failed to submit quiz:', err))
+          setCurrentScene('quiz4');
+          const nextQuestion = quiz.quiz_config.questions[3];
+          setQuizAnswers((prev) => {
+            const updated = { ...prev };
+            delete updated[nextQuestion.id];
+            return updated;
+          });
+        } else if (quizNumber === 4) {
+          setCurrentScene('quiz5');
+          const nextQuestion = quiz.quiz_config.questions[4];
+          setQuizAnswers((prev) => {
+            const updated = { ...prev };
+            delete updated[nextQuestion.id];
+            return updated;
+          });
+        } else if (quizNumber === 5) {
+          setCurrentScene('quiz6');
+          const nextQuestion = quiz.quiz_config.questions[5];
+          setQuizAnswers((prev) => {
+            const updated = { ...prev };
+            delete updated[nextQuestion.id];
+            return updated;
+          });
+        } else {
+          // All quizzes answered (even if some wrong)
+          // Submit quiz attempt
+          try {
+            submitQuizAttempt(quiz.id, quizAnswers);
+          } catch (error) {
+            console.error('Failed to submit quiz:', error);
           }
-          setCanRetakeQuiz(true)
-          setCurrentScene('reward')
-          setWizardMessage("You've completed the chapter. Review and retake the quiz to improve your score!")
+          
+          // Complete chapter (even with wrong answers)
+          try {
+            completeChapter(chapterId!);
+          } catch (error) {
+            console.error('Failed to complete chapter:', error);
+          }
+          
+          setCurrentScene('reward');
         }
-      }, 2500)
+      }, 1000);
     }
-  }
-
-  const handleComplete = async () => {
-    if (audioRef.current) audioRef.current.pause()
-    
-    if (chapterId) {
-      try {
-        await completeChapter(chapterId)
-        console.log('[Castle3-Ch1] Chapter marked as completed')
-      } catch (error) {
-        console.error('[Castle3-Ch1] Failed to mark chapter as completed:', error)
-      }
-    }
-    
-    router.push('/student/worldmap/castle3')
-  }
+  };
 
   const handleRetakeQuiz = () => {
-    setQuizAnswers({})
-    setSelectedAnswer(null)
-    setShowFeedback(false)
-    setFailedTasks({
-      passQuiz1: false,
-      passQuiz2: false,
-      passQuiz3: false
-    })
-    setCompletedTasks(prev => ({
-      ...prev,
-      passQuiz1: false,
-      passQuiz2: false,
-      passQuiz3: false
-    }))
-    setEarnedXP(prev => ({ ...prev, quiz: 0 }))
-    setCurrentScene('quiz1')
-    setWizardMessage("Let's try the quiz again! What is the center of a circle?")
-  }
+    setQuizAnswers({});
+    setQuizAttempts(0);
+    setFailedTasks({});
+    setQuizFeedback(null);
+    setQuizScore(null); // Reset quiz score when retaking
+    
+    // Clear quiz data from store
+    chapterStore.clearAllQuizData(CHAPTER_KEY);
+    
+    // Clear quiz task completions (task-7 through task-12)
+    setCompletedTasks((prev) => {
+      const updated = { ...prev };
+      delete updated['task-7'];
+      delete updated['task-8'];
+      delete updated['task-9'];
+      delete updated['task-10'];
+      delete updated['task-11'];
+      delete updated['task-12'];
+      delete updated['task-9'];
+      delete updated['task-10'];
+      delete updated['task-11'];
+      return updated;
+    });
+    
+    setCurrentScene('quiz1');
+  };
 
-  const handleExit = () => {
-    if (audioRef.current) audioRef.current.pause()
-    router.push('/student/worldmap/castle3')
-  }
+  const handleContinueProgress = () => {
+    setShowProgressModal(false);
+    // Continue with saved progress (already loaded)
+  };
 
-  const toggleAutoAdvance = (e: React.MouseEvent) => {
-    e.stopPropagation()
-    setAutoAdvance(!autoAdvance)
-  }
+  const handleDontShowAgain = () => {
+    const expirationTime = Date.now() + 5 * 60 * 1000; // 5 minutes
+    localStorage.setItem(`${CHAPTER_KEY}-dont-show-modal`, 'true');
+    localStorage.setItem(`${CHAPTER_KEY}-modal-expiration`, expirationTime.toString());
+    setShowProgressModal(false);
+  };
 
-  const toggleMute = (e: React.MouseEvent) => {
-    e.stopPropagation()
-    setIsMuted(!isMuted)
-  }
+  const handleRestartChapter = () => {
+    setShowProgressModal(false);
+    
+    // Reset all state to initial values
+    setCurrentScene('opening');
+    setCompletedTasks({});
+    setFailedTasks({});
+    setQuizAnswers({});
+    setQuizAttempts(0);
+    setEarnedXP({ lesson: 0, minigame: 0, quiz: 0 });
+    setCurrentMinigameLevel(0);
+    setQuizFeedback(null);
+    
+    // Clear all data from store for this chapter
+    chapterStore.clearAllQuizData(CHAPTER_KEY);
+    chapterStore.setScene(CHAPTER_KEY, 'opening');
+    chapterStore.setMinigameLevel(CHAPTER_KEY, 0);
+    chapterStore.setEarnedXP(CHAPTER_KEY, 'lesson', 0);
+    chapterStore.setEarnedXP(CHAPTER_KEY, 'minigame', 0);
+    chapterStore.setEarnedXP(CHAPTER_KEY, 'quiz', 0);
+    
+    // Reset lesson tracking
+    checkedLessonTasksRef.current = new Set();
+    previousMessageIndexRef.current = -1;
+    
+    // Reset dialogue
+    resetDialogue();
+  };
 
-  if (authLoading) {
+  const handleReturnToCastle = () => {
+    router.push('/student/worldmap/castle2');
+  };
+
+  // Loading and error states
+  if (authLoading || loading) {
     return (
-      <div className={styles.chapterContainer}>
-        <div className={styles.backgroundOverlay}></div>
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', color: 'white', flexDirection: 'column', gap: '1rem' }}>
-          <p>Authenticating...</p>
-        </div>
+      <div className={baseStyles.loading_container}>
+        <p>Loading Chapter 1...</p>
       </div>
-    )
+    );
   }
 
-  if (loadError) {
+  if (error) {
     return (
-      <div className={styles.chapterContainer}>
-        <div className={styles.backgroundOverlay}></div>
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', color: 'white', flexDirection: 'column', gap: '1rem' }}>
-          <p style={{ color: '#ff6b6b' }}>{loadError}</p>
-          <button 
-            onClick={() => router.push('/student/worldmap/castle3')}
-            style={{ padding: '0.5rem 1rem', background: '#4CAF50', border: 'none', borderRadius: '4px', color: 'white', cursor: 'pointer' }}
-          >
-            Return to Castle
-          </button>
-        </div>
+      <div className={baseStyles.loading_container}>
+        <p>Error: {error}</p>
+        <button onClick={handleReturnToCastle}>Return to Castle</button>
       </div>
-    )
+    );
   }
 
-  if (loading) {
-    return (
-      <div className={styles.chapterContainer}>
-        <div className={styles.backgroundOverlay}></div>
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', color: 'white', flexDirection: 'column', gap: '1rem' }}>
-          <p>Loading chapter...</p>
-          <p style={{ fontSize: '0.875rem', opacity: 0.7 }}>Please wait...</p>
-        </div>
-      </div>
-    )
-  }
-
+  // Main render
   return (
-    <div className={styles.chapterContainer}>
-      <div className={styles.backgroundOverlay}></div>
+    <div className={`${baseStyles.chapterContainer} ${baseStyles.castle3Theme}`}>
+      <div className={baseStyles.backgroundOverlay}></div>
 
-      <div className={styles.topBar}>
-        <div className={styles.chapterInfo}>
-          <Sparkles className={styles.titleIcon} />
-          <div>
-            <h1 className={styles.chapterTitle}>Chapter 1: The Tide of Shapes</h1>
-            <p className={styles.chapterSubtitle}>Circle Sanctuary • Castle III</p>
-          </div>
-        </div>
-        
-        <div className={styles.topBarActions}>
-          <button
-            className={`${styles.controlButton} ${isMuted ? styles.controlButtonActive : ''}`}
-            onClick={toggleMute}
-            title={isMuted ? "Audio: OFF" : "Audio: ON"}
-          >
-            {isMuted ? <VolumeX size={20} /> : <Volume2 size={20} />}
-          </button>
-          <button
-            className={`${styles.controlButton} ${autoAdvance ? styles.controlButtonActive : ''}`}
-            onClick={toggleAutoAdvance}
-            title={autoAdvance ? "Auto: ON" : "Auto: OFF"}
-          >
-            {autoAdvance ? <Pause size={20} /> : <Play size={20} />}
-          </button>
-          <button className={styles.exitButton} onClick={handleExit}>
-            <X size={20} />
-          </button>
-        </div>
-      </div>
+      {/* Progress Modal */}
+      {showProgressModal && (
+        <ChapterProgressModal
+          chapterTitle="Chapter 1: The Tide of Shapes"
+          currentScene={savedProgress?.currentScene || 'opening'}
+          onContinue={handleContinueProgress}
+          onRestart={handleRestartChapter}
+          onDontShowAgain={handleDontShowAgain}
+        />
+      )}
 
-      <div className={styles.mainContent}>
-        <div className={styles.taskPanel}>
-          <div className={styles.taskPanelHeader}>
-            <span className={styles.taskPanelTitle}>Learning Objectives</span>
-            <div className={styles.progressText}>
-              {Object.values(completedTasks).filter(Boolean).length} / 10 Complete
-            </div>
-          </div>
-          <div className={styles.taskList} ref={taskListRef}>
-            {[
-              { key: 'learnCenter', label: 'Learn: Center' },
-              { key: 'learnRadius', label: 'Learn: Radius' },
-              { key: 'learnDiameter', label: 'Learn: Diameter' },
-              { key: 'learnChord', label: 'Learn: Chord' },
-              { key: 'learnArc', label: 'Learn: Arc' },
-              { key: 'learnSector', label: 'Learn: Sector' },
-              { key: 'completeMinigame', label: 'Complete Ripple Reveal' },
-              { key: 'passQuiz1', label: 'Pass Quiz 1' },
-              { key: 'passQuiz2', label: 'Pass Quiz 2' },
-              { key: 'passQuiz3', label: 'Pass Quiz 3' }
-            ].map(task => (
-              <div key={task.key} className={`${styles.taskItem} ${
-                completedTasks[task.key as keyof typeof completedTasks] ? styles.taskCompleted : ''
-              } ${
-                failedTasks[task.key as keyof typeof failedTasks] ? styles.taskFailed : ''
-              }`}>
-                <div className={styles.taskCheckbox}>
-                  {completedTasks[task.key as keyof typeof completedTasks] && <span>✓</span>}
-                  {failedTasks[task.key as keyof typeof failedTasks] && <span>✗</span>}
-                </div>
-                <span className={styles.taskLabel}>{task.label}</span>
-              </div>
-            ))}
-          </div>
-        </div>
+      {/* Top Bar */}
+      <ChapterTopBar
+        chapterTitle="Chapter 1: The Tide of Shapes"
+        chapterSubtitle="Castle 3 - Circle Sanctuary"
+        isMuted={isMuted}
+        autoAdvance={autoAdvanceEnabled}
+        onToggleMute={() => setIsMuted(!isMuted)}
+        onToggleAutoAdvance={() => setAutoAdvanceEnabled(!autoAdvanceEnabled)}
+        onExit={handleReturnToCastle}
+        styleModule={baseStyles}
+      />
 
-        <div className={styles.gameArea} ref={gameAreaRef}>
+      {/* Main Content */}
+      <div className={baseStyles.mainContent}>
+        {/* Task Panel */}
+        <ChapterTaskPanel
+          tasks={CHAPTER1_LEARNING_OBJECTIVES}
+          completedTasks={completedTasks}
+          failedTasks={failedTasks}
+          styleModule={baseStyles}
+        />
+
+        {/* Game Area */}
+        <div className={baseStyles.gameArea}>
+          {/* Opening Scene */}
           {currentScene === 'opening' && (
-            <div className={styles.sceneContent}>
-              <div className={styles.observatoryView}>
-                <div className={styles.doorPreview}>
-                  <h2 className={styles.doorTitle}>The Sacred Pools of Knowledge</h2>
-                  <div className={styles.doorGrid}>
-                    <div className={styles.doorCard}>
-                      <div className={styles.doorImageWrapper}>
-                        <img 
-                          src="/images/castle3-door1.png" 
-                          alt="Chapter 1" 
-                          className={styles.doorImage}
-                        />
-                      </div>
-                      <span className={styles.doorLabel}>Chapter I: Tide of Shapes</span>
-                    </div>
-                    <div className={styles.doorCard}>
-                      <div className={styles.doorImageWrapper}>
-                        <img 
-                          src="/images/castle3-door2.png" 
-                          alt="Chapter 2" 
-                          className={styles.doorImage}
-                        />
-                      </div>
-                      <span className={styles.doorLabel}>Chapter II: Path of Perimeter</span>
-                    </div>
-                    <div className={styles.doorCard}>
-                      <div className={styles.doorImageWrapper}>
-                        <img 
-                          src="/images/castle3-door3.png" 
-                          alt="Chapter 3" 
-                          className={styles.doorImage}
-                        />
-                      </div>
-                      <span className={styles.doorLabel}>Chapter III: Chamber of Space</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
+            <div style={{ textAlign: 'center', padding: '2rem' }}>
+              <h2 style={{ color: '#FFFD8F', fontSize: '2rem' }}>Welcome to The Tide of Shapes!</h2>
+              <p style={{ color: '#B0CE88', fontSize: '1.2rem', marginTop: '1rem' }}>
+                Click the dialogue box to begin your journey...
+              </p>
             </div>
           )}
 
+          {/* Lesson Scene */}
           {currentScene === 'lesson' && (
-            <div className={styles.lessonContent}>
-              <div className={styles.conceptGrid}>
-                <div className={`${styles.conceptCard} ${completedTasks.learnCenter ? styles.revealed : styles.hidden}`}>
-                  <h3>Center (O)</h3>
-                  <div className={styles.visualDemo}>
-                    <svg width="100%" height="100" viewBox="0 0 200 100">
-                      <circle cx="100" cy="50" r="40" fill="none" stroke="#DAA520" strokeWidth="2" />
-                      <circle cx="100" cy="50" r="6" fill="#FFD700" />
-                      <text x="100" y="38" textAnchor="middle" fill="#FFFACD" fontSize="14" fontWeight="bold">O</text>
-                    </svg>
-                  </div>
-                  <p>The heart of the circle. All points on the edge are equidistant from it.</p>
-                </div>
+            <LessonGrid columns={3} gap="medium" styleModule={lessonStyles}>
+              {CHAPTER1_CONCEPTS.map((concept, index) => {
+                // Find the corresponding dialogue to determine if it's been reached
+                const dialogueIndex = CHAPTER1_LESSON_DIALOGUE.findIndex(d => d.key === concept.key);
+                const isHighlighted = messageIndex >= dialogueIndex;
                 
-                <div className={`${styles.conceptCard} ${completedTasks.learnRadius ? styles.revealed : styles.hidden}`}>
-                  <h3>Radius (r)</h3>
-                  <div className={styles.visualDemo}>
-                    <svg width="100%" height="100" viewBox="0 0 200 100">
-                      <circle cx="100" cy="50" r="40" fill="none" stroke="#DAA520" strokeWidth="2" />
-                      <line x1="100" y1="50" x2="140" y2="50" stroke="#FFD700" strokeWidth="3" />
-                      <circle cx="100" cy="50" r="4" fill="#FFD700" />
-                      <circle cx="140" cy="50" r="4" fill="#FFD700" />
-                      <text x="120" y="42" textAnchor="middle" fill="#FFFACD" fontSize="12" fontStyle="italic">r</text>
-                    </svg>
-                  </div>
-                  <p>Line from center to any point on the circle.</p>
-                </div>
-                
-                <div className={`${styles.conceptCard} ${completedTasks.learnDiameter ? styles.revealed : styles.hidden}`}>
-                  <h3>Diameter (d)</h3>
-                  <div className={styles.visualDemo}>
-                    <svg width="100%" height="100" viewBox="0 0 200 100">
-                      <circle cx="100" cy="50" r="40" fill="none" stroke="#DAA520" strokeWidth="2" />
-                      <line x1="60" y1="50" x2="140" y2="50" stroke="#FFD700" strokeWidth="3" />
-                      <circle cx="60" cy="50" r="4" fill="#FFD700" />
-                      <circle cx="140" cy="50" r="4" fill="#FFD700" />
-                      <text x="58" y="66" textAnchor="middle" fill="#FFFACD" fontSize="12" fontWeight="bold">A</text>
-                      <text x="142" y="66" textAnchor="middle" fill="#FFFACD" fontSize="12" fontWeight="bold">B</text>
-                    </svg>
-                  </div>
-                  <p>Line through center connecting two edge points. d = 2r</p>
-                </div>
-                
-                <div className={`${styles.conceptCard} ${completedTasks.learnChord ? styles.revealed : styles.hidden}`}>
-                  <h3>Chord</h3>
-                  <div className={styles.visualDemo}>
-                    <svg width="100%" height="100" viewBox="0 0 200 100">
-                      <circle cx="100" cy="50" r="40" fill="none" stroke="#DAA520" strokeWidth="2" />
-                      <line x1="80" y1="26" x2="120" y2="74" stroke="#FFD700" strokeWidth="3" />
-                      <circle cx="80" cy="26" r="4" fill="#FFD700" />
-                      <circle cx="120" cy="74" r="4" fill="#FFD700" />
-                      <text x="78" y="20" textAnchor="middle" fill="#FFFACD" fontSize="12" fontWeight="bold">C</text>
-                      <text x="122" y="88" textAnchor="middle" fill="#FFFACD" fontSize="12" fontWeight="bold">D</text>
-                    </svg>
-                  </div>
-                  <p>Line connecting two points on the circle (not through center).</p>
-                </div>
-                
-                <div className={`${styles.conceptCard} ${completedTasks.learnArc ? styles.revealed : styles.hidden}`}>
-                  <h3>Arc</h3>
-                  <div className={styles.visualDemo}>
-                    <svg width="100%" height="100" viewBox="0 0 200 100">
-                      <circle cx="100" cy="50" r="40" fill="none" stroke="#DAA520" strokeWidth="2" />
-                      <path d="M 100 10 A 40 40 0 0 1 140 50" fill="none" stroke="#FFD700" strokeWidth="5" />
-                      <circle cx="100" cy="10" r="4" fill="#FFD700" />
-                      <circle cx="140" cy="50" r="4" fill="#FFD700" />
-                    </svg>
-                  </div>
-                  <p>A curved portion of the circle between two points.</p>
-                </div>
-                
-                <div className={`${styles.conceptCard} ${completedTasks.learnSector ? styles.revealed : styles.hidden}`}>
-                  <h3>Sector</h3>
-                  <div className={styles.visualDemo}>
-                    <svg width="100%" height="100" viewBox="0 0 200 100">
-                      <circle cx="100" cy="50" r="40" fill="none" stroke="#DAA520" strokeWidth="2" />
-                      <path d="M 100 50 L 100 10 A 40 40 0 0 1 140 50 Z" fill="rgba(255, 215, 0, 0.3)" stroke="#FFD700" strokeWidth="2" />
-                      <line x1="100" y1="50" x2="100" y2="10" stroke="#FFD700" strokeWidth="2" />
-                      <line x1="100" y1="50" x2="140" y2="50" stroke="#FFD700" strokeWidth="2" />
-                    </svg>
-                  </div>
-                  <p>Pie-shaped region between two radii and an arc.</p>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {currentScene === 'minigame' && minigame && (
-            <div className={styles.minigameContent}>
-              <div className={styles.minigameCard}>
-                <h3>{minigame.game_config.questions[currentQuestion]?.instruction}</h3>
-                <p className={styles.minigameHint}>
-                  {minigame.game_config.questions[currentQuestion]?.hint}
-                </p>
-                
-                <div className={styles.canvasContainer} ref={canvasContainerRef}>
-                  <Stage width={stageSize.width} height={stageSize.height}>
-                    <Layer>
-                      {renderCirclePart(
-                        minigame.game_config.questions[currentQuestion]?.partType,
-                        selectedPart === minigame.game_config.questions[currentQuestion]?.partType
-                      )}
-                    </Layer>
-                  </Stage>
-                </div>
-                
-                {minigameFeedback && (
-                  <div className={`${styles.feedback} ${isFeedbackCorrect ? styles.correct : styles.incorrect}`}>
-                    {minigameFeedback}
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-
-          {currentScene === 'quiz1' && quiz && quiz.quiz_config.questions[0] && (
-            <div className={styles.quizContent}>
-              <div className={styles.quizCard}>
-                <h3 className={styles.quizQuestion}>{quiz.quiz_config.questions[0].question}</h3>
-                <div className={styles.quizOptions}>
-                  {quiz.quiz_config.questions[0].options.map((option) => (
-                    <button
-                      key={option}
-                      className={`${styles.quizOption} ${
-                        selectedAnswer === option
-                          ? isCorrect
-                            ? styles.correct
-                            : styles.incorrect
-                          : ''
-                      }`}
-                      onClick={() => handleAnswerSelect(option, quiz.quiz_config.questions[0].correctAnswer, 1)}
-                      disabled={showFeedback}
-                    >
-                      {option}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-          )}
-
-          {currentScene === 'quiz2' && quiz && quiz.quiz_config.questions[1] && (
-            <div className={styles.quizContent}>
-              <div className={styles.quizCard}>
-                <h3 className={styles.quizQuestion}>{quiz.quiz_config.questions[1].question}</h3>
-                <div className={styles.quizOptions}>
-                  {quiz.quiz_config.questions[1].options.map((option) => (
-                    <button
-                      key={option}
-                      className={`${styles.quizOption} ${
-                        selectedAnswer === option
-                          ? isCorrect
-                            ? styles.correct
-                            : styles.incorrect
-                          : ''
-                      }`}
-                      onClick={() => handleAnswerSelect(option, quiz.quiz_config.questions[1].correctAnswer, 2)}
-                      disabled={showFeedback}
-                    >
-                      {option}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-          )}
-
-          {currentScene === 'quiz3' && quiz && quiz.quiz_config.questions[2] && (
-            <div className={styles.quizContent}>
-              <div className={styles.quizCard}>
-                <h3 className={styles.quizQuestion}>{quiz.quiz_config.questions[2].question}</h3>
-                <div className={styles.quizOptions}>
-                  {quiz.quiz_config.questions[2].options.map((option) => (
-                    <button
-                      key={option}
-                      className={`${styles.quizOption} ${
-                        selectedAnswer === option
-                          ? isCorrect
-                            ? styles.correct
-                            : styles.incorrect
-                          : ''
-                      }`}
-                      onClick={() => handleAnswerSelect(option, quiz.quiz_config.questions[2].correctAnswer, 3)}
-                      disabled={showFeedback}
-                    >
-                      {option}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-          )}
-
-          {currentScene === 'reward' && (
-            <div className={styles.rewardContent}>
-              <h2 className={styles.rewardTitle}>Chapter Complete!</h2>
-              <div className={styles.rewardCard}>
-                <div className={styles.relicDisplay}>
-                  <img 
-                    src="/images/pearl-center.png" 
-                    alt="Pearl of the Center" 
-                    className={styles.relicIcon}
+                return (
+                  <ConceptCard
+                    key={`${concept.key}-${index}`}
+                    title={concept.title}
+                    description={concept.summary}
+                    icon={null}
+                    highlighted={isHighlighted}
+                    styleModule={lessonStyles}
                   />
-                </div>
-                <h3 className={styles.rewardName}>Pearl of the Center</h3>
-                <p className={styles.rewardDescription}>
-                  You have mastered the sacred parts of the circle! The heart of the sanctuary's magic is yours.
-                </p>
+                );
+              })}
+            </LessonGrid>
+          )}
+
+          {/* Minigame Scene */}
+          {currentScene === 'minigame' && (
+            <CirclePartsMinigame
+              question={{
+                id: `minigame-${currentMinigameLevel}`,
+                instruction: CHAPTER1_MINIGAME_LEVELS[currentMinigameLevel].instruction,
+                correctAnswer: CHAPTER1_MINIGAME_LEVELS[currentMinigameLevel].partType,
+                partType: CHAPTER1_MINIGAME_LEVELS[currentMinigameLevel].partType,
+                hint: CHAPTER1_MINIGAME_LEVELS[currentMinigameLevel].hint,
+              }}
+              onComplete={handleMinigameComplete}
+              styleModule={minigameStyles}
+            />
+          )}
+
+          {/* Quiz Scenes */}
+          {(currentScene === 'quiz1' || currentScene === 'quiz2' || currentScene === 'quiz3' || currentScene === 'quiz4' || currentScene === 'quiz5' || currentScene === 'quiz6') && quiz && (
+            <div className={minigameStyles.minigameContainer}>
+              <div className={minigameStyles.questionText}>
+                {quiz.quiz_config.questions[
+                  currentScene === 'quiz1' ? 0 : 
+                  currentScene === 'quiz2' ? 1 : 
+                  currentScene === 'quiz3' ? 2 : 
+                  currentScene === 'quiz4' ? 3 : 
+                  currentScene === 'quiz5' ? 4 : 5
+                ]?.question}
               </div>
-              <div className={styles.rewardStats}>
-                <div className={styles.statBox}>
-                  <span className={styles.statLabel}>Lesson XP</span>
-                  <span className={styles.statValue}>{earnedXP.lesson}</span>
-                </div>
-                <div className={styles.statBox}>
-                  <span className={styles.statLabel}>Minigame XP</span>
-                  <span className={styles.statValue}>{earnedXP.minigame}</span>
-                </div>
-                <div className={styles.statBox}>
-                  <span className={styles.statLabel}>Quiz XP</span>
-                  <span className={styles.statValue}>{earnedXP.quiz}</span>
-                </div>
+              
+              <div className={minigameStyles.answerOptions}>
+                {quiz.quiz_config.questions[
+                  currentScene === 'quiz1' ? 0 : 
+                  currentScene === 'quiz2' ? 1 : 
+                  currentScene === 'quiz3' ? 2 : 
+                  currentScene === 'quiz4' ? 3 : 
+                  currentScene === 'quiz5' ? 4 : 5
+                ]?.options.map((option, idx) => (
+                  <div
+                    key={idx}
+                    className={`${minigameStyles.answerOption} ${
+                      quizAnswers[quiz.quiz_config.questions[
+                        currentScene === 'quiz1' ? 0 : 
+                        currentScene === 'quiz2' ? 1 : 
+                        currentScene === 'quiz3' ? 2 : 
+                        currentScene === 'quiz4' ? 3 : 
+                        currentScene === 'quiz5' ? 4 : 5
+                      ].id] === option
+                        ? minigameStyles.answerOptionSelected
+                        : ''
+                    }`}
+                    onClick={() => {
+                      const questionId = quiz.quiz_config.questions[
+                        currentScene === 'quiz1' ? 0 : 
+                        currentScene === 'quiz2' ? 1 : 
+                        currentScene === 'quiz3' ? 2 : 
+                        currentScene === 'quiz4' ? 3 : 
+                        currentScene === 'quiz5' ? 4 : 5
+                      ].id;
+                      setQuizAnswers((prev) => ({ ...prev, [questionId]: option }));
+                    }}
+                  >
+                    {option}
+                  </div>
+                ))}
               </div>
-              <div className={styles.rewardActions}>
-                {canRetakeQuiz && (
-                  <button className={styles.retakeButton} onClick={handleRetakeQuiz}>
-                    Retake Quiz
-                  </button>
+
+              <button
+                className={`${minigameStyles.submitButton} ${
+                  quizFeedback === 'correct' 
+                    ? minigameStyles.submitButtonCorrect 
+                    : quizFeedback === 'incorrect' 
+                    ? minigameStyles.submitButtonIncorrect 
+                    : ''
+                }`}
+                onClick={() => handleQuizSubmit(
+                  currentScene === 'quiz1' ? 1 : 
+                  currentScene === 'quiz2' ? 2 : 
+                  currentScene === 'quiz3' ? 3 : 
+                  currentScene === 'quiz4' ? 4 : 
+                  currentScene === 'quiz5' ? 5 : 6
                 )}
-                <button className={styles.returnButton} onClick={handleComplete}>
-                  Return to Sanctuary
-                  <ChevronRight size={20} />
-                </button>
-              </div>
+                disabled={!quizAnswers[quiz.quiz_config.questions[
+                  currentScene === 'quiz1' ? 0 : 
+                  currentScene === 'quiz2' ? 1 : 
+                  currentScene === 'quiz3' ? 2 : 
+                  currentScene === 'quiz4' ? 3 : 4
+                ].id] || quizFeedback !== null}
+              >
+                {quizFeedback === 'correct' ? '✓ Correct!' : quizFeedback === 'incorrect' ? '✗ Incorrect' : 'Submit Answer'}
+              </button>
             </div>
+          )}
+
+          {/* Reward Scene */}
+          {currentScene === 'reward' && (
+            <ChapterRewardScreen
+              relicName={CHAPTER1_RELIC.name}
+              relicImage={CHAPTER1_RELIC.image}
+              relicDescription={CHAPTER1_RELIC.description}
+              earnedXP={earnedXP}
+              quizScore={quizScore}
+              canRetakeQuiz={true}
+              onRetakeQuiz={handleRetakeQuiz}
+              onComplete={handleReturnToCastle}
+              styleModule={baseStyles}
+            />
           )}
         </div>
       </div>
 
+      {/* Dialogue Box */}
       {currentScene !== 'reward' && (
-        <div className={styles.dialogueWrapper}>
-          <div className={styles.dialogueContainer} onClick={handleDialogueClick}>
-            <div className={styles.characterSection}>
-              <div className={styles.portraitFrame}>
-                <img src="/images/archim-wizard.png" alt="Archim" className={styles.wizardPortrait} />
-              </div>
-            </div>
-            <div className={styles.messageSection}>
-              <div className={styles.dialogueTextWrapper}>
-                <div className={styles.dialogueSpeaker}>Archim</div>
-                <div className={styles.dialogueText}>
-                  {displayedText}
-                </div>
-              </div>
-              {!isTyping && currentScene !== 'minigame' && (
-                <div className={styles.continuePrompt}>
-                  Click to continue →
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
+        <ChapterDialogueBox
+          wizardName={CHAPTER1_WIZARD.name}
+          wizardImage={CHAPTER1_WIZARD.image}
+          displayedText={displayedText}
+          isTyping={isTyping}
+          showContinuePrompt={!isTyping}
+          onClick={handleDialogueClick}
+          styleModule={baseStyles}
+        />
       )}
     </div>
-  )
+  );
 }

@@ -56,7 +56,7 @@ const AngleIdentificationMinigame: React.FC<AngleIdentificationMinigameProps> = 
   // Draw an angle at the center of the canvas
   const renderAngle = () => {
     const centerX = canvasSize.width / 2;
-    const centerY = canvasSize.height / 2 + 20; // Shift down slightly for better vertical centering
+    const centerY = canvasSize.height / 2 + 50; // Shift down for better vertical centering
     const rayLength = Math.min(canvasSize.width, canvasSize.height) * 0.32;
 
     // Get the actual angle measure from question data

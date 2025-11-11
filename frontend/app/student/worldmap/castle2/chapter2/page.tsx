@@ -1,418 +1,801 @@
-"use client";
+﻿'use client';
+
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, RefreshCw, CheckCircle, Lock } from 'lucide-react';
-import styles from '@/styles/castle2-chapter2.module.css';
+import {
+  ChapterTopBar,
+  ChapterTaskPanel,
+  ChapterDialogueBox,
+  ChapterRewardScreen,
+} from '@/components/chapters/shared';
+import { AngleConstructorMinigame } from '@/components/chapters/minigames';
+import { ConceptCard, LessonGrid } from '@/components/chapters/lessons';
+import ChapterProgressModal from '@/components/chapters/ChapterProgressModal';
+import { useChapterData, useChapterDialogue, useChapterAudio } from '@/hooks/chapters';
+import {
+  CHAPTER2_CASTLE_ID,
+  CHAPTER2_NUMBER,
+  CHAPTER2_OPENING_DIALOGUE,
+  CHAPTER2_LESSON_DIALOGUE,
+  CHAPTER2_MINIGAME_DIALOGUE,
+  CHAPTER2_MINIGAME_LEVELS,
+  CHAPTER2_LEARNING_OBJECTIVES,
+  CHAPTER2_CONCEPTS,
+  CHAPTER2_XP_VALUES,
+  CHAPTER2_RELIC,
+  CHAPTER2_WIZARD,
+} from '@/constants/chapters/castle2/chapter2';
+import Image from 'next/image';
+import { awardLessonXP, completeChapter } from '@/api/chapters';
+import { submitQuizAttempt, getUserQuizAttempts } from '@/api/chapterQuizzes';
+import { submitMinigameAttempt } from '@/api/minigames';
+import { useChapterStore } from '@/store/chapterStore';
+import baseStyles from '@/styles/chapters/chapter-base.module.css';
+import minigameStyles from '@/styles/chapters/minigame-shared.module.css';
+import lessonStyles from '@/styles/chapters/lesson-shared.module.css';
 
-const PerimeterPathway = () => {
+type SceneType = 'opening' | 'lesson' | 'minigame' | 'quiz1' | 'quiz2' | 'quiz3' | 'quiz4' | 'quiz5' | 'reward';
+
+const CHAPTER_KEY = 'castle2-CHAPTER2';
+
+export default function Castle2CHAPTER2Page() {
   const router = useRouter();
   
-  // Game State
-  const [currentRound, setCurrentRound] = useState(1);
-  const [totalRounds] = useState(6);
-  const [pathsGuarded, setPathsGuarded] = useState(0);
-  const [userAnswer, setUserAnswer] = useState('');
-  const [gamePhase, setGamePhase] = useState('introduction'); // introduction, playing, completed
-  const [roundCompleted, setRoundCompleted] = useState(false);
-  const [showHint, setShowHint] = useState(false);
-  const [isTracingComplete, setIsTracingComplete] = useState(false);
-  const [completedTasks, setCompletedTasks] = useState({
-    round1: false,
-    round2: false,
-    round3: false,
-    round4: false,
-    round5: false,
-    round6: false
+  // Zustand store
+  const chapterStore = useChapterStore();
+  const savedProgress = chapterStore.getChapterProgress(CHAPTER_KEY);
+  
+  // Progress modal state
+  const [showProgressModal, setShowProgressModal] = useState(false);
+  const [hasCheckedProgress, setHasCheckedProgress] = useState(false);
+  
+  // Initialize chapter in store if not exists and check for existing progress
+  useEffect(() => {
+    // Get existing progress BEFORE initializing (to check if it's truly new)
+    const existingProgress = chapterStore.getChapterProgress(CHAPTER_KEY);
+    const hasRealProgress = existingProgress && (
+      existingProgress.currentScene !== 'opening' ||
+      Object.keys(existingProgress.completedTasks || {}).length > 0 ||
+      existingProgress.earnedXP.lesson > 0 ||
+      existingProgress.earnedXP.minigame > 0 ||
+      existingProgress.earnedXP.quiz > 0
+    );
+    
+    chapterStore.initializeChapter(CHAPTER_KEY);
+    
+    // Clean up lesson tasks from store (remove old corrupted data)
+    if (existingProgress?.completedTasks) {
+      const lessonTasks = ['task-0', 'task-1', 'task-2', 'task-3', 'task-4', 'task-5'];
+      lessonTasks.forEach(taskId => {
+        if (existingProgress.completedTasks[taskId]) {
+          const progress = chapterStore.getChapterProgress(CHAPTER_KEY);
+          if (progress && progress.completedTasks) {
+            const cleaned = { ...progress.completedTasks };
+            delete cleaned[taskId];
+            chapterStore.chapters[CHAPTER_KEY].completedTasks = cleaned;
+          }
+        }
+      });
+    }
+    
+    // Check if user has disabled this modal for this chapter
+    const dontShowAgain = localStorage.getItem(`${CHAPTER_KEY}-dont-show-modal`);
+    const modalExpiration = localStorage.getItem(`${CHAPTER_KEY}-modal-expiration`);
+    
+    // Check if the "don't show again" has expired
+    let shouldShowModal = true;
+    if (dontShowAgain === 'true' && modalExpiration) {
+      const expirationTime = parseInt(modalExpiration, 10);
+      if (Date.now() < expirationTime) {
+        // Still within the 5-minute window, don't show modal
+        shouldShowModal = false;
+      } else {
+        // Expired, clear the flags
+        localStorage.removeItem(`${CHAPTER_KEY}-dont-show-modal`);
+        localStorage.removeItem(`${CHAPTER_KEY}-modal-expiration`);
+      }
+    }
+    
+    // Only show modal if there's REAL progress (not just initialization)
+    if (!hasCheckedProgress && hasRealProgress && shouldShowModal) {
+      setShowProgressModal(true);
+      setHasCheckedProgress(true);
+    } else {
+      setHasCheckedProgress(true);
+    }
+  }, []);
+  
+  // Scene and state management - initialize from store or defaults
+  const [currentScene, setCurrentScene] = useState<SceneType>(
+    (savedProgress?.currentScene as SceneType) || 'opening'
+  );
+  const [isMuted, setIsMuted] = useState(savedProgress?.isMuted || false);
+  const [autoAdvanceEnabled, setAutoAdvanceEnabled] = useState(savedProgress?.autoAdvanceEnabled || false);
+  const [currentMinigameLevel, setCurrentMinigameLevel] = useState(savedProgress?.currentMinigameLevel || 0);
+  
+  // Track which lesson tasks have been checked to prevent duplicates (using ref to avoid re-renders)
+  const checkedLessonTasksRef = React.useRef<Set<string>>(new Set()); // Changed from number to string for semantic keys
+  const previousMessageIndexRef = React.useRef<number>(-1);
+  
+  // Task tracking - initialize from store but filter out lesson tasks
+  const [completedTasks, setCompletedTasks] = useState<Record<string, boolean>>(() => {
+    const saved = savedProgress?.completedTasks || {};
+    const filtered = { ...saved };
+    // Remove lesson tasks - they will be re-tracked by the new system
+    delete filtered['task-0'];
+    delete filtered['task-1'];
+    delete filtered['task-2'];
+    delete filtered['task-3'];
+    delete filtered['task-4'];
+    delete filtered['task-5'];
+    return filtered;
+  });
+  const [failedTasks, setFailedTasks] = useState<Record<string, boolean>>(
+    savedProgress?.failedTasks || {}
+  );
+  
+  // Quiz state - initialize from store or defaults
+  const [quizAnswers, setQuizAnswers] = useState<Record<string, string>>(
+    savedProgress?.quizAnswers || {}
+  );
+  const [quizAttempts, setQuizAttempts] = useState(savedProgress?.quizAttempts || 0);
+  const [quizFeedback, setQuizFeedback] = useState<'correct' | 'incorrect' | null>(null);
+  
+  // XP tracking - initialize from store or defaults
+  const [earnedXP, setEarnedXP] = useState({
+    lesson: savedProgress?.earnedXP.lesson || 0,
+    minigame: savedProgress?.earnedXP.minigame || 0,
+    quiz: savedProgress?.earnedXP.quiz || 0,
   });
 
-  // Perimeter rounds configurations
-  const rounds = [
-    {
-      id: 1,
-      shape: 'triangle',
-      shapeName: 'Triangle',
-      sides: [4, 5, 6],
-      correctPerimeter: 15,
-      description: 'Trace the triangle and add its sides',
-      hint: 'Add all three sides: 4 + 5 + 6'
-    },
-    {
-      id: 2,
-      shape: 'rectangle',
-      shapeName: 'Rectangle',
-      sides: [8, 5, 8, 5],
-      correctPerimeter: 26,
-      description: 'Trace the rectangle and calculate perimeter',
-      hint: 'Add all four sides: 8 + 5 + 8 + 5'
-    },
-    {
-      id: 3,
-      shape: 'square',
-      shapeName: 'Square',
-      sides: [7, 7, 7, 7],
-      correctPerimeter: 28,
-      description: 'Trace the square and find the perimeter',
-      hint: 'All sides are equal: 7 + 7 + 7 + 7'
-    },
-    {
-      id: 4,
-      shape: 'pentagon',
-      shapeName: 'Pentagon',
-      sides: [6, 5, 7, 6, 8],
-      correctPerimeter: 32,
-      description: 'Trace the pentagon and sum all sides',
-      hint: 'Add all five sides: 6 + 5 + 7 + 6 + 8'
-    },
-    {
-      id: 5,
-      shape: 'hexagon',
-      shapeName: 'Hexagon',
-      sides: [5, 5, 5, 5, 5, 5],
-      correctPerimeter: 30,
-      description: 'Trace the hexagon and calculate perimeter',
-      hint: 'All sides equal 5: 5 × 6 = 30'
-    },
-    {
-      id: 6,
-      shape: 'irregular',
-      shapeName: 'Irregular Polygon',
-      sides: [4, 6, 3, 5, 7, 4],
-      correctPerimeter: 29,
-      description: 'Trace this irregular shape carefully',
-      hint: 'Add each side: 4 + 6 + 3 + 5 + 7 + 4'
-    }
-  ];
+  // Quiz score tracking
+  const [quizScore, setQuizScore] = useState<number | null>(null);
 
-  const [currentRoundData, setCurrentRoundData] = useState(rounds[0]);
-  const [wizardMessage, setWizardMessage] = useState("Welcome to the Perimeter Pathway! Guard the boundary by calculating perimeters...");
+  // Custom hooks
+  const { chapterId, quiz, minigame, loading, error, authLoading, userProfile } = useChapterData({
+    castleId: CHAPTER2_CASTLE_ID,
+    chapterNumber: CHAPTER2_NUMBER,
+  });
 
-  // Initialize game
+  const {
+    displayedText,
+    isTyping,
+    messageIndex,
+    handleDialogueClick,
+    handleNextMessage,
+    resetDialogue,
+  } = useChapterDialogue({
+    dialogue: currentScene === 'opening' ? CHAPTER2_OPENING_DIALOGUE : 
+             currentScene === 'lesson' ? CHAPTER2_LESSON_DIALOGUE.map(d => d.text) : 
+             CHAPTER2_MINIGAME_DIALOGUE,
+    autoAdvance: autoAdvanceEnabled,
+    autoAdvanceDelay: 3000,
+    typingSpeed: 30,
+    onDialogueComplete: handleDialogueComplete,
+  });
+
+  const { playNarration, stopAudio } = useChapterAudio({ isMuted });
+
+  // Sync state changes to store
   useEffect(() => {
-    setCurrentRoundData(rounds[currentRound - 1]);
-    setRoundCompleted(false);
-    setUserAnswer('');
-    setShowHint(false);
-    setIsTracingComplete(false);
-  }, [currentRound]);
+    chapterStore.setScene(CHAPTER_KEY, currentScene);
+  }, [currentScene]);
 
-  // Game introduction sequence
   useEffect(() => {
-    const introSequence = [
-      { delay: 2000, message: "Sir Segment guards this bridge. Only those who can walk its boundary may pass!", phase: 'introduction' },
-      { delay: 4000, message: "Trace the edges and calculate the perimeter to unlock the path.", phase: 'playing' },
-      { delay: 6000, message: rounds[0].description, phase: 'playing' }
-    ];
+    chapterStore.setMinigameLevel(CHAPTER_KEY, currentMinigameLevel);
+  }, [currentMinigameLevel]);
 
-    introSequence.forEach(({ delay, message, phase }) => {
-      setTimeout(() => {
-        setWizardMessage(message);
-        if (phase) setGamePhase(phase);
-      }, delay);
-    });
-  }, []);
+  useEffect(() => {
+    chapterStore.setAudioSettings(CHAPTER_KEY, isMuted, autoAdvanceEnabled);
+  }, [isMuted, autoAdvanceEnabled]);
 
-  // Handle trace completion
-  const handleTraceComplete = () => {
-    setIsTracingComplete(true);
-    setWizardMessage("Good! Now calculate the perimeter by adding all the sides.");
-  };
-
-  // Handle answer submission
-  const handleSubmit = () => {
-    if (gamePhase !== 'playing' || roundCompleted || !userAnswer) return;
-    
-    const answer = parseInt(userAnswer);
-    
-    if (answer === currentRoundData.correctPerimeter) {
-      // Correct answer
-      setRoundCompleted(true);
-      setPathsGuarded(prev => prev + 1);
-      setWizardMessage(`Excellent! The perimeter is ${currentRoundData.correctPerimeter} cm. The path opens!`);
-      
-      // Update completed tasks
-      const taskKey = `round${currentRound}` as keyof typeof completedTasks;
-      setCompletedTasks(prev => ({ ...prev, [taskKey]: true }));
-      
-      setTimeout(() => {
-        if (currentRound < totalRounds) {
-          setWizardMessage("Well done! Ready for the next pathway?");
-        } else {
-          setGamePhase('completed');
-          localStorage.setItem('castle2-chapter2-completed', 'true');
-          setWizardMessage("Magnificent! You have mastered the Perimeter Pathway and earned the Key of Edges!");
+  // Sync completed tasks to store
+  useEffect(() => {
+    Object.entries(completedTasks).forEach(([taskId, completed]) => {
+      if (completed) {
+        const savedProgress = chapterStore.getChapterProgress(CHAPTER_KEY);
+        if (!savedProgress?.completedTasks[taskId]) {
+          chapterStore.setTaskComplete(CHAPTER_KEY, taskId);
         }
-      }, 3000);
+      }
+    });
+  }, [completedTasks]);
+
+  // Sync failed tasks to store
+  useEffect(() => {
+    Object.entries(failedTasks).forEach(([taskId, failed]) => {
+      if (failed) {
+        const savedProgress = chapterStore.getChapterProgress(CHAPTER_KEY);
+        if (!savedProgress?.failedTasks[taskId]) {
+          chapterStore.setTaskFailed(CHAPTER_KEY, taskId);
+        }
+      }
+    });
+  }, [failedTasks]);
+
+  // Sync quiz answers to store
+  useEffect(() => {
+    Object.entries(quizAnswers).forEach(([questionId, answer]) => {
+      const savedProgress = chapterStore.getChapterProgress(CHAPTER_KEY);
+      if (savedProgress?.quizAnswers[questionId] !== answer) {
+        chapterStore.setQuizAnswer(CHAPTER_KEY, questionId, answer);
+      }
+    });
+  }, [quizAnswers]);
+
+  // Sync earned XP to store
+  useEffect(() => {
+    if (earnedXP.lesson > 0) {
+      chapterStore.setEarnedXP(CHAPTER_KEY, 'lesson', earnedXP.lesson);
+    }
+    if (earnedXP.minigame > 0) {
+      chapterStore.setEarnedXP(CHAPTER_KEY, 'minigame', earnedXP.minigame);
+    }
+    if (earnedXP.quiz > 0) {
+      chapterStore.setEarnedXP(CHAPTER_KEY, 'quiz', earnedXP.quiz);
+    }
+  }, [earnedXP]);
+
+  // Fetch quiz score when entering reward scene
+  useEffect(() => {
+    const fetchQuizScore = async () => {
+      if (currentScene === 'reward' && quiz?.id) {
+        try {
+          // Add a small delay to ensure the backend has finished processing
+          await new Promise(resolve => setTimeout(resolve, 500));
+          
+          const attempts = await getUserQuizAttempts(quiz.id);
+          console.log('[Castle2-CHAPTER2] Fetched quiz attempts:', attempts);
+          
+          if (attempts && attempts.length > 0) {
+            // Get the most recent attempt (assuming attempts are ordered by creation date)
+            const sortedAttempts = attempts.sort((a: any, b: any) => {
+              return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+            });
+            const mostRecentScore = sortedAttempts[0]?.score || 0;
+            console.log('[Castle2-CHAPTER2] Most recent quiz score:', mostRecentScore);
+            setQuizScore(mostRecentScore);
+          }
+        } catch (error) {
+          console.error('Failed to fetch quiz score:', error);
+          // Fallback to calculating score from earnedXP
+          setQuizScore(null);
+        }
+      }
+    };
+    
+    fetchQuizScore();
+  }, [currentScene, quiz?.id]);
+
+  // Track lesson progress and mark tasks as dialogue progresses
+  React.useEffect(() => {
+    // Castle 2 Chapter 1 has 6 lesson concepts with semantic keys
+    if (currentScene === 'lesson' && messageIndex >= 0 && messageIndex < CHAPTER2_LESSON_DIALOGUE.length) {
+      const currentDialogue = CHAPTER2_LESSON_DIALOGUE[messageIndex];
       
-    } else {
-      // Incorrect answer
-      setWizardMessage(`Not quite right. The perimeter should be ${currentRoundData.correctPerimeter} cm. Try again!`);
+      // Skip if no taskId (intro/conclusion messages)
+      if (!currentDialogue.taskId) return;
+      
+      const dialogueKey = currentDialogue.key;
+      
+      console.log('Lesson scene - dialogueKey:', dialogueKey, 'taskId:', currentDialogue.taskId);
+      
+      // Only process if we haven't checked this concept yet
+      if (checkedLessonTasksRef.current.has(dialogueKey)) {
+        console.log('Skipping - already checked:', dialogueKey);
+        return;
+      }
+      
+      // Mark the task complete based on dialogue key
+      console.log('Marking task complete:', currentDialogue.taskId, 'for concept:', dialogueKey);
+      markTaskComplete(currentDialogue.taskId);
+      checkedLessonTasksRef.current.add(dialogueKey);
+      
+      // Update previous messageIndex for backward detection
+      previousMessageIndexRef.current = messageIndex;
+    }
+    
+    // Detect if we're jumping backward (dialogue reset) - reset the tracking
+    if (previousMessageIndexRef.current > messageIndex) {
+      console.log('Detected backward jump - user may have restarted dialogue');
+      previousMessageIndexRef.current = messageIndex;
+    }
+  }, [currentScene, messageIndex]);
+
+  // Handlers
+  function handleDialogueComplete() {
+    if (currentScene === 'opening') {
+      checkedLessonTasksRef.current = new Set(); // Reset checked tasks when entering lesson scene
+      previousMessageIndexRef.current = -1; // Reset previous message index
+      resetDialogue(); // Reset dialogue BEFORE changing scene to prevent messageIndex carryover
+      setCurrentScene('lesson');
+      playNarration('castle2-CHAPTER2-lesson-intro');
+    } else if (currentScene === 'lesson' && messageIndex >= CHAPTER2_LESSON_DIALOGUE.length - 1) {
+      // All lesson tasks should be marked by now through the useEffect above
+      awardXP('lesson');
+      resetDialogue(); // Reset dialogue BEFORE changing scene
+      setCurrentScene('minigame');
+    }
+  }
+
+  // Reset dialogue when scene changes (backup, in case direct calls are missed)
+  React.useEffect(() => {
+    resetDialogue();
+  }, [currentScene]);
+
+  const markTaskComplete = (taskKey: string) => {
+    setCompletedTasks((prev) => {
+      if (prev[taskKey]) {
+        console.log(`Task ${taskKey} already completed, skipping`);
+        return prev; // Already completed, don't update
+      }
+      console.log(`Marking task ${taskKey} as complete`);
+      return { ...prev, [taskKey]: true };
+    });
+  };
+
+  const markTaskFailed = (taskKey: string) => {
+    setFailedTasks((prev) => ({ ...prev, [taskKey]: true }));
+  };
+
+  const awardXP = async (type: 'lesson' | 'minigame' | 'quiz') => {
+    let xp = 0;
+    if (type === 'lesson') xp = CHAPTER2_XP_VALUES.lesson;
+    else if (type === 'minigame') xp = CHAPTER2_XP_VALUES.minigame;
+    else if (type === 'quiz') xp = CHAPTER2_XP_VALUES.quiz1 + CHAPTER2_XP_VALUES.quiz2 + CHAPTER2_XP_VALUES.quiz3 + CHAPTER2_XP_VALUES.quiz4 + CHAPTER2_XP_VALUES.quiz5;
+
+    setEarnedXP((prev) => ({ ...prev, [type]: xp }));
+
+    // Award to backend
+    if (chapterId && userProfile?.id) {
+      try {
+        await awardLessonXP(chapterId, xp);
+      } catch (error) {
+        console.error('Failed to award XP:', error);
+      }
+    }
+  };
+
+  const handleMinigameComplete = async (isCorrect: boolean) => {
+    if (isCorrect) {
+      // Move to next level or complete minigame
+      if (currentMinigameLevel < CHAPTER2_MINIGAME_LEVELS.length - 1) {
+        setCurrentMinigameLevel(currentMinigameLevel + 1);
+      } else {
+        // All levels complete
+        markTaskComplete('task-6'); // Complete minigame task
+        awardXP('minigame');
+        
+        // Submit minigame attempt
+        if (minigame && userProfile?.id) {
+          try {
+            await submitMinigameAttempt(minigame.id, {
+              score: 100,
+              time_taken: 60,
+              attempt_data: { completedLevels: CHAPTER2_MINIGAME_LEVELS.length },
+            });
+          } catch (error) {
+            console.error('Failed to submit minigame:', error);
+          }
+        }
+        
+        setCurrentScene('quiz1');
+      }
+    }
+  };
+
+  const handleQuizSubmit = async (quizNumber: 1 | 2 | 3 | 4 | 5) => {
+    if (!quiz || !userProfile?.id) return;
+
+    const taskKey = quizNumber === 1 ? 'task-7' : quizNumber === 2 ? 'task-8' : quizNumber === 3 ? 'task-9' : quizNumber === 4 ? 'task-10' : 'task-11';
+    const questionIndex = quizNumber - 1;
+    const question = quiz.quiz_config.questions[questionIndex];
+    const userAnswer = quizAnswers[question.id];
+
+    if (userAnswer === question.correctAnswer) {
+      setQuizFeedback('correct');
+      markTaskComplete(taskKey);
+      
+      // Delay moving to next scene to show feedback
       setTimeout(() => {
-        setWizardMessage(showHint ? currentRoundData.hint : "Would you like a hint?");
-      }, 2000);
+        setQuizFeedback(null);
+        
+        // Move to next quiz or reward
+        if (quizNumber === 1) {
+          setCurrentScene('quiz2');
+          const nextQuestion = quiz.quiz_config.questions[1];
+          setQuizAnswers((prev) => {
+            const updated = { ...prev };
+            delete updated[nextQuestion.id];
+            return updated;
+          });
+        } else if (quizNumber === 2) {
+          setCurrentScene('quiz3');
+          const nextQuestion = quiz.quiz_config.questions[2];
+          setQuizAnswers((prev) => {
+            const updated = { ...prev };
+            delete updated[nextQuestion.id];
+            return updated;
+          });
+        } else if (quizNumber === 3) {
+          setCurrentScene('quiz4');
+          const nextQuestion = quiz.quiz_config.questions[3];
+          setQuizAnswers((prev) => {
+            const updated = { ...prev };
+            delete updated[nextQuestion.id];
+            return updated;
+          });
+        } else if (quizNumber === 4) {
+          setCurrentScene('quiz5');
+          const nextQuestion = quiz.quiz_config.questions[4];
+          setQuizAnswers((prev) => {
+            const updated = { ...prev };
+            delete updated[nextQuestion.id];
+            return updated;
+          });
+        } else {
+          // All quizzes complete
+          awardXP('quiz');
+          
+          // Submit quiz attempt
+          try {
+            console.log('[Castle2-CHAPTER2] Submitting quiz with answers:', quizAnswers);
+            console.log('[Castle2-CHAPTER2] Quiz config:', quiz.quiz_config);
+            submitQuizAttempt(quiz.id, quizAnswers);
+          } catch (error) {
+            console.error('Failed to submit quiz:', error);
+          }
+          
+          // Complete chapter
+          try {
+            completeChapter(chapterId!);
+          } catch (error) {
+            console.error('Failed to complete chapter:', error);
+          }
+          
+          setCurrentScene('reward');
+        }
+      }, 1000); // 1 second delay to show green feedback
+    } else {
+      setQuizFeedback('incorrect');
+      markTaskFailed(taskKey);
+      setQuizAttempts(quizAttempts + 1);
+      
+      // Reset feedback and move to next question after delay
+      setTimeout(() => {
+        setQuizFeedback(null);
+        
+        // Move to next quiz even if incorrect
+        if (quizNumber === 1) {
+          setCurrentScene('quiz2');
+          const nextQuestion = quiz.quiz_config.questions[1];
+          setQuizAnswers((prev) => {
+            const updated = { ...prev };
+            delete updated[nextQuestion.id];
+            return updated;
+          });
+        } else if (quizNumber === 2) {
+          setCurrentScene('quiz3');
+          const nextQuestion = quiz.quiz_config.questions[2];
+          setQuizAnswers((prev) => {
+            const updated = { ...prev };
+            delete updated[nextQuestion.id];
+            return updated;
+          });
+        } else if (quizNumber === 3) {
+          setCurrentScene('quiz4');
+          const nextQuestion = quiz.quiz_config.questions[3];
+          setQuizAnswers((prev) => {
+            const updated = { ...prev };
+            delete updated[nextQuestion.id];
+            return updated;
+          });
+        } else if (quizNumber === 4) {
+          setCurrentScene('quiz5');
+          const nextQuestion = quiz.quiz_config.questions[4];
+          setQuizAnswers((prev) => {
+            const updated = { ...prev };
+            delete updated[nextQuestion.id];
+            return updated;
+          });
+        } else {
+          // All quizzes answered (even if some wrong)
+          // Submit quiz attempt
+          try {
+            submitQuizAttempt(quiz.id, quizAnswers);
+          } catch (error) {
+            console.error('Failed to submit quiz:', error);
+          }
+          
+          // Complete chapter (even with wrong answers)
+          try {
+            completeChapter(chapterId!);
+          } catch (error) {
+            console.error('Failed to complete chapter:', error);
+          }
+          
+          setCurrentScene('reward');
+        }
+      }, 1000);
     }
   };
 
-  const handleNext = () => {
-    if (currentRound < totalRounds && roundCompleted) {
-      setCurrentRound(prev => prev + 1);
-    } else if (currentRound >= totalRounds) {
-      setGamePhase('completed');
-    }
+  const handleRetakeQuiz = () => {
+    setQuizAnswers({});
+    setQuizAttempts(0);
+    setFailedTasks({});
+    setQuizFeedback(null);
+    setQuizScore(null); // Reset quiz score when retaking
+    
+    // Clear quiz data from store
+    chapterStore.clearAllQuizData(CHAPTER_KEY);
+    
+    // Clear quiz task completions (task-7 through task-11)
+    setCompletedTasks((prev) => {
+      const updated = { ...prev };
+      delete updated['task-7'];
+      delete updated['task-8'];
+      delete updated['task-9'];
+      delete updated['task-10'];
+      delete updated['task-11'];
+      return updated;
+    });
+    
+    setCurrentScene('quiz1');
   };
 
-  const handlePrevious = () => {
-    if (currentRound > 1) {
-      setCurrentRound(prev => prev - 1);
-    }
+  const handleContinueProgress = () => {
+    setShowProgressModal(false);
+    // Continue with saved progress (already loaded)
   };
 
-  const handleBack = () => {
+  const handleDontShowAgain = () => {
+    const expirationTime = Date.now() + 5 * 60 * 1000; // 5 minutes
+    localStorage.setItem(`${CHAPTER_KEY}-dont-show-modal`, 'true');
+    localStorage.setItem(`${CHAPTER_KEY}-modal-expiration`, expirationTime.toString());
+    setShowProgressModal(false);
+  };
+
+  const handleRestartChapter = () => {
+    setShowProgressModal(false);
+    
+    // Reset all state to initial values
+    setCurrentScene('opening');
+    setCompletedTasks({});
+    setFailedTasks({});
+    setQuizAnswers({});
+    setQuizAttempts(0);
+    setEarnedXP({ lesson: 0, minigame: 0, quiz: 0 });
+    setCurrentMinigameLevel(0);
+    setQuizFeedback(null);
+    
+    // Clear all data from store for this chapter
+    chapterStore.clearAllQuizData(CHAPTER_KEY);
+    chapterStore.setScene(CHAPTER_KEY, 'opening');
+    chapterStore.setMinigameLevel(CHAPTER_KEY, 0);
+    chapterStore.setEarnedXP(CHAPTER_KEY, 'lesson', 0);
+    chapterStore.setEarnedXP(CHAPTER_KEY, 'minigame', 0);
+    chapterStore.setEarnedXP(CHAPTER_KEY, 'quiz', 0);
+    
+    // Reset lesson tracking
+    checkedLessonTasksRef.current = new Set();
+    previousMessageIndexRef.current = -1;
+    
+    // Reset dialogue
+    resetDialogue();
+  };
+
+  const handleReturnToCastle = () => {
     router.push('/student/worldmap/castle2');
   };
 
-  const resetRound = () => {
-    setRoundCompleted(false);
-    setUserAnswer('');
-    setShowHint(false);
-    setIsTracingComplete(false);
-    setWizardMessage(currentRoundData.description);
-  };
-
-  const toggleHint = () => {
-    setShowHint(!showHint);
-    if (!showHint) {
-      setWizardMessage(currentRoundData.hint);
-    }
-  };
-
-  // Render polygon with side labels
-  const renderPolygon = () => {
-    const size = 280;
-    const centerX = size / 2;
-    const centerY = size / 2;
-    const radius = 100;
-    const sides = currentRoundData.sides;
-    const numSides = sides.length;
-
-    const getPolygonPoints = () => {
-      const points = [];
-      for (let i = 0; i < numSides; i++) {
-        const angle = (Math.PI * 2 * i) / numSides - Math.PI / 2;
-        const x = centerX + radius * Math.cos(angle);
-        const y = centerY + radius * Math.sin(angle);
-        points.push({ x, y });
-      }
-      return points;
-    };
-
-    const points = getPolygonPoints();
-    const pathData = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x},${p.y}`).join(' ') + ' Z';
-
+  // Loading and error states
+  if (authLoading || loading) {
     return (
-      <svg width={size} height={size} className={styles.polygonSvg}>
-        {/* Main polygon */}
-        <path
-          d={pathData}
-          fill="rgba(76, 175, 80, 0.1)"
-          stroke="#4CAF50"
-          strokeWidth="3"
-          className={isTracingComplete ? styles.tracedPath : styles.untraced}
-        />
-        
-        {/* Side labels */}
-        {points.map((point, i) => {
-          const nextPoint = points[(i + 1) % numSides];
-          const midX = (point.x + nextPoint.x) / 2;
-          const midY = (point.y + nextPoint.y) / 2;
-          
-          return (
-            <g key={i}>
-              <circle cx={midX} cy={midY} r="18" fill="#4CAF50" opacity="0.9" />
-              <text
-                x={midX}
-                y={midY + 5}
-                textAnchor="middle"
-                fill="#fff"
-                fontSize="14"
-                fontWeight="bold"
-              >
-                {sides[i]}
-              </text>
-            </g>
-          );
-        })}
-
-        {/* Trace button */}
-        {!isTracingComplete && (
-          <g onClick={handleTraceComplete} style={{ cursor: 'pointer' }}>
-            <rect x={centerX - 40} y={centerY - 15} width="80" height="30" fill="#4CAF50" rx="5" />
-            <text x={centerX} y={centerY + 5} textAnchor="middle" fill="#fff" fontSize="14" fontWeight="bold">
-              Trace Path
-            </text>
-          </g>
-        )}
-      </svg>
+      <div className={baseStyles.loading_container}>
+        <p>Loading Chapter 1...</p>
+      </div>
     );
-  };
+  }
 
+  if (error) {
+    return (
+      <div className={baseStyles.loading_container}>
+        <p>Error: {error}</p>
+        <button onClick={handleReturnToCastle}>Return to Castle</button>
+      </div>
+    );
+  }
+
+  // Main render
   return (
-    <div className={styles.chapterContainer}>
-      {/* Background overlay */}
-      <div className={styles.backgroundOverlay}></div>
-      
-      {/* Header */}
-      <div className={styles.header}>
-        <h1 className={styles.chapterTitle}>Chapter 2: The Perimeter Pathway</h1>
-        <div className={styles.progressInfo}>
-          <span>Round {currentRound}/{totalRounds} - {pathsGuarded}/{totalRounds} Paths Guarded</span>
-        </div>
-        {/* Progress Bar */}
-        <div className={styles.progressBarContainer}>
-          <div 
-            className={styles.progressBarFill} 
-            style={{ width: `${(pathsGuarded / totalRounds) * 100}%` }}
-          />
-        </div>
-      </div>
+    <div className={`${baseStyles.chapterContainer} ${baseStyles.castle2Theme}`}>
+      <div className={baseStyles.backgroundOverlay}></div>
 
-      {/* Side Panel - Task List */}
-      <div className={styles.taskPanel}>
-        <h3 className={styles.taskPanelTitle}>Boundary Paths</h3>
-        {rounds.map((round) => (
-          <div key={round.id} className={styles.taskItem}>
-            <div className={styles.taskIcon}>
-              {completedTasks[`round${round.id}` as keyof typeof completedTasks] ? (
-                <CheckCircle size={20} color="#4CAF50" />
-              ) : (
-                <Lock size={20} color="#666" />
-              )}
-            </div>
-            <span className={completedTasks[`round${round.id}` as keyof typeof completedTasks] ? styles.completed : ''}>
-              {round.shapeName}
-            </span>
-          </div>
-        ))}
-      </div>
+      {/* Progress Modal */}
+      {showProgressModal && (
+        <ChapterProgressModal
+          chapterTitle="Chapter 1: The Chamber of Construction"
+          currentScene={savedProgress?.currentScene || 'opening'}
+          onContinue={handleContinueProgress}
+          onRestart={handleRestartChapter}
+          onDontShowAgain={handleDontShowAgain}
+        />
+      )}
 
-      {/* Main Game Area */}
-      <div className={styles.gameArea}>
-        {/* Wizard Character and Message - LEFT SIDE */}
-        <div className={styles.wizardContainer}>
-          <img 
-            src="/images/wizard.png" 
-            alt="Wizard Archimedes"
-            className={styles.wizardImage}
-          />
-          <div className={styles.wizardSpeech}>
-            <p>{wizardMessage}</p>
-          </div>
-        </div>
+      {/* Top Bar */}
+      <ChapterTopBar
+        chapterTitle="Chapter 1: The Chamber of Construction"
+        chapterSubtitle="Castle 2 - Angles Sanctuary"
+        isMuted={isMuted}
+        autoAdvance={autoAdvanceEnabled}
+        onToggleMute={() => setIsMuted(!isMuted)}
+        onToggleAutoAdvance={() => setAutoAdvanceEnabled(!autoAdvanceEnabled)}
+        onExit={handleReturnToCastle}
+        styleModule={baseStyles}
+      />
 
-        {/* Central Polygon Display */}
-        <div className={styles.centralPedestal}>
-          <div className={styles.pedestalBase}>
-            <div className={styles.pedestalLabel}>
-              <strong>{currentRoundData.shapeName}</strong>
+      {/* Main Content */}
+      <div className={baseStyles.mainContent}>
+        {/* Task Panel */}
+        <ChapterTaskPanel
+          tasks={CHAPTER2_LEARNING_OBJECTIVES}
+          completedTasks={completedTasks}
+          failedTasks={failedTasks}
+          styleModule={baseStyles}
+        />
+
+        {/* Game Area */}
+        <div className={baseStyles.gameArea}>
+          {/* Opening Scene */}
+          {currentScene === 'opening' && (
+            <div style={{ textAlign: 'center', padding: '2rem' }}>
+              <h2 style={{ color: '#FFFD8F', fontSize: '2rem' }}>Welcome to The Chamber of Construction!</h2>
+              <p style={{ color: '#B0CE88', fontSize: '1.2rem', marginTop: '1rem' }}>
+                Click the dialogue box to begin your journey...
+              </p>
             </div>
-            <div className={styles.polygonContainer}>
-              {renderPolygon()}
-            </div>
-            <div className={styles.pedestalDescription}>
-              All measurements are in centimeters (cm)
-            </div>
-            {/* Formula hint */}
-            {showHint && (
-              <div className={styles.formulaHint}>
-                Hint: {currentRoundData.hint}
+          )}
+
+          {/* Lesson Scene */}
+          {currentScene === 'lesson' && (
+            <LessonGrid columns={3} gap="medium" styleModule={lessonStyles}>
+              {CHAPTER2_CONCEPTS.map((concept, index) => {
+                // Find the corresponding dialogue to determine if it's been reached
+                const dialogueIndex = CHAPTER2_LESSON_DIALOGUE.findIndex(d => d.key === concept.key);
+                const isHighlighted = messageIndex >= dialogueIndex;
+                
+                return (
+                  <ConceptCard
+                    key={`${concept.key}-${index}`}
+                    title={concept.title}
+                    description={concept.summary}
+                    icon={<div style={{ fontSize: '3rem' }}>📐</div>}
+                    highlighted={isHighlighted}
+                    styleModule={lessonStyles}
+                  />
+                );
+              })}
+            </LessonGrid>
+          )}
+
+          {/* Minigame Scene */}
+          {currentScene === 'minigame' && (
+            <AngleConstructorMinigame
+              question={{
+                id: `minigame-${currentMinigameLevel}`,
+                instruction: CHAPTER2_MINIGAME_LEVELS[currentMinigameLevel].description,
+                correctAnswer: CHAPTER2_MINIGAME_LEVELS[currentMinigameLevel].targetAngle.toString(),
+                targetAngle: CHAPTER2_MINIGAME_LEVELS[currentMinigameLevel].targetAngle,
+                tolerance: CHAPTER2_MINIGAME_LEVELS[currentMinigameLevel].tolerance,
+                hint: CHAPTER2_MINIGAME_LEVELS[currentMinigameLevel].hint,
+              }}
+              onComplete={handleMinigameComplete}
+              styleModule={minigameStyles}
+            />
+          )}
+
+          {/* Quiz Scenes */}
+          {(currentScene === 'quiz1' || currentScene === 'quiz2' || currentScene === 'quiz3' || currentScene === 'quiz4' || currentScene === 'quiz5') && quiz && (
+            <div className={minigameStyles.minigameContainer}>
+              <div className={minigameStyles.questionText}>
+                {quiz.quiz_config.questions[
+                  currentScene === 'quiz1' ? 0 : 
+                  currentScene === 'quiz2' ? 1 : 
+                  currentScene === 'quiz3' ? 2 : 
+                  currentScene === 'quiz4' ? 3 : 4
+                ]?.question}
               </div>
-            )}
-            {/* Input Area */}
-            <div className={styles.answerInput}>
-              <input
-                type="number"
-                value={userAnswer}
-                onChange={(e) => setUserAnswer(e.target.value)}
-                placeholder="Enter perimeter in cm"
-                disabled={roundCompleted || !isTracingComplete}
-                className={styles.inputField}
-                onKeyPress={(e) => e.key === 'Enter' && handleSubmit()}
-              />
-              <button 
-                className={styles.submitButton}
-                onClick={handleSubmit}
-                disabled={roundCompleted || !userAnswer || !isTracingComplete}
+              
+              <div className={minigameStyles.answerOptions}>
+                {quiz.quiz_config.questions[
+                  currentScene === 'quiz1' ? 0 : 
+                  currentScene === 'quiz2' ? 1 : 
+                  currentScene === 'quiz3' ? 2 : 
+                  currentScene === 'quiz4' ? 3 : 4
+                ]?.options.map((option, idx) => (
+                  <div
+                    key={idx}
+                    className={`${minigameStyles.answerOption} ${
+                      quizAnswers[quiz.quiz_config.questions[
+                        currentScene === 'quiz1' ? 0 : 
+                        currentScene === 'quiz2' ? 1 : 
+                        currentScene === 'quiz3' ? 2 : 
+                        currentScene === 'quiz4' ? 3 : 4
+                      ].id] === option
+                        ? minigameStyles.answerOptionSelected
+                        : ''
+                    }`}
+                    onClick={() => {
+                      const questionId = quiz.quiz_config.questions[
+                        currentScene === 'quiz1' ? 0 : 
+                        currentScene === 'quiz2' ? 1 : 
+                        currentScene === 'quiz3' ? 2 : 
+                        currentScene === 'quiz4' ? 3 : 4
+                      ].id;
+                      setQuizAnswers((prev) => ({ ...prev, [questionId]: option }));
+                    }}
+                  >
+                    {option}
+                  </div>
+                ))}
+              </div>
+
+              <button
+                className={`${minigameStyles.submitButton} ${
+                  quizFeedback === 'correct' 
+                    ? minigameStyles.submitButtonCorrect 
+                    : quizFeedback === 'incorrect' 
+                    ? minigameStyles.submitButtonIncorrect 
+                    : ''
+                }`}
+                onClick={() => handleQuizSubmit(
+                  currentScene === 'quiz1' ? 1 : 
+                  currentScene === 'quiz2' ? 2 : 
+                  currentScene === 'quiz3' ? 3 : 
+                  currentScene === 'quiz4' ? 4 : 5
+                )}
+                disabled={!quizAnswers[quiz.quiz_config.questions[
+                  currentScene === 'quiz1' ? 0 : 
+                  currentScene === 'quiz2' ? 1 : 
+                  currentScene === 'quiz3' ? 2 : 
+                  currentScene === 'quiz4' ? 3 : 4
+                ].id] || quizFeedback !== null}
               >
-                Submit
+                {quizFeedback === 'correct' ? 'âœ“ Correct!' : quizFeedback === 'incorrect' ? 'âœ— Incorrect' : 'Submit Answer'}
               </button>
             </div>
-            {/* Hint Button */}
-            <button 
-              className={styles.hintButton}
-              onClick={toggleHint}
-              disabled={roundCompleted}
-            >
-              {showHint ? 'Hide Hint' : 'Show Hint'}
-            </button>
-          </div>
+          )}
+
+          {/* Reward Scene */}
+          {currentScene === 'reward' && (
+            <ChapterRewardScreen
+              relicName={CHAPTER2_RELIC.name}
+              relicImage={CHAPTER2_RELIC.image}
+              relicDescription={CHAPTER2_RELIC.description}
+              earnedXP={earnedXP}
+              quizScore={quizScore}
+              canRetakeQuiz={true}
+              onRetakeQuiz={handleRetakeQuiz}
+              onComplete={handleReturnToCastle}
+              styleModule={baseStyles}
+            />
+          )}
         </div>
       </div>
 
-      {/* Control Panel */}
-      <div className={styles.controlPanel}>
-        <button 
-          className={styles.controlButton}
-          onClick={handlePrevious}
-          disabled={currentRound <= 1}
-        >
-          <ArrowLeft size={20} />
-          Previous
-        </button>
-        
-        <button 
-          className={styles.controlButton}
-          onClick={handleBack}
-        >
-          Back to Chapter Map
-        </button>
-        
-        <button 
-          className={styles.controlButton}
-          onClick={resetRound}
-        >
-          <RefreshCw size={20} />
-          Reset Round
-        </button>
-        
-        <button 
-          className={styles.controlButton}
-          onClick={handleNext}
-          disabled={!roundCompleted}
-        >
-          Next Round
-        </button>
-      </div>
-
-      {/* Completion Modal */}
-      {gamePhase === 'completed' && (
-        <div className={styles.completionModal}>
-          <div className={styles.modalContent}>
-            <h2>🏆 Chapter Complete!</h2>
-            <p>You have earned the <strong>Key of Edges</strong></p>
-            <div className={styles.reward}>
-              <div className={styles.key}>🗝️</div>
-              <p>This key opens the Citadel gate and unlocks the secrets of perimeters!</p>
-            </div>
-            <button 
-              className={styles.nextChapterButton}
-              onClick={() => router.push('/student/worldmap/castle2')}
-            >
-              Return to Castle
-            </button>
-          </div>
-        </div>
+      {/* Dialogue Box */}
+      {currentScene !== 'reward' && (
+        <ChapterDialogueBox
+          wizardName={CHAPTER2_WIZARD.name}
+          wizardImage={CHAPTER2_WIZARD.image}
+          displayedText={displayedText}
+          isTyping={isTyping}
+          showContinuePrompt={!isTyping}
+          onClick={handleDialogueClick}
+          styleModule={baseStyles}
+        />
       )}
     </div>
   );
-};
-
-export default PerimeterPathway;
+}

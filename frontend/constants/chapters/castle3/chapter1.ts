@@ -86,8 +86,13 @@ export const CHAPTER1_LEARNING_OBJECTIVES = [
 export const CHAPTER1_XP_VALUES = {
   lesson: 40,
   minigame: 40,
-  quiz1: 50,
-  total: 250,
+  quiz1: 12,
+  quiz2: 12,
+  quiz3: 12,
+  quiz4: 12,
+  quiz5: 12,
+  quiz6: 12,
+  total: 152,
 };
 
 export const CHAPTER1_CASTLE_ID = '3d4e5f6a-7b8c-9d0e-1f2a-3b4c5d6e7f8a'; // Castle 3 (Circle Sanctuary)

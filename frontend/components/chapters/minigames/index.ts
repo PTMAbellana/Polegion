@@ -6,3 +6,6 @@ export { default as CirclePartsMinigame } from './CirclePartsMinigame';
 export { default as PerimeterMinigame } from './PerimeterMinigame';
 export { default as GeometryPhysicsGame } from './C1C1_GeometryPhysicsGame';
 export { default as AngleIdentificationMinigame } from './AngleIdentificationMinigame';
+export { default as AngleConstructorMinigame } from './AngleConstructorMinigame';
+export { default as ComplementarySupplementaryMinigame } from './ComplementarySupplementaryMinigame';
+export { default as WordProblemSolverMinigame } from './WordProblemSolverMinigame';

@@ -8,23 +8,22 @@ import {
   ChapterDialogueBox,
   ChapterRewardScreen,
 } from '@/components/chapters/shared';
-import { AreaCalculationMinigame } from '@/components/chapters/minigames';
+import { WordProblemSolverMinigame } from '@/components/chapters/minigames';
 import { ConceptCard, LessonGrid } from '@/components/chapters/lessons';
 import ChapterProgressModal from '@/components/chapters/ChapterProgressModal';
 import { useChapterData, useChapterDialogue, useChapterAudio } from '@/hooks/chapters';
 import {
-  CHAPTER3_CASTLE_ID,
-  CHAPTER3_NUMBER,
-  CHAPTER3_OPENING_DIALOGUE,
-  CHAPTER3_LESSON_DIALOGUE,
-  CHAPTER3_MINIGAME_DIALOGUE,
-  CHAPTER3_MINIGAME_LEVELS,
-  CHAPTER3_LEARNING_OBJECTIVES,
-  CHAPTER3_CONCEPTS,
-  CHAPTER3_XP_VALUES,
-  CHAPTER3_RELIC,
-  CHAPTER3_WIZARD,
-} from '@/constants/chapters/castle5/chapter3';
+  CHAPTER4_CASTLE_ID,
+  CHAPTER4_NUMBER,
+  CHAPTER4_OPENING_DIALOGUE,
+  CHAPTER4_LESSON_DIALOGUE,
+  CHAPTER4_MINIGAME_DIALOGUE,
+  CHAPTER4_MINIGAME_LEVELS,
+  CHAPTER4_LEARNING_OBJECTIVES,
+  CHAPTER4_XP_VALUES,
+  CHAPTER4_RELIC,
+  CHAPTER4_WIZARD,
+} from '@/constants/chapters/castle2/chapter4';
 import Image from 'next/image';
 import { awardLessonXP, completeChapter } from '@/api/chapters';
 import { submitQuizAttempt, getUserQuizAttempts } from '@/api/chapterQuizzes';
@@ -34,11 +33,11 @@ import baseStyles from '@/styles/chapters/chapter-base.module.css';
 import minigameStyles from '@/styles/chapters/minigame-shared.module.css';
 import lessonStyles from '@/styles/chapters/lesson-shared.module.css';
 
-type SceneType = 'opening' | 'lesson' | 'minigame' | 'quiz1' | 'quiz2' | 'quiz3' | 'quiz4' | 'quiz5' | 'reward';
+type SceneType = 'opening' | 'lesson' | 'minigame' | 'quiz1' | 'quiz2' | 'quiz3' | 'quiz3' | 'reward' | 'reward';
 
-const CHAPTER_KEY = 'castle5-chapter3';
+const CHAPTER_KEY = 'castle2-CHAPTER4';
 
-export default function Castle2Chapter1Page() {
+export default function Castle2CHAPTER4Page() {
   const router = useRouter();
   
   // Zustand store
@@ -153,8 +152,8 @@ export default function Castle2Chapter1Page() {
 
   // Custom hooks
   const { chapterId, quiz, minigame, loading, error, authLoading, userProfile } = useChapterData({
-    castleId: CHAPTER3_CASTLE_ID,
-    chapterNumber: CHAPTER3_NUMBER,
+    castleId: CHAPTER4_CASTLE_ID,
+    chapterNumber: CHAPTER4_NUMBER,
   });
 
   const {
@@ -165,9 +164,9 @@ export default function Castle2Chapter1Page() {
     handleNextMessage,
     resetDialogue,
   } = useChapterDialogue({
-    dialogue: currentScene === 'opening' ? CHAPTER3_OPENING_DIALOGUE : 
-             currentScene === 'lesson' ? CHAPTER3_LESSON_DIALOGUE.map(d => d.text) : 
-             CHAPTER3_MINIGAME_DIALOGUE,
+    dialogue: currentScene === 'opening' ? CHAPTER4_OPENING_DIALOGUE :
+             currentScene === 'lesson' ? CHAPTER4_LESSON_DIALOGUE :
+             CHAPTER4_MINIGAME_DIALOGUE,
     autoAdvance: autoAdvanceEnabled,
     autoAdvanceDelay: 3000,
     typingSpeed: 30,
@@ -245,7 +244,7 @@ export default function Castle2Chapter1Page() {
           await new Promise(resolve => setTimeout(resolve, 500));
           
           const attempts = await getUserQuizAttempts(quiz.id);
-          console.log('[castle5-chapter3] Fetched quiz attempts:', attempts);
+          console.log('[Castle2-CHAPTER4] Fetched quiz attempts:', attempts);
           
           if (attempts && attempts.length > 0) {
             // Get the most recent attempt (assuming attempts are ordered by creation date)
@@ -253,7 +252,7 @@ export default function Castle2Chapter1Page() {
               return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
             });
             const mostRecentScore = sortedAttempts[0]?.score || 0;
-            console.log('[castle5-chapter3] Most recent quiz score:', mostRecentScore);
+            console.log('[Castle2-CHAPTER4] Most recent quiz score:', mostRecentScore);
             setQuizScore(mostRecentScore);
           }
         } catch (error) {
@@ -267,38 +266,10 @@ export default function Castle2Chapter1Page() {
     fetchQuizScore();
   }, [currentScene, quiz?.id]);
 
-  // Track lesson progress and mark tasks as dialogue progresses
+  // Track lesson progress - simpler version for chapter4 (no dialogue task mappings)
   React.useEffect(() => {
-    // Castle 5 Chapter 3 has 6 lesson concepts with semantic keys
-    if (currentScene === 'lesson' && messageIndex >= 0 && messageIndex < CHAPTER3_LESSON_DIALOGUE.length) {
-      const currentDialogue = CHAPTER3_LESSON_DIALOGUE[messageIndex];
-      
-      // Skip if no taskId (intro/conclusion messages)
-      if (!currentDialogue.taskId) return;
-      
-      const dialogueKey = currentDialogue.key;
-      
-      console.log('Lesson scene - dialogueKey:', dialogueKey, 'taskId:', currentDialogue.taskId);
-      
-      // Only process if we haven't checked this concept yet
-      if (checkedLessonTasksRef.current.has(dialogueKey)) {
-        console.log('Skipping - already checked:', dialogueKey);
-        return;
-      }
-      
-      // Mark the task complete based on dialogue key
-      console.log('Marking task complete:', currentDialogue.taskId, 'for concept:', dialogueKey);
-      markTaskComplete(currentDialogue.taskId);
-      checkedLessonTasksRef.current.add(dialogueKey);
-      
-      // Update previous messageIndex for backward detection
-      previousMessageIndexRef.current = messageIndex;
-    }
-    
-    // Detect if we're jumping backward (dialogue reset) - reset the tracking
-    if (previousMessageIndexRef.current > messageIndex) {
-      console.log('Detected backward jump - user may have restarted dialogue');
-      previousMessageIndexRef.current = messageIndex;
+    if (currentScene === 'lesson' && messageIndex >= 0) {
+      // Award lesson XP when dialogue completes (handled in handleDialogueComplete)
     }
   }, [currentScene, messageIndex]);
 
@@ -309,8 +280,8 @@ export default function Castle2Chapter1Page() {
       previousMessageIndexRef.current = -1; // Reset previous message index
       resetDialogue(); // Reset dialogue BEFORE changing scene to prevent messageIndex carryover
       setCurrentScene('lesson');
-      playNarration('castle5-chapter3-lesson-intro');
-    } else if (currentScene === 'lesson' && messageIndex >= CHAPTER3_LESSON_DIALOGUE.length - 1) {
+      playNarration('castle2-CHAPTER4-lesson-intro');
+    } else if (currentScene === 'lesson' && messageIndex >= CHAPTER4_LESSON_DIALOGUE.length - 1) {
       // All lesson tasks should be marked by now through the useEffect above
       awardXP('lesson');
       resetDialogue(); // Reset dialogue BEFORE changing scene
@@ -340,9 +311,9 @@ export default function Castle2Chapter1Page() {
 
   const awardXP = async (type: 'lesson' | 'minigame' | 'quiz') => {
     let xp = 0;
-    if (type === 'lesson') xp = CHAPTER3_XP_VALUES.lesson;
-    else if (type === 'minigame') xp = CHAPTER3_XP_VALUES.minigame;
-    else if (type === 'quiz') xp = CHAPTER3_XP_VALUES.quiz1 + CHAPTER3_XP_VALUES.quiz2 + CHAPTER3_XP_VALUES.quiz3 + CHAPTER3_XP_VALUES.quiz4 + CHAPTER3_XP_VALUES.quiz5;
+    if (type === 'lesson') xp = CHAPTER4_XP_VALUES.lesson;
+    else if (type === 'minigame') xp = CHAPTER4_XP_VALUES.minigame;
+    else if (type === 'quiz') xp = CHAPTER4_XP_VALUES.quiz1 + CHAPTER4_XP_VALUES.quiz2 + CHAPTER4_XP_VALUES.quiz3;
 
     setEarnedXP((prev) => ({ ...prev, [type]: xp }));
 
@@ -359,7 +330,7 @@ export default function Castle2Chapter1Page() {
   const handleMinigameComplete = async (isCorrect: boolean) => {
     if (isCorrect) {
       // Move to next level or complete minigame
-      if (currentMinigameLevel < CHAPTER3_MINIGAME_LEVELS.length - 1) {
+      if (currentMinigameLevel < CHAPTER4_MINIGAME_LEVELS.length - 1) {
         setCurrentMinigameLevel(currentMinigameLevel + 1);
       } else {
         // All levels complete
@@ -372,7 +343,7 @@ export default function Castle2Chapter1Page() {
             await submitMinigameAttempt(minigame.id, {
               score: 100,
               time_taken: 60,
-              attempt_data: { completedLevels: CHAPTER3_MINIGAME_LEVELS.length },
+              attempt_data: { completedLevels: CHAPTER4_MINIGAME_LEVELS.length },
             });
           } catch (error) {
             console.error('Failed to submit minigame:', error);
@@ -384,10 +355,10 @@ export default function Castle2Chapter1Page() {
     }
   };
 
-  const handleQuizSubmit = async (quizNumber: 1 | 2 | 3 | 4 | 5) => {
+  const handleQuizSubmit = async (quizNumber: 1 | 2 | 3) => {
     if (!quiz || !userProfile?.id) return;
 
-    const taskKey = quizNumber === 1 ? 'task-7' : quizNumber === 2 ? 'task-8' : quizNumber === 3 ? 'task-9' : quizNumber === 4 ? 'task-10' : 'task-11';
+    const taskKey = quizNumber === 1 ? 'task-7' : quizNumber === 2 ? 'task-8' : 'task-9';
     const questionIndex = quizNumber - 1;
     const question = quiz.quiz_config.questions[questionIndex];
     const userAnswer = quizAnswers[question.id];
@@ -417,30 +388,14 @@ export default function Castle2Chapter1Page() {
             delete updated[nextQuestion.id];
             return updated;
           });
-        } else if (quizNumber === 3) {
-          setCurrentScene('quiz4');
-          const nextQuestion = quiz.quiz_config.questions[3];
-          setQuizAnswers((prev) => {
-            const updated = { ...prev };
-            delete updated[nextQuestion.id];
-            return updated;
-          });
-        } else if (quizNumber === 4) {
-          setCurrentScene('quiz5');
-          const nextQuestion = quiz.quiz_config.questions[4];
-          setQuizAnswers((prev) => {
-            const updated = { ...prev };
-            delete updated[nextQuestion.id];
-            return updated;
-          });
         } else {
           // All quizzes complete
           awardXP('quiz');
           
           // Submit quiz attempt
           try {
-            console.log('[castle5-chapter3] Submitting quiz with answers:', quizAnswers);
-            console.log('[castle5-chapter3] Quiz config:', quiz.quiz_config);
+            console.log('[Castle2-Chapter4] Submitting quiz with answers:', quizAnswers);
+            console.log('[Castle2-Chapter4] Quiz config:', quiz.quiz_config);
             submitQuizAttempt(quiz.id, quizAnswers);
           } catch (error) {
             console.error('Failed to submit quiz:', error);
@@ -477,22 +432,6 @@ export default function Castle2Chapter1Page() {
         } else if (quizNumber === 2) {
           setCurrentScene('quiz3');
           const nextQuestion = quiz.quiz_config.questions[2];
-          setQuizAnswers((prev) => {
-            const updated = { ...prev };
-            delete updated[nextQuestion.id];
-            return updated;
-          });
-        } else if (quizNumber === 3) {
-          setCurrentScene('quiz4');
-          const nextQuestion = quiz.quiz_config.questions[3];
-          setQuizAnswers((prev) => {
-            const updated = { ...prev };
-            delete updated[nextQuestion.id];
-            return updated;
-          });
-        } else if (quizNumber === 4) {
-          setCurrentScene('quiz5');
-          const nextQuestion = quiz.quiz_config.questions[4];
           setQuizAnswers((prev) => {
             const updated = { ...prev };
             delete updated[nextQuestion.id];
@@ -593,7 +532,7 @@ export default function Castle2Chapter1Page() {
   if (authLoading || loading) {
     return (
       <div className={baseStyles.loading_container}>
-        <p>Loading Chapter 3...</p>
+        <p>Loading Chapter 1...</p>
       </div>
     );
   }
@@ -609,13 +548,13 @@ export default function Castle2Chapter1Page() {
 
   // Main render
   return (
-    <div className={`${baseStyles.chapterContainer} ${baseStyles.castle5Theme}`}>
+    <div className={`${baseStyles.chapterContainer} ${baseStyles.castle2Theme}`}>
       <div className={baseStyles.backgroundOverlay}></div>
 
       {/* Progress Modal */}
       {showProgressModal && (
         <ChapterProgressModal
-          chapterTitle="Chapter 3: The Hall of Rays"
+          chapterTitle="Chapter 1: The Temple of Solutions"
           currentScene={savedProgress?.currentScene || 'opening'}
           onContinue={handleContinueProgress}
           onRestart={handleRestartChapter}
@@ -625,8 +564,8 @@ export default function Castle2Chapter1Page() {
 
       {/* Top Bar */}
       <ChapterTopBar
-        chapterTitle="Chapter 3: The Hall of Rays"
-        chapterSubtitle="Castle 5 - Angles Sanctuary"
+        chapterTitle="Chapter 1: The Temple of Solutions"
+        chapterSubtitle="Castle 2 - Angles Sanctuary"
         isMuted={isMuted}
         autoAdvance={autoAdvanceEnabled}
         onToggleMute={() => setIsMuted(!isMuted)}
@@ -639,7 +578,7 @@ export default function Castle2Chapter1Page() {
       <div className={baseStyles.mainContent}>
         {/* Task Panel */}
         <ChapterTaskPanel
-          tasks={CHAPTER3_LEARNING_OBJECTIVES}
+          tasks={CHAPTER4_LEARNING_OBJECTIVES}
           completedTasks={completedTasks}
           failedTasks={failedTasks}
           styleModule={baseStyles}
@@ -650,7 +589,7 @@ export default function Castle2Chapter1Page() {
           {/* Opening Scene */}
           {currentScene === 'opening' && (
             <div style={{ textAlign: 'center', padding: '2rem' }}>
-              <h2 style={{ color: '#FFFD8F', fontSize: '2rem' }}>Welcome to the Hall of Rays!</h2>
+              <h2 style={{ color: '#FFFD8F', fontSize: '2rem' }}>Welcome to The Temple of Solutions!</h2>
               <p style={{ color: '#B0CE88', fontSize: '1.2rem', marginTop: '1rem' }}>
                 Click the dialogue box to begin your journey...
               </p>
@@ -659,35 +598,28 @@ export default function Castle2Chapter1Page() {
 
           {/* Lesson Scene */}
           {currentScene === 'lesson' && (
-            <LessonGrid columns={3} gap="medium" styleModule={lessonStyles}>
-              {CHAPTER3_CONCEPTS.map((concept, index) => {
-                // Find the corresponding dialogue to determine if it's been reached
-                const dialogueIndex = CHAPTER3_LESSON_DIALOGUE.findIndex(d => d.key === concept.key);
-                const isHighlighted = messageIndex >= dialogueIndex;
-                
-                return (
-                  <ConceptCard
-                    key={`${concept.key}-${index}`}
-                    title={concept.title}
-                    description={concept.summary}
-                    icon={null}
-                    highlighted={isHighlighted}
-                    styleModule={lessonStyles}
-                  />
-                );
-              })}
-            </LessonGrid>
+            <div style={{ textAlign: 'center', padding: '3rem' }}>
+              <h2 style={{ color: '#FFFD8F', fontSize: '2rem', marginBottom: '2rem' }}>Solving Angle Word Problems</h2>
+              <div style={{ fontSize: '1.2rem', color: '#B0CE88', lineHeight: '1.8', maxWidth: '800px', margin: '0 auto' }}>
+                <p>📖 Read the problem carefully</p>
+                <p>🔍 Identify given angles and relationships</p>
+                <p>🧮 Set up equations and solve step by step</p>
+                <p>✅ Check your answer makes sense!</p>
+              </div>
+            </div>
           )}
 
           {/* Minigame Scene */}
           {currentScene === 'minigame' && (
-            <AreaCalculationMinigame
+            <WordProblemSolverMinigame
               question={{
                 id: `minigame-${currentMinigameLevel}`,
-                instruction: CHAPTER3_MINIGAME_LEVELS[currentMinigameLevel].instruction,
-                correctAnswer: CHAPTER3_MINIGAME_LEVELS[currentMinigameLevel].correctAnswer,
-                shape: CHAPTER3_MINIGAME_LEVELS[currentMinigameLevel].shape,
-                hint: CHAPTER3_MINIGAME_LEVELS[currentMinigameLevel].hint,
+                instruction: CHAPTER4_MINIGAME_LEVELS[currentMinigameLevel].description,
+                correctAnswer: CHAPTER4_MINIGAME_LEVELS[currentMinigameLevel].correctAnswer.toString(),
+                problem: CHAPTER4_MINIGAME_LEVELS[currentMinigameLevel].problem,
+                solution: CHAPTER4_MINIGAME_LEVELS[currentMinigameLevel].solution,
+                hint: CHAPTER4_MINIGAME_LEVELS[currentMinigameLevel].hint,
+                type: CHAPTER4_MINIGAME_LEVELS[currentMinigameLevel].type,
               }}
               onComplete={handleMinigameComplete}
               styleModule={minigameStyles}
@@ -695,32 +627,26 @@ export default function Castle2Chapter1Page() {
           )}
 
           {/* Quiz Scenes */}
-          {(currentScene === 'quiz1' || currentScene === 'quiz2' || currentScene === 'quiz3' || currentScene === 'quiz4' || currentScene === 'quiz5') && quiz && (
+          {(currentScene === 'quiz1' || currentScene === 'quiz2' || currentScene === 'quiz3') && quiz && (
             <div className={minigameStyles.minigameContainer}>
               <div className={minigameStyles.questionText}>
                 {quiz.quiz_config.questions[
                   currentScene === 'quiz1' ? 0 : 
-                  currentScene === 'quiz2' ? 1 : 
-                  currentScene === 'quiz3' ? 2 : 
-                  currentScene === 'quiz4' ? 3 : 4
+                  currentScene === 'quiz2' ? 1 : 2
                 ]?.question}
               </div>
               
               <div className={minigameStyles.answerOptions}>
                 {quiz.quiz_config.questions[
                   currentScene === 'quiz1' ? 0 : 
-                  currentScene === 'quiz2' ? 1 : 
-                  currentScene === 'quiz3' ? 2 : 
-                  currentScene === 'quiz4' ? 3 : 4
+                  currentScene === 'quiz2' ? 1 : 2
                 ]?.options.map((option, idx) => (
                   <div
                     key={idx}
                     className={`${minigameStyles.answerOption} ${
                       quizAnswers[quiz.quiz_config.questions[
                         currentScene === 'quiz1' ? 0 : 
-                        currentScene === 'quiz2' ? 1 : 
-                        currentScene === 'quiz3' ? 2 : 
-                        currentScene === 'quiz4' ? 3 : 4
+                        currentScene === 'quiz2' ? 1 : 2
                       ].id] === option
                         ? minigameStyles.answerOptionSelected
                         : ''
@@ -728,9 +654,7 @@ export default function Castle2Chapter1Page() {
                     onClick={() => {
                       const questionId = quiz.quiz_config.questions[
                         currentScene === 'quiz1' ? 0 : 
-                        currentScene === 'quiz2' ? 1 : 
-                        currentScene === 'quiz3' ? 2 : 
-                        currentScene === 'quiz4' ? 3 : 4
+                        currentScene === 'quiz2' ? 1 : 2
                       ].id;
                       setQuizAnswers((prev) => ({ ...prev, [questionId]: option }));
                     }}
@@ -750,15 +674,11 @@ export default function Castle2Chapter1Page() {
                 }`}
                 onClick={() => handleQuizSubmit(
                   currentScene === 'quiz1' ? 1 : 
-                  currentScene === 'quiz2' ? 2 : 
-                  currentScene === 'quiz3' ? 3 : 
-                  currentScene === 'quiz4' ? 4 : 5
+                  currentScene === 'quiz2' ? 2 : 3
                 )}
                 disabled={!quizAnswers[quiz.quiz_config.questions[
                   currentScene === 'quiz1' ? 0 : 
-                  currentScene === 'quiz2' ? 1 : 
-                  currentScene === 'quiz3' ? 2 : 
-                  currentScene === 'quiz4' ? 3 : 4
+                  currentScene === 'quiz2' ? 1 : 2
                 ].id] || quizFeedback !== null}
               >
                 {quizFeedback === 'correct' ? '✓ Correct!' : quizFeedback === 'incorrect' ? '✗ Incorrect' : 'Submit Answer'}
@@ -769,9 +689,9 @@ export default function Castle2Chapter1Page() {
           {/* Reward Scene */}
           {currentScene === 'reward' && (
             <ChapterRewardScreen
-              relicName={CHAPTER3_RELIC.name}
-              relicImage={CHAPTER3_RELIC.image}
-              relicDescription={CHAPTER3_RELIC.description}
+              relicName={CHAPTER4_RELIC.name}
+              relicImage={CHAPTER4_RELIC.image}
+              relicDescription={CHAPTER4_RELIC.description}
               earnedXP={earnedXP}
               quizScore={quizScore}
               canRetakeQuiz={true}
@@ -786,8 +706,8 @@ export default function Castle2Chapter1Page() {
       {/* Dialogue Box */}
       {currentScene !== 'reward' && (
         <ChapterDialogueBox
-          wizardName={CHAPTER3_WIZARD.name}
-          wizardImage={CHAPTER3_WIZARD.image}
+          wizardName={CHAPTER4_WIZARD.name}
+          wizardImage={CHAPTER4_WIZARD.image}
           displayedText={displayedText}
           isTyping={isTyping}
           showContinuePrompt={!isTyping}

@@ -84,8 +84,12 @@ export const CHAPTER2_LEARNING_OBJECTIVES = [
 export const CHAPTER2_XP_VALUES = {
   lesson: 50,
   minigame: 60,
-  quiz1: 60,
-  total: 250,
+  quiz1: 12,
+  quiz2: 12,
+  quiz3: 12,
+  quiz4: 12,
+  quiz5: 12,
+  total: 170,
 };
 
 export const CHAPTER2_CASTLE_ID = '3d4e5f6a-7b8c-9d0e-1f2a-3b4c5d6e7f8a';

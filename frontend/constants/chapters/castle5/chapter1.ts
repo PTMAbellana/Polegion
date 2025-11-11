@@ -93,8 +93,11 @@ export const CHAPTER1_LEARNING_OBJECTIVES = [
 export const CHAPTER1_XP_VALUES = {
   lesson: 80,
   minigame: 60,
-  quiz1: 100,
-  total: 200,
+  quiz1: 12,
+  quiz2: 12,
+  quiz3: 12,
+  quiz4: 12,
+  total: 188,
 };
 
 export const CHAPTER1_CASTLE_ID = '5f6a7b8c-9d0e-1f2a-3b4c-5d6e7f8a9b0c'; // Castle 5 (Arcane Observatory)

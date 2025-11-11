@@ -39,6 +39,7 @@ export interface MinigameLine {
 export interface MinigameQuestion {
     id: string
     instruction: string
+    description?: string            // Description/explanation text for the question
     // Chapter-specific properties (all optional to support different chapter types)
     points?: MinigamePoint[]        // Chapter 1: point-based minigames
     lines?: MinigameLine[]          // Chapter 2: line-based minigames
@@ -46,9 +47,16 @@ export interface MinigameQuestion {
     partType?: string               // Castle 3 Chapter 1: circle parts (center, radius, diameter, chord, arc, sector)
     angleMeasure?: number           // Castle 2 Chapter 1: angle measurement in degrees
     angleType?: string              // Castle 2 Chapter 1: type of angle (acute, right, obtuse, straight)
+    targetAngle?: number            // Castle 2 Chapter 2: target angle for construction
+    tolerance?: number              // Castle 2 Chapter 2: tolerance for angle construction
+    givenAngle?: number             // Castle 2 Chapter 3: given angle for complement/supplement
+    relationship?: 'complementary' | 'supplementary' // Castle 2 Chapter 3: angle relationship
+    targetSum?: number              // Castle 2 Chapter 3: target sum (90 or 180)
+    problem?: string                // Castle 2 Chapter 4: word problem text
+    solution?: string               // Castle 2 Chapter 4: step-by-step solution
+    type?: 'complementary' | 'supplementary' | string // Castle 2 Chapter 4: problem type
     // Answer and metadata
     correctAnswer: string | number | string[]
-    type?: string
     showType?: 'segment' | 'ray' | 'line' | string
     hint?: string
     // Additional properties for calculation-based minigames
