@@ -1,8 +1,6 @@
 /* Profile Module CSS */
 
 /* Import Poppins font */
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
-
 /* CSS Variables */
 .variables {
   --primary-gradient: linear-gradient(135deg, #2C514C 0%, #6D8A72 100%);

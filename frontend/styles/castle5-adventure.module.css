@@ -1,5 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=UnifrakturMaguntia&family=Cinzel:wght@400;600&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap');
-
 /* Chapter Selection Page Styles - Mystic/Violet Theme */
 /* Theme Colors: #D4BEE4 (light purple), #9B7EBD (purple), #6A4C93 (dark purple), #2D1B4E (deep purple) */
 .chapterSelectionContainer {
@@ -329,8 +327,8 @@
 .chapterItem:hover:not(.locked) {
   background: rgba(106, 76, 147, 0.6);
   border-color: rgba(155, 126, 189, 0.5);
-  transform: translateY(-2px);
-  box-shadow: 0 5px 13px rgba(0, 0, 0, 0.4);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
 }
 
 /* LOCKED STATE - Gray and disabled */
@@ -358,7 +356,7 @@
 .chapterItem.completed:not(.selected):hover {
   background: rgba(106, 76, 147, 0.6);
   border-left-color: #D4BEE4;
-  box-shadow: 0 5px 13px rgba(212, 190, 228, 0.1);
+  box-shadow: 0 4px 10px rgba(212, 190, 228, 0.08);
 }
 
 /* SELECTED STATE - Castle purple highlight */
@@ -379,7 +377,7 @@
 
 .chapterItem.selected:hover {
   box-shadow: 
-    0 0 20px rgba(155, 126, 189, 0.4),
+    0 0 18px rgba(155, 126, 189, 0.35),
     0 5px 16px rgba(0, 0, 0, 0.6);
 }
 

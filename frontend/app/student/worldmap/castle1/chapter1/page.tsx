@@ -8,7 +8,7 @@ import {
   ChapterDialogueBox,
   ChapterRewardScreen,
 } from '@/components/chapters/shared';
-import { PointBasedMinigame, GeometryPhysicsGame } from '@/components/chapters/minigames';
+import { GeometryPhysicsGame } from '@/components/chapters/minigames';
 import { ConceptCard, LessonGrid, VisualDemo } from '@/components/chapters/lessons';
 import ChapterProgressModal from '@/components/chapters/ChapterProgressModal';
 import { useChapterData, useChapterDialogue, useChapterAudio } from '@/hooks/chapters';
@@ -23,7 +23,6 @@ import {
   CHAPTER1_XP_VALUES,
   CHAPTER1_CONCEPTS,
 } from '@/constants/chapters/castle1/chapter1';
-import Image from 'next/image';
 import { awardLessonXP, completeChapter } from '@/api/chapters';
 import { submitQuizAttempt, getUserQuizAttempts } from '@/api/chapterQuizzes';
 import { submitMinigameAttempt } from '@/api/minigames';
@@ -590,7 +589,8 @@ export default function Chapter1Page() {
                     key={`${concept.key}-${index}`}
                     title={concept.title}
                     description={concept.description}
-                    icon={<Image src={concept.image} alt={concept.title} width={200} height={80} />}
+                    imageSrc={concept.image}
+                    imageAlt={concept.title}
                     highlighted={isHighlighted}
                     styleModule={lessonStyles}
                   />

@@ -28,6 +28,10 @@ const swaggerOptions = {
     tags: [
       { name: 'Authentication', description: 'User authentication and authorization with Supabase' },
       { name: 'Users', description: 'User management operations' },
+      { name: 'Castles', description: 'Castle and worldmap management' },
+      { name: 'Chapters', description: 'Chapter management within castles' },
+      { name: 'Chapter Quizzes', description: 'Quiz management for chapters' },
+      { name: 'Minigames', description: 'Minigame management and progress tracking' },
       { name: 'Rooms', description: 'Virtual room management for competitions' },
       { name: 'Participants', description: 'Room participant management' },
       { name: 'Problems', description: 'Programming problem management' },

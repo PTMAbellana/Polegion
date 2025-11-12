@@ -55,17 +55,16 @@
   display: flex;
   gap: 1rem;
   align-items: flex-start;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   width: 100%;
   max-height: calc(100vh - 400px); /* Allow space for top bar, task panel, and dialogue */
 }
 
 /* Canvas Container */
 .canvasContainer {
-  flex: 0 0 auto;
+  flex: 1 1 auto;
   min-width: 300px;
   max-width: 800px;
-  width: 100%;
   display: flex;
   justify-content: center;
   align-items: center;

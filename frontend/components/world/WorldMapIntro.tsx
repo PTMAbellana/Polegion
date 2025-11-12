@@ -112,14 +112,26 @@ export default function WorldMapIntro({ onIntroComplete }: WorldMapIntroProps) {
     setDisplayText('');
 
     const audio = audioRefs.current[index];
+    
+    // Stop previous audio before playing new one
+    if (currentAudioRef.current && currentAudioRef.current !== audio) {
+      currentAudioRef.current.pause();
+      currentAudioRef.current.currentTime = 0;
+    }
+    
     currentAudioRef.current = audio;
 
     if (audio) {
       audio.currentTime = 0;
-      audio.play().catch(e => {
-        console.error("Audio play failed:", e);
-        console.log("Attempting to play:", DIALOGUE[index].audioSrc);
-      });
+      // Use a promise to handle play() properly
+      const playPromise = audio.play();
+      
+      if (playPromise !== undefined) {
+        playPromise.catch(e => {
+          console.error("Audio play failed:", e);
+          console.log("Attempting to play:", DIALOGUE[index].audioSrc);
+        });
+      }
     }
 
     const line = DIALOGUE[index].text;
@@ -140,7 +152,10 @@ export default function WorldMapIntro({ onIntroComplete }: WorldMapIntroProps) {
   const stopAllAudio = () => {
     audioRefs.current.forEach((audio) => {
       if (audio) {
-        audio.pause();
+        // Check if audio is actually playing before pausing
+        if (!audio.paused) {
+          audio.pause();
+        }
         audio.currentTime = 0;
       }
     });

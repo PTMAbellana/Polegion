@@ -9,11 +9,37 @@ export default function CastleMarker({
   type,
   isSelected,
   isHovered,
+  animationDirection,
   onClick,
   onMouseEnter,
   onMouseLeave,
 }: CastleMarkerProps) {
   const [imgError, setImgError] = useState(false)
+
+  // Determine animation classes based on type and direction
+  const getAnimationClass = () => {
+    if (!animationDirection) return '';
+    
+    if (animationDirection === 'right') {
+      // When moving right (clicking >):
+      // - Prev (CL) stays as side castle (no animation needed)
+      // - Current (CC) becomes prev - shrinks from center to side
+      // - Next (CR) becomes current - grows from side to center (handled by current_castle)
+      // - New next appears - grows from small to side
+      if (type === 'prev') return styles.shrinking_from_center; // This was the old current
+      if (type === 'next') return styles.appearing; // This is the new castle appearing
+    } else if (animationDirection === 'left') {
+      // When moving left (clicking <):
+      // - Prev (CL) becomes current - grows from side to center (handled by current_castle)
+      // - Current (CC) becomes next - shrinks from center to side
+      // - Next (CR) stays as side castle (no animation needed)
+      // - New prev appears - grows from small to side
+      if (type === 'prev') return styles.appearing; // This is the new castle appearing
+      if (type === 'next') return styles.shrinking_from_center; // This was the old current
+    }
+    
+    return '';
+  };
 
   const markerClasses = [
     styles.castle_marker,
@@ -22,7 +48,8 @@ export default function CastleMarker({
     castle.progress?.completed ? styles.completed : '',
     isSelected ? styles.selected : '',
     isHovered ? styles.hovered : '',
-  ].join(' ')
+    getAnimationClass(),
+  ].filter(Boolean).join(' ')
 
   const getImagePath = () => {
     if (imgError) {

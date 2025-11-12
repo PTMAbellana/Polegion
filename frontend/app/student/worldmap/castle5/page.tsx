@@ -28,6 +28,7 @@ export default function CastlePage() {
   const { isLoading: authLoading } = AuthProtection()
 
   const [loading, setLoading] = useState(true)
+  const [navigating, setNavigating] = useState(false)
   const [selectedChapter, setSelectedChapter] = useState<number | null>(null)
   const [hoveredChapter, setHoveredChapter] = useState<string | null>(null)
   const [showIntro, setShowIntro] = useState(false)
@@ -109,6 +110,7 @@ export default function CastlePage() {
   const handleStartChapter = () => {
     const chapter = chapters.find(c => c.chapter_number === selectedChapter)
     if (chapter?.progress?.unlocked && castleData) {
+      setNavigating(true)
       router.push(`/student/worldmap/${CASTLE_ROUTE}/chapter${chapter.chapter_number}`)
     }
   }
@@ -158,6 +160,29 @@ export default function CastlePage() {
 
   return (
     <div className={styles.chapterSelectionContainer}>
+      {/* Navigation Loading Overlay */}
+      {navigating && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.85)',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          alignItems: 'center',
+          zIndex: 10000,
+          gap: '1.5rem'
+        }}>
+          <Loader />
+          <p style={{ color: '#fff', fontSize: '1.2rem', fontWeight: '500' }}>
+            Loading Chapter...
+          </p>
+        </div>
+      )}
+      
       <div className={styles.backgroundOverlay}></div>
       <CastleIntro show={showIntro} castleName={castleData.name} description={castleData.description} styleModule={styles} />
       <CastleHeader castleName={castleData.name} region={castleData.region} description={castleData.description} completedChapters={completedChaptersCount} totalChapters={chapters.length} overallProgress={overallProgress} onBack={handleBackToWorldMap} styleModule={styles} isLoading={loading} />
