@@ -6,3 +6,6 @@ export type { UseChapterDialogueOptions, UseChapterDialogueReturn } from './useC
 
 export { useChapterAudio } from './useChapterAudio'
 export type { UseChapterAudioOptions, UseChapterAudioReturn } from './useChapterAudio'
+
+export { useChapterProgress } from './useChapterProgress'
+export type { UseChapterProgressOptions, UseChapterProgressReturn } from './useChapterProgress'

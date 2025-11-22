@@ -18,6 +18,7 @@ import {
     updateUserProfile, 
     uploadImage 
 } from '@/api/users';
+import { useChapterStore } from '@/store/chapterStore';
 
 export const useAuthStore = create<AuthState>()(
     persist(
@@ -235,6 +236,10 @@ export const useAuthStore = create<AuthState>()(
                 await apiLogout();
                 authUtils.clearAuthData();
                 localStorage.removeItem('auth-storage');
+                
+                // Clear all chapter progress when logging out
+                useChapterStore.getState().reset();
+                
                 set({
                     authToken: null,
                     userProfile: null,

@@ -41,6 +41,171 @@
   background: rgba(255, 215, 0, 0.5);
 }
 
+/* Castle 1 Theme - Minigame */
+.minigameContainer:global(.castle1Theme) {
+  background: linear-gradient(135deg, rgba(62, 88, 121, 0.3) 0%, rgba(33, 53, 85, 0.3) 100%);
+  border-color: rgba(216, 196, 182, 0.3);
+}
+
+.minigameContainer:global(.castle1Theme) .questionText {
+  color: #F5EFE7;
+  background: linear-gradient(135deg, rgba(216, 196, 182, 0.2), rgba(245, 239, 231, 0.1));
+  border-color: rgba(216, 196, 182, 0.4);
+}
+
+.minigameContainer:global(.castle1Theme) .answerOption {
+  background: linear-gradient(135deg, rgba(62, 88, 121, 0.4) 0%, rgba(33, 53, 85, 0.4) 100%);
+  border-color: rgba(216, 196, 182, 0.3);
+  color: #F5EFE7;
+}
+
+.minigameContainer:global(.castle1Theme) .answerOption:hover {
+  background: linear-gradient(135deg, rgba(216, 196, 182, 0.3) 0%, rgba(245, 239, 231, 0.2) 100%);
+  border-color: rgba(216, 196, 182, 0.6);
+}
+
+.minigameContainer:global(.castle1Theme) .submitButton {
+  background: linear-gradient(135deg, rgba(216, 196, 182, 0.6) 0%, rgba(245, 239, 231, 0.4) 100%);
+  border-color: #D8C4B6;
+  color: #213555;
+}
+
+.minigameContainer:global(.castle1Theme) .submitButton:hover {
+  background: linear-gradient(135deg, rgba(245, 239, 231, 0.8) 0%, rgba(216, 196, 182, 0.6) 100%);
+}
+
+/* Castle 2 Theme - Minigame */
+.minigameContainer:global(.castle2Theme) {
+  background: linear-gradient(135deg, rgba(76, 118, 59, 0.3) 0%, rgba(4, 57, 21, 0.3) 100%);
+  border-color: rgba(176, 206, 136, 0.3);
+}
+
+.minigameContainer:global(.castle2Theme) .questionText {
+  color: #FFFD8F;
+  background: linear-gradient(135deg, rgba(176, 206, 136, 0.2), rgba(255, 253, 143, 0.1));
+  border-color: rgba(176, 206, 136, 0.4);
+}
+
+.minigameContainer:global(.castle2Theme) .answerOption {
+  background: linear-gradient(135deg, rgba(76, 118, 59, 0.4) 0%, rgba(4, 57, 21, 0.4) 100%);
+  border-color: rgba(176, 206, 136, 0.3);
+  color: #FFFD8F;
+}
+
+.minigameContainer:global(.castle2Theme) .answerOption:hover {
+  background: linear-gradient(135deg, rgba(176, 206, 136, 0.3) 0%, rgba(255, 253, 143, 0.2) 100%);
+  border-color: rgba(176, 206, 136, 0.6);
+}
+
+.minigameContainer:global(.castle2Theme) .submitButton {
+  background: linear-gradient(135deg, rgba(176, 206, 136, 0.6) 0%, rgba(255, 253, 143, 0.4) 100%);
+  border-color: #B0CE88;
+  color: #043915;
+}
+
+.minigameContainer:global(.castle2Theme) .submitButton:hover {
+  background: linear-gradient(135deg, rgba(255, 253, 143, 0.8) 0%, rgba(176, 206, 136, 0.6) 100%);
+}
+
+/* Castle 3 Theme - Minigame */
+.minigameContainer:global(.castle3Theme) {
+  background: linear-gradient(135deg, rgba(38, 102, 123, 0.3) 0%, rgba(20, 61, 96, 0.3) 100%);
+  border-color: rgba(160, 200, 120, 0.3);
+}
+
+.minigameContainer:global(.castle3Theme) .questionText {
+  color: #DDEB9D;
+  background: linear-gradient(135deg, rgba(160, 200, 120, 0.2), rgba(221, 235, 157, 0.1));
+  border-color: rgba(160, 200, 120, 0.4);
+}
+
+.minigameContainer:global(.castle3Theme) .answerOption {
+  background: linear-gradient(135deg, rgba(38, 102, 123, 0.4) 0%, rgba(20, 61, 96, 0.4) 100%);
+  border-color: rgba(160, 200, 120, 0.3);
+  color: #DDEB9D;
+}
+
+.minigameContainer:global(.castle3Theme) .answerOption:hover {
+  background: linear-gradient(135deg, rgba(160, 200, 120, 0.3) 0%, rgba(221, 235, 157, 0.2) 100%);
+  border-color: rgba(160, 200, 120, 0.6);
+}
+
+.minigameContainer:global(.castle3Theme) .submitButton {
+  background: linear-gradient(135deg, rgba(160, 200, 120, 0.6) 0%, rgba(221, 235, 157, 0.4) 100%);
+  border-color: #A0C878;
+  color: #143D60;
+}
+
+.minigameContainer:global(.castle3Theme) .submitButton:hover {
+  background: linear-gradient(135deg, rgba(221, 235, 157, 0.8) 0%, rgba(160, 200, 120, 0.6) 100%);
+}
+
+/* Castle 4 Theme - Minigame */
+.minigameContainer:global(.castle4Theme) {
+  background: linear-gradient(135deg, rgba(183, 116, 102, 0.3) 0%, rgba(149, 124, 98, 0.3) 100%);
+  border-color: rgba(226, 181, 154, 0.3);
+}
+
+.minigameContainer:global(.castle4Theme) .questionText {
+  color: #FFE1AF;
+  background: linear-gradient(135deg, rgba(226, 181, 154, 0.2), rgba(255, 225, 175, 0.1));
+  border-color: rgba(226, 181, 154, 0.4);
+}
+
+.minigameContainer:global(.castle4Theme) .answerOption {
+  background: linear-gradient(135deg, rgba(183, 116, 102, 0.4) 0%, rgba(149, 124, 98, 0.4) 100%);
+  border-color: rgba(226, 181, 154, 0.3);
+  color: #FFE1AF;
+}
+
+.minigameContainer:global(.castle4Theme) .answerOption:hover {
+  background: linear-gradient(135deg, rgba(226, 181, 154, 0.3) 0%, rgba(255, 225, 175, 0.2) 100%);
+  border-color: rgba(226, 181, 154, 0.6);
+}
+
+.minigameContainer:global(.castle4Theme) .submitButton {
+  background: linear-gradient(135deg, rgba(226, 181, 154, 0.6) 0%, rgba(255, 225, 175, 0.4) 100%);
+  border-color: #E2B59A;
+  color: #957C62;
+}
+
+.minigameContainer:global(.castle4Theme) .submitButton:hover {
+  background: linear-gradient(135deg, rgba(255, 225, 175, 0.8) 0%, rgba(226, 181, 154, 0.6) 100%);
+}
+
+/* Castle 5 Theme - Minigame */
+.minigameContainer:global(.castle5Theme) {
+  background: linear-gradient(135deg, rgba(114, 92, 173, 0.3) 0%, rgba(11, 29, 81, 0.3) 100%);
+  border-color: rgba(140, 205, 235, 0.3);
+}
+
+.minigameContainer:global(.castle5Theme) .questionText {
+  color: #FFE3A9;
+  background: linear-gradient(135deg, rgba(140, 205, 235, 0.2), rgba(255, 227, 169, 0.1));
+  border-color: rgba(140, 205, 235, 0.4);
+}
+
+.minigameContainer:global(.castle5Theme) .answerOption {
+  background: linear-gradient(135deg, rgba(114, 92, 173, 0.4) 0%, rgba(11, 29, 81, 0.4) 100%);
+  border-color: rgba(140, 205, 235, 0.3);
+  color: #FFE3A9;
+}
+
+.minigameContainer:global(.castle5Theme) .answerOption:hover {
+  background: linear-gradient(135deg, rgba(140, 205, 235, 0.3) 0%, rgba(255, 227, 169, 0.2) 100%);
+  border-color: rgba(140, 205, 235, 0.6);
+}
+
+.minigameContainer:global(.castle5Theme) .submitButton {
+  background: linear-gradient(135deg, rgba(140, 205, 235, 0.6) 0%, rgba(255, 227, 169, 0.4) 100%);
+  border-color: #8CCDEB;
+  color: #0B1D51;
+}
+
+.minigameContainer:global(.castle5Theme) .submitButton:hover {
+  background: linear-gradient(135deg, rgba(255, 227, 169, 0.8) 0%, rgba(140, 205, 235, 0.6) 100%);
+}
+
 /* Level Info Container (for title/instructions at top) */
 .levelInfoContainer {
   display: flex;
@@ -219,6 +384,42 @@
   background: linear-gradient(135deg, rgba(216, 196, 182, 0.5) 0%, rgba(245, 239, 231, 0.3) 100%);
   border-color: #D8C4B6;
   box-shadow: 0 4px 16px rgba(216, 196, 182, 0.4);
+}
+
+/* Castle-specific selected states for better visibility */
+.minigameContainer:global(.castle1Theme) .answerOptionSelected {
+  background: linear-gradient(135deg, rgba(216, 196, 182, 0.7) 0%, rgba(245, 239, 231, 0.5) 100%);
+  border-color: #F5EFE7;
+  box-shadow: 0 0 20px rgba(216, 196, 182, 0.6), 0 4px 16px rgba(216, 196, 182, 0.5);
+  transform: scale(1.02);
+}
+
+.minigameContainer:global(.castle2Theme) .answerOptionSelected {
+  background: linear-gradient(135deg, rgba(176, 206, 136, 0.7) 0%, rgba(255, 253, 143, 0.5) 100%);
+  border-color: #FFFD8F;
+  box-shadow: 0 0 20px rgba(255, 253, 143, 0.6), 0 4px 16px rgba(176, 206, 136, 0.5);
+  transform: scale(1.02);
+}
+
+.minigameContainer:global(.castle3Theme) .answerOptionSelected {
+  background: linear-gradient(135deg, rgba(160, 200, 120, 0.7) 0%, rgba(221, 235, 157, 0.5) 100%);
+  border-color: #DDEB9D;
+  box-shadow: 0 0 20px rgba(221, 235, 157, 0.6), 0 4px 16px rgba(160, 200, 120, 0.5);
+  transform: scale(1.02);
+}
+
+.minigameContainer:global(.castle4Theme) .answerOptionSelected {
+  background: linear-gradient(135deg, rgba(226, 181, 154, 0.7) 0%, rgba(255, 225, 175, 0.5) 100%);
+  border-color: #FFE1AF;
+  box-shadow: 0 0 20px rgba(255, 225, 175, 0.6), 0 4px 16px rgba(226, 181, 154, 0.5);
+  transform: scale(1.02);
+}
+
+.minigameContainer:global(.castle5Theme) .answerOptionSelected {
+  background: linear-gradient(135deg, rgba(140, 205, 235, 0.7) 0%, rgba(255, 227, 169, 0.5) 100%);
+  border-color: #FFE3A9;
+  box-shadow: 0 0 20px rgba(255, 227, 169, 0.6), 0 4px 16px rgba(140, 205, 235, 0.5);
+  transform: scale(1.02);
 }
 
 .answerOptionCorrect {

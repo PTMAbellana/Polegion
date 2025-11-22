@@ -1,27 +1,45 @@
 import type { GeometryLevel } from '@/components/chapters/minigames/C1C1_GeometryPhysicsGame';
 
-// Dialogue data
-export const CHAPTER1_OPENING_DIALOGUE = [
-  'Ah, a new seeker of shapes has arrived! Welcome, traveler.',
-  'I am Archim, Keeper of the Euclidean Spire, where all geometry was born.',
-  'These are Points, the seeds of all geometry. Touch one, and it comes alive!',
-  'From these points, we shall unlock the tower\'s ancient power!',
+// Unified dialogue system with scene markers
+export interface ChapterDialogue {
+  scene: 'opening' | 'lesson' | 'minigame';
+  text: string;
+  key?: string;
+  taskId?: string;
+}
+
+export const CHAPTER1_DIALOGUE: ChapterDialogue[] = [
+  // Opening Scene (indices 0-3)
+  { scene: 'opening', text: 'Ah, a new seeker of shapes has arrived! Welcome, traveler.' },
+  { scene: 'opening', text: 'I am Archim, Keeper of the Euclidean Spire, where all geometry was born.' },
+  { scene: 'opening', text: 'These are Points, the seeds of all geometry. Touch one, and it comes alive!' },
+  { scene: 'opening', text: 'From these points, we shall unlock the tower\'s ancient power!' },
+  
+  // Lesson Scene (indices 4-9)
+  { scene: 'lesson', text: 'Every shape begins with a Point, small, yet mighty.', key: 'intro' },
+  { scene: 'lesson', text: 'A point represents a specific location in space with no size, only position.', key: 'point', taskId: 'task-0' },
+  { scene: 'lesson', text: 'Two points form a connection, that is the beginning of a Line Segment.', key: 'line-segment', taskId: 'task-1' },
+  { scene: 'lesson', text: 'If the path stretches endlessly in one direction, it is a Ray.', key: 'ray', taskId: 'task-2' },
+  { scene: 'lesson', text: 'And if it continues in both directions, it becomes a Line, infinite and eternal.', key: 'line', taskId: 'task-3' },
+  { scene: 'lesson', text: 'Now, let us put your knowledge to practice!', key: 'practice' },
+  
+  // Minigame Scene (indices 10-12)
+  { scene: 'minigame', text: 'Excellent! Now let\'s put your knowledge into practice with a fun challenge!' },
+  { scene: 'minigame', text: 'Help the ball reach the trash can by creating geometric shapes.' },
+  { scene: 'minigame', text: 'Think carefully about where to place your points!' },
 ];
 
-export const CHAPTER1_LESSON_DIALOGUE = [
-  { key: 'point', text: 'Every shape begins with a Point, small, yet mighty.', taskId: 'task-0' },
-  { key: 'line-segment', text: 'Two points form a connection, that is the beginning of a Line Segment.', taskId: 'task-1' },
-  { key: 'ray', text: 'If the path stretches endlessly in one direction, it is a Ray.', taskId: 'task-2' },
-  { key: 'line', text: 'And if it continues in both directions, it becomes a Line, infinite and eternal.', taskId: 'task-3' },
-  { key: 'review', text: 'Watch closely as these fundamental forms reveal themselves.' },
-  { key: 'practice', text: 'Now, let us put your knowledge to practice!' },
-];
+// Helper to get scene boundaries
+export const CHAPTER1_SCENE_RANGES = {
+  opening: { start: 0, end: 3 },
+  lesson: { start: 4, end: 9 },
+  minigame: { start: 10, end: 12 },
+};
 
-export const CHAPTER1_MINIGAME_DIALOGUE = [
-  'Excellent! Now let\'s put your knowledge into practice with a fun challenge!',
-  'Help the ball reach the trash can by creating geometric shapes.',
-  'Think carefully about where to place your points!',
-];
+// Legacy exports for backward compatibility (deprecated)
+export const CHAPTER1_OPENING_DIALOGUE = CHAPTER1_DIALOGUE.filter(d => d.scene === 'opening').map(d => d.text);
+export const CHAPTER1_LESSON_DIALOGUE = CHAPTER1_DIALOGUE.filter(d => d.scene === 'lesson').map(d => ({ key: d.key || '', text: d.text, taskId: d.taskId }));
+export const CHAPTER1_MINIGAME_DIALOGUE = CHAPTER1_DIALOGUE.filter(d => d.scene === 'minigame').map(d => d.text);
 
 // Minigame levels
 export const CHAPTER1_MINIGAME_LEVELS: GeometryLevel[] = [

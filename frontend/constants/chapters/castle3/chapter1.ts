@@ -1,29 +1,48 @@
 // Castle 3 - Chapter 1: The Tide of Shapes
 // Theme: Parts of a Circle (center, radius, diameter, chord, arc, sector)
 
-export const CHAPTER1_OPENING_DIALOGUE = [
-  "Welcome to the Circle Sanctuary! I am Archim, Keeper of the Curved Path.",
-  "Enter the Tidal Hall where glowing rings rise and fall like ripples on water.",
-  "The circle is one of the most perfect shapes in all of geometry.",
-  "Let us explore its sacred components together!"
+interface ChapterDialogue {
+  scene: 'opening' | 'lesson' | 'minigame';
+  text: string;
+  key?: string;
+  taskId?: string;
+}
+
+// Unified dialogue array combining all scenes
+export const CHAPTER1_DIALOGUE: ChapterDialogue[] = [
+  // Opening scene (indices 0-3)
+  { scene: 'opening', text: "Welcome to the Circle Sanctuary! I am Archim, Keeper of the Curved Path." },
+  { scene: 'opening', text: "Enter the Tidal Hall where glowing rings rise and fall like ripples on water." },
+  { scene: 'opening', text: "The circle is one of the most perfect shapes in all of geometry." },
+  { scene: 'opening', text: "Let us explore its sacred components together!" },
+  
+  // Lesson scene (indices 4-11)
+  { scene: 'lesson', key: 'intro', text: "A circle is a set of all points equidistant from a single point called the center.", taskId: 'task-0' },
+  { scene: 'lesson', key: 'center', text: "The CENTER is the point equidistant from all points on the circle. We often label it as point O.", taskId: 'task-0' },
+  { scene: 'lesson', key: 'radius', text: "The RADIUS is a line segment from the center to any point on the circle.", taskId: 'task-1' },
+  { scene: 'lesson', key: 'diameter', text: "The DIAMETER is a line segment passing through the center, connecting two points on the circle. It equals 2 times the radius!", taskId: 'task-2' },
+  { scene: 'lesson', key: 'chord', text: "A CHORD is any line segment connecting two points on the circle (but not through the center).", taskId: 'task-3' },
+  { scene: 'lesson', key: 'arc', text: "An ARC is a curved portion of the circle between two points.", taskId: 'task-4' },
+  { scene: 'lesson', key: 'sector', text: "A SECTOR is a pie-shaped region bounded by two radii and an arc.", taskId: 'task-5' },
+  { scene: 'lesson', key: 'summary', text: "Master these parts, and you understand the foundation of all circular geometry!" },
+  
+  // Minigame scene (indices 12-14)
+  { scene: 'minigame', text: "Excellent! Now identify the parts of the circle as they appear." },
+  { scene: 'minigame', text: "Tap or select the correct part when I call its name!" },
+  { scene: 'minigame', text: "Precision is key in the Circle Sanctuary!" },
 ];
 
-export const CHAPTER1_LESSON_DIALOGUE = [
-  { key: 'intro', text: "A circle is a set of all points equidistant from a single point called the center.", taskId: 'task-0' },
-  { key: 'center', text: "The CENTER is the point equidistant from all points on the circle. We often label it as point O.", taskId: 'task-0' },
-  { key: 'radius', text: "The RADIUS is a line segment from the center to any point on the circle.", taskId: 'task-1' },
-  { key: 'diameter', text: "The DIAMETER is a line segment passing through the center, connecting two points on the circle. It equals 2 times the radius!", taskId: 'task-2' },
-  { key: 'chord', text: "A CHORD is any line segment connecting two points on the circle (but not through the center).", taskId: 'task-3' },
-  { key: 'arc', text: "An ARC is a curved portion of the circle between two points.", taskId: 'task-4' },
-  { key: 'sector', text: "A SECTOR is a pie-shaped region bounded by two radii and an arc.", taskId: 'task-5' },
-  { key: 'summary', text: "Master these parts, and you understand the foundation of all circular geometry!" }
-];
+// Scene ranges for navigation
+export const CHAPTER1_SCENE_RANGES = {
+  opening: { start: 0, end: 3 },
+  lesson: { start: 4, end: 11 },
+  minigame: { start: 12, end: 14 },
+};
 
-export const CHAPTER1_MINIGAME_DIALOGUE = [
-  "Excellent! Now identify the parts of the circle as they appear.",
-  "Tap or select the correct part when I call its name!",
-  "Precision is key in the Circle Sanctuary!"
-];
+// Legacy exports for backward compatibility
+export const CHAPTER1_OPENING_DIALOGUE = CHAPTER1_DIALOGUE.filter(d => d.scene === 'opening').map(d => d.text);
+export const CHAPTER1_LESSON_DIALOGUE = CHAPTER1_DIALOGUE.filter(d => d.scene === 'lesson').map(d => ({ key: d.key || '', text: d.text, taskId: d.taskId }));
+export const CHAPTER1_MINIGAME_DIALOGUE = CHAPTER1_DIALOGUE.filter(d => d.scene === 'minigame').map(d => d.text);
 
 export const CHAPTER1_MINIGAME_LEVELS = [
   { id: 1, partType: 'center', instruction: 'Find the CENTER', hint: 'The center is the point equidistant from all points on the circle' },
@@ -80,19 +99,17 @@ export const CHAPTER1_LEARNING_OBJECTIVES = [
   { id: 'task-9', key: 'quiz3', label: 'Pass Quiz Question 3', type: 'quiz' as const },
   { id: 'task-10', key: 'quiz4', label: 'Pass Quiz Question 4', type: 'quiz' as const },
   { id: 'task-11', key: 'quiz5', label: 'Pass Quiz Question 5', type: 'quiz' as const },
-  { id: 'task-12', key: 'quiz6', label: 'Pass Quiz Question 6', type: 'quiz' as const },
 ];
 
 export const CHAPTER1_XP_VALUES = {
-  lesson: 40,
+  lesson: 160,
   minigame: 40,
-  quiz1: 12,
-  quiz2: 12,
-  quiz3: 12,
-  quiz4: 12,
-  quiz5: 12,
-  quiz6: 12,
-  total: 152,
+  quiz1: 10,
+  quiz2: 10,
+  quiz3: 10,
+  quiz4: 10,
+  quiz5: 10,
+  total: 250,
 };
 
 export const CHAPTER1_CASTLE_ID = '3d4e5f6a-7b8c-9d0e-1f2a-3b4c5d6e7f8a'; // Castle 3 (Circle Sanctuary)

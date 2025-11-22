@@ -1,30 +1,32 @@
 // Castle 5 - Chapter 1: The Hall of Planes
 // Theme: Identifying plane (2D) and solid (3D) figures
 
-export const CHAPTER1_OPENING_DIALOGUE = [
-  "Welcome to the Arcane Observatory! I am Dimensius, Guardian of Space.",
-  "You stand in the Hall of Planes, where shapes float in mysterious dimensions.",
-  "Some shapes are flat — they are PLANE FIGURES with only length and width.",
-  "Others have depth — they are SOLID FIGURES existing in three dimensions!",
-  "Let us learn to see beyond the surface!"
+interface ChapterDialogue { scene: 'opening' | 'lesson' | 'minigame'; text: string; key?: string; taskId?: string; }
+
+export const CHAPTER1_DIALOGUE: ChapterDialogue[] = [
+  { scene: 'opening', text: "Welcome to the Arcane Observatory! I am Dimensius, Guardian of Space." },
+  { scene: 'opening', text: "You stand in the Hall of Planes, where shapes float in mysterious dimensions." },
+  { scene: 'opening', text: "Some shapes are flat, they are PLANE FIGURES with only length and width." },
+  { scene: 'opening', text: "Others have depth, they are SOLID FIGURES existing in three dimensions!" },
+  { scene: 'opening', text: "Let us learn to see beyond the surface!" },
+  { scene: 'lesson', key: 'intro', text: "PLANE FIGURES are flat, 2D shapes with length and width only.", taskId: 'task-0' },
+  { scene: 'lesson', key: 'plane-examples', text: "Examples of plane figures: circle, square, triangle, rectangle, pentagon, hexagon.", taskId: 'task-1' },
+  { scene: 'lesson', key: 'solid-intro', text: "SOLID FIGURES are 3D shapes with length, width, AND height (or depth).", taskId: 'task-2' },
+  { scene: 'lesson', key: 'solid-examples', text: "Examples of solid figures: cube, sphere, cylinder, cone, pyramid, prism.", taskId: 'task-3' },
+  { scene: 'lesson', key: 'difference', text: "The key difference: Plane figures are FLAT, solid figures have VOLUME!", taskId: 'task-4' },
+  { scene: 'lesson', key: 'prism', text: "A PRISM is a solid figure with two identical parallel bases connected by rectangular faces.", taskId: 'task-5' },
+  { scene: 'lesson', key: 'pyramid', text: "A PYRAMID has a polygon base and triangular faces meeting at a point (apex).", taskId: 'task-6' },
+  { scene: 'lesson', key: 'practice', text: "Now sort shapes into their proper dimensions!" },
+  { scene: 'minigame', text: "The Hall presents you with floating shapes!" },
+  { scene: 'minigame', text: "Sort each shape: Is it a plane figure or solid figure?" },
+  { scene: 'minigame', text: "Look carefully at the dimensions!" },
 ];
 
-export const CHAPTER1_LESSON_DIALOGUE = [
-  { key: 'intro', text: "PLANE FIGURES are flat, 2D shapes with length and width only.", taskId: 'task-0' },
-  { key: 'plane-examples', text: "Examples of plane figures: circle, square, triangle, rectangle, pentagon, hexagon.", taskId: 'task-1' },
-  { key: 'solid-intro', text: "SOLID FIGURES are 3D shapes with length, width, AND height (or depth).", taskId: 'task-2' },
-  { key: 'solid-examples', text: "Examples of solid figures: cube, sphere, cylinder, cone, pyramid, prism.", taskId: 'task-3' },
-  { key: 'difference', text: "The key difference: Plane figures are FLAT, solid figures have VOLUME!", taskId: 'task-4' },
-  { key: 'prism', text: "A PRISM is a solid figure with two identical parallel bases connected by rectangular faces.", taskId: 'task-5' },
-  { key: 'pyramid', text: "A PYRAMID has a polygon base and triangular faces meeting at a point (apex).", taskId: 'task-6' },
-  { key: 'practice', text: "Now sort shapes into their proper dimensions!" }
-];
+export const CHAPTER1_SCENE_RANGES = { opening: { start: 0, end: 4 }, lesson: { start: 5, end: 12 }, minigame: { start: 13, end: 15 } };
 
-export const CHAPTER1_MINIGAME_DIALOGUE = [
-  "The Hall presents you with floating shapes!",
-  "Sort each shape: Is it a plane figure or solid figure?",
-  "Look carefully at the dimensions!"
-];
+export const CHAPTER1_OPENING_DIALOGUE = CHAPTER1_DIALOGUE.filter(d => d.scene === 'opening').map(d => d.text);
+export const CHAPTER1_LESSON_DIALOGUE = CHAPTER1_DIALOGUE.filter(d => d.scene === 'lesson').map(d => ({ key: d.key || '', text: d.text, taskId: d.taskId }));
+export const CHAPTER1_MINIGAME_DIALOGUE = CHAPTER1_DIALOGUE.filter(d => d.scene === 'minigame').map(d => d.text);
 
 export const CHAPTER1_MINIGAME_LEVELS = [
   { id: 1, shape: 'triangle', type: 'plane', instruction: 'Is this a plane or solid figure?', hint: 'Does it have depth?' },
@@ -88,16 +90,18 @@ export const CHAPTER1_LEARNING_OBJECTIVES = [
   { id: 'task-9', key: 'quiz2', label: 'Pass Quiz Question 2', type: 'quiz' as const },
   { id: 'task-10', key: 'quiz3', label: 'Pass Quiz Question 3', type: 'quiz' as const },
   { id: 'task-11', key: 'quiz4', label: 'Pass Quiz Question 4', type: 'quiz' as const },
+  { id: 'task-12', key: 'quiz5', label: 'Pass Quiz Question 5', type: 'quiz' as const },
 ];
 
 export const CHAPTER1_XP_VALUES = {
-  lesson: 80,
-  minigame: 60,
-  quiz1: 12,
-  quiz2: 12,
-  quiz3: 12,
-  quiz4: 12,
-  total: 188,
+  lesson: 60,
+  minigame: 40,
+  quiz1: 20,
+  quiz2: 20,
+  quiz3: 20,
+  quiz4: 20,
+  quiz5: 20,
+  total: 200,
 };
 
 export const CHAPTER1_CASTLE_ID = '5f6a7b8c-9d0e-1f2a-3b4c-5d6e7f8a9b0c'; // Castle 5 (Arcane Observatory)

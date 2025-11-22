@@ -1,28 +1,47 @@
 // Castle 3 - Chapter 2: The Path of the Perimeter
 // Theme: Circumference of circles using C = 2πr and C = πd
 
-export const CHAPTER2_OPENING_DIALOGUE = [
-  "Well done, seeker! You understand the parts of the circle.",
-  "Now we venture to the massive circular gate of ancient coral.",
-  "The distance around a circle has a special name: CIRCUMFERENCE.",
-  "Let us unlock the formula that measures this sacred path!"
+interface ChapterDialogue {
+  scene: 'opening' | 'lesson' | 'minigame';
+  text: string;
+  key?: string;
+  taskId?: string;
+}
+
+// Unified dialogue array combining all scenes
+export const CHAPTER2_DIALOGUE: ChapterDialogue[] = [
+  // Opening scene (indices 0-3)
+  { scene: 'opening', text: "Well done, seeker! You understand the parts of the circle." },
+  { scene: 'opening', text: "Now we venture to the massive circular gate of ancient coral." },
+  { scene: 'opening', text: "The distance around a circle has a special name: CIRCUMFERENCE." },
+  { scene: 'opening', text: "Let us unlock the formula that measures this sacred path!" },
+  
+  // Lesson scene (indices 4-10)
+  { scene: 'lesson', key: 'intro', text: "The CIRCUMFERENCE is the distance around the circle, like walking along its edge.", taskId: 'task-0' },
+  { scene: 'lesson', key: 'pi', text: "We use the magical constant π (pi) ≈ 3.14159... It represents the ratio of circumference to diameter!", taskId: 'task-1' },
+  { scene: 'lesson', key: 'formula-radius', text: "When you know the radius, use: C = 2πr", taskId: 'task-2' },
+  { scene: 'lesson', key: 'formula-diameter', text: "When you know the diameter, use: C = πd", taskId: 'task-3' },
+  { scene: 'lesson', key: 'example1', text: "Example: If radius = 5 cm, then C = 2π(5) = 10π ≈ 31.4 cm", taskId: 'task-4' },
+  { scene: 'lesson', key: 'example2', text: "Example: If diameter = 12 cm, then C = π(12) = 12π ≈ 37.7 cm", taskId: 'task-5' },
+  { scene: 'lesson', key: 'practice', text: "Now calculate circumferences and open the coral gate!" },
+  
+  // Minigame scene (indices 11-13)
+  { scene: 'minigame', text: "The gate presents you with circular locks!" },
+  { scene: 'minigame', text: "Calculate the circumference to unlock each one." },
+  { scene: 'minigame', text: "Use C = 2πr or C = πd. Round to 1 decimal place!" },
 ];
 
-export const CHAPTER2_LESSON_DIALOGUE = [
-  { key: 'intro', text: "The CIRCUMFERENCE is the distance around the circle, like walking along its edge.", taskId: 'task-0' },
-  { key: 'pi', text: "We use the magical constant π (pi) ≈ 3.14159... It represents the ratio of circumference to diameter!", taskId: 'task-1' },
-  { key: 'formula-radius', text: "When you know the radius, use: C = 2πr", taskId: 'task-2' },
-  { key: 'formula-diameter', text: "When you know the diameter, use: C = πd", taskId: 'task-3' },
-  { key: 'example1', text: "Example: If radius = 5 cm, then C = 2π(5) = 10π ≈ 31.4 cm", taskId: 'task-4' },
-  { key: 'example2', text: "Example: If diameter = 12 cm, then C = π(12) = 12π ≈ 37.7 cm", taskId: 'task-5' },
-  { key: 'practice', text: "Now calculate circumferences and open the coral gate!" }
-];
+// Scene ranges for navigation
+export const CHAPTER2_SCENE_RANGES = {
+  opening: { start: 0, end: 3 },
+  lesson: { start: 4, end: 10 },
+  minigame: { start: 11, end: 13 },
+};
 
-export const CHAPTER2_MINIGAME_DIALOGUE = [
-  "The gate presents you with circular locks!",
-  "Calculate the circumference to unlock each one.",
-  "Use C = 2πr or C = πd. Round to 1 decimal place!"
-];
+// Legacy exports for backward compatibility
+export const CHAPTER2_OPENING_DIALOGUE = CHAPTER2_DIALOGUE.filter(d => d.scene === 'opening').map(d => d.text);
+export const CHAPTER2_LESSON_DIALOGUE = CHAPTER2_DIALOGUE.filter(d => d.scene === 'lesson').map(d => ({ key: d.key || '', text: d.text, taskId: d.taskId }));
+export const CHAPTER2_MINIGAME_DIALOGUE = CHAPTER2_DIALOGUE.filter(d => d.scene === 'minigame').map(d => d.text);
 
 export const CHAPTER2_MINIGAME_LEVELS = [
   { id: 1, radius: 3, diameter: null, correctAnswer: 18.8, instruction: 'Find circumference (radius = 3 cm)', hint: 'Use C = 2πr' },
@@ -82,14 +101,14 @@ export const CHAPTER2_LEARNING_OBJECTIVES = [
 ];
 
 export const CHAPTER2_XP_VALUES = {
-  lesson: 50,
+  lesson: 130,
   minigame: 60,
   quiz1: 12,
   quiz2: 12,
   quiz3: 12,
   quiz4: 12,
   quiz5: 12,
-  total: 170,
+  total: 250,
 };
 
 export const CHAPTER2_CASTLE_ID = '3d4e5f6a-7b8c-9d0e-1f2a-3b4c5d6e7f8a';

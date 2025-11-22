@@ -6,6 +6,8 @@ export interface UseChapterDialogueOptions {
   onDialogueComplete?: () => void
   typingSpeed?: number
   autoAdvanceDelay?: number
+  initialMessageIndex?: number
+  onMessageIndexChange?: (index: number) => void
 }
 
 export interface UseChapterDialogueReturn {
@@ -25,15 +27,54 @@ export function useChapterDialogue({
   autoAdvance,
   onDialogueComplete,
   typingSpeed = 15,
-  autoAdvanceDelay = 2500
+  autoAdvanceDelay = 2500,
+  initialMessageIndex = 0,
+  onMessageIndexChange,
 }: UseChapterDialogueOptions): UseChapterDialogueReturn {
   const [currentMessage, setCurrentMessage] = useState("")
   const [displayedText, setDisplayedText] = useState("")
-  const [messageIndex, setMessageIndex] = useState(0)
+  const [messageIndex, setMessageIndex] = useState(initialMessageIndex)
   const [isTyping, setIsTyping] = useState(false)
 
   const typingIntervalRef = useRef<NodeJS.Timeout | null>(null)
   const autoAdvanceTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const previousDialogueLengthRef = useRef(dialogue.length)
+  const hasInitializedRef = useRef(false)
+
+  // Initialize on first mount with saved position
+  useEffect(() => {
+    if (!hasInitializedRef.current && dialogue.length > 0) {
+      hasInitializedRef.current = true
+      previousDialogueLengthRef.current = dialogue.length
+      
+      const index = Math.min(initialMessageIndex, dialogue.length - 1)
+      setMessageIndex(index)
+      setCurrentMessage(dialogue[index])
+      setDisplayedText("")
+      setIsTyping(false)
+    }
+  }, [dialogue.length, initialMessageIndex])
+
+  // Detect scene changes by length change (but skip first init)
+  useEffect(() => {
+    if (!hasInitializedRef.current) return; // Skip if not initialized yet
+    
+    const lengthChanged = dialogue.length !== previousDialogueLengthRef.current
+    
+    if (lengthChanged) {
+      previousDialogueLengthRef.current = dialogue.length
+      
+      if (dialogue.length > 0) {
+        setMessageIndex(0)
+        setCurrentMessage(dialogue[0])
+        setDisplayedText("")
+        setIsTyping(false)
+        if (onMessageIndexChange) {
+          onMessageIndexChange(0)
+        }
+      }
+    }
+  }, [dialogue.length, onMessageIndexChange])
 
   // Typing effect
   useEffect(() => {
@@ -68,14 +109,16 @@ export function useChapterDialogue({
 
   const handleNextMessage = useCallback(() => {
     if (messageIndex < dialogue.length - 1) {
-      setMessageIndex(prev => prev + 1)
-      setCurrentMessage(dialogue[messageIndex + 1])
+      const newIndex = messageIndex + 1
+      setMessageIndex(newIndex)
+      setCurrentMessage(dialogue[newIndex])
+      onMessageIndexChange?.(newIndex)
     } else {
       if (onDialogueComplete) {
         onDialogueComplete()
       }
     }
-  }, [messageIndex, dialogue, onDialogueComplete])
+  }, [messageIndex, dialogue, onDialogueComplete, onMessageIndexChange])
 
   const handleDialogueClick = useCallback(() => {
     if (autoAdvanceTimeoutRef.current) {
@@ -101,13 +144,6 @@ export function useChapterDialogue({
     setDisplayedText("")
     setIsTyping(false)
   }, [dialogue])
-
-  // Initialize with first message
-  useEffect(() => {
-    if (dialogue.length > 0 && messageIndex === 0 && !currentMessage) {
-      setCurrentMessage(dialogue[0])
-    }
-  }, [dialogue, messageIndex, currentMessage])
 
   return {
     currentMessage,

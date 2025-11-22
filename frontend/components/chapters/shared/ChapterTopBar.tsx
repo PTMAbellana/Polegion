@@ -1,7 +1,7 @@
 "use client"
 
 import React from 'react'
-import { Sparkles, Volume2, VolumeX, Play, Pause, X } from 'lucide-react'
+import { Sparkles, Volume2, VolumeX, Play, Pause, X, RotateCcw } from 'lucide-react'
 
 export interface ChapterTopBarProps {
   chapterTitle: string
@@ -10,6 +10,7 @@ export interface ChapterTopBarProps {
   autoAdvance: boolean
   onToggleMute: (e: React.MouseEvent) => void
   onToggleAutoAdvance: (e: React.MouseEvent) => void
+  onRestart?: () => void
   onExit: () => void
   styleModule: any
 }
@@ -21,6 +22,7 @@ export default function ChapterTopBar({
   autoAdvance,
   onToggleMute,
   onToggleAutoAdvance,
+  onRestart,
   onExit,
   styleModule: styles
 }: ChapterTopBarProps) {
@@ -49,6 +51,15 @@ export default function ChapterTopBar({
         >
           {autoAdvance ? <Pause size={20} /> : <Play size={20} />}
         </button>
+        {onRestart && (
+          <button
+            className={styles.controlButton}
+            onClick={onRestart}
+            title="Restart Chapter"
+          >
+            <RotateCcw size={20} />
+          </button>
+        )}
         <button className={styles.exitButton} onClick={onExit}>
           <X size={20} />
         </button>

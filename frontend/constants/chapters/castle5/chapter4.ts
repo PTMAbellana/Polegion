@@ -1,33 +1,35 @@
 // Castle 5 - Chapter 4: The Core of Volumes
 // Theme: Volume of 3D solids
 
-export const CHAPTER4_OPENING_DIALOGUE = [
-  "Extraordinary, surface sage!",
-  "We have reached the Observatory's heart: The Core of Volumes.",
-  "VOLUME measures the space INSIDE a 3D solid.",
-  "Think of it as how much water, air, or material fills the shape.",
-  "This is the ultimate mastery of three-dimensional geometry!"
+interface ChapterDialogue { scene: 'opening' | 'lesson' | 'minigame'; text: string; key?: string; taskId?: string; }
+
+export const CHAPTER4_DIALOGUE: ChapterDialogue[] = [
+  { scene: 'opening', text: "Extraordinary, surface sage!" },
+  { scene: 'opening', text: "We have reached the Observatory's heart: The Core of Volumes." },
+  { scene: 'opening', text: "VOLUME measures the space INSIDE a 3D solid." },
+  { scene: 'opening', text: "Think of it as how much water, air, or material fills the shape." },
+  { scene: 'opening', text: "This is the ultimate mastery of three-dimensional geometry!" },
+  { scene: 'lesson', key: 'intro', text: "VOLUME is the amount of 3D space inside a solid, measured in cubic units.", taskId: 'task-0' },
+  { scene: 'lesson', key: 'cube', text: "Cube Volume: V = s³ (side cubed)", taskId: 'task-1' },
+  { scene: 'lesson', key: 'rectangular-prism', text: "Rectangular Prism (Box): V = l × w × h", taskId: 'task-2' },
+  { scene: 'lesson', key: 'cylinder', text: "Cylinder: V = πr²h (circular base area × height)", taskId: 'task-3' },
+  { scene: 'lesson', key: 'sphere', text: "Sphere: V = (4/3)πr³", taskId: 'task-4' },
+  { scene: 'lesson', key: 'cone', text: "Cone: V = (1/3)πr²h (one-third of cylinder)", taskId: 'task-5' },
+  { scene: 'lesson', key: 'square-pyramid', text: "Square Pyramid: V = (1/3)b²h (one-third of prism)", taskId: 'task-6' },
+  { scene: 'lesson', key: 'triangular-prism', text: "Triangular Prism: V = (½bh) × H (triangular base area × height)", taskId: 'task-7' },
+  { scene: 'lesson', key: 'pattern', text: "Notice: Pyramids and cones are 1/3 of their prism/cylinder counterparts!", taskId: 'task-8' },
+  { scene: 'lesson', key: 'word-problems', text: "Now solve volume word problems involving real-world containers!", taskId: 'task-9' },
+  { scene: 'lesson', key: 'practice', text: "Calculate volumes and master the Observatory!" },
+  { scene: 'minigame', text: "The Core pulses with geometric power!" },
+  { scene: 'minigame', text: "Calculate the volume of each solid." },
+  { scene: 'minigame', text: "Use π ≈ 3.14 for rounded answers!" },
 ];
 
-export const CHAPTER4_LESSON_DIALOGUE = [
-  { key: 'intro', text: "VOLUME is the amount of 3D space inside a solid, measured in cubic units.", taskId: 'task-0' },
-  { key: 'cube', text: "Cube Volume: V = s³ (side cubed)", taskId: 'task-1' },
-  { key: 'rectangular-prism', text: "Rectangular Prism (Box): V = l × w × h", taskId: 'task-2' },
-  { key: 'cylinder', text: "Cylinder: V = πr²h (circular base area × height)", taskId: 'task-3' },
-  { key: 'sphere', text: "Sphere: V = (4/3)πr³", taskId: 'task-4' },
-  { key: 'cone', text: "Cone: V = (1/3)πr²h (one-third of cylinder)", taskId: 'task-5' },
-  { key: 'square-pyramid', text: "Square Pyramid: V = (1/3)b²h (one-third of prism)", taskId: 'task-6' },
-  { key: 'triangular-prism', text: "Triangular Prism: V = (½bh) × H (triangular base area × height)", taskId: 'task-7' },
-  { key: 'pattern', text: "Notice: Pyramids and cones are 1/3 of their prism/cylinder counterparts!", taskId: 'task-8' },
-  { key: 'word-problems', text: "Now solve volume word problems involving real-world containers!", taskId: 'task-9' },
-  { key: 'practice', text: "Calculate volumes and master the Observatory!" }
-];
+export const CHAPTER4_SCENE_RANGES = { opening: { start: 0, end: 4 }, lesson: { start: 5, end: 15 }, minigame: { start: 16, end: 18 } };
 
-export const CHAPTER4_MINIGAME_DIALOGUE = [
-  "The Core pulses with geometric power!",
-  "Calculate the volume of each solid.",
-  "Use π ≈ 3.14 for rounded answers!"
-];
+export const CHAPTER4_OPENING_DIALOGUE = CHAPTER4_DIALOGUE.filter(d => d.scene === 'opening').map(d => d.text);
+export const CHAPTER4_LESSON_DIALOGUE = CHAPTER4_DIALOGUE.filter(d => d.scene === 'lesson').map(d => ({ key: d.key || '', text: d.text, taskId: d.taskId }));
+export const CHAPTER4_MINIGAME_DIALOGUE = CHAPTER4_DIALOGUE.filter(d => d.scene === 'minigame').map(d => d.text);
 
 export const CHAPTER4_MINIGAME_LEVELS = [
   { id: 1, shape: 'cube', side: 6, correctAnswer: 216, instruction: 'Find volume of cube (s=6)', hint: 'V = s³' },
@@ -112,14 +114,14 @@ export const CHAPTER4_LEARNING_OBJECTIVES = [
 ];
 
 export const CHAPTER4_XP_VALUES = {
-  lesson: 120,
-  minigame: 100,
-  quiz1: 12,
-  quiz2: 12,
-  quiz3: 12,
-  quiz4: 12,
-  quiz5: 12,
-  total: 280,
+  lesson: 90,
+  minigame: 60,
+  quiz1: 30,
+  quiz2: 30,
+  quiz3: 30,
+  quiz4: 30,
+  quiz5: 30,
+  total: 300,
 };
 
 export const CHAPTER4_CASTLE_ID = '5f6a7b8c-9d0e-1f2a-3b4c-5d6e7f8a9b0c';

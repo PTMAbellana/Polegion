@@ -1,43 +1,61 @@
 import type { MinigameQuestion } from '@/types/common/quiz';
 
-// Dialogue data
-export const CHAPTER3_OPENING_DIALOGUE = [
-  "Well done, Apprentice! You've mastered points and lines.",
-  "Now we venture deeper into the Spire, where shapes come alive!",
-  "This chamber holds the Shape Summoner, an ancient artifact.",
-  "Here, you'll learn to identify and classify geometric shapes.",
-  "Triangles, squares, rectangles, circles, and more await your discovery!",
-  "Are you ready to breathe life into the Shapes of the Spire?"
+// Unified dialogue system with scene markers
+export interface ChapterDialogue {
+  scene: 'opening' | 'lesson' | 'minigame';
+  text: string;
+  key?: string;
+  taskId?: string;
+}
+
+export const CHAPTER3_DIALOGUE: ChapterDialogue[] = [
+  // Opening Scene (indices 0-5)
+  { scene: 'opening', text: "Well done, Apprentice! You've mastered points and lines." },
+  { scene: 'opening', text: "Now we venture deeper into the Spire, where shapes come alive!" },
+  { scene: 'opening', text: "This chamber holds the Shape Summoner, an ancient artifact." },
+  { scene: 'opening', text: "Here, you'll learn to identify and classify geometric shapes." },
+  { scene: 'opening', text: "Triangles, squares, rectangles, circles, and more await your discovery!" },
+  { scene: 'opening', text: "Are you ready to breathe life into the Shapes of the Spire?" },
+  
+  // Lesson Scene (indices 6-25)
+  { scene: 'lesson', text: "Let me introduce you to the concept of ANGLES! An angle forms when two rays meet at a common endpoint called the vertex.", key: 'angles', taskId: 'task-0' },
+  { scene: 'lesson', text: "Now, let's explore POLYGONS - closed figures made of straight line segments!", key: 'polygons', taskId: 'task-1' },
+  { scene: 'lesson', text: "A POLYGON is a closed figure made of straight line segments. The word 'polygon' comes from Greek: 'poly' means many, and 'gon' means angle!", key: 'polygon-def', taskId: 'task-2' },
+  { scene: 'lesson', text: "First, the TRIANGLE - a polygon with 3 sides and 3 angles. It's the simplest polygon!", key: 'triangle', taskId: 'task-3' },
+  { scene: 'lesson', text: "And here's the CIRCLE, perfectly round with no corners, not a polygon!", key: 'circle', taskId: 'task-4' },
+  { scene: 'lesson', text: "Now behold the SQUARE - a quadrilateral with 4 equal sides and 4 right angles!", key: 'square', taskId: 'task-5' },
+  { scene: 'lesson', text: "And the RECTANGLE - a quadrilateral with opposite sides equal and 4 right angles.", key: 'rectangle', taskId: 'task-6' },
+  { scene: 'lesson', text: "Meet the RHOMBUS - a quadrilateral with 4 equal sides, but slanted!", key: 'rhombus', taskId: 'task-7' },
+  { scene: 'lesson', text: "Here's the PARALLELOGRAM - opposite sides are parallel and equal.", key: 'parallelogram', taskId: 'task-8' },
+  { scene: 'lesson', text: "The TRAPEZOID has one pair of parallel sides.", key: 'trapezoid', taskId: 'task-9' },
+  { scene: 'lesson', text: "And the KITE has two pairs of adjacent equal sides!", key: 'kite', taskId: 'task-10' },
+  { scene: 'lesson', text: "Behold the PENTAGON - a polygon with 5 sides!", key: 'pentagon', taskId: 'task-11' },
+  { scene: 'lesson', text: "The HEXAGON has 6 sides - like a honeycomb!", key: 'hexagon', taskId: 'task-12' },
+  { scene: 'lesson', text: "The HEPTAGON has 7 sides!", key: 'heptagon', taskId: 'task-13' },
+  { scene: 'lesson', text: "And the OCTAGON has 8 sides - like a STOP sign!", key: 'octagon', taskId: 'task-14' },
+  { scene: 'lesson', text: "The NONAGON has 9 sides!", key: 'nonagon', taskId: 'task-15' },
+  { scene: 'lesson', text: "The DECAGON has 10 sides!", key: 'decagon', taskId: 'task-16' },
+  { scene: 'lesson', text: "The HENDECAGON has 11 sides!", key: 'hendecagon', taskId: 'task-17' },
+  { scene: 'lesson', text: "And the DODECAGON has 12 sides!", key: 'dodecagon', taskId: 'task-18' },
+  { scene: 'lesson', text: "Remember: Each polygon is named by its number of sides and angles. Master these shapes, and you've learned the building blocks of all geometry!", key: 'summary', taskId: 'task-19' },
+  
+  // Minigame Scene (indices 26-28)
+  { scene: 'minigame', text: "Now, let's practice! The Shape Summoner will show you various shapes." },
+  { scene: 'minigame', text: "Click on the shapes that match the description. Some challenges require multiple selections!" },
+  { scene: 'minigame', text: "Choose wisely, young geometer!" },
 ];
 
-export const CHAPTER3_LESSON_DIALOGUE = [
-  { key: 'angles', text: "Let me introduce you to the concept of ANGLES! An angle forms when two rays meet at a common endpoint called the vertex.", taskId: 'task-0' },
-  { key: 'polygons', text: "Now, let's explore POLYGONS - closed figures made of straight line segments!", taskId: 'task-1' },
-  { key: 'polygon-def', text: "A POLYGON is a closed figure made of straight line segments. The word 'polygon' comes from Greek: 'poly' means many, and 'gon' means angle!", taskId: 'task-2' },
-  { key: 'triangle', text: "First, the TRIANGLE - a polygon with 3 sides and 3 angles. It's the simplest polygon!", taskId: 'task-3' },
-  { key: 'circle', text: "And here's the CIRCLE, perfectly round with no corners—not a polygon!", taskId: 'task-4' },
-  { key: 'square', text: "Now behold the SQUARE - a quadrilateral with 4 equal sides and 4 right angles!", taskId: 'task-5' },
-  { key: 'rectangle', text: "And the RECTANGLE - a quadrilateral with opposite sides equal and 4 right angles.", taskId: 'task-6' },
-  { key: 'rhombus', text: "Meet the RHOMBUS - a quadrilateral with 4 equal sides, but slanted!", taskId: 'task-7' },
-  { key: 'parallelogram', text: "Here's the PARALLELOGRAM - opposite sides are parallel and equal.", taskId: 'task-8' },
-  { key: 'trapezoid', text: "The TRAPEZOID has one pair of parallel sides.", taskId: 'task-9' },
-  { key: 'kite', text: "And the KITE has two pairs of adjacent equal sides!", taskId: 'task-10' },
-  { key: 'pentagon', text: "Behold the PENTAGON - a polygon with 5 sides!", taskId: 'task-11' },
-  { key: 'hexagon', text: "The HEXAGON has 6 sides - like a honeycomb!", taskId: 'task-12' },
-  { key: 'heptagon', text: "The HEPTAGON has 7 sides!", taskId: 'task-13' },
-  { key: 'octagon', text: "And the OCTAGON has 8 sides - like a STOP sign!", taskId: 'task-14' },
-  { key: 'nonagon', text: "The NONAGON has 9 sides!", taskId: 'task-15' },
-  { key: 'decagon', text: "The DECAGON has 10 sides!", taskId: 'task-16' },
-  { key: 'hendecagon', text: "The HENDECAGON has 11 sides!", taskId: 'task-17' },
-  { key: 'dodecagon', text: "And the DODECAGON has 12 sides!", taskId: 'task-18' },
-  { key: 'summary', text: "Remember: Each polygon is named by its number of sides and angles. Master these shapes, and you've learned the building blocks of all geometry!", taskId: 'task-19' }
-];
+// Helper to get scene boundaries
+export const CHAPTER3_SCENE_RANGES = {
+  opening: { start: 0, end: 5 },
+  lesson: { start: 6, end: 25 },
+  minigame: { start: 26, end: 28 },
+};
 
-export const CHAPTER3_MINIGAME_DIALOGUE = [
-  "Now, let's practice! The Shape Summoner will show you various shapes.",
-  "Click on the shapes that match the description. Some challenges require multiple selections!",
-  "Choose wisely, young geometer!"
-];
+// Legacy exports for backward compatibility (deprecated)
+export const CHAPTER3_OPENING_DIALOGUE = CHAPTER3_DIALOGUE.filter(d => d.scene === 'opening').map(d => d.text);
+export const CHAPTER3_LESSON_DIALOGUE = CHAPTER3_DIALOGUE.filter(d => d.scene === 'lesson').map(d => ({ key: d.key || '', text: d.text, taskId: d.taskId }));
+export const CHAPTER3_MINIGAME_DIALOGUE = CHAPTER3_DIALOGUE.filter(d => d.scene === 'minigame').map(d => d.text);
 
 // Minigame level structures - Shape identification
 export const CHAPTER3_MINIGAME_LEVELS: MinigameQuestion[] = [
@@ -156,7 +174,7 @@ export const CHAPTER3_CONCEPTS = [
   {
     key: 'circle',
     title: 'Circle',
-    description: 'A CIRCLE is perfectly round with no corners—not a polygon!',
+    description: 'A CIRCLE is perfectly round with no corners, not a polygon!',
     image: '/images/castle1/circle.png',
     taskId: 'task-4',
   },

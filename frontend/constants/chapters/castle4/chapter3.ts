@@ -1,30 +1,31 @@
 // Castle 4 - Chapter 3: The Hall of Angles
 // Theme: Interior angles of polygons using (n-2) × 180°
 
-export const CHAPTER3_OPENING_DIALOGUE = [
-  "Impressive drawing skills, geometer!",
-  "Now we enter the Hall of Angles, where ancient formulas are inscribed.",
-  "Every polygon hides a secret pattern within its angles.",
-  "Let us discover the formula that unlocks this mystery!"
+interface ChapterDialogue { scene: 'opening' | 'lesson' | 'minigame'; text: string; key?: string; taskId?: string; }
+
+export const CHAPTER3_DIALOGUE: ChapterDialogue[] = [
+  { scene: 'opening', text: "Impressive drawing skills, geometer!" },
+  { scene: 'opening', text: "Now we enter the Hall of Angles, where ancient formulas are inscribed." },
+  { scene: 'opening', text: "Every polygon hides a secret pattern within its angles." },
+  { scene: 'opening', text: "Let us discover the formula that unlocks this mystery!" },
+  { scene: 'lesson', key: 'intro', text: "The sum of INTERIOR ANGLES in a polygon follows a beautiful pattern.", taskId: 'task-0' },
+  { scene: 'lesson', key: 'formula', text: "The formula is: Sum = (n - 2) × 180°, where n is the number of sides.", taskId: 'task-1' },
+  { scene: 'lesson', key: 'triangle-example', text: "Triangle (n=3): (3-2) × 180° = 1 × 180° = 180°", taskId: 'task-2' },
+  { scene: 'lesson', key: 'quadrilateral-example', text: "Quadrilateral (n=4): (4-2) × 180° = 2 × 180° = 360°", taskId: 'task-3' },
+  { scene: 'lesson', key: 'pentagon-example', text: "Pentagon (n=5): (5-2) × 180° = 3 × 180° = 540°", taskId: 'task-4' },
+  { scene: 'lesson', key: 'hexagon-example', text: "Hexagon (n=6): (6-2) × 180° = 4 × 180° = 720°", taskId: 'task-5' },
+  { scene: 'lesson', key: 'regular', text: "For REGULAR polygons (all sides equal), each angle = Sum ÷ n", taskId: 'task-6' },
+  { scene: 'lesson', key: 'regular-example', text: "Regular pentagon: Each angle = 540° ÷ 5 = 108°", taskId: 'task-7' },
+  { scene: 'lesson', key: 'practice', text: "Now calculate interior angles for any polygon!" },
+  { scene: 'minigame', text: "The Hall presents you with angular challenges!" },
+  { scene: 'minigame', text: "Calculate the sum of interior angles." },
+  { scene: 'minigame', text: "For regular polygons, find each individual angle!" },
 ];
 
-export const CHAPTER3_LESSON_DIALOGUE = [
-  { key: 'intro', text: "The sum of INTERIOR ANGLES in a polygon follows a beautiful pattern.", taskId: 'task-0' },
-  { key: 'formula', text: "The formula is: Sum = (n - 2) × 180°, where n is the number of sides.", taskId: 'task-1' },
-  { key: 'triangle-example', text: "Triangle (n=3): (3-2) × 180° = 1 × 180° = 180°", taskId: 'task-2' },
-  { key: 'quadrilateral-example', text: "Quadrilateral (n=4): (4-2) × 180° = 2 × 180° = 360°", taskId: 'task-3' },
-  { key: 'pentagon-example', text: "Pentagon (n=5): (5-2) × 180° = 3 × 180° = 540°", taskId: 'task-4' },
-  { key: 'hexagon-example', text: "Hexagon (n=6): (6-2) × 180° = 4 × 180° = 720°", taskId: 'task-5' },
-  { key: 'regular', text: "For REGULAR polygons (all sides equal), each angle = Sum ÷ n", taskId: 'task-6' },
-  { key: 'regular-example', text: "Regular pentagon: Each angle = 540° ÷ 5 = 108°", taskId: 'task-7' },
-  { key: 'practice', text: "Now calculate interior angles for any polygon!" }
-];
-
-export const CHAPTER3_MINIGAME_DIALOGUE = [
-  "The Hall presents you with angular challenges!",
-  "Calculate the sum of interior angles.",
-  "For regular polygons, find each individual angle!"
-];
+export const CHAPTER3_SCENE_RANGES = { opening: { start: 0, end: 3 }, lesson: { start: 4, end: 12 }, minigame: { start: 13, end: 15 } };
+export const CHAPTER3_OPENING_DIALOGUE = CHAPTER3_DIALOGUE.filter(d => d.scene === 'opening').map(d => d.text);
+export const CHAPTER3_LESSON_DIALOGUE = CHAPTER3_DIALOGUE.filter(d => d.scene === 'lesson').map(d => ({ key: d.key || '', text: d.text, taskId: d.taskId }));
+export const CHAPTER3_MINIGAME_DIALOGUE = CHAPTER3_DIALOGUE.filter(d => d.scene === 'minigame').map(d => d.text);
 
 export const CHAPTER3_MINIGAME_LEVELS = [
   { id: 1, sides: 3, isRegular: false, correctAnswer: 180, instruction: 'Sum of interior angles in triangle', hint: 'Use (n-2) × 180°' },
@@ -97,13 +98,13 @@ export const CHAPTER3_LEARNING_OBJECTIVES = [
 
 export const CHAPTER3_XP_VALUES = {
   lesson: 70,
-  minigame: 75,
-  quiz1: 12,
-  quiz2: 12,
-  quiz3: 12,
-  quiz4: 12,
-  quiz5: 12,
-  total: 205,
+  minigame: 40,
+  quiz1: 23,
+  quiz2: 23,
+  quiz3: 23,
+  quiz4: 23,
+  quiz5: 23,
+  total: 225,
 };
 
 export const CHAPTER3_CASTLE_ID = '4e5f6a7b-8c9d-0e1f-2a3b-4c5d6e7f8a9b';

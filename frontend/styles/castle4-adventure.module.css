@@ -327,7 +327,6 @@
 .chapterItem:hover:not(.locked) {
   background: rgba(183, 116, 102, 0.6);
   border-color: rgba(226, 181, 154, 0.5);
-  transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
@@ -372,7 +371,6 @@
   box-shadow: 
     0 0 20px rgba(226, 181, 154, 0.3),
     0 4px 16px rgba(0, 0, 0, 0.5);
-  transform: translateX(6px);
 }
 
 .chapterItem.selected:hover {
@@ -807,124 +805,88 @@
 
 .castleInfoAvatar {
   position: relative;
-  width: 130px;
-  height: 130px;
+  width: 170px;
+  height: 170px;
   margin: 0 auto 1.15rem;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.castleImageCircle {
-  position: relative;
-  width: 100px;
-  height: 100px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #B77466 0%, #957C62 100%);
-  box-shadow: 0 6px 16px rgba(226, 181, 154, 0.4);
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 3px solid rgba(226, 181, 154, 0.2);
-  z-index: 1;
-  transition: transform 0.3s ease;
-}
-
-.castleIconCircle {
-  position: absolute;
-  bottom: -8px;
-  right: -8px;
-  width: 65px;
-  height: 65px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #E2B59A 0%, #FFE1AF 100%);
-  box-shadow: 0 5px 12px rgba(226, 181, 154, 0.4);
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 2.5px solid rgba(226, 181, 154, 0.3);
-  z-index: 2;
-  transition: transform 0.3s ease;
-}
-
 .castleImage {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.3));
+  transition: transform 0.3s ease, filter 0.3s ease;
 }
 
-.castleIconImage {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.castleEmoji {
-  font-size: 2.8rem;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-}
-
-.castleEmojiSmall {
-  font-size: 2rem;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-}
-
-.hidden {
-  display: none;
-}
-
-.castleInfoAvatar:hover .castleImageCircle {
+.castleInfoAvatar:hover .castleImage {
   transform: scale(1.05);
-}
-
-.castleInfoAvatar:hover .castleIconCircle {
-  transform: scale(1.1);
+  filter: drop-shadow(0 6px 16px rgba(216, 196, 182, 0.5));
 }
 
 .castleInfoName {
-  color: #FFE1AF;
-  font-size: 1.1rem;
-  margin: 0 0 0.4rem 0;
-  font-weight: 600;
-  text-shadow: 0 0 8px rgba(255, 225, 175, 0.3);
+  color: #F5EFE7;
+  font-size: 1.15rem;
+  margin: 0 0 1rem 0;
+  font-weight: 700;
+  text-shadow: 0 0 10px rgba(245, 239, 231, 0.4);
+  letter-spacing: 0.3px;
 }
 
-.castleInfoQuote {
-  color: #E2B59A;
-  font-size: 0.75rem;
-  font-style: italic;
-  margin: 0 0 0.8rem 0;
-  opacity: 0.9;
-  line-height: 1.35;
-}
-
+/* Castle Info Stats Grid */
 .castleInfoStats {
   display: flex;
   flex-direction: column;
-  gap: 0.6rem;
+  gap: 0.75rem;
 }
 
 .castleInfoStat {
   display: flex;
   align-items: center;
-  gap: 0.4rem;
-  color: #E2B59A;
-  font-size: 0.75rem;
-  justify-content: center;
+  gap: 0.6rem;
+  padding: 0.5rem 0.7rem;
+  background: rgba(33, 53, 85, 0.3);
+  border-radius: 8px;
+  border: 1px solid rgba(216, 196, 182, 0.2);
+  transition: all 0.3s ease;
+}
+
+.castleInfoStat:hover {
+  background: rgba(62, 88, 121, 0.4);
+  border-color: rgba(216, 196, 182, 0.3);
+  transform: translateX(3px);
 }
 
 .statIcon {
-  color: #FFE1AF;
-  width: 15px;
-  height: 15px;
+  color: #F5EFE7;
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  filter: drop-shadow(0 0 4px rgba(245, 239, 231, 0.4));
+}
+
+.statText {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  flex: 1;
+}
+
+.statValue {
+  color: #F5EFE7;
+  font-size: 0.85rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.statLabel {
+  color: #D8C4B6;
+  font-size: 0.65rem;
+  font-weight: 500;
+  opacity: 0.9;
+  line-height: 1;
 }
 
 .chapterTooltip {

@@ -1,30 +1,32 @@
 // Castle 5 - Chapter 2: The Chamber of Perimeters
 // Theme: Perimeter and area of 2D shapes (advanced)
 
-export const CHAPTER2_OPENING_DIALOGUE = [
-  "Well done, dimensional explorer!",
-  "Now we climb to the Chamber of Perimeters.",
-  "The walls form moving puzzles — each a geometric challenge.",
-  "Master perimeter and area calculations to unlock the next floor!"
+interface ChapterDialogue { scene: 'opening' | 'lesson' | 'minigame'; text: string; key?: string; taskId?: string; }
+
+export const CHAPTER2_DIALOGUE: ChapterDialogue[] = [
+  { scene: 'opening', text: "Well done, dimensional explorer!" },
+  { scene: 'opening', text: "Now we climb to the Chamber of Perimeters." },
+  { scene: 'opening', text: "The walls form moving puzzles, each a geometric challenge." },
+  { scene: 'opening', text: "Master perimeter and area calculations to unlock the next floor!" },
+  { scene: 'lesson', key: 'review-perimeter', text: "PERIMETER is the total distance around a shape. Add all sides!", taskId: 'task-0' },
+  { scene: 'lesson', key: 'review-area', text: "AREA is the space inside a shape, measured in square units.", taskId: 'task-1' },
+  { scene: 'lesson', key: 'rectangle', text: "Rectangle: P = 2(l + w), A = l × w", taskId: 'task-2' },
+  { scene: 'lesson', key: 'square', text: "Square: P = 4s, A = s²", taskId: 'task-3' },
+  { scene: 'lesson', key: 'triangle', text: "Triangle: P = a + b + c, A = (b × h) ÷ 2", taskId: 'task-4' },
+  { scene: 'lesson', key: 'parallelogram', text: "Parallelogram: P = 2(a + b), A = b × h", taskId: 'task-5' },
+  { scene: 'lesson', key: 'trapezoid', text: "Trapezoid: P = a + b₁ + c + b₂, A = [(b₁ + b₂) × h] ÷ 2", taskId: 'task-6' },
+  { scene: 'lesson', key: 'circle-review', text: "Circle: C = 2πr or πd, A = πr²", taskId: 'task-7' },
+  { scene: 'lesson', key: 'word-problems', text: "Now apply these formulas to complex word problems!", taskId: 'task-8' },
+  { scene: 'minigame', text: "The Chamber walls shift with geometric challenges!" },
+  { scene: 'minigame', text: "Calculate perimeters and areas correctly." },
+  { scene: 'minigame', text: "Each shape requires the right formula!" },
 ];
 
-export const CHAPTER2_LESSON_DIALOGUE = [
-  { key: 'review-perimeter', text: "PERIMETER is the total distance around a shape. Add all sides!", taskId: 'task-0' },
-  { key: 'review-area', text: "AREA is the space inside a shape, measured in square units.", taskId: 'task-1' },
-  { key: 'rectangle', text: "Rectangle: P = 2(l + w), A = l × w", taskId: 'task-2' },
-  { key: 'square', text: "Square: P = 4s, A = s²", taskId: 'task-3' },
-  { key: 'triangle', text: "Triangle: P = a + b + c, A = (b × h) ÷ 2", taskId: 'task-4' },
-  { key: 'parallelogram', text: "Parallelogram: P = 2(a + b), A = b × h", taskId: 'task-5' },
-  { key: 'trapezoid', text: "Trapezoid: P = a + b₁ + c + b₂, A = [(b₁ + b₂) × h] ÷ 2", taskId: 'task-6' },
-  { key: 'circle-review', text: "Circle: C = 2πr or πd, A = πr²", taskId: 'task-7' },
-  { key: 'word-problems', text: "Now apply these formulas to complex word problems!", taskId: 'task-8' }
-];
+export const CHAPTER2_SCENE_RANGES = { opening: { start: 0, end: 3 }, lesson: { start: 4, end: 12 }, minigame: { start: 13, end: 15 } };
 
-export const CHAPTER2_MINIGAME_DIALOGUE = [
-  "The Chamber walls shift with geometric challenges!",
-  "Calculate perimeters and areas correctly.",
-  "Each shape requires the right formula!"
-];
+export const CHAPTER2_OPENING_DIALOGUE = CHAPTER2_DIALOGUE.filter(d => d.scene === 'opening').map(d => d.text);
+export const CHAPTER2_LESSON_DIALOGUE = CHAPTER2_DIALOGUE.filter(d => d.scene === 'lesson').map(d => ({ key: d.key || '', text: d.text, taskId: d.taskId }));
+export const CHAPTER2_MINIGAME_DIALOGUE = CHAPTER2_DIALOGUE.filter(d => d.scene === 'minigame').map(d => d.text);
 
 export const CHAPTER2_MINIGAME_LEVELS = [
   { id: 1, shape: 'rectangle', length: 12, width: 7, type: 'both', correctPerimeter: 38, correctArea: 84, instruction: 'Find both perimeter and area', hint: 'P = 2(l+w), A = l×w' },
@@ -102,14 +104,14 @@ export const CHAPTER2_LEARNING_OBJECTIVES = [
 ];
 
 export const CHAPTER2_XP_VALUES = {
-  lesson: 90,
-  minigame: 90,
-  quiz1: 12,
-  quiz2: 12,
-  quiz3: 12,
-  quiz4: 12,
-  quiz5: 12,
-  total: 270,
+  lesson: 70,
+  minigame: 55,
+  quiz1: 25,
+  quiz2: 25,
+  quiz3: 25,
+  quiz4: 25,
+  quiz5: 25,
+  total: 250,
 };
 
 export const CHAPTER2_CASTLE_ID = '5f6a7b8c-9d0e-1f2a-3b4c-5d6e7f8a9b0c';

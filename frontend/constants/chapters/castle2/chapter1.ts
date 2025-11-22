@@ -1,45 +1,107 @@
 // Castle 2 - Chapter 1: The Hall of Rays
 // Theme: Learning about angle types and measurement (acute, right, obtuse, straight, reflex)
 
-export const CHAPTER1_OPENING_DIALOGUE = [
-  "Welcome, traveler! I am Angulus, Guardian of the Angles Sanctuary.",
-  "Within these sacred halls, beams of light converge to form angles of power.",
-  "An Angle is formed when two rays meet at a common point called the vertex.",
-  "Come, let us explore the magnificent world of angles together!"
+interface ChapterDialogue {
+  scene: 'opening' | 'lesson' | 'minigame';
+  text: string;
+  key?: string;
+  taskId?: string;
+}
+
+// Unified dialogue array combining all scenes
+export const CHAPTER1_DIALOGUE: ChapterDialogue[] = [
+  // Opening scene (indices 0-3)
+  { scene: 'opening', text: "Welcome, traveler! I am Sylvan, Guardian of the Polygon Citadel." },
+  { scene: 'opening', text: "Within these sacred halls, beams of light converge to form angles of power." },
+  { scene: 'opening', text: "An Angle is formed when two rays meet at a common point called the vertex." },
+  { scene: 'opening', text: "Come, let us explore the magnificent world of angles together!" },
+  
+  // Lesson scene (indices 4-11)
+  { scene: 'lesson', key: 'intro', text: "Angles are measured in degrees (°), describing the amount of rotation between two rays." },
+  { scene: 'lesson', key: 'acute', text: "An Acute Angle measures less than 90°, small, sharp, and precise.", taskId: 'task-0' },
+  { scene: 'lesson', key: 'right', text: "A Right Angle measures exactly 90°, forming a perfect corner, like the letter L.", taskId: 'task-1' },
+  { scene: 'lesson', key: 'obtuse', text: "An Obtuse Angle measures between 90° and 180°, wider and more open.", taskId: 'task-2' },
+  { scene: 'lesson', key: 'straight', text: "A Straight Angle measures exactly 180°, forming a perfectly straight line.", taskId: 'task-3' },
+  { scene: 'lesson', key: 'reflex', text: "A Reflex Angle measures between 180° and 360°, more than a straight angle!", taskId: 'task-4' },
+  { scene: 'lesson', key: 'protractor', text: "We use a Protractor to measure angles precisely. It's marked from 0° to 180°!", taskId: 'task-5' },
+  { scene: 'lesson', key: 'conclusion', text: "Now, let us test your ability to identify and measure these angles!" },
+  
+  // Minigame scene (indices 12-14)
+  { scene: 'minigame', text: "Excellent! Now it's time to construct angles yourself!" },
+  { scene: 'minigame', text: "Drag the pink ray to create the angle shown. Watch the degree measurement change." },
+  { scene: 'minigame', text: "When you think your angle is correct, click the Submit button below the canvas!" },
 ];
 
-// Lesson dialogue with semantic keys for tracking
-export const CHAPTER1_LESSON_DIALOGUE = [
-  { key: 'intro', text: "Angles are measured in degrees (°), describing the amount of rotation between two rays." },
-  { key: 'acute', text: "An Acute Angle measures less than 90° — small, sharp, and precise.", taskId: 'task-0' },
-  { key: 'right', text: "A Right Angle measures exactly 90° — forming a perfect corner, like the letter L.", taskId: 'task-1' },
-  { key: 'obtuse', text: "An Obtuse Angle measures between 90° and 180° — wider and more open.", taskId: 'task-2' },
-  { key: 'straight', text: "A Straight Angle measures exactly 180° — forming a perfectly straight line.", taskId: 'task-3' },
-  { key: 'reflex', text: "A Reflex Angle measures between 180° and 360° — more than a straight angle!", taskId: 'task-4' },
-  { key: 'protractor', text: "We use a Protractor to measure angles precisely. It's marked from 0° to 180°!", taskId: 'task-5' },
-  { key: 'conclusion', text: "Now, let us test your ability to identify and measure these angles!" }
-];
+// Scene ranges for navigation
+export const CHAPTER1_SCENE_RANGES = {
+  opening: { start: 0, end: 3 },
+  lesson: { start: 4, end: 11 },
+  minigame: { start: 12, end: 14 },
+};
 
-export const CHAPTER1_MINIGAME_DIALOGUE = [
-  "Excellent! Now let's test your knowledge of angles.",
-  "Look at each angle carefully and identify its type.",
-  "Choose wisely, young angle-seeker!"
-];
+// Legacy exports for backward compatibility
+export const CHAPTER1_OPENING_DIALOGUE = CHAPTER1_DIALOGUE.filter(d => d.scene === 'opening').map(d => d.text);
+export const CHAPTER1_LESSON_DIALOGUE = CHAPTER1_DIALOGUE.filter(d => d.scene === 'lesson').map(d => ({ key: d.key || '', text: d.text, taskId: d.taskId }));
+export const CHAPTER1_MINIGAME_DIALOGUE = CHAPTER1_DIALOGUE.filter(d => d.scene === 'minigame').map(d => d.text);
 
 type AngleType = 'acute' | 'right' | 'obtuse' | 'straight' | 'reflex';
 
 export const CHAPTER1_MINIGAME_LEVELS: Array<{ 
-  angleMeasure: number; 
+  targetAngle: number;
+  tolerance: number;
   angleType: AngleType; 
   name: string;
   description: string;
+  instruction: string;
 }> = [
-  { angleMeasure: 45, angleType: 'acute', name: 'Acute Angle', description: 'Less than 90°' },
-  { angleMeasure: 90, angleType: 'right', name: 'Right Angle', description: 'Exactly 90°' },
-  { angleMeasure: 135, angleType: 'obtuse', name: 'Obtuse Angle', description: 'Between 90° and 180°' },
-  { angleMeasure: 180, angleType: 'straight', name: 'Straight Angle', description: 'Exactly 180°' },
-  { angleMeasure: 60, angleType: 'acute', name: 'Acute Angle', description: 'Less than 90°' },
-  { angleMeasure: 120, angleType: 'obtuse', name: 'Obtuse Angle', description: 'Between 90° and 180°' }
+  { 
+    targetAngle: 45, 
+    tolerance: 5,
+    angleType: 'acute', 
+    name: 'Acute Angle', 
+    description: 'Less than 90°',
+    instruction: 'Construct a 45° acute angle by dragging the ray. Click Submit when ready!'
+  },
+  { 
+    targetAngle: 90, 
+    tolerance: 3,
+    angleType: 'right', 
+    name: 'Right Angle', 
+    description: 'Exactly 90°',
+    instruction: 'Construct a perfect 90° right angle. Precision is key!'
+  },
+  { 
+    targetAngle: 135, 
+    tolerance: 5,
+    angleType: 'obtuse', 
+    name: 'Obtuse Angle', 
+    description: 'Between 90° and 180°',
+    instruction: 'Construct a 135° obtuse angle. Make it wide!'
+  },
+  { 
+    targetAngle: 180, 
+    tolerance: 3,
+    angleType: 'straight', 
+    name: 'Straight Angle', 
+    description: 'Exactly 180°',
+    instruction: 'Construct a perfectly straight 180° angle!'
+  },
+  { 
+    targetAngle: 60, 
+    tolerance: 5,
+    angleType: 'acute', 
+    name: 'Acute Angle', 
+    description: 'Less than 90°',
+    instruction: 'Construct a 60° acute angle!'
+  },
+  { 
+    targetAngle: 120, 
+    tolerance: 5,
+    angleType: 'obtuse', 
+    name: 'Obtuse Angle', 
+    description: 'Between 90° and 180°',
+    instruction: 'Construct a 120° obtuse angle!'
+  }
 ];
 
 // Concept cards with semantic keys matching dialogue
@@ -78,7 +140,7 @@ export const CHAPTER1_XP_VALUES = {
   total: 150,
 };
 
-export const CHAPTER1_CASTLE_ID = 'bdfc1a9f-cd2a-4c1a-9062-9f99ec41e008'; // Castle 2 (Angles Sanctuary)
+export const CHAPTER1_CASTLE_ID = 'bdfc1a9f-cd2a-4c1a-9062-9f99ec41e008'; // Castle 2 (Polygon Citadel)
 export const CHAPTER1_NUMBER = 1;
 
 // Relic information for reward screen
@@ -90,13 +152,13 @@ export const CHAPTER1_RELIC = {
 
 // Wizard information
 export const CHAPTER1_WIZARD = {
-  name: "Angulus, Guardian of the Angles Sanctuary",
-  image: "/images/angulus-wizard.png"
+  name: "Sylvan, Guardian of the Polygon Citadel",
+  image: "/images/sylvan-wizard.png"
 };
 
 // Chapter metadata
 export const CHAPTER1_METADATA = {
   title: "The Hall of Rays",
-  subtitle: "Castle 2 - The Angles Sanctuary",
+  subtitle: "Castle 2 - Polygon Citadel",
   description: "Learn to identify and measure different types of angles: acute, right, obtuse, straight, and reflex."
 };

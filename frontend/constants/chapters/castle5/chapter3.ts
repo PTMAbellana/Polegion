@@ -1,31 +1,33 @@
 // Castle 5 - Chapter 3: The Sanctum of Surfaces
 // Theme: Surface area of 3D solids
 
-export const CHAPTER3_OPENING_DIALOGUE = [
-  "Magnificent work, measurement master!",
-  "We ascend to the Sanctum of Surfaces.",
-  "Here, glowing 3D objects rotate in the air.",
-  "SURFACE AREA measures the total area covering a solid figure.",
-  "Think of it as wrapping paper needed to cover the shape completely!"
+interface ChapterDialogue { scene: 'opening' | 'lesson' | 'minigame'; text: string; key?: string; taskId?: string; }
+
+export const CHAPTER3_DIALOGUE: ChapterDialogue[] = [
+  { scene: 'opening', text: "Magnificent work, measurement master!" },
+  { scene: 'opening', text: "We ascend to the Sanctum of Surfaces." },
+  { scene: 'opening', text: "Here, glowing 3D objects rotate in the air." },
+  { scene: 'opening', text: "SURFACE AREA measures the total area covering a solid figure." },
+  { scene: 'opening', text: "Think of it as wrapping paper needed to cover the shape completely!" },
+  { scene: 'lesson', key: 'intro', text: "SURFACE AREA is the sum of the areas of all faces of a 3D solid.", taskId: 'task-0' },
+  { scene: 'lesson', key: 'cube', text: "Cube Surface Area: SA = 6s² (6 square faces)", taskId: 'task-1' },
+  { scene: 'lesson', key: 'rectangular-prism', text: "Rectangular Prism: SA = 2(lw + lh + wh)", taskId: 'task-2' },
+  { scene: 'lesson', key: 'cylinder', text: "Cylinder: SA = 2πr² + 2πrh (two circles + curved surface)", taskId: 'task-3' },
+  { scene: 'lesson', key: 'sphere', text: "Sphere: SA = 4πr² (perfectly round surface)", taskId: 'task-4' },
+  { scene: 'lesson', key: 'cone', text: "Cone: SA = πr² + πrl (base + lateral surface, l = slant height)", taskId: 'task-5' },
+  { scene: 'lesson', key: 'square-pyramid', text: "Square Pyramid: SA = b² + 2bl (base + 4 triangular faces, l = slant height)", taskId: 'task-6' },
+  { scene: 'lesson', key: 'triangular-prism', text: "Triangular Prism: SA = 2(½bh) + (a+b+c)H (2 triangular bases + 3 rectangular faces)", taskId: 'task-7' },
+  { scene: 'lesson', key: 'practice', text: "Now calculate surface areas of these 3D shapes!" },
+  { scene: 'minigame', text: "The Sanctum challenges your spatial understanding!" },
+  { scene: 'minigame', text: "Calculate the surface area of each rotating solid." },
+  { scene: 'minigame', text: "Use π ≈ 3.14 for circular solids!" },
 ];
 
-export const CHAPTER3_LESSON_DIALOGUE = [
-  { key: 'intro', text: "SURFACE AREA is the sum of the areas of all faces of a 3D solid.", taskId: 'task-0' },
-  { key: 'cube', text: "Cube Surface Area: SA = 6s² (6 square faces)", taskId: 'task-1' },
-  { key: 'rectangular-prism', text: "Rectangular Prism: SA = 2(lw + lh + wh)", taskId: 'task-2' },
-  { key: 'cylinder', text: "Cylinder: SA = 2πr² + 2πrh (two circles + curved surface)", taskId: 'task-3' },
-  { key: 'sphere', text: "Sphere: SA = 4πr² (perfectly round surface)", taskId: 'task-4' },
-  { key: 'cone', text: "Cone: SA = πr² + πrl (base + lateral surface, l = slant height)", taskId: 'task-5' },
-  { key: 'square-pyramid', text: "Square Pyramid: SA = b² + 2bl (base + 4 triangular faces, l = slant height)", taskId: 'task-6' },
-  { key: 'triangular-prism', text: "Triangular Prism: SA = 2(½bh) + (a+b+c)H (2 triangular bases + 3 rectangular faces)", taskId: 'task-7' },
-  { key: 'practice', text: "Now calculate surface areas of these 3D shapes!" }
-];
+export const CHAPTER3_SCENE_RANGES = { opening: { start: 0, end: 4 }, lesson: { start: 5, end: 13 }, minigame: { start: 14, end: 16 } };
 
-export const CHAPTER3_MINIGAME_DIALOGUE = [
-  "The Sanctum challenges your spatial understanding!",
-  "Calculate the surface area of each rotating solid.",
-  "Use π ≈ 3.14 for circular solids!"
-];
+export const CHAPTER3_OPENING_DIALOGUE = CHAPTER3_DIALOGUE.filter(d => d.scene === 'opening').map(d => d.text);
+export const CHAPTER3_LESSON_DIALOGUE = CHAPTER3_DIALOGUE.filter(d => d.scene === 'lesson').map(d => ({ key: d.key || '', text: d.text, taskId: d.taskId }));
+export const CHAPTER3_MINIGAME_DIALOGUE = CHAPTER3_DIALOGUE.filter(d => d.scene === 'minigame').map(d => d.text);
 
 export const CHAPTER3_MINIGAME_LEVELS = [
   { id: 1, shape: 'cube', side: 5, correctAnswer: 150, instruction: 'Find surface area of cube (s=5)', hint: 'SA = 6s²' },
@@ -97,13 +99,13 @@ export const CHAPTER3_LEARNING_OBJECTIVES = [
 ];
 
 export const CHAPTER3_XP_VALUES = {
-  lesson: 100,
-  minigame: 90,
-  quiz1: 12,
-  quiz2: 12,
-  quiz3: 12,
-  quiz4: 12,
-  quiz5: 12,
+  lesson: 75,
+  minigame: 50,
+  quiz1: 25,
+  quiz2: 25,
+  quiz3: 25,
+  quiz4: 25,
+  quiz5: 25,
   total: 250,
 };
 

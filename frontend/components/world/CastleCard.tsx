@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Star, Zap } from 'lucide-react';
+import { Star, Trophy } from 'lucide-react';
 
 interface CastleCardProps {
   castleName: string;
@@ -10,6 +10,7 @@ interface CastleCardProps {
   totalXpEarned: number;
   chaptersRemaining: number;
   styleModule: any;
+  totalXp?: number;
 }
 
 export default function CastleCard({
@@ -18,33 +19,39 @@ export default function CastleCard({
   imageNumber,
   totalXpEarned,
   chaptersRemaining,
-  styleModule
+  styleModule,
+  totalXp = 500
 }: CastleCardProps) {
   return (
     <div className={styleModule.castleInfoContainer}>
       <div className={styleModule.castleInfoCard}>
+        {/* Castle Image */}
         <div className={styleModule.castleInfoAvatar}>
           <img 
             src={`/images/castles/castle${imageNumber}.png`}
             alt={castleName}
             className={styleModule.castleImage}
-            onError={(e) => {
-              e.currentTarget.style.display = 'none';
-              e.currentTarget.nextElementSibling?.classList.remove(styleModule.hidden);
-            }}
           />
-          <span className={`${styleModule.castleEmoji} ${styleModule.hidden}`}>🏰</span>
         </div>
+
+        {/* Castle Name */}
         <h2 className={styleModule.castleInfoName}>{castleName}</h2>
-        <p className={styleModule.castleInfoQuote}>"{description}"</p>
+
+        {/* Stats Grid */}
         <div className={styleModule.castleInfoStats}>
           <div className={styleModule.castleInfoStat}>
             <Star className={styleModule.statIcon} />
-            <span>{totalXpEarned} XP Earned</span>
+            <div className={styleModule.statText}>
+              <span className={styleModule.statValue}>{totalXpEarned}</span>
+              <span className={styleModule.statLabel}>XP Earned</span>
+            </div>
           </div>
           <div className={styleModule.castleInfoStat}>
-            <Zap className={styleModule.statIcon} />
-            <span>{chaptersRemaining} Chapters Remaining</span>
+            <Trophy className={styleModule.statIcon} />
+            <div className={styleModule.statText}>
+              <span className={styleModule.statValue}>{totalXp}</span>
+              <span className={styleModule.statLabel}>Total XP</span>
+            </div>
           </div>
         </div>
       </div>

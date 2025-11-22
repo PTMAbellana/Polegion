@@ -1,31 +1,28 @@
 // Castle 4 - Chapter 4: The Measurement Vault
-// Theme: Perimeter and area of polygons, word problems
-
-export const CHAPTER4_OPENING_DIALOGUE = [
-  "Outstanding, angle master!",
-  "We have reached the final chamber: The Measurement Vault.",
-  "Here, you will apply all your polygon knowledge to real-world problems.",
-  "Calculate perimeters and areas to unlock the vault's treasures!"
+interface ChapterDialogue { scene: 'opening' | 'lesson' | 'minigame'; text: string; key?: string; taskId?: string; }
+export const CHAPTER4_DIALOGUE: ChapterDialogue[] = [
+  { scene: 'opening', text: "Outstanding, angle master!" },
+  { scene: 'opening', text: "We have reached the final chamber: The Measurement Vault." },
+  { scene: 'opening', text: "Here, you will apply all your polygon knowledge to real-world problems." },
+  { scene: 'opening', text: "Calculate perimeters and areas to unlock the vault's treasures!" },
+  { scene: 'lesson', key: 'intro', text: "PERIMETER is the distance around a polygon. Add all side lengths!", taskId: 'task-0' },
+  { scene: 'lesson', key: 'rectangle-perimeter', text: "Rectangle Perimeter: P = 2(length + width) or P = 2l + 2w", taskId: 'task-1' },
+  { scene: 'lesson', key: 'square-perimeter', text: "Square Perimeter: P = 4 × side", taskId: 'task-2' },
+  { scene: 'lesson', key: 'area-intro', text: "AREA is the space inside a polygon, measured in square units.", taskId: 'task-3' },
+  { scene: 'lesson', key: 'rectangle-area', text: "Rectangle Area: A = length × width", taskId: 'task-4' },
+  { scene: 'lesson', key: 'square-area', text: "Square Area: A = side × side = side²", taskId: 'task-5' },
+  { scene: 'lesson', key: 'triangle-area', text: "Triangle Area: A = (base × height) ÷ 2", taskId: 'task-6' },
+  { scene: 'lesson', key: 'parallelogram-area', text: "Parallelogram Area: A = base × height", taskId: 'task-7' },
+  { scene: 'lesson', key: 'trapezoid-area', text: "Trapezoid Area: A = [(base₁ + base₂) × height] ÷ 2", taskId: 'task-8' },
+  { scene: 'lesson', key: 'word-problems', text: "Now apply these formulas to solve real-world problems!", taskId: 'task-9' },
+  { scene: 'minigame', text: "The Vault Master presents measurement challenges!" },
+  { scene: 'minigame', text: "Calculate perimeters and areas correctly." },
+  { scene: 'minigame', text: "Apply the right formula for each shape!" },
 ];
-
-export const CHAPTER4_LESSON_DIALOGUE = [
-  { key: 'intro', text: "PERIMETER is the distance around a polygon. Add all side lengths!", taskId: 'task-0' },
-  { key: 'rectangle-perimeter', text: "Rectangle Perimeter: P = 2(length + width) or P = 2l + 2w", taskId: 'task-1' },
-  { key: 'square-perimeter', text: "Square Perimeter: P = 4 × side", taskId: 'task-2' },
-  { key: 'area-intro', text: "AREA is the space inside a polygon, measured in square units.", taskId: 'task-3' },
-  { key: 'rectangle-area', text: "Rectangle Area: A = length × width", taskId: 'task-4' },
-  { key: 'square-area', text: "Square Area: A = side × side = side²", taskId: 'task-5' },
-  { key: 'triangle-area', text: "Triangle Area: A = (base × height) ÷ 2", taskId: 'task-6' },
-  { key: 'parallelogram-area', text: "Parallelogram Area: A = base × height", taskId: 'task-7' },
-  { key: 'trapezoid-area', text: "Trapezoid Area: A = [(base₁ + base₂) × height] ÷ 2", taskId: 'task-8' },
-  { key: 'word-problems', text: "Now apply these formulas to solve real-world problems!", taskId: 'task-9' },
-];
-
-export const CHAPTER4_MINIGAME_DIALOGUE = [
-  "The Vault Master presents measurement challenges!",
-  "Calculate perimeters and areas correctly.",
-  "Apply the right formula for each shape!"
-];
+export const CHAPTER4_SCENE_RANGES = { opening: { start: 0, end: 3 }, lesson: { start: 4, end: 13 }, minigame: { start: 14, end: 16 } };
+export const CHAPTER4_OPENING_DIALOGUE = CHAPTER4_DIALOGUE.filter(d => d.scene === 'opening').map(d => d.text);
+export const CHAPTER4_LESSON_DIALOGUE = CHAPTER4_DIALOGUE.filter(d => d.scene === 'lesson').map(d => ({ key: d.key || '', text: d.text, taskId: d.taskId }));
+export const CHAPTER4_MINIGAME_DIALOGUE = CHAPTER4_DIALOGUE.filter(d => d.scene === 'minigame').map(d => d.text);
 
 export const CHAPTER4_MINIGAME_LEVELS = [
   { id: 1, shape: 'rectangle', length: 8, width: 5, type: 'perimeter', correctAnswer: 26, instruction: 'Find perimeter of rectangle (l=8, w=5)', hint: 'P = 2(l + w)' },
@@ -110,14 +107,14 @@ export const CHAPTER4_LEARNING_OBJECTIVES = [
 ];
 
 export const CHAPTER4_XP_VALUES = {
-  lesson: 80,
-  minigame: 90,
-  quiz1: 12,
-  quiz2: 12,
-  quiz3: 12,
-  quiz4: 12,
-  quiz5: 12,
-  total: 230,
+  lesson: 75,
+  minigame: 50,
+  quiz1: 25,
+  quiz2: 25,
+  quiz3: 25,
+  quiz4: 25,
+  quiz5: 25,
+  total: 250,
 };
 
 export const CHAPTER4_CASTLE_ID = '4e5f6a7b-8c9d-0e1f-2a3b-4c5d6e7f8a9b';

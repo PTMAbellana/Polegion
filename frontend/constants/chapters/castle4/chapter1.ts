@@ -1,28 +1,47 @@
 // Castle 4 - Chapter 1: The Gallery of Shapes
 // Theme: Identifying polygons, similar and congruent polygons
 
-export const CHAPTER1_OPENING_DIALOGUE = [
-  "Welcome to the Polygon Citadel! I am Polymus, Master of Many Sides.",
-  "Enter the grand gallery where polygons float like art pieces.",
-  "Each polygon has a unique number of sides and angles.",
-  "Let us explore the naming and classification of these magnificent shapes!"
+interface ChapterDialogue {
+  scene: 'opening' | 'lesson' | 'minigame';
+  text: string;
+  key?: string;
+  taskId?: string;
+}
+
+// Unified dialogue array combining all scenes
+export const CHAPTER1_DIALOGUE: ChapterDialogue[] = [
+  // Opening scene (indices 0-3)
+  { scene: 'opening', text: "Welcome to the Polygon Citadel! I am Polymus, Master of Many Sides." },
+  { scene: 'opening', text: "Enter the grand gallery where polygons float like art pieces." },
+  { scene: 'opening', text: "Each polygon has a unique number of sides and angles." },
+  { scene: 'opening', text: "Let us explore the naming and classification of these magnificent shapes!" },
+  
+  // Lesson scene (indices 4-10)
+  { scene: 'lesson', key: 'intro', text: "A POLYGON is a closed figure made of straight line segments.", taskId: 'task-0' },
+  { scene: 'lesson', key: 'naming', text: "Polygons are named by their number of sides: Triangle (3), Quadrilateral (4), Pentagon (5), Hexagon (6), Heptagon (7), Octagon (8), Nonagon (9), Decagon (10).", taskId: 'task-1' },
+  { scene: 'lesson', key: 'congruent', text: "Two polygons are CONGRUENT if they have the same shape AND same size.", taskId: 'task-2' },
+  { scene: 'lesson', key: 'congruent-example', text: "Example: Two squares with side length 5 cm are congruent.", taskId: 'task-3' },
+  { scene: 'lesson', key: 'similar', text: "Two polygons are SIMILAR if they have the same shape but different sizes.", taskId: 'task-4' },
+  { scene: 'lesson', key: 'similar-example', text: "Example: A square with side 3 cm and a square with side 6 cm are similar (same shape, different size).", taskId: 'task-5' },
+  { scene: 'lesson', key: 'practice', text: "Now identify polygons and determine their relationships!" },
+  
+  // Minigame scene (indices 11-13)
+  { scene: 'minigame', text: "The Gallery Keeper challenges you!" },
+  { scene: 'minigame', text: "Identify polygons by counting their sides." },
+  { scene: 'minigame', text: "Determine if pairs are congruent or similar!" },
 ];
 
-export const CHAPTER1_LESSON_DIALOGUE = [
-  { key: 'intro', text: "A POLYGON is a closed figure made of straight line segments.", taskId: 'task-0' },
-  { key: 'naming', text: "Polygons are named by their number of sides: Triangle (3), Quadrilateral (4), Pentagon (5), Hexagon (6), Heptagon (7), Octagon (8), Nonagon (9), Decagon (10).", taskId: 'task-1' },
-  { key: 'congruent', text: "Two polygons are CONGRUENT if they have the same shape AND same size.", taskId: 'task-2' },
-  { key: 'congruent-example', text: "Example: Two squares with side length 5 cm are congruent.", taskId: 'task-3' },
-  { key: 'similar', text: "Two polygons are SIMILAR if they have the same shape but different sizes.", taskId: 'task-4' },
-  { key: 'similar-example', text: "Example: A square with side 3 cm and a square with side 6 cm are similar (same shape, different size).", taskId: 'task-5' },
-  { key: 'practice', text: "Now identify polygons and determine their relationships!" }
-];
+// Scene ranges for navigation
+export const CHAPTER1_SCENE_RANGES = {
+  opening: { start: 0, end: 3 },
+  lesson: { start: 4, end: 10 },
+  minigame: { start: 11, end: 13 },
+};
 
-export const CHAPTER1_MINIGAME_DIALOGUE = [
-  "The Gallery Keeper challenges you!",
-  "Identify polygons by counting their sides.",
-  "Determine if pairs are congruent or similar!"
-];
+// Legacy exports for backward compatibility
+export const CHAPTER1_OPENING_DIALOGUE = CHAPTER1_DIALOGUE.filter(d => d.scene === 'opening').map(d => d.text);
+export const CHAPTER1_LESSON_DIALOGUE = CHAPTER1_DIALOGUE.filter(d => d.scene === 'lesson').map(d => ({ key: d.key || '', text: d.text, taskId: d.taskId }));
+export const CHAPTER1_MINIGAME_DIALOGUE = CHAPTER1_DIALOGUE.filter(d => d.scene === 'minigame').map(d => d.text);
 
 export const CHAPTER1_MINIGAME_LEVELS = [
   { id: 1, sides: 5, correctAnswer: 'pentagon', instruction: 'What is a 5-sided polygon called?', hint: 'Count the sides carefully' },
@@ -84,12 +103,12 @@ export const CHAPTER1_LEARNING_OBJECTIVES = [
 export const CHAPTER1_XP_VALUES = {
   lesson: 50,
   minigame: 50,
-  quiz1: 12,
-  quiz2: 12,
-  quiz3: 12,
-  quiz4: 12,
-  quiz5: 12,
-  total: 160,
+  quiz1: 20,
+  quiz2: 20,
+  quiz3: 20,
+  quiz4: 20,
+  quiz5: 20,
+  total: 200,
 };
 
 export const CHAPTER1_CASTLE_ID = '4e5f6a7b-8c9d-0e1f-2a3b-4c5d6e7f8a9b'; // Castle 4 (Polygon Citadel)

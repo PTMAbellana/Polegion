@@ -9,6 +9,7 @@ interface ChapterProgress {
   quizAnswers: Record<string, string>
   quizAttempts: number
   currentMinigameLevel: number
+  currentQuizIndex: number
   earnedXP: {
     lesson: number
     minigame: number
@@ -33,6 +34,7 @@ interface ChapterState {
   clearQuizAnswer: (chapterKey: string, questionId: string) => void
   setQuizAttempts: (chapterKey: string, attempts: number) => void
   setMinigameLevel: (chapterKey: string, level: number) => void
+  setQuizIndex: (chapterKey: string, index: number) => void
   setEarnedXP: (chapterKey: string, type: 'lesson' | 'minigame' | 'quiz', xp: number) => void
   setAudioSettings: (chapterKey: string, isMuted: boolean, autoAdvanceEnabled: boolean) => void
   clearChapterProgress: (chapterKey: string) => void
@@ -49,6 +51,7 @@ const DEFAULT_CHAPTER_PROGRESS: ChapterProgress = {
   quizAnswers: {},
   quizAttempts: 0,
   currentMinigameLevel: 0,
+  currentQuizIndex: 0,
   earnedXP: {
     lesson: 0,
     minigame: 0,
@@ -182,6 +185,19 @@ export const useChapterStore = create<ChapterState>()(
             [chapterKey]: {
               ...(state.chapters[chapterKey] || DEFAULT_CHAPTER_PROGRESS),
               currentMinigameLevel: level,
+              lastUpdated: Date.now(),
+            },
+          },
+        }))
+      },
+
+      setQuizIndex: (chapterKey: string, index: number) => {
+        set((state) => ({
+          chapters: {
+            ...state.chapters,
+            [chapterKey]: {
+              ...(state.chapters[chapterKey] || DEFAULT_CHAPTER_PROGRESS),
+              currentQuizIndex: index,
               lastUpdated: Date.now(),
             },
           },

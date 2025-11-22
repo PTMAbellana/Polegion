@@ -22,6 +22,81 @@
   background-repeat: no-repeat;
 }
 
+.castle1Theme .topBar {
+  background: linear-gradient(180deg, rgba(33, 53, 85, 0.9) 0%, rgba(62, 88, 121, 0.8) 100%);
+  border-bottom: 2px solid #D8C4B6;
+}
+
+.castle1Theme .chapterTitle {
+  color: #F5EFE7;
+}
+
+.castle1Theme .chapterSubtitle {
+  color: #D8C4B6;
+}
+
+.castle1Theme .titleIcon {
+  color: #D8C4B6;
+  filter: drop-shadow(0 0 8px rgba(216, 196, 182, 0.6));
+}
+
+.castle1Theme .controlButton,
+.castle1Theme .exitButton {
+  border-color: #D8C4B6;
+  background: rgba(62, 88, 121, 0.4);
+}
+
+.castle1Theme .controlButton:hover,
+.castle1Theme .exitButton:hover {
+  border-color: #F5EFE7;
+  background: rgba(62, 88, 121, 0.6);
+}
+
+.castle1Theme .backgroundOverlay {
+  background: rgba(33, 53, 85, 0.4);
+}
+
+.castle1Theme .taskPanel {
+  background: rgba(33, 53, 85, 0.8);
+  border-color: #D8C4B6;
+}
+
+.castle1Theme .taskPanelTitle {
+  color: #D8C4B6;
+  text-shadow: 0 0 10px rgba(216, 196, 182, 0.5);
+}
+
+.castle1Theme .progressText {
+  color: #F5EFE7;
+}
+
+.castle1Theme .gameArea {
+  background: rgba(33, 53, 85, 0.5);
+  border-color: #D8C4B6;
+}
+
+.castle1Theme .dialogueWrapper {
+  background: rgba(33, 53, 85, 0.5);
+}
+
+.castle1Theme .dialogueContainer {
+  background: rgba(62, 88, 121, 0.85);
+  border-color: #D8C4B6;
+}
+
+.castle1Theme .dialogueContainer:hover {
+  border-color: #F5EFE7;
+  box-shadow: 0 0 20px rgba(216, 196, 182, 0.4);
+}
+
+.castle1Theme .dialogueSpeaker {
+  color: #D8C4B6;
+}
+
+.castle1Theme .dialogueText {
+  color: #F5EFE7;
+}
+
 /* Castle 2 - Forest Theme */
 .chapterContainer.castle2Theme {
   background-image: url('/images/castles/castle2-background.png');
@@ -114,6 +189,255 @@
 
 .castle2Theme .dialogueText {
   color: #B0CE88;
+}
+
+/* Castle 3 Theme */
+.chapterContainer.castle3Theme {
+  background-image: url('/images/castles/castle3-background.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.castle3Theme .topBar {
+  background: linear-gradient(180deg, rgba(20, 61, 96, 0.9) 0%, rgba(38, 102, 123, 0.8) 100%);
+  border-bottom: 2px solid #DDEB9D;
+}
+
+.castle3Theme .chapterTitle {
+  color: #DDEB9D;
+}
+
+.castle3Theme .chapterSubtitle {
+  color: #A0C878;
+}
+
+.castle3Theme .titleIcon {
+  color: #DDEB9D;
+  filter: drop-shadow(0 0 8px rgba(221, 235, 157, 0.6));
+}
+
+.castle3Theme .controlButton,
+.castle3Theme .exitButton {
+  border-color: #A0C878;
+  background: rgba(38, 102, 123, 0.4);
+}
+
+.castle3Theme .controlButton:hover,
+.castle3Theme .exitButton:hover {
+  border-color: #DDEB9D;
+  background: rgba(38, 102, 123, 0.6);
+}
+
+.castle3Theme .backgroundOverlay {
+  background: rgba(20, 61, 96, 0.3);
+}
+
+.castle3Theme .taskPanel {
+  background: rgba(20, 61, 96, 0.8);
+  border-color: #A0C878;
+}
+
+.castle3Theme .taskPanelTitle {
+  color: #DDEB9D;
+  text-shadow: 0 0 10px rgba(221, 235, 157, 0.5);
+}
+
+.castle3Theme .progressText {
+  color: #A0C878;
+}
+
+.castle3Theme .gameArea {
+  background: rgba(20, 61, 96, 0.4);
+  border-color: #A0C878;
+}
+
+.castle3Theme .dialogueWrapper {
+  background: rgba(20, 61, 96, 0.5);
+}
+
+.castle3Theme .dialogueContainer {
+  background: rgba(38, 102, 123, 0.85);
+  border-color: #A0C878;
+}
+
+.castle3Theme .dialogueContainer:hover {
+  border-color: #DDEB9D;
+  box-shadow: 0 0 20px rgba(221, 235, 157, 0.4);
+}
+
+.castle3Theme .dialogueSpeaker {
+  color: #DDEB9D;
+}
+
+.castle3Theme .dialogueText {
+  color: #A0C878;
+}
+
+/* Castle 4 Theme */
+.chapterContainer.castle4Theme {
+  background-image: url('/images/castles/castle4-background.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.castle4Theme .topBar {
+  background: linear-gradient(180deg, rgba(149, 124, 98, 0.9) 0%, rgba(183, 116, 102, 0.8) 100%);
+  border-bottom: 2px solid #FFE1AF;
+}
+
+.castle4Theme .chapterTitle {
+  color: #FFE1AF;
+}
+
+.castle4Theme .chapterSubtitle {
+  color: #E2B59A;
+}
+
+.castle4Theme .titleIcon {
+  color: #FFE1AF;
+  filter: drop-shadow(0 0 8px rgba(255, 225, 175, 0.6));
+}
+
+.castle4Theme .controlButton,
+.castle4Theme .exitButton {
+  border-color: #E2B59A;
+  background: rgba(183, 116, 102, 0.4);
+}
+
+.castle4Theme .controlButton:hover,
+.castle4Theme .exitButton:hover {
+  border-color: #FFE1AF;
+  background: rgba(183, 116, 102, 0.6);
+}
+
+.castle4Theme .backgroundOverlay {
+  background: rgba(149, 124, 98, 0.3);
+}
+
+.castle4Theme .taskPanel {
+  background: rgba(149, 124, 98, 0.8);
+  border-color: #E2B59A;
+}
+
+.castle4Theme .taskPanelTitle {
+  color: #FFE1AF;
+  text-shadow: 0 0 10px rgba(255, 225, 175, 0.5);
+}
+
+.castle4Theme .progressText {
+  color: #E2B59A;
+}
+
+.castle4Theme .gameArea {
+  background: rgba(149, 124, 98, 0.4);
+  border-color: #E2B59A;
+}
+
+.castle4Theme .dialogueWrapper {
+  background: rgba(149, 124, 98, 0.5);
+}
+
+.castle4Theme .dialogueContainer {
+  background: rgba(183, 116, 102, 0.85);
+  border-color: #E2B59A;
+}
+
+.castle4Theme .dialogueContainer:hover {
+  border-color: #FFE1AF;
+  box-shadow: 0 0 20px rgba(255, 225, 175, 0.4);
+}
+
+.castle4Theme .dialogueSpeaker {
+  color: #FFE1AF;
+}
+
+.castle4Theme .dialogueText {
+  color: #E2B59A;
+}
+
+/* Castle 5 Theme */
+.chapterContainer.castle5Theme {
+  background-image: url('/images/castles/castle5-background.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.castle5Theme .topBar {
+  background: linear-gradient(180deg, rgba(11, 29, 81, 0.9) 0%, rgba(114, 92, 173, 0.8) 100%);
+  border-bottom: 2px solid #FFE3A9;
+}
+
+.castle5Theme .chapterTitle {
+  color: #FFE3A9;
+}
+
+.castle5Theme .chapterSubtitle {
+  color: #8CCDEB;
+}
+
+.castle5Theme .titleIcon {
+  color: #FFE3A9;
+  filter: drop-shadow(0 0 8px rgba(255, 227, 169, 0.6));
+}
+
+.castle5Theme .controlButton,
+.castle5Theme .exitButton {
+  border-color: #8CCDEB;
+  background: rgba(114, 92, 173, 0.4);
+}
+
+.castle5Theme .controlButton:hover,
+.castle5Theme .exitButton:hover {
+  border-color: #FFE3A9;
+  background: rgba(114, 92, 173, 0.6);
+}
+
+.castle5Theme .backgroundOverlay {
+  background: rgba(11, 29, 81, 0.3);
+}
+
+.castle5Theme .taskPanel {
+  background: rgba(11, 29, 81, 0.8);
+  border-color: #8CCDEB;
+}
+
+.castle5Theme .taskPanelTitle {
+  color: #FFE3A9;
+  text-shadow: 0 0 10px rgba(255, 227, 169, 0.5);
+}
+
+.castle5Theme .progressText {
+  color: #8CCDEB;
+}
+
+.castle5Theme .gameArea {
+  background: rgba(11, 29, 81, 0.4);
+  border-color: #8CCDEB;
+}
+
+.castle5Theme .dialogueWrapper {
+  background: rgba(11, 29, 81, 0.5);
+}
+
+.castle5Theme .dialogueContainer {
+  background: rgba(114, 92, 173, 0.85);
+  border-color: #8CCDEB;
+}
+
+.castle5Theme .dialogueContainer:hover {
+  border-color: #FFE3A9;
+  box-shadow: 0 0 20px rgba(255, 227, 169, 0.4);
+}
+
+.castle5Theme .dialogueSpeaker {
+  color: #FFE3A9;
+}
+
+.castle5Theme .dialogueText {
+  color: #8CCDEB;
 }
 
 /* Top Bar */
@@ -249,18 +573,18 @@
 }
 
 .taskList::-webkit-scrollbar-track {
-  background: rgba(33, 53, 85, 0.3);
+  background: rgba(139, 115, 85, 0.2);
   border-radius: 4px;
 }
 
 .taskList::-webkit-scrollbar-thumb {
-  background: rgba(216, 196, 182, 0.4);
+  background: rgba(139, 115, 85, 0.5);
   border-radius: 4px;
   transition: background 0.3s ease;
 }
 
 .taskList::-webkit-scrollbar-thumb:hover {
-  background: rgba(216, 196, 182, 0.6);
+  background: rgba(139, 115, 85, 0.7);
 }
 
 .taskItem {
@@ -268,50 +592,120 @@
   align-items: center;
   gap: 0.75rem;
   padding: 0.75rem;
-  background: rgba(62, 88, 121, 0.3);
-  border: 1px solid rgba(216, 196, 182, 0.2);
+  background: rgba(244, 228, 193, 0.95);
+  border: 2px solid #8b7355;
   border-radius: 6px;
   transition: all 0.3s ease;
   flex-shrink: 0;
+  box-shadow: 0 2px 6px rgba(90, 62, 43, 0.15);
 }
 
 .taskCompleted {
-  background: rgba(76, 175, 80, 0.2);
-  border-color: rgba(139, 195, 74, 0.5);
+  background: rgba(67, 233, 123, 0.15);
+  border-color: rgba(67, 233, 123, 0.5);
 }
 
 .taskFailed {
-  background: rgba(244, 67, 54, 0.1);
-  border-color: rgba(244, 67, 54, 0.3);
+  background: rgba(250, 112, 154, 0.15);
+  border-color: rgba(250, 112, 154, 0.5);
 }
 
 .taskCheckbox {
   width: 24px;
   height: 24px;
-  border: 2px solid rgba(216, 196, 182, 0.4);
+  border: 2px solid #8b7355;
   border-radius: 4px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 1rem;
   flex-shrink: 0;
+  background: rgba(255, 255, 255, 0.9);
 }
 
 .taskCompleted .taskCheckbox {
-  background: rgba(76, 175, 80, 0.3);
-  border-color: #4CAF50;
-  color: #4CAF50;
+  background: rgba(67, 233, 123, 0.2);
+  border-color: #43e97b;
+  color: #43e97b;
 }
 
 .taskFailed .taskCheckbox {
-  background: rgba(244, 67, 54, 0.3);
-  border-color: #F44336;
-  color: #F44336;
+  background: rgba(250, 112, 154, 0.2);
+  border-color: #fa709a;
+  color: #fa709a;
 }
 
 .taskLabel {
   font-size: 0.9rem;
-  color: #F5EFE7;
+  color: #3d2a1f;
+  font-weight: 500;
+}
+
+.taskCompleted .taskLabel {
+  color: #FFFD8F;
+  font-weight: 600;
+}
+
+/* Castle-specific Task Completion Styling */
+
+/* Castle 1 - Snow Theme (Light blue/white completion) */
+.castle1Theme .taskCompleted {
+  background: rgba(216, 196, 182, 0.25);
+  border-color: rgba(216, 196, 182, 0.6);
+}
+
+.castle1Theme .taskCompleted .taskCheckbox {
+  background: rgba(216, 196, 182, 0.3);
+  border-color: #D8C4B6;
+  color: #D8C4B6;
+}
+
+/* Castle 2 - Forest Theme (Light green/yellow completion) */
+.castle2Theme .taskCompleted {
+  background: rgba(255, 253, 143, 0.2);
+  border-color: rgba(255, 253, 143, 0.6);
+}
+
+.castle2Theme .taskCompleted .taskCheckbox {
+  background: rgba(255, 253, 143, 0.25);
+  border-color: #FFFD8F;
+  color: #B0CE88;
+}
+
+/* Castle 3 - Ocean Theme (Light cyan/green completion) */
+.castle3Theme .taskCompleted {
+  background: rgba(221, 235, 157, 0.2);
+  border-color: rgba(221, 235, 157, 0.6);
+}
+
+.castle3Theme .taskCompleted .taskCheckbox {
+  background: rgba(221, 235, 157, 0.25);
+  border-color: #DDEB9D;
+  color: #A0C878;
+}
+
+/* Castle 4 - Desert Theme (Light orange/beige completion) */
+.castle4Theme .taskCompleted {
+  background: rgba(255, 225, 175, 0.25);
+  border-color: rgba(255, 225, 175, 0.6);
+}
+
+.castle4Theme .taskCompleted .taskCheckbox {
+  background: rgba(255, 225, 175, 0.3);
+  border-color: #FFE1AF;
+  color: #E2B59A;
+}
+
+/* Castle 5 - Sky Theme (Light gold/blue completion) */
+.castle5Theme .taskCompleted {
+  background: rgba(255, 227, 169, 0.2);
+  border-color: rgba(255, 227, 169, 0.6);
+}
+
+.castle5Theme .taskCompleted .taskCheckbox {
+  background: rgba(255, 227, 169, 0.25);
+  border-color: #FFE3A9;
+  color: #8CCDEB;
 }
 
 /* Game Area */
@@ -336,18 +730,18 @@
 }
 
 .gameArea::-webkit-scrollbar-track {
-  background: rgba(33, 53, 85, 0.3);
+  background: rgba(139, 115, 85, 0.2);
   border-radius: 5px;
 }
 
 .gameArea::-webkit-scrollbar-thumb {
-  background: rgba(216, 196, 182, 0.4);
+  background: rgba(139, 115, 85, 0.5);
   border-radius: 5px;
   transition: background 0.3s ease;
 }
 
 .gameArea::-webkit-scrollbar-thumb:hover {
-  background: rgba(216, 196, 182, 0.6);
+  background: rgba(139, 115, 85, 0.7);
 }
 
 /* Dialogue */
@@ -470,6 +864,142 @@
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
 }
 
+/* Castle 1 Theme - Reward Card */
+.castle1Theme .rewardCard {
+  background: linear-gradient(135deg, rgba(62, 88, 121, 0.5) 0%, rgba(33, 53, 85, 0.5) 100%);
+  border-color: #D8C4B6;
+}
+
+.castle1Theme .rewardTitle {
+  color: #D8C4B6;
+  text-shadow: 0 0 20px rgba(216, 196, 182, 0.6);
+}
+
+.castle1Theme .relicIcon {
+  filter: drop-shadow(0 0 20px rgba(216, 196, 182, 0.6));
+}
+
+.castle1Theme .statBox {
+  background: linear-gradient(135deg, rgba(216, 196, 182, 0.2) 0%, rgba(245, 239, 231, 0.1) 100%);
+  border-color: rgba(216, 196, 182, 0.4);
+}
+
+.castle1Theme .statLabel {
+  color: #D8C4B6;
+}
+
+/* Castle 2 Theme - Reward Card */
+.castle2Theme .rewardCard {
+  background: linear-gradient(135deg, rgba(76, 118, 59, 0.5) 0%, rgba(4, 57, 21, 0.5) 100%);
+  border-color: #B0CE88;
+}
+
+.castle2Theme .rewardTitle {
+  color: #FFFD8F;
+  text-shadow: 0 0 20px rgba(255, 253, 143, 0.6);
+}
+
+.castle2Theme .relicIcon {
+  filter: drop-shadow(0 0 20px rgba(255, 253, 143, 0.6));
+}
+
+.castle2Theme .rewardDescription {
+  color: #B0CE88;
+}
+
+.castle2Theme .statBox {
+  background: linear-gradient(135deg, rgba(176, 206, 136, 0.2) 0%, rgba(255, 253, 143, 0.1) 100%);
+  border-color: rgba(176, 206, 136, 0.4);
+}
+
+.castle2Theme .statLabel {
+  color: #B0CE88;
+}
+
+/* Castle 3 Theme - Reward Card */
+.castle3Theme .rewardCard {
+  background: linear-gradient(135deg, rgba(38, 102, 123, 0.5) 0%, rgba(20, 61, 96, 0.5) 100%);
+  border-color: #A0C878;
+}
+
+.castle3Theme .rewardTitle {
+  color: #DDEB9D;
+  text-shadow: 0 0 20px rgba(221, 235, 157, 0.6);
+}
+
+.castle3Theme .relicIcon {
+  filter: drop-shadow(0 0 20px rgba(221, 235, 157, 0.6));
+}
+
+.castle3Theme .rewardDescription {
+  color: #A0C878;
+}
+
+.castle3Theme .statBox {
+  background: linear-gradient(135deg, rgba(160, 200, 120, 0.2) 0%, rgba(221, 235, 157, 0.1) 100%);
+  border-color: rgba(160, 200, 120, 0.4);
+}
+
+.castle3Theme .statLabel {
+  color: #A0C878;
+}
+
+/* Castle 4 Theme - Reward Card */
+.castle4Theme .rewardCard {
+  background: linear-gradient(135deg, rgba(183, 116, 102, 0.5) 0%, rgba(149, 124, 98, 0.5) 100%);
+  border-color: #E2B59A;
+}
+
+.castle4Theme .rewardTitle {
+  color: #FFE1AF;
+  text-shadow: 0 0 20px rgba(255, 225, 175, 0.6);
+}
+
+.castle4Theme .relicIcon {
+  filter: drop-shadow(0 0 20px rgba(255, 225, 175, 0.6));
+}
+
+.castle4Theme .rewardDescription {
+  color: #E2B59A;
+}
+
+.castle4Theme .statBox {
+  background: linear-gradient(135deg, rgba(226, 181, 154, 0.2) 0%, rgba(255, 225, 175, 0.1) 100%);
+  border-color: rgba(226, 181, 154, 0.4);
+}
+
+.castle4Theme .statLabel {
+  color: #E2B59A;
+}
+
+/* Castle 5 Theme - Reward Card */
+.castle5Theme .rewardCard {
+  background: linear-gradient(135deg, rgba(114, 92, 173, 0.5) 0%, rgba(11, 29, 81, 0.5) 100%);
+  border-color: #8CCDEB;
+}
+
+.castle5Theme .rewardTitle {
+  color: #FFE3A9;
+  text-shadow: 0 0 20px rgba(255, 227, 169, 0.6);
+}
+
+.castle5Theme .relicIcon {
+  filter: drop-shadow(0 0 20px rgba(255, 227, 169, 0.6));
+}
+
+.castle5Theme .rewardDescription {
+  color: #8CCDEB;
+}
+
+.castle5Theme .statBox {
+  background: linear-gradient(135deg, rgba(140, 205, 235, 0.2) 0%, rgba(255, 227, 169, 0.1) 100%);
+  border-color: rgba(140, 205, 235, 0.4);
+}
+
+.castle5Theme .statLabel {
+  color: #8CCDEB;
+}
+
 .relicDisplay {
   margin-bottom: 0.75rem;
   animation: float 3s ease-in-out infinite;
@@ -576,6 +1106,101 @@
   border-color: #F5EFE7;
 }
 
+/* Castle 1 Theme - Reward Buttons */
+.castle1Theme .retakeButton {
+  background: linear-gradient(135deg, rgba(62, 88, 121, 0.5) 0%, rgba(33, 53, 85, 0.5) 100%);
+  color: #F5EFE7;
+  border: 2px solid rgba(216, 196, 182, 0.6);
+}
+
+.castle1Theme .returnButton {
+  background: linear-gradient(135deg, #3E5879 0%, #213555 100%);
+  color: #F5EFE7;
+  border: 2px solid #D8C4B6;
+}
+
+.castle1Theme .retakeButton:hover,
+.castle1Theme .returnButton:hover {
+  box-shadow: 0 6px 20px rgba(216, 196, 182, 0.4);
+  border-color: #F5EFE7;
+}
+
+/* Castle 2 Theme - Reward Buttons */
+.castle2Theme .retakeButton {
+  background: linear-gradient(135deg, rgba(76, 118, 59, 0.5) 0%, rgba(4, 57, 21, 0.5) 100%);
+  color: #FFFD8F;
+  border: 2px solid rgba(176, 206, 136, 0.6);
+}
+
+.castle2Theme .returnButton {
+  background: linear-gradient(135deg, #4C763B 0%, #043915 100%);
+  color: #FFFD8F;
+  border: 2px solid #B0CE88;
+}
+
+.castle2Theme .retakeButton:hover,
+.castle2Theme .returnButton:hover {
+  box-shadow: 0 6px 20px rgba(255, 253, 143, 0.4);
+  border-color: #FFFD8F;
+}
+
+/* Castle 3 Theme - Reward Buttons */
+.castle3Theme .retakeButton {
+  background: linear-gradient(135deg, rgba(38, 102, 123, 0.5) 0%, rgba(20, 61, 96, 0.5) 100%);
+  color: #DDEB9D;
+  border: 2px solid rgba(160, 200, 120, 0.6);
+}
+
+.castle3Theme .returnButton {
+  background: linear-gradient(135deg, #27667B 0%, #143D60 100%);
+  color: #DDEB9D;
+  border: 2px solid #A0C878;
+}
+
+.castle3Theme .retakeButton:hover,
+.castle3Theme .returnButton:hover {
+  box-shadow: 0 6px 20px rgba(221, 235, 157, 0.4);
+  border-color: #DDEB9D;
+}
+
+/* Castle 4 Theme - Reward Buttons */
+.castle4Theme .retakeButton {
+  background: linear-gradient(135deg, rgba(183, 116, 102, 0.5) 0%, rgba(149, 124, 98, 0.5) 100%);
+  color: #FFE1AF;
+  border: 2px solid rgba(226, 181, 154, 0.6);
+}
+
+.castle4Theme .returnButton {
+  background: linear-gradient(135deg, #B77466 0%, #957C62 100%);
+  color: #FFE1AF;
+  border: 2px solid #E2B59A;
+}
+
+.castle4Theme .retakeButton:hover,
+.castle4Theme .returnButton:hover {
+  box-shadow: 0 6px 20px rgba(255, 225, 175, 0.4);
+  border-color: #FFE1AF;
+}
+
+/* Castle 5 Theme - Reward Buttons */
+.castle5Theme .retakeButton {
+  background: linear-gradient(135deg, rgba(114, 92, 173, 0.5) 0%, rgba(11, 29, 81, 0.5) 100%);
+  color: #FFE3A9;
+  border: 2px solid rgba(140, 205, 235, 0.6);
+}
+
+.castle5Theme .returnButton {
+  background: linear-gradient(135deg, #725CAD 0%, #0B1D51 100%);
+  color: #FFE3A9;
+  border: 2px solid #8CCDEB;
+}
+
+.castle5Theme .retakeButton:hover,
+.castle5Theme .returnButton:hover {
+  box-shadow: 0 6px 20px rgba(255, 227, 169, 0.4);
+  border-color: #FFE3A9;
+}
+
 /* Animations */
 @keyframes pulse {
   0%, 100% { opacity: 0.7; }
@@ -609,6 +1234,109 @@
   background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
   color: #E8F4FD;
   gap: 1rem;
+}
+
+.loading_container button {
+  padding: 0.75rem 1.5rem;
+  background: rgba(62, 88, 121, 0.6);
+  border: 2px solid #6FA3EF;
+  border-radius: 8px;
+  color: #E8F4FD;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.loading_container button:hover {
+  background: rgba(62, 88, 121, 0.8);
+  border-color: #A8D5FF;
+  box-shadow: 0 0 15px rgba(111, 163, 239, 0.5);
+}
+
+.loading_container.castle1Theme {
+  background: linear-gradient(135deg, #213555 0%, #3E5879 100%);
+  color: #F5EFE7;
+}
+
+.loading_container.castle1Theme button {
+  background: rgba(62, 88, 121, 0.6);
+  border: 2px solid #D8C4B6;
+  color: #F5EFE7;
+}
+
+.loading_container.castle1Theme button:hover {
+  background: rgba(62, 88, 121, 0.8);
+  border-color: #F5EFE7;
+  box-shadow: 0 0 15px rgba(216, 196, 182, 0.5);
+}
+
+.loading_container.castle2Theme {
+  background: linear-gradient(135deg, #043915 0%, #2a5520 100%);
+  color: #FFFD8F;
+}
+
+.loading_container.castle2Theme button {
+  background: rgba(76, 118, 59, 0.6);
+  border: 2px solid #B0CE88;
+  color: #FFFD8F;
+}
+
+.loading_container.castle2Theme button:hover {
+  background: rgba(76, 118, 59, 0.8);
+  border-color: #FFFD8F;
+  box-shadow: 0 0 15px rgba(255, 253, 143, 0.5);
+}
+
+.loading_container.castle3Theme {
+  background: linear-gradient(135deg, #143D60 0%, #27667B 100%);
+  color: #DDEB9D;
+}
+
+.loading_container.castle3Theme button {
+  background: rgba(38, 102, 123, 0.6);
+  border: 2px solid #A0C878;
+  color: #DDEB9D;
+}
+
+.loading_container.castle3Theme button:hover {
+  background: rgba(38, 102, 123, 0.8);
+  border-color: #DDEB9D;
+  box-shadow: 0 0 15px rgba(221, 235, 157, 0.5);
+}
+
+.loading_container.castle4Theme {
+  background: linear-gradient(135deg, #957C62 0%, #B77466 100%);
+  color: #FFE1AF;
+}
+
+.loading_container.castle4Theme button {
+  background: rgba(183, 116, 102, 0.6);
+  border: 2px solid #E2B59A;
+  color: #FFE1AF;
+}
+
+.loading_container.castle4Theme button:hover {
+  background: rgba(183, 116, 102, 0.8);
+  border-color: #FFE1AF;
+  box-shadow: 0 0 15px rgba(255, 225, 175, 0.5);
+}
+
+.loading_container.castle5Theme {
+  background: linear-gradient(135deg, #0B1D51 0%, #725CAD 100%);
+  color: #FFE3A9;
+}
+
+.loading_container.castle5Theme button {
+  background: rgba(114, 92, 173, 0.6);
+  border: 2px solid #8CCDEB;
+  color: #FFE3A9;
+}
+
+.loading_container.castle5Theme button:hover {
+  background: rgba(114, 92, 173, 0.8);
+  border-color: #FFE3A9;
+  box-shadow: 0 0 15px rgba(255, 227, 169, 0.5);
 }
 
 /* Responsive */

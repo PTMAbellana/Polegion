@@ -3,16 +3,22 @@ import api from './axios'
 // Get all castles with optional user progress
 export const getAllCastles = async (userId) => {
     try {
-        const endpoint = userId ? `castles?userId=${userId}` : 'castles'
+        // Add timestamp to bypass all caching layers
+        const timestamp = Date.now()
+        const endpoint = userId ? `castles?userId=${userId}&_t=${timestamp}` : `castles?_t=${timestamp}`
         console.log('[CastleAPI] Fetching from endpoint:', endpoint)
         
         // Bypass cache for user-specific castle data to ensure fresh progress
-        const config = userId ? {
+        const config = {
             cache: {
-                ttl: 0, // No caching for user-specific data
+                ttl: 0, // No caching
                 interpretHeader: false
+            },
+            headers: {
+                'Cache-Control': 'no-cache, no-store, must-revalidate',
+                'Pragma': 'no-cache'
             }
-        } : undefined
+        }
         
         const res = await api.get(endpoint, config)
         
@@ -20,7 +26,22 @@ export const getAllCastles = async (userId) => {
         return res.data.data || []
     } catch (error) {
         console.error('[CastleAPI] Error fetching castles:', error)
-        console.error('[CastleAPI] Error response:', error.response?.data)
+        console.error('[CastleAPI] Error name:', error.name)
+        console.error('[CastleAPI] Error message:', error.message)
+        
+        if (error.response) {
+            // Server responded with error status
+            console.error('[CastleAPI] Error response:', error.response.data)
+            console.error('[CastleAPI] Error status:', error.response.status)
+        } else if (error.request) {
+            // Request made but no response received
+            console.error('[CastleAPI] No response received from server')
+            console.error('[CastleAPI] Is backend running on', endpoint, '?')
+        } else {
+            // Error in request setup
+            console.error('[CastleAPI] Request setup error:', error.message)
+        }
+        
         throw error
     }
 }

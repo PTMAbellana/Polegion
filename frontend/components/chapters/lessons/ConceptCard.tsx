@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 import Image from 'next/image';
 
 interface ConceptCardProps {
@@ -24,8 +24,21 @@ const ConceptCard: React.FC<ConceptCardProps> = ({
   onClick,
   styleModule,
 }) => {
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  // Auto-scroll to highlighted card
+  useEffect(() => {
+    if (highlighted && cardRef.current) {
+      cardRef.current.scrollIntoView({
+        behavior: 'smooth',
+        block: 'nearest',
+      });
+    }
+  }, [highlighted]);
+
   return (
     <div
+      ref={cardRef}
       className={`${styleModule.conceptCard} ${
         highlighted ? styleModule.conceptCardHighlighted : ''
       } ${onClick ? styleModule.conceptCardClickable : ''}`}

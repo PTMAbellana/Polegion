@@ -1,28 +1,39 @@
 // Castle 4 - Chapter 2: The Drawing Chamber
 // Theme: Drawing polygons accurately
 
-export const CHAPTER2_OPENING_DIALOGUE = [
-  "Excellent work, polygon apprentice!",
-  "Now we enter the Drawing Chamber, where shapes come to life.",
-  "Here you will learn to draw polygons with precision.",
-  "The art of construction is the heart of geometry!"
+interface ChapterDialogue {
+  scene: 'opening' | 'lesson' | 'minigame';
+  text: string;
+  key?: string;
+  taskId?: string;
+}
+
+export const CHAPTER2_DIALOGUE: ChapterDialogue[] = [
+  { scene: 'opening', text: "Excellent work, polygon apprentice!" },
+  { scene: 'opening', text: "Now we enter the Drawing Chamber, where shapes come to life." },
+  { scene: 'opening', text: "Here you will learn to draw polygons with precision." },
+  { scene: 'opening', text: "The art of construction is the heart of geometry!" },
+  { scene: 'lesson', key: 'intro', text: "To draw a polygon, we must plan its sides and angles carefully.", taskId: 'task-0' },
+  { scene: 'lesson', key: 'triangle', text: "Drawing a TRIANGLE: Start with one side, then use a protractor to measure angles and draw the other two sides.", taskId: 'task-1' },
+  { scene: 'lesson', key: 'quadrilateral', text: "Drawing a QUADRILATERAL: Draw four connected sides. Remember, interior angles must sum to 360°!", taskId: 'task-2' },
+  { scene: 'lesson', key: 'pentagon', text: "Drawing a PENTAGON: Five sides require careful angle measurement. Each interior angle in a regular pentagon is 108°.", taskId: 'task-3' },
+  { scene: 'lesson', key: 'hexagon', text: "Drawing a HEXAGON: Six sides, each interior angle in a regular hexagon is 120°.", taskId: 'task-4' },
+  { scene: 'lesson', key: 'tools', text: "Use a ruler for straight sides and a protractor for precise angles!", taskId: 'task-5' },
+  { scene: 'lesson', key: 'practice', text: "Now draw polygons and bring them to life!" },
+  { scene: 'minigame', text: "The Drawing Master challenges you!" },
+  { scene: 'minigame', text: "Draw the requested polygon accurately." },
+  { scene: 'minigame', text: "Click to place vertices, following the instructions!" },
 ];
 
-export const CHAPTER2_LESSON_DIALOGUE = [
-  { key: 'intro', text: "To draw a polygon, we must plan its sides and angles carefully.", taskId: 'task-0' },
-  { key: 'triangle', text: "Drawing a TRIANGLE: Start with one side, then use a protractor to measure angles and draw the other two sides.", taskId: 'task-1' },
-  { key: 'quadrilateral', text: "Drawing a QUADRILATERAL: Draw four connected sides. Remember, interior angles must sum to 360°!", taskId: 'task-2' },
-  { key: 'pentagon', text: "Drawing a PENTAGON: Five sides require careful angle measurement. Each interior angle in a regular pentagon is 108°.", taskId: 'task-3' },
-  { key: 'hexagon', text: "Drawing a HEXAGON: Six sides, each interior angle in a regular hexagon is 120°.", taskId: 'task-4' },
-  { key: 'tools', text: "Use a ruler for straight sides and a protractor for precise angles!", taskId: 'task-5' },
-  { key: 'practice', text: "Now draw polygons and bring them to life!" }
-];
+export const CHAPTER2_SCENE_RANGES = {
+  opening: { start: 0, end: 3 },
+  lesson: { start: 4, end: 10 },
+  minigame: { start: 11, end: 13 },
+};
 
-export const CHAPTER2_MINIGAME_DIALOGUE = [
-  "The Drawing Master challenges you!",
-  "Draw the requested polygon accurately.",
-  "Click to place vertices, following the instructions!"
-];
+export const CHAPTER2_OPENING_DIALOGUE = CHAPTER2_DIALOGUE.filter(d => d.scene === 'opening').map(d => d.text);
+export const CHAPTER2_LESSON_DIALOGUE = CHAPTER2_DIALOGUE.filter(d => d.scene === 'lesson').map(d => ({ key: d.key || '', text: d.text, taskId: d.taskId }));
+export const CHAPTER2_MINIGAME_DIALOGUE = CHAPTER2_DIALOGUE.filter(d => d.scene === 'minigame').map(d => d.text);
 
 export const CHAPTER2_MINIGAME_LEVELS = [
   { id: 1, polygonType: 'triangle', instruction: 'Draw a triangle', hint: '3 connected vertices' },
@@ -83,13 +94,13 @@ export const CHAPTER2_LEARNING_OBJECTIVES = [
 
 export const CHAPTER2_XP_VALUES = {
   lesson: 60,
-  minigame: 65,
-  quiz1: 12,
-  quiz2: 12,
-  quiz3: 12,
-  quiz4: 12,
-  quiz5: 12,
-  total: 185,
+  minigame: 50,
+  quiz1: 23,
+  quiz2: 23,
+  quiz3: 23,
+  quiz4: 23,
+  quiz5: 23,
+  total: 225,
 };
 
 export const CHAPTER2_CASTLE_ID = '4e5f6a7b-8c9d-0e1f-2a3b-4c5d6e7f8a9b';

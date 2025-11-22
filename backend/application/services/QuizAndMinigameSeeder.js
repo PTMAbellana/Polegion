@@ -10,7 +10,31 @@ const {
     castle2Chapter2Quizzes,
     castle2Chapter2Minigames,
     castle2Chapter3Quizzes,
-    castle2Chapter3Minigames
+    castle2Chapter3Minigames,
+    castle2Chapter4Quizzes,
+    castle2Chapter4Minigames,
+    castle3Chapter1Quizzes,
+    castle3Chapter1Minigames,
+    castle3Chapter2Quizzes,
+    castle3Chapter2Minigames,
+    castle3Chapter3Quizzes,
+    castle3Chapter3Minigames,
+    castle4Chapter1Quizzes,
+    castle4Chapter1Minigames,
+    castle4Chapter2Quizzes,
+    castle4Chapter2Minigames,
+    castle4Chapter3Quizzes,
+    castle4Chapter3Minigames,
+    castle4Chapter4Quizzes,
+    castle4Chapter4Minigames,
+    castle5Chapter1Quizzes,
+    castle5Chapter1Minigames,
+    castle5Chapter2Quizzes,
+    castle5Chapter2Minigames,
+    castle5Chapter3Quizzes,
+    castle5Chapter3Minigames,
+    castle5Chapter4Quizzes,
+    castle5Chapter4Minigames
 } = require('../../infrastructure/seeds/chapterSeeds');
 
 // Mapping of castle and chapter to their respective seed data
@@ -24,6 +48,24 @@ const QUIZ_SEEDS = {
         1: castle2Chapter1Quizzes,
         2: castle2Chapter2Quizzes,
         3: castle2Chapter3Quizzes,
+        4: castle2Chapter4Quizzes,
+    },
+    3: { // Castle 3
+        1: castle3Chapter1Quizzes,
+        2: castle3Chapter2Quizzes,
+        3: castle3Chapter3Quizzes,
+    },
+    4: { // Castle 4
+        1: castle4Chapter1Quizzes,
+        2: castle4Chapter2Quizzes,
+        3: castle4Chapter3Quizzes,
+        4: castle4Chapter4Quizzes,
+    },
+    5: { // Castle 5
+        1: castle5Chapter1Quizzes,
+        2: castle5Chapter2Quizzes,
+        3: castle5Chapter3Quizzes,
+        4: castle5Chapter4Quizzes,
     }
 };
 
@@ -37,6 +79,24 @@ const MINIGAME_SEEDS = {
         1: castle2Chapter1Minigames,
         2: castle2Chapter2Minigames,
         3: castle2Chapter3Minigames,
+        4: castle2Chapter4Minigames,
+    },
+    3: { // Castle 3
+        1: castle3Chapter1Minigames,
+        2: castle3Chapter2Minigames,
+        3: castle3Chapter3Minigames,
+    },
+    4: { // Castle 4
+        1: castle4Chapter1Minigames,
+        2: castle4Chapter2Minigames,
+        3: castle4Chapter3Minigames,
+        4: castle4Chapter4Minigames,
+    },
+    5: { // Castle 5
+        1: castle5Chapter1Minigames,
+        2: castle5Chapter2Minigames,
+        3: castle5Chapter3Minigames,
+        4: castle5Chapter4Minigames,
     }
 };
 

@@ -1,29 +1,48 @@
 // Castle 3 - Chapter 3: The Chamber of Space
 // Theme: Area of circles using A = πr²
 
-export const CHAPTER3_OPENING_DIALOGUE = [
-  "Marvelous work! You have measured the circle's edge.",
-  "Now we enter the Chamber of Space, where a circular pool glows with starlight.",
-  "The AREA of a circle measures the space inside its boundary.",
-  "Let us discover the formula that reveals this inner realm!"
+interface ChapterDialogue {
+  scene: 'opening' | 'lesson' | 'minigame';
+  text: string;
+  key?: string;
+  taskId?: string;
+}
+
+// Unified dialogue array combining all scenes
+export const CHAPTER3_DIALOGUE: ChapterDialogue[] = [
+  // Opening scene (indices 0-3)
+  { scene: 'opening', text: "Marvelous work! You have measured the circle's edge." },
+  { scene: 'opening', text: "Now we enter the Chamber of Space, where a circular pool glows with starlight." },
+  { scene: 'opening', text: "The AREA of a circle measures the space inside its boundary." },
+  { scene: 'opening', text: "Let us discover the formula that reveals this inner realm!" },
+  
+  // Lesson scene (indices 4-11)
+  { scene: 'lesson', key: 'intro', text: "The AREA is the amount of space inside the circle.", taskId: 'task-0' },
+  { scene: 'lesson', key: 'formula', text: "The formula for the area of a circle is: A = πr²", taskId: 'task-1' },
+  { scene: 'lesson', key: 'squared', text: "Notice: We SQUARE the radius (r²), meaning r × r!", taskId: 'task-2' },
+  { scene: 'lesson', key: 'example1', text: "Example: If radius = 4 cm, then A = π(4²) = π(16) = 16π ≈ 50.3 cm²", taskId: 'task-3' },
+  { scene: 'lesson', key: 'semicircle', text: "A SEMI-CIRCLE is half of a circle. Its area is: A = πr²/2", taskId: 'task-4' },
+  { scene: 'lesson', key: 'example2', text: "Example: Semi-circle with radius 6 cm has area = π(36)/2 = 18π ≈ 56.5 cm²", taskId: 'task-5' },
+  { scene: 'lesson', key: 'sector-intro', text: "A SECTOR is a portion of the circle, like a slice of pie.", taskId: 'task-6' },
+  { scene: 'lesson', key: 'practice', text: "Now calculate areas and illuminate the Chamber of Space!" },
+  
+  // Minigame scene (indices 12-14)
+  { scene: 'minigame', text: "The starlight pool presents circular challenges!" },
+  { scene: 'minigame', text: "Calculate the area of each circle or semi-circle." },
+  { scene: 'minigame', text: "Use A = πr² or A = πr²/2. Round to 1 decimal place!" },
 ];
 
-export const CHAPTER3_LESSON_DIALOGUE = [
-  { key: 'intro', text: "The AREA is the amount of space inside the circle.", taskId: 'task-0' },
-  { key: 'formula', text: "The formula for the area of a circle is: A = πr²", taskId: 'task-1' },
-  { key: 'squared', text: "Notice: We SQUARE the radius (r²), meaning r × r!", taskId: 'task-2' },
-  { key: 'example1', text: "Example: If radius = 4 cm, then A = π(4²) = π(16) = 16π ≈ 50.3 cm²", taskId: 'task-3' },
-  { key: 'semicircle', text: "A SEMI-CIRCLE is half of a circle. Its area is: A = πr²/2", taskId: 'task-4' },
-  { key: 'example2', text: "Example: Semi-circle with radius 6 cm has area = π(36)/2 = 18π ≈ 56.5 cm²", taskId: 'task-5' },
-  { key: 'sector-intro', text: "A SECTOR is a portion of the circle, like a slice of pie.", taskId: 'task-6' },
-  { key: 'practice', text: "Now calculate areas and illuminate the Chamber of Space!" }
-];
+// Scene ranges for navigation
+export const CHAPTER3_SCENE_RANGES = {
+  opening: { start: 0, end: 3 },
+  lesson: { start: 4, end: 11 },
+  minigame: { start: 12, end: 14 },
+};
 
-export const CHAPTER3_MINIGAME_DIALOGUE = [
-  "The starlight pool presents circular challenges!",
-  "Calculate the area of each circle or semi-circle.",
-  "Use A = πr² or A = πr²/2. Round to 1 decimal place!"
-];
+// Legacy exports for backward compatibility
+export const CHAPTER3_OPENING_DIALOGUE = CHAPTER3_DIALOGUE.filter(d => d.scene === 'opening').map(d => d.text);
+export const CHAPTER3_LESSON_DIALOGUE = CHAPTER3_DIALOGUE.filter(d => d.scene === 'lesson').map(d => ({ key: d.key || '', text: d.text, taskId: d.taskId }));
+export const CHAPTER3_MINIGAME_DIALOGUE = CHAPTER3_DIALOGUE.filter(d => d.scene === 'minigame').map(d => d.text);
 
 export const CHAPTER3_MINIGAME_LEVELS = [
   { id: 1, radius: 3, isSemiCircle: false, correctAnswer: 28.3, instruction: 'Find area (radius = 3 cm)', hint: 'Use A = πr²' },
@@ -89,14 +108,14 @@ export const CHAPTER3_LEARNING_OBJECTIVES = [
 ];
 
 export const CHAPTER3_XP_VALUES = {
-  lesson: 60,
+  lesson: 110,
   minigame: 70,
-  quiz1: 12,
-  quiz2: 12,
-  quiz3: 12,
-  quiz4: 12,
-  quiz5: 12,
-  total: 190,
+  quiz1: 14,
+  quiz2: 14,
+  quiz3: 14,
+  quiz4: 14,
+  quiz5: 14,
+  total: 250,
 };
 
 export const CHAPTER3_CASTLE_ID = '3d4e5f6a-7b8c-9d0e-1f2a-3b4c5d6e7f8a';

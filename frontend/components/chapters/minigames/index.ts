@@ -1,11 +1,12 @@
 export { default as PointBasedMinigame } from './PointBasedMinigame';
 export { default as LineBasedMinigame } from './C1C2_LineBasedMinigame';
-export { default as ShapeBasedMinigame } from './ShapeBasedMinigame';
+export { default as ShapeBasedMinigame } from './C1C3_ShapeBasedMinigame';
 export { default as AreaCalculationMinigame } from './AreaCalculationMinigame';
 export { default as CirclePartsMinigame } from './CirclePartsMinigame';
 export { default as PerimeterMinigame } from './PerimeterMinigame';
 export { default as GeometryPhysicsGame } from './C1C1_GeometryPhysicsGame';
 export { default as AngleIdentificationMinigame } from './AngleIdentificationMinigame';
-export { default as AngleConstructorMinigame } from './AngleConstructorMinigame';
-export { default as ComplementarySupplementaryMinigame } from './ComplementarySupplementaryMinigame';
-export { default as WordProblemSolverMinigame } from './WordProblemSolverMinigame';
+export { default as AngleConstructorMinigame } from './C2C1_AngleConstructorMinigame';
+export { default as AngleRelationshipsMinigame } from './C2C2_AngleRelationshipsMinigame';
+export { default as ComplementarySupplementaryMinigame } from './C2C3_ComplementarySupplementaryMinigame';
+export { default as WordProblemSolverMinigame } from './C2C4_WordProblemSolverMinigame';

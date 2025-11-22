@@ -14,7 +14,7 @@ export interface GeometryLevel {
 }
 
 interface GeometryPhysicsGameProps {
-  level: GeometryLevel;
+  question: GeometryLevel;
   onComplete: (success: boolean) => void;
   styleModule: any;
 }
@@ -32,7 +32,7 @@ const BOX_WALL_THICKNESS = 8;
 const SUCCESS_TIMER_DURATION = 3000; // 3 seconds in milliseconds
 
 export default function GeometryPhysicsGame({
-  level,
+  question: level,
   onComplete,
   styleModule: styles,
 }: GeometryPhysicsGameProps) {

@@ -9,46 +9,24 @@ export default function CastleMarker({
   type,
   isSelected,
   isHovered,
-  animationDirection,
+  isAnimating,
   onClick,
   onMouseEnter,
   onMouseLeave,
 }: CastleMarkerProps) {
   const [imgError, setImgError] = useState(false)
 
-  // Determine animation classes based on type and direction
-  const getAnimationClass = () => {
-    if (!animationDirection) return '';
-    
-    if (animationDirection === 'right') {
-      // When moving right (clicking >):
-      // - Prev (CL) stays as side castle (no animation needed)
-      // - Current (CC) becomes prev - shrinks from center to side
-      // - Next (CR) becomes current - grows from side to center (handled by current_castle)
-      // - New next appears - grows from small to side
-      if (type === 'prev') return styles.shrinking_from_center; // This was the old current
-      if (type === 'next') return styles.appearing; // This is the new castle appearing
-    } else if (animationDirection === 'left') {
-      // When moving left (clicking <):
-      // - Prev (CL) becomes current - grows from side to center (handled by current_castle)
-      // - Current (CC) becomes next - shrinks from center to side
-      // - Next (CR) stays as side castle (no animation needed)
-      // - New prev appears - grows from small to side
-      if (type === 'prev') return styles.appearing; // This is the new castle appearing
-      if (type === 'next') return styles.shrinking_from_center; // This was the old current
-    }
-    
-    return '';
-  };
-
   const markerClasses = [
     styles.castle_marker,
-    type === 'current' ? styles.current_castle : styles.side_castle,
+    type === 'current'
+      ? styles.current_castle
+      : type === 'prev'
+      ? styles.prev_castle
+      : styles.next_castle,
     castle.progress?.unlocked ? styles.unlocked : styles.locked,
     castle.progress?.completed ? styles.completed : '',
     isSelected ? styles.selected : '',
     isHovered ? styles.hovered : '',
-    getAnimationClass(),
   ].filter(Boolean).join(' ')
 
   const getImagePath = () => {
@@ -72,6 +50,7 @@ export default function CastleMarker({
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
     >
+
       <div className={styles.castle_image_container}>
         <img
           src={getImagePath()}
@@ -80,6 +59,16 @@ export default function CastleMarker({
           draggable={false}
           onError={handleImageError}
         />
+        {/* Reflection */}
+        <div className={styles.castle_reflection_wrapper} aria-hidden="true">
+          <img
+            src={getImagePath()}
+            alt=""
+            className={`${styles.castle_image} ${styles.castle_reflection} ${!castle.progress?.unlocked ? styles.locked_filter : ''}`}
+            draggable={false}
+            onError={handleImageError}
+          />
+        </div>
       </div>
 
       {type === 'current' && (

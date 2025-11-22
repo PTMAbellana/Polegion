@@ -38,24 +38,68 @@ export default function WorldMapPage() {
   // Local UI state
   const [backgroundError, setBackgroundError] = useState(false);
   const [preloadedImages, setPreloadedImages] = useState<Set<number>>(new Set());
-  const [animationDirection, setAnimationDirection] = useState<'left' | 'right' | null>(null);
-
-  // Refs for touch/swipe and fetching
+  const [isTransitioning, setIsTransitioning] = useState(false); // Track if castles are transitioning
+  const [transitionDirection, setTransitionDirection] = useState<'left' | 'right' | null>(null);
+  const [preloadedCastleImages, setPreloadedCastleImages] = useState<Set<number>>(new Set());
+  const [backgroundCastleIndex, setBackgroundCastleIndex] = useState<number>(0);
+  const [bgUrlA, setBgUrlA] = useState<string>('');
+  const [bgUrlB, setBgUrlB] = useState<string>('');
+  const [bgLayer, setBgLayer] = useState<'A' | 'B'>('A');
+  
+  // Refs for touch/swipe, fetching, and animation
   const touchStartX = useRef<number>(0);
   const touchEndX = useRef<number>(0);
   const hasFetchedRef = useRef<boolean>(false);
   const lastUserIdRef = useRef<string | null>(null);
+  const animationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const whooshAudioRef = useRef<HTMLAudioElement | null>(null);
+
+  // Initialize audio
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      whooshAudioRef.current = new Audio('/audio/whoosh.mp3');
+      whooshAudioRef.current.volume = 0.5;
+      // Preload the audio
+      whooshAudioRef.current.load();
+    }
+  }, []);
 
   // Fetch castles on mount or when user changes
+  // Always refetch on mount to ensure fresh data
   useEffect(() => {
     const userId = userProfile?.id;
     
-    if (userId && (!hasFetchedRef.current || lastUserIdRef.current !== userId)) {
+    if (userId) {
       console.log('[WorldMap] Fetching castles for user:', userId);
       hasFetchedRef.current = true;
       lastUserIdRef.current = userId;
       fetchCastles(userId);
     }
+  }, [userProfile?.id, fetchCastles]);
+
+  // Refetch castles when page becomes visible (user returns from chapter)
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (!document.hidden && userProfile?.id) {
+        console.log('[WorldMap] Page visible - refetching castle data');
+        fetchCastles(userProfile.id);
+      }
+    };
+
+    const handleFocus = () => {
+      if (userProfile?.id) {
+        console.log('[WorldMap] Window focused - refetching castle data');
+        fetchCastles(userProfile.id);
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('focus', handleFocus);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('focus', handleFocus);
+    };
   }, [userProfile?.id, fetchCastles]);
 
   // Intro display - use user-specific localStorage key
@@ -87,6 +131,56 @@ export default function WorldMapPage() {
       
       img.onerror = () => {
         console.warn(`Background image not found for castle ${castle.image_number}`);
+      };
+    });
+  }, [castles]);
+
+
+
+  // Initialize first background
+  useEffect(() => {
+    if (castles.length === 0) return;
+    const initialCastle = castles[currentCastleIndex];
+    const url = `/images/castles/castle${initialCastle.image_number}-background.png`;
+    setBgUrlA(`url('${url}')`);
+    setBgLayer('A');
+  }, [castles]);
+
+  // Update background when castle index changes
+  useEffect(() => {
+    if (castles.length === 0) return;
+    const nextCastle = castles[currentCastleIndex];
+    const imgNumber = nextCastle.image_number;
+    const url = `url('/images/castles/castle${imgNumber}-background.png')`;
+
+    if (preloadedImages.has(imgNumber)) {
+      setBgLayer(prevLayer => {
+        if (prevLayer === 'A') {
+          setBgUrlB(url);
+          return 'B';
+        } else {
+          setBgUrlA(url);
+          return 'A';
+        }
+      });
+    }
+  }, [currentCastleIndex, preloadedImages, castles]);
+
+  // Preload ALL castle foreground images on mount
+  useEffect(() => {
+    if (castles.length === 0) return;
+
+    const loadedSet = new Set<number>();
+
+    castles.forEach((castle) => {
+      const img = new Image();
+      img.src = `/images/castles/castle${castle.image_number}.png`;
+      img.onload = () => {
+        loadedSet.add(castle.image_number);
+        setPreloadedCastleImages(new Set(loadedSet));
+      };
+      img.onerror = () => {
+        console.warn(`Foreground image not found for castle ${castle.image_number}`);
       };
     });
   }, [castles]);
@@ -126,21 +220,51 @@ export default function WorldMapPage() {
     }
   };
 
-  const goNext = useCallback(() => {
+  const playWhoosh = () => {
+    if (whooshAudioRef.current) {
+      whooshAudioRef.current.currentTime = 0;
+      whooshAudioRef.current.play().catch(err => console.log('Audio play failed:', err));
+    }
+  };
+
+  const triggerCastleAnimation = (currentIdx: number, direction: 'left' | 'right') => {
     if (castles.length === 0) return;
-    setAnimationDirection('right');
-    setCurrentCastleIndex((currentCastleIndex + 1) % castles.length);
+    
+    // Set transitioning state
+    setIsTransitioning(true);
+    setTransitionDirection(direction);
+    
+    // Play whoosh sound immediately when animation starts
+    playWhoosh();
+    
+    // Clear transitioning after animation completes (0.5s)
+    setTimeout(() => {
+      setIsTransitioning(false);
+      setTransitionDirection(null);
+    }, 500);
+  };
+
+  const goNext = useCallback(() => {
+    if (castles.length === 0 || isTransitioning) return;
+    const nextIndex = (currentCastleIndex + 1) % castles.length;
     setSelectedCastle(null);
-    setTimeout(() => setAnimationDirection(null), 500);
-  }, [castles.length, currentCastleIndex, setCurrentCastleIndex, setSelectedCastle]);
+    triggerCastleAnimation(nextIndex, 'left');
+    // Update index after a brief moment to allow animation to start
+    setTimeout(() => {
+      setCurrentCastleIndex(nextIndex);
+    }, 50);
+  }, [castles, currentCastleIndex, isTransitioning, setCurrentCastleIndex, setSelectedCastle]);
 
   const goPrev = useCallback(() => {
-    if (castles.length === 0) return;
-    setAnimationDirection('left');
-    setCurrentCastleIndex((currentCastleIndex - 1 + castles.length) % castles.length);
+    if (castles.length === 0 || isTransitioning) return;
+    const prevIndex = (currentCastleIndex - 1 + castles.length) % castles.length;
     setSelectedCastle(null);
-    setTimeout(() => setAnimationDirection(null), 500);
-  }, [castles.length, currentCastleIndex, setCurrentCastleIndex, setSelectedCastle]);
+    triggerCastleAnimation(prevIndex, 'right');
+    // Update index after a brief moment to allow animation to start
+    setTimeout(() => {
+      setCurrentCastleIndex(prevIndex);
+    }, 50);
+  }, [castles, currentCastleIndex, isTransitioning, setCurrentCastleIndex, setSelectedCastle]);
 
   // Keyboard navigation
   useEffect(() => {
@@ -158,10 +282,7 @@ export default function WorldMapPage() {
   }, [goPrev, goNext, selectedCastle]);
 
   const handleCastleClick = (castle: CastleWithProgress) => {
-    if (!castle.progress?.unlocked) {
-      return;
-    }
-    
+    // Allow navigation to any castle via side clicks
     if (castles[currentCastleIndex].id !== castle.id) {
       const newIndex = castles.findIndex(c => c.id === castle.id);
       if (newIndex !== -1) {
@@ -169,7 +290,10 @@ export default function WorldMapPage() {
         setSelectedCastle(null);
       }
     } else {
-      setSelectedCastle(selectedCastle?.id === castle.id ? null : castle);
+      // Only allow opening modal for unlocked current castle
+      if (castle.progress?.unlocked) {
+        setSelectedCastle(selectedCastle?.id === castle.id ? null : castle);
+      }
     }
   };
 
@@ -193,11 +317,11 @@ export default function WorldMapPage() {
       };
     }
 
-    const currentCastle = castles[currentCastleIndex];
-    const currentBackgroundImage = `/images/castles/castle${currentCastle.image_number}-background.png`;
+    const bgCastle = castles[backgroundCastleIndex];
+    const currentBackgroundImage = `/images/castles/castle${bgCastle.image_number}-background.png`;
 
     // Only show the image if it's preloaded, otherwise show gradient
-    const isImageLoaded = preloadedImages.has(currentCastle.image_number);
+    const isImageLoaded = preloadedImages.has(bgCastle.image_number);
     
     if (isImageLoaded && !backgroundError) {
       return {
@@ -215,7 +339,7 @@ export default function WorldMapPage() {
     };
 
     return {
-      backgroundImage: gradients[currentCastle.image_number] || gradients[1],
+      backgroundImage: gradients[bgCastle.image_number] || gradients[1],
     };
   };
 
@@ -257,15 +381,8 @@ export default function WorldMapPage() {
     );
   }
 
-  // Calculate carousel data
-  const prevIndex = (currentCastleIndex - 1 + castles.length) % castles.length;
-  const nextIndex = (currentCastleIndex + 1) % castles.length;
-
-  const castlesToDisplay = [
-    { castle: castles[prevIndex], type: 'prev' as const },
-    { castle: castles[currentCastleIndex], type: 'current' as const },
-    { castle: castles[nextIndex], type: 'next' as const },
-  ];
+  // Calculate carousel data - Show only current castle
+  const currentCastle = castles[currentCastleIndex];
 
   const stats = getCastleStats();
 
@@ -273,11 +390,18 @@ export default function WorldMapPage() {
     <div className={styles.world_map_page_container}>
       {showIntro && <WorldMapIntro onIntroComplete={handleIntroComplete} />}
       
-      {/* Dynamic Background */}
-      <div
-        className={styles.map_background}
-        style={getBackgroundStyle()}
-      />
+      {/* Dynamic Background Crossfade */}
+      <div className={styles.map_background_container}>
+        <div
+          className={`${styles.map_background_layer} ${bgLayer === 'A' ? styles.visible : ''}`}
+          style={{ backgroundImage: bgUrlA }}
+        />
+        <div
+          className={`${styles.map_background_layer} ${bgLayer === 'B' ? styles.visible : ''}`}
+          style={{ backgroundImage: bgUrlB }}
+        />
+        <div className={styles.map_background_overlay} />
+      </div>
 
       {/* Logo - Top Right */}
       <div className={styles.world_map_logo}>
@@ -288,49 +412,6 @@ export default function WorldMapPage() {
       <main className={styles.main_content}>
         {/* Carousel Section */}
         <div className={styles.carousel_section}>
-          {/* Carousel Indicators (Dots) */}
-          <div className={styles.carousel_indicators}>
-            {castles.map((castle, index) => {
-              // Castle theme colors (matching modal and stats)
-              const castleThemes: Record<number, { primary: string; secondary: string }> = {
-                1: { primary: '#3E5879', secondary: '#213555' },
-                2: { primary: '#4C763B', secondary: '#043915' },
-                3: { primary: '#27667B', secondary: '#143D60' },
-                4: { primary: '#B77466', secondary: '#957C62' },
-                5: { primary: '#6A4C93', secondary: '#2D1B4E' }
-              };
-              const theme = castleThemes[index + 1] || castleThemes[1];
-              const isActive = index === currentCastleIndex;
-
-              return (
-                <button
-                  key={castle.id}
-                  className={`${styles.indicator_dot} ${
-                    isActive ? styles.active : ''
-                  } ${castle.progress?.completed ? styles.completed : ''} ${
-                    castle.progress?.unlocked ? styles.unlocked : styles.locked
-                  }`}
-                  style={
-                    isActive
-                      ? {
-                          backgroundImage: `linear-gradient(135deg, ${theme.primary} 0%, ${theme.secondary} 100%)`,
-                          borderColor: theme.primary
-                        }
-                      : {}
-                  }
-                  onClick={() => {
-                    if (castle.progress?.unlocked) {
-                      setCurrentCastleIndex(index);
-                      setSelectedCastle(null);
-                    }
-                  }}
-                  aria-label={`Go to ${castle.name}`}
-                  title={castle.name}
-                />
-              );
-            })}
-          </div>
-
           {/* Carousel */}
           <div
             className={styles.carousel_container}
@@ -349,19 +430,50 @@ export default function WorldMapPage() {
             </button>
 
             <div className={styles.carousel_track}>
-              {castlesToDisplay.map(({ castle, type }) => (
+              {/* Previous Castle (left) */}
+              {castles.length > 0 && (
                 <CastleMarker
-                  key={`${castle.id}-${type}`}
-                  castle={castle}
-                  type={type}
-                  isSelected={selectedCastle?.id === castle.id}
-                  isHovered={hoveredCastle?.id === castle.id}
-                  animationDirection={animationDirection}
-                  onClick={() => handleCastleClick(castle)}
-                  onMouseEnter={() => setHoveredCastle(castle)}
+                  key={`prev`}
+                  castle={castles[(currentCastleIndex - 1 + castles.length) % castles.length]}
+                  type="prev"
+                  isSelected={selectedCastle?.id === castles[(currentCastleIndex - 1 + castles.length) % castles.length].id}
+                  isHovered={hoveredCastle?.id === castles[(currentCastleIndex - 1 + castles.length) % castles.length].id}
+                  isAnimating={isTransitioning}
+                  onClick={() => handleCastleClick(castles[(currentCastleIndex - 1 + castles.length) % castles.length])}
+                  onMouseEnter={() => setHoveredCastle(castles[(currentCastleIndex - 1 + castles.length) % castles.length])}
                   onMouseLeave={() => setHoveredCastle(null)}
                 />
-              ))}
+              )}
+              
+              {/* Current Castle (center) */}
+              {currentCastle && (
+                <CastleMarker
+                  key={`current`}
+                  castle={currentCastle}
+                  type="current"
+                  isSelected={selectedCastle?.id === currentCastle.id}
+                  isHovered={hoveredCastle?.id === currentCastle.id}
+                  isAnimating={isTransitioning}
+                  onClick={() => handleCastleClick(currentCastle)}
+                  onMouseEnter={() => setHoveredCastle(currentCastle)}
+                  onMouseLeave={() => setHoveredCastle(null)}
+                />
+              )}
+              
+              {/* Next Castle (right) */}
+              {castles.length > 0 && (
+                <CastleMarker
+                  key={`next`}
+                  castle={castles[(currentCastleIndex + 1) % castles.length]}
+                  type="next"
+                  isSelected={selectedCastle?.id === castles[(currentCastleIndex + 1) % castles.length].id}
+                  isHovered={hoveredCastle?.id === castles[(currentCastleIndex + 1) % castles.length].id}
+                  isAnimating={isTransitioning}
+                  onClick={() => handleCastleClick(castles[(currentCastleIndex + 1) % castles.length])}
+                  onMouseEnter={() => setHoveredCastle(castles[(currentCastleIndex + 1) % castles.length])}
+                  onMouseLeave={() => setHoveredCastle(null)}
+                />
+              )}
             </div>
 
             <button

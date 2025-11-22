@@ -7,21 +7,21 @@ const castle1Chapters = [
     {
         id: '0847c3d5-3f86-4c1e-9b05-464270295cd8',
         title: 'Chapter 1: The Point of Origin',
-        description: 'These are Points, the seeds of all geometry. Learn about points, lines, rays, and line segments through the Dot Dash mini-game.',
+        description: 'These are Points, the seeds of all geometry. Learn about points, lines, rays, and line segments.',
         chapter_number: 1,
         xp_reward: 100
     },
     {
         id: '69d21734-679b-45ea-9203-1dd15194e5cf',
         title: 'Chapter 2: Paths of Power',
-        description: "Navigate the tower's magical floating bridges and master parallel, intersecting, and perpendicular lines through the Line Labyrinth.",
+        description: "Navigate the tower's magical floating bridges and master parallel, intersecting, and perpendicular lines.",
         chapter_number: 2,
         xp_reward: 150
     },
     {
         id: 'c9b7a976-d466-4831-aacf-f8e0476f5153',
         title: 'Chapter 3: Shapes of the Spire',
-        description: 'Breathe life into geometric shapes! Identify and draw triangles, squares, rectangles, circles, and polygons in the Shape Summoner mini-game.',
+        description: 'Breathe life into geometric shapes! Identify and draw triangles, squares, rectangles, circles, and polygons.',
         chapter_number: 3,
         xp_reward: 200
     }
@@ -395,14 +395,14 @@ const castle2Chapters = [
     {
         id: 'f3a8b5c2-4d6e-7f8a-9b0c-1d2e3f4a5b6c',
         title: 'Chapter 1: The Hall of Rays',
-        description: 'Enter the Angles Sanctuary where beams of light form geometric angles. Learn to name and measure angles, and identify acute, right, obtuse, straight, and reflex angles.',
+        description: 'Enter the Polygon Citadel where beams of light form geometric angles. Learn to name and measure angles, and identify acute, right, obtuse, straight, and reflex angles.',
         chapter_number: 1,
         xp_reward: 150
     },
     {
         id: 'a7b8c9d0-1e2f-3a4b-5c6d-7e8f9a0b1c2d',
-        title: 'Chapter 2: The Chamber of Construction',
-        description: 'Master the art of constructing angles using a protractor. Draw angles of specific measures and identify congruent angles that share the same measurement.',
+        title: 'Chapter 2: The Point of Convergence',
+        description: 'Discover how angles relate when lines intersect. Master vertical angles, linear pairs, and angles around a point to solve geometric puzzles.',
         chapter_number: 2,
         xp_reward: 150
     },
@@ -442,28 +442,28 @@ const castle2Chapter1Quizzes = [
                     question: 'An angle that measures exactly 90° is called:',
                     options: ['Acute angle', 'Right angle', 'Obtuse angle', 'Straight angle'],
                     correctAnswer: 'Right angle',
-                    points: 20
+                    points: 15
                 },
                 {
                     id: 'q2',
                     question: 'An angle that measures less than 90° is called:',
                     options: ['Acute angle', 'Right angle', 'Obtuse angle', 'Reflex angle'],
                     correctAnswer: 'Acute angle',
-                    points: 20
+                    points: 15
                 },
                 {
                     id: 'q3',
                     question: 'An angle that measures between 90° and 180° is called:',
                     options: ['Acute angle', 'Right angle', 'Obtuse angle', 'Straight angle'],
                     correctAnswer: 'Obtuse angle',
-                    points: 25
+                    points: 15
                 },
                 {
                     id: 'q4',
                     question: 'An angle that measures exactly 180° is called:',
                     options: ['Obtuse angle', 'Straight angle', 'Reflex angle', 'Complete angle'],
                     correctAnswer: 'Straight angle',
-                    points: 20
+                    points: 15
                 },
                 {
                     id: 'q5',
@@ -479,57 +479,75 @@ const castle2Chapter1Quizzes = [
 ];
 
 // ============================================================================
-// CASTLE 2 - CHAPTER 1 - MINIGAMES (Angle Identifier)
+// CASTLE 2 - CHAPTER 1 - MINIGAMES (Angle Constructor)
 // ============================================================================
 
 const castle2Chapter1Minigames = [
     {
         id: 'b2c3d4e5-6789-abcd-ef01-234567890001',
         chapter_id: 'f3a8b5c2-4d6e-7f8a-9b0c-1d2e3f4a5b6c',
-        title: 'Angle Identifier',
-        description: 'Measure angles using a protractor and classify them by type',
+        title: 'Angle Constructor',
+        description: 'Construct angles by dragging the ray to match the target angle',
         game_type: 'interactive',
         xp_reward: 40,
         time_limit: null,
         order_index: 1,
         game_config: {
-            instructions: 'Look at the angle and identify what type it is!',
-            rounds: [
+            instructions: 'Drag the ray to construct the angle shown. Click Submit when ready!',
+            questions: [
                 {
-                    id: 'round1',
-                    angleMeasure: 45,
+                    id: 'mg1',
+                    instruction: 'Construct a 45° acute angle by dragging the ray. Click Submit when ready!',
+                    targetAngle: 45,
+                    tolerance: 5,
                     angleType: 'acute',
-                    hint: 'Think about how many degrees this angle has'
+                    name: 'Acute Angle',
+                    description: 'Less than 90°'
                 },
                 {
-                    id: 'round2',
-                    angleMeasure: 90,
+                    id: 'mg2',
+                    instruction: 'Construct a perfect 90° right angle. Precision is key!',
+                    targetAngle: 90,
+                    tolerance: 3,
                     angleType: 'right',
-                    hint: 'Look carefully at the corner formed by these two rays'
+                    name: 'Right Angle',
+                    description: 'Exactly 90°'
                 },
                 {
-                    id: 'round3',
-                    angleMeasure: 135,
+                    id: 'mg3',
+                    instruction: 'Construct a 135° obtuse angle. Make it wide!',
+                    targetAngle: 135,
+                    tolerance: 5,
                     angleType: 'obtuse',
-                    hint: 'Compare this angle to a right angle'
+                    name: 'Obtuse Angle',
+                    description: 'Between 90° and 180°'
                 },
                 {
-                    id: 'round4',
-                    angleMeasure: 180,
+                    id: 'mg4',
+                    instruction: 'Construct a perfectly straight 180° angle!',
+                    targetAngle: 180,
+                    tolerance: 3,
                     angleType: 'straight',
-                    hint: 'What do you notice about how the two rays are positioned?'
+                    name: 'Straight Angle',
+                    description: 'Exactly 180°'
                 },
                 {
-                    id: 'round5',
-                    angleMeasure: 60,
+                    id: 'mg5',
+                    instruction: 'Construct a 60° acute angle!',
+                    targetAngle: 60,
+                    tolerance: 5,
                     angleType: 'acute',
-                    hint: 'Is this angle smaller or larger than a right angle?'
+                    name: 'Acute Angle',
+                    description: 'Less than 90°'
                 },
                 {
-                    id: 'round6',
-                    angleMeasure: 120,
+                    id: 'mg6',
+                    instruction: 'Construct a 120° obtuse angle!',
+                    targetAngle: 120,
+                    tolerance: 5,
                     angleType: 'obtuse',
-                    hint: 'Compare the size of this angle opening'
+                    name: 'Obtuse Angle',
+                    description: 'Between 90° and 180°'
                 }
             ]
         }
@@ -544,8 +562,8 @@ const castle2Chapter2Quizzes = [
     {
         id: 'c3d4e5f6-789a-bcde-f012-345678900002',
         chapter_id: 'a7b8c9d0-1e2f-3a4b-5c6d-7e8f9a0b1c2d',
-        title: 'Angle Construction & Congruence Quiz',
-        description: 'Test your understanding of constructing and identifying congruent angles',
+        title: 'Angle Relationships Quiz',
+        description: 'Test your understanding of vertical angles, linear pairs, and angles around a point',
         xp_reward: 75,
         passing_score: 70,
         time_limit: null,
@@ -553,38 +571,38 @@ const castle2Chapter2Quizzes = [
             questions: [
                 {
                     id: 'q1',
-                    question: 'Two angles are congruent if they have:',
-                    options: ['The same measure', 'The same shape', 'Different measures', 'Different vertices'],
-                    correctAnswer: 'The same measure',
-                    points: 20
+                    question: 'Vertical angles are:',
+                    options: ['Always equal', 'Always complementary', 'Always supplementary', 'Always 90°'],
+                    correctAnswer: 'Always equal',
+                    points: 15
                 },
                 {
                     id: 'q2',
-                    question: 'Which tool is used to measure and construct angles?',
-                    options: ['Compass', 'Protractor', 'Ruler', 'Calculator'],
-                    correctAnswer: 'Protractor',
+                    question: 'Two angles that form a linear pair add up to:',
+                    options: ['90°', '180°', '270°', '360°'],
+                    correctAnswer: '180°',
                     points: 15
                 },
                 {
                     id: 'q3',
-                    question: 'If ∠A = 65° and ∠B = 65°, what can we say about these angles?',
-                    options: ['They are supplementary', 'They are complementary', 'They are congruent', 'They are perpendicular'],
-                    correctAnswer: 'They are congruent',
-                    points: 25
+                    question: 'All angles around a point sum to:',
+                    options: ['90°', '180°', '270°', '360°'],
+                    correctAnswer: '360°',
+                    points: 15
                 },
                 {
                     id: 'q4',
-                    question: 'To construct a 45° angle, you would place your protractor and mark at:',
-                    options: ['30°', '45°', '60°', '90°'],
-                    correctAnswer: '45°',
-                    points: 20
+                    question: 'If one angle at an intersection is 75°, its vertical angle is:',
+                    options: ['15°', '75°', '105°', '285°'],
+                    correctAnswer: '75°',
+                    points: 15
                 },
                 {
                     id: 'q5',
-                    question: 'Which pair of angles are congruent?',
-                    options: ['30° and 60°', '45° and 45°', '90° and 180°', '120° and 60°'],
-                    correctAnswer: '45° and 45°',
-                    points: 20
+                    question: 'If three angles around a point are 80°, 120°, and 95°, the fourth angle is:',
+                    options: ['65°', '75°', '85°', '95°'],
+                    correctAnswer: '65°',
+                    points: 15
                 }
             ]
         }
@@ -592,63 +610,69 @@ const castle2Chapter2Quizzes = [
 ];
 
 // ============================================================================
-// CASTLE 2 - CHAPTER 2 - MINIGAMES (Angle Constructor)
+// CASTLE 2 - CHAPTER 2 - MINIGAMES (Angle Relationships)
 // ============================================================================
 
 const castle2Chapter2Minigames = [
     {
         id: 'd4e5f6a7-89ab-cdef-0123-456789000002',
         chapter_id: 'a7b8c9d0-1e2f-3a4b-5c6d-7e8f9a0b1c2d',
-        title: 'Angle Constructor',
-        description: 'Use the protractor to construct angles with specific measures',
+        title: 'Angle Relationships Solver',
+        description: 'Find missing angles using vertical angles, linear pairs, and angles around a point',
         game_type: 'interactive',
         xp_reward: 40,
         time_limit: null,
         order_index: 1,
         game_config: {
-            instructions: 'Construct the angle by rotating the ray to the correct degree!',
+            instructions: 'Find the missing angle using angle relationships!',
             questions: [
                 {
                     id: 'mg1',
-                    instruction: 'Construct a 30° angle',
-                    targetAngle: 30,
-                    tolerance: 3,
-                    hint: 'Use the protractor to measure 30°'
+                    instruction: 'Find the vertical angle',
+                    type: 'vertical-angles',
+                    givenAngles: [65],
+                    correctAnswer: 65,
+                    hint: 'Vertical angles are equal!'
                 },
                 {
                     id: 'mg2',
-                    instruction: 'Construct a 60° angle',
-                    targetAngle: 60,
-                    tolerance: 3,
-                    hint: 'Look for 60° on the protractor scale'
+                    instruction: 'Find the linear pair angle',
+                    type: 'linear-pair',
+                    givenAngles: [110],
+                    correctAnswer: 70,
+                    hint: 'Linear pair angles add to 180°'
                 },
                 {
                     id: 'mg3',
-                    instruction: 'Construct a 90° angle (right angle)',
-                    targetAngle: 90,
-                    tolerance: 2,
-                    hint: 'A right angle is exactly 90°'
+                    instruction: 'Find the missing angle around the point',
+                    type: 'around-point',
+                    givenAngles: [80, 120, 90],
+                    correctAnswer: 70,
+                    hint: 'All angles around a point = 360°'
                 },
                 {
                     id: 'mg4',
-                    instruction: 'Construct a 135° angle',
-                    targetAngle: 135,
-                    tolerance: 3,
-                    hint: 'This is between 90° and 180°'
+                    instruction: 'Find the vertical angle',
+                    type: 'vertical-angles',
+                    givenAngles: [135],
+                    correctAnswer: 135,
+                    hint: 'Remember: vertical angles are always equal!'
                 },
                 {
                     id: 'mg5',
-                    instruction: 'Construct a 45° angle',
-                    targetAngle: 45,
-                    tolerance: 3,
-                    hint: 'Exactly half of a right angle'
+                    instruction: 'Find the linear pair angle',
+                    type: 'linear-pair',
+                    givenAngles: [45],
+                    correctAnswer: 135,
+                    hint: '180° - 45° = ?'
                 },
                 {
                     id: 'mg6',
-                    instruction: 'Construct a 120° angle',
-                    targetAngle: 120,
-                    tolerance: 3,
-                    hint: 'An obtuse angle measuring 120°'
+                    instruction: 'Find the missing angle',
+                    type: 'around-point',
+                    givenAngles: [95, 105, 85],
+                    correctAnswer: 75,
+                    hint: 'Add the given angles, then subtract from 360°'
                 }
             ]
         }
@@ -675,21 +699,21 @@ const castle2Chapter3Quizzes = [
                     question: 'Two angles are complementary if their sum equals:',
                     options: ['45°', '90°', '180°', '360°'],
                     correctAnswer: '90°',
-                    points: 20
+                    points: 15
                 },
                 {
                     id: 'q2',
                     question: 'Two angles are supplementary if their sum equals:',
                     options: ['90°', '120°', '180°', '360°'],
                     correctAnswer: '180°',
-                    points: 20
+                    points: 15
                 },
                 {
                     id: 'q3',
                     question: 'If one angle measures 35°, what is its complement?',
                     options: ['45°', '55°', '65°', '145°'],
                     correctAnswer: '55°',
-                    points: 25,
+                    points: 15,
                     hint: '90° - 35° = ?'
                 },
                 {
@@ -697,7 +721,7 @@ const castle2Chapter3Quizzes = [
                     question: 'If one angle measures 120°, what is its supplement?',
                     options: ['30°', '60°', '90°', '180°'],
                     correctAnswer: '60°',
-                    points: 25,
+                    points: 15,
                     hint: '180° - 120° = ?'
                 },
                 {
@@ -705,7 +729,7 @@ const castle2Chapter3Quizzes = [
                     question: 'Two angles measure 45° and 45°. What relationship do they have?',
                     options: ['Complementary', 'Supplementary', 'Both complementary and congruent', 'Neither'],
                     correctAnswer: 'Both complementary and congruent',
-                    points: 10,
+                    points: 15,
                     hint: '45° + 45° = 90° and they have equal measure'
                 }
             ]
@@ -803,7 +827,7 @@ const castle2Chapter4Quizzes = [
                     question: 'Two complementary angles are in the ratio 1:2. What are their measures?',
                     options: ['20° and 40°', '30° and 60°', '45° and 45°', '25° and 50°'],
                     correctAnswer: '30° and 60°',
-                    points: 30,
+                    points: 15,
                     hint: 'Let angles be x and 2x, then x + 2x = 90°'
                 },
                 {
@@ -811,7 +835,7 @@ const castle2Chapter4Quizzes = [
                     question: 'The supplement of an angle is three times the angle. Find the angle.',
                     options: ['30°', '45°', '60°', '90°'],
                     correctAnswer: '45°',
-                    points: 35,
+                    points: 15,
                     hint: 'Let angle be x, then 180° - x = 3x'
                 },
                 {
@@ -819,8 +843,24 @@ const castle2Chapter4Quizzes = [
                     question: 'An angle is 20° more than its complement. Find the angle.',
                     options: ['45°', '50°', '55°', '70°'],
                     correctAnswer: '55°',
-                    points: 35,
+                    points: 15,
                     hint: 'Let angle be x, then x = (90° - x) + 20°'
+                },
+                {
+                    id: 'q4',
+                    question: 'Two angles are supplementary. One angle is 4 times the other. Find the smaller angle.',
+                    options: ['30°', '36°', '40°', '45°'],
+                    correctAnswer: '36°',
+                    points: 15,
+                    hint: 'Let smaller angle be x, then x + 4x = 180°'
+                },
+                {
+                    id: 'q5',
+                    question: 'The complement of an angle is 15° less than twice the angle. Find the angle.',
+                    options: ['30°', '35°', '40°', '45°'],
+                    correctAnswer: '35°',
+                    points: 15,
+                    hint: 'Let angle be x, then 90° - x = 2x - 15°'
                 }
             ]
         }
@@ -940,14 +980,14 @@ const castle3Chapter1Quizzes = [
                         'The edge of the circle'
                     ],
                     correctAnswer: 'The point equidistant from all points on the circle',
-                    points: 20
+                    points: 10
                 },
                 {
                     id: 'q2',
                     question: 'Which part of a circle is a line segment from the center to any point on the circle?',
                     options: ['Radius', 'Diameter', 'Chord', 'Arc'],
                     correctAnswer: 'Radius',
-                    points: 15
+                    points: 10
                 },
                 {
                     id: 'q3',
@@ -959,7 +999,7 @@ const castle3Chapter1Quizzes = [
                         'Diameter = Radius × 3'
                     ],
                     correctAnswer: 'Diameter = 2 × Radius',
-                    points: 20
+                    points: 10
                 },
                 {
                     id: 'q4',
@@ -971,7 +1011,7 @@ const castle3Chapter1Quizzes = [
                         'The distance around the circle'
                     ],
                     correctAnswer: 'A line segment connecting two points on the circle',
-                    points: 15
+                    points: 10
                 },
                 {
                     id: 'q5',
@@ -983,19 +1023,7 @@ const castle3Chapter1Quizzes = [
                         'A radius doubled'
                     ],
                     correctAnswer: 'A curved portion of the circle',
-                    points: 15
-                },
-                {
-                    id: 'q6',
-                    question: 'A sector is:',
-                    options: [
-                        'A pie-shaped region between two radii and an arc',
-                        'A straight line',
-                        'The same as a chord',
-                        'Half of the diameter'
-                    ],
-                    correctAnswer: 'A pie-shaped region between two radii and an arc',
-                    points: 15
+                    points: 10
                 }
             ]
         }
@@ -1088,14 +1116,14 @@ const castle3Chapter2Quizzes = [
                     question: 'What is the formula for the circumference of a circle using radius?',
                     options: ['C = 2πr', 'C = πr²', 'C = πd', 'C = 2r'],
                     correctAnswer: 'C = 2πr',
-                    points: 15
+                    points: 12
                 },
                 {
                     id: 'q2',
                     question: 'A circle has a radius of 5 cm. What is its circumference? (Use π = 3.14)',
                     options: ['31.4 cm', '15.7 cm', '78.5 cm', '10 cm'],
                     correctAnswer: '31.4 cm',
-                    points: 25,
+                    points: 12,
                     hint: 'C = 2πr = 2 × 3.14 × 5'
                 },
                 {
@@ -1103,7 +1131,7 @@ const castle3Chapter2Quizzes = [
                     question: 'A circle has a diameter of 14 cm. What is its circumference? (Use π = 3.14)',
                     options: ['43.96 cm', '21.98 cm', '153.86 cm', '28 cm'],
                     correctAnswer: '43.96 cm',
-                    points: 25,
+                    points: 12,
                     hint: 'C = πd = 3.14 × 14'
                 },
                 {
@@ -1111,7 +1139,7 @@ const castle3Chapter2Quizzes = [
                     question: 'If a circle has a radius of 7 cm, what is its diameter?',
                     options: ['14 cm', '7 cm', '3.5 cm', '21 cm'],
                     correctAnswer: '14 cm',
-                    points: 15,
+                    points: 12,
                     hint: 'Diameter = 2 × Radius'
                 },
                 {
@@ -1119,7 +1147,7 @@ const castle3Chapter2Quizzes = [
                     question: 'Which formula uses diameter to find circumference?',
                     options: ['C = πd', 'C = 2πr', 'C = πr²', 'C = d²'],
                     correctAnswer: 'C = πd',
-                    points: 20
+                    points: 12
                 }
             ]
         }
@@ -1209,14 +1237,14 @@ const castle3Chapter3Quizzes = [
                     question: 'What is the formula for the area of a circle?',
                     options: ['A = πr²', 'A = 2πr', 'A = πd', 'A = r²'],
                     correctAnswer: 'A = πr²',
-                    points: 15
+                    points: 14
                 },
                 {
                     id: 'q2',
                     question: 'Find the area of a circle with radius 7 cm (Use π = 3.14)',
                     options: ['153.86 cm²', '43.96 cm²', '49 cm²', '98 cm²'],
                     correctAnswer: '153.86 cm²',
-                    points: 25,
+                    points: 14,
                     hint: 'A = πr² = 3.14 × 7²'
                 },
                 {
@@ -1224,7 +1252,7 @@ const castle3Chapter3Quizzes = [
                     question: 'A circle has a radius of 5 cm. What is its area? (Use π = 3.14)',
                     options: ['78.5 cm²', '31.4 cm²', '25 cm²', '15.7 cm²'],
                     correctAnswer: '78.5 cm²',
-                    points: 25,
+                    points: 14,
                     hint: 'A = πr² = 3.14 × 5²'
                 },
                 {
@@ -1232,7 +1260,7 @@ const castle3Chapter3Quizzes = [
                     question: 'What is the area of a semi-circle with radius 4 cm? (Use π = 3.14)',
                     options: ['25.12 cm²', '50.24 cm²', '12.56 cm²', '16 cm²'],
                     correctAnswer: '25.12 cm²',
-                    points: 30,
+                    points: 14,
                     hint: 'Semi-circle area = (πr²) ÷ 2 = (3.14 × 16) ÷ 2'
                 },
                 {
@@ -1245,7 +1273,7 @@ const castle3Chapter3Quizzes = [
                         'None of the above'
                     ],
                     correctAnswer: 'Diameter = twice the radius',
-                    points: 15
+                    points: 14
                 }
             ]
         }
@@ -1373,28 +1401,28 @@ const castle4Chapter1Quizzes = [
                     question: 'How many sides does a pentagon have?',
                     options: ['4 sides', '5 sides', '6 sides', '7 sides'],
                     correctAnswer: '5 sides',
-                    points: 15
+                    points: 20
                 },
                 {
                     id: 'q2',
                     question: 'What is a polygon with 8 sides called?',
                     options: ['Hexagon', 'Heptagon', 'Octagon', 'Nonagon'],
                     correctAnswer: 'Octagon',
-                    points: 15
+                    points: 20
                 },
                 {
                     id: 'q3',
                     question: 'Two polygons are congruent if they have:',
                     options: ['Same shape only', 'Same size only', 'Same shape and same size', 'Different shapes'],
                     correctAnswer: 'Same shape and same size',
-                    points: 25
+                    points: 20
                 },
                 {
                     id: 'q4',
                     question: 'Two polygons are similar if they have:',
                     options: ['Same shape but different sizes', 'Different shapes', 'Same perimeter', 'Same area'],
                     correctAnswer: 'Same shape but different sizes',
-                    points: 25
+                    points: 20
                 },
                 {
                     id: 'q5',
@@ -1494,28 +1522,28 @@ const castle4Chapter2Quizzes = [
                     question: 'To draw a regular pentagon, all sides must be:',
                     options: ['Different lengths', 'Equal length', 'Parallel', 'Perpendicular'],
                     correctAnswer: 'Equal length',
-                    points: 20
+                    points: 23
                 },
                 {
                     id: 'q2',
                     question: 'Which tool is most useful for drawing accurate polygons?',
                     options: ['Only a pencil', 'Ruler and protractor', 'Compass only', 'Eraser'],
                     correctAnswer: 'Ruler and protractor',
-                    points: 20
+                    points: 23
                 },
                 {
                     id: 'q3',
                     question: 'A quadrilateral MUST have:',
                     options: ['3 sides', '4 sides', '5 sides', 'All equal sides'],
                     correctAnswer: '4 sides',
-                    points: 25
+                    points: 23
                 },
                 {
                     id: 'q4',
                     question: 'When drawing a regular hexagon, each interior angle measures:',
                     options: ['90°', '108°', '120°', '135°'],
                     correctAnswer: '120°',
-                    points: 35,
+                    points: 23,
                     hint: 'Sum of angles = 720°, divided by 6 sides'
                 },
                 {
@@ -1523,7 +1551,7 @@ const castle4Chapter2Quizzes = [
                     question: 'Which statement about drawing polygons is TRUE?',
                     options: ['All polygons have curved sides', 'Polygons must be closed shapes', 'Polygons can have 2 sides', 'All polygons are regular'],
                     correctAnswer: 'Polygons must be closed shapes',
-                    points: 15
+                    points: 23
                 }
             ]
         }
@@ -1614,14 +1642,14 @@ const castle4Chapter3Quizzes = [
                     question: 'What is the formula for finding the sum of interior angles of a polygon?',
                     options: ['n × 180°', '(n-2) × 180°', '(n+2) × 180°', 'n × 90°'],
                     correctAnswer: '(n-2) × 180°',
-                    points: 20
+                    points: 23
                 },
                 {
                     id: 'q2',
                     question: 'What is the sum of interior angles in a quadrilateral?',
                     options: ['180°', '270°', '360°', '540°'],
                     correctAnswer: '360°',
-                    points: 25,
+                    points: 23,
                     hint: '(4-2) × 180° = ?'
                 },
                 {
@@ -1629,7 +1657,7 @@ const castle4Chapter3Quizzes = [
                     question: 'What is the sum of interior angles in a hexagon?',
                     options: ['540°', '720°', '900°', '1080°'],
                     correctAnswer: '720°',
-                    points: 30,
+                    points: 23,
                     hint: '(6-2) × 180° = ?'
                 },
                 {
@@ -1637,8 +1665,16 @@ const castle4Chapter3Quizzes = [
                     question: 'Each interior angle of a regular pentagon measures:',
                     options: ['90°', '108°', '120°', '135°'],
                     correctAnswer: '108°',
-                    points: 40,
+                    points: 23,
                     hint: 'Sum = 540°, divide by 5 sides'
+                },
+                {
+                    id: 'q5',
+                    question: 'What is the sum of interior angles in an octagon?',
+                    options: ['720°', '900°', '1080°', '1260°'],
+                    correctAnswer: '1080°',
+                    points: 23,
+                    hint: '(8-2) × 180° = ?'
                 }
             ]
         }
@@ -1747,7 +1783,7 @@ const castle4Chapter4Quizzes = [
                     question: 'What is the area of a triangle with base 10 cm and height 6 cm?',
                     options: ['16 cm²', '30 cm²', '60 cm²', '20 cm²'],
                     correctAnswer: '30 cm²',
-                    points: 30,
+                    points: 25,
                     hint: 'Area = ½ × base × height'
                 },
                 {
@@ -1755,7 +1791,7 @@ const castle4Chapter4Quizzes = [
                     question: 'The area of a parallelogram with base 8 cm and height 4 cm is:',
                     options: ['12 cm²', '24 cm²', '32 cm²', '48 cm²'],
                     correctAnswer: '32 cm²',
-                    points: 30,
+                    points: 25,
                     hint: 'Area = base × height'
                 },
                 {
@@ -1763,7 +1799,7 @@ const castle4Chapter4Quizzes = [
                     question: 'A trapezoid has parallel sides of 6 cm and 10 cm, and height 4 cm. What is its area?',
                     options: ['24 cm²', '32 cm²', '40 cm²', '64 cm²'],
                     correctAnswer: '32 cm²',
-                    points: 15,
+                    points: 25,
                     hint: 'Area = ½ × (sum of parallel sides) × height'
                 }
             ]
@@ -1924,14 +1960,21 @@ const castle5Chapter1Quizzes = [
                     question: 'What is the main difference between 2D and 3D shapes?',
                     options: ['2D shapes have color', '3D shapes have depth/volume', '2D shapes are larger', '3D shapes have fewer sides'],
                     correctAnswer: '3D shapes have depth/volume',
-                    points: 30
+                    points: 20
                 },
                 {
                     id: 'q4',
                     question: 'A prism is a type of:',
                     options: ['Plane figure', 'Solid figure', '2D shape', 'Line segment'],
                     correctAnswer: 'Solid figure',
-                    points: 30
+                    points: 20
+                },
+                {
+                    id: 'q5',
+                    question: 'Which shape exists only in 2D space?',
+                    options: ['Cone', 'Pentagon', 'Cube', 'Cylinder'],
+                    correctAnswer: 'Pentagon',
+                    points: 20
                 }
             ]
         }
@@ -2004,7 +2047,7 @@ const castle5Chapter2Quizzes = [
                     question: 'The area of a triangle with base 10 cm and height 6 cm is:',
                     options: ['30 cm²', '60 cm²', '16 cm²', '20 cm²'],
                     correctAnswer: '30 cm²',
-                    points: 30,
+                    points: 25,
                     hint: 'A = ½ × base × height'
                 },
                 {
@@ -2012,8 +2055,16 @@ const castle5Chapter2Quizzes = [
                     question: 'A parallelogram has base 8 m and height 5 m. What is its area?',
                     options: ['13 m²', '26 m²', '40 m²', '80 m²'],
                     correctAnswer: '40 m²',
-                    points: 40,
+                    points: 25,
                     hint: 'A = base × height'
+                },
+                {
+                    id: 'q5',
+                    question: 'Find the area of a circle with radius 5 cm. (Use π = 3.14)',
+                    options: ['15.7 cm²', '31.4 cm²', '78.5 cm²', '157 cm²'],
+                    correctAnswer: '78.5 cm²',
+                    points: 25,
+                    hint: 'A = πr² = 3.14 × 5²'
                 }
             ]
         }
@@ -2087,7 +2138,7 @@ const castle5Chapter3Quizzes = [
                     question: 'Find the surface area of a cube with edge length 5 cm.',
                     options: ['25 cm²', '100 cm²', '125 cm²', '150 cm²'],
                     correctAnswer: '150 cm²',
-                    points: 30,
+                    points: 25,
                     hint: 'SA = 6s² = 6 × 5²'
                 },
                 {
@@ -2095,15 +2146,30 @@ const castle5Chapter3Quizzes = [
                     question: 'The formula for surface area of a rectangular prism is:',
                     options: ['SA = lwh', 'SA = 2(lw + lh + wh)', 'SA = l + w + h', 'SA = πr²h'],
                     correctAnswer: 'SA = 2(lw + lh + wh)',
-                    points: 30
+                    points: 25
                 },
                 {
                     id: 'q3',
                     question: 'A cylinder has radius 3 cm and height 8 cm. What is its surface area? (Use π = 3.14)',
                     options: ['150.72 cm²', '207.24 cm²', '75.36 cm²', '226.08 cm²'],
                     correctAnswer: '207.24 cm²',
-                    points: 40,
+                    points: 25,
                     hint: 'SA = 2πr² + 2πrh'
+                },
+                {
+                    id: 'q4',
+                    question: 'Find the surface area of a rectangular prism with length 6 cm, width 4 cm, and height 3 cm.',
+                    options: ['48 cm²', '72 cm²', '108 cm²', '144 cm²'],
+                    correctAnswer: '108 cm²',
+                    points: 25,
+                    hint: 'SA = 2(lw + lh + wh) = 2(24 + 18 + 12)'
+                },
+                {
+                    id: 'q5',
+                    question: 'The surface area of a sphere with radius r is:',
+                    options: ['SA = 4πr²', 'SA = 2πr²', 'SA = πr²', 'SA = ⅔πr³'],
+                    correctAnswer: 'SA = 4πr²',
+                    points: 25
                 }
             ]
         }
@@ -2185,7 +2251,7 @@ const castle5Chapter4Quizzes = [
                     question: 'A cylinder has radius 6 cm and height 10 cm. What is its volume? (Use π = 3.14)',
                     options: ['376.8 cm³', '1130.4 cm³', '188.4 cm³', '753.6 cm³'],
                     correctAnswer: '1130.4 cm³',
-                    points: 40,
+                    points: 30,
                     hint: 'V = πr²h = 3.14 × 6² × 10'
                 },
                 {
@@ -2200,8 +2266,16 @@ const castle5Chapter4Quizzes = [
                     question: 'Find the volume of a sphere with radius 3 cm. (Use π = 3.14)',
                     options: ['28.26 cm³', '113.04 cm³', '37.68 cm³', '84.78 cm³'],
                     correctAnswer: '113.04 cm³',
-                    points: 50,
+                    points: 30,
                     hint: 'V = ⁴⁄₃πr³ = (4/3) × 3.14 × 3³'
+                },
+                {
+                    id: 'q5',
+                    question: 'Find the volume of a cube with edge length 4 cm.',
+                    options: ['16 cm³', '48 cm³', '64 cm³', '96 cm³'],
+                    correctAnswer: '64 cm³',
+                    points: 30,
+                    hint: 'V = s³ = 4³'
                 }
             ]
         }

@@ -5,7 +5,7 @@ export interface CastleMarkerProps {
     type: 'prev' | 'current' | 'next'
     isSelected: boolean
     isHovered: boolean
-    animationDirection?: 'left' | 'right' | null
+    isAnimating?: boolean
     onClick: () => void
     onMouseEnter: () => void
     onMouseLeave: () => void

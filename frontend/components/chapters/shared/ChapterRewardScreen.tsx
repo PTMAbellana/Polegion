@@ -15,7 +15,7 @@ export interface ChapterRewardScreenProps {
   quizScore?: number | null
   canRetakeQuiz: boolean
   onRetakeQuiz: () => void
-  onRetakeLesson?: () => void
+  onRestartChapter?: () => void
   onComplete: () => void
   styleModule: any
 }
@@ -28,7 +28,7 @@ export default function ChapterRewardScreen({
   quizScore,
   canRetakeQuiz,
   onRetakeQuiz,
-  onRetakeLesson,
+  onRestartChapter,
   onComplete,
   styleModule: styles
 }: ChapterRewardScreenProps) {
@@ -69,9 +69,9 @@ export default function ChapterRewardScreen({
         )}
       </div>
       <div className={styles.rewardActions}>
-        {onRetakeLesson && (
-          <button className={styles.retakeButton} onClick={onRetakeLesson}>
-            Retake Lesson
+        {onRestartChapter && (
+          <button className={styles.retakeButton} onClick={onRestartChapter}>
+            Restart Chapter
           </button>
         )}
         {canRetakeQuiz && (
