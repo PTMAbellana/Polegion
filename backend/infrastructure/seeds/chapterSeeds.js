@@ -1628,7 +1628,7 @@ const castle4Chapter2Minigames = [
 
 const castle4Chapter3Quizzes = [
     {
-        id: 'e5f6a7b8-9abc-def0-1234-567890123f3',
+        id: 'e5f6a7b8-9abc-def0-1234-567890123f3a',
         chapter_id: '6f7a8b9c-0d1e-2f3a-4b5c-6d7e8f9a0b1c',
         title: 'Interior Angles of Polygons Quiz',
         description: 'Test your mastery of the interior angle formula (n-2) × 180°',
@@ -1687,7 +1687,7 @@ const castle4Chapter3Quizzes = [
 
 const castle4Chapter3Minigames = [
     {
-        id: 'f6a7b8c9-0abc-def1-2345-678901234f3',
+        id: 'f6a7b8c9-0abc-def1-2345-678901234f3a',
         chapter_id: '6f7a8b9c-0d1e-2f3a-4b5c-6d7e8f9a0b1c',
         title: 'Angle Calculator',
         description: 'Calculate the sum and individual measures of interior angles in polygons',
@@ -1753,7 +1753,7 @@ const castle4Chapter3Minigames = [
 
 const castle4Chapter4Quizzes = [
     {
-        id: 'a7b8c9d0-1bcd-ef12-3456-789012345f4',
+        id: 'a7b8c9d0-1bcd-ef12-3456-789012345f4a',
         chapter_id: '7a8b9c0d-1e2f-3a4b-5c6d-7e8f9a0b1c2d',
         title: 'Perimeter and Area Mastery Quiz',
         description: 'Test your knowledge of polygon perimeter and area formulas',
@@ -1813,7 +1813,7 @@ const castle4Chapter4Quizzes = [
 
 const castle4Chapter4Minigames = [
     {
-        id: 'b8c9d0e1-2cde-f123-4567-890123456f4',
+        id: 'b8c9d0e1-2cde-f123-4567-890123456f4a',
         chapter_id: '7a8b9c0d-1e2f-3a4b-5c6d-7e8f9a0b1c2d',
         title: 'Measurement Master',
         description: 'Calculate perimeters and areas of various polygons',

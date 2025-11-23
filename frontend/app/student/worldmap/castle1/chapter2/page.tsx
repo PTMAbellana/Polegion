@@ -1,4 +1,4 @@
-﻿// ============================================================================
+// ============================================================================
 // CASTLE 1 - CHAPTER 2: Lines and Angles
 // ============================================================================
 
@@ -19,18 +19,20 @@ import {
   CHAPTER2_NARRATION,
 } from '@/constants/chapters/castle1/chapter2';
 
+const lessonTaskIds = CHAPTER2_LEARNING_OBJECTIVES.filter((t: any) => t.type === 'lesson').map((t: any) => t.id)
+const minigameTaskId = CHAPTER2_LEARNING_OBJECTIVES.find((t: any) => t.type === 'minigame')!.id
+const quizTaskIds = Object.fromEntries(
+  CHAPTER2_LEARNING_OBJECTIVES.filter((t: any) => t.type === 'quiz').map((t: any, i: number) => [`quiz${i + 1}`, t.id])
+)
+
 const config: ChapterConfig = {
   chapterKey: 'castle1-chapter2',
   castleId: CHAPTER2_CASTLE_ID,
   chapterNumber: CHAPTER2_NUMBER,
   
-  lessonTaskIds: ['task-0', 'task-1', 'task-2', 'task-3', 'task-4'],
-  minigameTaskId: 'task-5',
-  quizTaskIds: {
-    quiz1: 'task-6',
-    quiz2: 'task-7',
-    quiz3: 'task-8',
-  },
+  lessonTaskIds,
+  minigameTaskId,
+  quizTaskIds,
   
   dialogue: CHAPTER2_DIALOGUE,
   sceneRanges: CHAPTER2_SCENE_RANGES,

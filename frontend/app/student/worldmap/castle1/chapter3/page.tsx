@@ -19,23 +19,20 @@ import {
   CHAPTER3_NARRATION,
 } from '@/constants/chapters/castle1/chapter3';
 
+const lessonTaskIds = CHAPTER3_LEARNING_OBJECTIVES.filter((t: any) => t.type === 'lesson').map((t: any) => t.id)
+const minigameTaskId = CHAPTER3_LEARNING_OBJECTIVES.find((t: any) => t.type === 'minigame')!.id
+const quizTaskIds = Object.fromEntries(
+  CHAPTER3_LEARNING_OBJECTIVES.filter((t: any) => t.type === 'quiz').map((t: any, i: number) => [`quiz${i + 1}`, t.id])
+)
+
 const config: ChapterConfig = {
   chapterKey: 'castle1-chapter3',
   castleId: CHAPTER3_CASTLE_ID,
   chapterNumber: CHAPTER3_NUMBER,
   
-  lessonTaskIds: [
-    'task-0', 'task-1', 'task-2', 'task-3', 'task-4',
-    'task-5', 'task-6', 'task-7', 'task-8', 'task-9',
-    'task-10', 'task-11', 'task-12', 'task-13', 'task-14',
-    'task-15', 'task-16', 'task-17', 'task-18', 'task-19'
-  ],
-  minigameTaskId: 'task-20',
-  quizTaskIds: {
-    quiz1: 'task-21',
-    quiz2: 'task-22',
-    quiz3: 'task-23',
-  },
+  lessonTaskIds,
+  minigameTaskId,
+  quizTaskIds,
   
   dialogue: CHAPTER3_DIALOGUE,
   sceneRanges: CHAPTER3_SCENE_RANGES,

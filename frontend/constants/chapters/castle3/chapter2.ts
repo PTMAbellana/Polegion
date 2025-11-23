@@ -44,12 +44,12 @@ export const CHAPTER2_LESSON_DIALOGUE = CHAPTER2_DIALOGUE.filter(d => d.scene ==
 export const CHAPTER2_MINIGAME_DIALOGUE = CHAPTER2_DIALOGUE.filter(d => d.scene === 'minigame').map(d => d.text);
 
 export const CHAPTER2_MINIGAME_LEVELS = [
-  { id: 1, radius: 3, diameter: null, correctAnswer: 18.8, instruction: 'Find circumference (radius = 3 cm)', hint: 'Use C = 2πr' },
-  { id: 2, radius: null, diameter: 10, correctAnswer: 31.4, instruction: 'Find circumference (diameter = 10 cm)', hint: 'Use C = πd' },
-  { id: 3, radius: 7, diameter: null, correctAnswer: 44.0, instruction: 'Find circumference (radius = 7 cm)', hint: 'Use C = 2πr' },
-  { id: 4, radius: null, diameter: 15, correctAnswer: 47.1, instruction: 'Find circumference (diameter = 15 cm)', hint: 'Use C = πd' },
-  { id: 5, radius: 4.5, diameter: null, correctAnswer: 28.3, instruction: 'Find circumference (radius = 4.5 cm)', hint: 'Use C = 2πr' },
-  { id: 6, radius: null, diameter: 20, correctAnswer: 62.8, instruction: 'Find circumference (diameter = 20 cm)', hint: 'Use C = πd' }
+  { id: 1, radius: 3, diameter: null, correctAnswer: 18.8, symbolicAnswer: '6π', acceptPi: true, instruction: 'Find circumference (radius = 3 cm)', hint: 'Use C = 2πr. Enter exact (e.g., 6π) or round to 1 decimal.' },
+  { id: 2, radius: null, diameter: 10, correctAnswer: 31.4, symbolicAnswer: '10π', acceptPi: true, instruction: 'Find circumference (diameter = 10 cm)', hint: 'Use C = πd. Enter exact (e.g., 10π) or round to 1 decimal.' },
+  { id: 3, radius: 7, diameter: null, correctAnswer: 44.0, symbolicAnswer: '14π', acceptPi: true, instruction: 'Find circumference (radius = 7 cm)', hint: 'Use C = 2πr. Enter exact (e.g., 14π) or round to 1 decimal.' },
+  { id: 4, radius: null, diameter: 15, correctAnswer: 47.1, symbolicAnswer: '15π', acceptPi: true, instruction: 'Find circumference (diameter = 15 cm)', hint: 'Use C = πd. Enter exact (e.g., 15π) or round to 1 decimal.' },
+  { id: 5, radius: 4.5, diameter: null, correctAnswer: 28.3, symbolicAnswer: '9π', acceptPi: true, instruction: 'Find circumference (radius = 4.5 cm)', hint: 'Use C = 2πr. Enter exact (e.g., 9π) or round to 1 decimal.' },
+  { id: 6, radius: null, diameter: 20, correctAnswer: 62.8, symbolicAnswer: '20π', acceptPi: true, instruction: 'Find circumference (diameter = 20 cm)', hint: 'Use C = πd. Enter exact (e.g., 20π) or round to 1 decimal.' }
 ];
 
 export const CHAPTER2_CONCEPTS = [

@@ -19,6 +19,7 @@ import { ConceptCard, LessonGrid } from '@/components/chapters/lessons';
 import ChapterRestartModal from '@/components/chapters/ChapterRestartModal';
 import { useChapterData, useChapterDialogue, useChapterAudio } from '@/hooks/chapters';
 import { awardLessonXP, completeChapter } from '@/api/chapters';
+import { cacheControl } from '@/api/axios';
 import { submitQuizAttempt, getUserQuizAttempts } from '@/api/chapterQuizzes';
 import { submitMinigameAttempt } from '@/api/minigames';
 import { useChapterStore } from '@/store/chapterStore';
@@ -530,7 +531,7 @@ function ChapterPageBase({ config }: { config: ChapterConfig }) {
           
           try {
             console.log(`${config.logPrefix} Submitting quiz with answers:`, quizAnswers);
-            submitQuizAttempt(quiz.id, quizAnswers);
+            await submitQuizAttempt(quiz.id, quizAnswers);
           } catch (error) {
             console.error('Failed to submit quiz:', error);
           }
@@ -563,7 +564,7 @@ function ChapterPageBase({ config }: { config: ChapterConfig }) {
           });
         } else {
           try {
-            submitQuizAttempt(quiz.id, quizAnswers);
+            await submitQuizAttempt(quiz.id, quizAnswers);
           } catch (error) {
             console.error('Failed to submit quiz:', error);
           }
@@ -588,6 +589,7 @@ function ChapterPageBase({ config }: { config: ChapterConfig }) {
     setQuizFeedback(null);
     setQuizScore(null);
     setQuizScoreKey(prev => prev + 1);
+    cacheControl.clear();
     
     setEarnedXP(prev => ({ ...prev, quiz: 0 }));
     chapterStore.clearAllQuizData(config.chapterKey);

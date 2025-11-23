@@ -45,12 +45,12 @@ export const CHAPTER3_LESSON_DIALOGUE = CHAPTER3_DIALOGUE.filter(d => d.scene ==
 export const CHAPTER3_MINIGAME_DIALOGUE = CHAPTER3_DIALOGUE.filter(d => d.scene === 'minigame').map(d => d.text);
 
 export const CHAPTER3_MINIGAME_LEVELS = [
-  { id: 1, radius: 3, isSemiCircle: false, correctAnswer: 28.3, instruction: 'Find area (radius = 3 cm)', hint: 'Use A = πr²' },
-  { id: 2, radius: 5, isSemiCircle: false, correctAnswer: 78.5, instruction: 'Find area (radius = 5 cm)', hint: 'Use A = πr²' },
-  { id: 3, radius: 4, isSemiCircle: true, correctAnswer: 25.1, instruction: 'Find semi-circle area (radius = 4 cm)', hint: 'Use A = πr²/2' },
-  { id: 4, radius: 7, isSemiCircle: false, correctAnswer: 153.9, instruction: 'Find area (radius = 7 cm)', hint: 'Use A = πr²' },
-  { id: 5, radius: 6, isSemiCircle: true, correctAnswer: 56.5, instruction: 'Find semi-circle area (radius = 6 cm)', hint: 'Use A = πr²/2' },
-  { id: 6, radius: 10, isSemiCircle: false, correctAnswer: 314.2, instruction: 'Find area (radius = 10 cm)', hint: 'Use A = πr²' }
+  { id: 1, radius: 3, isSemiCircle: false, correctAnswer: 28.3, symbolicAnswer: '9π', acceptPi: true, instruction: 'Find area (radius = 3 cm)', hint: 'Use A = πr². Enter exact (e.g., 9π) or round to 1 decimal.' },
+  { id: 2, radius: 5, isSemiCircle: false, correctAnswer: 78.5, symbolicAnswer: '25π', acceptPi: true, instruction: 'Find area (radius = 5 cm)', hint: 'Use A = πr². Enter exact (e.g., 25π) or round to 1 decimal.' },
+  { id: 3, radius: 4, isSemiCircle: true, correctAnswer: 25.1, symbolicAnswer: '8π', acceptPi: true, instruction: 'Find semi-circle area (radius = 4 cm)', hint: 'Use A = πr²/2. Enter exact (e.g., 8π) or round to 1 decimal.' },
+  { id: 4, radius: 7, isSemiCircle: false, correctAnswer: 153.9, symbolicAnswer: '49π', acceptPi: true, instruction: 'Find area (radius = 7 cm)', hint: 'Use A = πr². Enter exact (e.g., 49π) or round to 1 decimal.' },
+  { id: 5, radius: 6, isSemiCircle: true, correctAnswer: 56.5, symbolicAnswer: '18π', acceptPi: true, instruction: 'Find semi-circle area (radius = 6 cm)', hint: 'Use A = πr²/2. Enter exact (e.g., 18π) or round to 1 decimal.' },
+  { id: 6, radius: 10, isSemiCircle: false, correctAnswer: 314.2, symbolicAnswer: '100π', acceptPi: true, instruction: 'Find area (radius = 10 cm)', hint: 'Use A = πr². Enter exact (e.g., 100π) or round to 1 decimal.' }
 ];
 
 export const CHAPTER3_CONCEPTS = [

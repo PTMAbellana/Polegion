@@ -1,4 +1,4 @@
-﻿// ============================================================================
+// ============================================================================
 // CASTLE 1 - CHAPTER 1: The Point of Origin
 // ============================================================================
 // This chapter uses the reusable ChapterPageBase component.
@@ -25,6 +25,12 @@ import {
 // ============================================================================
 // Chapter Configuration
 // ============================================================================
+const lessonTaskIds = CHAPTER1_LEARNING_OBJECTIVES.filter((t: any) => t.type === 'lesson').map((t: any) => t.id)
+const minigameTaskId = CHAPTER1_LEARNING_OBJECTIVES.find((t: any) => t.type === 'minigame')!.id
+const quizTaskIds = Object.fromEntries(
+  CHAPTER1_LEARNING_OBJECTIVES.filter((t: any) => t.type === 'quiz').map((t: any, i: number) => [`quiz${i + 1}`, t.id])
+)
+
 const config: ChapterConfig = {
   // Identity
   chapterKey: 'castle1-chapter1',
@@ -32,13 +38,9 @@ const config: ChapterConfig = {
   chapterNumber: CHAPTER1_NUMBER,
   
   // Task IDs
-  lessonTaskIds: ['task-0', 'task-1', 'task-2', 'task-3'],
-  minigameTaskId: 'task-4',
-  quizTaskIds: {
-    quiz1: 'task-5',
-    quiz2: 'task-6',
-    quiz3: 'task-7',
-  },
+  lessonTaskIds,
+  minigameTaskId,
+  quizTaskIds,
   
   // Content from constants
   dialogue: CHAPTER1_DIALOGUE,

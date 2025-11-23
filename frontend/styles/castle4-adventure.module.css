@@ -491,12 +491,14 @@
 
 /* LOCKED - Grayed out text */
 .chapterItem.locked .chapterTitle {
-  color: #B77466;
+  color: #FFE1AF;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
 }
 
 .chapterItem.locked .chapterObjective {
-  color: #957C62;
-  opacity: 0.7;
+  color: #E2B59A;
+  opacity: 0.95;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
 }
 
 /* COMPLETED - Bright beige text (when not selected) */

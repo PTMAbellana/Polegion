@@ -1,0 +1,424 @@
+/* Main Assessment Container */
+.assessment-container {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+}
+
+/* Dialogue Box */
+.dialogue-box {
+    max-width: 800px;
+    width: 100%;
+    background: white;
+    border-radius: 24px;
+    padding: 3rem;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    animation: slideIn 0.5s ease-out;
+}
+
+.dialogue-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.dialogue-header h2 {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #1a202c;
+}
+
+.dialogue-content {
+    margin-bottom: 2rem;
+    min-height: 120px;
+}
+
+.dialogue-content p {
+    font-size: 1.25rem;
+    line-height: 1.8;
+    color: #2d3748;
+}
+
+.dialogue-footer {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.dialogue-button {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    font-size: 1.125rem;
+    font-weight: 600;
+    padding: 0.875rem 2rem;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.dialogue-button:hover {
+    transform: scale(1.05);
+    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+}
+
+.reassurance-message {
+    margin-top: 1.5rem;
+    padding: 1.25rem;
+    background: #f0f9ff;
+    border-left: 4px solid #3b82f6;
+    border-radius: 8px;
+}
+
+.reassurance-text {
+    font-size: 1rem;
+    color: #1e40af;
+    margin: 0;
+}
+
+/* Loading and Placeholder */
+.loading,
+.placeholder {
+    text-align: center;
+    color: white;
+    padding: 3rem;
+}
+
+.placeholder h2 {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+}
+
+.placeholder p {
+    font-size: 1.25rem;
+    margin-bottom: 2rem;
+}
+
+/* Intro Screen */
+.assessment-intro {
+    max-width: 900px;
+    width: 100%;
+    background: white;
+    border-radius: 24px;
+    padding: 3rem;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    animation: slideIn 0.5s ease-out;
+}
+
+.intro-header h1 {
+    font-size: 3rem;
+    font-weight: bold;
+    color: #1a202c;
+    margin-bottom: 1rem;
+    text-align: center;
+}
+
+.intro-header p {
+    font-size: 1.25rem;
+    color: #4a5568;
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+/* Assessment Info Cards */
+.assessment-info {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.info-card {
+    background: #f7fafc;
+    border-radius: 12px;
+    padding: 1.5rem;
+    text-align: center;
+    border: 2px solid #e2e8f0;
+}
+
+.info-card .icon {
+    font-size: 2rem;
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.info-card .label {
+    font-weight: 600;
+    color: #2d3748;
+}
+
+/* Categories Preview */
+.categories-preview {
+    margin: 2rem 0;
+}
+
+.categories-preview h3 {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #2d3748;
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+.categories-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.category-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    text-align: center;
+    transition: transform 0.2s;
+}
+
+.category-card:hover {
+    transform: translateY(-4px);
+}
+
+.category-card .icon {
+    font-size: 2.5rem;
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.category-card h4 {
+    font-size: 1.125rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+}
+
+.category-card p {
+    font-size: 0.875rem;
+    opacity: 0.9;
+}
+
+/* Start Button */
+.start-button {
+    width: 100%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    font-size: 1.5rem;
+    font-weight: bold;
+    padding: 1.5rem;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    margin-top: 2rem;
+}
+
+.start-button:hover {
+    transform: scale(1.02);
+    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+}
+
+/* Question Card - Kahoot Style */
+.question-card {
+    max-width: 1000px;
+    width: 100%;
+    background: white;
+    border-radius: 24px;
+    padding: 2rem;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.question-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.category-badge {
+    background: #667eea;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-weight: 600;
+}
+
+.progress {
+    font-weight: 600;
+    color: #4a5568;
+}
+
+.question-content {
+    font-size: 1.75rem;
+    font-weight: bold;
+    color: #1a202c;
+    text-align: center;
+    margin-bottom: 2rem;
+    padding: 2rem;
+    min-height: 150px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Answer Grid - Kahoot Style Colorful Buttons */
+.answer-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+}
+
+.answer-button {
+    padding: 2rem;
+    border: none;
+    border-radius: 12px;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: white;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    min-height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.answer-button:hover {
+    transform: scale(1.05);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+/* Kahoot-style answer colors */
+.answer-button.option-a {
+    background: #e21b3c;
+}
+
+.answer-button.option-b {
+    background: #1368ce;
+}
+
+.answer-button.option-c {
+    background: #d89e00;
+}
+
+.answer-button.option-d {
+    background: #26890c;
+}
+
+/* Progress Bar */
+.assessment-progress {
+    width: 100%;
+    max-width: 1000px;
+    margin-bottom: 2rem;
+}
+
+.progress-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    color: white;
+    font-weight: 600;
+}
+
+.category-info {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.progress-bar-container {
+    width: 100%;
+    height: 12px;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    background: white;
+    transition: width 0.3s ease;
+    border-radius: 6px;
+}
+
+/* Results Screen */
+.assessment-results {
+    max-width: 900px;
+    width: 100%;
+    background: white;
+    border-radius: 24px;
+    padding: 3rem;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.results-header h1 {
+    font-size: 3rem;
+    font-weight: bold;
+    color: #1a202c;
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.overall-score {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 3rem;
+}
+
+.score-circle {
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    font-weight: bold;
+    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+}
+
+.category-breakdown {
+    margin-bottom: 2rem;
+}
+
+.continue-button {
+    width: 100%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    font-size: 1.25rem;
+    font-weight: bold;
+    padding: 1.25rem;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.continue-button:hover {
+    transform: scale(1.02);
+}
+
+/* Animations */
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}

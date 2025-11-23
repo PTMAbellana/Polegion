@@ -69,6 +69,7 @@ export interface MinigameQuestion {
     diameter?: number
     base?: number
     height?: number
+    isSemiCircle?: boolean          // Castle 3 Chapter 3: whether calculating semicircle area
 }
 
 export interface Minigame {
