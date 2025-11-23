@@ -150,6 +150,29 @@ export const CHAPTER3_XP_VALUES = {
 export const CHAPTER3_CASTLE_ID = 'bdfc1a9f-cd2a-4c1a-9062-9f99ec41e008'; // Castle 2 (Polygon Citadel)
 export const CHAPTER3_NUMBER = 3;
 
+// Audio narration paths - matches dialogue indices
+export const CHAPTER3_NARRATION = {
+  opening: [
+    '/audio/castle2/chapter3/opening_0.mp3',
+    '/audio/castle2/chapter3/opening_1.mp3',
+    '/audio/castle2/chapter3/opening_2.mp3',
+    '/audio/castle2/chapter3/opening_3.mp3',
+  ],
+  lesson: [
+    '/audio/castle2/chapter3/lesson_0.mp3',
+    '/audio/castle2/chapter3/lesson_1.mp3',
+    '/audio/castle2/chapter3/lesson_2.mp3',
+    '/audio/castle2/chapter3/lesson_3.mp3',
+    '/audio/castle2/chapter3/lesson_4.mp3',
+    '/audio/castle2/chapter3/lesson_5.mp3',
+  ],
+  minigame: [
+    '/audio/castle2/chapter3/minigame_0.mp3',
+    '/audio/castle2/chapter3/minigame_1.mp3',
+    '/audio/castle2/chapter3/minigame_2.mp3',
+  ],
+};
+
 // Relic information for reward screen
 export const CHAPTER3_RELIC = {
   name: "Medallion of Harmony",

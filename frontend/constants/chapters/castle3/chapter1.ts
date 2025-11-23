@@ -115,6 +115,31 @@ export const CHAPTER1_XP_VALUES = {
 export const CHAPTER1_CASTLE_ID = '3d4e5f6a-7b8c-9d0e-1f2a-3b4c5d6e7f8a'; // Castle 3 (Circle Sanctuary)
 export const CHAPTER1_NUMBER = 1;
 
+// Audio narration paths - matches dialogue indices
+export const CHAPTER1_NARRATION = {
+  opening: [
+    '/audio/castle3/chapter1/opening_0.mp3',
+    '/audio/castle3/chapter1/opening_1.mp3',
+    '/audio/castle3/chapter1/opening_2.mp3',
+    '/audio/castle3/chapter1/opening_3.mp3',
+  ],
+  lesson: [
+    '/audio/castle3/chapter1/lesson_0.mp3',
+    '/audio/castle3/chapter1/lesson_1.mp3',
+    '/audio/castle3/chapter1/lesson_2.mp3',
+    '/audio/castle3/chapter1/lesson_3.mp3',
+    '/audio/castle3/chapter1/lesson_4.mp3',
+    '/audio/castle3/chapter1/lesson_5.mp3',
+    '/audio/castle3/chapter1/lesson_6.mp3',
+    '/audio/castle3/chapter1/lesson_7.mp3',
+  ],
+  minigame: [
+    '/audio/castle3/chapter1/minigame_0.mp3',
+    '/audio/castle3/chapter1/minigame_1.mp3',
+    '/audio/castle3/chapter1/minigame_2.mp3',
+  ],
+};
+
 export const CHAPTER1_RELIC = {
   name: "Compass of the Circle",
   image: "/images/relics/compass-circle.png",

@@ -19,6 +19,7 @@ import {
   CHAPTER4_RELIC,
   CHAPTER4_WIZARD,
 } from '@/constants/chapters/castle4/chapter4';
+import { CHAPTER4_NARRATION } from '@/constants/chapters/castle4/chapter4';
 
 const config: ChapterConfig = {
   chapterKey: 'castle4-chapter4',
@@ -52,7 +53,7 @@ const config: ChapterConfig = {
   wizard: CHAPTER4_WIZARD,
   relic: CHAPTER4_RELIC,
   
-  narrationKey: 'castle4-chapter4-lesson-intro',
+  narration: CHAPTER4_NARRATION,
   logPrefix: '[Castle4Ch4]',
   
   MinigameComponent: AreaCalculationMinigame,

@@ -18,6 +18,7 @@ import {
   CHAPTER2_CONCEPTS,
   CHAPTER2_RELIC,
   CHAPTER2_WIZARD,
+  CHAPTER2_NARRATION,
 } from '@/constants/chapters/castle2/chapter2';
 
 const config: ChapterConfig = {
@@ -52,7 +53,7 @@ const config: ChapterConfig = {
   wizard: CHAPTER2_WIZARD,
   relic: CHAPTER2_RELIC,
   
-  narrationKey: 'castle2-chapter2-lesson-intro',
+  narration: CHAPTER2_NARRATION,
   logPrefix: '[Castle2Ch2]',
   
   MinigameComponent: AngleRelationshipsMinigame,

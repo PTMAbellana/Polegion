@@ -121,6 +121,31 @@ export const CHAPTER3_XP_VALUES = {
 export const CHAPTER3_CASTLE_ID = '3d4e5f6a-7b8c-9d0e-1f2a-3b4c5d6e7f8a';
 export const CHAPTER3_NUMBER = 3;
 
+// Audio narration paths - matches dialogue indices
+export const CHAPTER3_NARRATION = {
+  opening: [
+    '/audio/castle3/chapter3/opening_0.mp3',
+    '/audio/castle3/chapter3/opening_1.mp3',
+    '/audio/castle3/chapter3/opening_2.mp3',
+    '/audio/castle3/chapter3/opening_3.mp3',
+  ],
+  lesson: [
+    '/audio/castle3/chapter3/lesson_0.mp3',
+    '/audio/castle3/chapter3/lesson_1.mp3',
+    '/audio/castle3/chapter3/lesson_2.mp3',
+    '/audio/castle3/chapter3/lesson_3.mp3',
+    '/audio/castle3/chapter3/lesson_4.mp3',
+    '/audio/castle3/chapter3/lesson_5.mp3',
+    '/audio/castle3/chapter3/lesson_6.mp3',
+    '/audio/castle3/chapter3/lesson_7.mp3',
+  ],
+  minigame: [
+    '/audio/castle3/chapter3/minigame_0.mp3',
+    '/audio/castle3/chapter3/minigame_1.mp3',
+    '/audio/castle3/chapter3/minigame_2.mp3',
+  ],
+};
+
 export const CHAPTER3_RELIC = {
   name: "Orb of Space",
   image: "/images/relics/orb-space.png",

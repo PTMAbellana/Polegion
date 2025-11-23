@@ -107,6 +107,32 @@ export const CHAPTER1_XP_VALUES = {
 export const CHAPTER1_CASTLE_ID = '5f6a7b8c-9d0e-1f2a-3b4c-5d6e7f8a9b0c'; // Castle 5 (Arcane Observatory)
 export const CHAPTER1_NUMBER = 1;
 
+// Audio narration paths - matches dialogue indices
+export const CHAPTER1_NARRATION = {
+  opening: [
+    '/audio/castle5/chapter1/opening_0.mp3',
+    '/audio/castle5/chapter1/opening_1.mp3',
+    '/audio/castle5/chapter1/opening_2.mp3',
+    '/audio/castle5/chapter1/opening_3.mp3',
+    '/audio/castle5/chapter1/opening_4.mp3',
+  ],
+  lesson: [
+    '/audio/castle5/chapter1/lesson_0.mp3',
+    '/audio/castle5/chapter1/lesson_1.mp3',
+    '/audio/castle5/chapter1/lesson_2.mp3',
+    '/audio/castle5/chapter1/lesson_3.mp3',
+    '/audio/castle5/chapter1/lesson_4.mp3',
+    '/audio/castle5/chapter1/lesson_5.mp3',
+    '/audio/castle5/chapter1/lesson_6.mp3',
+    '/audio/castle5/chapter1/lesson_7.mp3',
+  ],
+  minigame: [
+    '/audio/castle5/chapter1/minigame_0.mp3',
+    '/audio/castle5/chapter1/minigame_1.mp3',
+    '/audio/castle5/chapter1/minigame_2.mp3',
+  ],
+};
+
 export const CHAPTER1_RELIC = {
   name: "Lens of Dimensions",
   image: "/images/relics/lens-dimensions.png",

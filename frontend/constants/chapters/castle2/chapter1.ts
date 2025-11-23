@@ -143,6 +143,31 @@ export const CHAPTER1_XP_VALUES = {
 export const CHAPTER1_CASTLE_ID = 'bdfc1a9f-cd2a-4c1a-9062-9f99ec41e008'; // Castle 2 (Polygon Citadel)
 export const CHAPTER1_NUMBER = 1;
 
+// Audio narration paths - matches dialogue indices
+export const CHAPTER1_NARRATION = {
+  opening: [
+    '/audio/castle2/chapter1/opening_0.mp3',
+    '/audio/castle2/chapter1/opening_1.mp3',
+    '/audio/castle2/chapter1/opening_2.mp3',
+    '/audio/castle2/chapter1/opening_3.mp3',
+  ],
+  lesson: [
+    '/audio/castle2/chapter1/lesson_0.mp3',
+    '/audio/castle2/chapter1/lesson_1.mp3',
+    '/audio/castle2/chapter1/lesson_2.mp3',
+    '/audio/castle2/chapter1/lesson_3.mp3',
+    '/audio/castle2/chapter1/lesson_4.mp3',
+    '/audio/castle2/chapter1/lesson_5.mp3',
+    '/audio/castle2/chapter1/lesson_6.mp3',
+    '/audio/castle2/chapter1/lesson_7.mp3',
+  ],
+  minigame: [
+    '/audio/castle2/chapter1/minigame_0.mp3',
+    '/audio/castle2/chapter1/minigame_1.mp3',
+    '/audio/castle2/chapter1/minigame_2.mp3',
+  ],
+};
+
 // Relic information for reward screen
 export const CHAPTER1_RELIC = {
   name: "Protractor of Precision",

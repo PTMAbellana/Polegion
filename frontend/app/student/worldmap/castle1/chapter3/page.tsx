@@ -16,6 +16,7 @@ import {
   CHAPTER3_LEARNING_OBJECTIVES,
   CHAPTER3_XP_VALUES,
   CHAPTER3_CONCEPTS,
+  CHAPTER3_NARRATION,
 } from '@/constants/chapters/castle1/chapter3';
 
 const config: ChapterConfig = {
@@ -61,7 +62,7 @@ const config: ChapterConfig = {
     description: 'You have mastered shapes and polygons! The Polygon Prism reveals the hidden properties of all geometric forms.',
   },
   
-  narrationKey: 'chapter3-lesson-intro',
+  narration: CHAPTER3_NARRATION,
   logPrefix: '[Castle1Ch3]',
   
   MinigameComponent: ShapeBasedMinigame,

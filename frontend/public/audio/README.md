@@ -1,32 +1,136 @@
-# Audio Files for World Map Carousel
+# Audio Files for Polegion - Chapter Narration
 
-## Whoosh Sound Effect
+This directory contains audio narration files for all chapters across the 5 castles in Polegion.
 
-The carousel uses a whoosh sound effect when transitioning between castles.
+## Directory Structure
 
-### How to add the sound file:
+```
+audio/
+├── whoosh.mp3                    # Carousel transition sound
+├── castle1/                      # Euclidean Spire
+│   ├── chapter1/
+│   ├── chapter2/
+│   └── chapter3/
+├── castle2/                      # Polygon Citadel
+│   ├── chapter1/
+│   ├── chapter2/
+│   ├── chapter3/
+│   └── chapter4/
+├── castle3/                      # Circle Sanctuary
+│   ├── chapter1/
+│   ├── chapter2/
+│   └── chapter3/
+├── castle4/                      # Coordinate Fortress
+│   ├── chapter1/
+│   ├── chapter2/
+│   ├── chapter3/
+│   └── chapter4/
+└── castle5/                      # Arcane Observatory
+    ├── chapter1/
+    ├── chapter2/
+    ├── chapter3/
+    └── chapter4/
+```
 
-1. **Option 1: Download from the sample**
-   - Download from: https://assets.codepen.io/605876/whoosh-two.mp3
-   - Save as `whoosh.mp3` in this directory
+## File Naming Convention
 
-2. **Option 2: Use your own sound**
-   - Find any whoosh/swoosh/slide sound effect
-   - Must be in MP3 format
-   - Save as `whoosh.mp3` in this directory
-   - Recommended duration: 0.3-0.6 seconds
+Each chapter folder contains audio files organized by scene:
 
-3. **Option 3: Free sound resources**
-   - Freesound.org
-   - Zapsplat.com
-   - Search for "whoosh" or "swish" sound effects
+### Format: `{scene}_{index}.mp3`
 
-### Current Status:
-- The placeholder `whoosh.mp3` file needs to be replaced with an actual audio file
-- The carousel will work without sound, but won't play audio
-- No errors will occur if the file is missing
+**Scenes:**
+- `opening` - Introduction dialogue for the chapter
+- `lesson` - Educational content and concept explanations
+- `minigame` - Instructions and encouragement during gameplay
 
-### Testing:
-- Once you add the audio file, refresh the page
-- Click the arrow buttons to hear the whoosh sound
-- Volume is set to 50% by default
+**Examples:**
+- `opening_0.mp3` - First opening dialogue line
+- `lesson_5.mp3` - Sixth lesson dialogue line (0-indexed)
+- `minigame_2.mp3` - Third minigame dialogue line
+
+## Audio File Count by Chapter
+
+### Castle 1 - Euclidean Spire
+- **Chapter 1:** Opening: 4, Lesson: 6, Minigame: 3
+- **Chapter 2:** Opening: 6, Lesson: 8, Minigame: 3
+- **Chapter 3:** Opening: 6, Lesson: 20, Minigame: 3
+
+### Castle 2 - Polygon Citadel
+- **Chapter 1:** Opening: 4, Lesson: 8, Minigame: 3
+- **Chapter 2:** Opening: 4, Lesson: 7, Minigame: 3
+- **Chapter 3:** Opening: 4, Lesson: 6, Minigame: 3
+- **Chapter 4:** Opening: 4, Lesson: 6, Minigame: 3
+
+### Castle 3 - Circle Sanctuary
+- **Chapter 1:** Opening: 4, Lesson: 8, Minigame: 3
+- **Chapter 2:** Opening: 4, Lesson: 7, Minigame: 3
+- **Chapter 3:** Opening: 4, Lesson: 8, Minigame: 3
+
+### Castle 4 - Coordinate Fortress
+- **Chapter 1:** Opening: 4, Lesson: 7, Minigame: 3
+- **Chapter 2:** Opening: 4, Lesson: 7, Minigame: 3
+- **Chapter 3:** Opening: 4, Lesson: 9, Minigame: 3
+- **Chapter 4:** Opening: 4, Lesson: 10, Minigame: 3
+
+### Castle 5 - Arcane Observatory
+- **Chapter 1:** Opening: 5, Lesson: 8, Minigame: 3
+- **Chapter 2:** Opening: 4, Lesson: 9, Minigame: 3
+- **Chapter 3:** Opening: 5, Lesson: 9, Minigame: 3
+- **Chapter 4:** Opening: 5, Lesson: 11, Minigame: 3
+
+## Audio Specifications
+
+**Recommended Format:**
+- Format: MP3
+- Sample Rate: 44.1kHz
+- Bit Rate: 128-192 kbps
+- Channels: Mono or Stereo
+- Duration: Varies by dialogue length (typically 2-10 seconds per line)
+
+## Implementation
+
+The audio system is integrated into the chapter framework:
+
+1. **Audio Hook:** `frontend/hooks/chapters/useChapterAudio.ts`
+   - Handles audio playback with mute controls
+   - Gracefully handles missing files (audio is optional)
+
+2. **Chapter Base:** `frontend/components/chapters/ChapterPageBase.tsx`
+   - Automatically plays audio for each dialogue message
+   - Maps dialogue index to corresponding audio file
+
+3. **Chapter Constants:** `frontend/constants/chapters/castle{X}/chapter{Y}.ts`
+   - Each chapter exports a `CHAPTER{Y}_NARRATION` object
+   - Contains arrays of audio paths for each scene
+
+## Adding Audio Files
+
+1. Create audio files following the naming convention
+2. Place files in the appropriate castle/chapter folder
+3. The system will automatically play them when dialogue appears
+4. Missing files won't cause errors - audio is optional
+
+## Voice Acting Guidelines
+
+- **Archim (Castle 1):** Wise, patient mentor voice
+- **Sylvan (Castle 2):** Mystical, ethereal tone
+- **Marina (Castle 3):** Calm, flowing like water
+- **Vex (Castle 4):** Precise, mathematical clarity
+- **Astron (Castle 5):** Ancient, cosmic wisdom
+
+## Testing
+
+1. Enable audio in the chapter (unmute button in top bar)
+2. Navigate through dialogue to hear narration
+3. Check browser console for any audio loading messages
+4. Missing files will show optional warnings but won't break gameplay
+
+## Status
+
+✅ Folder structure created
+✅ Audio integration complete
+⏳ Audio files need to be recorded and added
+
+---
+
+**Note:** All audio files are optional. The game will function perfectly without them, but they greatly enhance the learning experience.

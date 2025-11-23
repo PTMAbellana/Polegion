@@ -78,7 +78,11 @@ export interface ChapterConfig {
     description: string;
   };
   
-  narrationKey: string;
+  narration: {
+    opening: string[];
+    lesson: string[];
+    minigame: string[];
+  };
   logPrefix: string;
   
   // Minigame component
@@ -378,6 +382,34 @@ function ChapterPageBase({ config }: { config: ChapterConfig }) {
     }
   }, [messageIndex, config.dialogue]);
   
+  // Play narration audio for each dialogue message
+  React.useEffect(() => {
+    if (messageIndex < 0 || messageIndex >= config.dialogue.length) return;
+    
+    const currentDialogue = config.dialogue[messageIndex];
+    const scene = currentDialogue.scene;
+    
+    // Determine the narration array and index within that scene
+    let narrationArray: string[] = [];
+    let sceneIndex = 0;
+    
+    if (scene === 'opening') {
+      narrationArray = config.narration.opening;
+      sceneIndex = messageIndex - config.sceneRanges.opening.start;
+    } else if (scene === 'lesson') {
+      narrationArray = config.narration.lesson;
+      sceneIndex = messageIndex - config.sceneRanges.lesson.start;
+    } else if (scene === 'minigame') {
+      narrationArray = config.narration.minigame;
+      sceneIndex = messageIndex - config.sceneRanges.minigame.start;
+    }
+    
+    // Play audio if path exists for this index
+    if (narrationArray[sceneIndex]) {
+      playNarration(narrationArray[sceneIndex]);
+    }
+  }, [messageIndex, config.dialogue, config.narration, config.sceneRanges, playNarration]);
+  
   // Award XP when crossing scene boundaries
   React.useEffect(() => {
     if (messageIndex === config.sceneRanges.lesson.end + 1) {
@@ -394,7 +426,6 @@ function ChapterPageBase({ config }: { config: ChapterConfig }) {
     if (messageIndex === config.sceneRanges.opening.end) {
       checkedLessonTasksRef.current = new Set();
       handleNextMessage();
-      playNarration(config.narrationKey);
     } else if (messageIndex === config.sceneRanges.lesson.end) {
       awardXP('lesson');
       handleNextMessage();

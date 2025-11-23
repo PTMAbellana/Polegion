@@ -19,6 +19,7 @@ import {
   CHAPTER1_LEARNING_OBJECTIVES,
   CHAPTER1_XP_VALUES,
   CHAPTER1_CONCEPTS,
+  CHAPTER1_NARRATION,
 } from '@/constants/chapters/castle1/chapter1';
 
 // ============================================================================
@@ -66,7 +67,7 @@ const config: ChapterConfig = {
     description: 'You have mastered the fundamental building blocks of geometry! The Pointlight Crystal allows you to illuminate dark areas and reveal hidden paths.',
   },
   
-  narrationKey: 'chapter1-lesson-intro',
+  narration: CHAPTER1_NARRATION,
   logPrefix: '[Castle1Ch1]',
   
   // Minigame component

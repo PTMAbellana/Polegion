@@ -117,6 +117,32 @@ export const CHAPTER2_XP_VALUES = {
 export const CHAPTER2_CASTLE_ID = '5f6a7b8c-9d0e-1f2a-3b4c-5d6e7f8a9b0c';
 export const CHAPTER2_NUMBER = 2;
 
+// Audio narration paths - matches dialogue indices
+export const CHAPTER2_NARRATION = {
+  opening: [
+    '/audio/castle5/chapter2/opening_0.mp3',
+    '/audio/castle5/chapter2/opening_1.mp3',
+    '/audio/castle5/chapter2/opening_2.mp3',
+    '/audio/castle5/chapter2/opening_3.mp3',
+  ],
+  lesson: [
+    '/audio/castle5/chapter2/lesson_0.mp3',
+    '/audio/castle5/chapter2/lesson_1.mp3',
+    '/audio/castle5/chapter2/lesson_2.mp3',
+    '/audio/castle5/chapter2/lesson_3.mp3',
+    '/audio/castle5/chapter2/lesson_4.mp3',
+    '/audio/castle5/chapter2/lesson_5.mp3',
+    '/audio/castle5/chapter2/lesson_6.mp3',
+    '/audio/castle5/chapter2/lesson_7.mp3',
+    '/audio/castle5/chapter2/lesson_8.mp3',
+  ],
+  minigame: [
+    '/audio/castle5/chapter2/minigame_0.mp3',
+    '/audio/castle5/chapter2/minigame_1.mp3',
+    '/audio/castle5/chapter2/minigame_2.mp3',
+  ],
+};
+
 export const CHAPTER2_RELIC = {
   name: "Compass of Calculation",
   image: "/images/relics/compass-calculation.png",

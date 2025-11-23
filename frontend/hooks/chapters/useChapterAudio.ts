@@ -17,25 +17,27 @@ export function useChapterAudio({
 }: UseChapterAudioOptions): UseChapterAudioReturn {
   const audioRef = useRef<HTMLAudioElement | null>(null)
 
-  const playNarration = useCallback((filename: string) => {
-    // Skip audio playback if muted or no filename
-    if (isMuted || !filename) return
+  const playNarration = useCallback((audioPath: string) => {
+    // Skip audio playback if muted or no audio path
+    if (isMuted || !audioPath) return
     
     try {
       if (audioRef.current) {
         audioRef.current.pause()
       }
       
-      const audio = new Audio(`${audioBasePath}/${filename}.mp3`)
+      // If path already includes extension, use as-is; otherwise add .mp3
+      const fullPath = audioPath.endsWith('.mp3') ? audioPath : `${audioPath}.mp3`
+      const audio = new Audio(fullPath)
       
       audio.onerror = () => {
         // Silently fail - audio files are optional
-        console.log(`[Audio] File not found (optional): ${filename}.mp3`)
+        console.log(`[Audio] File not found (optional): ${fullPath}`)
       }
       
       audio.play().catch(err => {
         // Silently fail - audio is optional
-        console.log(`[Audio] Playback skipped (optional): ${filename}.mp3`)
+        console.log(`[Audio] Playback skipped (optional): ${fullPath}`)
       })
       
       audioRef.current = audio

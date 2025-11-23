@@ -110,6 +110,32 @@ export const CHAPTER3_XP_VALUES = {
 export const CHAPTER3_CASTLE_ID = '4e5f6a7b-8c9d-0e1f-2a3b-4c5d6e7f8a9b';
 export const CHAPTER3_NUMBER = 3;
 
+// Audio narration paths - matches dialogue indices
+export const CHAPTER3_NARRATION = {
+  opening: [
+    '/audio/castle4/chapter3/opening_0.mp3',
+    '/audio/castle4/chapter3/opening_1.mp3',
+    '/audio/castle4/chapter3/opening_2.mp3',
+    '/audio/castle4/chapter3/opening_3.mp3',
+  ],
+  lesson: [
+    '/audio/castle4/chapter3/lesson_0.mp3',
+    '/audio/castle4/chapter3/lesson_1.mp3',
+    '/audio/castle4/chapter3/lesson_2.mp3',
+    '/audio/castle4/chapter3/lesson_3.mp3',
+    '/audio/castle4/chapter3/lesson_4.mp3',
+    '/audio/castle4/chapter3/lesson_5.mp3',
+    '/audio/castle4/chapter3/lesson_6.mp3',
+    '/audio/castle4/chapter3/lesson_7.mp3',
+    '/audio/castle4/chapter3/lesson_8.mp3',
+  ],
+  minigame: [
+    '/audio/castle4/chapter3/minigame_0.mp3',
+    '/audio/castle4/chapter3/minigame_1.mp3',
+    '/audio/castle4/chapter3/minigame_2.mp3',
+  ],
+};
+
 export const CHAPTER3_RELIC = {
   name: "Protractor of Power",
   image: "/images/relics/protractor-power.png",

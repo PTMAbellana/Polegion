@@ -16,6 +16,7 @@ import {
   CHAPTER2_LEARNING_OBJECTIVES,
   CHAPTER2_XP_VALUES,
   CHAPTER2_CONCEPTS,
+  CHAPTER2_NARRATION,
 } from '@/constants/chapters/castle1/chapter2';
 
 const config: ChapterConfig = {
@@ -56,7 +57,7 @@ const config: ChapterConfig = {
     description: 'You have mastered lines and angles! The Line Compass allows you to measure and draw perfect lines.',
   },
   
-  narrationKey: 'chapter2-lesson-intro',
+  narration: CHAPTER2_NARRATION,
   logPrefix: '[Castle1Ch2]',
   
   MinigameComponent: LineBasedMinigame,

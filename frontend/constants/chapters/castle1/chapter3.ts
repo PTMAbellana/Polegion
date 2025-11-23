@@ -326,3 +326,42 @@ export const CHAPTER3_XP_VALUES = {
 // Castle and Chapter IDs
 export const CHAPTER3_CASTLE_ID = 'cd5ddb70-b4ba-46cb-85fd-d66e5735619f';
 export const CHAPTER3_NUMBER = 3;
+
+// Audio narration paths - matches dialogue indices
+export const CHAPTER3_NARRATION = {
+  opening: [
+    '/audio/castle1/chapter3/opening_0.mp3', // "Well done, Apprentice! You've mastered points and lines."
+    '/audio/castle1/chapter3/opening_1.mp3', // "Now we venture deeper into the Spire, where shapes come alive!"
+    '/audio/castle1/chapter3/opening_2.mp3', // "This chamber holds the Shape Summoner, an ancient artifact."
+    '/audio/castle1/chapter3/opening_3.mp3', // "Here, you'll learn to identify and classify geometric shapes."
+    '/audio/castle1/chapter3/opening_4.mp3', // "Triangles, squares, rectangles, circles, and more await your discovery!"
+    '/audio/castle1/chapter3/opening_5.mp3', // "Are you ready to breathe life into the Shapes of the Spire?"
+  ],
+  lesson: [
+    '/audio/castle1/chapter3/lesson_0.mp3',  // "Let me introduce you to the concept of ANGLES!"
+    '/audio/castle1/chapter3/lesson_1.mp3',  // "Now, let's explore POLYGONS"
+    '/audio/castle1/chapter3/lesson_2.mp3',  // "A POLYGON is a closed figure made of straight line segments."
+    '/audio/castle1/chapter3/lesson_3.mp3',  // "First, the TRIANGLE"
+    '/audio/castle1/chapter3/lesson_4.mp3',  // "And here's the CIRCLE"
+    '/audio/castle1/chapter3/lesson_5.mp3',  // "Now behold the SQUARE"
+    '/audio/castle1/chapter3/lesson_6.mp3',  // "And the RECTANGLE"
+    '/audio/castle1/chapter3/lesson_7.mp3',  // "Meet the RHOMBUS"
+    '/audio/castle1/chapter3/lesson_8.mp3',  // "Here's the PARALLELOGRAM"
+    '/audio/castle1/chapter3/lesson_9.mp3',  // "The TRAPEZOID"
+    '/audio/castle1/chapter3/lesson_10.mp3', // "And the KITE"
+    '/audio/castle1/chapter3/lesson_11.mp3', // "Behold the PENTAGON"
+    '/audio/castle1/chapter3/lesson_12.mp3', // "The HEXAGON"
+    '/audio/castle1/chapter3/lesson_13.mp3', // "The HEPTAGON"
+    '/audio/castle1/chapter3/lesson_14.mp3', // "And the OCTAGON"
+    '/audio/castle1/chapter3/lesson_15.mp3', // "The NONAGON"
+    '/audio/castle1/chapter3/lesson_16.mp3', // "The DECAGON"
+    '/audio/castle1/chapter3/lesson_17.mp3', // "The HENDECAGON"
+    '/audio/castle1/chapter3/lesson_18.mp3', // "And the DODECAGON"
+    '/audio/castle1/chapter3/lesson_19.mp3', // "Remember: Each polygon is named by its number of sides and angles."
+  ],
+  minigame: [
+    '/audio/castle1/chapter3/minigame_0.mp3', // "Now, let's practice! The Shape Summoner will show you various shapes."
+    '/audio/castle1/chapter3/minigame_1.mp3', // "Click on the shapes that match the description."
+    '/audio/castle1/chapter3/minigame_2.mp3', // "Choose wisely, young geometer!"
+  ],
+};

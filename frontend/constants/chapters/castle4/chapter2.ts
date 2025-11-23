@@ -106,6 +106,30 @@ export const CHAPTER2_XP_VALUES = {
 export const CHAPTER2_CASTLE_ID = '4e5f6a7b-8c9d-0e1f-2a3b-4c5d6e7f8a9b';
 export const CHAPTER2_NUMBER = 2;
 
+// Audio narration paths - matches dialogue indices
+export const CHAPTER2_NARRATION = {
+  opening: [
+    '/audio/castle4/chapter2/opening_0.mp3',
+    '/audio/castle4/chapter2/opening_1.mp3',
+    '/audio/castle4/chapter2/opening_2.mp3',
+    '/audio/castle4/chapter2/opening_3.mp3',
+  ],
+  lesson: [
+    '/audio/castle4/chapter2/lesson_0.mp3',
+    '/audio/castle4/chapter2/lesson_1.mp3',
+    '/audio/castle4/chapter2/lesson_2.mp3',
+    '/audio/castle4/chapter2/lesson_3.mp3',
+    '/audio/castle4/chapter2/lesson_4.mp3',
+    '/audio/castle4/chapter2/lesson_5.mp3',
+    '/audio/castle4/chapter2/lesson_6.mp3',
+  ],
+  minigame: [
+    '/audio/castle4/chapter2/minigame_0.mp3',
+    '/audio/castle4/chapter2/minigame_1.mp3',
+    '/audio/castle4/chapter2/minigame_2.mp3',
+  ],
+};
+
 export const CHAPTER2_RELIC = {
   name: "Pencil of Precision",
   image: "/images/relics/pencil-precision.png",

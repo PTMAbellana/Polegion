@@ -120,6 +120,33 @@ export const CHAPTER4_XP_VALUES = {
 export const CHAPTER4_CASTLE_ID = '4e5f6a7b-8c9d-0e1f-2a3b-4c5d6e7f8a9b';
 export const CHAPTER4_NUMBER = 4;
 
+// Audio narration paths - matches dialogue indices
+export const CHAPTER4_NARRATION = {
+  opening: [
+    '/audio/castle4/chapter4/opening_0.mp3',
+    '/audio/castle4/chapter4/opening_1.mp3',
+    '/audio/castle4/chapter4/opening_2.mp3',
+    '/audio/castle4/chapter4/opening_3.mp3',
+  ],
+  lesson: [
+    '/audio/castle4/chapter4/lesson_0.mp3',
+    '/audio/castle4/chapter4/lesson_1.mp3',
+    '/audio/castle4/chapter4/lesson_2.mp3',
+    '/audio/castle4/chapter4/lesson_3.mp3',
+    '/audio/castle4/chapter4/lesson_4.mp3',
+    '/audio/castle4/chapter4/lesson_5.mp3',
+    '/audio/castle4/chapter4/lesson_6.mp3',
+    '/audio/castle4/chapter4/lesson_7.mp3',
+    '/audio/castle4/chapter4/lesson_8.mp3',
+    '/audio/castle4/chapter4/lesson_9.mp3',
+  ],
+  minigame: [
+    '/audio/castle4/chapter4/minigame_0.mp3',
+    '/audio/castle4/chapter4/minigame_1.mp3',
+    '/audio/castle4/chapter4/minigame_2.mp3',
+  ],
+};
+
 export const CHAPTER4_RELIC = {
   name: "Ruler of Realms",
   image: "/images/relics/ruler-realms.png",
