@@ -38,52 +38,62 @@ export const CHAPTER4_CONCEPTS = [
   {
     key: 'perimeter',
     title: 'Perimeter',
-    summary: 'The distance around a polygon'
+    summary: 'The distance around a polygon',
+    description: 'Total length around a polygon.'
   },
   {
     key: 'rectangle-perimeter',
     title: 'Rectangle Perimeter',
-    summary: 'P = 2(l + w)'
+    summary: 'P = 2(l + w)',
+    description: 'Add length and width, then double.'
   },
   {
     key: 'square-perimeter',
     title: 'Square Perimeter',
-    summary: 'P = 4 × side'
+    summary: 'P = 4 × side',
+    description: 'Four equal sides; multiply side by 4.'
   },
   {
     key: 'area',
     title: 'Area',
-    summary: 'The space inside a polygon (square units)'
+    summary: 'The space inside a polygon (square units)',
+    description: 'Space inside a shape measured in square units.'
   },
   {
     key: 'rectangle-area',
     title: 'Rectangle Area',
-    summary: 'A = length × width'
+    summary: 'A = length × width',
+    description: 'Multiply length by width.'
   },
   {
     key: 'square-area',
     title: 'Square Area',
-    summary: 'A = side²'
+    summary: 'A = side²',
+    description: 'Multiply the side by itself.'
   },
   {
     key: 'triangle-area',
     title: 'Triangle Area',
-    summary: 'A = (base × height) ÷ 2'
+    summary: 'A = (base × height) ÷ 2',
+    description: 'Half the product of base and height.'
   },
   {
     key: 'parallelogram-area',
     title: 'Parallelogram Area',
-    summary: 'A = base × height'
+    summary: 'A = base × height',
+    description: 'Base times height.'
   },
   {
     key: 'trapezoid-area',
     title: 'Trapezoid Area',
-    summary: 'A = [(b₁ + b₂) × h] ÷ 2'
+    summary: 'A = [(b₁ + b₂) × h] ÷ 2',
+    description: 'Average of bases times height.'
   },
   {
     key: 'word-problems',
     title: 'Word Problems',
-    summary: 'Apply formulas to real-world situations'
+    summary: 'Apply formulas to real-world situations',
+    description: 'Apply formulas to practical scenarios.'
   }
 ];
 

@@ -44,20 +44,19 @@ const ConceptCard: React.FC<ConceptCardProps> = ({
       } ${onClick ? styleModule.conceptCardClickable : ''}`}
       onClick={onClick}
     >
-      {/* Icon/Image Section - Only render if there's content */}
-      {(imageSrc || icon) && (
-        <div className={styleModule.conceptImageSection}>
-          {imageSrc && (
-            <div className={styleModule.conceptImage}>
-              <Image src={imageSrc} alt={imageAlt} width={120} height={120} />
-            </div>
-          )}
-          
-          {!imageSrc && icon && (
-            <div className={styleModule.conceptImage}>{icon}</div>
-          )}
-        </div>
-      )}
+      <div className={styleModule.conceptImageSection}>
+        {imageSrc ? (
+          <div className={styleModule.conceptImage}>
+            <Image src={imageSrc} alt={imageAlt} width={120} height={120} />
+          </div>
+        ) : icon ? (
+          <div className={styleModule.conceptImage}>{icon}</div>
+        ) : (
+          <div className={styleModule.conceptImage}>
+            <div className={styleModule.conceptPlaceholder} />
+          </div>
+        )}
+      </div>
 
       {/* Text Section */}
       <div className={styleModule.conceptTextSection}>

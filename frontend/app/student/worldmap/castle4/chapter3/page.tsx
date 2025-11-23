@@ -6,7 +6,7 @@
 
 import ChapterPageBase from '@/components/chapters/ChapterPageBase';
 import type { ChapterConfig } from '@/components/chapters/ChapterPageBase';
-import { ShapeBasedMinigame } from '@/components/chapters/minigames';
+import { C4C3_AngleSumMinigame } from '@/components/chapters/minigames';
 import {
   CHAPTER3_CASTLE_ID,
   CHAPTER3_NUMBER,
@@ -56,7 +56,7 @@ const config: ChapterConfig = {
   narration: CHAPTER3_NARRATION,
   logPrefix: '[Castle4Ch3]',
   
-  MinigameComponent: ShapeBasedMinigame,
+  MinigameComponent: C4C3_AngleSumMinigame,
 };
 
 export default function Chapter3Page() {

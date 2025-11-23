@@ -41,47 +41,56 @@ export const CHAPTER2_CONCEPTS = [
   {
     key: 'perimeter-review',
     title: 'Perimeter Review',
-    summary: 'Total distance around a shape'
+    summary: 'Total distance around a shape',
+    description: 'Add all side lengths to get the boundary length.'
   },
   {
     key: 'area-review',
     title: 'Area Review',
-    summary: 'Space inside a shape (square units)'
+    summary: 'Space inside a shape (square units)',
+    description: 'Measure the space inside; units are squared.'
   },
   {
     key: 'rectangle',
     title: 'Rectangle Formulas',
-    summary: 'P = 2(l + w), A = l × w'
+    summary: 'P = 2(l + w), A = l × w',
+    description: 'Perimeter doubles sum of length and width; area is l × w.'
   },
   {
     key: 'square',
     title: 'Square Formulas',
-    summary: 'P = 4s, A = s²'
+    summary: 'P = 4s, A = s²',
+    description: 'Four equal sides; area equals side squared.'
   },
   {
     key: 'triangle',
     title: 'Triangle Formulas',
-    summary: 'P = a + b + c, A = (b × h) ÷ 2'
+    summary: 'P = a + b + c, A = (b × h) ÷ 2',
+    description: 'Sum three sides for P; A is base × height ÷ 2.'
   },
   {
     key: 'parallelogram',
     title: 'Parallelogram Formulas',
-    summary: 'P = 2(a + b), A = b × h'
+    summary: 'P = 2(a + b), A = b × h',
+    description: 'Perimeter doubles sum of adjacent sides; area is b × h.'
   },
   {
     key: 'trapezoid',
     title: 'Trapezoid Formulas',
-    summary: 'A = [(b₁ + b₂) × h] ÷ 2'
+    summary: 'A = [(b₁ + b₂) × h] ÷ 2',
+    description: 'Area equals average of bases times height.'
   },
   {
     key: 'circle',
     title: 'Circle Formulas',
-    summary: 'C = 2πr, A = πr²'
+    summary: 'C = 2πr, A = πr²',
+    description: 'Use circumference 2πr or πd; area is πr².'
   },
   {
     key: 'word-problems',
     title: 'Word Problems',
-    summary: 'Apply formulas to real situations'
+    summary: 'Apply formulas to real situations',
+    description: 'Choose formulas to model and solve practical tasks.'
   }
 ];
 

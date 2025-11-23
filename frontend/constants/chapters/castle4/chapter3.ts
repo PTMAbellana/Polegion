@@ -40,42 +40,50 @@ export const CHAPTER3_CONCEPTS = [
   {
     key: 'interior-angles',
     title: 'Interior Angles',
-    summary: 'The angles inside a polygon'
+    summary: 'The angles inside a polygon',
+    description: 'Angles formed inside a polygon’s sides.'
   },
   {
     key: 'formula',
     title: 'Angle Sum Formula',
-    summary: 'Sum = (n - 2) × 180°'
+    summary: 'Sum = (n - 2) × 180°',
+    description: 'Sum equals (n − 2) times 180 degrees.'
   },
   {
     key: 'triangle',
     title: 'Triangle Angles',
-    summary: '(3-2) × 180° = 180°'
+    summary: '(3-2) × 180° = 180°',
+    description: 'Three sides give a total of 180 degrees.'
   },
   {
     key: 'quadrilateral',
     title: 'Quadrilateral Angles',
-    summary: '(4-2) × 180° = 360°'
+    summary: '(4-2) × 180° = 360°',
+    description: 'Four sides give a total of 360 degrees.'
   },
   {
     key: 'pentagon',
     title: 'Pentagon Angles',
-    summary: '(5-2) × 180° = 540°'
+    summary: '(5-2) × 180° = 540°',
+    description: 'Five sides give a total of 540 degrees.'
   },
   {
     key: 'hexagon',
     title: 'Hexagon Angles',
-    summary: '(6-2) × 180° = 720°'
+    summary: '(6-2) × 180° = 720°',
+    description: 'Six sides give a total of 720 degrees.'
   },
   {
     key: 'regular',
     title: 'Regular Polygons',
-    summary: 'Each angle = Sum ÷ n'
+    summary: 'Each angle = Sum ÷ n',
+    description: 'Equal sides and angles; each angle is Sum divided by n.'
   },
   {
     key: 'regular-example',
     title: 'Regular Pentagon',
-    summary: '540° ÷ 5 = 108° per angle'
+    summary: '540° ÷ 5 = 108° per angle',
+    description: 'Each angle in a regular pentagon is 108 degrees.'
   }
 ];
 

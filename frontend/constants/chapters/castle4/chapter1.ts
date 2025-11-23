@@ -56,32 +56,38 @@ export const CHAPTER1_CONCEPTS = [
   {
     key: 'polygon',
     title: 'Polygon',
-    summary: 'A closed figure made of straight line segments'
+    summary: 'A closed figure made of straight line segments',
+    description: 'A closed shape formed by straight line segments called sides.'
   },
   {
     key: 'naming',
     title: 'Naming Polygons',
-    summary: 'Named by number of sides: Pentagon (5), Hexagon (6), Octagon (8), etc.'
+    summary: 'Named by number of sides: Pentagon (5), Hexagon (6), Octagon (8), etc.',
+    description: 'Named by side count (e.g., triangle=3, quadrilateral=4, pentagon=5, hexagon=6, octagon=8).'
   },
   {
     key: 'congruent',
     title: 'Congruent Polygons',
-    summary: 'Same shape AND same size'
+    summary: 'Same shape AND same size',
+    description: 'Polygons that match in shape and size (equal corresponding sides and angles).'
   },
   {
     key: 'congruent-example',
     title: 'Congruent Example',
-    summary: 'Two identical squares are congruent'
+    summary: 'Two identical squares are congruent',
+    description: 'Squares with equal side lengths (e.g., both 5 cm) are congruent.'
   },
   {
     key: 'similar',
     title: 'Similar Polygons',
-    summary: 'Same shape but different sizes'
+    summary: 'Same shape but different sizes',
+    description: 'Same shape with proportional sides and equal angles; sizes differ.'
   },
   {
     key: 'similar-example',
     title: 'Similar Example',
-    summary: 'A small and large square are similar'
+    summary: 'A small and large square are similar',
+    description: 'Squares with side lengths in proportion (e.g., 3 cm and 6 cm) are similar.'
   }
 ];
 

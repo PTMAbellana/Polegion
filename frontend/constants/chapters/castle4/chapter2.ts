@@ -48,32 +48,38 @@ export const CHAPTER2_CONCEPTS = [
   {
     key: 'drawing',
     title: 'Drawing Polygons',
-    summary: 'Plan sides and angles carefully to construct polygons'
+    summary: 'Plan sides and angles carefully to construct polygons',
+    description: 'Sketch polygons by planning sides and angle measures.'
   },
   {
     key: 'triangle',
     title: 'Drawing Triangles',
-    summary: 'Use protractor to measure angles between three sides'
+    summary: 'Use protractor to measure angles between three sides',
+    description: 'Draw three sides with angles measured accurately.'
   },
   {
     key: 'quadrilateral',
     title: 'Drawing Quadrilaterals',
-    summary: 'Four sides, interior angles sum to 360°'
+    summary: 'Four sides, interior angles sum to 360°',
+    description: 'Four connected sides; interior angles add to 360°.'
   },
   {
     key: 'pentagon',
     title: 'Drawing Pentagons',
-    summary: 'Five sides, regular pentagon has 108° angles'
+    summary: 'Five sides, regular pentagon has 108° angles',
+    description: 'Five sides; each angle is 108° in a regular pentagon.'
   },
   {
     key: 'hexagon',
     title: 'Drawing Hexagons',
-    summary: 'Six sides, regular hexagon has 120° angles'
+    summary: 'Six sides, regular hexagon has 120° angles',
+    description: 'Six sides; each angle is 120° in a regular hexagon.'
   },
   {
     key: 'tools',
     title: 'Drawing Tools',
-    summary: 'Ruler for sides, protractor for angles'
+    summary: 'Ruler for sides, protractor for angles',
+    description: 'Use a ruler for straight lines and a protractor for angles.'
   }
 ];
 

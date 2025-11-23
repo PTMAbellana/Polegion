@@ -6,7 +6,7 @@
 
 import ChapterPageBase from '@/components/chapters/ChapterPageBase';
 import type { ChapterConfig } from '@/components/chapters/ChapterPageBase';
-import { ShapeBasedMinigame } from '@/components/chapters/minigames';
+import { C4C2_PolygonDrawingMinigame } from '@/components/chapters/minigames';
 import {
   CHAPTER2_CASTLE_ID,
   CHAPTER2_NUMBER,
@@ -56,7 +56,7 @@ const config: ChapterConfig = {
   narration: CHAPTER2_NARRATION,
   logPrefix: '[Castle4Ch2]',
   
-  MinigameComponent: ShapeBasedMinigame,
+  MinigameComponent: C4C2_PolygonDrawingMinigame,
 };
 
 export default function Chapter2Page() {

@@ -43,37 +43,44 @@ export const CHAPTER1_CONCEPTS = [
   {
     key: 'plane',
     title: 'Plane Figures (2D)',
-    summary: 'Flat shapes with only length and width'
+    summary: 'Flat shapes with only length and width',
+    description: 'Flat 2D shapes with length and width only (no depth).'
   },
   {
     key: 'plane-examples',
     title: 'Plane Examples',
-    summary: 'Circle, square, triangle, rectangle, pentagon, hexagon'
+    summary: 'Circle, square, triangle, rectangle, pentagon, hexagon',
+    description: 'Common plane figures include circle, square, triangle, rectangle, pentagon, and hexagon.'
   },
   {
     key: 'solid',
     title: 'Solid Figures (3D)',
-    summary: 'Shapes with length, width, AND height'
+    summary: 'Shapes with length, width, AND height',
+    description: '3D shapes with length, width, and height (depth).'
   },
   {
     key: 'solid-examples',
     title: 'Solid Examples',
-    summary: 'Cube, sphere, cylinder, cone, pyramid, prism'
+    summary: 'Cube, sphere, cylinder, cone, pyramid, prism',
+    description: 'Common solid figures include cube, sphere, cylinder, cone, pyramid, and prism.'
   },
   {
     key: 'difference',
     title: 'Key Difference',
-    summary: 'Plane = flat, Solid = has volume'
+    summary: 'Plane = flat, Solid = has volume',
+    description: 'Plane figures are flat; solid figures occupy space and have volume.'
   },
   {
     key: 'prism',
     title: 'Prism',
-    summary: 'Two parallel bases connected by rectangular faces'
+    summary: 'Two parallel bases connected by rectangular faces',
+    description: 'A solid with two parallel congruent bases and rectangular lateral faces.'
   },
   {
     key: 'pyramid',
     title: 'Pyramid',
-    summary: 'Polygon base with triangular faces meeting at apex'
+    summary: 'Polygon base with triangular faces meeting at apex',
+    description: 'A solid with a polygon base and triangular faces meeting at a single apex.'
   }
 ];
 

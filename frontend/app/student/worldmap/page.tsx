@@ -39,12 +39,6 @@ export default function WorldMapPage() {
   const [backgroundError, setBackgroundError] = useState(false);
   const [preloadedImages, setPreloadedImages] = useState<Set<number>>(new Set());
   const [isTransitioning, setIsTransitioning] = useState(false); // Track if castles are transitioning
-  const [transitionDirection, setTransitionDirection] = useState<'left' | 'right' | null>(null);
-  const [preloadedCastleImages, setPreloadedCastleImages] = useState<Set<number>>(new Set());
-  const [backgroundCastleIndex, setBackgroundCastleIndex] = useState<number>(0);
-  const [bgUrlA, setBgUrlA] = useState<string>('');
-  const [bgUrlB, setBgUrlB] = useState<string>('');
-  const [bgLayer, setBgLayer] = useState<'A' | 'B'>('A');
   
   // Refs for touch/swipe, fetching, and animation
   const touchStartX = useRef<number>(0);
@@ -65,41 +59,15 @@ export default function WorldMapPage() {
   }, []);
 
   // Fetch castles on mount or when user changes
-  // Always refetch on mount to ensure fresh data
   useEffect(() => {
     const userId = userProfile?.id;
     
-    if (userId) {
+    if (userId && (!hasFetchedRef.current || lastUserIdRef.current !== userId)) {
       console.log('[WorldMap] Fetching castles for user:', userId);
       hasFetchedRef.current = true;
       lastUserIdRef.current = userId;
       fetchCastles(userId);
     }
-  }, [userProfile?.id, fetchCastles]);
-
-  // Refetch castles when page becomes visible (user returns from chapter)
-  useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (!document.hidden && userProfile?.id) {
-        console.log('[WorldMap] Page visible - refetching castle data');
-        fetchCastles(userProfile.id);
-      }
-    };
-
-    const handleFocus = () => {
-      if (userProfile?.id) {
-        console.log('[WorldMap] Window focused - refetching castle data');
-        fetchCastles(userProfile.id);
-      }
-    };
-
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    window.addEventListener('focus', handleFocus);
-
-    return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-      window.removeEventListener('focus', handleFocus);
-    };
   }, [userProfile?.id, fetchCastles]);
 
   // Intro display - use user-specific localStorage key
@@ -131,56 +99,6 @@ export default function WorldMapPage() {
       
       img.onerror = () => {
         console.warn(`Background image not found for castle ${castle.image_number}`);
-      };
-    });
-  }, [castles]);
-
-
-
-  // Initialize first background
-  useEffect(() => {
-    if (castles.length === 0) return;
-    const initialCastle = castles[currentCastleIndex];
-    const url = `/images/castles/castle${initialCastle.image_number}-background.png`;
-    setBgUrlA(`url('${url}')`);
-    setBgLayer('A');
-  }, [castles]);
-
-  // Update background when castle index changes
-  useEffect(() => {
-    if (castles.length === 0) return;
-    const nextCastle = castles[currentCastleIndex];
-    const imgNumber = nextCastle.image_number;
-    const url = `url('/images/castles/castle${imgNumber}-background.png')`;
-
-    if (preloadedImages.has(imgNumber)) {
-      setBgLayer(prevLayer => {
-        if (prevLayer === 'A') {
-          setBgUrlB(url);
-          return 'B';
-        } else {
-          setBgUrlA(url);
-          return 'A';
-        }
-      });
-    }
-  }, [currentCastleIndex, preloadedImages, castles]);
-
-  // Preload ALL castle foreground images on mount
-  useEffect(() => {
-    if (castles.length === 0) return;
-
-    const loadedSet = new Set<number>();
-
-    castles.forEach((castle) => {
-      const img = new Image();
-      img.src = `/images/castles/castle${castle.image_number}.png`;
-      img.onload = () => {
-        loadedSet.add(castle.image_number);
-        setPreloadedCastleImages(new Set(loadedSet));
-      };
-      img.onerror = () => {
-        console.warn(`Foreground image not found for castle ${castle.image_number}`);
       };
     });
   }, [castles]);
@@ -227,12 +145,11 @@ export default function WorldMapPage() {
     }
   };
 
-  const triggerCastleAnimation = (currentIdx: number, direction: 'left' | 'right') => {
+  const triggerCastleAnimation = (currentIdx: number) => {
     if (castles.length === 0) return;
     
     // Set transitioning state
     setIsTransitioning(true);
-    setTransitionDirection(direction);
     
     // Play whoosh sound immediately when animation starts
     playWhoosh();
@@ -240,31 +157,24 @@ export default function WorldMapPage() {
     // Clear transitioning after animation completes (0.5s)
     setTimeout(() => {
       setIsTransitioning(false);
-      setTransitionDirection(null);
     }, 500);
   };
 
   const goNext = useCallback(() => {
-    if (castles.length === 0 || isTransitioning) return;
+    if (castles.length === 0) return;
     const nextIndex = (currentCastleIndex + 1) % castles.length;
+    setCurrentCastleIndex(nextIndex);
     setSelectedCastle(null);
-    triggerCastleAnimation(nextIndex, 'left');
-    // Update index after a brief moment to allow animation to start
-    setTimeout(() => {
-      setCurrentCastleIndex(nextIndex);
-    }, 50);
-  }, [castles, currentCastleIndex, isTransitioning, setCurrentCastleIndex, setSelectedCastle]);
+    triggerCastleAnimation(nextIndex);
+  }, [castles, currentCastleIndex, setCurrentCastleIndex, setSelectedCastle]);
 
   const goPrev = useCallback(() => {
-    if (castles.length === 0 || isTransitioning) return;
+    if (castles.length === 0) return;
     const prevIndex = (currentCastleIndex - 1 + castles.length) % castles.length;
+    setCurrentCastleIndex(prevIndex);
     setSelectedCastle(null);
-    triggerCastleAnimation(prevIndex, 'right');
-    // Update index after a brief moment to allow animation to start
-    setTimeout(() => {
-      setCurrentCastleIndex(prevIndex);
-    }, 50);
-  }, [castles, currentCastleIndex, isTransitioning, setCurrentCastleIndex, setSelectedCastle]);
+    triggerCastleAnimation(prevIndex);
+  }, [castles, currentCastleIndex, setCurrentCastleIndex, setSelectedCastle]);
 
   // Keyboard navigation
   useEffect(() => {
@@ -282,7 +192,10 @@ export default function WorldMapPage() {
   }, [goPrev, goNext, selectedCastle]);
 
   const handleCastleClick = (castle: CastleWithProgress) => {
-    // Allow navigation to any castle via side clicks
+    if (!castle.progress?.unlocked) {
+      return;
+    }
+    
     if (castles[currentCastleIndex].id !== castle.id) {
       const newIndex = castles.findIndex(c => c.id === castle.id);
       if (newIndex !== -1) {
@@ -290,10 +203,7 @@ export default function WorldMapPage() {
         setSelectedCastle(null);
       }
     } else {
-      // Only allow opening modal for unlocked current castle
-      if (castle.progress?.unlocked) {
-        setSelectedCastle(selectedCastle?.id === castle.id ? null : castle);
-      }
+      setSelectedCastle(selectedCastle?.id === castle.id ? null : castle);
     }
   };
 
@@ -317,11 +227,11 @@ export default function WorldMapPage() {
       };
     }
 
-    const bgCastle = castles[backgroundCastleIndex];
-    const currentBackgroundImage = `/images/castles/castle${bgCastle.image_number}-background.png`;
+    const currentCastle = castles[currentCastleIndex];
+    const currentBackgroundImage = `/images/castles/castle${currentCastle.image_number}-background.png`;
 
     // Only show the image if it's preloaded, otherwise show gradient
-    const isImageLoaded = preloadedImages.has(bgCastle.image_number);
+    const isImageLoaded = preloadedImages.has(currentCastle.image_number);
     
     if (isImageLoaded && !backgroundError) {
       return {
@@ -339,7 +249,7 @@ export default function WorldMapPage() {
     };
 
     return {
-      backgroundImage: gradients[bgCastle.image_number] || gradients[1],
+      backgroundImage: gradients[currentCastle.image_number] || gradients[1],
     };
   };
 
@@ -390,18 +300,11 @@ export default function WorldMapPage() {
     <div className={styles.world_map_page_container}>
       {showIntro && <WorldMapIntro onIntroComplete={handleIntroComplete} />}
       
-      {/* Dynamic Background Crossfade */}
-      <div className={styles.map_background_container}>
-        <div
-          className={`${styles.map_background_layer} ${bgLayer === 'A' ? styles.visible : ''}`}
-          style={{ backgroundImage: bgUrlA }}
-        />
-        <div
-          className={`${styles.map_background_layer} ${bgLayer === 'B' ? styles.visible : ''}`}
-          style={{ backgroundImage: bgUrlB }}
-        />
-        <div className={styles.map_background_overlay} />
-      </div>
+      {/* Dynamic Background */}
+      <div
+        className={styles.map_background}
+        style={getBackgroundStyle()}
+      />
 
       {/* Logo - Top Right */}
       <div className={styles.world_map_logo}>
@@ -433,7 +336,7 @@ export default function WorldMapPage() {
               {/* Previous Castle (left) */}
               {castles.length > 0 && (
                 <CastleMarker
-                  key={`prev`}
+                  key={`prev-${castles[(currentCastleIndex - 1 + castles.length) % castles.length].id}`}
                   castle={castles[(currentCastleIndex - 1 + castles.length) % castles.length]}
                   type="prev"
                   isSelected={selectedCastle?.id === castles[(currentCastleIndex - 1 + castles.length) % castles.length].id}
@@ -448,7 +351,7 @@ export default function WorldMapPage() {
               {/* Current Castle (center) */}
               {currentCastle && (
                 <CastleMarker
-                  key={`current`}
+                  key={`current-${currentCastle.id}`}
                   castle={currentCastle}
                   type="current"
                   isSelected={selectedCastle?.id === currentCastle.id}
@@ -463,7 +366,7 @@ export default function WorldMapPage() {
               {/* Next Castle (right) */}
               {castles.length > 0 && (
                 <CastleMarker
-                  key={`next`}
+                  key={`next-${castles[(currentCastleIndex + 1) % castles.length].id}`}
                   castle={castles[(currentCastleIndex + 1) % castles.length]}
                   type="next"
                   isSelected={selectedCastle?.id === castles[(currentCastleIndex + 1) % castles.length].id}

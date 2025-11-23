@@ -6,7 +6,7 @@
 
 import ChapterPageBase from '@/components/chapters/ChapterPageBase';
 import type { ChapterConfig } from '@/components/chapters/ChapterPageBase';
-import { CirclePartsMinigame } from '@/components/chapters/minigames';
+import { C3C1_CirclePartsMinigame } from '@/components/chapters/minigames';
 import {
   CHAPTER1_CASTLE_ID,
   CHAPTER1_NUMBER,
@@ -57,7 +57,7 @@ const config: ChapterConfig = {
   narration: CHAPTER1_NARRATION,
   logPrefix: '[Castle3Ch1]',
   
-  MinigameComponent: CirclePartsMinigame,
+  MinigameComponent: C3C1_CirclePartsMinigame,
 };
 
 export default function Chapter1Page() {

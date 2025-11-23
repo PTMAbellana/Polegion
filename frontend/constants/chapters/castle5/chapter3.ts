@@ -42,42 +42,50 @@ export const CHAPTER3_CONCEPTS = [
   {
     key: 'surface-area',
     title: 'Surface Area',
-    summary: 'Total area of all faces of a 3D solid'
+    summary: 'Total area of all faces of a 3D solid',
+    description: 'Total covering area of a solid’s outer surfaces.'
   },
   {
     key: 'cube',
     title: 'Cube Surface Area',
-    summary: 'SA = 6s² (6 equal square faces)'
+    summary: 'SA = 6s² (6 equal square faces)',
+    description: 'Six identical squares; multiply 6 by side squared.'
   },
   {
     key: 'rectangular-prism',
     title: 'Rectangular Prism',
-    summary: 'SA = 2(lw + lh + wh)'
+    summary: 'SA = 2(lw + lh + wh)',
+    description: 'Sum areas of all rectangular faces.'
   },
   {
     key: 'cylinder',
     title: 'Cylinder Surface Area',
-    summary: 'SA = 2πr² + 2πrh'
+    summary: 'SA = 2πr² + 2πrh',
+    description: 'Two circular ends plus curved side area.'
   },
   {
     key: 'sphere',
     title: 'Sphere Surface Area',
-    summary: 'SA = 4πr²'
+    summary: 'SA = 4πr²',
+    description: 'Area depends only on radius: 4 × π × r².'
   },
   {
     key: 'cone',
     title: 'Cone Surface Area',
-    summary: 'SA = πr² + πrl (l = slant height)'
+    summary: 'SA = πr² + πrl (l = slant height)',
+    description: 'Base circle plus lateral surface using slant height.'
   },
   {
     key: 'square-pyramid',
     title: 'Square Pyramid',
-    summary: 'SA = b² + 2bl (l = slant height)'
+    summary: 'SA = b² + 2bl (l = slant height)',
+    description: 'Square base plus four triangular faces.'
   },
   {
     key: 'triangular-prism',
     title: 'Triangular Prism',
-    summary: 'SA = 2(½bh) + perimeter × H'
+    summary: 'SA = 2(½bh) + perimeter × H',
+    description: 'Two triangular bases plus three rectangles; sum all face areas.'
   }
 ];
 

@@ -395,35 +395,6 @@
   z-index: 1;
 }
 
-.map_background_container {
-  position: fixed;
-  top: 0;
-  left: 70px;
-  right: 0;
-  bottom: 0;
-  z-index: 0;
-}
-
-.map_background_layer {
-  position: absolute;
-  inset: 0;
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  opacity: 0;
-  transition: opacity 200ms ease;
-}
-
-.map_background_layer.visible {
-  opacity: 1;
-}
-
-.map_background_overlay {
-  position: absolute;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.3);
-}
-
 /* ========================================
    MAIN CONTENT
    ======================================== */
@@ -559,12 +530,49 @@
   flex: 1;
   max-width: 1200px;
   margin: 0 auto;
+  perspective: 1000px;
   position: relative;
   min-height: 400px;
-  overflow: visible;
+  overflow: visible; /* Allow side castles to be visible */
 }
 
-/* Carousel Arrows */
+/* Castle carousel animation - simplified for next/prev buttons */
+/* Castles should scale in and stay visible, not fade out */
+
+/* Animation: Scale in (no fade out) */
+@keyframes castleScaleIn {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, var(--y, 0), 0) scale(0);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, var(--y, 0), 0) scale(1);
+  }
+}
+
+/* Side castles: smaller scale animation */
+@keyframes castleScaleSide {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, var(--y, 0), 0) scale(0);
+  }
+  100% {
+    opacity: 0.5;
+    transform: translate3d(0, var(--y, 0), 0) scale(0.8);
+  }
+}
+
+@keyframes castleGlow {
+  0%, 100% {
+    filter: drop-shadow(0 10px 30px rgba(218, 165, 32, 0.4));
+  }
+  50% {
+    filter: drop-shadow(0 15px 50px rgba(218, 165, 32, 0.8));
+  }
+}
+
+/* Carousel Arrows - Enhanced SVG STYLE */
 .carousel_arrow {
   background: rgba(20, 20, 25, 0.7);
   backdrop-filter: blur(10px);
@@ -576,7 +584,7 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
   color: rgba(218, 165, 32, 0.8);
   flex-shrink: 0;
   position: relative;
@@ -589,18 +597,18 @@
   inset: 0;
   background: radial-gradient(circle, rgba(218, 165, 32, 0.2) 0%, transparent 70%);
   opacity: 0;
-  transition: opacity 0.3s ease;
+  transition: opacity 0.4s ease;
 }
 
 .carousel_arrow svg {
   filter: drop-shadow(0 2px 8px rgba(218, 165, 32, 0.5));
-  transition: transform 0.3s ease;
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .carousel_arrow:hover {
   background: rgba(218, 165, 32, 0.2);
   border-color: rgba(218, 165, 32, 0.8);
-  transform: scale(1.1);
+  transform: scale(1.15);
   box-shadow: 0 10px 30px rgba(218, 165, 32, 0.4);
   color: rgba(255, 255, 255, 1);
 }
@@ -610,11 +618,12 @@
 }
 
 .carousel_arrow:hover svg {
-  transform: scale(1.1);
+  transform: scale(1.2);
 }
 
 .carousel_arrow:active {
   transform: scale(0.95);
+  box-shadow: 0 5px 15px rgba(218, 165, 32, 0.3);
 }
 
 /* ========================================
@@ -622,7 +631,6 @@
    ======================================== */
 
 .castle_marker {
-  --y: 0;
   position: relative;
   display: flex;
   flex-direction: column;
@@ -630,32 +638,63 @@
   justify-content: center;
   gap: 1rem;
   cursor: pointer;
+  filter: drop-shadow(0 10px 30px rgba(0, 0, 0, 0.6));
+  transform-style: preserve-3d;
+}
+
+/* Animating state - when carousel is transitioning */
+.castle_marker.animating {
+  animation: castleAppear 1s ease-in-out;
+}
+
+/* Castle Size Variants */
+.castle_marker {
+  --y: 0;
+  width: 400px;
+  cursor: pointer;
+  position: relative;
   flex-shrink: 0;
-  will-change: transform, opacity, filter;
+  transition: 0.1s ease;
+  transform: translate3d(0, var(--y, 0), 0);
 }
 
 .castle_marker:hover {
-  --y: -10px;
+  --y: -2%;
 }
 
-/* Castle variants - Simple and clean */
 .current_castle {
   width: 400px;
   z-index: 20;
   opacity: 1;
   transform: translate3d(0, var(--y, 0), 0) scale(1);
   filter: drop-shadow(0 10px 30px rgba(218, 165, 32, 0.4));
-  transition: transform 0.4s ease, filter 0.4s ease;
 }
 
-.prev_castle,
+.current_castle.animating {
+  /* Simple scale in animation */
+  animation: castleScaleIn 0.5s ease-out forwards;
+}
+
+.prev_castle {
+  width: 300px;
+  opacity: 0.5;
+  z-index: 10;
+  transform: translate3d(0, var(--y, 0), 0) scale(0.8);
+  transition: 0.2s ease;
+}
+
 .next_castle {
   width: 300px;
   opacity: 0.5;
   z-index: 10;
   transform: translate3d(0, var(--y, 0), 0) scale(0.8);
-  filter: drop-shadow(0 10px 30px rgba(0, 0, 0, 0.6));
-  transition: transform 0.4s ease, opacity 0.4s ease, filter 0.4s ease;
+  transition: 0.2s ease;
+}
+
+.prev_castle.animating,
+.next_castle.animating {
+  /* Side castles animate with smaller scale */
+  animation: castleScaleSide 0.5s ease-out forwards;
 }
 
 /* Selected State */
@@ -715,40 +754,23 @@
   animation: castlePulse 2s ease-in-out infinite;
 }
 
-@keyframes castlePulse {
-  0%, 100% {
-    transform: scale(1);
-    opacity: 0.8;
-  }
-  50% {
-    transform: scale(1.05);
-    opacity: 1;
-  }
-}
-
 .castle_image {
   width: 100%;
   height: auto;
   object-fit: contain;
-  transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.5s ease;
+  transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
   border-radius: 10px;
   position: relative;
   z-index: 1;
-  will-change: transform, filter;
 }
 
 .current_castle .castle_image {
   filter: brightness(1.1) contrast(1.05);
 }
 
-/* Locked State Filter - higher specificity to override */
-.castle_image.locked_filter {
-  filter: grayscale(100%) brightness(0.5) !important;
-  opacity: 0.6;
-}
-
-.current_castle .castle_image.locked_filter {
-  filter: grayscale(100%) brightness(0.5) !important;
+/* Locked State Filter */
+.locked_filter {
+  filter: grayscale(100%) brightness(0.5);
   opacity: 0.6;
 }
 
@@ -829,9 +851,7 @@
     width: 280px;
   }
   
-  .side_castle,
-  .prev_castle,
-  .next_castle {
+  .side_castle {
     width: 200px;
   }
 
@@ -850,9 +870,7 @@
     width: 260px;
   }
   
-  .side_castle,
-  .prev_castle,
-  .next_castle {
+  .side_castle {
     width: 180px;
   }
 
@@ -889,9 +907,7 @@
     width: 240px;
   }
   
-  .side_castle,
-  .prev_castle,
-  .next_castle {
+  .side_castle {
     width: 170px;
   }
 
@@ -1306,12 +1322,11 @@
 
 /* Enter Button */
 .enter_button {
-  width: auto;
-  min-width: 200px;
-  padding: 0.75rem 2rem;
+  width: 100%;
+  padding: 1rem 1.5rem;
   background: linear-gradient(135deg, #b8860b 0%, #daa520 50%, #b8860b 100%);
   color: #ffffff;
-  font-size: 1rem;
+  font-size: 1.1rem;
   font-weight: 700;
   font-family: 'Poppins', sans-serif;
   border: 2px solid rgba(80, 80, 90, 0.6);
@@ -1324,40 +1339,10 @@
     inset 0 1px 0 rgba(255, 255, 255, 0.2);
   position: relative;
   overflow: hidden;
-  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-  margin: 0 auto;
-  display: block;
-}
-
-.enter_button::before {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 0;
-  height: 0;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.3);
-  transform: translate(-50%, -50%);
-  transition: width 0.6s ease, height 0.6s ease;
-}
-
-.enter_button:hover {
-  transform: translateY(-4px) scale(1.02);
-  box-shadow: 
-    0 10px 30px rgba(218, 165, 32, 0.6),
-    inset 0 1px 0 rgba(255, 255, 255, 0.3);
-  border-color: rgba(218, 165, 32, 0.9);
-  background: linear-gradient(135deg, #daa520 0%, #f4d03f 50%, #daa520 100%);
-}
-
-.enter_button:hover::before {
-  width: 400px;
-  height: 400px;
 }
 
 .enter_button:active {
-  transform: translateY(-2px) scale(0.98);
+  transform: translateY(0);
   box-shadow: 
     0 4px 12px rgba(0, 0, 0, 0.4),
     inset 0 1px 0 rgba(255, 255, 255, 0.2);

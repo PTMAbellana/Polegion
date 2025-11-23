@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useAuthStore } from '@/store/authStore'
 import { AuthProtection } from '@/context/AuthProtection'
 import { getChaptersByCastle } from '@/api/chapters'
+import { initializeCastleProgress } from '@/api/castles'
 import { getChapterQuizzesByChapter } from '@/api/chapterQuizzes'
 import { getMinigamesByChapter } from '@/api/minigames'
 import type { ChapterQuiz, Minigame } from '@/types/common'
@@ -9,6 +10,7 @@ import type { ChapterQuiz, Minigame } from '@/types/common'
 export interface UseChapterDataOptions {
   castleId: string
   chapterNumber: number
+  castleRoute?: string
 }
 
 export interface UseChapterDataReturn {
@@ -21,7 +23,7 @@ export interface UseChapterDataReturn {
   userProfile: any
 }
 
-export function useChapterData({ castleId, chapterNumber }: UseChapterDataOptions): UseChapterDataReturn {
+export function useChapterData({ castleId, chapterNumber, castleRoute }: UseChapterDataOptions): UseChapterDataReturn {
   const { userProfile } = useAuthStore()
   const { isLoading: authLoading } = AuthProtection()
 
@@ -41,7 +43,14 @@ export function useChapterData({ castleId, chapterNumber }: UseChapterDataOption
           console.log(`[useChapterData] Loading data for castle: ${castleId}, chapter: ${chapterNumber}`)
           const chaptersRes = await getChaptersByCastle(castleId)
           
-          const chapter = chaptersRes.data?.find((ch: any) => ch.chapter_number === chapterNumber)
+          let chapter = chaptersRes.data?.find((ch: any) => ch.chapter_number === chapterNumber)
+          
+          if (!chapter && castleRoute) {
+            const routeSlug = castleRoute.split('/').filter(Boolean).pop() || castleRoute
+            const initRes = await initializeCastleProgress(userProfile.id, routeSlug)
+            const initChapters = initRes?.data?.chapters || []
+            chapter = initChapters.find((ch: any) => ch.chapter_number === chapterNumber)
+          }
           
           if (!chapter) {
             throw new Error(`Chapter ${chapterNumber} not found`)

@@ -210,6 +210,7 @@ function ChapterPageBase({ config }: { config: ChapterConfig }) {
   const { chapterId, quiz, minigame, loading, error, authLoading, userProfile } = useChapterData({
     castleId: config.castleId,
     chapterNumber: config.chapterNumber,
+    castleRoute: config.castleRoute,
   });
 
   const {
@@ -666,7 +667,7 @@ function ChapterPageBase({ config }: { config: ChapterConfig }) {
 
   // Main render
   return (
-    <div className={`${baseStyles.chapterContainer} ${baseStyles[config.castleTheme]}`}>
+    <div className={`${baseStyles.chapterContainer} ${baseStyles[config.castleTheme]} ${config.castleTheme}`}>
       <div className={baseStyles.backgroundOverlay}></div>
 
       {showRestartModal && (

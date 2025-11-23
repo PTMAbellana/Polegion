@@ -45,52 +45,62 @@ export const CHAPTER4_CONCEPTS = [
   {
     key: 'volume',
     title: 'Volume',
-    summary: 'Space inside a 3D solid (cubic units)'
+    summary: 'Space inside a 3D solid (cubic units)',
+    description: 'Amount of 3D space a solid contains; measured in cubes.'
   },
   {
     key: 'cube',
     title: 'Cube Volume',
-    summary: 'V = s³'
+    summary: 'V = s³',
+    description: 'Multiply side by itself three times (side cubed).'
   },
   {
     key: 'rectangular-prism',
     title: 'Rectangular Prism',
-    summary: 'V = l × w × h'
+    summary: 'V = l × w × h',
+    description: 'Length times width times height gives the volume.'
   },
   {
     key: 'cylinder',
     title: 'Cylinder Volume',
-    summary: 'V = πr²h'
+    summary: 'V = πr²h',
+    description: 'Area of circular base (πr²) times height.'
   },
   {
     key: 'sphere',
     title: 'Sphere Volume',
-    summary: 'V = (4/3)πr³'
+    summary: 'V = (4/3)πr³',
+    description: 'Four-thirds times π times radius cubed.'
   },
   {
     key: 'cone',
     title: 'Cone Volume',
-    summary: 'V = (1/3)πr²h'
+    summary: 'V = (1/3)πr²h',
+    description: 'One-third of a cylinder with same base and height.'
   },
   {
     key: 'square-pyramid',
     title: 'Square Pyramid',
-    summary: 'V = (1/3)b²h'
+    summary: 'V = (1/3)b²h',
+    description: 'One-third of a prism with square base b and height h.'
   },
   {
     key: 'triangular-prism',
     title: 'Triangular Prism',
-    summary: 'V = (½bh) × H'
+    summary: 'V = (½bh) × H',
+    description: 'Base triangle area (½bh) multiplied by prism height H.'
   },
   {
     key: 'pattern',
     title: 'Volume Pattern',
-    summary: 'Pyramids/cones = 1/3 of prisms/cylinders'
+    summary: 'Pyramids/cones = 1/3 of prisms/cylinders',
+    description: 'Cones and pyramids have one-third the volume counterparts.'
   },
   {
     key: 'word-problems',
     title: 'Volume Word Problems',
-    summary: 'Calculate capacity of containers'
+    summary: 'Calculate capacity of containers',
+    description: 'Use volume formulas to find how much a container holds.'
   }
 ];
 

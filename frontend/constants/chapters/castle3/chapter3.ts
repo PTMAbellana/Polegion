@@ -57,37 +57,44 @@ export const CHAPTER3_CONCEPTS = [
   {
     key: 'area',
     title: 'Area of Circle',
-    summary: 'The amount of space inside the circle'
+    summary: 'The amount of space inside the circle',
+    description: 'Space enclosed by the circle’s boundary.'
   },
   {
     key: 'formula',
     title: 'Area Formula',
-    summary: 'A = πr² (pi times radius squared)'
+    summary: 'A = πr² (pi times radius squared)',
+    description: 'Multiply π by the square of the radius.'
   },
   {
     key: 'squared',
     title: 'Squaring the Radius',
-    summary: 'r² means r × r (multiply radius by itself)'
+    summary: 'r² means r × r (multiply radius by itself)',
+    description: 'r² means radius multiplied by itself.'
   },
   {
     key: 'example1',
     title: 'Example: Full Circle',
-    summary: 'If r = 4, then A = π(16) ≈ 50.3 cm²'
+    summary: 'If r = 4, then A = π(16) ≈ 50.3 cm²',
+    description: 'With r = 4 cm, A ≈ 50.3 cm² using πr².'
   },
   {
     key: 'semicircle',
     title: 'Semi-Circle',
-    summary: 'Half of a circle, area = πr²/2'
+    summary: 'Half of a circle, area = πr²/2',
+    description: 'Half a circle has area equal to πr² ÷ 2.'
   },
   {
     key: 'example2',
     title: 'Example: Semi-Circle',
-    summary: 'If r = 6, then A = 18π ≈ 56.5 cm²'
+    summary: 'If r = 6, then A = 18π ≈ 56.5 cm²',
+    description: 'With r = 6 cm, A ≈ 56.5 cm² for a semicircle.'
   },
   {
     key: 'sector',
     title: 'Sector',
-    summary: 'A pie-shaped portion of the circle'
+    summary: 'A pie-shaped portion of the circle',
+    description: 'A slice of the circle defined by a central angle.'
   }
 ];
 

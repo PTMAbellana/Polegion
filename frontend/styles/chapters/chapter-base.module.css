@@ -649,6 +649,20 @@
 /* Castle-specific Task Completion Styling */
 
 /* Castle 1 - Snow Theme (Light blue/white completion) */
+.castle1Theme .taskItem:not(.taskCompleted) {
+  background: linear-gradient(135deg, rgba(62, 88, 121, 0.12) 0%, rgba(33, 53, 85, 0.1) 100%);
+  border-color: #D8C4B6;
+  box-shadow: 0 2px 8px rgba(33, 53, 85, 0.2);
+}
+
+.castle1Theme .taskItem:not(.taskCompleted) .taskCheckbox {
+  border-color: #D8C4B6;
+  background: rgba(245, 239, 231, 0.15);
+}
+
+.castle1Theme .taskItem:not(.taskCompleted) .taskLabel {
+  color: #F5EFE7;
+}
 .castle1Theme .taskCompleted {
   background: rgba(216, 196, 182, 0.25);
   border-color: rgba(216, 196, 182, 0.6);
@@ -661,6 +675,20 @@
 }
 
 /* Castle 2 - Forest Theme (Light green/yellow completion) */
+.castle2Theme .taskItem:not(.taskCompleted) {
+  background: linear-gradient(135deg, rgba(176, 206, 136, 0.12) 0%, rgba(255, 253, 143, 0.1) 100%);
+  border-color: #B0CE88;
+  box-shadow: 0 2px 8px rgba(76, 118, 59, 0.2);
+}
+
+.castle2Theme .taskItem:not(.taskCompleted) .taskCheckbox {
+  border-color: #B0CE88;
+  background: rgba(255, 253, 143, 0.15);
+}
+
+.castle2Theme .taskItem:not(.taskCompleted) .taskLabel {
+  color: #B0CE88;
+}
 .castle2Theme .taskCompleted {
   background: rgba(255, 253, 143, 0.2);
   border-color: rgba(255, 253, 143, 0.6);
@@ -673,6 +701,20 @@
 }
 
 /* Castle 3 - Ocean Theme (Light cyan/green completion) */
+.castle3Theme .taskItem:not(.taskCompleted) {
+  background: linear-gradient(135deg, rgba(38, 102, 123, 0.12) 0%, rgba(20, 61, 96, 0.1) 100%);
+  border-color: #A0C878;
+  box-shadow: 0 2px 8px rgba(38, 102, 123, 0.2);
+}
+
+.castle3Theme .taskItem:not(.taskCompleted) .taskCheckbox {
+  border-color: #A0C878;
+  background: rgba(221, 235, 157, 0.15);
+}
+
+.castle3Theme .taskItem:not(.taskCompleted) .taskLabel {
+  color: #DDEB9D;
+}
 .castle3Theme .taskCompleted {
   background: rgba(221, 235, 157, 0.2);
   border-color: rgba(221, 235, 157, 0.6);
@@ -685,6 +727,20 @@
 }
 
 /* Castle 4 - Desert Theme (Light orange/beige completion) */
+.castle4Theme .taskItem:not(.taskCompleted) {
+  background: linear-gradient(135deg, rgba(183, 116, 102, 0.12) 0%, rgba(149, 124, 98, 0.1) 100%);
+  border-color: #E2B59A;
+  box-shadow: 0 2px 8px rgba(149, 124, 98, 0.2);
+}
+
+.castle4Theme .taskItem:not(.taskCompleted) .taskCheckbox {
+  border-color: #E2B59A;
+  background: rgba(255, 225, 175, 0.15);
+}
+
+.castle4Theme .taskItem:not(.taskCompleted) .taskLabel {
+  color: #FFE1AF;
+}
 .castle4Theme .taskCompleted {
   background: rgba(255, 225, 175, 0.25);
   border-color: rgba(255, 225, 175, 0.6);
@@ -697,6 +753,20 @@
 }
 
 /* Castle 5 - Sky Theme (Light gold/blue completion) */
+.castle5Theme .taskItem:not(.taskCompleted) {
+  background: linear-gradient(135deg, rgba(114, 92, 173, 0.12) 0%, rgba(11, 29, 81, 0.1) 100%);
+  border-color: #8CCDEB;
+  box-shadow: 0 2px 8px rgba(11, 29, 81, 0.2);
+}
+
+.castle5Theme .taskItem:not(.taskCompleted) .taskCheckbox {
+  border-color: #8CCDEB;
+  background: rgba(255, 227, 169, 0.15);
+}
+
+.castle5Theme .taskItem:not(.taskCompleted) .taskLabel {
+  color: #FFE3A9;
+}
 .castle5Theme .taskCompleted {
   background: rgba(255, 227, 169, 0.2);
   border-color: rgba(255, 227, 169, 0.6);
@@ -1994,4 +2064,82 @@
   .modalChapterName {
     font-size: 0.85rem;
   }
+}
+.castle1Theme .taskList::-webkit-scrollbar-track {
+  background: rgba(216, 196, 182, 0.25);
+}
+
+.castle1Theme .taskList::-webkit-scrollbar-thumb {
+  background: rgba(216, 196, 182, 0.5);
+}
+
+.castle1Theme .taskList::-webkit-scrollbar-thumb:hover {
+  background: rgba(216, 196, 182, 0.7);
+}
+
+.castle2Theme .taskList::-webkit-scrollbar-track {
+  background: rgba(176, 206, 136, 0.25);
+}
+
+.castle2Theme .taskList::-webkit-scrollbar-thumb {
+  background: rgba(255, 253, 143, 0.5);
+}
+
+.castle2Theme .taskList::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 253, 143, 0.7);
+}
+
+.castle3Theme .taskList::-webkit-scrollbar-track {
+  background: rgba(160, 200, 120, 0.25);
+}
+
+.castle3Theme .taskList::-webkit-scrollbar-thumb {
+  background: rgba(221, 235, 157, 0.5);
+}
+
+.castle3Theme .taskList::-webkit-scrollbar-thumb:hover {
+  background: rgba(221, 235, 157, 0.7);
+}
+
+.castle4Theme .taskList::-webkit-scrollbar-track {
+  background: rgba(226, 181, 154, 0.25);
+}
+
+.castle4Theme .taskList::-webkit-scrollbar-thumb {
+  background: rgba(255, 225, 175, 0.5);
+}
+
+.castle4Theme .taskList::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 225, 175, 0.7);
+}
+
+.castle5Theme .taskList::-webkit-scrollbar-track {
+  background: rgba(140, 205, 235, 0.25);
+}
+
+.castle5Theme .taskList::-webkit-scrollbar-thumb {
+  background: rgba(255, 227, 169, 0.5);
+}
+
+.castle5Theme .taskList::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 227, 169, 0.7);
+}
+.castle1Theme .taskCompleted .taskLabel {
+  color: #D8C4B6;
+}
+
+.castle2Theme .taskCompleted .taskLabel {
+  color: #FFFD8F;
+}
+
+.castle3Theme .taskCompleted .taskLabel {
+  color: #DDEB9D;
+}
+
+.castle4Theme .taskCompleted .taskLabel {
+  color: #FFE1AF;
+}
+
+.castle5Theme .taskCompleted .taskLabel {
+  color: #FFE3A9;
 }
