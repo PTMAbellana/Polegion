@@ -75,19 +75,19 @@ class CastleService {
             const hasAnyProgress = castles.some(c => c.progress);
             
             if (!hasAnyProgress) {
-                console.log(`[CastleService] User ${userId} has no castle progress, auto-creating for first castle`);
+                console.log(`[CastleService] User ${userId} has no castle progress, auto-creating for Castle 0 (Pretest)`);
                 
-                // Find the first castle (unlock_order = 1)
-                const firstCastle = castles.find(c => c.unlockOrder === 1) || castles[0];
+                // Find Castle 0 (The Trial Grounds - Pretest, unlock_order = 0)
+                const firstCastle = castles.find(c => c.unlockOrder === 0) || castles[0];
                 
                 if (firstCastle) {
                     console.log(`[CastleService] Creating progress for castle: ${firstCastle.name}`);
                     
-                    // Create progress for the first castle
+                    // Create progress for Castle 0 (Pretest)
                     const newProgress = await this.userCastleProgressRepo.createUserCastleProgress({
                         user_id: userId,
                         castle_id: firstCastle.id,
-                        unlocked: true, // First castle is always unlocked
+                        unlocked: true, // Castle 0 (Pretest) is always unlocked for new users
                         completed: false,
                         total_xp_earned: 0,
                         completion_percentage: 0,
@@ -154,11 +154,11 @@ class CastleService {
             
             if (!castleProgress) {
                 console.log(`[CastleService] Creating castle progress for user ${userId}`);
-                // Create castle progress - unlocked if it's the first castle (unlock_order = 1)
-                castleProgress = await this.userCastleProgressRepo.createUserCastleProgress({
+                // Create castle progress - unlocked if it's Castle 0 (unlock_order = 0)
+                const castleProgress = await this.userCastleProgressRepo.createUserCastleProgress({
                     user_id: userId,
                     castle_id: castle.id,
-                    unlocked: castle.unlockOrder === 1, // Auto-unlock first castle
+                    unlocked: castle.unlockOrder === 0, // Auto-unlock Castle 0 (Pretest)
                     completed: false,
                     total_xp_earned: 0,
                     completion_percentage: 0,

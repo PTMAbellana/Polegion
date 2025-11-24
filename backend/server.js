@@ -20,7 +20,8 @@ const {
     userCastleProgressRoutes, // Newly Added
     userChapterProgressRoutes, // Newly Added
     userMinigameAttemptRoutes, // Newly Added
-    userQuizAttemptRoutes      // Newly Added
+    userQuizAttemptRoutes,      // Newly Added
+    assessmentRoutes           // Assessment system
 } = require('./container')
 
 const app = express()
@@ -50,6 +51,7 @@ app.use('/api/user-castle-progress', userCastleProgressRoutes) // Newly Added
 app.use('/api/user-chapter-progress', userChapterProgressRoutes) // Newly Added
 app.use('/api/user-minigame-attempts', userMinigameAttemptRoutes) // Newly Added
 app.use('/api/user-quiz-attempts', userQuizAttemptRoutes)       // Newly Added
+app.use('/api/assessments', assessmentRoutes)                   // Assessment system
 //swagger documentation
 app.use('/api-docs', swaggerServe, swaggerSetup)
 

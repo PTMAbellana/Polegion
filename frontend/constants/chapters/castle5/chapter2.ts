@@ -34,7 +34,7 @@ export const CHAPTER2_MINIGAME_LEVELS = [
   { id: 3, shape: 'triangle', side1: 5, side2: 12, side3: 13, base: 12, height: 5, type: 'both', correctPerimeter: 30, correctArea: 30, instruction: 'Find perimeter and area', hint: 'P = a+b+c, A = (b×h)÷2' },
   { id: 4, shape: 'circle', radius: 7, type: 'both', correctPerimeter: 44, correctArea: 154, instruction: 'Find circumference and area (use π ≈ 3.14)', hint: 'C = 2πr, A = πr²' },
   { id: 5, shape: 'parallelogram', side1: 8, side2: 5, base: 8, height: 4, type: 'both', correctPerimeter: 26, correctArea: 32, instruction: 'Find perimeter and area', hint: 'P = 2(a+b), A = b×h' },
-  { id: 6, shape: 'trapezoid', side1: 6, side2: 4, side3: 6, base1: 10, base2: 6, height: 5, type: 'both', correctPerimeter: 28, correctArea: 40, instruction: 'Find perimeter and area', hint: 'A = [(b₁+b₂)×h]÷2' }
+  { id: 6, shape: 'trapezoid', side1: 6, side2: 4, side3: 6, base1: 10, base2: 6, height: 5, type: 'both', correctPerimeter: 26, correctArea: 40, instruction: 'Find perimeter and area', hint: 'A = [(b₁+b₂)×h]÷2' }
 ];
 
 export const CHAPTER2_CONCEPTS = [

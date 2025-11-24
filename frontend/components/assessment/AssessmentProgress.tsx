@@ -5,6 +5,7 @@
 'use client';
 
 import React from 'react';
+import styles from '@/styles/assessment.module.css';
 
 interface AssessmentProgressProps {
     currentQuestion: number;
@@ -22,20 +23,20 @@ export default function AssessmentProgress({
     const progress = (currentQuestion / totalQuestions) * 100;
     
     return (
-        <div className="assessment-progress">
-            <div className="progress-info">
-                <span className="category-info">
-                    <span className="icon">{categoryIcon}</span>
-                    <span className="name">{currentCategory}</span>
+        <div className={styles['assessment-progress']}>
+            <div className={styles['progress-info']}>
+                <span className={styles['category-info']}>
+                    <span className={styles['icon']}>{categoryIcon}</span>
+                    <span className={styles['name']}>{currentCategory}</span>
                 </span>
-                <span className="question-count">
+                <span className={styles['question-count']}>
                     {currentQuestion} / {totalQuestions}
                 </span>
             </div>
             
-            <div className="progress-bar-container">
+            <div className={styles['progress-bar-container']}>
                 <div 
-                    className="progress-bar-fill" 
+                    className={styles['progress-bar-fill']} 
                     style={{ width: `${progress}%` }}
                 />
             </div>

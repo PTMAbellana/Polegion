@@ -448,11 +448,17 @@ function ChapterPageBase({ config }: { config: ChapterConfig }) {
     setFailedTasks((prev) => ({ ...prev, [taskKey]: true }));
   };
 
-  const awardXP = async (type: 'lesson' | 'minigame' | 'quiz') => {
+  const awardXP = async (type: 'lesson' | 'minigame' | 'quiz', quizScorePercentage?: number) => {
     let xp = 0;
     if (type === 'lesson') xp = config.xpValues.lesson;
     else if (type === 'minigame') xp = config.xpValues.minigame;
-    else if (type === 'quiz') xp = Object.keys(config.quizTaskIds).reduce((sum, key) => sum + (config.xpValues[key] || 0), 0);
+    else if (type === 'quiz') {
+      const totalQuizXP = Object.keys(config.quizTaskIds).reduce((sum, key) => sum + (config.xpValues[key] || 0), 0);
+      // Award XP proportional to quiz score
+      xp = quizScorePercentage !== undefined 
+        ? Math.round(totalQuizXP * (quizScorePercentage / 100))
+        : totalQuizXP;
+    }
 
     console.log(`${config.logPrefix} Awarding ${type} XP:`, xp);
     setEarnedXP((prev) => {
@@ -526,7 +532,18 @@ function ChapterPageBase({ config }: { config: ChapterConfig }) {
             return updated;
           });
         } else {
-          awardXP('quiz');
+          // Calculate quiz score percentage from actual answers
+          const totalQuestions = quiz.quiz_config.questions.length;
+          let correctCount = 0;
+          quiz.quiz_config.questions.forEach((q: any) => {
+            if (quizAnswers[q.id] === q.correctAnswer) {
+              correctCount++;
+            }
+          });
+          const quizScorePercentage = Math.round((correctCount / totalQuestions) * 100);
+          
+          setQuizScore(quizScorePercentage);
+          awardXP('quiz', quizScorePercentage);
           
           try {
             console.log(`${config.logPrefix} Submitting quiz with answers:`, quizAnswers);
@@ -575,7 +592,18 @@ function ChapterPageBase({ config }: { config: ChapterConfig }) {
           console.error('Failed to complete chapter:', error);
         }
         
-        awardXP('quiz');
+        // Calculate quiz score percentage from actual answers
+        const totalQuestions = quiz.quiz_config.questions.length;
+        let correctCount = 0;
+        quiz.quiz_config.questions.forEach((q: any) => {
+          if (quizAnswers[q.id] === q.correctAnswer) {
+            correctCount++;
+          }
+        });
+        const quizScorePercentage = Math.round((correctCount / totalQuestions) * 100);
+        
+        setQuizScore(quizScorePercentage);
+        awardXP('quiz', quizScorePercentage);
         
         setCurrentScene('reward');
       }

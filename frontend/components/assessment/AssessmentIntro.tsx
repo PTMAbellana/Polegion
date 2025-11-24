@@ -5,6 +5,7 @@
 'use client';
 
 import React from 'react';
+import styles from '@/styles/assessment.module.css';
 
 interface AssessmentIntroProps {
     title: string;
@@ -26,33 +27,33 @@ export default function AssessmentIntro({
     onStart 
 }: AssessmentIntroProps) {
     return (
-        <div className="assessment-intro">
-            <div className="intro-header">
+        <div className={styles['assessment-intro']}>
+            <div className={styles['intro-header']}>
                 <h1>{title}</h1>
                 <p>{description}</p>
             </div>
             
-            <div className="assessment-info">
-                <div className="info-card">
-                    <span className="icon">📝</span>
-                    <span className="label">{totalQuestions} Questions</span>
+            <div className={styles['assessment-info']}>
+                <div className={styles['info-card']}>
+                    <span className={styles['icon']}>📝</span>
+                    <span className={styles['label']}>{totalQuestions} Questions</span>
                 </div>
-                <div className="info-card">
-                    <span className="icon">⏱️</span>
-                    <span className="label">No Time Limit</span>
+                <div className={styles['info-card']}>
+                    <span className={styles['icon']}>⏱️</span>
+                    <span className={styles['label']}>No Time Limit</span>
                 </div>
-                <div className="info-card">
-                    <span className="icon">✨</span>
-                    <span className="label">6 Categories</span>
+                <div className={styles['info-card']}>
+                    <span className={styles['icon']}>✨</span>
+                    <span className={styles['label']}>6 Categories</span>
                 </div>
             </div>
             
-            <div className="categories-preview">
+            <div className={styles['categories-preview']}>
                 <h3>What You'll Be Tested On:</h3>
-                <div className="categories-grid">
+                <div className={styles['categories-grid']}>
                     {categories.map((cat, idx) => (
-                        <div key={idx} className="category-card">
-                            <span className="icon">{cat.icon}</span>
+                        <div key={idx} className={styles['category-card-intro']}>
+                            <span className={styles['icon']}>{cat.icon}</span>
                             <h4>{cat.name}</h4>
                             <p>{cat.description}</p>
                         </div>
@@ -60,7 +61,7 @@ export default function AssessmentIntro({
                 </div>
             </div>
             
-            <button onClick={onStart} className="start-button">
+            <button onClick={onStart} className={styles['start-button']}>
                 Begin Assessment 🚀
             </button>
         </div>

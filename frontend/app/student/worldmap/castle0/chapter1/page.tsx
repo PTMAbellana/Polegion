@@ -1,6 +1,7 @@
 // Castle 0 - Chapter 1: Pretest Assessment
 'use client';
 
+import { useEffect, useState } from 'react';
 import AssessmentPageBase, { AssessmentConfig } from '@/components/assessment/AssessmentPageBase';
 import { 
     CASTLE0_CHAPTER1_TITLE,
@@ -12,6 +13,14 @@ import {
 } from '@/constants/chapters/castle0/chapter1';
 
 export default function Castle0Chapter1Page() {
+    // Force remount on retake by using timestamp as key
+    const [remountKey, setRemountKey] = useState(Date.now());
+    
+    useEffect(() => {
+        // Update key when page is visited to force fresh state
+        setRemountKey(Date.now());
+    }, []);
+
     const config: AssessmentConfig = {
         type: 'pretest',
         castleId: 'a0b1c2d3-0000-4000-a000-000000000000',
@@ -33,5 +42,5 @@ export default function Castle0Chapter1Page() {
         nextRoute: '/student/worldmap'
     };
 
-    return <AssessmentPageBase config={config} />;
+    return <AssessmentPageBase key={remountKey} config={config} />;
 }

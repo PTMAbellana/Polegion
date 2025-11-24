@@ -157,6 +157,6 @@ export const CHAPTER3_WIZARD = {
 
 export const CHAPTER3_METADATA = {
   title: "The Hall of Angles",
-  subtitle: "Castle 4 - The Polygon Citadel",
+  subtitle: "Castle 4 - The Fractal Bastion",
   description: "Calculate interior angles using (n-2) × 180° and find individual angles in regular polygons."
 };

@@ -9,16 +9,40 @@
   align-items: center;
   gap: 1.5rem;
   width: 100%;
-  max-width: 900px;
+  max-width: 1000px;
   margin: 0 auto;
   padding: 1rem;
-  overflow: hidden;
-  max-height: 100%;
+  overflow-y: auto;
+  max-height: calc(100vh - 180px);
   background: linear-gradient(135deg, rgba(62, 88, 121, 0.3) 0%, rgba(33, 53, 85, 0.3) 100%);
   border: 2px solid rgba(216, 196, 182, 0.3);
   border-radius: 12px;
   backdrop-filter: blur(10px);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+/* Compact layout for shorter viewport heights to avoid zooming */
+@media (max-height: 800px) {
+  .minigameContainer {
+    gap: 0.75rem;
+    padding: 0.5rem;
+    max-height: calc(100vh - 200px);
+  }
+  .questionText {
+    font-size: 1rem;
+    padding: 0.5rem 0.75rem;
+  }
+  .canvasWrapper {
+    max-height: 360px;
+    overflow: auto;
+  }
+  .controlsContainer {
+    gap: 0.5rem;
+  }
+  .feedback {
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+  }
 }
 
 /* Custom Scrollbar for Minigame Container */
@@ -227,9 +251,9 @@
 
 /* Canvas Container */
 .canvasContainer {
-  flex: 1 1 auto;
-  min-width: 260px;
-  max-width: 560px;
+  flex: 1 1 50%;
+  min-width: 280px;
+  max-width: 500px;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -237,13 +261,26 @@
 
 /* Controls Container (buttons, hints) */
 .controlsContainer {
-  flex: 0 1 auto;
+  flex: 1 1 40%;
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
-  min-width: 160px;
-  max-width: 200px;
+  min-width: 240px;
+  max-width: 360px;
   width: 100%;
+}
+
+/* For screens that need more compact layout */
+@media (max-width: 900px) {
+  .gameAreaWrapper {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .canvasContainer,
+  .controlsContainer {
+    max-width: 100%;
+  }
 }
 
 .questionText {
@@ -270,9 +307,10 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   cursor: crosshair;
   flex-shrink: 0;
-  overflow: hidden;
+  overflow: auto;
   width: 100%;
   max-width: 600px;
+  max-height: 60vh;
   display: flex;
   justify-content: center;
   align-items: center;

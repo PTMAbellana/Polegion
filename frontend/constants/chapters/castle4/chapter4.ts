@@ -170,6 +170,6 @@ export const CHAPTER4_WIZARD = {
 
 export const CHAPTER4_METADATA = {
   title: "The Measurement Vault",
-  subtitle: "Castle 4 - The Polygon Citadel",
+  subtitle: "Castle 4 - The Fractal Bastion",
   description: "Calculate perimeters and areas of polygons and solve real-world measurement problems."
 };

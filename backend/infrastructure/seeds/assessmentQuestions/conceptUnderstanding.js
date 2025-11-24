@@ -63,7 +63,7 @@ const conceptUnderstandingQuestions = [
   {
     id: 'cu_pre_05',
     category: 'concept_understanding',
-    question: 'A straight angle measures—',
+    question: 'A straight angle measures',
     options: ['45°', '90°', '180°', '360°'],
     correctAnswer: '180°',
     difficulty: 'easy',
@@ -73,7 +73,7 @@ const conceptUnderstandingQuestions = [
   {
     id: 'cu_pre_06',
     category: 'concept_understanding',
-    question: 'Complementary angles have measures that add up to—',
+    question: 'Complementary angles have measures that add up to',
     options: ['90°', '180°', '270°', '360°'],
     correctAnswer: '90°',
     difficulty: 'easy',
@@ -83,7 +83,7 @@ const conceptUnderstandingQuestions = [
   {
     id: 'cu_pre_07',
     category: 'concept_understanding',
-    question: 'Supplementary angles add up to—',
+    question: 'Supplementary angles add up to',
     options: ['60°', '90°', '120°', '180°'],
     correctAnswer: '180°',
     difficulty: 'easy',
@@ -108,7 +108,7 @@ const conceptUnderstandingQuestions = [
   {
     id: 'cu_pre_09',
     category: 'concept_understanding',
-    question: 'A diameter is—',
+    question: 'A diameter is',
     options: [
       'Twice the radius',
       'Half the radius',
@@ -153,7 +153,7 @@ const conceptUnderstandingQuestions = [
   {
     id: 'cu_pre_12',
     category: 'concept_understanding',
-    question: 'A quadrilateral has—',
+    question: 'A quadrilateral has',
     options: ['2 sides', '3 sides', '4 sides', '5 sides'],
     correctAnswer: '4 sides',
     difficulty: 'easy',
@@ -163,7 +163,7 @@ const conceptUnderstandingQuestions = [
   {
     id: 'cu_pre_13',
     category: 'concept_understanding',
-    question: 'A cone is different from a cylinder because a cone has—',
+    question: 'A cone is different from a cylinder because a cone has',
     options: [
       'Two circular bases',
       'A curved surface',
@@ -178,7 +178,7 @@ const conceptUnderstandingQuestions = [
   {
     id: 'cu_pre_14',
     category: 'concept_understanding',
-    question: 'A prism is identified by its—',
+    question: 'A prism is identified by its',
     options: ['Sides', 'Base shape', 'Height', 'Surface area'],
     correctAnswer: 'Base shape',
     difficulty: 'medium',
@@ -188,7 +188,7 @@ const conceptUnderstandingQuestions = [
   {
     id: 'cu_pre_15',
     category: 'concept_understanding',
-    question: 'A sphere is unique because—',
+    question: 'A sphere is unique because',
     options: [
       'It has edges',
       'It has vertices',
@@ -213,7 +213,7 @@ const conceptUnderstandingQuestions = [
   {
     id: 'cu_pre_17',
     category: 'concept_understanding',
-    question: 'A polygon is a figure made of—',
+    question: 'A polygon is a figure made of',
     options: ['Curved lines', 'Straight segments', 'Rays', 'Arcs'],
     correctAnswer: 'Straight segments',
     difficulty: 'easy',
@@ -238,7 +238,7 @@ const conceptUnderstandingQuestions = [
   {
     id: 'cu_pre_19',
     category: 'concept_understanding',
-    question: 'Vertical angles are—',
+    question: 'Vertical angles are',
     options: [
       'Adjacent',
       'Formed by parallel lines',
@@ -300,7 +300,7 @@ const conceptUnderstandingQuestions = [
   {
     id: 'cu_post_03',
     category: 'concept_understanding',
-    question: 'If an angle measures 120°, it is—',
+    question: 'If an angle measures 120°, it is',
     options: ['Acute', 'Right', 'Obtuse', 'Straight'],
     correctAnswer: 'Obtuse',
     difficulty: 'easy',
@@ -310,7 +310,7 @@ const conceptUnderstandingQuestions = [
   {
     id: 'cu_post_04',
     category: 'concept_understanding',
-    question: 'A radius is always—',
+    question: 'A radius is always',
     options: [
       'Half of the diameter',
       'Equal to the circumference',
@@ -325,7 +325,7 @@ const conceptUnderstandingQuestions = [
   {
     id: 'cu_post_05',
     category: 'concept_understanding',
-    question: 'Two polygons are congruent if—',
+    question: 'Two polygons are congruent if',
     options: [
       'They have the same number of sides only',
       'They have equal corresponding sides and angles',
@@ -355,7 +355,7 @@ const conceptUnderstandingQuestions = [
   {
     id: 'cu_post_07',
     category: 'concept_understanding',
-    question: 'The sum of interior angles of a pentagon is—',
+    question: 'The sum of interior angles of a pentagon is',
     options: ['360°', '540°', '720°', '900°'],
     correctAnswer: '540°',
     difficulty: 'hard',
@@ -365,7 +365,7 @@ const conceptUnderstandingQuestions = [
   {
     id: 'cu_post_08',
     category: 'concept_understanding',
-    question: 'A right triangle must have—',
+    question: 'A right triangle must have',
     options: [
       'One 90° angle',
       'One obtuse angle',
@@ -380,7 +380,7 @@ const conceptUnderstandingQuestions = [
   {
     id: 'cu_post_09',
     category: 'concept_understanding',
-    question: 'Opposite angles formed by intersecting lines are called—',
+    question: 'Opposite angles formed by intersecting lines are called',
     options: [
       'Adjacent angles',
       'Complementary angles',
@@ -395,7 +395,7 @@ const conceptUnderstandingQuestions = [
   {
     id: 'cu_post_10',
     category: 'concept_understanding',
-    question: 'A regular hexagon has—',
+    question: 'A regular hexagon has',
     options: [
       '3 congruent sides',
       '4 congruent sides',
@@ -410,7 +410,7 @@ const conceptUnderstandingQuestions = [
   {
     id: 'cu_post_11',
     category: 'concept_understanding',
-    question: 'A cylinder has—',
+    question: 'A cylinder has',
     options: [
       'One base',
       'Two circular congruent bases',
@@ -425,7 +425,7 @@ const conceptUnderstandingQuestions = [
   {
     id: 'cu_post_12',
     category: 'concept_understanding',
-    question: 'A pyramid is different from a prism because—',
+    question: 'A pyramid is different from a prism because',
     options: [
       'A pyramid has only one base',
       'A pyramid has parallel bases',
@@ -440,7 +440,7 @@ const conceptUnderstandingQuestions = [
   {
     id: 'cu_post_13',
     category: 'concept_understanding',
-    question: 'A square is always a—',
+    question: 'A square is always a',
     options: ['Rhombus', 'Rectangle', 'Parallelogram', 'All of the above'],
     correctAnswer: 'All of the above',
     difficulty: 'hard',
@@ -450,7 +450,7 @@ const conceptUnderstandingQuestions = [
   {
     id: 'cu_post_14',
     category: 'concept_understanding',
-    question: 'The point where all radii of a circle meet is called—',
+    question: 'The point where all radii of a circle meet is called',
     options: ['Chord', 'Center', 'Diameter', 'Tangent'],
     correctAnswer: 'Center',
     difficulty: 'easy',
@@ -460,7 +460,7 @@ const conceptUnderstandingQuestions = [
   {
     id: 'cu_post_15',
     category: 'concept_understanding',
-    question: 'When two angles form a straight line, they are—',
+    question: 'When two angles form a straight line, they are',
     options: ['Complementary', 'Vertical', 'Adjacent angles', 'Linear pair'],
     correctAnswer: 'Linear pair',
     difficulty: 'medium',
@@ -470,7 +470,7 @@ const conceptUnderstandingQuestions = [
   {
     id: 'cu_post_16',
     category: 'concept_understanding',
-    question: 'If two angles share a common arm, they are—',
+    question: 'If two angles share a common arm, they are',
     options: ['Vertical', 'Adjacent', 'Complementary', 'Straight'],
     correctAnswer: 'Adjacent',
     difficulty: 'medium',
@@ -480,7 +480,7 @@ const conceptUnderstandingQuestions = [
   {
     id: 'cu_post_17',
     category: 'concept_understanding',
-    question: 'A triangle with exactly two equal sides is—',
+    question: 'A triangle with exactly two equal sides is',
     options: ['Scalene', 'Isosceles', 'Equilateral', 'Right'],
     correctAnswer: 'Isosceles',
     difficulty: 'easy',
@@ -490,7 +490,7 @@ const conceptUnderstandingQuestions = [
   {
     id: 'cu_post_18',
     category: 'concept_understanding',
-    question: 'A three-dimensional object with a circular base and no edges is—',
+    question: 'A three-dimensional object with a circular base and no edges is',
     options: ['Cone', 'Sphere', 'Cylinder', 'Prism'],
     correctAnswer: 'Sphere',
     difficulty: 'medium',
@@ -500,7 +500,7 @@ const conceptUnderstandingQuestions = [
   {
     id: 'cu_post_19',
     category: 'concept_understanding',
-    question: 'A quadrilateral with only one pair of parallel sides is—',
+    question: 'A quadrilateral with only one pair of parallel sides is',
     options: ['Square', 'Trapezoid', 'Rectangle', 'Rhombus'],
     correctAnswer: 'Trapezoid',
     difficulty: 'medium',
@@ -510,7 +510,7 @@ const conceptUnderstandingQuestions = [
   {
     id: 'cu_post_20',
     category: 'concept_understanding',
-    question: 'The boundary of a circle is called—',
+    question: 'The boundary of a circle is called',
     options: ['Radius', 'Chord', 'Circumference', 'Arc'],
     correctAnswer: 'Circumference',
     difficulty: 'easy',

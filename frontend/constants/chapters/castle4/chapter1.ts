@@ -11,7 +11,7 @@ interface ChapterDialogue {
 // Unified dialogue array combining all scenes
 export const CHAPTER1_DIALOGUE: ChapterDialogue[] = [
   // Opening scene (indices 0-3)
-  { scene: 'opening', text: "Welcome to the Polygon Citadel! I am Polymus, Master of Many Sides." },
+  { scene: 'opening', text: "Welcome to the Fractal Bastion! I am Polymus, Master of Many Sides." },
   { scene: 'opening', text: "Enter the grand gallery where polygons float like art pieces." },
   { scene: 'opening', text: "Each polygon has a unique number of sides and angles." },
   { scene: 'opening', text: "Let us explore the naming and classification of these magnificent shapes!" },
@@ -157,6 +157,6 @@ export const CHAPTER1_WIZARD = {
 
 export const CHAPTER1_METADATA = {
   title: "The Gallery of Shapes",
-  subtitle: "Castle 4 - The Polygon Citadel",
+  subtitle: "Castle 4 - The Fractal Bastion",
   description: "Identify polygons by counting sides and understand congruent and similar polygons."
 };
