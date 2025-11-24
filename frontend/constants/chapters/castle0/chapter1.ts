@@ -25,10 +25,10 @@ export const CASTLE0_CHAPTER1_SCENES = {
 // Audio narration paths (optional)
 export const CASTLE0_CHAPTER1_NARRATION = {
     opening: [
-        '/audio/castle0/chapter1/opening_1.mp3',
-        '/audio/castle0/chapter1/opening_2.mp3',
-        '/audio/castle0/chapter1/opening_3.mp3',
-        '/audio/castle0/chapter1/opening_4.mp3'
+        '/audio/castle0/chapter1/opening_1.wav',
+        '/audio/castle0/chapter1/opening_2.wav',
+        '/audio/castle0/chapter1/opening_3.wav',
+        '/audio/castle0/chapter1/opening_4.wav'
     ]
 };
 
