@@ -130,22 +130,22 @@ export const CHAPTER1_NUMBER = 1;
 // Audio narration paths - matches dialogue indices
 export const CHAPTER1_NARRATION = {
   opening: [
-    '/audio/castle1/chapter1/opening_0.mp3', // 'Ah, a new seeker of shapes has arrived!'
-    '/audio/castle1/chapter1/opening_1.mp3', // 'I am Archim, Keeper of the Euclidean Spire'
-    '/audio/castle1/chapter1/opening_2.mp3', // 'These are Points, the seeds of all geometry'
-    '/audio/castle1/chapter1/opening_3.mp3', // 'From these points, we shall unlock the tower's ancient power!'
+    '/audio/castle1/chapter1/opening_0.wav', // 'Ah, a new seeker of shapes has arrived!'
+    '/audio/castle1/chapter1/opening_1.wav', // 'I am Archim, Keeper of the Euclidean Spire'
+    '/audio/castle1/chapter1/opening_2.wav', // 'These are Points, the seeds of all geometry'
+    '/audio/castle1/chapter1/opening_3.wav', // 'From these points, we shall unlock the tower's ancient power!'
   ],
   lesson: [
-    '/audio/castle1/chapter1/lesson_0.mp3', // 'Every shape begins with a Point'
-    '/audio/castle1/chapter1/lesson_1.mp3', // 'A point represents a specific location in space'
-    '/audio/castle1/chapter1/lesson_2.mp3', // 'Two points form a connection, that is the beginning of a Line Segment'
-    '/audio/castle1/chapter1/lesson_3.mp3', // 'If the path stretches endlessly in one direction, it is a Ray'
-    '/audio/castle1/chapter1/lesson_4.mp3', // 'And if it continues in both directions, it becomes a Line'
-    '/audio/castle1/chapter1/lesson_5.mp3', // 'Now, let us put your knowledge to practice!'
+    '/audio/castle1/chapter1/lesson_0.wav', // 'Every shape begins with a Point'
+    '/audio/castle1/chapter1/lesson_1.wav', // 'A point represents a specific location in space'
+    '/audio/castle1/chapter1/lesson_2.wav', // 'Two points form a connection, that is the beginning of a Line Segment'
+    '/audio/castle1/chapter1/lesson_3.wav', // 'If the path stretches endlessly in one direction, it is a Ray'
+    '/audio/castle1/chapter1/lesson_4.wav', // 'And if it continues in both directions, it becomes a Line'
+    '/audio/castle1/chapter1/lesson_5.wav', // 'Now, let us put your knowledge to practice!'
   ],
   minigame: [
-    '/audio/castle1/chapter1/minigame_0.mp3', // 'Excellent! Now let's put your knowledge into practice'
-    '/audio/castle1/chapter1/minigame_1.mp3', // 'Help the ball reach the trash can'
-    '/audio/castle1/chapter1/minigame_2.mp3', // 'Think carefully about where to place your points!'
+    '/audio/castle1/chapter1/minigame_0.wav', // 'Excellent! Now let's put your knowledge into practice'
+    '/audio/castle1/chapter1/minigame_1.wav', // 'Help the ball reach the trash can'
+    '/audio/castle1/chapter1/minigame_2.wav', // 'Think carefully about where to place your points!'
   ],
 };
