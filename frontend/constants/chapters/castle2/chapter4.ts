@@ -191,23 +191,23 @@ export const CHAPTER4_NUMBER = 4;
 // Audio narration paths - matches dialogue indices
 export const CHAPTER4_NARRATION = {
   opening: [
-    '/audio/castle2/chapter4/opening_0.mp3',
-    '/audio/castle2/chapter4/opening_1.mp3',
-    '/audio/castle2/chapter4/opening_2.mp3',
-    '/audio/castle2/chapter4/opening_3.mp3',
+    '/audio/castle2/chapter4/opening_0.wav',
+    '/audio/castle2/chapter4/opening_1.wav',
+    '/audio/castle2/chapter4/opening_2.wav',
+    '/audio/castle2/chapter4/opening_3.wav',
   ],
   lesson: [
-    '/audio/castle2/chapter4/lesson_0.mp3',
-    '/audio/castle2/chapter4/lesson_1.mp3',
-    '/audio/castle2/chapter4/lesson_2.mp3',
-    '/audio/castle2/chapter4/lesson_3.mp3',
-    '/audio/castle2/chapter4/lesson_4.mp3',
-    '/audio/castle2/chapter4/lesson_5.mp3',
+    '/audio/castle2/chapter4/lesson_0.wav',
+    '/audio/castle2/chapter4/lesson_1.wav',
+    '/audio/castle2/chapter4/lesson_2.wav',
+    '/audio/castle2/chapter4/lesson_3.wav',
+    '/audio/castle2/chapter4/lesson_4.wav',
+    '/audio/castle2/chapter4/lesson_5.wav',
   ],
   minigame: [
-    '/audio/castle2/chapter4/minigame_0.mp3',
-    '/audio/castle2/chapter4/minigame_1.mp3',
-    '/audio/castle2/chapter4/minigame_2.mp3',
+    '/audio/castle2/chapter4/minigame_0.wav',
+    '/audio/castle2/chapter4/minigame_1.wav',
+    '/audio/castle2/chapter4/minigame_2.wav',
   ],
 };
 
