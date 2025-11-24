@@ -69,13 +69,15 @@ class AssessmentRepo extends BaseRepo {
     /**
      * Save multiple attempts in bulk
      * @param {Array} attempts - Array of attempt objects
-     * @returns {Promise<Array>} Created attempt records
+     * @returns {Promise<Array>} Created/updated attempt records
      */
     async saveBulkAttempts(attempts) {
         try {
             const { data, error } = await this.supabase
                 .from('user_assessment_attempts')
-                .insert(attempts)
+                .upsert(attempts, {
+                    onConflict: 'user_id,test_type,question_id'
+                })
                 .select();
 
             if (error) {
@@ -97,29 +99,48 @@ class AssessmentRepo extends BaseRepo {
      */
     async saveResults(resultsData) {
         try {
+            // Build insert object with base fields
+            const insertData = {
+                user_id: resultsData.userId,
+                test_type: resultsData.testType,
+                total_score: resultsData.totalScore,
+                max_score: resultsData.maxScore,
+                percentage: resultsData.percentage,
+                category_scores: resultsData.categoryScores
+            };
+
+            // Add time tracking fields if they exist in the schema
+            // (These are optional until migration is run)
+            if (resultsData.startTime) {
+                insertData.started_at = resultsData.startTime;
+            }
+            if (resultsData.endTime) {
+                insertData.ended_at = resultsData.endTime;
+            }
+            if (resultsData.duration !== undefined) {
+                insertData.duration_seconds = resultsData.duration;
+            }
+
+            console.log('💾 Saving assessment results:', JSON.stringify(insertData, null, 2));
+
             const { data, error } = await this.supabase
                 .from('user_assessment_results')
-                .upsert({
-                    user_id: resultsData.userId,
-                    test_type: resultsData.testType,
-                    total_score: resultsData.totalScore,
-                    max_score: resultsData.maxScore,
-                    percentage: resultsData.percentage,
-                    category_scores: resultsData.categoryScores
-                }, {
+                .upsert(insertData, {
                     onConflict: 'user_id,test_type'
                 })
                 .select()
                 .single();
 
             if (error) {
-                console.error('Error saving results:', error);
+                console.error('❌ Error saving results:', error);
+                console.error('❌ Insert data was:', insertData);
                 throw error;
             }
 
+            console.log('✅ Results saved successfully');
             return data;
         } catch (error) {
-            console.error('saveResults error:', error);
+            console.error('❌ saveResults error:', error);
             throw error;
         }
     }

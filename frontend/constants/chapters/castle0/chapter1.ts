@@ -43,37 +43,31 @@ export const CASTLE0_CHAPTER1_ASSESSMENT_CONFIG = {
         { 
             id: 'knowledge_recall', 
             name: 'Memory Challenge',
-            icon: '🧠',
             description: 'Remember and recall geometric facts'
         },
         { 
             id: 'concept_understanding', 
             name: 'Wisdom Test',
-            icon: '📚',
             description: 'Understand geometric concepts'
         },
         { 
             id: 'procedural_skills', 
             name: 'Skill Trial',
-            icon: '⚔️',
             description: 'Apply geometric procedures'
         },
         { 
             id: 'analytical_thinking', 
             name: 'Detective Quest',
-            icon: '🔍',
             description: 'Analyze geometric relationships'
         },
         { 
             id: 'problem_solving', 
             name: "Hero's Challenge",
-            icon: '🏆',
             description: 'Solve geometric problems'
         },
         { 
             id: 'higher_order', 
             name: "Master's Riddle",
-            icon: '✨',
             description: 'Creative geometric thinking'
         }
     ],

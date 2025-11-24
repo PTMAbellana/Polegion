@@ -19,6 +19,7 @@ import {
     getAssessmentResults, 
     getAssessmentComparison 
 } from '@/api/assessments';
+import { authUtils } from '@/api/axios';
 import toast from 'react-hot-toast';
 
 type AssessmentStage = 'intro' | 'dialogue' | 'assessment' | 'results';
@@ -92,7 +93,7 @@ export interface AssessmentConfig {
     categories: Array<{
         id: string;
         name: string;
-        icon: string;
+        icon?: string;
         description: string;
     }>;
     
@@ -119,28 +120,91 @@ export default function AssessmentPageBase({ config }: { config: AssessmentConfi
     const [dialogueIndex, setDialogueIndex] = useState(0);
     const [assessmentQuestions, setAssessmentQuestions] = useState<any[]>([]);
     const [currentQuestion, setCurrentQuestion] = useState(0);
-    const [userAnswers, setUserAnswers] = useState<any[]>([]);
+    const [userAnswers, setUserAnswers] = useState<Record<number, string>>({});
+    const [startTime, setStartTime] = useState<string | null>(null);
     const [results, setResults] = useState<any>(null);
     const [isLoading, setIsLoading] = useState(false);
+    const [elapsedSeconds, setElapsedSeconds] = useState(0);
+    const [restoredProgress, setRestoredProgress] = useState(false);
 
-    // Reset component state when navigating back to assessment page
+    const STORAGE_KEY = `assessment_${config.type}_${config.castleId}`;
+
+    // Load saved progress on mount
+    useEffect(() => {
+        const savedProgress = localStorage.getItem(STORAGE_KEY);
+        if (savedProgress) {
+            try {
+                const { stage: savedStage, questions, currentQ, answers, startTime: savedStart } = JSON.parse(savedProgress);
+                console.log(`[${config.type}] Restoring saved progress...`);
+                setStage(savedStage);
+                setAssessmentQuestions(questions || []);
+                setCurrentQuestion(currentQ || 0);
+                setUserAnswers(answers || {});
+                setStartTime(savedStart);
+                if (savedStart) {
+                    setElapsedSeconds(Math.max(0, Math.floor((Date.now() - new Date(savedStart).getTime()) / 1000)));
+                }
+                setRestoredProgress(true);
+                return;
+            } catch (error) {
+                console.error('Failed to restore progress:', error);
+                localStorage.removeItem(STORAGE_KEY);
+            }
+        }
+        setRestoredProgress(false);
+    }, [STORAGE_KEY, config.type]);
+
+    // Timer tracking
+    useEffect(() => {
+        if (stage === 'assessment' && startTime) {
+            const updateElapsed = () => {
+                setElapsedSeconds(Math.max(0, Math.floor((Date.now() - new Date(startTime).getTime()) / 1000)));
+            };
+            updateElapsed();
+            const intervalId = window.setInterval(updateElapsed, 1000);
+            return () => clearInterval(intervalId);
+        }
+    }, [stage, startTime]);
+
+    // Save progress whenever state changes
+    useEffect(() => {
+        if (stage === 'assessment' && assessmentQuestions.length > 0) {
+            const progress = {
+                stage,
+                questions: assessmentQuestions,
+                currentQ: currentQuestion,
+                answers: userAnswers,
+                startTime
+            };
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
+            setRestoredProgress(true);
+        }
+    }, [stage, assessmentQuestions, currentQuestion, userAnswers, startTime, STORAGE_KEY]);
+
+    // Clear progress on unmount or when assessment completes
     useEffect(() => {
         return () => {
-            // Cleanup when component unmounts
-            setStage('intro');
-            setDialogueIndex(0);
-            setAssessmentQuestions([]);
-            setCurrentQuestion(0);
-            setUserAnswers([]);
-            setResults(null);
+            // Don't clear if still in progress
+            if (stage === 'results') {
+                localStorage.removeItem(STORAGE_KEY);
+                setRestoredProgress(false);
+            }
         };
-    }, []);
+    }, [stage, STORAGE_KEY]);
 
     // ============================================================================
     // INTRO STAGE
     // ============================================================================
     const handleStartAssessment = () => {
         console.log(`[${config.type}] Starting assessment dialogue...`);
+        // Reset any previous state if starting a fresh attempt
+        setAssessmentQuestions([]);
+        setCurrentQuestion(0);
+        setUserAnswers({});
+        setStartTime(null);
+        setElapsedSeconds(0);
+        localStorage.removeItem(STORAGE_KEY);
+        setRestoredProgress(false);
         setStage('dialogue');
     };
 
@@ -166,8 +230,10 @@ export default function AssessmentPageBase({ config }: { config: AssessmentConfi
         try {
             console.log(`[${config.type}] Loading assessment questions...`);
             
-            // Get user ID from localStorage or auth context
-            const userId = localStorage.getItem('user_id');
+            // Get user ID from auth data
+            const authData = authUtils.getAuthData();
+            const userId = authData.user?.id;
+            
             if (!userId) {
                 toast.error('Please log in to take the assessment');
                 router.push('/auth/login');
@@ -178,9 +244,24 @@ export default function AssessmentPageBase({ config }: { config: AssessmentConfi
             const response = await generateAssessment(userId, config.type) as GenerateAssessmentResponse;
             
             if (response.questions && response.questions.length > 0) {
+                const startedAt = startTime || new Date().toISOString();
+                if (!startTime) {
+                    setStartTime(startedAt);
+                    setElapsedSeconds(0);
+                }
                 setAssessmentQuestions(response.questions);
+                setCurrentQuestion(0);
+                setUserAnswers({});
                 console.log(`[${config.type}] Loaded ${response.questions.length} questions`);
                 setStage('assessment');
+                localStorage.setItem(STORAGE_KEY, JSON.stringify({
+                    stage: 'assessment',
+                    questions: response.questions,
+                    currentQ: 0,
+                    answers: {},
+                    startTime: startedAt
+                }));
+                setRestoredProgress(true);
             } else {
                 toast.error('Failed to load assessment questions');
                 console.error('Invalid response:', response);
@@ -197,19 +278,42 @@ export default function AssessmentPageBase({ config }: { config: AssessmentConfi
     // ============================================================================
     // HANDLE ANSWER SUBMISSION
     // ============================================================================
-    const handleAnswerSubmit = (answer: any) => {
+    const handleAnswerSubmit = (answer: string) => {
         console.log(`[${config.type}] Question ${currentQuestion + 1} answered:`, answer);
         
-        // Store answer
-        setUserAnswers([...userAnswers, answer]);
-        
-        // Move to next question or finish
-        if (currentQuestion < assessmentQuestions.length - 1) {
-            setCurrentQuestion(currentQuestion + 1);
-        } else {
-            // All questions answered, calculate results
-            calculateResults([...userAnswers, answer]);
+        // Store answer for current question
+        setUserAnswers(prev => ({
+            ...prev,
+            [currentQuestion]: answer
+        }));
+    };
+
+    // Navigate to specific question
+    const handleQuestionNavigate = (questionIndex: number) => {
+        if (questionIndex >= 0 && questionIndex < assessmentQuestions.length) {
+            setCurrentQuestion(questionIndex);
         }
+    };
+
+    // Check if all questions are answered
+    const allQuestionsAnswered = () => {
+        return Object.keys(userAnswers).length === assessmentQuestions.length;
+    };
+
+    // Submit assessment when all questions answered
+    const handleSubmitAssessment = () => {
+        if (!allQuestionsAnswered()) {
+            toast.error(`Please answer all ${assessmentQuestions.length} questions before submitting`);
+            return;
+        }
+        
+        // Convert answers object to array format for backend
+        const answersArray = assessmentQuestions.map((q, index) => ({
+            questionId: q.questionId,
+            answer: userAnswers[index]
+        }));
+        
+        calculateResults(answersArray);
     };
 
     // ============================================================================
@@ -220,55 +324,82 @@ export default function AssessmentPageBase({ config }: { config: AssessmentConfi
         try {
             console.log(`[${config.type}] Calculating results...`);
             
-            // Get user ID
-            const userId = localStorage.getItem('user_id');
+            // Get user ID from auth data
+            const authData = authUtils.getAuthData();
+            const userId = authData.user?.id;
+            
             if (!userId) {
                 toast.error('User session expired. Please log in again.');
                 router.push('/auth/login');
                 return;
             }
+
+            // Calculate duration
+            const endTime = new Date().toISOString();
+            const duration = startTime ? Math.floor((new Date(endTime).getTime() - new Date(startTime).getTime()) / 1000) : 0;
             
-            // Format answers for backend
-            const formattedAnswers = allAnswers.map((answer, index) => ({
-                questionId: assessmentQuestions[index].id,
-                selectedAnswer: answer
-            }));
+            console.log(`[${config.type}] Test duration: ${duration} seconds`);
             
             // Submit to backend and get results
-            const response = await submitAssessment(userId, config.type, formattedAnswers) as SubmitAssessmentResponse;
+            const response = await submitAssessment(
+                userId, 
+                config.type, 
+                allAnswers, 
+                startTime || undefined, 
+                endTime, 
+                duration
+            ) as SubmitAssessmentResponse;
             
-            if (response.results) {
-                console.log(`[${config.type}] Results:`, response.results);
+            console.log(`[${config.type}] Raw response:`, response);
+            
+            if (response.results || response) {
+                const results = response.results || response;
+                console.log(`[${config.type}] Results data:`, results);
                 
                 // Transform backend results for display
                 const transformedResults: any = {
-                    totalScore: response.results.correctAnswers,
-                    totalQuestions: response.results.totalQuestions,
-                    percentage: response.results.percentage,
-                    categoryScores: Object.entries(response.results.categoryScores).map(([category, scores]: [string, any]) => ({
-                        category,
-                        score: scores.correct,
-                        total: scores.total,
-                        percentage: scores.percentage,
-                        icon: getCategoryIcon(category)
-                    })),
-                    completedAt: response.results.completedAt
+                    totalScore: results.correctAnswers || results.totalScore || 0,
+                    totalQuestions: results.totalQuestions || 0,
+                    percentage: results.percentage || 0,
+                    categoryScores: results.categoryScores 
+                        ? Object.entries(results.categoryScores).map(([category, scores]: [string, any]) => ({
+                            category,
+                            score: scores.correct,
+                            total: scores.total,
+                            percentage: scores.percentage,
+                            icon: getCategoryIcon(category)
+                        }))
+                        : [],
+                    completedAt: results.completedAt || new Date().toISOString()
                 };
                 
                 // For posttest, get comparison data
                 if (config.type === 'posttest' && config.showComparison) {
                     try {
                         const comparisonResponse = await getAssessmentComparison(userId) as ComparisonResponse;
-                        if (comparisonResponse.comparison) {
+                        if (comparisonResponse && comparisonResponse.comparison) {
                             transformedResults.comparison = comparisonResponse.comparison;
+                            console.log('[posttest] Comparison data loaded');
                         }
-                    } catch (error) {
-                        console.warn('Could not load comparison data:', error);
+                    } catch (error: any) {
+                        // It's okay if comparison fails (e.g., user hasn't done pretest)
+                        if (error?.response?.status === 404) {
+                            console.log('[posttest] No pretest found for comparison - this is okay');
+                        } else {
+                            console.warn('Could not load comparison data:', error);
+                        }
                     }
                 }
                 
                 setResults(transformedResults);
                 setStage('results');
+                localStorage.removeItem(STORAGE_KEY); // Clear progress after completion
+                setRestoredProgress(false);
+                setStartTime(null);
+                setElapsedSeconds(0);
+                setAssessmentQuestions([]);
+                setCurrentQuestion(0);
+                setUserAnswers({});
                 toast.success('Assessment completed!');
             } else {
                 toast.error('Failed to save results');
@@ -285,7 +416,7 @@ export default function AssessmentPageBase({ config }: { config: AssessmentConfi
     // Helper to get category icon
     const getCategoryIcon = (categoryName: string): string => {
         const category = config.categories.find(cat => cat.name === categoryName);
-        return category?.icon || '📚';
+        return category?.icon || '';
     };
 
     // ============================================================================
@@ -384,19 +515,26 @@ export default function AssessmentPageBase({ config }: { config: AssessmentConfi
             );
         }
 
+        const currentQuestionData = assessmentQuestions[currentQuestion] || assessmentQuestions[0];
+        const currentCategoryName = currentQuestionData?.category || config.categories[0]?.name || 'Current category';
+        const currentCategoryIcon = getCategoryIcon(currentCategoryName);
+
         return (
             <div className={styles['assessment-container']}>
                 <AssessmentProgress
-                    currentQuestion={currentQuestion + 1}
+                    currentQuestion={Math.min(currentQuestion + 1, assessmentQuestions.length)}
                     totalQuestions={assessmentQuestions.length}
-                    currentCategory={config.categories[Math.floor(currentQuestion / config.questionsPerCategory)]?.name || ''}
-                    categoryIcon={config.categories[Math.floor(currentQuestion / config.questionsPerCategory)]?.icon || ''}
+                    currentCategory={currentCategoryName}
+                    categoryIcon={currentCategoryIcon}
+                    elapsedSeconds={elapsedSeconds}
                 />
-                
                 <AssessmentQuiz
                     questions={assessmentQuestions}
                     currentQuestionIndex={currentQuestion}
+                    userAnswers={userAnswers}
                     onAnswerSubmit={handleAnswerSubmit}
+                    onNavigate={handleQuestionNavigate}
+                    onSubmitAssessment={handleSubmitAssessment}
                 />
             </div>
         );

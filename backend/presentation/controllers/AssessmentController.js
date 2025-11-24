@@ -58,10 +58,16 @@ class AssessmentController {
      */
     submitAssessment = async (req, res) => {
         try {
-            const { userId, testType, answers } = req.body;
+            console.log('🔵 ==========================================');
+            console.log('🔵 SUBMIT ASSESSMENT REQUEST RECEIVED');
+            console.log('🔵 Request body:', JSON.stringify(req.body, null, 2));
+            console.log('🔵 ==========================================');
+            
+            const { userId, testType, answers, startTime, endTime, duration } = req.body;
 
             // Validation
             if (!userId || !testType || !answers) {
+                console.log('❌ Validation failed: Missing required fields');
                 return res.status(400).json({
                     success: false,
                     message: 'userId, testType, and answers are required'
@@ -69,6 +75,7 @@ class AssessmentController {
             }
 
             if (!['pretest', 'posttest'].includes(testType)) {
+                console.log('❌ Validation failed: Invalid testType');
                 return res.status(400).json({
                     success: false,
                     message: 'testType must be either "pretest" or "posttest"'
@@ -76,13 +83,26 @@ class AssessmentController {
             }
 
             if (!Array.isArray(answers) || answers.length === 0) {
+                console.log('❌ Validation failed: Invalid answers format');
                 return res.status(400).json({
                     success: false,
                     message: 'answers must be a non-empty array'
                 });
             }
 
-            const results = await this.assessmentService.submitAssessment(userId, testType, answers);
+            console.log('✅ Validation passed, calling service...');
+            
+            const results = await this.assessmentService.submitAssessment(
+                userId, 
+                testType, 
+                answers, 
+                startTime, 
+                endTime, 
+                duration
+            );
+
+            console.log('✅ Service completed successfully');
+            console.log('🔵 ==========================================');
 
             return res.status(200).json({
                 success: true,
@@ -90,7 +110,11 @@ class AssessmentController {
             });
 
         } catch (error) {
-            console.error('submitAssessment error:', error);
+            console.error('❌❌❌ submitAssessment CONTROLLER error:', error);
+            console.error('❌ Error name:', error.name);
+            console.error('❌ Error message:', error.message);
+            console.error('❌ Error stack:', error.stack);
+            console.log('🔵 ==========================================');
             return res.status(500).json({
                 success: false,
                 message: 'Failed to submit assessment',

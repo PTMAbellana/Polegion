@@ -1,0 +1,24 @@
+<svg width="720" height="480" viewBox="0 0 720 480" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="grad3" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#0d1b2a"/>
+      <stop offset="100%" stop-color="#1b263b"/>
+    </linearGradient>
+  </defs>
+  <rect width="720" height="480" rx="32" fill="url(#grad3)"/>
+  <g opacity="0.7">
+    <circle cx="560" cy="140" r="80" fill="#3a9679"/>
+    <rect x="80" y="110" width="320" height="70" rx="16" fill="#e9c46a"/>
+    <rect x="80" y="210" width="320" height="70" rx="16" fill="#2a9d8f"/>
+    <rect x="80" y="310" width="320" height="70" rx="16" fill="#e76f51"/>
+  </g>
+  <g fill="#f1faee" font-family="Montserrat, Arial, sans-serif">
+    <text x="100" y="155" font-size="22" font-weight="600">Quest Log (Placeholder)</text>
+    <text x="100" y="255" font-size="22" font-weight="600">Daily Challenges</text>
+    <text x="100" y="355" font-size="22" font-weight="600">Teacher Feedback</text>
+  </g>
+  <text x="520" y="260" fill="#d1e2f3" font-family="Montserrat, Arial, sans-serif" font-size="48" font-weight="700" opacity="0.3">
+    XP+
+  </text>
+</svg>
+

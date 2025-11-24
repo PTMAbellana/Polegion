@@ -12,13 +12,21 @@ interface AssessmentProgressProps {
     totalQuestions: number;
     currentCategory: string;
     categoryIcon: string;
+    elapsedSeconds?: number;
 }
+
+const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+};
 
 export default function AssessmentProgress({ 
     currentQuestion, 
     totalQuestions,
     currentCategory,
-    categoryIcon
+    categoryIcon,
+    elapsedSeconds = 0
 }: AssessmentProgressProps) {
     const progress = (currentQuestion / totalQuestions) * 100;
     
@@ -31,6 +39,9 @@ export default function AssessmentProgress({
                 </span>
                 <span className={styles['question-count']}>
                     {currentQuestion} / {totalQuestions}
+                </span>
+                <span className={styles['timer-badge']}>
+                    ⏱ {formatTime(elapsedSeconds)}
                 </span>
             </div>
             

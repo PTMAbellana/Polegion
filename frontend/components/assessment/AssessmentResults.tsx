@@ -13,7 +13,7 @@ interface CategoryScore {
     score: number;
     total: number;
     percentage: number;
-    icon: string;
+    icon?: string;
 }
 
 interface AssessmentResultsProps {
@@ -53,11 +53,11 @@ export default function AssessmentResults({
         Math.round((results.totalScore / results.totalQuestions) * 100);
     
     const getGradeMessage = (percent: number) => {
-        if (percent >= 90) return { emoji: '🏆', message: 'Outstanding!' };
-        if (percent >= 80) return { emoji: '🌟', message: 'Excellent!' };
-        if (percent >= 70) return { emoji: '👍', message: 'Great Job!' };
-        if (percent >= 60) return { emoji: '💪', message: 'Good Effort!' };
-        return { emoji: '📚', message: 'Keep Learning!' };
+        if (percent >= 90) return { message: 'Outstanding!' };
+        if (percent >= 80) return { message: 'Excellent!' };
+        if (percent >= 70) return { message: 'Great Job!' };
+        if (percent >= 60) return { message: 'Good Effort!' };
+        return { message: 'Keep Learning!' };
     };
     
     const grade = getGradeMessage(percentage);
@@ -81,7 +81,6 @@ export default function AssessmentResults({
         <div className={styles['assessment-results']}>
             {/* Celebration Header */}
             <div className={styles['results-header']}>
-                <div className={styles['celebration-emoji']}>{grade.emoji}</div>
                 <h1 className={styles['results-title']}>
                     {assessmentType === 'pretest' ? 'Pretest' : 'Posttest'} Complete!
                 </h1>
@@ -109,7 +108,7 @@ export default function AssessmentResults({
             {/* Improvement Banner (Posttest only) */}
             {assessmentType === 'posttest' && results.comparison && (
                 <div className={styles['improvement-banner']}>
-                    <h2>🎯 Your Growth Journey</h2>
+                    <h2>Your Growth Journey</h2>
                     <p className={styles['improvement-text']}>
                         Overall Improvement: 
                         <span className={styles['improvement-value']}>
@@ -143,7 +142,7 @@ export default function AssessmentResults({
                     
                     return (
                         <div key={cat.category} className={styles['category-card']}>
-                            <div className={styles['category-icon']}>{cat.icon}</div>
+                            {cat.icon && <div className={styles['category-icon']}>{cat.icon}</div>}
                             <h3 className={styles['category-name']}>{cat.category}</h3>
                             <div className={styles['category-score']}>
                                 {cat.score} / {cat.total}

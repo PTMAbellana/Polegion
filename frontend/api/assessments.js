@@ -1,4 +1,4 @@
-import { fetchApiData } from "./axios";
+import api from "./axios";
 
 /**
  * Generate assessment questions for a user
@@ -8,12 +8,8 @@ import { fetchApiData } from "./axios";
  */
 export const generateAssessment = async (userId, testType) => {
   try {
-    const response = await fetchApiData({
-      url: `/assessments/generate/${testType}`,
-      method: "POST",
-      data: { userId },
-    });
-    return response;
+    const response = await api.post(`/assessments/generate/${testType}`, { userId });
+    return response.data?.data ?? response.data;
   } catch (error) {
     console.error("Error generating assessment:", error);
     throw error;
@@ -24,21 +20,23 @@ export const generateAssessment = async (userId, testType) => {
  * Submit assessment answers for grading
  * @param {string} userId - User ID
  * @param {string} testType - 'pretest' or 'posttest'
- * @param {Array<{questionId: number, selectedAnswer: string}>} answers - User's answers
+ * @param {Array<{questionId: number, answer: string}>} answers - User's answers
+ * @param {string} startTime - ISO timestamp when assessment started
+ * @param {string} endTime - ISO timestamp when assessment ended
+ * @param {number} duration - Duration in seconds
  * @returns {Promise<{results: Object}>}
  */
-export const submitAssessment = async (userId, testType, answers) => {
+export const submitAssessment = async (userId, testType, answers, startTime = null, endTime = null, duration = 0) => {
   try {
-    const response = await fetchApiData({
-      url: "/assessments/submit",
-      method: "POST",
-      data: {
-        userId,
-        testType,
-        answers,
-      },
+    const response = await api.post("/assessments/submit", {
+      userId,
+      testType,
+      answers,
+      startTime,
+      endTime,
+      duration,
     });
-    return response;
+    return response.data?.data ?? response.data;
   } catch (error) {
     console.error("Error submitting assessment:", error);
     throw error;
@@ -53,11 +51,8 @@ export const submitAssessment = async (userId, testType, answers) => {
  */
 export const getAssessmentResults = async (userId, testType) => {
   try {
-    const response = await fetchApiData({
-      url: `/assessments/results/${userId}/${testType}`,
-      method: "GET",
-    });
-    return response;
+    const response = await api.get(`/assessments/results/${userId}/${testType}`);
+    return response.data?.data ?? response.data;
   } catch (error) {
     console.error("Error fetching assessment results:", error);
     throw error;
@@ -71,11 +66,8 @@ export const getAssessmentResults = async (userId, testType) => {
  */
 export const getAssessmentComparison = async (userId) => {
   try {
-    const response = await fetchApiData({
-      url: `/assessments/comparison/${userId}`,
-      method: "GET",
-    });
-    return response;
+    const response = await api.get(`/assessments/comparison/${userId}`);
+    return response.data?.data ?? response.data;
   } catch (error) {
     console.error("Error fetching assessment comparison:", error);
     throw error;

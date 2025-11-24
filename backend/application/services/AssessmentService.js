@@ -81,10 +81,21 @@ class AssessmentService {
      * @param {string} userId - User UUID
      * @param {string} testType - 'pretest' or 'posttest'
      * @param {Array} answers - Array of {questionId, answer}
+     * @param {string} startTime - ISO timestamp when started
+     * @param {string} endTime - ISO timestamp when ended
+     * @param {number} duration - Duration in seconds
      * @returns {Promise<Object>} Grading results with score breakdown
      */
-    async submitAssessment(userId, testType, answers) {
+    async submitAssessment(userId, testType, answers, startTime = null, endTime = null, duration = 0) {
         try {
+            console.log('📝 Submit Assessment Request:');
+            console.log('  userId:', userId);
+            console.log('  testType:', testType);
+            console.log('  answers count:', answers.length);
+            console.log('  startTime:', startTime);
+            console.log('  endTime:', endTime);
+            console.log('  duration:', duration);
+
             // Fetch the correct answers for all submitted questions
             const questionIds = answers.map(a => a.questionId);
             const { data: questions, error } = await this.assessmentRepo.supabase
@@ -93,8 +104,11 @@ class AssessmentService {
                 .in('question_id', questionIds);
 
             if (error) {
+                console.error('❌ Error fetching questions:', error);
                 throw error;
             }
+
+            console.log('✅ Fetched', questions.length, 'questions from database');
 
             // Create a map for quick lookup
             const questionsMap = {};
@@ -161,20 +175,31 @@ class AssessmentService {
                     : 0;
             });
 
+            console.log('📊 Grading complete:');
+            console.log('  Total correct:', gradedAnswers.filter(a => a.is_correct).length, '/', answers.length);
+            console.log('  Total score:', totalScore, '/', maxScore);
+
             // Save all attempts in bulk
+            console.log('💾 Saving', gradedAnswers.length, 'attempts...');
             await this.assessmentRepo.saveBulkAttempts(gradedAnswers);
+            console.log('✅ Attempts saved');
 
             // Save overall results
             const percentage = maxScore > 0 ? (totalScore / maxScore) * 100 : 0;
 
+            console.log('💾 Saving overall results...');
             const results = await this.assessmentRepo.saveResults({
                 userId,
                 testType,
                 totalScore,
                 maxScore,
                 percentage: parseFloat(percentage.toFixed(2)),
-                categoryScores
+                categoryScores,
+                startTime,
+                endTime,
+                duration
             });
+            console.log('✅ Overall results saved');
 
             // UNLOCK PROGRESSION: Handle castle unlocking after assessment
             await this.handleCastleUnlockAfterAssessment(userId, testType);

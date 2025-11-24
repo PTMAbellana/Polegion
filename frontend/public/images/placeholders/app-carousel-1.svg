@@ -1,0 +1,22 @@
+<svg width="720" height="480" viewBox="0 0 720 480" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1b4332"/>
+      <stop offset="100%" stop-color="#2d6a4f"/>
+    </linearGradient>
+  </defs>
+  <rect width="720" height="480" fill="url(#grad1)" rx="32"/>
+  <g fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="1">
+    <rect x="40" y="40" width="640" height="400" rx="24"/>
+    <rect x="90" y="120" width="240" height="220" rx="18"/>
+    <rect x="390" y="120" width="240" height="220" rx="18"/>
+  </g>
+  <g fill="#d8f3dc" font-family="Montserrat, Arial, sans-serif">
+    <text x="80" y="90" font-size="28" font-weight="600">Castle Missions</text>
+    <text x="90" y="160" font-size="18" opacity="0.9">Placeholder Image</text>
+    <text x="390" y="160" font-size="18" opacity="0.9">Adventure Preview</text>
+  </g>
+  <circle cx="180" cy="300" r="38" fill="rgba(255,255,255,0.15)"/>
+  <circle cx="480" cy="230" r="60" fill="rgba(255,255,255,0.12)"/>
+</svg>
+

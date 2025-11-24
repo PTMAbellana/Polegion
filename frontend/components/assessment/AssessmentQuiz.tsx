@@ -19,16 +19,27 @@ interface Question {
 interface AssessmentQuizProps {
     questions: Question[];
     currentQuestionIndex: number;
+    userAnswers: Record<number, string>;
     onAnswerSubmit: (answer: string) => void;
+    onNavigate: (index: number) => void;
+    onSubmitAssessment: () => void;
 }
 
 export default function AssessmentQuiz({ 
     questions, 
-    currentQuestionIndex, 
-    onAnswerSubmit 
+    currentQuestionIndex,
+    userAnswers,
+    onAnswerSubmit,
+    onNavigate,
+    onSubmitAssessment
 }: AssessmentQuizProps) {
     const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
-    const [isSubmitting, setIsSubmitting] = useState(false);
+
+    // Load saved answer when question changes
+    React.useEffect(() => {
+        const savedAnswer = userAnswers[currentQuestionIndex];
+        setSelectedAnswer(savedAnswer || null);
+    }, [currentQuestionIndex, userAnswers]);
 
     if (!questions || questions.length === 0 || currentQuestionIndex >= questions.length) {
         return (
@@ -42,70 +53,130 @@ export default function AssessmentQuiz({
     const answerLabels = ['A', 'B', 'C', 'D'];
 
     const handleAnswerClick = (answer: string) => {
-        if (isSubmitting) return;
         setSelectedAnswer(answer);
+        onAnswerSubmit(answer); // Save answer immediately
     };
 
-    const handleSubmit = () => {
-        if (!selectedAnswer || isSubmitting) return;
-        
-        setIsSubmitting(true);
-        onAnswerSubmit(selectedAnswer);
-        
-        // Reset for next question
-        setTimeout(() => {
-            setSelectedAnswer(null);
-            setIsSubmitting(false);
-        }, 300);
+    const handlePrevious = () => {
+        if (currentQuestionIndex > 0) {
+            onNavigate(currentQuestionIndex - 1);
+        }
     };
+
+    const handleNext = () => {
+        if (currentQuestionIndex < questions.length - 1) {
+            onNavigate(currentQuestionIndex + 1);
+        }
+    };
+
+    const allQuestionsAnswered = Object.keys(userAnswers).length === questions.length;
 
     return (
         <div className={styles['quiz-container']}>
-            {/* Question Card */}
-            <div className={styles['question-card']}>
-                <div className={styles['question-header']}>
-                    <span className={styles['question-category']}>{currentQuestion.category}</span>
-                    <span className={styles['question-difficulty']}>{currentQuestion.difficulty}</span>
-                </div>
-                
-                <div className={styles['question-text']}>
-                    {currentQuestion.question}
+            <div className={styles['quiz-left']}>
+                <div className={styles['question-navigator']}>
+                    <div className={styles['question-grid']}>
+                        {questions.map((_, index) => (
+                            <button
+                                key={index}
+                                className={`${styles['question-number']} ${
+                                    index === currentQuestionIndex ? styles['current'] : ''
+                                } ${
+                                    userAnswers[index] ? styles['answered'] : ''
+                                }`}
+                                onClick={() => onNavigate(index)}
+                            >
+                                {index + 1}
+                            </button>
+                        ))}
+                    </div>
+                    <div className={styles['progress-text']}>
+                        {Object.keys(userAnswers).length} / {questions.length} answered
+                    </div>
+                    <div className={styles['answer-legend']}>
+                        <div className={styles['legend-item']}>
+                            <span className={`${styles['legend-dot']} ${styles['legend-dot-current']}`}></span>
+                            <span>Current</span>
+                        </div>
+                        <div className={styles['legend-item']}>
+                            <span className={`${styles['legend-dot']} ${styles['legend-dot-answered']}`}></span>
+                            <span>Answered</span>
+                        </div>
+                        <div className={styles['legend-item']}>
+                            <span className={styles['legend-dot']}></span>
+                            <span>Not answered</span>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            {/* Answer Options - Kahoot Style */}
-            <div className={styles['answer-grid']}>
-                {currentQuestion.options.map((option, index) => (
-                    <button
-                        key={index}
-                        className={`${styles['answer-button']} ${
-                            selectedAnswer === answerLabels[index] ? styles['selected'] : ''
-                        } ${styles[`answer-color-${index}`]}`}
-                        onClick={() => handleAnswerClick(answerLabels[index])}
-                        disabled={isSubmitting}
-                    >
-                        <div className={styles['answer-label']}>
-                            {answerLabels[index]}
-                        </div>
-                        <div className={styles['answer-text']}>
-                            {option}
-                        </div>
-                    </button>
-                ))}
-            </div>
+            <div className={styles['quiz-right']}>
+                {/* Question Card */}
+                <div className={styles['question-card']}>
+                    <div className={styles['question-header']}>
+                        <span className={styles['question-number-label']}>
+                            Question {currentQuestionIndex + 1} of {questions.length}
+                        </span>
+                        <span className={styles['question-category']}>{currentQuestion.category}</span>
+                    </div>
+                    
+                    <div className={styles['question-text']}>
+                        {currentQuestion.question}
+                    </div>
+                </div>
 
-            {/* Submit Button */}
-            {selectedAnswer && (
-                <div className={styles['submit-section']}>
+                {/* Answer Options */}
+                <div className={styles['answer-grid']}>
+                    {currentQuestion.options.map((option, index) => (
+                        <button
+                            key={index}
+                            className={`${styles['answer-button']} ${
+                                selectedAnswer === option ? styles['selected'] : ''
+                            } ${styles[`answer-color-${index}`]}`}
+                            onClick={() => handleAnswerClick(option)}
+                        >
+                            <div className={styles['answer-label']}>
+                                {answerLabels[index]}
+                            </div>
+                            <div className={styles['answer-text']}>
+                                {option}
+                            </div>
+                        </button>
+                    ))}
+                </div>
+
+                {/* Navigation Buttons */}
+                <div className={styles['navigation-section']}>
                     <button 
-                        onClick={handleSubmit}
-                        className={styles['submit-button']}
-                        disabled={isSubmitting}
+                        onClick={handlePrevious}
+                        className={styles['nav-button']}
+                        disabled={currentQuestionIndex === 0}
                     >
-                        {isSubmitting ? 'Submitting...' : 'Submit Answer'}
+                        ← Previous
+                    </button>
+                    
+                    {allQuestionsAnswered ? (
+                        <button 
+                            onClick={onSubmitAssessment}
+                            className={styles['submit-assessment-button']}
+                        >
+                            Submit Assessment
+                        </button>
+                    ) : (
+                        <span className={styles['submit-hint']}>
+                            Answer all questions to submit
+                        </span>
+                    )}
+                    
+                    <button 
+                        onClick={handleNext}
+                        className={styles['nav-button']}
+                        disabled={currentQuestionIndex === questions.length - 1}
+                    >
+                        Next →
                     </button>
                 </div>
-            )}
+            </div>
         </div>
     );
 }

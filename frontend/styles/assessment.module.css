@@ -1,44 +1,47 @@
 /* Main Assessment Container */
 .assessment-container {
-    min-height: 100vh;
+    height: 100vh;
+    overflow: hidden;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 2rem;
+    padding: 1rem;
 }
 
 /* Dialogue Box */
 .dialogue-box {
     max-width: 800px;
+    max-height: calc(100vh - 2rem);
     width: 100%;
     background: white;
     border-radius: 24px;
-    padding: 3rem;
+    padding: 2rem;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
     animation: slideIn 0.5s ease-out;
+    overflow-y: auto;
 }
 
 .dialogue-header {
     text-align: center;
-    margin-bottom: 2rem;
+    margin-bottom: 1.5rem;
 }
 
 .dialogue-header h2 {
-    font-size: 2rem;
+    font-size: 1.5rem;
     font-weight: bold;
     color: #1a202c;
 }
 
 .dialogue-content {
-    margin-bottom: 2rem;
-    min-height: 120px;
+    margin-bottom: 1.5rem;
+    min-height: 80px;
 }
 
 .dialogue-content p {
-    font-size: 1.25rem;
-    line-height: 1.8;
+    font-size: 1.05rem;
+    line-height: 1.6;
     color: #2d3748;
 }
 
@@ -99,40 +102,46 @@
 /* Intro Screen */
 .assessment-intro {
     max-width: 900px;
+    max-height: calc(100vh - 2rem);
     width: 100%;
     background: white;
-    border-radius: 24px;
-    padding: 3rem;
+    border-radius: 16px;
+    padding: 1.25rem;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
     animation: slideIn 0.5s ease-out;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
 }
 
 .intro-header {
     text-align: center;
-    margin-bottom: 2.5rem;
+    margin-bottom: 1rem;
 }
 
 .intro-header h1 {
-    font-size: 3rem;
+    font-size: 1.75rem;
     font-weight: bold;
     color: #1a202c;
-    margin-bottom: 0.75rem;
+    margin-bottom: 0.35rem;
+    margin-top: 0;
 }
 
 .intro-header p {
-    font-size: 1.25rem;
+    font-size: 0.95rem;
     color: #667eea;
     font-weight: 500;
+    margin: 0;
 }
 
 .assessment-info {
     display: flex;
     justify-content: space-around;
-    gap: 1.5rem;
-    margin-bottom: 3rem;
-    padding: 1.5rem;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+    padding: 0.75rem;
     background: #f7fafc;
-    border-radius: 16px;
+    border-radius: 12px;
 }
 
 .info-card {
@@ -147,78 +156,81 @@
 }
 
 .info-card .label {
-    font-size: 1rem;
+    font-size: 0.875rem;
     font-weight: 600;
     color: #4a5568;
 }
 
 .categories-preview {
-    margin-bottom: 2.5rem;
+    margin-bottom: 1rem;
+    flex: 1;
+    overflow-y: auto;
 }
 
 .categories-preview h3 {
-    font-size: 1.5rem;
+    font-size: 1.125rem;
     font-weight: bold;
     color: #1a202c;
     text-align: center;
-    margin-bottom: 1.5rem;
+    margin-bottom: 0.75rem;
+    margin-top: 0;
 }
 
 .categories-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 1.25rem;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.65rem;
 }
 
 .category-card-intro {
     background: linear-gradient(135deg, #f8f9ff 0%, #f0f4ff 100%);
     border: 2px solid #e5e7eb;
-    border-radius: 12px;
-    padding: 1.5rem;
+    border-radius: 10px;
+    padding: 0.75rem;
     text-align: center;
-    transition: transform 0.2s, box-shadow 0.2s;
+    transition: border-color 0.2s;
 }
 
 .category-card-intro:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.2);
+    border-color: #667eea;
 }
 
 .category-card-intro .icon {
-    font-size: 2.5rem;
+    font-size: 2rem;
     display: block;
-    margin-bottom: 0.75rem;
-}
-
-.category-card-intro h4 {
-    font-size: 1.125rem;
-    font-weight: bold;
-    color: #1a202c;
     margin-bottom: 0.5rem;
 }
 
-.category-card-intro p {
+.category-card-intro h4 {
     font-size: 0.875rem;
+    font-weight: bold;
+    color: #1a202c;
+    margin: 0 0 0.25rem 0;
+}
+
+.category-card-intro p {
+    font-size: 0.75rem;
     color: #6b7280;
     margin: 0;
+    line-height: 1.3;
 }
 
 .start-button {
     width: 100%;
     background: linear-gradient(135deg, #10b981 0%, #059669 100%);
     color: white;
-    font-size: 1.5rem;
+    font-size: 1.05rem;
     font-weight: bold;
-    padding: 1.5rem;
+    padding: 0.875rem;
     border: none;
-    border-radius: 12px;
+    border-radius: 10px;
     cursor: pointer;
-    transition: transform 0.2s, box-shadow 0.2s;
+    transition: opacity 0.2s;
+    margin-top: auto;
 }
 
 .start-button:hover {
-    transform: scale(1.02);
-    box-shadow: 0 10px 30px rgba(16, 185, 129, 0.4);
+    opacity: 0.9;
 }
 
 /* Progress Bar */
@@ -256,6 +268,15 @@
     font-size: 1rem;
     font-weight: bold;
     color: #4a5568;
+}
+
+.timer-badge {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #1f2937;
+    background: #f3f4f6;
+    padding: 0.25rem 0.75rem;
+    border-radius: 999px;
 }
 
 .progress-bar-container {
@@ -750,9 +771,33 @@
 
 /* Quiz Component Styles - Kahoot Style */
 .quiz-container {
-    max-width: 1000px;
+    max-width: 1100px;
     width: 100%;
-    padding: 2rem;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 16px;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+    display: grid;
+    grid-template-columns: 240px minmax(0, 1fr);
+    gap: 1rem;
+    min-height: 520px;
+}
+
+.quiz-left {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    background: #f8fafc;
+    border-radius: 12px;
+    padding: 0.75rem;
+    overflow: hidden;
+}
+
+.quiz-right {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    overflow: hidden;
 }
 
 .quiz-error {
@@ -764,9 +809,8 @@
 
 .question-card {
     background: white;
-    border-radius: 20px;
-    padding: 2.5rem;
-    margin-bottom: 2rem;
+    border-radius: 16px;
+    padding: 1.25rem;
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
     animation: slideIn 0.4s ease-out;
 }
@@ -775,8 +819,8 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 1.5rem;
-    padding-bottom: 1rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
     border-bottom: 2px solid #e5e7eb;
 }
 
@@ -798,32 +842,33 @@
 }
 
 .question-text {
-    font-size: 1.5rem;
+    font-size: 1.25rem;
     font-weight: 600;
     color: #1a202c;
-    line-height: 1.6;
+    line-height: 1.5;
 }
 
 .answer-grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1.5rem;
-    margin-bottom: 2rem;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 0.75rem;
+    flex: 1;
+    min-height: 180px;
 }
 
 .answer-button {
     background: white;
-    border: 3px solid transparent;
-    border-radius: 16px;
-    padding: 2rem;
-    min-height: 120px;
+    border: 2px solid transparent;
+    border-radius: 12px;
+    padding: 1rem;
+    min-height: 80px;
     cursor: pointer;
     transition: all 0.2s;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 0.75rem;
+    gap: 0.5rem;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     animation: fadeIn 0.3s ease-out;
 }
@@ -886,10 +931,10 @@
 }
 
 .answer-label {
-    font-size: 1.5rem;
+    font-size: 1.125rem;
     font-weight: bold;
-    width: 48px;
-    height: 48px;
+    width: 36px;
+    height: 36px;
     border-radius: 50%;
     background: currentColor;
     color: white;
@@ -904,10 +949,10 @@
 }
 
 .answer-text {
-    font-size: 1.125rem;
+    font-size: 0.95rem;
     font-weight: 500;
     text-align: center;
-    line-height: 1.4;
+    line-height: 1.3;
 }
 
 .submit-section {
@@ -937,6 +982,162 @@
 .submit-button:disabled {
     opacity: 0.6;
     cursor: not-allowed;
+}
+
+/* Question Navigator */
+.question-navigator {
+    background: white;
+    border-radius: 12px;
+    padding: 0.75rem;
+    margin-bottom: 0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.question-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(38px, 1fr));
+    gap: 0.4rem;
+    margin-bottom: 0.5rem;
+}
+
+.answer-legend {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    font-size: 0.85rem;
+    color: #6b7280;
+    flex-wrap: wrap;
+    margin-top: 0.25rem;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.legend-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid #e5e7eb;
+    background: white;
+    display: inline-block;
+}
+
+.legend-dot-current {
+    background: #667eea;
+    border-color: #667eea;
+}
+
+.legend-dot-answered {
+    background: #10b981;
+    border-color: #10b981;
+}
+
+.question-number {
+    width: 38px;
+    height: 38px;
+    border: 2px solid #e5e7eb;
+    border-radius: 6px;
+    background: white;
+    color: #6b7280;
+    font-weight: 600;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.question-number:hover {
+    border-color: #667eea;
+    background: #f8f9ff;
+}
+
+.question-number.current {
+    border-color: #667eea;
+    background: #667eea;
+    color: white;
+}
+
+.question-number.answered {
+    border-color: #10b981;
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.question-number.answered.current {
+    border-color: #10b981;
+    background: #10b981;
+    color: white;
+}
+
+.progress-text {
+    text-align: center;
+    font-size: 0.9rem;
+    color: #6b7280;
+    font-weight: 500;
+}
+
+.question-number-label {
+    font-size: 0.9rem;
+    color: #6b7280;
+    font-weight: 600;
+}
+
+/* Navigation Section */
+.navigation-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 1rem;
+}
+
+.nav-button {
+    background: white;
+    border: 2px solid #667eea;
+    color: #667eea;
+    font-size: 0.875rem;
+    font-weight: 600;
+    padding: 0.625rem 1.25rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.nav-button:hover:not(:disabled) {
+    background: #667eea;
+    color: white;
+}
+
+.nav-button:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.submit-assessment-button {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    font-size: 0.95rem;
+    font-weight: bold;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.submit-assessment-button:hover {
+    transform: scale(1.05);
+    box-shadow: 0 8px 24px rgba(16, 185, 129, 0.4);
+}
+
+.submit-hint {
+    font-size: 0.9rem;
+    color: #9ca3af;
+    font-style: italic;
 }
 
 /* Responsive Design */

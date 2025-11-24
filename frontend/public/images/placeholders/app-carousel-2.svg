@@ -1,0 +1,23 @@
+<svg width="720" height="480" viewBox="0 0 720 480" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="grad2" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#2f3e75"/>
+      <stop offset="100%" stop-color="#3a9679"/>
+    </linearGradient>
+    <pattern id="grid2" width="24" height="24" patternUnits="userSpaceOnUse">
+      <path d="M24 0H0V24" stroke="rgba(255,255,255,0.08)" stroke-width="1" fill="none"/>
+    </pattern>
+  </defs>
+  <rect width="720" height="480" rx="32" fill="url(#grad2)"/>
+  <rect width="720" height="480" rx="32" fill="url(#grid2)"/>
+  <g fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="2">
+    <path d="M120 320C200 240 280 240 360 320" stroke-linecap="round"/>
+    <rect x="440" y="140" width="160" height="200" rx="20"/>
+    <circle cx="220" cy="200" r="60"/>
+  </g>
+  <text x="60" y="80" font-family="Montserrat, Arial, sans-serif" font-size="26" font-weight="600" fill="#fefae0">
+    Interactive Challenges (Placeholder)
+  </text>
+  <text x="460" y="200" font-family="Montserrat, Arial, sans-serif" font-size="18" fill="#e9f5f2">Live score HUD</text>
+</svg>
+

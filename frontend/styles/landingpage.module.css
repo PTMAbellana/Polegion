@@ -172,6 +172,272 @@
   animation: spin 1s linear infinite;
 }
 
+/* ========== DISCOVERY ROWS ========== */
+.discoverySection {
+  padding: 4rem 2rem 3rem;
+  background: #f3f8f5;
+}
+
+.discoveryIntro {
+  max-width: 900px;
+  margin: 0 auto 2.5rem;
+  text-align: center;
+}
+
+.discoveryIntro h2 {
+  font-size: 2.2rem;
+  color: #1f2937;
+  margin-bottom: 0.5rem;
+}
+
+.discoveryIntro p {
+  color: #4b5563;
+  font-size: 1.05rem;
+  line-height: 1.6;
+}
+
+.discoveryEyebrow {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #3a9679;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  margin-bottom: 0.8rem;
+}
+
+.discoveryGrid {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.5rem;
+}
+
+.discoveryCard {
+  background: white;
+  border-radius: 18px;
+  padding: 1.75rem;
+  border: 1px solid rgba(58, 150, 121, 0.15);
+  box-shadow: 0 10px 30px rgba(31, 41, 55, 0.09);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.discoveryCard:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 18px 35px rgba(31, 41, 55, 0.12);
+}
+
+.discoveryCard h3 {
+  margin: 0;
+  font-size: 1.25rem;
+  color: #1f2937;
+}
+
+.discoveryCard p {
+  margin: 0;
+  color: #6b7280;
+  line-height: 1.5;
+}
+
+.discoveryIcon {
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+  background: rgba(58, 150, 121, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+}
+
+/* ========== CAROUSEL SECTION ========== */
+.carouselSection {
+  padding: 4.5rem 2rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+  align-items: stretch;
+  background: linear-gradient(135deg, rgba(47, 62, 117, 0.06), rgba(58, 150, 121, 0.08));
+}
+
+.carouselIntro {
+  flex: 1 1 320px;
+  max-width: 420px;
+}
+
+.carouselIntro h2 {
+  font-size: 2.3rem;
+  color: #1f2937;
+  margin-bottom: 1rem;
+}
+
+.carouselIntro p {
+  color: #4b5563;
+  line-height: 1.6;
+}
+
+.carouselDots {
+  margin-top: 1.5rem;
+  display: flex;
+  gap: 0.75rem;
+}
+
+.carouselDot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid rgba(47, 62, 117, 0.4);
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.carouselDotActive {
+  background: #3a9679;
+  border-color: #3a9679;
+  transform: scale(1.2);
+}
+
+.carouselStage {
+  flex: 1 1 560px;
+  background: white;
+  border-radius: 24px;
+  padding: 2rem;
+  position: relative;
+  box-shadow: 0 25px 60px rgba(31, 41, 55, 0.15);
+  display: grid;
+  grid-template-columns: minmax(260px, 1fr) minmax(220px, 1fr);
+  gap: 1.5rem;
+}
+
+.carouselBadge {
+  position: absolute;
+  top: 1.5rem;
+  left: 1.5rem;
+  background: rgba(58, 150, 121, 0.15);
+  color: #146c43;
+  font-weight: 600;
+  padding: 0.35rem 1rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+}
+
+.carouselImageWrap {
+  position: relative;
+  border-radius: 18px;
+  overflow: hidden;
+  min-height: 280px;
+  border: 1px solid rgba(47, 62, 117, 0.08);
+}
+
+.carouselImage {
+  object-fit: cover;
+}
+
+.carouselDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.carouselDetails h3 {
+  font-size: 1.5rem;
+  margin: 0;
+  color: #1f2937;
+}
+
+.carouselDetails p {
+  color: #4b5563;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.carouselStats {
+  display: flex;
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+.carouselStats div {
+  background: rgba(47, 62, 117, 0.06);
+  border-radius: 12px;
+  padding: 0.75rem 1rem;
+  flex: 1;
+  text-align: center;
+}
+
+.carouselStats span {
+  display: block;
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.carouselStats small {
+  color: #4b5563;
+  font-size: 0.85rem;
+}
+
+/* ========== MODULES SECTION ========== */
+.modulesSection {
+  padding: 5rem 2rem;
+  background: #fff;
+}
+
+.modulesGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.5rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.moduleCard {
+  border: 1px solid rgba(31, 41, 55, 0.1);
+  border-radius: 18px;
+  padding: 1.5rem;
+  background: #fdfdfc;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  min-height: 240px;
+  position: relative;
+}
+
+.moduleCard h3 {
+  margin: 0;
+  font-size: 1.35rem;
+  color: #1f2937;
+}
+
+.moduleCard p {
+  margin: 0;
+  color: #4b5563;
+  line-height: 1.6;
+}
+
+.moduleTag {
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #3a9679;
+}
+
+.modulePlaceholder {
+  margin-top: auto;
+  border: 1px dashed rgba(47, 62, 117, 0.35);
+  border-radius: 10px;
+  padding: 0.75rem;
+  text-align: center;
+  font-size: 0.85rem;
+  color: #4b5563;
+  background: rgba(47, 62, 117, 0.03);
+}
+
 /* ========== WHY KIDS SECTION ========== */
 .whyKidsSection {
   position: relative;
@@ -530,6 +796,10 @@
     max-width: 500px;
     margin: 0 auto;
   }
+
+  .carouselStage {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 768px) {
@@ -602,6 +872,28 @@
 
   .ctaSubtitle {
     font-size: 1.1rem;
+  }
+
+  .discoverySection,
+  .modulesSection {
+    padding: 3rem 1.5rem;
+  }
+
+  .carouselSection {
+    padding: 3.5rem 1.5rem;
+    flex-direction: column;
+  }
+
+  .carouselStage {
+    padding: 1.5rem;
+  }
+
+  .carouselStats {
+    flex-direction: column;
+  }
+
+  .modulesGrid {
+    grid-template-columns: 1fr;
   }
 }
 

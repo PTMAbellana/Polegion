@@ -1,7 +1,7 @@
 "use client";
 import Head from "next/head";
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ROUTES } from "@/constants/routes";
 import styles from "../styles/landingpage.module.css";
@@ -9,6 +9,91 @@ import styles from "../styles/landingpage.module.css";
 export default function Home() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const carouselSlides = [
+    {
+      id: 1,
+      title: "World Map Missions",
+      description: "Travel across floating castles and pick the next quest from the interactive world map.",
+      image: "/images/placeholders/app-carousel-1.svg",
+      badge: "Exploration",
+      stats: [
+        { label: "Castles", value: "6" },
+        { label: "Miniquests", value: "40+" },
+      ],
+    },
+    {
+      id: 2,
+      title: "Real-Time Challenges",
+      description: "Rotate solids, drag shapes, and watch your accuracy climb with instant feedback.",
+      image: "/images/placeholders/app-carousel-2.svg",
+      badge: "Play Mode",
+      stats: [
+        { label: "Mini-games", value: "20+" },
+        { label: "Leaderboards", value: "Live" },
+      ],
+    },
+    {
+      id: 3,
+      title: "Quest Log & XP",
+      description: "Earn badges, level up, and keep parents & teachers in the loop with shared progress.",
+      image: "/images/placeholders/app-carousel-3.svg",
+      badge: "Progress",
+      stats: [
+        { label: "Badges", value: "30" },
+        { label: "XP Boosts", value: "Weekly" },
+      ],
+    },
+  ];
+
+  const discoveryHighlights = [
+    {
+      label: "Casual Play or Story Mode",
+      text: "Pick free-play puzzles or follow Dimensius through cinematic story beats.",
+      icon: "🎮",
+    },
+    {
+      label: "Guided Feedback",
+      text: "Hints, narrated lessons, and XP stars keep learners confident.",
+      icon: "✨",
+    },
+    {
+      label: "Teacher Dashboards",
+      text: "Shareable progress, printable quizzes, and classroom competitions.",
+      icon: "🧭",
+    },
+  ];
+
+  const adventureModules = [
+    {
+      title: "Interactive World Map",
+      description: "Unlock castles and zoom into every chapter. Each icon glows when new XP is available.",
+      tag: "Map Hub",
+    },
+    {
+      title: "Mini-Game Arcade",
+      description: "Angle launchers, polygon scanners, surface-area labs, and more playful practice.",
+      tag: "Arcade",
+    },
+    {
+      title: "Narrated Lessons",
+      description: "Every chapter includes voiced stories, concept cards, and guided tasks.",
+      tag: "Lessons",
+    },
+    {
+      title: "Rewards & Relics",
+      description: "Collect relics, badges, and banners that decorate the player profile.",
+      tag: "Rewards",
+    },
+  ];
+
+  const [activeSlide, setActiveSlide] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setActiveSlide((prev) => (prev + 1) % carouselSlides.length);
+    }, 6000);
+    return () => clearInterval(timer);
+  }, [carouselSlides.length]);
 
   const handleSignIn = () => {
     router.push(ROUTES.LOGIN); //TEMPORARY CHANGE
@@ -98,6 +183,93 @@ export default function Home() {
                 </>
               )}
             </button>
+          </div>
+        </section>
+
+        {/* Discovery Section */}
+        <section className={styles.discoverySection}>
+          <div className={styles.discoveryIntro}>
+            <p className={styles.discoveryEyebrow}>What makes Polegion different?</p>
+            <h2>Built for curious brains & confident teachers</h2>
+            <p>
+              Polegion feels like an adventure game but secretly follows the exact geometry competencies
+              you expect in class.
+            </p>
+          </div>
+          <div className={styles.discoveryGrid}>
+            {discoveryHighlights.map((card) => (
+              <div key={card.label} className={styles.discoveryCard}>
+                <div className={styles.discoveryIcon}>{card.icon}</div>
+                <h3>{card.label}</h3>
+                <p>{card.text}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Carousel Section */}
+        <section className={styles.carouselSection}>
+          <div className={styles.carouselIntro}>
+            <p className={styles.discoveryEyebrow}>See it in action</p>
+            <h2>Inside the Arcane Observatory</h2>
+            <p>
+              Switch between story mode, mini-games, and rewards. Here’s a quick peek while we prep the
+              full launch media.
+            </p>
+            <div className={styles.carouselDots}>
+              {carouselSlides.map((slide, index) => (
+                <button
+                  key={slide.id}
+                  className={`${styles.carouselDot} ${
+                    activeSlide === index ? styles.carouselDotActive : ""
+                  }`}
+                  onClick={() => setActiveSlide(index)}
+                  aria-label={`Show slide ${index + 1}`}
+                />
+              ))}
+            </div>
+          </div>
+
+          <div className={styles.carouselStage}>
+            <div className={styles.carouselBadge}>{carouselSlides[activeSlide].badge}</div>
+            <div className={styles.carouselImageWrap}>
+              <Image
+                src={carouselSlides[activeSlide].image}
+                alt={carouselSlides[activeSlide].title}
+                fill
+                className={styles.carouselImage}
+                priority
+              />
+            </div>
+            <div className={styles.carouselDetails}>
+              <h3>{carouselSlides[activeSlide].title}</h3>
+              <p>{carouselSlides[activeSlide].description}</p>
+              <div className={styles.carouselStats}>
+                {carouselSlides[activeSlide].stats.map((stat) => (
+                  <div key={stat.label}>
+                    <span>{stat.value}</span>
+                    <small>{stat.label}</small>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Modules section */}
+        <section className={styles.modulesSection}>
+          <h2 className={styles.sectionTitle}>What&apos;s inside the app</h2>
+          <div className={styles.modulesGrid}>
+            {adventureModules.map((module) => (
+              <div key={module.title} className={styles.moduleCard}>
+                <span className={styles.moduleTag}>{module.tag}</span>
+                <h3>{module.title}</h3>
+                <p>{module.description}</p>
+                <div className={styles.modulePlaceholder}>
+                  <span>Preview coming soon</span>
+                </div>
+              </div>
+            ))}
           </div>
         </section>
 
