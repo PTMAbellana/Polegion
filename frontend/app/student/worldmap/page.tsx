@@ -70,6 +70,32 @@ export default function WorldMapPage() {
     }
   }, [userProfile?.id, fetchCastles]);
 
+  // Ensure fresh data when returning to this page (window focus / tab visible)
+  useEffect(() => {
+    const onFocus = () => {
+      const userId = userProfile?.id;
+      if (userId) {
+        console.log('[WorldMap] Refetching castles on window focus');
+        fetchCastles(userId);
+      }
+    };
+    const onVisibility = () => {
+      if (!document.hidden) {
+        const userId = userProfile?.id;
+        if (userId) {
+          console.log('[WorldMap] Refetching castles on visibilitychange');
+          fetchCastles(userId);
+        }
+      }
+    };
+    window.addEventListener('focus', onFocus);
+    document.addEventListener('visibilitychange', onVisibility);
+    return () => {
+      window.removeEventListener('focus', onFocus);
+      document.removeEventListener('visibilitychange', onVisibility);
+    };
+  }, [userProfile?.id, fetchCastles]);
+
   // Intro display - use user-specific localStorage key
   useEffect(() => {
     if (!authLoading && userProfile) {
@@ -137,6 +163,12 @@ export default function WorldMapPage() {
       localStorage.setItem(`hasSeenMapIntro_${userProfile.id}`, 'true');
     }
   };
+
+  // Reset modal state when arriving on world map
+  useEffect(() => {
+    setSelectedCastle(null);
+    setHoveredCastle(null);
+  }, [setSelectedCastle, setHoveredCastle]);
 
   const playWhoosh = () => {
     if (whooshAudioRef.current) {

@@ -24,6 +24,7 @@
     "react-hot-toast": "^2.5.2",
     "react-icons": "^5.5.0",
     "react-konva": "^19.0.7",
+    "recharts": "^3.5.0",
     "sweetalert2": "^11.21.0",
     "yup": "^1.6.1"
   },

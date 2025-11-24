@@ -18,7 +18,7 @@ const knowledgeRecallQuestions = [
   {
     id: 'kr_pre_02',
     category: 'knowledge_recall',
-    question: 'A straight path that extends infinitely in both directions is called a—',
+    question: 'A straight path that extends infinitely in both directions is called a',
     options: ['Line', 'Line Segment', 'Ray', 'Angle'],
     correctAnswer: 'Line',
     difficulty: 'easy',
@@ -28,7 +28,7 @@ const knowledgeRecallQuestions = [
   {
     id: 'kr_pre_03',
     category: 'knowledge_recall',
-    question: 'A part of a line with two endpoints is called—',
+    question: 'A part of a line with two endpoints is called',
     options: ['Ray', 'Line', 'Line Segment', 'Plane'],
     correctAnswer: 'Line Segment',
     difficulty: 'easy',
@@ -38,7 +38,7 @@ const knowledgeRecallQuestions = [
   {
     id: 'kr_pre_04',
     category: 'knowledge_recall',
-    question: 'Two lines that never meet are called—',
+    question: 'Two lines that never meet are called',
     options: ['Intersecting lines', 'Perpendicular lines', 'Parallel lines', 'Skew lines'],
     correctAnswer: 'Parallel lines',
     difficulty: 'easy',
@@ -48,7 +48,7 @@ const knowledgeRecallQuestions = [
   {
     id: 'kr_pre_05',
     category: 'knowledge_recall',
-    question: 'Lines that meet or cross at one point are called—',
+    question: 'Lines that meet or cross at one point are called',
     options: ['Parallel', 'Intersecting', 'Perpendicular', 'Skew'],
     correctAnswer: 'Intersecting',
     difficulty: 'easy',
@@ -58,7 +58,7 @@ const knowledgeRecallQuestions = [
   {
     id: 'kr_pre_06',
     category: 'knowledge_recall',
-    question: 'Lines that intersect to form a right angle are—',
+    question: 'Lines that intersect to form a right angle are',
     options: ['Parallel', 'Skew', 'Intersecting', 'Perpendicular'],
     correctAnswer: 'Perpendicular',
     difficulty: 'easy',
@@ -68,7 +68,7 @@ const knowledgeRecallQuestions = [
   {
     id: 'kr_pre_07',
     category: 'knowledge_recall',
-    question: 'Lines that are not coplanar and do not meet are—',
+    question: 'Lines that are not coplanar and do not meet are',
     options: ['Parallel', 'Skew', 'Perpendicular', 'Coplanar'],
     correctAnswer: 'Skew',
     difficulty: 'medium',
@@ -78,7 +78,7 @@ const knowledgeRecallQuestions = [
   {
     id: 'kr_pre_08',
     category: 'knowledge_recall',
-    question: 'A figure formed by two rays with a common endpoint is—',
+    question: 'A figure formed by two rays with a common endpoint is',
     options: ['Segment', 'Ray', 'Angle', 'Line'],
     correctAnswer: 'Angle',
     difficulty: 'easy',
@@ -88,7 +88,7 @@ const knowledgeRecallQuestions = [
   {
     id: 'kr_pre_09',
     category: 'knowledge_recall',
-    question: 'The common endpoint of an angle is called the—',
+    question: 'The common endpoint of an angle is called the',
     options: ['Vertex', 'Arm', 'Side', 'Endpoint'],
     correctAnswer: 'Vertex',
     difficulty: 'easy',
@@ -108,7 +108,7 @@ const knowledgeRecallQuestions = [
   {
     id: 'kr_pre_11',
     category: 'knowledge_recall',
-    question: 'A polygon with four sides is called—',
+    question: 'A polygon with four sides is called',
     options: ['Triangle', 'Quadrilateral', 'Pentagon', 'Hexagon'],
     correctAnswer: 'Quadrilateral',
     difficulty: 'easy',
@@ -118,7 +118,7 @@ const knowledgeRecallQuestions = [
   {
     id: 'kr_pre_12',
     category: 'knowledge_recall',
-    question: 'A circle is named using its—',
+    question: 'A circle is named using its',
     options: ['Center', 'Radius', 'Diameter', 'Chord'],
     correctAnswer: 'Center',
     difficulty: 'easy',
@@ -128,7 +128,7 @@ const knowledgeRecallQuestions = [
   {
     id: 'kr_pre_13',
     category: 'knowledge_recall',
-    question: 'The distance from the center of a circle to any point on the circle is—',
+    question: 'The distance from the center of a circle to any point on the circle is',
     options: ['Radius', 'Diameter', 'Chord', 'Arc'],
     correctAnswer: 'Radius',
     difficulty: 'easy',
@@ -138,7 +138,7 @@ const knowledgeRecallQuestions = [
   {
     id: 'kr_pre_14',
     category: 'knowledge_recall',
-    question: 'The longest chord in a circle is the—',
+    question: 'The longest chord in a circle is the',
     options: ['Radius', 'Diameter', 'Tangent', 'Secant'],
     correctAnswer: 'Diameter',
     difficulty: 'easy',
@@ -148,7 +148,7 @@ const knowledgeRecallQuestions = [
   {
     id: 'kr_pre_15',
     category: 'knowledge_recall',
-    question: 'A flat surface that extends infinitely is a—',
+    question: 'A flat surface that extends infinitely is a',
     options: ['Point', 'Line', 'Plane', 'Solid'],
     correctAnswer: 'Plane',
     difficulty: 'easy',
@@ -158,7 +158,7 @@ const knowledgeRecallQuestions = [
   {
     id: 'kr_pre_16',
     category: 'knowledge_recall',
-    question: 'A 3D figure with a circular base and one vertex is a—',
+    question: 'A 3D figure with a circular base and one vertex is a',
     options: ['Cylinder', 'Sphere', 'Cone', 'Prism'],
     correctAnswer: 'Cone',
     difficulty: 'medium',
@@ -178,7 +178,7 @@ const knowledgeRecallQuestions = [
   {
     id: 'kr_pre_18',
     category: 'knowledge_recall',
-    question: 'A solid figure with two congruent parallel faces is a—',
+    question: 'A solid figure with two congruent parallel faces is a',
     options: ['Prism', 'Pyramid', 'Sphere', 'Cone'],
     correctAnswer: 'Prism',
     difficulty: 'medium',
@@ -188,7 +188,7 @@ const knowledgeRecallQuestions = [
   {
     id: 'kr_pre_19',
     category: 'knowledge_recall',
-    question: 'A figure with all points equidistant from the center is a—',
+    question: 'A figure with all points equidistant from the center is a',
     options: ['Circle', 'Square', 'Triangle', 'Rectangle'],
     correctAnswer: 'Circle',
     difficulty: 'easy',
@@ -198,7 +198,7 @@ const knowledgeRecallQuestions = [
   {
     id: 'kr_pre_20',
     category: 'knowledge_recall',
-    question: 'A three-dimensional figure with no edges and no vertices is a—',
+    question: 'A three-dimensional figure with no edges and no vertices is a',
     options: ['Cube', 'Sphere', 'Cone', 'Prism'],
     correctAnswer: 'Sphere',
     difficulty: 'easy',
@@ -210,7 +210,7 @@ const knowledgeRecallQuestions = [
   {
     id: 'kr_post_01',
     category: 'knowledge_recall',
-    question: 'A location in space without width, length, or height is a—',
+    question: 'A location in space without width, length, or height is a',
     options: ['Plane', 'Point', 'Line', 'Vertex'],
     correctAnswer: 'Point',
     difficulty: 'easy',
@@ -230,7 +230,7 @@ const knowledgeRecallQuestions = [
   {
     id: 'kr_post_03',
     category: 'knowledge_recall',
-    question: 'A ray has—',
+    question: 'A ray has',
     options: ['No endpoints', 'One endpoint', 'Two endpoints', 'Infinite endpoints'],
     correctAnswer: 'One endpoint',
     difficulty: 'easy',
@@ -250,7 +250,7 @@ const knowledgeRecallQuestions = [
   {
     id: 'kr_post_05',
     category: 'knowledge_recall',
-    question: 'Lines that lie in different planes are—',
+    question: 'Lines that lie in different planes are',
     options: ['Skew lines', 'Perpendicular', 'Intersecting', 'Coplanar'],
     correctAnswer: 'Skew lines',
     difficulty: 'medium',
@@ -260,7 +260,7 @@ const knowledgeRecallQuestions = [
   {
     id: 'kr_post_06',
     category: 'knowledge_recall',
-    question: 'Two rays forming an angle are called—',
+    question: 'Two rays forming an angle are called',
     options: ['Arms', 'Bases', 'Segments', 'Ends'],
     correctAnswer: 'Arms',
     difficulty: 'medium',
@@ -270,7 +270,7 @@ const knowledgeRecallQuestions = [
   {
     id: 'kr_post_07',
     category: 'knowledge_recall',
-    question: 'A polygon with 8 sides is a—',
+    question: 'A polygon with 8 sides is a',
     options: ['Heptagon', 'Octagon', 'Nonagon', 'Decagon'],
     correctAnswer: 'Octagon',
     difficulty: 'easy',
@@ -280,7 +280,7 @@ const knowledgeRecallQuestions = [
   {
     id: 'kr_post_08',
     category: 'knowledge_recall',
-    question: 'A closed figure made of straight segments is a—',
+    question: 'A closed figure made of straight segments is a',
     options: ['Circle', 'Arc', 'Polygon', 'Ray'],
     correctAnswer: 'Polygon',
     difficulty: 'easy',
@@ -290,7 +290,7 @@ const knowledgeRecallQuestions = [
   {
     id: 'kr_post_09',
     category: 'knowledge_recall',
-    question: 'The line passing through the center and touching two points on the circle is—',
+    question: 'The line passing through the center and touching two points on the circle is',
     options: ['Chord', 'Radius', 'Diameter', 'Arc'],
     correctAnswer: 'Diameter',
     difficulty: 'easy',
@@ -300,7 +300,7 @@ const knowledgeRecallQuestions = [
   {
     id: 'kr_post_10',
     category: 'knowledge_recall',
-    question: 'A chord that passes through the center is the—',
+    question: 'A chord that passes through the center is the',
     options: ['Radius', 'Diameter', 'Tangent', 'Secant'],
     correctAnswer: 'Diameter',
     difficulty: 'easy',
@@ -310,7 +310,7 @@ const knowledgeRecallQuestions = [
   {
     id: 'kr_post_11',
     category: 'knowledge_recall',
-    question: 'A polyhedron with one base and triangular faces is a—',
+    question: 'A polyhedron with one base and triangular faces is a',
     options: ['Prism', 'Pyramid', 'Cylinder', 'Sphere'],
     correctAnswer: 'Pyramid',
     difficulty: 'medium',
@@ -320,7 +320,7 @@ const knowledgeRecallQuestions = [
   {
     id: 'kr_post_12',
     category: 'knowledge_recall',
-    question: 'A solid figure with two circular congruent bases is a—',
+    question: 'A solid figure with two circular congruent bases is a',
     options: ['Cone', 'Sphere', 'Cylinder', 'Pyramid'],
     correctAnswer: 'Cylinder',
     difficulty: 'medium',
@@ -330,7 +330,7 @@ const knowledgeRecallQuestions = [
   {
     id: 'kr_post_13',
     category: 'knowledge_recall',
-    question: 'The measure of the "opening" of an angle refers to—',
+    question: 'The measure of the "opening" of an angle refers to',
     options: ['Sides', 'Vertex', 'Degree', 'Length'],
     correctAnswer: 'Degree',
     difficulty: 'medium',
@@ -340,7 +340,7 @@ const knowledgeRecallQuestions = [
   {
     id: 'kr_post_14',
     category: 'knowledge_recall',
-    question: 'A 5-sided polygon is called—',
+    question: 'A 5-sided polygon is called',
     options: ['Pentagram', 'Pentagon', 'Hexagon', 'Septagon'],
     correctAnswer: 'Pentagon',
     difficulty: 'easy',
@@ -360,7 +360,7 @@ const knowledgeRecallQuestions = [
   {
     id: 'kr_post_16',
     category: 'knowledge_recall',
-    question: 'A triangle with all sides equal is—',
+    question: 'A triangle with all sides equal is',
     options: ['Isosceles', 'Scalene', 'Equilateral', 'Right'],
     correctAnswer: 'Equilateral',
     difficulty: 'easy',
@@ -370,7 +370,7 @@ const knowledgeRecallQuestions = [
   {
     id: 'kr_post_17',
     category: 'knowledge_recall',
-    question: 'A figure that is flat and has length and width is—',
+    question: 'A figure that is flat and has length and width is',
     options: ['Solid figure', 'Plane figure', 'Spatial figure', 'Volume'],
     correctAnswer: 'Plane figure',
     difficulty: 'medium',
@@ -390,7 +390,7 @@ const knowledgeRecallQuestions = [
   {
     id: 'kr_post_19',
     category: 'knowledge_recall',
-    question: 'A curved surface with no edges belongs to a—',
+    question: 'A curved surface with no edges belongs to a',
     options: ['Cube', 'Cylinder', 'Sphere', 'Prism'],
     correctAnswer: 'Sphere',
     difficulty: 'medium',
@@ -400,7 +400,7 @@ const knowledgeRecallQuestions = [
   {
     id: 'kr_post_20',
     category: 'knowledge_recall',
-    question: 'A figure formed by points in space is a—',
+    question: 'A figure formed by points in space is a',
     options: ['Plane figure', 'Solid figure', 'Circular figure', 'Line figure'],
     correctAnswer: 'Solid figure',
     difficulty: 'medium',

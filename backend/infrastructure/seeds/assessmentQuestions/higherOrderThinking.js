@@ -55,12 +55,12 @@ const higherOrderThinkingQuestions = [
     category: 'higher_order_thinking',
     question: 'A student claims a triangle with sides 4, 5, 10 is possible. Evaluate.',
     options: [
-      'Correct—any three numbers make a triangle',
-      'Incorrect—violates triangle inequality',
-      'Correct—10 is the longest side',
-      'Correct—4 + 5 > 10'
+      'Correctany three numbers make a triangle',
+      'Incorrectviolates triangle inequality',
+      'Correct10 is the longest side',
+      'Correct4 + 5 > 10'
     ],
-    correctAnswer: 'Incorrect—violates triangle inequality',
+    correctAnswer: 'Incorrectviolates triangle inequality',
     difficulty: 'medium',
     testType: 'pretest',
     points: 1

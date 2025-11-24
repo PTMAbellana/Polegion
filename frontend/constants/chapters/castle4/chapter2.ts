@@ -149,6 +149,6 @@ export const CHAPTER2_WIZARD = {
 
 export const CHAPTER2_METADATA = {
   title: "The Drawing Chamber",
-  subtitle: "Castle 4 - The Polygon Citadel",
+  subtitle: "Castle 4 - The Fractal Bastion",
   description: "Master the art of drawing polygons accurately with proper sides and angles."
 };

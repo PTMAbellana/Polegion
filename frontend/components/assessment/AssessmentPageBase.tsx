@@ -13,8 +13,55 @@ import {
     AssessmentResults
 } from '@/components/assessment';
 import styles from '@/styles/assessment.module.css';
+import { 
+    generateAssessment, 
+    submitAssessment, 
+    getAssessmentResults, 
+    getAssessmentComparison 
+} from '@/api/assessments';
+import toast from 'react-hot-toast';
 
 type AssessmentStage = 'intro' | 'dialogue' | 'assessment' | 'results';
+
+// API Response Types
+interface GenerateAssessmentResponse {
+    success?: boolean;
+    questions: any[];
+    metadata: Record<string, any>;
+}
+
+interface AssessmentResults {
+    correctAnswers: number;
+    totalQuestions: number;
+    percentage: number;
+    categoryScores: Record<string, { correct: number; total: number; percentage: number }>;
+    completedAt: string;
+}
+
+interface SubmitAssessmentResponse {
+    success?: boolean;
+    results: AssessmentResults;
+}
+
+interface ComparisonResponse {
+    success?: boolean;
+    comparison: {
+        pretest: {
+            percentage: number;
+            categoryScores: Record<string, { correct: number; total: number; percentage: number }>;
+            completedAt: string;
+        };
+        posttest: {
+            percentage: number;
+            categoryScores: Record<string, { correct: number; total: number; percentage: number }>;
+            completedAt: string;
+        };
+        improvements: {
+            overallImprovement: number;
+            categoryImprovements: Record<string, number>;
+        };
+    };
+}
 
 // ============================================================================
 // Configuration Interface
@@ -76,6 +123,19 @@ export default function AssessmentPageBase({ config }: { config: AssessmentConfi
     const [results, setResults] = useState<any>(null);
     const [isLoading, setIsLoading] = useState(false);
 
+    // Reset component state when navigating back to assessment page
+    useEffect(() => {
+        return () => {
+            // Cleanup when component unmounts
+            setStage('intro');
+            setDialogueIndex(0);
+            setAssessmentQuestions([]);
+            setCurrentQuestion(0);
+            setUserAnswers([]);
+            setResults(null);
+        };
+    }, []);
+
     // ============================================================================
     // INTRO STAGE
     // ============================================================================
@@ -106,16 +166,29 @@ export default function AssessmentPageBase({ config }: { config: AssessmentConfi
         try {
             console.log(`[${config.type}] Loading assessment questions...`);
             
-            // TODO: Call backend API to get random questions
-            // const response = await axios.get(`/api/assessments/generate/${config.type}`);
-            // setAssessmentQuestions(response.data.questions);
+            // Get user ID from localStorage or auth context
+            const userId = localStorage.getItem('user_id');
+            if (!userId) {
+                toast.error('Please log in to take the assessment');
+                router.push('/auth/login');
+                return;
+            }
             
-            // For now, set empty array (will be populated when backend is ready)
-            setAssessmentQuestions([]);
+            // Call backend API to get random questions
+            const response = await generateAssessment(userId, config.type) as GenerateAssessmentResponse;
             
-            setStage('assessment');
+            if (response.questions && response.questions.length > 0) {
+                setAssessmentQuestions(response.questions);
+                console.log(`[${config.type}] Loaded ${response.questions.length} questions`);
+                setStage('assessment');
+            } else {
+                toast.error('Failed to load assessment questions');
+                console.error('Invalid response:', response);
+            }
+            
         } catch (error) {
             console.error(`[${config.type}] Error loading assessment:`, error);
+            toast.error('Failed to load assessment. Please try again.');
         } finally {
             setIsLoading(false);
         }
@@ -147,33 +220,72 @@ export default function AssessmentPageBase({ config }: { config: AssessmentConfi
         try {
             console.log(`[${config.type}] Calculating results...`);
             
-            // TODO: Submit to backend and get results
-            // const response = await axios.post('/api/assessments/submit', {
-            //     type: config.type,
-            //     answers: allAnswers,
-            //     chapterId: config.chapterId
-            // });
+            // Get user ID
+            const userId = localStorage.getItem('user_id');
+            if (!userId) {
+                toast.error('User session expired. Please log in again.');
+                router.push('/auth/login');
+                return;
+            }
             
-            // For now, create mock results
-            const mockResults = {
-                totalScore: 0,
-                totalQuestions: config.totalQuestions,
-                categoryScores: config.categories.map(cat => ({
-                    category: cat.name,
-                    score: 0,
-                    total: config.questionsPerCategory,
-                    icon: cat.icon
-                })),
-                timeTaken: 0
-            };
+            // Format answers for backend
+            const formattedAnswers = allAnswers.map((answer, index) => ({
+                questionId: assessmentQuestions[index].id,
+                selectedAnswer: answer
+            }));
             
-            setResults(mockResults);
-            setStage('results');
+            // Submit to backend and get results
+            const response = await submitAssessment(userId, config.type, formattedAnswers) as SubmitAssessmentResponse;
+            
+            if (response.results) {
+                console.log(`[${config.type}] Results:`, response.results);
+                
+                // Transform backend results for display
+                const transformedResults: any = {
+                    totalScore: response.results.correctAnswers,
+                    totalQuestions: response.results.totalQuestions,
+                    percentage: response.results.percentage,
+                    categoryScores: Object.entries(response.results.categoryScores).map(([category, scores]: [string, any]) => ({
+                        category,
+                        score: scores.correct,
+                        total: scores.total,
+                        percentage: scores.percentage,
+                        icon: getCategoryIcon(category)
+                    })),
+                    completedAt: response.results.completedAt
+                };
+                
+                // For posttest, get comparison data
+                if (config.type === 'posttest' && config.showComparison) {
+                    try {
+                        const comparisonResponse = await getAssessmentComparison(userId) as ComparisonResponse;
+                        if (comparisonResponse.comparison) {
+                            transformedResults.comparison = comparisonResponse.comparison;
+                        }
+                    } catch (error) {
+                        console.warn('Could not load comparison data:', error);
+                    }
+                }
+                
+                setResults(transformedResults);
+                setStage('results');
+                toast.success('Assessment completed!');
+            } else {
+                toast.error('Failed to save results');
+            }
+            
         } catch (error) {
             console.error(`[${config.type}] Error calculating results:`, error);
+            toast.error('Failed to submit assessment. Please try again.');
         } finally {
             setIsLoading(false);
         }
+    };
+    
+    // Helper to get category icon
+    const getCategoryIcon = (categoryName: string): string => {
+        const category = config.categories.find(cat => cat.name === categoryName);
+        return category?.icon || '📚';
     };
 
     // ============================================================================
@@ -282,11 +394,9 @@ export default function AssessmentPageBase({ config }: { config: AssessmentConfi
                 />
                 
                 <AssessmentQuiz
-                    assessmentConfig={config}
-                    onComplete={(results) => {
-                        setResults(results);
-                        setStage('results');
-                    }}
+                    questions={assessmentQuestions}
+                    currentQuestionIndex={currentQuestion}
+                    onAnswerSubmit={handleAnswerSubmit}
                 />
             </div>
         );
@@ -300,11 +410,11 @@ export default function AssessmentPageBase({ config }: { config: AssessmentConfi
                     results={results || {
                         totalScore: 0,
                         totalQuestions: config.totalQuestions,
+                        percentage: 0,
                         categoryScores: [],
-                        timeTaken: 0
+                        completedAt: new Date().toISOString()
                     }}
                     assessmentType={config.type}
-                    comparison={config.showComparison ? { pretestScore: 0, improvement: 0 } : undefined}
                     onContinue={handleComplete}
                 />
             </div>
