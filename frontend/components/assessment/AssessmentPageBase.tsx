@@ -33,6 +33,7 @@ interface GenerateAssessmentResponse {
 
 interface AssessmentResults {
     correctAnswers: number;
+    totalScore?: number;
     totalQuestions: number;
     percentage: number;
     categoryScores: Record<string, { correct: number; total: number; percentage: number }>;
