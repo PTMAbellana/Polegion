@@ -117,26 +117,26 @@ export const CHAPTER1_NUMBER = 1;
 // Audio narration paths - matches dialogue indices
 export const CHAPTER1_NARRATION = {
   opening: [
-    '/audio/castle5/chapter1/opening_0.mp3',
-    '/audio/castle5/chapter1/opening_1.mp3',
-    '/audio/castle5/chapter1/opening_2.mp3',
-    '/audio/castle5/chapter1/opening_3.mp3',
-    '/audio/castle5/chapter1/opening_4.mp3',
+    '/audio/castle5/chapter1/opening_0.wav',
+    '/audio/castle5/chapter1/opening_1.wav',
+    '/audio/castle5/chapter1/opening_2.wav',
+    '/audio/castle5/chapter1/opening_3.wav',
+    '/audio/castle5/chapter1/opening_4.wav',
   ],
   lesson: [
-    '/audio/castle5/chapter1/lesson_0.mp3',
-    '/audio/castle5/chapter1/lesson_1.mp3',
-    '/audio/castle5/chapter1/lesson_2.mp3',
-    '/audio/castle5/chapter1/lesson_3.mp3',
-    '/audio/castle5/chapter1/lesson_4.mp3',
-    '/audio/castle5/chapter1/lesson_5.mp3',
-    '/audio/castle5/chapter1/lesson_6.mp3',
-    '/audio/castle5/chapter1/lesson_7.mp3',
+    '/audio/castle5/chapter1/lesson_0.wav',
+    '/audio/castle5/chapter1/lesson_1.wav',
+    '/audio/castle5/chapter1/lesson_2.wav',
+    '/audio/castle5/chapter1/lesson_3.wav',
+    '/audio/castle5/chapter1/lesson_4.wav',
+    '/audio/castle5/chapter1/lesson_5.wav',
+    '/audio/castle5/chapter1/lesson_6.wav',
+    '/audio/castle5/chapter1/lesson_7.wav',
   ],
   minigame: [
-    '/audio/castle5/chapter1/minigame_0.mp3',
-    '/audio/castle5/chapter1/minigame_1.mp3',
-    '/audio/castle5/chapter1/minigame_2.mp3',
+    '/audio/castle5/chapter1/minigame_0.wav',
+    '/audio/castle5/chapter1/minigame_1.wav',
+    '/audio/castle5/chapter1/minigame_2.wav',
   ],
 };
 
