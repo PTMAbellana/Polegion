@@ -11,7 +11,7 @@ interface ChapterDialogue {
 // Unified dialogue array combining all scenes
 export const CHAPTER1_DIALOGUE: ChapterDialogue[] = [
   // Opening scene (indices 0-3)
-  { scene: 'opening', text: "Welcome to the Circle Sanctuary! I am Archim, Keeper of the Curved Path." },
+  { scene: 'opening', text: "Welcome to the Circle Sanctuary! I am Arcana, Keeper of the Curved Path." },
   { scene: 'opening', text: "Enter the Tidal Hall where glowing rings rise and fall like ripples on water." },
   { scene: 'opening', text: "The circle is one of the most perfect shapes in all of geometry." },
   { scene: 'opening', text: "Let us explore its sacred components together!" },
@@ -124,25 +124,25 @@ export const CHAPTER1_NUMBER = 1;
 // Audio narration paths - matches dialogue indices
 export const CHAPTER1_NARRATION = {
   opening: [
-    '/audio/castle3/chapter1/opening_0.mp3',
-    '/audio/castle3/chapter1/opening_1.mp3',
-    '/audio/castle3/chapter1/opening_2.mp3',
-    '/audio/castle3/chapter1/opening_3.mp3',
+    '/audio/castle3/chapter1/opening_0.wav',
+    '/audio/castle3/chapter1/opening_1.wav',
+    '/audio/castle3/chapter1/opening_2.wav',
+    '/audio/castle3/chapter1/opening_3.wav',
   ],
   lesson: [
-    '/audio/castle3/chapter1/lesson_0.mp3',
-    '/audio/castle3/chapter1/lesson_1.mp3',
-    '/audio/castle3/chapter1/lesson_2.mp3',
-    '/audio/castle3/chapter1/lesson_3.mp3',
-    '/audio/castle3/chapter1/lesson_4.mp3',
-    '/audio/castle3/chapter1/lesson_5.mp3',
-    '/audio/castle3/chapter1/lesson_6.mp3',
-    '/audio/castle3/chapter1/lesson_7.mp3',
+    '/audio/castle3/chapter1/lesson_0.wav',
+    '/audio/castle3/chapter1/lesson_1.wav',
+    '/audio/castle3/chapter1/lesson_2.wav',
+    '/audio/castle3/chapter1/lesson_3.wav',
+    '/audio/castle3/chapter1/lesson_4.wav',
+    '/audio/castle3/chapter1/lesson_5.wav',
+    '/audio/castle3/chapter1/lesson_6.wav',
+    '/audio/castle3/chapter1/lesson_7.wav',
   ],
   minigame: [
-    '/audio/castle3/chapter1/minigame_0.mp3',
-    '/audio/castle3/chapter1/minigame_1.mp3',
-    '/audio/castle3/chapter1/minigame_2.mp3',
+    '/audio/castle3/chapter1/minigame_0.wav',
+    '/audio/castle3/chapter1/minigame_1.wav',
+    '/audio/castle3/chapter1/minigame_2.wav',
   ],
 };
 
@@ -153,8 +153,8 @@ export const CHAPTER1_RELIC = {
 };
 
 export const CHAPTER1_WIZARD = {
-  name: "Archim, Keeper of the Curved Path",
-  image: "/images/archim-wizard.png"
+  name: "Arcana, Keeper of the Curved Path",
+  image: "/images/arcana-wizard.png"
 };
 
 export const CHAPTER1_METADATA = {

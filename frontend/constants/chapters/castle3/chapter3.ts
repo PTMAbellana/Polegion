@@ -131,25 +131,25 @@ export const CHAPTER3_NUMBER = 3;
 // Audio narration paths - matches dialogue indices
 export const CHAPTER3_NARRATION = {
   opening: [
-    '/audio/castle3/chapter3/opening_0.mp3',
-    '/audio/castle3/chapter3/opening_1.mp3',
-    '/audio/castle3/chapter3/opening_2.mp3',
-    '/audio/castle3/chapter3/opening_3.mp3',
+    '/audio/castle3/chapter3/opening_0.wav',
+    '/audio/castle3/chapter3/opening_1.wav',
+    '/audio/castle3/chapter3/opening_2.wav',
+    '/audio/castle3/chapter3/opening_3.wav',
   ],
   lesson: [
-    '/audio/castle3/chapter3/lesson_0.mp3',
-    '/audio/castle3/chapter3/lesson_1.mp3',
-    '/audio/castle3/chapter3/lesson_2.mp3',
-    '/audio/castle3/chapter3/lesson_3.mp3',
-    '/audio/castle3/chapter3/lesson_4.mp3',
-    '/audio/castle3/chapter3/lesson_5.mp3',
-    '/audio/castle3/chapter3/lesson_6.mp3',
-    '/audio/castle3/chapter3/lesson_7.mp3',
+    '/audio/castle3/chapter3/lesson_0.wav',
+    '/audio/castle3/chapter3/lesson_1.wav',
+    '/audio/castle3/chapter3/lesson_2.wav',
+    '/audio/castle3/chapter3/lesson_3.wav',
+    '/audio/castle3/chapter3/lesson_4.wav',
+    '/audio/castle3/chapter3/lesson_5.wav',
+    '/audio/castle3/chapter3/lesson_6.wav',
+    '/audio/castle3/chapter3/lesson_7.wav',
   ],
   minigame: [
-    '/audio/castle3/chapter3/minigame_0.mp3',
-    '/audio/castle3/chapter3/minigame_1.mp3',
-    '/audio/castle3/chapter3/minigame_2.mp3',
+    '/audio/castle3/chapter3/minigame_0.wav',
+    '/audio/castle3/chapter3/minigame_1.wav',
+    '/audio/castle3/chapter3/minigame_2.wav',
   ],
 };
 
@@ -160,8 +160,8 @@ export const CHAPTER3_RELIC = {
 };
 
 export const CHAPTER3_WIZARD = {
-  name: "Archim, Keeper of the Curved Path",
-  image: "/images/archim-wizard.png"
+  name: "Arcana, Keeper of the Curved Path",
+  image: "/images/arcana-wizard.png"
 };
 
 export const CHAPTER3_METADATA = {
