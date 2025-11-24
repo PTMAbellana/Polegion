@@ -23,6 +23,6 @@ export { default as C5C2_2DMeasurementMinigame } from './C5C2_2DMeasurementMinig
 export { default as C5C3_SurfaceAreaMinigame } from './C5C3_SurfaceAreaMinigame';
 export { default as C5C4_VolumeMinigame } from './C5C4_VolumeMinigame';
 
-// Aliases to follow naming convention while reusing components
-export { default as C4C1_ShapeGalleryMinigame } from './C1C3_ShapeBasedMinigame';
+// Castle 4 - Chapter 1 specific component
+export { default as C4C1_ShapeGalleryMinigame } from './C4C1_ShapeGalleryMinigame';
 export { default as C5C1_PlaneFiguresMinigame } from './C1C3_ShapeBasedMinigame';

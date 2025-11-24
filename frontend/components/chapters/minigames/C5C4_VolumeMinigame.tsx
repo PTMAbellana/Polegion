@@ -22,6 +22,7 @@ const C5C4_VolumeMinigame: React.FC<Props> = ({ question, onComplete, styleModul
     setTimeout(() => {
       setShowFeedback(false)
       onComplete(isCorrect, answer)
+      setAnswer('')
     }, 1200)
   }
 

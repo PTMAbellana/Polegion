@@ -53,6 +53,7 @@ const C3C2_CircumferenceMinigame: React.FC<Props> = ({ question, onComplete, sty
     setTimeout(() => {
       setShowFeedback(false)
       onComplete(isCorrect, givenRaw)
+      setAnswer('')
     }, 1200)
   }
 

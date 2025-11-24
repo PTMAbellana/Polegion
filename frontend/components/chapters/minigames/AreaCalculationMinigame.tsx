@@ -37,15 +37,11 @@ const AreaCalculationMinigame: React.FC<AreaCalculationMinigameProps> = ({
     );
     setShowFeedback(true);
 
-    setTimeout(() => {
-      setShowFeedback(false);
-      if (isCorrect) {
-        onComplete(true, userAnswer);
-      } else {
-        setAnswer('');
-        onComplete(false, userAnswer);
-      }
-    }, 2500);
+  setTimeout(() => {
+    setShowFeedback(false);
+    onComplete(isCorrect, userAnswer);
+    setAnswer('');
+  }, 2500);
   };
 
   const renderShapeDiagram = () => {

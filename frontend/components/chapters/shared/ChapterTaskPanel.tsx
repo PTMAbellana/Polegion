@@ -61,14 +61,41 @@ export default function ChapterTaskPanel({
     }
   }, [completedTasks, tasks, styles.taskItem])
 
+  useEffect(() => {
+    if (taskListRef.current) {
+      // Find the most recent failed task index
+      let lastFailedIndex = -1
+      for (let i = 0; i < tasks.length; i++) {
+        const taskKey = tasks[i].id || tasks[i].key || ''
+        if (failedTasks[taskKey]) {
+          lastFailedIndex = i
+        }
+      }
+      if (lastFailedIndex >= 0) {
+        const taskItems = taskListRef.current.querySelectorAll(`.${styles.taskItem}`)
+        if (taskItems[lastFailedIndex]) {
+          setTimeout(() => {
+            taskItems[lastFailedIndex].scrollIntoView({
+              behavior: 'smooth',
+              block: 'nearest',
+              inline: 'nearest'
+            })
+          }, 300)
+        }
+      }
+    }
+  }, [failedTasks, tasks, styles.taskItem])
+
   const completedCount = Object.values(completedTasks).filter(Boolean).length
+  const failedCount = Object.values(failedTasks).filter(Boolean).length
+  const progressCount = completedCount + failedCount
 
   return (
     <div className={styles.taskPanel}>
       <div className={styles.taskPanelHeader}>
         <span className={styles.taskPanelTitle}>Learning Objectives</span>
         <div className={styles.progressText}>
-          {completedCount} / {tasks.length} Complete
+          {progressCount} / {tasks.length} Complete
         </div>
       </div>
       

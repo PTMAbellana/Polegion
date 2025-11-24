@@ -1,13 +1,13 @@
 // ============================================================================
-// CASTLE 0 - CHAPTER 1: PRETEST ASSESSMENT
+// CASTLE 7 - CHAPTER 1: PRETEST ASSESSMENT
 // "The Trial Grounds" - Initial Assessment
 // ============================================================================
 
-export const CASTLE0_CHAPTER1_TITLE = "The Trial Grounds";
-export const CASTLE0_CHAPTER1_DESCRIPTION = "Prove your worth before entering the kingdom!";
+export const CASTLE7_CHAPTER1_TITLE = "The Trial Grounds";
+export const CASTLE7_CHAPTER1_DESCRIPTION = "Prove your worth before entering the kingdom!";
 
 // Dialogue and Scenes (Kahoot/Quizlet Style)
-export const CASTLE0_CHAPTER1_DIALOGUE = [
+export const CASTLE7_CHAPTER1_DIALOGUE = [
     // Opening Scene
     "Welcome, brave adventurer! Before you embark on your journey through the Kingdom of Geometry...",
     "The Guardian must assess your current knowledge.",
@@ -17,26 +17,26 @@ export const CASTLE0_CHAPTER1_DIALOGUE = [
     // Assessment will be loaded dynamically via API
 ];
 
-export const CASTLE0_CHAPTER1_SCENES = {
+export const CASTLE7_CHAPTER1_SCENES = {
     opening: { start: 0, end: 3 }
     // Assessment scene will be handled by AssessmentQuiz component
 };
 
 // Audio narration paths (optional)
-export const CASTLE0_CHAPTER1_NARRATION = {
+export const CASTLE7_CHAPTER1_NARRATION = {
     opening: [
-        '/audio/castle0/chapter1/opening_1.wav',
-        '/audio/castle0/chapter1/opening_2.wav',
-        '/audio/castle0/chapter1/opening_3.wav',
-        '/audio/castle0/chapter1/opening_4.wav'
+        '/audio/castle7/chapter1/opening_1.wav',
+        '/audio/castle7/chapter1/opening_2.wav',
+        '/audio/castle7/chapter1/opening_3.wav',
+        '/audio/castle7/chapter1/opening_4.wav'
     ]
 };
 
 // Assessment configuration
-export const CASTLE0_CHAPTER1_ASSESSMENT_CONFIG = {
+export const CASTLE7_CHAPTER1_ASSESSMENT_CONFIG = {
     type: 'pretest',
-    castleId: 'castle0',
-    chapterId: 'castle0-chapter1',
+    castleId: 'castle7',
+    chapterId: 'castle7-chapter1',
     totalQuestions: 60,
     questionsPerCategory: 10,
     categories: [

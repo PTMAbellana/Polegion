@@ -22,6 +22,7 @@ const C5C2_2DMeasurementMinigame: React.FC<Props> = ({ question, onComplete, sty
     setTimeout(() => {
       setShowFeedback(false)
       onComplete(isCorrect, answer)
+      setAnswer('')
     }, 1200)
   }
 

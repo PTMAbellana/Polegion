@@ -57,6 +57,7 @@ const C3C3_CircleAreaMinigame: React.FC<Props> = ({ question, onComplete, styleM
     setTimeout(() => {
       setShowFeedback(false)
       onComplete(isCorrect, givenRaw)
+      setAnswer('')
     }, 1200)
   }
 

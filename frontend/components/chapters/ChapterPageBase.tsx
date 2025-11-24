@@ -115,23 +115,16 @@ function ChapterPageBase({ config }: { config: ChapterConfig }) {
   // Scene and state management - initialize from store or defaults
   const getInitialScene = (): SceneType => {
     const saved = savedProgress?.currentScene as SceneType | undefined;
-    
-    if (saved === 'reward' || saved === 'quiz') {
-      return saved;
-    }
-    
-    if (saved === 'minigame' && savedProgress?.completedTasks?.[config.minigameTaskId]) {
-      return 'quiz';
-    }
-    
+
+    if (saved === 'reward') return 'reward';
+    if (typeof saved === 'string' && saved.startsWith('quiz')) return saved;
+    if (saved === 'minigame') return 'minigame';
+
     const savedIndex = savedProgress?.messageIndex || 0;
     const dialogue = config.dialogue[savedIndex];
-    if (dialogue) {
-      if (dialogue.scene === 'opening' || dialogue.scene === 'lesson' || dialogue.scene === 'minigame') {
-        return dialogue.scene;
-      }
+    if (dialogue && (dialogue.scene === 'opening' || dialogue.scene === 'lesson' || dialogue.scene === 'minigame')) {
+      return dialogue.scene;
     }
-    
     return 'opening';
   };
   
@@ -238,10 +231,16 @@ function ChapterPageBase({ config }: { config: ChapterConfig }) {
   // Sync state changes to store
   useEffect(() => {
     chapterStore.setScene(config.chapterKey, currentScene);
+    try {
+      localStorage.setItem(`chapter:lastScene:${config.chapterKey}`, currentScene);
+    } catch {}
   }, [currentScene, config.chapterKey]);
 
   useEffect(() => {
     chapterStore.setMinigameLevel(config.chapterKey, currentMinigameLevel);
+    try {
+      localStorage.setItem(`chapter:lastMinigameLevel:${config.chapterKey}`, String(currentMinigameLevel));
+    } catch {}
   }, [currentMinigameLevel, config.chapterKey]);
 
   useEffect(() => {
@@ -562,22 +561,24 @@ function ChapterPageBase({ config }: { config: ChapterConfig }) {
             delete updated[nextQuestion.id];
             return updated;
           });
-        } else {
-          try {
-            await submitQuizAttempt(quiz.id, quizAnswers);
-          } catch (error) {
-            console.error('Failed to submit quiz:', error);
-          }
-          
-          try {
-            await completeChapter(chapterId!);
-            console.log(`${config.logPrefix} Chapter marked as complete (with wrong answers)`);
-          } catch (error) {
-            console.error('Failed to complete chapter:', error);
-          }
-          
-          setCurrentScene('reward');
+      } else {
+        try {
+          await submitQuizAttempt(quiz.id, quizAnswers);
+        } catch (error) {
+          console.error('Failed to submit quiz:', error);
         }
+        
+        try {
+          await completeChapter(chapterId!);
+          console.log(`${config.logPrefix} Chapter marked as complete (with wrong answers)`);
+        } catch (error) {
+          console.error('Failed to complete chapter:', error);
+        }
+        
+        awardXP('quiz');
+        
+        setCurrentScene('reward');
+      }
       }, 1000);
     }
   };
@@ -717,8 +718,8 @@ function ChapterPageBase({ config }: { config: ChapterConfig }) {
               {config.concepts.map((concept, index) => {
                 const conceptDialogue = config.dialogue.find(d => d.key === concept.key);
                 const conceptDialogueIndex = conceptDialogue ? config.dialogue.indexOf(conceptDialogue) : -1;
-                const isHighlighted = conceptDialogueIndex !== -1 && messageIndex >= conceptDialogueIndex;
-                
+                const isHighlighted = conceptDialogueIndex !== -1 && messageIndex === conceptDialogueIndex;
+
                 return (
                   <ConceptCard
                     key={`${concept.key}-${index}`}

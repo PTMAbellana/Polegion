@@ -846,9 +846,9 @@
 }
 
 .portraitFrame {
-  width: 70px;
-  height: 70px;
-  border-radius: 6px;
+  width: 96px;
+  height: 96px;
+  border-radius: 8px;
   overflow: hidden;
   border: 3px solid #D8C4B6;
   box-shadow: 0 0 20px rgba(216, 196, 182, 0.5);
@@ -2143,3 +2143,8 @@
 .castle5Theme .taskCompleted .taskLabel {
   color: #FFE3A9;
 }
+.castle1Theme .portraitFrame { border-color: #D8C4B6; }
+.castle2Theme .portraitFrame { border-color: #B0CE88; }
+.castle3Theme .portraitFrame { border-color: #A0C878; }
+.castle4Theme .portraitFrame { border-color: #E2B59A; }
+.castle5Theme .portraitFrame { border-color: #8CCDEB; }

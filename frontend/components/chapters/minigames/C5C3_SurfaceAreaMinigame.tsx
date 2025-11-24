@@ -22,6 +22,7 @@ const C5C3_SurfaceAreaMinigame: React.FC<Props> = ({ question, onComplete, style
     setTimeout(() => {
       setShowFeedback(false)
       onComplete(isCorrect, answer)
+      setAnswer('')
     }, 1200)
   }
 

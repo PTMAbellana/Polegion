@@ -1,11 +1,11 @@
 -- =====================================================
 -- CASTLE 0 & CASTLE 6 - ASSESSMENT CASTLES
--- Pretest and Posttest Castles
+-- Pretest (Castle 0) and Posttest (Castle 6) Castles
 -- Run this in Supabase SQL Editor after main schema
 -- =====================================================
 
 -- Castle 0: The Trial Grounds (Pretest)
--- Unlock order 0 means it's available from the start
+-- Unlock order 0 means it's available from the start (BEFORE Castle 1-5)
 INSERT INTO castles (id, name, description, difficulty, region, route, image_number, total_xp, unlock_order)
 VALUES 
   (
@@ -22,7 +22,7 @@ VALUES
 ON CONFLICT (id) DO NOTHING;
 
 -- Castle 6: The Grand Championship (Posttest)
--- Unlock order 6 means it unlocks after Castle 5
+-- Unlock order 6 means it unlocks after Castle 5 (AFTER Castle 1-5)
 INSERT INTO castles (id, name, description, difficulty, region, route, image_number, total_xp, unlock_order)
 VALUES 
   (
