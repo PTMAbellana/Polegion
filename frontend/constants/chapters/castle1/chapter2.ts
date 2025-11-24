@@ -161,26 +161,26 @@ export const CHAPTER2_NUMBER = 2;
 // Audio narration paths - matches dialogue indices
 export const CHAPTER2_NARRATION = {
   opening: [
-    '/audio/castle1/chapter2/opening_0.mp3', // "Ah, Apprentice! You've brought life back to the Points and Paths"
-    '/audio/castle1/chapter2/opening_1.mp3', // "But our journey continues deeper, into the Paths of Power!"
-    '/audio/castle1/chapter2/opening_2.mp3', // "These radiant lines you see… they do not all behave the same."
-    '/audio/castle1/chapter2/opening_3.mp3', // "Some walk side by side, never meeting. Others collide and part ways."
-    '/audio/castle1/chapter2/opening_4.mp3', // "And a few meet with perfect balance, forming right angles!"
-    '/audio/castle1/chapter2/opening_5.mp3', // "Let us explore the dance of direction together!"
+    '/audio/castle1/chapter2/opening_0.wav', // "Ah, Apprentice! You've brought life back to the Points and Paths"
+    '/audio/castle1/chapter2/opening_1.wav', // "But our journey continues deeper, into the Paths of Power!"
+    '/audio/castle1/chapter2/opening_2.wav', // "These radiant lines you see… they do not all behave the same."
+    '/audio/castle1/chapter2/opening_3.wav', // "Some walk side by side, never meeting. Others collide and part ways."
+    '/audio/castle1/chapter2/opening_4.wav', // "And a few meet with perfect balance, forming right angles!"
+    '/audio/castle1/chapter2/opening_5.wav', // "Let us explore the dance of direction together!"
   ],
   lesson: [
-    '/audio/castle1/chapter2/lesson_0.mp3', // "Before we explore lines, let us understand the canvas they rest upon: the PLANE!"
-    '/audio/castle1/chapter2/lesson_1.mp3', // "When two lines travel side by side on a plane, never touching, they share parallel harmony!"
-    '/audio/castle1/chapter2/lesson_2.mp3', // "Parallel lines, forever apart, yet always equal in distance."
-    '/audio/castle1/chapter2/lesson_3.mp3', // "Some lines meet and then diverge. These are intersecting lines."
-    '/audio/castle1/chapter2/lesson_4.mp3', // "When two paths meet like travelers at a crossroads, they intersect."
-    '/audio/castle1/chapter2/lesson_5.mp3', // "Ah! The rarest bond of all, perpendicular lines!"
-    '/audio/castle1/chapter2/lesson_6.mp3', // "Your eyes are sharp! Skew lines dwell in different planes"
-    '/audio/castle1/chapter2/lesson_7.mp3', // "Now let us test your understanding!"
+    '/audio/castle1/chapter2/lesson_0.wav', // "Before we explore lines, let us understand the canvas they rest upon: the PLANE!"
+    '/audio/castle1/chapter2/lesson_1.wav', // "When two lines travel side by side on a plane, never touching, they share parallel harmony!"
+    '/audio/castle1/chapter2/lesson_2.wav', // "Parallel lines, forever apart, yet always equal in distance."
+    '/audio/castle1/chapter2/lesson_3.wav', // "Some lines meet and then diverge. These are intersecting lines."
+    '/audio/castle1/chapter2/lesson_4.wav', // "When two paths meet like travelers at a crossroads, they intersect."
+    '/audio/castle1/chapter2/lesson_5.wav', // "Ah! The rarest bond of all, perpendicular lines!"
+    '/audio/castle1/chapter2/lesson_6.wav', // "Your eyes are sharp! Skew lines dwell in different planes"
+    '/audio/castle1/chapter2/lesson_7.wav', // "Now let us test your understanding!"
   ],
   minigame: [
-    '/audio/castle1/chapter2/minigame_0.mp3', // "Excellent! Now identify the types of lines I present to you."
-    '/audio/castle1/chapter2/minigame_1.mp3', // "Click on the lines that match the description."
-    '/audio/castle1/chapter2/minigame_2.mp3', // "Choose wisely, young geometer!"
+    '/audio/castle1/chapter2/minigame_0.wav', // "Excellent! Now identify the types of lines I present to you."
+    '/audio/castle1/chapter2/minigame_1.wav', // "Click on the lines that match the description."
+    '/audio/castle1/chapter2/minigame_2.wav', // "Choose wisely, young geometer!"
   ],
 };
