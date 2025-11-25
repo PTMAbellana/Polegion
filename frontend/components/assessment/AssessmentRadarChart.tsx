@@ -65,8 +65,8 @@ const AssessmentRadarChart = ({ currentScores, pretestScores = null }: RadarChar
   });
 
   return (
-    <div className="w-full h-[500px] flex flex-col items-center">
-      <ResponsiveContainer width="100%" height="100%">
+    <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+      <ResponsiveContainer width="100%" height={280}>
         <RadarChart data={chartData}>
           <PolarGrid stroke="#4a5568" strokeWidth={1} />
           <PolarAngleAxis
@@ -120,7 +120,7 @@ const AssessmentRadarChart = ({ currentScores, pretestScores = null }: RadarChar
       </ResponsiveContainer>
 
       {/* Category legend with scores */}
-      <div className="mt-6 grid grid-cols-2 gap-4 w-full max-w-3xl px-4">
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.5rem' }}>
         {categories.map((category) => {
           const currentScore = currentScores?.[category];
           const pretestScore = pretestScores?.[category];
@@ -128,46 +128,45 @@ const AssessmentRadarChart = ({ currentScores, pretestScores = null }: RadarChar
           return (
             <div
               key={category}
-              className="bg-gray-800/50 rounded-lg p-3 border border-gray-700"
+              style={{
+                backgroundColor: 'rgba(31, 41, 55, 0.5)',
+                borderRadius: '6px',
+                padding: '0.5rem',
+                border: '1px solid #374151'
+              }}
             >
-              <h4 className="text-sm font-semibold text-gray-300 mb-2">
+              <h4 style={{ fontSize: '0.7rem', fontWeight: 600, color: '#d1d5db', marginBottom: '0.25rem' }}>
                 {category}
               </h4>
-              <div className="flex justify-between items-center">
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 {pretestScore && (
-                  <div className="text-xs">
-                    <span className="text-blue-400">Pretest: </span>
-                    <span className="text-white font-bold">
+                  <div style={{ fontSize: '0.625rem' }}>
+                    <span style={{ color: '#60a5fa' }}>Pretest: </span>
+                    <span style={{ color: 'white', fontWeight: 700 }}>
                       {pretestScore.percentage.toFixed(1)}%
                     </span>
                   </div>
                 )}
-                <div className="text-xs">
-                  <span className={pretestScore ? "text-yellow-400" : "text-blue-400"}>
+                <div style={{ fontSize: '0.625rem' }}>
+                  <span style={{ color: pretestScore ? '#fbbf24' : '#60a5fa' }}>
                     {pretestScore ? "Posttest: " : "Score: "}
                   </span>
-                  <span className="text-white font-bold">
+                  <span style={{ color: 'white', fontWeight: 700 }}>
                     {currentScore?.percentage.toFixed(1)}%
                   </span>
                 </div>
               </div>
               {pretestScore && currentScore && (
-                <div className="mt-1 text-xs">
-                  <span className="text-gray-400">Improvement: </span>
+                <div style={{ marginTop: '0.125rem', fontSize: '0.625rem' }}>
+                  <span style={{ color: '#9ca3af' }}>Improvement: </span>
                   <span
-                    className={
-                      currentScore.percentage - pretestScore.percentage >= 0
-                        ? "text-green-400 font-bold"
-                        : "text-red-400 font-bold"
-                    }
+                    style={{
+                      color: currentScore.percentage - pretestScore.percentage >= 0 ? '#34d399' : '#f87171',
+                      fontWeight: 700
+                    }}
                   >
-                    {currentScore.percentage - pretestScore.percentage >= 0
-                      ? "+"
-                      : ""}
-                    {(
-                      currentScore.percentage - pretestScore.percentage
-                    ).toFixed(1)}
-                    %
+                    {currentScore.percentage - pretestScore.percentage >= 0 ? "+" : ""}
+                    {(currentScore.percentage - pretestScore.percentage).toFixed(1)}%
                   </span>
                 </div>
               )}

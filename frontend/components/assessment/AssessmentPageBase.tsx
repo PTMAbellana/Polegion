@@ -130,6 +130,60 @@ export default function AssessmentPageBase({ config }: { config: AssessmentConfi
 
     const STORAGE_KEY = `assessment_${config.type}_${config.castleId}`;
 
+    // Check if assessment is already completed on mount
+    useEffect(() => {
+        const checkCompletedAssessment = async () => {
+            const authData = authUtils.getAuthData();
+            const userId = authData.user?.id;
+            
+            if (!userId) return;
+            
+            try {
+                console.log(`[${config.type}] Checking if assessment is already completed...`);
+                const existingResults = await getAssessmentResults(userId, config.type);
+                
+                if (existingResults && existingResults.percentage !== undefined) {
+                    console.log(`[${config.type}] Assessment already completed, loading results...`);
+                    
+                    // Transform results to match expected format
+                    const formattedResults = {
+                        totalScore: existingResults.totalScore || Math.round((existingResults.percentage / 100) * existingResults.totalQuestions),
+                        totalQuestions: existingResults.totalQuestions || 60,
+                        percentage: existingResults.percentage,
+                        categoryScores: Object.entries(existingResults.categoryScores || {}).map(([category, data]: [string, any]) => ({
+                            category,
+                            score: data.correct,
+                            total: data.total,
+                            percentage: data.percentage
+                        })),
+                        completedAt: existingResults.completedAt
+                    };
+                    
+                    // If posttest, fetch comparison
+                    if (config.type === 'posttest' && config.showComparison) {
+                        try {
+                            const comparison = await getAssessmentComparison(userId);
+                            if (comparison) {
+                                formattedResults.comparison = comparison;
+                            }
+                        } catch (err) {
+                            console.warn('Could not load comparison:', err);
+                        }
+                    }
+                    
+                    setResults(formattedResults);
+                    setStage('results');
+                    localStorage.removeItem(STORAGE_KEY); // Clear any saved progress
+                    return;
+                }
+            } catch (error) {
+                console.log(`[${config.type}] No completed assessment found, showing intro`);
+            }
+        };
+        
+        checkCompletedAssessment();
+    }, [config.type, config.castleId, config.showComparison, STORAGE_KEY]);
+
     // Load saved progress on mount
     useEffect(() => {
         const savedProgress = localStorage.getItem(STORAGE_KEY);
@@ -268,9 +322,61 @@ export default function AssessmentPageBase({ config }: { config: AssessmentConfi
                 console.error('Invalid response:', response);
             }
             
-        } catch (error) {
+        } catch (error: any) {
             console.error(`[${config.type}] Error loading assessment:`, error);
-            toast.error('Failed to load assessment. Please try again.');
+            
+            // Check if error is 400 (assessment already completed)
+            if (error?.response?.status === 400) {
+                console.log(`[${config.type}] Assessment already completed, loading results...`);
+                
+                try {
+                    const authData = authUtils.getAuthData();
+                    const userId = authData.user?.id;
+                    
+                    if (userId) {
+                        const existingResults = await getAssessmentResults(userId, config.type);
+                        
+                        if (existingResults) {
+                            // Transform results to match expected format
+                            const formattedResults = {
+                                totalScore: existingResults.totalScore || Math.round((existingResults.percentage / 100) * existingResults.totalQuestions),
+                                totalQuestions: existingResults.totalQuestions || 60,
+                                percentage: existingResults.percentage,
+                                categoryScores: Object.entries(existingResults.categoryScores || {}).map(([category, data]: [string, any]) => ({
+                                    category,
+                                    score: data.correct,
+                                    total: data.total,
+                                    percentage: data.percentage
+                                })),
+                                completedAt: existingResults.completedAt
+                            };
+                            
+                            // If posttest, fetch comparison
+                            if (config.type === 'posttest' && config.showComparison) {
+                                try {
+                                    const comparison = await getAssessmentComparison(userId);
+                                    if (comparison) {
+                                        formattedResults.comparison = comparison;
+                                    }
+                                } catch (err) {
+                                    console.warn('Could not load comparison:', err);
+                                }
+                            }
+                            
+                            setResults(formattedResults);
+                            setStage('results');
+                            localStorage.removeItem(STORAGE_KEY); // Clear any saved progress
+                            toast.success('Showing your completed assessment results');
+                        }
+                    }
+                } catch (resultError) {
+                    console.error('Failed to load existing results:', resultError);
+                    toast.error('You have already completed this assessment');
+                    setTimeout(() => router.push('/student/world'), 2000);
+                }
+            } else {
+                toast.error('Failed to load assessment. Please try again.');
+            }
         } finally {
             setIsLoading(false);
         }
