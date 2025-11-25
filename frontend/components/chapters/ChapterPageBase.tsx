@@ -385,6 +385,11 @@ function ChapterPageBase({ config }: { config: ChapterConfig }) {
   
   // Play narration audio for each dialogue message
   React.useEffect(() => {
+    // Don't play audio in quiz or reward scenes
+    if (currentScene === 'quiz' || currentScene === 'reward') {
+      return;
+    }
+    
     if (messageIndex < 0 || messageIndex >= config.dialogue.length) return;
     
     const currentDialogue = config.dialogue[messageIndex];
@@ -409,7 +414,7 @@ function ChapterPageBase({ config }: { config: ChapterConfig }) {
     if (narrationArray[sceneIndex]) {
       playNarration(narrationArray[sceneIndex]);
     }
-  }, [messageIndex, config.dialogue, config.narration, config.sceneRanges, playNarration]);
+  }, [messageIndex, currentScene, config.dialogue, config.narration, config.sceneRanges, playNarration]);
   
   // Award XP when crossing scene boundaries
   React.useEffect(() => {
