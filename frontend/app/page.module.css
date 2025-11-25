@@ -8,6 +8,7 @@
   font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   color: #333333;
   overflow-x: hidden;
+  transition: all 0.3s ease;
 }
 
 /* ========== HEADER ========== */
@@ -30,6 +31,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  transition: padding 0.3s ease;
 }
 
 .logoSection {
@@ -58,12 +60,12 @@
 
 /* ========== HERO SECTION ========== */
 .heroSection {
-  padding: 140px 2rem 80px;
-  max-width: 1200px;
+  padding: 140px 2rem 60px;
+  max-width: 1400px;
   margin: 0 auto;
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 4rem;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 5rem;
   align-items: center;
 }
 
@@ -100,9 +102,9 @@
 }
 
 .heroSubtitle {
-  font-size: 1.25rem;
+  font-size: 1.125rem;
   color: #333333;
-  line-height: 1.6;
+  line-height: 1.7;
   margin-bottom: 2rem;
   font-weight: 500;
 }
@@ -165,28 +167,28 @@
 .heroVisual {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 1.5rem;
+  gap: 1.25rem;
   position: relative;
 }
 
 .statCard {
   background: white;
-  border-radius: 20px;
-  padding: 2rem;
+  border-radius: 16px;
+  padding: 1.5rem;
   text-align: center;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
   border: 3px solid transparent;
   transition: all 0.3s ease;
 }
 
 .statCard:hover {
-  transform: translateY(-8px);
+  transform: translateY(-5px);
   border-color: #FABC60;
-  box-shadow: 0 15px 50px rgba(250, 188, 96, 0.3);
+  box-shadow: 0 12px 40px rgba(250, 188, 96, 0.3);
 }
 
 .statNumber {
-  font-size: 3rem;
+  font-size: 2.5rem;
   font-weight: 900;
   background: linear-gradient(135deg, #2F3E75 0%, #3A9679 100%);
   -webkit-background-clip: text;
@@ -196,11 +198,36 @@
 }
 
 .statLabel {
-  font-size: 0.875rem;
+  font-size: 0.75rem;
   font-weight: 600;
   color: #333333;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  line-height: 1.3;
+}
+
+/* ========== CREDIT SECTION ========== */
+.creditSection {
+  padding: 2rem 2rem 4rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.creditContent {
+  text-align: center;
+  padding: 1.5rem 2rem;
+  background: rgba(58, 150, 121, 0.05);
+  border-left: 4px solid #3A9679;
+  border-radius: 8px;
+}
+
+.creditText {
+  font-size: 0.875rem;
+  color: #2F3E75;
+  font-weight: 500;
+  line-height: 1.6;
+  margin: 0;
+  font-style: italic;
 }
 
 /* ========== SECTION HEADERS ========== */
@@ -475,21 +502,27 @@
 }
 
 .parentCardIcon {
-  font-size: 2.5rem;
-  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.5rem 0.875rem;
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: 20px;
+  color: white;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
 }
 
 .parentCard h3 {
-  font-size: 1.5rem;
-  font-weight: 800;
+  font-size: 1.25rem;
+  font-weight: 700;
   color: white;
   margin: 0;
 }
 
 .parentCard p {
-  font-size: 1.05rem;
-  line-height: 1.7;
-  color: rgba(255, 255, 255, 0.95);
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.9);
   margin: 0;
 }
 
@@ -649,11 +682,47 @@
 }
 
 /* ========== RESPONSIVE ========== */
+
+/* Tablet Large (1024px and below) */
+@media (max-width: 1024px) {
+  .heroSection {
+    max-width: 100%;
+    padding: 120px 2.5rem 60px;
+    gap: 3.5rem;
+  }
+
+  .heroTitle {
+    font-size: 3rem;
+  }
+
+  .heroSubtitle {
+    font-size: 1.05rem;
+  }
+
+  .featuresGrid, .parentGrid, .previewGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Tablet (968px and below) */
 @media (max-width: 968px) {
+  .header {
+    border-bottom-width: 2px;
+  }
+
+  .headerContent {
+    padding: 0.875rem 1.5rem;
+  }
+
+  .signInBtn {
+    padding: 0.625rem 1.5rem;
+    font-size: 0.9rem;
+  }
+
   .heroSection {
     grid-template-columns: 1fr;
     gap: 3rem;
-    padding: 120px 2rem 60px;
+    padding: 110px 1.5rem 50px;
   }
 
   .heroContent {
@@ -662,42 +731,293 @@
 
   .heroTitle {
     font-size: 2.5rem;
+    line-height: 1.15;
+  }
+
+  .heroSubtitle {
+    font-size: 1rem;
+    margin-bottom: 1.75rem;
+  }
+
+  .ctaButton {
+    padding: 1.125rem 2.25rem;
+    font-size: 1.05rem;
+  }
+
+  .heroVisual {
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+
+  .statCard {
+    padding: 1.25rem;
+  }
+
+  .statNumber {
+    font-size: 2rem;
+  }
+
+  .statLabel {
+    font-size: 0.7rem;
+  }
+
+  .creditSection {
+    padding: 1.5rem 1.5rem 3rem;
+  }
+
+  .creditText {
+    font-size: 0.8rem;
+  }
+
+  .sectionTitle {
+    font-size: 2.25rem;
+  }
+
+  .sectionSubtitle {
+    font-size: 1rem;
+  }
+
+  .carouselSection {
+    padding: 60px 1.5rem;
   }
 
   .carouselSlide {
     grid-template-columns: 1fr;
     padding: 2rem;
+    gap: 1.5rem;
   }
 
   .slideImage {
     order: -1;
+    height: 250px;
+  }
+
+  .featuresGrid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .parentGrid {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+
+  .previewGrid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
   }
 
   .footerContent {
     flex-direction: column;
+    gap: 1.5rem;
     text-align: center;
+  }
+
+  .footerLinks {
+    flex-direction: column;
+    gap: 1rem;
   }
 }
 
+/* Mobile (640px and below) */
 @media (max-width: 640px) {
+  .header {
+    border-bottom-width: 2px;
+  }
+
+  .headerContent {
+    padding: 0.75rem 1rem;
+  }
+
+  .polegionLogo {
+    width: 140px;
+    height: auto;
+  }
+
+  .signInBtn {
+    padding: 0.5rem 1.25rem;
+    font-size: 0.85rem;
+  }
+
+  .heroSection {
+    padding: 100px 1rem 40px;
+    gap: 2.5rem;
+  }
+
+  .heroBadge {
+    font-size: 0.75rem;
+    padding: 0.4rem 1rem;
+  }
+
   .heroTitle {
-    font-size: 2rem;
+    font-size: 1.875rem;
+    line-height: 1.2;
+    margin-bottom: 1.25rem;
+  }
+
+  .heroSubtitle {
+    font-size: 0.9rem;
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+  }
+
+  .ctaButton {
+    padding: 1rem 1.75rem;
+    font-size: 0.95rem;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .trustText {
+    font-size: 0.75rem;
+    margin-top: 1.25rem;
+  }
+
+  .heroVisual {
+    grid-template-columns: 1fr;
+    gap: 0.875rem;
+  }
+
+  .statCard {
+    padding: 1rem 0.875rem;
+  }
+
+  .statNumber {
+    font-size: 1.75rem;
+  }
+
+  .statLabel {
+    font-size: 0.65rem;
+  }
+
+  .creditSection {
+    padding: 1.25rem 1rem 2.5rem;
+  }
+
+  .creditContent {
+    padding: 1rem 1.25rem;
+  }
+
+  .creditText {
+    font-size: 0.7rem;
+    line-height: 1.5;
+  }
+
+  .sectionBadge {
+    font-size: 0.75rem;
+    padding: 0.4rem 1rem;
   }
 
   .sectionTitle {
-    font-size: 2rem;
+    font-size: 1.75rem;
+    line-height: 1.3;
   }
 
-  .ctaButton, .ctaButtonLarge {
-    padding: 1rem 2rem;
+  .sectionSubtitle {
+    font-size: 0.9rem;
+    line-height: 1.5;
+  }
+
+  .carouselSection {
+    padding: 50px 1rem;
+  }
+
+  .carouselSlide {
+    padding: 1.5rem;
+    gap: 1rem;
+  }
+
+  .slideTitle {
+    font-size: 1.25rem;
+  }
+
+  .slideDescription {
+    font-size: 0.85rem;
+  }
+
+  .slideImage {
+    height: 200px;
+  }
+
+  .carouselControls {
+    gap: 1rem;
+  }
+
+  .carouselArrow {
+    width: 36px;
+    height: 36px;
     font-size: 1rem;
   }
 
-  .floatingCard {
-    padding: 1rem 1.5rem;
+  .featureCard {
+    padding: 1.25rem;
   }
 
-  .cardText {
+  .featureCard h3 {
     font-size: 1rem;
+  }
+
+  .featureCard p {
+    font-size: 0.85rem;
+  }
+
+  .parentCard {
+    padding: 1.25rem;
+  }
+
+  .parentCardIcon {
+    font-size: 0.65rem;
+    padding: 0.375rem 0.625rem;
+  }
+
+  .parentCard h3 {
+    font-size: 0.95rem;
+  }
+
+  .parentCard p {
+    font-size: 0.8rem;
+  }
+
+  .previewCard {
+    height: 180px;
+  }
+
+  .previewLabel {
+    font-size: 0.75rem;
+    padding: 0.5rem;
+  }
+
+  .ctaButtonLarge {
+    padding: 1rem 1.75rem;
+    font-size: 0.95rem;
+    width: 100%;
+  }
+
+  .ctaTitle {
+    font-size: 1.5rem;
+  }
+
+  .ctaSubtitle {
+    font-size: 0.9rem;
+  }
+
+  .noCardText {
+    font-size: 0.75rem;
+  }
+
+  .footer {
+    padding: 2rem 1rem;
+  }
+
+  .footerBrand span {
+    font-size: 1rem;
+  }
+
+  .footerLinks a {
+    font-size: 0.85rem;
+  }
+
+  .footerBottom p {
+    font-size: 0.75rem;
   }
 }

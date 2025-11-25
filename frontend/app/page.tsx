@@ -14,22 +14,22 @@ export default function Home() {
   const carouselSlides = [
     {
       id: 1,
-      title: "Explore Magical Castles",
-      description: "Travel through 6 amazing castles, each teaching you cool geometry tricks!",
+      title: "7 Interactive Worlds",
+      description: "Navigate through 2 assessment levels and 5 castle realms, each with unique geometry challenges and lessons!",
       image: "/images/placeholders/app-carousel-1.svg",
       color: "#2F3E75",
     },
     {
       id: 2,
-      title: "Play Fun Mini-Games",
-      description: "Solve puzzles, play games, and compete with friends on the leaderboard!",
+      title: "Collaborative Learning",
+      description: "Join virtual rooms, compete with classmates, and participate in real-time geometry challenges!",
       image: "/images/placeholders/app-carousel-2.svg",
       color: "#3A9679",
     },
     {
       id: 3,
-      title: "Earn Cool Rewards",
-      description: "Collect stars, unlock badges, and show off your amazing progress!",
+      title: "Collect Relics & Track Progress",
+      description: "Earn relics as you master concepts, complete assessments, and unlock achievements!",
       image: "/images/placeholders/app-carousel-3.svg",
       color: "#FABC60",
     },
@@ -44,25 +44,7 @@ export default function Home() {
     return () => clearInterval(timer);
   }, [carouselSlides.length]);
 
-  // Mouse wheel scroll handler for carousel
-  useEffect(() => {
-    const carousel = carouselRef.current;
-    if (!carousel) return;
 
-    const handleWheel = (e: WheelEvent) => {
-      e.preventDefault();
-      if (e.deltaY > 0) {
-        // Scroll down - next slide
-        setActiveSlide((prev) => (prev + 1) % carouselSlides.length);
-      } else {
-        // Scroll up - previous slide
-        setActiveSlide((prev) => (prev - 1 + carouselSlides.length) % carouselSlides.length);
-      }
-    };
-
-    carousel.addEventListener('wheel', handleWheel, { passive: false });
-    return () => carousel.removeEventListener('wheel', handleWheel);
-  }, [carouselSlides.length]);
 
   const handleSignIn = () => {
     router.push(ROUTES.LOGIN);
@@ -111,13 +93,13 @@ export default function Home() {
         {/* Hero Section - Big and Exciting */}
         <section className={styles.heroSection}>
           <div className={styles.heroContent}>
-            <div className={styles.heroBadge}>NEW Adventure Game!</div>
+            <div className={styles.heroBadge}>Welcome! Currently in Development</div>
             <h1 className={styles.heroTitle}>
               Master Geometry Through<br/>
               Interactive Adventures
             </h1>
             <p className={styles.heroSubtitle}>
-              Journey through magical castles, solve engaging puzzles, and master geometry concepts through gamified learning experiences designed for students.
+              An interactive geometry learning platform featuring 7 progressive worlds—2 comprehensive assessment levels and 5 curriculum-based castle realms. Navigate through engaging challenges, collect relics as you master concepts, and track your improvement through structured pre-test and post-test evaluations.
             </p>
             <button 
               className={styles.ctaButton} 
@@ -137,23 +119,36 @@ export default function Home() {
               )}
             </button>
             <p className={styles.trustText}>
-              100% Safe • No Ads • Parent Approved
+              Safe & Focused • Built for Students • Developed with AI Assistance
             </p>
           </div>
           
           <div className={styles.heroVisual}>
             <div className={styles.statCard}>
+              <div className={styles.statNumber}>7</div>
+              <div className={styles.statLabel}>Interactive Worlds</div>
+            </div>
+            <div className={styles.statCard}>
+              <div className={styles.statNumber}>5</div>
+              <div className={styles.statLabel}>Castle Realms</div>
+            </div>
+            <div className={styles.statCard}>
+              <div className={styles.statNumber}>2</div>
+              <div className={styles.statLabel}>Assessment Levels</div>
+            </div>
+            <div className={styles.statCard}>
               <div className={styles.statNumber}>6</div>
-              <div className={styles.statLabel}>Interactive Castles</div>
+              <div className={styles.statLabel}>Learning Categories</div>
             </div>
-            <div className={styles.statCard}>
-              <div className={styles.statNumber}>40+</div>
-              <div className={styles.statLabel}>Fun Challenges</div>
-            </div>
-            <div className={styles.statCard}>
-              <div className={styles.statNumber}>1000+</div>
-              <div className={styles.statLabel}>Happy Students</div>
-            </div>
+          </div>
+        </section>
+
+        {/* Credit Section */}
+        <section className={styles.creditSection}>
+          <div className={styles.creditContent}>
+            <p className={styles.creditText}>
+              Curriculum inspired by the Grade 6 Mathematics program at Cebu Institute of Technology University
+            </p>
           </div>
         </section>
 
@@ -229,20 +224,20 @@ export default function Home() {
 
           <div className={styles.featuresGrid}>
             <div className={styles.featureCard}>
-              <h3>Colorful & Interactive</h3>
-              <p>Make shapes move, spin, and come to life with engaging 3D visualizations!</p>
+              <h3>Interactive World Map</h3>
+              <p>Navigate through 7 distinct worlds, each offering unique geometry challenges and progressive learning paths!</p>
             </div>
             <div className={styles.featureCard}>
-              <h3>Story Adventures</h3>
-              <p>Follow exciting quests through magical lands and unlock new chapters!</p>
+              <h3>Curriculum-Based Modules</h3>
+              <p>Follow structured lessons aligned with educational standards, covering polygons, angles, circles, and spatial reasoning!</p>
             </div>
             <div className={styles.featureCard}>
-              <h3>Instant Feedback</h3>
-              <p>Know right away if you got it right with real-time validation!</p>
+              <h3>Pre & Post Assessments</h3>
+              <p>Track your learning journey with comprehensive assessments that measure your geometry mastery!</p>
             </div>
             <div className={styles.featureCard}>
-              <h3>Play With Friends</h3>
-              <p>Compete on leaderboards and collaborate in multiplayer rooms!</p>
+              <h3>Collaborative Rooms</h3>
+              <p>Join virtual classrooms, compete with peers, and participate in teacher-led geometry competitions!</p>
             </div>
           </div>
         </section>
@@ -251,32 +246,32 @@ export default function Home() {
         <section className={styles.parentsSection}>
           <div className={styles.parentsContainer}>
             <div className={styles.sectionHeader}>
-              <span className={styles.sectionBadge}>Trusted by Educators</span>
-              <h2 className={styles.sectionTitle}>Built for Success in the Classroom</h2>
-              <p className={styles.sectionSubtitle}>Designed with input from teachers and aligned with curriculum standards</p>
+              <span className={styles.sectionBadge}>Designed for Learning</span>
+              <h2 className={styles.sectionTitle}>Evidence-Based Geometry Education</h2>
+              <p className={styles.sectionSubtitle}>Targeting measurable improvement in geometry performance through interactive learning</p>
             </div>
 
             <div className={styles.parentGrid}>
               <div className={styles.parentCard}>
                 <div className={styles.parentCardHeader}>
-                  <div className={styles.parentCardIcon}>📚</div>
-                  <h3>Curriculum Aligned</h3>
+                  <div className={styles.parentCardIcon}>CURRICULUM</div>
+                  <h3>DepEd-Aligned Curriculum</h3>
                 </div>
-                <p>Every lesson matches educational standards and classroom objectives, reinforcing what students learn in school.</p>
+                <p>Covers Grade 5-6 geometry MELCs including polygons, angles, circles, perimeter/area, spatial reasoning, and 3D figures.</p>
               </div>
               <div className={styles.parentCard}>
                 <div className={styles.parentCardHeader}>
-                  <div className={styles.parentCardIcon}>🛡️</div>
-                  <h3>Safe Learning Space</h3>
+                  <div className={styles.parentCardIcon}>AI BUILT</div>
+                  <h3>AI-Assisted Development</h3>
                 </div>
-                <p>Completely ad-free environment with no distractions, ensuring students stay focused on learning.</p>
+                <p>Platform developed with AI assistance to optimize user experience, generate educational content, and streamline development processes.</p>
               </div>
               <div className={styles.parentCard}>
                 <div className={styles.parentCardHeader}>
-                  <div className={styles.parentCardIcon}>📊</div>
-                  <h3>Detailed Analytics</h3>
+                  <div className={styles.parentCardIcon}>TRACKING</div>
+                  <h3>Progress Tracking</h3>
                 </div>
-                <p>Track progress with comprehensive reports showing strengths, areas for improvement, and learning milestones.</p>
+                <p>Comprehensive pre-test and post-test assessments measure geometry mastery and track improvement over time.</p>
               </div>
             </div>
           </div>
@@ -323,9 +318,9 @@ export default function Home() {
         {/* Final CTA */}
         <section className={styles.finalCtaSection}>
           <div className={styles.ctaBox}>
-            <h2 className={styles.ctaTitle}>Ready to Make Geometry Fun?</h2>
+            <h2 className={styles.ctaTitle}>Join Our Learning Adventure</h2>
             <p className={styles.ctaSubtitle}>
-              Join thousands of students mastering geometry through interactive adventures
+              Experience interactive geometry education through 7 unique worlds, collaborative rooms, and comprehensive assessments
             </p>
             <button 
               className={styles.ctaButtonLarge} 
@@ -339,11 +334,11 @@ export default function Home() {
                 </>
               ) : (
                 <>
-                  Start Learning Now - It's FREE!
+                  Get Started - Free Access!
                 </>
               )}
             </button>
-            <p className={styles.noCardText}>No credit card needed • Start instantly</p>
+            <p className={styles.noCardText}>Platform in development • New features added regularly</p>
           </div>
         </section>
 
@@ -367,7 +362,7 @@ export default function Home() {
             </nav>
           </div>
           <div className={styles.footerBottom}>
-            <p>Making geometry magical for every learner ✨</p>
+            <p>Making geometry accessible through interactive learning • Built with AI assistance</p>
           </div>
         </footer>
       </div>

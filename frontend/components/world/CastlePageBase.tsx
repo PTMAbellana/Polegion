@@ -96,6 +96,14 @@ export default function CastlePageBase({ config }: CastlePageBaseProps) {
       if (!castle || !progress) {
         throw new Error('Invalid response: missing castle or progress data')
       }
+
+      // Check if castle is unlocked
+      if (!progress.unlocked) {
+        setError('LOCKED')
+        setCastleData(castle)
+        setLoading(false)
+        return
+      }
       
       setCastleData(castle)
       setCastleProgress(progress)
@@ -145,10 +153,22 @@ export default function CastlePageBase({ config }: CastlePageBaseProps) {
     )
   }
 
+  if (error === 'LOCKED') {
+    return (
+      <div className={styles.error_container}>
+        <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>🔒</div>
+        <h2>Castle Locked</h2>
+        <p>You need to complete previous castles to unlock {castleData?.name || 'this castle'}.</p>
+        <p style={{ fontSize: '0.9rem', opacity: 0.8, marginTop: '0.5rem' }}>Progress through the world map to gain access!</p>
+        <button onClick={handleBackToWorldMap} className={styles.errorButton}>Return to World Map</button>
+      </div>
+    )
+  }
+
   if (error) {
     return (
       <div className={styles.error_container}>
-        <h2>Error Loading Castle</h2>
+        <h2>Unable to Load Castle</h2>
         <p>{error}</p>
         <button onClick={handleBackToWorldMap} className={styles.errorButton}>Return to World Map</button>
       </div>

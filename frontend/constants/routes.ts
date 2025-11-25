@@ -39,7 +39,10 @@ export const STUDENT_ROUTES = {
     // worldmap
     WORLD_MAP: `/student/worldmap`,
     
-    // worldmap
+    // practice
+    PRACTICE: `/student/practice`,
+    
+    // playground
     PLAYGROUND: `/student/playground`,
     
     // wall of fame or leaderboards
