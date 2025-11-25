@@ -287,7 +287,17 @@ export const useChapterStore = create<ChapterState>()(
     }),
     {
       name: 'chapter-progress-storage',
-      storage: createJSONStorage(() => localStorage),
+      storage: createJSONStorage(() => {
+        // Return a no-op storage during SSR
+        if (typeof window === 'undefined') {
+          return {
+            getItem: () => null,
+            setItem: () => {},
+            removeItem: () => {},
+          }
+        }
+        return localStorage
+      }),
     }
   )
 )

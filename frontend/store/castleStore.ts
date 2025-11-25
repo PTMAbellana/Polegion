@@ -5,6 +5,11 @@ import { getAllCastles } from '@/api/castles'
 
 // Helper to get user-specific storage key
 const getUserStorageKey = () => {
+    // Check if we're in a browser environment
+    if (typeof window === 'undefined') {
+        return 'castle-storage-guest'
+    }
+    
     try {
         const authStorage = localStorage.getItem('auth-storage')
         if (authStorage) {
@@ -114,12 +119,14 @@ export const useCastleStore = create<CastleState>()(
                 })
                 
                 // Clear user-specific localStorage
-                try {
-                    const storageKey = getUserStorageKey()
-                    localStorage.removeItem(storageKey)
-                    console.log(`[CastleStore] Cleared storage: ${storageKey}`)
-                } catch (error) {
-                    console.error('[CastleStore] Error clearing storage:', error)
+                if (typeof window !== 'undefined') {
+                    try {
+                        const storageKey = getUserStorageKey()
+                        localStorage.removeItem(storageKey)
+                        console.log(`[CastleStore] Cleared storage: ${storageKey}`)
+                    } catch (error) {
+                        console.error('[CastleStore] Error clearing storage:', error)
+                    }
                 }
             },
 
@@ -136,7 +143,17 @@ export const useCastleStore = create<CastleState>()(
         }),
         {
             name: getUserStorageKey(),
-            storage: createJSONStorage(() => localStorage),
+            storage: createJSONStorage(() => {
+                // Return a no-op storage during SSR
+                if (typeof window === 'undefined') {
+                    return {
+                        getItem: () => null,
+                        setItem: () => {},
+                        removeItem: () => {},
+                    }
+                }
+                return localStorage
+            }),
             partialize: (state) => ({
                 // Only persist UI preferences, not castle data (which can become stale)
                 showIntro: state.showIntro
