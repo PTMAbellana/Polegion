@@ -21,7 +21,7 @@ interface AssessmentResultsProps {
         totalScore: number;
         totalQuestions: number;
         percentage: number;
-        categoryScores: CategoryScore[];
+        categoryScores: Record<string, { correct: number; total: number; score?: number; maxScore?: number; percentage: number }>;
         completedAt?: string;
         comparison?: {
             pretest: {
@@ -97,15 +97,8 @@ export default function AssessmentResults({
     const grade = getGradeMessage(percentage);
     const proficiency = getProficiencyLevel(percentage);
     
-    // Transform category scores for radar chart
-    const currentCategoryScores = results.categoryScores.reduce((acc, cat) => {
-        acc[cat.category] = {
-            correct: cat.score,
-            total: cat.total,
-            percentage: cat.percentage
-        };
-        return acc;
-    }, {} as Record<string, { correct: number; total: number; percentage: number }>);
+    // categoryScores is already an object from the backend, no transformation needed
+    const currentCategoryScores = results.categoryScores || {};
     
     // Get pretest scores if this is posttest
     const pretestScores: Record<string, { correct: number; total: number; percentage: number }> | null = assessmentType === 'posttest' && results.comparison
@@ -128,18 +121,37 @@ export default function AssessmentResults({
                 <div className={styles['left-column']}>
                     {/* Overall Score Card */}
                     <div className={styles['overall-score-card']}>
-                        <div className={styles['score-circle']}>
-                            <div className={styles['score-value']}>{percentage}%</div>
-                            <div className={styles['score-label']}>Overall Score</div>
+                        <div className={styles['score-main']}>
+                            <div className={styles['score-circle']}>
+                                <div className={styles['score-value']}>{percentage}%</div>
+                                <div className={styles['score-label']}>Overall</div>
+                            </div>
+                            <div className={styles['score-info']}>
+                                <h3 className={styles['score-heading']}>
+                                    {assessmentType === 'pretest' ? 'Pretest Score' : 'Posttest Score'}
+                                </h3>
+                                <p className={styles['score-message']}>{grade.message}</p>
+                            </div>
                         </div>
+                        <div className={styles['score-divider']}></div>
                         <div className={styles['score-details']}>
                             <div className={styles['score-stat']}>
-                                <span className={styles['stat-value']}>{results.totalScore}</span>
-                                <span className={styles['stat-label']}>Correct</span>
+                                <div className={styles['stat-content']}>
+                                    <span className={styles['stat-value']}>{results.totalScore}</span>
+                                    <span className={styles['stat-label']}>Correct</span>
+                                </div>
                             </div>
                             <div className={styles['score-stat']}>
-                                <span className={styles['stat-value']}>{results.totalQuestions}</span>
-                                <span className={styles['stat-label']}>Total</span>
+                                <div className={styles['stat-content']}>
+                                    <span className={styles['stat-value']}>{results.totalQuestions}</span>
+                                    <span className={styles['stat-label']}>Questions</span>
+                                </div>
+                            </div>
+                            <div className={styles['score-stat']}>
+                                <div className={styles['stat-content']}>
+                                    <span className={styles['stat-value']}>{proficiency.icon}</span>
+                                    <span className={styles['stat-label']}>{proficiency.level.split(' ')[0]}</span>
+                                </div>
                             </div>
                         </div>
                     </div>

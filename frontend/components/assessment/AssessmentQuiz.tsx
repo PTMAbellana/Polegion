@@ -23,6 +23,10 @@ interface AssessmentQuizProps {
     onAnswerSubmit: (answer: string) => void;
     onNavigate: (index: number) => void;
     onSubmitAssessment: () => void;
+    // Progress bar props
+    currentCategory?: string;
+    categoryIcon?: string;
+    elapsedSeconds?: number;
 }
 
 export default function AssessmentQuiz({ 
@@ -31,7 +35,10 @@ export default function AssessmentQuiz({
     userAnswers,
     onAnswerSubmit,
     onNavigate,
-    onSubmitAssessment
+    onSubmitAssessment,
+    currentCategory = '',
+    categoryIcon = '📚',
+    elapsedSeconds = 0
 }: AssessmentQuizProps) {
     const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
 
@@ -71,10 +78,37 @@ export default function AssessmentQuiz({
 
     const allQuestionsAnswered = Object.keys(userAnswers).length === questions.length;
 
+    const formatTime = (seconds: number) => {
+        const mins = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+    };
+
+    const progress = ((currentQuestionIndex + 1) / questions.length) * 100;
+
     return (
         <div className={styles['quiz-container']}>
             <div className={styles['quiz-left']}>
                 <div className={styles['question-navigator']}>
+                    <div className={styles['navigator-header']}>
+                        <div className={styles['progress-text']}>
+                            {Object.keys(userAnswers).length} / {questions.length} answered
+                        </div>
+                        <div className={styles['answer-legend']}>
+                            <div className={styles['legend-item']}>
+                                <span className={`${styles['legend-dot']} ${styles['legend-dot-current']}`}></span>
+                                <span>Current</span>
+                            </div>
+                            <div className={styles['legend-item']}>
+                                <span className={`${styles['legend-dot']} ${styles['legend-dot-answered']}`}></span>
+                                <span>Answered</span>
+                            </div>
+                            <div className={styles['legend-item']}>
+                                <span className={styles['legend-dot']}></span>
+                                <span>Not answered</span>
+                            </div>
+                        </div>
+                    </div>
                     <div className={styles['question-grid']}>
                         {questions.map((_, index) => (
                             <button
@@ -90,27 +124,32 @@ export default function AssessmentQuiz({
                             </button>
                         ))}
                     </div>
-                    <div className={styles['progress-text']}>
-                        {Object.keys(userAnswers).length} / {questions.length} answered
-                    </div>
-                    <div className={styles['answer-legend']}>
-                        <div className={styles['legend-item']}>
-                            <span className={`${styles['legend-dot']} ${styles['legend-dot-current']}`}></span>
-                            <span>Current</span>
-                        </div>
-                        <div className={styles['legend-item']}>
-                            <span className={`${styles['legend-dot']} ${styles['legend-dot-answered']}`}></span>
-                            <span>Answered</span>
-                        </div>
-                        <div className={styles['legend-item']}>
-                            <span className={styles['legend-dot']}></span>
-                            <span>Not answered</span>
-                        </div>
-                    </div>
                 </div>
             </div>
 
             <div className={styles['quiz-right']}>
+                {/* Progress Bar */}
+                <div className={styles['assessment-progress']}>
+                    <div className={styles['progress-info']}>
+                        <span className={styles['category-info']}>
+                            <span className={styles['icon']}>{categoryIcon}</span>
+                            <span className={styles['name']}>{currentCategory}</span>
+                        </span>
+                        <span className={styles['question-count']}>
+                            {currentQuestionIndex + 1} / {questions.length}
+                        </span>
+                        <span className={styles['timer-badge']}>
+                            ⏱ {formatTime(elapsedSeconds)}
+                        </span>
+                    </div>
+                    <div className={styles['progress-bar-container']}>
+                        <div 
+                            className={styles['progress-bar-fill']} 
+                            style={{ width: `${progress}%` }}
+                        />
+                    </div>
+                </div>
+
                 {/* Question Card */}
                 <div className={styles['question-card']}>
                     <div className={styles['question-header']}>

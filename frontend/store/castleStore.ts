@@ -155,8 +155,8 @@ export const useCastleStore = create<CastleState>()(
                 return localStorage
             }),
             partialize: (state) => ({
-                // Only persist UI preferences, not castle data (which can become stale)
-                showIntro: state.showIntro
+                // Don't persist showIntro - it should be controlled by localStorage check
+                // Only persist UI preferences that don't have their own storage
             })
         }
     )

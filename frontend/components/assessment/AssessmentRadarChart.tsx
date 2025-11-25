@@ -35,6 +35,9 @@ interface ChartDataPoint {
  * Shows comparison between pretest (if available) and current results
  */
 const AssessmentRadarChart = ({ currentScores, pretestScores = null }: RadarChartProps) => {
+  // Check if we have valid data
+  const hasData = currentScores && Object.keys(currentScores).length > 0;
+  
   // Transform category scores into radar chart data
   const categories = [
     "Knowledge Recall",
@@ -45,6 +48,23 @@ const AssessmentRadarChart = ({ currentScores, pretestScores = null }: RadarChar
     "Higher-Order Thinking",
   ];
 
+  // If no data yet, show loading state
+  if (!hasData) {
+    return (
+      <div style={{ 
+        width: '100%', 
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: 'center',
+        minHeight: '280px',
+        color: '#9ca3af',
+        fontSize: '0.875rem'
+      }}>
+        Loading category data...
+      </div>
+    );
+  }
+
   const chartData: ChartDataPoint[] = categories.map((category) => {
     const dataPoint: ChartDataPoint = {
       category: category.replace(" ", "\n"), // Line break for better display
@@ -53,12 +73,12 @@ const AssessmentRadarChart = ({ currentScores, pretestScores = null }: RadarChar
 
     // Add current test scores
     if (currentScores && currentScores[category]) {
-      dataPoint.current = currentScores[category].percentage;
+      dataPoint.current = currentScores[category].percentage || 0;
     }
 
     // Add pretest scores if available (for posttest comparison)
     if (pretestScores && pretestScores[category]) {
-      dataPoint.pretest = pretestScores[category].percentage;
+      dataPoint.pretest = pretestScores[category].percentage || 0;
     }
 
     return dataPoint;
@@ -143,7 +163,7 @@ const AssessmentRadarChart = ({ currentScores, pretestScores = null }: RadarChar
                   <div style={{ fontSize: '0.625rem' }}>
                     <span style={{ color: '#60a5fa' }}>Pretest: </span>
                     <span style={{ color: 'white', fontWeight: 700 }}>
-                      {pretestScore.percentage.toFixed(1)}%
+                      {pretestScore.percentage?.toFixed(1) || '0.0'}%
                     </span>
                   </div>
                 )}
@@ -152,7 +172,7 @@ const AssessmentRadarChart = ({ currentScores, pretestScores = null }: RadarChar
                     {pretestScore ? "Posttest: " : "Score: "}
                   </span>
                   <span style={{ color: 'white', fontWeight: 700 }}>
-                    {currentScore?.percentage.toFixed(1)}%
+                    {currentScore?.percentage?.toFixed(1) || '0.0'}%
                   </span>
                 </div>
               </div>
@@ -161,12 +181,12 @@ const AssessmentRadarChart = ({ currentScores, pretestScores = null }: RadarChar
                   <span style={{ color: '#9ca3af' }}>Improvement: </span>
                   <span
                     style={{
-                      color: currentScore.percentage - pretestScore.percentage >= 0 ? '#34d399' : '#f87171',
+                      color: (currentScore.percentage || 0) - (pretestScore.percentage || 0) >= 0 ? '#34d399' : '#f87171',
                       fontWeight: 700
                     }}
                   >
-                    {currentScore.percentage - pretestScore.percentage >= 0 ? "+" : ""}
-                    {(currentScore.percentage - pretestScore.percentage).toFixed(1)}%
+                    {(currentScore.percentage || 0) - (pretestScore.percentage || 0) >= 0 ? "+" : ""}
+                    {((currentScore.percentage || 0) - (pretestScore.percentage || 0)).toFixed(1)}%
                   </span>
                 </div>
               )}

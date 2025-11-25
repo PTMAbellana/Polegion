@@ -70,43 +70,48 @@ export default function WorldMapPage() {
     }
   }, [userProfile?.id, fetchCastles]);
 
-  // Ensure fresh data when returning to this page (window focus / tab visible)
+  // Refetch castles when navigating back to this page (not on tab switches)
   useEffect(() => {
-    const onFocus = () => {
-      const userId = userProfile?.id;
-      if (userId) {
-        console.log('[WorldMap] Refetching castles on window focus');
-        fetchCastles(userId);
+    const handleVisibilityChange = () => {
+      // Only refetch if the page is becoming visible (not hidden)
+      if (!document.hidden && userProfile?.id) {
+        console.log('[WorldMap] Page visible - refetching castles');
+        fetchCastles(userProfile.id);
       }
     };
-    const onVisibility = () => {
-      if (!document.hidden) {
-        const userId = userProfile?.id;
-        if (userId) {
-          console.log('[WorldMap] Refetching castles on visibilitychange');
-          fetchCastles(userId);
-        }
-      }
-    };
-    window.addEventListener('focus', onFocus);
-    document.addEventListener('visibilitychange', onVisibility);
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    
     return () => {
-      window.removeEventListener('focus', onFocus);
-      document.removeEventListener('visibilitychange', onVisibility);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, [userProfile?.id, fetchCastles]);
 
-  // Intro display - use user-specific localStorage key
+  // Intro display - use user-specific localStorage key (only check once per session)
+  const hasCheckedIntroRef = useRef<string | null>(null);
+  
   useEffect(() => {
     if (!authLoading && userProfile) {
       const introKey = `hasSeenMapIntro_${userProfile.id}`;
       const hasSeenIntro = localStorage.getItem(introKey);
       
-      if (!hasSeenIntro && !showIntro) {
-        setShowIntro(true);
+      // Only update if we haven't checked for this user yet
+      if (hasCheckedIntroRef.current !== userProfile.id) {
+        hasCheckedIntroRef.current = userProfile.id;
+        console.log('[WorldMap] Checking intro for user:', userProfile.id, 'hasSeenIntro:', hasSeenIntro);
+        
+        if (!hasSeenIntro) {
+          console.log('[WorldMap] First time user - showing intro');
+          // Mark as started immediately so it won't show again
+          localStorage.setItem(introKey, 'started');
+          setShowIntro(true);
+        } else {
+          console.log('[WorldMap] User has seen intro - keeping it hidden');
+          setShowIntro(false);
+        }
       }
     }
-  }, [authLoading, userProfile, showIntro, setShowIntro]);
+  }, [authLoading, userProfile]);
 
   // Preload ALL castle background images on mount
   useEffect(() => {
@@ -115,8 +120,15 @@ export default function WorldMapPage() {
     const loadedSet = new Set<number>();
     
     castles.forEach((castle) => {
+      // Use specific backgrounds for castle 0 and 6, modulo cycling for 7+
+      let backgroundNum: number;
+      if (castle.image_number === 0 || castle.image_number === 6) {
+        backgroundNum = castle.image_number;
+      } else {
+        backgroundNum = ((castle.image_number - 1) % 5) + 1;
+      }
       const img = new Image();
-      img.src = `/images/castles/castle${castle.image_number}-background.png`;
+      img.src = `/images/castles/castle${backgroundNum}-background.png`;
       
       img.onload = () => {
         loadedSet.add(castle.image_number);
@@ -124,7 +136,7 @@ export default function WorldMapPage() {
       };
       
       img.onerror = () => {
-        console.warn(`Background image not found for castle ${castle.image_number}`);
+        console.warn(`Background image not found for castle ${castle.image_number}, using fallback`);
       };
     });
   }, [castles]);
@@ -158,10 +170,12 @@ export default function WorldMapPage() {
 
   // Callbacks
   const handleIntroComplete = () => {
-    setShowIntro(false);
     if (userProfile) {
-      localStorage.setItem(`hasSeenMapIntro_${userProfile.id}`, 'true');
+      const introKey = `hasSeenMapIntro_${userProfile.id}`;
+      localStorage.setItem(introKey, 'true');
+      console.log('[WorldMap] Intro completed, saved to localStorage:', introKey);
     }
+    setShowIntro(false);
   };
 
   // Reset modal state when arriving on world map
@@ -260,7 +274,14 @@ export default function WorldMapPage() {
     }
 
     const currentCastle = castles[currentCastleIndex];
-    const currentBackgroundImage = `/images/castles/castle${currentCastle.image_number}-background.png`;
+    // Use specific backgrounds for castle 0 and 6, modulo cycling for 7+
+    let backgroundNum: number;
+    if (currentCastle.image_number === 0 || currentCastle.image_number === 6) {
+      backgroundNum = currentCastle.image_number;
+    } else {
+      backgroundNum = ((currentCastle.image_number - 1) % 5) + 1;
+    }
+    const currentBackgroundImage = `/images/castles/castle${backgroundNum}-background.png`;
 
     // Only show the image if it's preloaded, otherwise show gradient
     const isImageLoaded = preloadedImages.has(currentCastle.image_number);
@@ -281,7 +302,7 @@ export default function WorldMapPage() {
     };
 
     return {
-      backgroundImage: gradients[currentCastle.image_number] || gradients[1],
+      backgroundImage: gradients[backgroundNum] || gradients[1],
     };
   };
 

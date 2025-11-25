@@ -128,6 +128,39 @@ export default function AssessmentPageBase({ config }: { config: AssessmentConfi
     const [elapsedSeconds, setElapsedSeconds] = useState(0);
     const [restoredProgress, setRestoredProgress] = useState(false);
 
+    const castleNumber = config.type === 'pretest' ? 0 : config.type === 'posttest' ? 6 : null;
+    const castleBackgroundColors = (() => {
+        if (castleNumber === 0) {
+            return { primary: '#37353E', accent: '#44444E' };
+        }
+        if (castleNumber === 6) {
+            return { primary: '#000080', accent: '#00044A' };
+        }
+        return { primary: config.theme.primaryColor, accent: config.theme.accentColor };
+    })();
+
+    const renderStage = (content: React.ReactNode, extraStyles: React.CSSProperties = {}) => {
+        const themeStyles = {
+            ['--primary-color' as any]: castleBackgroundColors.primary,
+            ['--accent-color' as any]: castleBackgroundColors.accent,
+        };
+
+        return (
+            <div 
+                className={styles['assessment-container']}
+                style={themeStyles}
+            >
+                <div className={styles['assessment-backdrop']} />
+                <div 
+                    className={styles['assessment-main']}
+                    style={extraStyles}
+                >
+                    {content}
+                </div>
+            </div>
+        );
+    };
+
     const STORAGE_KEY = `assessment_${config.type}_${config.castleId}`;
 
     // Check if assessment is already completed on mount
@@ -145,17 +178,12 @@ export default function AssessmentPageBase({ config }: { config: AssessmentConfi
                 if (existingResults && existingResults.percentage !== undefined) {
                     console.log(`[${config.type}] Assessment already completed, loading results...`);
                     
-                    // Transform results to match expected format
+                    // Keep results in the format returned by backend
                     const formattedResults = {
-                        totalScore: existingResults.totalScore || Math.round((existingResults.percentage / 100) * existingResults.totalQuestions),
+                        totalScore: existingResults.totalScore || Math.round((existingResults.percentage / 100) * (existingResults.totalQuestions || 60)),
                         totalQuestions: existingResults.totalQuestions || 60,
                         percentage: existingResults.percentage,
-                        categoryScores: Object.entries(existingResults.categoryScores || {}).map(([category, data]: [string, any]) => ({
-                            category,
-                            score: data.correct,
-                            total: data.total,
-                            percentage: data.percentage
-                        })),
+                        categoryScores: existingResults.categoryScores || {}, // Keep as object
                         completedAt: existingResults.completedAt
                     };
                     
@@ -337,17 +365,12 @@ export default function AssessmentPageBase({ config }: { config: AssessmentConfi
                         const existingResults = await getAssessmentResults(userId, config.type);
                         
                         if (existingResults) {
-                            // Transform results to match expected format
+                            // Keep results in the format returned by backend
                             const formattedResults = {
-                                totalScore: existingResults.totalScore || Math.round((existingResults.percentage / 100) * existingResults.totalQuestions),
+                                totalScore: existingResults.totalScore || Math.round((existingResults.percentage / 100) * (existingResults.totalQuestions || 60)),
                                 totalQuestions: existingResults.totalQuestions || 60,
                                 percentage: existingResults.percentage,
-                                categoryScores: Object.entries(existingResults.categoryScores || {}).map(([category, data]: [string, any]) => ({
-                                    category,
-                                    score: data.correct,
-                                    total: data.total,
-                                    percentage: data.percentage
-                                })),
+                                categoryScores: existingResults.categoryScores || {}, // Keep as object
                                 completedAt: existingResults.completedAt
                             };
                             
@@ -462,23 +485,19 @@ export default function AssessmentPageBase({ config }: { config: AssessmentConfi
             if (response.results || response) {
                 const results = response.results || response;
                 console.log(`[${config.type}] Results data:`, results);
+                console.log(`[${config.type}] Category scores:`, results.categoryScores);
                 
-                // Transform backend results for display
+                // Keep results in the format returned by backend
                 const transformedResults: any = {
                     totalScore: results.correctAnswers || results.totalScore || 0,
                     totalQuestions: results.totalQuestions || 0,
                     percentage: results.percentage || 0,
-                    categoryScores: results.categoryScores 
-                        ? Object.entries(results.categoryScores).map(([category, scores]: [string, any]) => ({
-                            category,
-                            score: scores.correct,
-                            total: scores.total,
-                            percentage: scores.percentage,
-                            icon: getCategoryIcon(category)
-                        }))
-                        : [],
+                    categoryScores: results.categoryScores || {}, // Keep as object
                     completedAt: results.completedAt || new Date().toISOString()
                 };
+                
+                console.log(`[${config.type}] Transformed results:`, transformedResults);
+                console.log(`[${config.type}] Transformed categoryScores:`, transformedResults.categoryScores);
                 
                 // For posttest, get comparison data
                 if (config.type === 'posttest' && config.showComparison) {
@@ -546,102 +565,128 @@ export default function AssessmentPageBase({ config }: { config: AssessmentConfi
     
     // INTRO STAGE
     if (stage === 'intro') {
-        return (
-            <div
-                className={styles['assessment-container']}
-                style={{
-                    ['--primary-color' as any]: config.theme.primaryColor,
-                    ['--accent-color' as any]: config.theme.accentColor
-                }}
-            >
-                <AssessmentIntro
-                    title={config.title}
-                    description={config.description}
-                    totalQuestions={config.totalQuestions}
-                    categories={config.categories}
-                    onStart={handleStartAssessment}
-                />
-            </div>
+        const introCastleNumber = castleNumber ?? 1;
+        return renderStage(
+            <AssessmentIntro
+                title={config.title}
+                description={config.description}
+                totalQuestions={config.totalQuestions}
+                castleNumber={introCastleNumber}
+                categories={config.categories}
+                onStart={handleStartAssessment}
+            />
         );
     }
 
     // DIALOGUE STAGE
     if (stage === 'dialogue') {
         const currentDialogue = config.dialogue[dialogueIndex];
+        const totalDialogueLines = config.dialogue.length;
+        const progressPercent = Math.round(((dialogueIndex + 1) / Math.max(totalDialogueLines, 1)) * 100);
+        const dialogueTheme = (() => {
+            if (castleNumber === 0) {
+                return {
+                    panel: '#F2F2F4',
+                    accent: '#715A5A',
+                    muted: '#4A454F'
+                };
+            }
+            if (castleNumber === 6) {
+                return {
+                    panel: '#FFF7D6',
+                    accent: '#FFBF1C',
+                    muted: '#4C3A00'
+                };
+            }
+            return {
+                panel: '#f4f6ff',
+                accent: '#8b5cf6',
+                muted: '#4a5568'
+            };
+        })();
         
-        return (
-            <div
-                className={styles['assessment-container']}
-                style={{
-                    ['--primary-color' as any]: config.theme.primaryColor,
-                    ['--accent-color' as any]: config.theme.accentColor
-                }}
-            >
-                <div className={styles['dialogue-box']}>
-                    <div className={styles['dialogue-header']}>
-                        <h2>{config.castleName}</h2>
-                    </div>
-                    
-                    <div className={styles['dialogue-content']}>
-                        <p>{currentDialogue}</p>
-                    </div>
-                    
-                    <div className={styles['dialogue-footer']}>
-                        <button 
-                            onClick={handleNextDialogue}
-                            className={styles['dialogue-button']}
-                        >
-                            {dialogueIndex < config.scenes.opening.end ? 'Continue' : 'Begin Assessment'}
-                        </button>
-                    </div>
-                    
-                    {config.type === 'pretest' && dialogueIndex === 2 && (
-                        <div className={styles['reassurance-message']}>
-                            <p className={styles['reassurance-text']}>
-                                💡 <strong>Remember:</strong> This is just to help us understand what you know. 
-                                There are no wrong answers, and your score won't affect your progress!
-                            </p>
+        return renderStage(
+            <div className={styles['dialogue-box']}>
+                <div className={styles['dialogue-progress']}>
+                    <div>
+                        <span className={styles['progress-label']}>Guide Briefing</span>
+                        <div className={styles['progress-bar']}>
+                            <div
+                                className={styles['progress-fill']}
+                                style={{ width: `${progressPercent}%` }}
+                            />
                         </div>
-                    )}
+                    </div>
+                    <span className={styles['progress-count']}>
+                        {dialogueIndex + 1} / {totalDialogueLines}
+                    </span>
                 </div>
-            </div>
+
+                <div className={styles['dialogue-hero']}>
+                    <div>
+                        <p className={styles['dialogue-subtitle']}>Welcome to {config.castleName}</p>
+                        <h2>{config.title}</h2>
+                        <p className={styles['dialogue-description']}>
+                            {config.description}
+                        </p>
+                    </div>
+                    <div className={styles['dialogue-meta']}>
+                        <span>{config.totalQuestions} Questions</span>
+                        <span>{config.categories.length} Categories</span>
+                    </div>
+                </div>
+
+                <div className={styles['dialogue-content']}>
+                    <p>{currentDialogue}</p>
+                </div>
+                
+                {config.type === 'pretest' && dialogueIndex === 2 && (
+                    <div className={styles['reassurance-message']}>
+                        <p className={styles['reassurance-text']}>
+                            <strong>Reminder:</strong> This checkpoint only measures what you already know. 
+                            Use it to see how much you grow later on.
+                        </p>
+                    </div>
+                )}
+
+                <div className={styles['dialogue-footer']}>
+                    <div className={styles['dialogue-hint']}>
+                        Press Enter or tap Continue
+                    </div>
+                    <button 
+                        onClick={handleNextDialogue}
+                        className={styles['dialogue-button']}
+                    >
+                        {dialogueIndex < config.scenes.opening.end ? 'Continue' : 'Begin Assessment'}
+                    </button>
+                </div>
+            </div>,
+            {
+                ['--dialogue-panel' as any]: dialogueTheme.panel,
+                ['--dialogue-accent' as any]: dialogueTheme.accent,
+                ['--dialogue-muted' as any]: dialogueTheme.muted
+            }
         );
     }
 
     // ASSESSMENT STAGE
     if (stage === 'assessment') {
         if (isLoading) {
-            return (
-                <div
-                    className={styles['assessment-container']}
-                    style={{
-                        ['--primary-color' as any]: config.theme.primaryColor,
-                        ['--accent-color' as any]: config.theme.accentColor
-                    }}
-                >
-                    <div className={styles['loading']}>
-                        <p>Loading assessment...</p>
-                    </div>
+            return renderStage(
+                <div className={styles['loading']}>
+                    <p>Loading assessment...</p>
                 </div>
             );
         }
 
         if (assessmentQuestions.length === 0) {
-            return (
-                <div
-                    className={styles['assessment-container']}
-                    style={{
-                        ['--primary-color' as any]: config.theme.primaryColor,
-                        ['--accent-color' as any]: config.theme.accentColor
-                    }}
-                >
-                    <div className={styles['placeholder']}>
-                        <h2>Assessment Questions</h2>
-                        <p>Backend integration pending. Questions will be loaded here.</p>
-                        <button onClick={() => setStage('results')} className={styles['continue-button']}>
-                            Skip to Results (Testing)
-                        </button>
-                    </div>
+            return renderStage(
+                <div className={styles['placeholder']}>
+                    <h2>Assessment Questions</h2>
+                    <p>Backend integration pending. Questions will be loaded here.</p>
+                    <button onClick={() => setStage('results')} className={styles['continue-button']}>
+                        Skip to Results (Testing)
+                    </button>
                 </div>
             );
         }
@@ -650,55 +695,35 @@ export default function AssessmentPageBase({ config }: { config: AssessmentConfi
         const currentCategoryName = currentQuestionData?.category || config.categories[0]?.name || 'Current category';
         const currentCategoryIcon = getCategoryIcon(currentCategoryName);
 
-        return (
-            <div
-                className={styles['assessment-container']}
-                style={{
-                    ['--primary-color' as any]: config.theme.primaryColor,
-                    ['--accent-color' as any]: config.theme.accentColor
-                }}
-            >
-                <AssessmentProgress
-                    currentQuestion={Math.min(currentQuestion + 1, assessmentQuestions.length)}
-                    totalQuestions={assessmentQuestions.length}
-                    currentCategory={currentCategoryName}
-                    categoryIcon={currentCategoryIcon}
-                    elapsedSeconds={elapsedSeconds}
-                />
-                <AssessmentQuiz
-                    questions={assessmentQuestions}
-                    currentQuestionIndex={currentQuestion}
-                    userAnswers={userAnswers}
-                    onAnswerSubmit={handleAnswerSubmit}
-                    onNavigate={handleQuestionNavigate}
-                    onSubmitAssessment={handleSubmitAssessment}
-                />
-            </div>
+        return renderStage(
+            <AssessmentQuiz
+                questions={assessmentQuestions}
+                currentQuestionIndex={currentQuestion}
+                userAnswers={userAnswers}
+                onAnswerSubmit={handleAnswerSubmit}
+                onNavigate={handleQuestionNavigate}
+                onSubmitAssessment={handleSubmitAssessment}
+                currentCategory={currentCategoryName}
+                categoryIcon={currentCategoryIcon}
+                elapsedSeconds={elapsedSeconds}
+            />
         );
     }
 
     // RESULTS STAGE
     if (stage === 'results') {
-        return (
-            <div
-                className={styles['assessment-container']}
-                style={{
-                    ['--primary-color' as any]: config.theme.primaryColor,
-                    ['--accent-color' as any]: config.theme.accentColor
+        return renderStage(
+            <AssessmentResults
+                results={results || {
+                    totalScore: 0,
+                    totalQuestions: config.totalQuestions,
+                    percentage: 0,
+                    categoryScores: [],
+                    completedAt: new Date().toISOString()
                 }}
-            >
-                <AssessmentResults
-                    results={results || {
-                        totalScore: 0,
-                        totalQuestions: config.totalQuestions,
-                        percentage: 0,
-                        categoryScores: [],
-                        completedAt: new Date().toISOString()
-                    }}
-                    assessmentType={config.type}
-                    onContinue={handleComplete}
-                />
-            </div>
+                assessmentType={config.type}
+                onContinue={handleComplete}
+            />
         );
     }
 
