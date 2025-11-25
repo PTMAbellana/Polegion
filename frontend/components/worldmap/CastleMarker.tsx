@@ -18,7 +18,9 @@ export default function CastleMarker({
 
   const markerClasses = [
     styles.castle_marker,
-    type === 'current' ? styles.current_castle : styles.side_castle,
+    type === 'current' ? styles.current_castle : '',
+    type === 'prev' ? styles.prev_castle : '',
+    type === 'next' ? styles.next_castle : '',
     castle.progress?.unlocked ? styles.unlocked : styles.locked,
     castle.progress?.completed ? styles.completed : '',
     isSelected ? styles.selected : '',

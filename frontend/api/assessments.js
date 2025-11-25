@@ -54,6 +54,10 @@ export const getAssessmentResults = async (userId, testType) => {
     const response = await api.get(`/assessments/results/${userId}/${testType}`);
     return response.data?.data ?? response.data;
   } catch (error) {
+    // Return null for 404 (not found) instead of throwing
+    if (error.response?.status === 404) {
+      return { success: false, results: null };
+    }
     console.error("Error fetching assessment results:", error);
     throw error;
   }

@@ -1,88 +1,37 @@
 "use client";
 import Head from "next/head";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { ROUTES } from "@/constants/routes";
-import styles from "../styles/landingpage.module.css";
+import styles from "./page.module.css";
 
 export default function Home() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const carouselRef = useRef<HTMLDivElement>(null);
+  
   const carouselSlides = [
     {
       id: 1,
-      title: "World Map Missions",
-      description: "Travel across floating castles and pick the next quest from the interactive world map.",
+      title: "Explore Magical Castles",
+      description: "Travel through 6 amazing castles, each teaching you cool geometry tricks!",
       image: "/images/placeholders/app-carousel-1.svg",
-      badge: "Exploration",
-      stats: [
-        { label: "Castles", value: "6" },
-        { label: "Miniquests", value: "40+" },
-      ],
+      color: "#2F3E75",
     },
     {
       id: 2,
-      title: "Real-Time Challenges",
-      description: "Rotate solids, drag shapes, and watch your accuracy climb with instant feedback.",
+      title: "Play Fun Mini-Games",
+      description: "Solve puzzles, play games, and compete with friends on the leaderboard!",
       image: "/images/placeholders/app-carousel-2.svg",
-      badge: "Play Mode",
-      stats: [
-        { label: "Mini-games", value: "20+" },
-        { label: "Leaderboards", value: "Live" },
-      ],
+      color: "#3A9679",
     },
     {
       id: 3,
-      title: "Quest Log & XP",
-      description: "Earn badges, level up, and keep parents & teachers in the loop with shared progress.",
+      title: "Earn Cool Rewards",
+      description: "Collect stars, unlock badges, and show off your amazing progress!",
       image: "/images/placeholders/app-carousel-3.svg",
-      badge: "Progress",
-      stats: [
-        { label: "Badges", value: "30" },
-        { label: "XP Boosts", value: "Weekly" },
-      ],
-    },
-  ];
-
-  const discoveryHighlights = [
-    {
-      label: "Casual Play or Story Mode",
-      text: "Pick free-play puzzles or follow Dimensius through cinematic story beats.",
-      icon: "🎮",
-    },
-    {
-      label: "Guided Feedback",
-      text: "Hints, narrated lessons, and XP stars keep learners confident.",
-      icon: "✨",
-    },
-    {
-      label: "Teacher Dashboards",
-      text: "Shareable progress, printable quizzes, and classroom competitions.",
-      icon: "🧭",
-    },
-  ];
-
-  const adventureModules = [
-    {
-      title: "Interactive World Map",
-      description: "Unlock castles and zoom into every chapter. Each icon glows when new XP is available.",
-      tag: "Map Hub",
-    },
-    {
-      title: "Mini-Game Arcade",
-      description: "Angle launchers, polygon scanners, surface-area labs, and more playful practice.",
-      tag: "Arcade",
-    },
-    {
-      title: "Narrated Lessons",
-      description: "Every chapter includes voiced stories, concept cards, and guided tasks.",
-      tag: "Lessons",
-    },
-    {
-      title: "Rewards & Relics",
-      description: "Collect relics, badges, and banners that decorate the player profile.",
-      tag: "Rewards",
+      color: "#FABC60",
     },
   ];
 
@@ -91,53 +40,66 @@ export default function Home() {
   useEffect(() => {
     const timer = setInterval(() => {
       setActiveSlide((prev) => (prev + 1) % carouselSlides.length);
-    }, 6000);
+    }, 5000);
     return () => clearInterval(timer);
   }, [carouselSlides.length]);
 
+  // Mouse wheel scroll handler for carousel
+  useEffect(() => {
+    const carousel = carouselRef.current;
+    if (!carousel) return;
+
+    const handleWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      if (e.deltaY > 0) {
+        // Scroll down - next slide
+        setActiveSlide((prev) => (prev + 1) % carouselSlides.length);
+      } else {
+        // Scroll up - previous slide
+        setActiveSlide((prev) => (prev - 1 + carouselSlides.length) % carouselSlides.length);
+      }
+    };
+
+    carousel.addEventListener('wheel', handleWheel, { passive: false });
+    return () => carousel.removeEventListener('wheel', handleWheel);
+  }, [carouselSlides.length]);
+
   const handleSignIn = () => {
-    router.push(ROUTES.LOGIN); //TEMPORARY CHANGE
+    router.push(ROUTES.LOGIN);
   };
 
   const handleGetStarted = () => {
     setIsLoading(true);
     setTimeout(() => {
       setIsLoading(false);
-      router.push(ROUTES.LOGIN); // TEMPORARY CHANGE
+      router.push(ROUTES.LOGIN);
     }, 1000);
   };
 
   return (
     <>
       <Head>
-        <title>Polegion - Fun Geometry Visualizer</title>
+        <title>Polegion - Learn Geometry the Fun Way!</title>
         <meta
           name="description"
-          content="Explore interactive geometry visualizations and gamified learning"
+          content="Join the adventure! Learn geometry through magical castles, fun games, and exciting quests."
         />
         <link rel="icon" type="image/png" href="/images/polegionIcon.png" />
       </Head>
 
-      <div className={styles.container}>
-        {/* Header with background image */}
-        <header className={styles.pageHeader}>
-          <div className={styles.headerBg}>
-            <Image 
-              src="/images/landing-page-header.svg" 
-              alt="Header background" 
-              fill 
-              className={styles.headerBgImage}
-              priority 
-            />
-          </div>
+      <div className={styles.landingContainer}>
+        {/* Floating Header */}
+        <header className={styles.header}>
           <div className={styles.headerContent}>
             <div className={styles.logoSection}>
               <Image 
-                src="/images/polegionIcon.png" 
-                alt="Polegion Icon" 
-                width={50} 
-                height={50}
-                className={styles.brandIcon}
+                src="/images/polegion-logo.gif" 
+                alt="Polegion" 
+                width={180} 
+                height={60}
+                className={styles.polegionLogo}
+                unoptimized
+                style={{ objectFit: 'contain' }}
               />
             </div>
             <button className={styles.signInBtn} onClick={handleSignIn}>
@@ -146,278 +108,16 @@ export default function Home() {
           </div>
         </header>
 
-        {/* Hero Section */}
+        {/* Hero Section - Big and Exciting */}
         <section className={styles.heroSection}>
           <div className={styles.heroContent}>
+            <div className={styles.heroBadge}>NEW Adventure Game!</div>
             <h1 className={styles.heroTitle}>
-              <span className={styles.welcomeText}>Welcome to</span>
-              <div className={styles.logoContainer}>
-                <Image 
-                  src="/images/polegion-logo.gif" 
-                  alt="Polegion" 
-                  width={400} 
-                  height={120}
-                  className={styles.polegionLogo}
-                  unoptimized
-                  priority
-                />
-              </div>
+              Master Geometry Through<br/>
+              Interactive Adventures
             </h1>
             <p className={styles.heroSubtitle}>
-              Explore castles, solve puzzles, and learn geometry the fun way.
-            </p>
-            <button 
-              className={styles.getStartedBtn} 
-              onClick={handleGetStarted}
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <>
-                  <div className={styles.spinner} />
-                  Loading...
-                </>
-              ) : (
-                <>
-                  Let&rsquo;s Get Started
-                  <span className={styles.arrow}>→</span>
-                </>
-              )}
-            </button>
-          </div>
-        </section>
-
-        {/* Discovery Section */}
-        <section className={styles.discoverySection}>
-          <div className={styles.discoveryIntro}>
-            <p className={styles.discoveryEyebrow}>What makes Polegion different?</p>
-            <h2>Built for curious brains & confident teachers</h2>
-            <p>
-              Polegion feels like an adventure game but secretly follows the exact geometry competencies
-              you expect in class.
-            </p>
-          </div>
-          <div className={styles.discoveryGrid}>
-            {discoveryHighlights.map((card) => (
-              <div key={card.label} className={styles.discoveryCard}>
-                <div className={styles.discoveryIcon}>{card.icon}</div>
-                <h3>{card.label}</h3>
-                <p>{card.text}</p>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* Carousel Section */}
-        <section className={styles.carouselSection}>
-          <div className={styles.carouselIntro}>
-            <p className={styles.discoveryEyebrow}>See it in action</p>
-            <h2>Inside the Arcane Observatory</h2>
-            <p>
-              Switch between story mode, mini-games, and rewards. Here’s a quick peek while we prep the
-              full launch media.
-            </p>
-            <div className={styles.carouselDots}>
-              {carouselSlides.map((slide, index) => (
-                <button
-                  key={slide.id}
-                  className={`${styles.carouselDot} ${
-                    activeSlide === index ? styles.carouselDotActive : ""
-                  }`}
-                  onClick={() => setActiveSlide(index)}
-                  aria-label={`Show slide ${index + 1}`}
-                />
-              ))}
-            </div>
-          </div>
-
-          <div className={styles.carouselStage}>
-            <div className={styles.carouselBadge}>{carouselSlides[activeSlide].badge}</div>
-            <div className={styles.carouselImageWrap}>
-              <Image
-                src={carouselSlides[activeSlide].image}
-                alt={carouselSlides[activeSlide].title}
-                fill
-                className={styles.carouselImage}
-                priority
-              />
-            </div>
-            <div className={styles.carouselDetails}>
-              <h3>{carouselSlides[activeSlide].title}</h3>
-              <p>{carouselSlides[activeSlide].description}</p>
-              <div className={styles.carouselStats}>
-                {carouselSlides[activeSlide].stats.map((stat) => (
-                  <div key={stat.label}>
-                    <span>{stat.value}</span>
-                    <small>{stat.label}</small>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Modules section */}
-        <section className={styles.modulesSection}>
-          <h2 className={styles.sectionTitle}>What&apos;s inside the app</h2>
-          <div className={styles.modulesGrid}>
-            {adventureModules.map((module) => (
-              <div key={module.title} className={styles.moduleCard}>
-                <span className={styles.moduleTag}>{module.tag}</span>
-                <h3>{module.title}</h3>
-                <p>{module.description}</p>
-                <div className={styles.modulePlaceholder}>
-                  <span>Preview coming soon</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* Why Kids Love It Section */}
-        <section className={styles.whyKidsSection}>
-          <div className={styles.sectionBg}>
-            <Image 
-              src="/images/landing-page-background-1.svg" 
-              alt="Background" 
-              fill 
-              className={styles.sectionBgImage}
-            />
-          </div>
-          <div className={styles.sectionContent}>
-            <h2 className={styles.sectionTitle}>Why Kids Will Love It</h2>
-            <div className={styles.featureRow}>
-              <div className={styles.featureBox}>
-                <div className={styles.featureImageWrap}>
-                  <div className={styles.featureIcon}>🌀</div>
-                </div>
-                <div className={styles.featureTextWrap}>
-                  <h3 className={styles.featureTitle}>Interactive Visualizations</h3>
-                  <p className={styles.featureDesc}>
-                    Make shapes move, rotate, and come alive with engaging animations.
-                  </p>
-                </div>
-              </div>
-
-              <div className={styles.featureBox}>
-                <div className={styles.featureImageWrap}>
-                  <div className={styles.featureIcon}>🏰</div>
-                </div>
-                <div className={styles.featureTextWrap}>
-                  <h3 className={styles.featureTitle}>Story + Adventure</h3>
-                  <p className={styles.featureDesc}>
-                    Each castle is a math topic to conquer with exciting quests.
-                  </p>
-                </div>
-              </div>
-
-              <div className={styles.featureBox}>
-                <div className={styles.featureImageWrap}>
-                  <div className={styles.featureIcon}>⭐</div>
-                </div>
-                <div className={styles.featureTextWrap}>
-                  <h3 className={styles.featureTitle}>Rewards & Achievements</h3>
-                  <p className={styles.featureDesc}>
-                    Collect stars, unlock badges, and progress like a game.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Why Parents Approve Section */}
-        <section className={styles.parentsSection}>
-          <div className={styles.sectionContent}>
-            <h2 className={styles.sectionTitle}>Why Parents & Teachers Approve</h2>
-            <div className={styles.benefitsGrid}>
-              <div className={styles.benefitCard}>
-                <div className={styles.benefitIcon}>📚</div>
-                <h3 className={styles.benefitTitle}>Curriculum-Aligned</h3>
-                <p className={styles.benefitText}>
-                  Matches grade-level geometry lessons perfectly.
-                </p>
-              </div>
-              <div className={styles.benefitCard}>
-                <div className={styles.benefitIcon}>🛡️</div>
-                <h3 className={styles.benefitTitle}>Safe & Kid-Friendly</h3>
-                <p className={styles.benefitText}>
-                  Ad-free, distraction-free learning environment.
-                </p>
-              </div>
-              <div className={styles.benefitCard}>
-                <div className={styles.benefitIcon}>📈</div>
-                <h3 className={styles.benefitTitle}>Progress Tracking</h3>
-                <p className={styles.benefitText}>
-                  See mastered topics and areas needing help.
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Preview Section */}
-        <section className={styles.previewSection}>
-          <div className={styles.sectionContent}>
-            <h2 className={styles.sectionTitle}>A Sneak Peek</h2>
-            <div className={styles.previewGrid}>
-              <div className={styles.previewCard}>
-                <Image 
-                  src="/images/world-map.png" 
-                  alt="World Map Preview" 
-                  fill 
-                  className={styles.previewImage}
-                />
-                <div className={styles.previewLabel}>World Map (Castles & Topics)</div>
-              </div>
-              <div className={styles.previewCard}>
-                <Image 
-                  src="/images/2.png" 
-                  alt="Geometry Puzzle Preview" 
-                  fill 
-                  className={styles.previewImage}
-                />
-                <div className={styles.previewLabel}>Interactive Geometry Puzzle</div>
-              </div>
-              <div className={styles.previewCard}>
-                <Image 
-                  src="/images/1.png" 
-                  alt="Badges Preview" 
-                  fill 
-                  className={styles.previewImage}
-                />
-                <div className={styles.previewLabel}>Badges & Achievements</div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Testimonials */}
-        {/* <section className={styles.testimonialsSection}>
-          <div className={styles.sectionContent}>
-            <h2 className={styles.sectionTitle}>What People Are Saying</h2>
-            <div className={styles.testimonials}>
-              <blockquote className={styles.testimonial}>
-                <p className={styles.testimonialText}>
-                  &ldquo;My students are excited about geometry again!&rdquo;
-                </p>
-                <span className={styles.testimonialAuthor}>— Ms. Rivera, Math Teacher</span>
-              </blockquote>
-              <blockquote className={styles.testimonial}>
-                <p className={styles.testimonialText}>
-                  &ldquo;My child actually asks to practice math now.&rdquo;
-                </p>
-                <span className={styles.testimonialAuthor}>— Jacob, Parent</span>
-              </blockquote>
-            </div>
-          </div>
-        </section> */}
-
-        {/* Bottom CTA */}
-        <section className={styles.ctaSection}>
-          <div className={styles.ctaContent}>
-            <h2 className={styles.ctaTitle}>Start Your Adventure Now</h2>
-            <p className={styles.ctaSubtitle}>
-              It&rsquo;s free to begin — jump into your first geometry quest today!
+              Journey through magical castles, solve engaging puzzles, and master geometry concepts through gamified learning experiences designed for students.
             </p>
             <button 
               className={styles.ctaButton} 
@@ -431,27 +131,243 @@ export default function Home() {
                 </>
               ) : (
                 <>
-                  Start Exploring
+                  Start Your Adventure FREE
                   <span className={styles.arrow}>→</span>
                 </>
               )}
             </button>
+            <p className={styles.trustText}>
+              100% Safe • No Ads • Parent Approved
+            </p>
+          </div>
+          
+          <div className={styles.heroVisual}>
+            <div className={styles.statCard}>
+              <div className={styles.statNumber}>6</div>
+              <div className={styles.statLabel}>Interactive Castles</div>
+            </div>
+            <div className={styles.statCard}>
+              <div className={styles.statNumber}>40+</div>
+              <div className={styles.statLabel}>Fun Challenges</div>
+            </div>
+            <div className={styles.statCard}>
+              <div className={styles.statNumber}>1000+</div>
+              <div className={styles.statLabel}>Happy Students</div>
+            </div>
+          </div>
+        </section>
+
+        {/* Interactive Carousel Section */}
+        <section className={styles.carouselSection} ref={carouselRef}>
+          <div className={styles.sectionHeader}>
+            <span className={styles.sectionBadge}>See It In Action</span>
+            <h2 className={styles.sectionTitle}>What Makes It Awesome?</h2>
+            <p className={styles.sectionSubtitle}>
+              Scroll through to see how fun learning can be!
+            </p>
+          </div>
+
+          <div className={styles.carouselWrapper}>
+            <div 
+              className={styles.carouselTrack}
+              style={{ transform: `translateX(-${activeSlide * 100}%)` }}
+            >
+              {carouselSlides.map((slide, index) => (
+                <div 
+                  key={slide.id} 
+                  className={styles.carouselSlide}
+                  style={{ borderColor: slide.color }}
+                >
+                  <div className={styles.slideContent}>
+                    <h3 className={styles.slideTitle}>{slide.title}</h3>
+                    <p className={styles.slideDescription}>{slide.description}</p>
+                  </div>
+                  <div className={styles.slideImage}>
+                    <Image
+                      src={slide.image}
+                      alt={slide.title}
+                      fill
+                      className={styles.slideImg}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className={styles.carouselControls}>
+            <button 
+              className={styles.carouselArrow}
+              onClick={() => setActiveSlide((prev) => (prev - 1 + carouselSlides.length) % carouselSlides.length)}
+            >
+              ←
+            </button>
+            <div className={styles.carouselDots}>
+              {carouselSlides.map((_, index) => (
+                <button
+                  key={index}
+                  className={`${styles.carouselDot} ${activeSlide === index ? styles.active : ''}`}
+                  onClick={() => setActiveSlide(index)}
+                />
+              ))}
+            </div>
+            <button 
+              className={styles.carouselArrow}
+              onClick={() => setActiveSlide((prev) => (prev + 1) % carouselSlides.length)}
+            >
+              →
+            </button>
+          </div>
+        </section>
+
+        {/* Why Kids Love It */}
+        <section className={styles.featuresSection}>
+          <div className={styles.sectionHeader}>
+            <span className={styles.sectionBadge}>Key Features</span>
+            <h2 className={styles.sectionTitle}>Why Students Love It</h2>
+          </div>
+
+          <div className={styles.featuresGrid}>
+            <div className={styles.featureCard}>
+              <h3>Colorful & Interactive</h3>
+              <p>Make shapes move, spin, and come to life with engaging 3D visualizations!</p>
+            </div>
+            <div className={styles.featureCard}>
+              <h3>Story Adventures</h3>
+              <p>Follow exciting quests through magical lands and unlock new chapters!</p>
+            </div>
+            <div className={styles.featureCard}>
+              <h3>Instant Feedback</h3>
+              <p>Know right away if you got it right with real-time validation!</p>
+            </div>
+            <div className={styles.featureCard}>
+              <h3>Play With Friends</h3>
+              <p>Compete on leaderboards and collaborate in multiplayer rooms!</p>
+            </div>
+          </div>
+        </section>
+
+        {/* Why Parents Trust It */}
+        <section className={styles.parentsSection}>
+          <div className={styles.parentsContainer}>
+            <div className={styles.sectionHeader}>
+              <span className={styles.sectionBadge}>Trusted by Educators</span>
+              <h2 className={styles.sectionTitle}>Built for Success in the Classroom</h2>
+              <p className={styles.sectionSubtitle}>Designed with input from teachers and aligned with curriculum standards</p>
+            </div>
+
+            <div className={styles.parentGrid}>
+              <div className={styles.parentCard}>
+                <div className={styles.parentCardHeader}>
+                  <div className={styles.parentCardIcon}>📚</div>
+                  <h3>Curriculum Aligned</h3>
+                </div>
+                <p>Every lesson matches educational standards and classroom objectives, reinforcing what students learn in school.</p>
+              </div>
+              <div className={styles.parentCard}>
+                <div className={styles.parentCardHeader}>
+                  <div className={styles.parentCardIcon}>🛡️</div>
+                  <h3>Safe Learning Space</h3>
+                </div>
+                <p>Completely ad-free environment with no distractions, ensuring students stay focused on learning.</p>
+              </div>
+              <div className={styles.parentCard}>
+                <div className={styles.parentCardHeader}>
+                  <div className={styles.parentCardIcon}>📊</div>
+                  <h3>Detailed Analytics</h3>
+                </div>
+                <p>Track progress with comprehensive reports showing strengths, areas for improvement, and learning milestones.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Social Proof - Preview Images */}
+        <section className={styles.previewSection}>
+          <div className={styles.sectionHeader}>
+            <span className={styles.sectionBadge}>Sneak Peek</span>
+            <h2 className={styles.sectionTitle}>Take A Look Inside</h2>
+          </div>
+
+          <div className={styles.previewGrid}>
+            <div className={styles.previewCard}>
+              <Image 
+                src="/images/world-map.png" 
+                alt="World Map" 
+                fill 
+                className={styles.previewImage}
+              />
+              <div className={styles.previewLabel}>Interactive World Map</div>
+            </div>
+            <div className={styles.previewCard}>
+              <Image 
+                src="/images/2.png" 
+                alt="Fun Puzzles" 
+                fill 
+                className={styles.previewImage}
+              />
+              <div className={styles.previewLabel}>Engaging Puzzles</div>
+            </div>
+            <div className={styles.previewCard}>
+              <Image 
+                src="/images/1.png" 
+                alt="Awesome Rewards" 
+                fill 
+                className={styles.previewImage}
+              />
+              <div className={styles.previewLabel}>Achievement Rewards</div>
+            </div>
+          </div>
+        </section>
+
+        {/* Final CTA */}
+        <section className={styles.finalCtaSection}>
+          <div className={styles.ctaBox}>
+            <h2 className={styles.ctaTitle}>Ready to Make Geometry Fun?</h2>
+            <p className={styles.ctaSubtitle}>
+              Join thousands of students mastering geometry through interactive adventures
+            </p>
+            <button 
+              className={styles.ctaButtonLarge} 
+              onClick={handleGetStarted}
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <>
+                  <div className={styles.spinner} />
+                  Loading...
+                </>
+              ) : (
+                <>
+                  Start Learning Now - It's FREE!
+                </>
+              )}
+            </button>
+            <p className={styles.noCardText}>No credit card needed • Start instantly</p>
           </div>
         </section>
 
         {/* Footer */}
         <footer className={styles.footer}>
-          <nav className={styles.footerLinks}>
-            <a href="#" className={styles.footerLink}>About</a>
-            <span>·</span>
-            <a href="#" className={styles.footerLink}>Contact</a>
-            <span>·</span>
-            <a href="#" className={styles.footerLink}>Privacy</a>
-            <span>·</span>
-            <a href="#" className={styles.footerLink}>Help</a>
-          </nav>
-          <div className={styles.footerTagline}>
-            Polegion — Making math magical for every learner.
+          <div className={styles.footerContent}>
+            <div className={styles.footerBrand}>
+              <Image 
+                src="/images/polegionIcon.png" 
+                alt="Polegion" 
+                width={30} 
+                height={30}
+              />
+              <span>Polegion</span>
+            </div>
+            <nav className={styles.footerLinks}>
+              <a href="#">About</a>
+              <a href="#">Contact</a>
+              <a href="#">Privacy</a>
+              <a href="#">Help</a>
+            </nav>
+          </div>
+          <div className={styles.footerBottom}>
+            <p>Making geometry magical for every learner ✨</p>
           </div>
         </footer>
       </div>

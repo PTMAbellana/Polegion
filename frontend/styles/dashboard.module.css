@@ -17,36 +17,15 @@
   background: linear-gradient(135deg, rgba(34, 197, 94, 0.1) 0%, rgba(132, 204, 22, 0.05) 100%);
   backdrop-filter: blur(10px);
   border: 2px solid rgba(34, 197, 94, 0.3);
-  border-radius: 1.5rem;
-  padding: 2rem;
+  border-radius: 1rem;
+  padding: 1.25rem;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1rem;
+  gap: 0.75rem;
   position: relative;
   overflow: hidden;
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.miniProfileCard::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(45deg, #22c55e, #84cc16, #eab308, #f59e0b);
-  z-index: -1;
-  padding: 2px;
-  border-radius: 1.5rem;
-  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  mask-composite: exclude;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.miniProfileCard:hover::before {
-  opacity: 1;
 }
 
 /* .miniProfileAvatar {
@@ -90,18 +69,18 @@
 
 .miniProfileName {
   font-family: 'Poppins', sans-serif;
-  font-size: 1.5rem;
+  font-size: 1.125rem;
   font-weight: 700;
   background: linear-gradient(135deg, #2C514C 0%, #22c55e 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  margin: 0 0 0.5rem 0;
+  margin: 0 0 0.25rem 0;
 }
 
 .miniProfileRole {
   font-family: 'Poppins', sans-serif;
-  font-size: 1rem;
+  font-size: 0.875rem;
   color: #6b7280;
   font-weight: 500;
   margin: 0;
@@ -111,14 +90,10 @@
   gap: 0.5rem;
 }
 
-.roleIcon {
-  font-size: 1.2rem;
-}
-
 .viewProfileButton {
   font-family: 'Poppins', sans-serif;
-  margin-top: 1rem;
-  padding: 0.75rem 1.5rem;
+  margin-top: 0.5rem;
+  padding: 0.5rem 1.25rem;
   background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
   color: white;
   border: none;
@@ -127,7 +102,7 @@
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
-  font-size: 0.9rem;
+  font-size: 0.8rem;
 }
 
 .viewProfileButton:hover {
@@ -150,13 +125,13 @@
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(247, 254, 231, 0.95) 100%);
   backdrop-filter: blur(10px);
   border: 2px solid rgba(34, 197, 94, 0.2);
-  border-radius: 1.5rem;
-  padding: 1.5rem;
+  border-radius: 1rem;
+  padding: 1rem;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 1rem;
+  gap: 0.75rem;
   cursor: pointer;
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
@@ -188,20 +163,22 @@
 }
 
 .quickActionIcon {
-  font-size: 3rem;
-  width: 80px;
-  height: 80px;
+  width: 60px;
+  height: 60px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.15) 0%, rgba(132, 204, 22, 0.15) 100%);
+  border: 2px solid rgba(34, 197, 94, 0.3);
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, rgba(34, 197, 94, 0.1) 0%, rgba(132, 204, 22, 0.1) 100%);
-  border-radius: 1.5rem;
+  font-size: 2rem;
   transition: all 0.3s ease;
 }
 
 .quickActionCard:hover .quickActionIcon {
-  transform: scale(1.1) rotate(5deg);
-  background: linear-gradient(135deg, rgba(34, 197, 94, 0.2) 0%, rgba(132, 204, 22, 0.2) 100%);
+  transform: scale(1.1);
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.25) 0%, rgba(132, 204, 22, 0.25) 100%);
+  border-color: rgba(34, 197, 94, 0.5);
 }
 
 .quickActionContent {
@@ -210,15 +187,15 @@
 
 .quickActionContent h4 {
   font-family: 'Poppins', sans-serif;
-  font-size: 1.1rem;
+  font-size: 0.95rem;
   font-weight: 700;
   color: #2C514C;
-  margin: 0 0 0.25rem 0;
+  margin: 0 0 0.125rem 0;
 }
 
 .quickActionContent p {
   font-family: 'Poppins', sans-serif;
-  font-size: 0.85rem;
+  font-size: 0.75rem;
   color: #6b7280;
   margin: 0;
   font-weight: 500;
@@ -264,6 +241,306 @@
   color: white;
   transform: translateX(4px);
   box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+}
+
+/* ========================================
+   PERFORMANCE SECTION WITH TABS
+   ======================================== */
+
+.performanceSection {
+  margin-bottom: 2.5rem;
+}
+
+.performanceCard {
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.05) 0%, rgba(132, 204, 22, 0.05) 100%);
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba(34, 197, 94, 0.3);
+  border-radius: 1.5rem;
+  overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.performanceCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(34, 197, 94, 0.3);
+}
+
+.tabNavigation {
+  display: flex;
+  border-bottom: 2px solid rgba(34, 197, 94, 0.2);
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.tabButton {
+  flex: 1;
+  padding: 1rem 1.5rem;
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #6b7280;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.tabButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.tabButton:not(:disabled):hover {
+  color: #16a34a;
+  background: rgba(34, 197, 94, 0.05);
+}
+
+.tabButtonActive {
+  color: #16a34a;
+  background: rgba(34, 197, 94, 0.1);
+}
+
+.tabButtonActive::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(135deg, #22c55e 0%, #84cc16 100%);
+}
+
+.tabContent {
+  padding: 2rem;
+}
+
+/* ========================================
+   LEADERBOARDS SECTION
+   ======================================== */
+
+.assessmentSection {
+  margin-bottom: 2.5rem;
+}
+
+.assessmentCard {
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.05) 0%, rgba(132, 204, 22, 0.05) 100%);
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba(34, 197, 94, 0.3);
+  border-radius: 1.5rem;
+  padding: 2rem;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.assessmentCard::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, #22c55e, #84cc16, #eab308, #f59e0b);
+  z-index: -1;
+  padding: 2px;
+  border-radius: 1.5rem;
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.assessmentCard:hover::before {
+  opacity: 1;
+}
+
+.assessmentCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(34, 197, 94, 0.3);
+}
+
+.assessmentContent {
+  display: grid;
+  grid-template-columns: 0.8fr 1.2fr;
+  gap: 2rem;
+  align-items: center;
+}
+
+.assessmentInfo h3 {
+  font-family: 'Poppins', sans-serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #2C514C 0%, #22c55e 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: 0 0 0.75rem 0;
+}
+
+.assessmentInfo p {
+  font-family: 'Poppins', sans-serif;
+  font-size: 1rem;
+  color: #6b7280;
+  line-height: 1.6;
+  margin: 0 0 1.5rem 0;
+}
+
+.assessmentStats {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.statBadge {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.1) 0%, rgba(132, 204, 22, 0.1) 100%);
+  border: 1px solid rgba(34, 197, 94, 0.3);
+  border-radius: 50px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #16a34a;
+}
+
+.statIcon {
+  font-size: 1rem;
+}
+
+.assessmentChartWrapper {
+  background: #1a202c;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  min-height: 400px;
+}
+
+/* Castle Progress Styles */
+.castleContent {
+  width: 100%;
+}
+
+.castleGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+.castleCard {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(247, 254, 231, 0.95) 100%);
+  border: 2px solid rgba(34, 197, 94, 0.2);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.castleCard::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: radial-gradient(circle, rgba(34, 197, 94, 0.08) 0%, transparent 70%);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: all 0.5s ease;
+}
+
+.castleCard:hover::before {
+  width: 300%;
+  height: 300%;
+}
+
+.castleCard:hover {
+  transform: translateY(-4px);
+  border-color: rgba(34, 197, 94, 0.5);
+  box-shadow: 0 8px 24px rgba(34, 197, 94, 0.3);
+}
+
+.castleHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.castleHeader h4 {
+  font-family: 'Poppins', sans-serif;
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #2C514C;
+  margin: 0;
+}
+
+.castleLevel {
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #16a34a;
+  background: rgba(34, 197, 94, 0.1);
+  padding: 0.25rem 0.75rem;
+  border-radius: 50px;
+  border: 1px solid rgba(34, 197, 94, 0.3);
+}
+
+.castleProgress {
+  margin-bottom: 1rem;
+}
+
+.progressBar {
+  width: 100%;
+  height: 8px;
+  background: rgba(34, 197, 94, 0.1);
+  border-radius: 50px;
+  overflow: hidden;
+  margin-bottom: 0.5rem;
+}
+
+.progressFill {
+  height: 100%;
+  background: linear-gradient(135deg, #22c55e 0%, #84cc16 100%);
+  border-radius: 50px;
+  transition: width 0.5s ease;
+  box-shadow: 0 0 10px rgba(34, 197, 94, 0.4);
+}
+
+.progressText {
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.75rem;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.castleStats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.castleStat {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.statLabel {
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.7rem;
+  color: #9ca3af;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.statValue {
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #2C514C;
 }
 
 /* ========================================
@@ -418,6 +695,10 @@
   .quickActionsGrid {
     grid-template-columns: repeat(3, 1fr);
   }
+
+  .assessmentContent {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 768px) {
@@ -467,6 +748,23 @@
   .viewAllButton {
     padding: 0.5rem 1rem;
     font-size: 0.85rem;
+  }
+
+  .assessmentCard {
+    padding: 1.5rem;
+  }
+
+  .assessmentInfo h3 {
+    font-size: 1.25rem;
+  }
+
+  .assessmentInfo p {
+    font-size: 0.9rem;
+  }
+
+  .assessmentChartWrapper {
+    padding: 1rem;
+    min-height: 350px;
   }
 }
 
@@ -527,4 +825,8 @@
 
 .roomsSection {
   animation: fadeInUp 0.6s ease-out 0.2s both;
+}
+
+.assessmentSection {
+  animation: fadeInUp 0.6s ease-out 0.15s both;
 }

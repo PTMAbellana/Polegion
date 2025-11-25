@@ -1,8 +1,8 @@
 /* Main Assessment Container */
 .assessment-container {
-    height: 100vh;
-    overflow: hidden;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    overflow-y: auto;
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -51,7 +51,7 @@
 }
 
 .dialogue-button {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
     color: white;
     font-size: 1.125rem;
     font-weight: 600;
@@ -257,7 +257,7 @@
     gap: 0.5rem;
     font-size: 1rem;
     font-weight: 600;
-    color: #667eea;
+    color: var(--primary-color);
 }
 
 .category-info .icon {
@@ -289,7 +289,7 @@
 
 .progress-bar-fill {
     height: 100%;
-    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(90deg, var(--primary-color) 0%, var(--accent-color) 100%);
     border-radius: 999px;
     transition: width 0.3s ease;
 }
@@ -356,7 +356,7 @@
 }
 
 .category-card {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
     color: white;
     border-radius: 12px;
     padding: 1.5rem;
@@ -388,7 +388,7 @@
 /* Start Button */
 .start-button {
     width: 100%;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
     color: white;
     font-size: 1.5rem;
     font-weight: bold;
@@ -423,7 +423,7 @@
 }
 
 .category-badge {
-    background: #667eea;
+    background: var(--primary-color);
     color: white;
     padding: 0.5rem 1rem;
     border-radius: 20px;
@@ -538,6 +538,8 @@
     border-radius: 12px;
     padding: 1rem;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    max-height: calc(100vh - 2rem);
+    overflow-y: auto;
 }
 
 .results-header {
@@ -559,14 +561,14 @@
 
 .results-subtitle {
     font-size: 0.875rem;
-    color: #667eea;
+    color: var(--primary-color);
     font-weight: 600;
 }
 
 /* Two Column Grid Layout */
 .results-grid {
     display: grid;
-    grid-template-columns: 0.8fr 1.2fr;
+    grid-template-columns: 1fr 1fr;
     gap: 0.75rem;
     margin-bottom: 0.75rem;
     align-items: start;
@@ -593,7 +595,7 @@
     width: 70px;
     height: 70px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
     color: white;
     display: flex;
     flex-direction: column;
@@ -629,7 +631,7 @@
 .stat-value {
     font-size: 1.25rem;
     font-weight: bold;
-    color: #667eea;
+    color: var(--primary-color);
 }
 
 .stat-label {
@@ -775,6 +777,13 @@
     border-radius: 8px;
     display: flex;
     flex-direction: column;
+}
+
+@media (max-height: 800px) {
+    .chart-section {
+        max-height: 60vh;
+        overflow-y: auto;
+    }
 }
 
 .section-title {

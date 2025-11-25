@@ -547,7 +547,13 @@ export default function AssessmentPageBase({ config }: { config: AssessmentConfi
     // INTRO STAGE
     if (stage === 'intro') {
         return (
-            <div className={styles['assessment-container']}>
+            <div
+                className={styles['assessment-container']}
+                style={{
+                    ['--primary-color' as any]: config.theme.primaryColor,
+                    ['--accent-color' as any]: config.theme.accentColor
+                }}
+            >
                 <AssessmentIntro
                     title={config.title}
                     description={config.description}
@@ -564,7 +570,13 @@ export default function AssessmentPageBase({ config }: { config: AssessmentConfi
         const currentDialogue = config.dialogue[dialogueIndex];
         
         return (
-            <div className={styles['assessment-container']}>
+            <div
+                className={styles['assessment-container']}
+                style={{
+                    ['--primary-color' as any]: config.theme.primaryColor,
+                    ['--accent-color' as any]: config.theme.accentColor
+                }}
+            >
                 <div className={styles['dialogue-box']}>
                     <div className={styles['dialogue-header']}>
                         <h2>{config.castleName}</h2>
@@ -600,7 +612,13 @@ export default function AssessmentPageBase({ config }: { config: AssessmentConfi
     if (stage === 'assessment') {
         if (isLoading) {
             return (
-                <div className={styles['assessment-container']}>
+                <div
+                    className={styles['assessment-container']}
+                    style={{
+                        ['--primary-color' as any]: config.theme.primaryColor,
+                        ['--accent-color' as any]: config.theme.accentColor
+                    }}
+                >
                     <div className={styles['loading']}>
                         <p>Loading assessment...</p>
                     </div>
@@ -610,7 +628,13 @@ export default function AssessmentPageBase({ config }: { config: AssessmentConfi
 
         if (assessmentQuestions.length === 0) {
             return (
-                <div className={styles['assessment-container']}>
+                <div
+                    className={styles['assessment-container']}
+                    style={{
+                        ['--primary-color' as any]: config.theme.primaryColor,
+                        ['--accent-color' as any]: config.theme.accentColor
+                    }}
+                >
                     <div className={styles['placeholder']}>
                         <h2>Assessment Questions</h2>
                         <p>Backend integration pending. Questions will be loaded here.</p>
@@ -627,7 +651,13 @@ export default function AssessmentPageBase({ config }: { config: AssessmentConfi
         const currentCategoryIcon = getCategoryIcon(currentCategoryName);
 
         return (
-            <div className={styles['assessment-container']}>
+            <div
+                className={styles['assessment-container']}
+                style={{
+                    ['--primary-color' as any]: config.theme.primaryColor,
+                    ['--accent-color' as any]: config.theme.accentColor
+                }}
+            >
                 <AssessmentProgress
                     currentQuestion={Math.min(currentQuestion + 1, assessmentQuestions.length)}
                     totalQuestions={assessmentQuestions.length}
@@ -650,7 +680,13 @@ export default function AssessmentPageBase({ config }: { config: AssessmentConfi
     // RESULTS STAGE
     if (stage === 'results') {
         return (
-            <div className={styles['assessment-container']}>
+            <div
+                className={styles['assessment-container']}
+                style={{
+                    ['--primary-color' as any]: config.theme.primaryColor,
+                    ['--accent-color' as any]: config.theme.accentColor
+                }}
+            >
                 <AssessmentResults
                     results={results || {
                         totalScore: 0,

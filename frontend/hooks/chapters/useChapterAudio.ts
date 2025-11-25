@@ -26,8 +26,9 @@ export function useChapterAudio({
         audioRef.current.pause()
       }
       
-      // If path already includes extension, use as-is; otherwise add .mp3
-      const fullPath = audioPath.endsWith('.mp3') ? audioPath : `${audioPath}.mp3`
+      // If path already includes an audio extension, use as-is; otherwise add .mp3
+      const hasExtension = audioPath.match(/\.(mp3|wav|ogg|m4a)$/i)
+      const fullPath = hasExtension ? audioPath : `${audioPath}.mp3`
       const audio = new Audio(fullPath)
       
       audio.onerror = () => {

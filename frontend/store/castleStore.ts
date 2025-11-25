@@ -3,6 +3,23 @@ import { persist, createJSONStorage } from 'zustand/middleware'
 import { CastleState } from '@/types/state/castle'
 import { getAllCastles } from '@/api/castles'
 
+// Helper to get user-specific storage key
+const getUserStorageKey = () => {
+    try {
+        const authStorage = localStorage.getItem('auth-storage')
+        if (authStorage) {
+            const parsed = JSON.parse(authStorage)
+            const userId = parsed?.state?.userProfile?.id
+            if (userId) {
+                return `castle-storage-${userId}`
+            }
+        }
+    } catch (error) {
+        console.error('[CastleStore] Error getting user storage key:', error)
+    }
+    return 'castle-storage-guest'
+}
+
 export const useCastleStore = create<CastleState>()(
     persist(
         (set, get) => ({
@@ -24,7 +41,7 @@ export const useCastleStore = create<CastleState>()(
                     console.log('[CastleStore] Fetching castles for user:', userId)
                     const castles = await getAllCastles(userId)
                     console.log('[CastleStore] Fetched castles:', castles)
-                    console.log('[CastleStore] Castle progress details:', castles.map(c => ({
+                    console.log('[CastleStore] Castle progress details:', castles.map((c: any) => ({
                         name: c.name,
                         unlocked: c.progress?.unlocked,
                         completed: c.progress?.completed,
@@ -32,12 +49,12 @@ export const useCastleStore = create<CastleState>()(
                     })))
                     
                     const sortedCastles = castles.sort(
-                        (a, b) => a.unlock_order - b.unlock_order
+                        (a: any, b: any) => a.unlock_order - b.unlock_order
                     )
                     
                     // Find first unlocked castle
                     const firstUnlockedIndex = sortedCastles.findIndex(
-                        c => c.progress?.unlocked
+                        (c: any) => c.progress?.unlocked
                     )
                     
                     console.log('[CastleStore] First unlocked castle index:', firstUnlockedIndex)
@@ -95,6 +112,15 @@ export const useCastleStore = create<CastleState>()(
                     initialized: false,
                     showIntro: false
                 })
+                
+                // Clear user-specific localStorage
+                try {
+                    const storageKey = getUserStorageKey()
+                    localStorage.removeItem(storageKey)
+                    console.log(`[CastleStore] Cleared storage: ${storageKey}`)
+                } catch (error) {
+                    console.error('[CastleStore] Error clearing storage:', error)
+                }
             },
 
             // Computed
@@ -109,7 +135,7 @@ export const useCastleStore = create<CastleState>()(
             }
         }),
         {
-            name: 'castle-storage',
+            name: getUserStorageKey(),
             storage: createJSONStorage(() => localStorage),
             partialize: (state) => ({
                 // Only persist UI preferences, not castle data (which can become stale)

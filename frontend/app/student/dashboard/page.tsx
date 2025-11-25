@@ -16,6 +16,9 @@ import competitionStyles from "@/styles/competitions-dashboard.module.css"
 import { Competition } from "@/types/common/competition"
 import { LeaderboardData } from "@/types/common/leaderboard"
 import AnimatedAvatar from "@/components/profile/AnimatedAvatar"
+import { getAssessmentResults } from "@/api/assessments"
+import AssessmentRadarChart from "@/components/assessment/AssessmentRadarChart"
+import { getAllCastles } from "@/api/castles"
 
 // Extended type for competitions with room context and additional fields
 interface CompetitionWithRoom extends Competition {
@@ -36,12 +39,82 @@ export default function StudentDashboard() {
 
   const [activeCompetitions, setActiveCompetitions] = useState<CompetitionWithRoom[]>([])
   const [leaderboards, setLeaderboards] = useState<LeaderboardData[]>([])
+  const [pretestScores, setPretestScores] = useState<any>(null)
+  const [posttestScores, setPosttestScores] = useState<any>(null)
+  const [assessmentLoading, setAssessmentLoading] = useState(true)
+  const [castles, setCastles] = useState<any[]>([])
+  const [castlesLoading, setCastlesLoading] = useState(true)
+  const [activeTab, setActiveTab] = useState<'assessment' | 'castle'>('castle')
 
   useEffect(() => {
     if (isLoggedIn && !appLoading) {
       void fetchJoinedRooms()
     }
   }, [isLoggedIn, appLoading, fetchJoinedRooms])
+
+  // Fetch assessment results
+  useEffect(() => {
+    const fetchAssessments = async () => {
+      if (!userProfile?.id) return
+      
+      setAssessmentLoading(true)
+      try {
+        // Fetch pretest
+        const pretestResponse: any = await getAssessmentResults(userProfile.id, 'pretest')
+        console.log('[Dashboard] Pretest response:', pretestResponse)
+        // Handle both response formats: {success: false} or direct data
+        if (pretestResponse?.categoryScores) {
+          console.log('[Dashboard] Pretest category scores:', pretestResponse.categoryScores)
+          setPretestScores(pretestResponse.categoryScores)
+        } else if (pretestResponse?.success && pretestResponse?.results) {
+          console.log('[Dashboard] Pretest category scores:', pretestResponse.results.categoryScores)
+          setPretestScores(pretestResponse.results.categoryScores)
+        }
+      } catch (error) {
+        console.log('[Dashboard] No pretest results found:', error)
+      }
+
+      try {
+        // Fetch posttest
+        const posttestResponse: any = await getAssessmentResults(userProfile.id, 'posttest')
+        console.log('[Dashboard] Posttest response:', posttestResponse)
+        // Handle both response formats: {success: false} or direct data
+        if (posttestResponse?.categoryScores) {
+          console.log('[Dashboard] Posttest category scores:', posttestResponse.categoryScores)
+          setPosttestScores(posttestResponse.categoryScores)
+        } else if (posttestResponse?.success && posttestResponse?.results) {
+          console.log('[Dashboard] Posttest category scores:', posttestResponse.results.categoryScores)
+          setPosttestScores(posttestResponse.results.categoryScores)
+        }
+      } catch (error) {
+        console.log('[Dashboard] No posttest results found:', error)
+      }
+
+      setAssessmentLoading(false)
+    }
+
+    fetchAssessments()
+  }, [userProfile?.id])
+
+  // Fetch castle progress
+  useEffect(() => {
+    const fetchCastles = async () => {
+      if (!userProfile?.id) return
+      
+      setCastlesLoading(true)
+      try {
+        const castleData = await getAllCastles(userProfile.id)
+        console.log('[Dashboard] Castle data received:', castleData)
+        console.log('[Dashboard] Sample castle:', castleData[0])
+        setCastles(castleData)
+      } catch (error) {
+        console.error('[Dashboard] Error fetching castles:', error)
+      }
+      setCastlesLoading(false)
+    }
+
+    fetchCastles()
+  }, [userProfile?.id])
 
   // Fetch leaderboards for joined rooms
   useEffect(() => {
@@ -118,7 +191,7 @@ export default function StudentDashboard() {
     <div className={dashboardStyles["dashboard-container"]}>
       {/* Fixed Header */}
       <PageHeader 
-        title={`Welcome back, ${userProfile?.first_name || 'Student'}! 🎮`}
+        title={`Welcome back, ${userProfile?.first_name || 'Student'}!`}
         subtitle="Continue your learning journey and track your progress"
         showAvatar={true}
         avatarText={userProfile?.first_name?.charAt(0).toUpperCase() || 'S'}
@@ -131,25 +204,22 @@ export default function StudentDashboard() {
         <div className={studentStyles.topSection}>
           {/* Mini Profile Card */}
           <section className={studentStyles.miniProfileCard}>
-            <div className={studentStyles.miniProfileAvatar}>
-              {userProfile?.profile_pic ? (
-                <AnimatedAvatar
-                  className={studentStyles.miniProfileImg}
-                  src={userProfile.profile_pic}
-                  alt="Profile"
-                />
-              ) : (
-                <div className={studentStyles.miniProfileLetter}>
-                  {userProfile?.first_name?.charAt(0).toUpperCase() || 'S'}
-                </div>
-              )}
-            </div>
+            {userProfile?.profile_pic ? (
+              <AnimatedAvatar
+                className={studentStyles.miniProfileImg}
+                src={userProfile.profile_pic}
+                alt="Profile"
+              />
+            ) : (
+              <div className={studentStyles.miniProfileLetter}>
+                {userProfile?.first_name?.charAt(0).toUpperCase() || 'S'}
+              </div>
+            )}
             <div className={studentStyles.miniProfileInfo}>
               <h3 className={studentStyles.miniProfileName}>
                 {userProfile?.first_name} {userProfile?.last_name}
               </h3>
               <p className={studentStyles.miniProfileRole}>
-                <span className={studentStyles.roleIcon}>🎓</span>
                 Student
               </p>
             </div>
@@ -167,7 +237,9 @@ export default function StudentDashboard() {
               className={studentStyles.quickActionCard}
               onClick={() => router.push(STUDENT_ROUTES.WORLD_MAP)}
             >
-              <div className={studentStyles.quickActionIcon}>🗺️</div>
+              <div className={studentStyles.quickActionIcon}>
+                🗺️
+              </div>
               <div className={studentStyles.quickActionContent}>
                 <h4>Adventure Mode</h4>
                 <p>Explore the world map</p>
@@ -178,7 +250,9 @@ export default function StudentDashboard() {
               className={studentStyles.quickActionCard}
               onClick={handleJoinRoom}
             >
-              <div className={studentStyles.quickActionIcon}>➕</div>
+              <div className={studentStyles.quickActionIcon}>
+                🚪
+              </div>
               <div className={studentStyles.quickActionContent}>
                 <h4>Join Room</h4>
                 <p>Enter a room code</p>
@@ -189,7 +263,9 @@ export default function StudentDashboard() {
               className={studentStyles.quickActionCard}
               onClick={() => router.push(STUDENT_ROUTES.LEADERBOARD)}
             >
-              <div className={studentStyles.quickActionIcon}>🏆</div>
+              <div className={studentStyles.quickActionIcon}>
+                🏆
+              </div>
               <div className={studentStyles.quickActionContent}>
                 <h4>Leaderboard</h4>
                 <p>See top performers</p>
@@ -197,6 +273,121 @@ export default function StudentDashboard() {
             </button>
           </div>
         </div>
+
+        {/* Performance Tracking Section with Tabs */}
+        {(!assessmentLoading && (pretestScores || posttestScores)) || (!castlesLoading && castles.length > 0) ? (
+          <section className={studentStyles.performanceSection}>
+            <div className={studentStyles.sectionHeader}>
+              <h2>Your Progress</h2>
+            </div>
+            
+            <div className={studentStyles.performanceCard}>
+              {/* Tab Navigation */}
+              <div className={studentStyles.tabNavigation}>
+                <button
+                  className={`${studentStyles.tabButton} ${activeTab === 'castle' ? studentStyles.tabButtonActive : ''}`}
+                  onClick={() => setActiveTab('castle')}
+                  disabled={castles.length === 0}
+                >
+                  Castle Progress
+                </button>
+                <button
+                  className={`${studentStyles.tabButton} ${activeTab === 'assessment' ? studentStyles.tabButtonActive : ''}`}
+                  onClick={() => setActiveTab('assessment')}
+                  disabled={!pretestScores && !posttestScores}
+                >
+                  Assessment Performance
+                </button>
+              </div>
+
+              {/* Tab Content */}
+              <div className={studentStyles.tabContent}>
+                {activeTab === 'castle' && castles.length > 0 && (
+                  <div className={studentStyles.castleContent}>
+                    <div className={studentStyles.castleGrid}>
+                      {castles.map((castle) => {
+                        console.log('[Dashboard] Castle:', castle.name, 'total_chapters:', castle.total_chapters, 'full data:', castle)
+                        const totalChapters = castle.total_chapters || 0
+                        const progressPercent = castle.progress?.completion_percentage || 0
+                        // Estimate completed chapters based on completion percentage
+                        const completedChapters = totalChapters > 0 
+                          ? Math.floor((progressPercent / 100) * totalChapters)
+                          : 0
+                        const userXp = castle.progress?.total_xp_earned || 0
+                        const isUnlocked = castle.progress?.unlocked || false
+                        const isCompleted = castle.progress?.completed || false
+                        
+                        return (
+                          <div key={castle.id} className={studentStyles.castleCard}>
+                            <div className={studentStyles.castleHeader}>
+                              <h4>{castle.name}</h4>
+                              <span className={studentStyles.castleLevel}>Castle {castle.unlock_order}</span>
+                            </div>
+                            <div className={studentStyles.castleProgress}>
+                              <div className={studentStyles.progressBar}>
+                                <div 
+                                  className={studentStyles.progressFill}
+                                  style={{ width: `${progressPercent}%` }}
+                                />
+                              </div>
+                              <span className={studentStyles.progressText}>
+                                {completedChapters} / {totalChapters} chapters
+                              </span>
+                            </div>
+                            <div className={studentStyles.castleStats}>
+                              <div className={studentStyles.castleStat}>
+                                <span className={studentStyles.statLabel}>XP Earned</span>
+                                <span className={studentStyles.statValue}>{userXp}</span>
+                              </div>
+                              <div className={studentStyles.castleStat}>
+                                <span className={studentStyles.statLabel}>Status</span>
+                                <span className={studentStyles.statValue}>
+                                  {!isUnlocked ? 'Locked' : isCompleted ? 'Complete' : progressPercent > 0 ? 'In Progress' : 'Not Started'}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {activeTab === 'assessment' && (pretestScores || posttestScores) && (
+                  <div className={studentStyles.assessmentContent}>
+                    <div className={studentStyles.assessmentInfo}>
+                      <h3>Knowledge Assessment Progress</h3>
+                      <p>
+                        {pretestScores && posttestScores
+                          ? "View your learning journey from pretest to posttest"
+                          : pretestScores
+                          ? "Complete your posttest to see your improvement"
+                          : "Your posttest results are ready"}
+                      </p>
+                      <div className={studentStyles.assessmentStats}>
+                        <div className={studentStyles.statBadge}>
+                          <span className={studentStyles.statIcon}>{pretestScores ? '✓' : '○'}</span>
+                          <span>Pretest {pretestScores ? 'Complete' : 'Pending'}</span>
+                        </div>
+                        <div className={studentStyles.statBadge}>
+                          <span className={studentStyles.statIcon}>{posttestScores ? '✓' : '○'}</span>
+                          <span>Posttest {posttestScores ? 'Complete' : 'Pending'}</span>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className={studentStyles.assessmentChartWrapper}>
+                      <AssessmentRadarChart
+                        currentScores={posttestScores || pretestScores}
+                        pretestScores={posttestScores ? pretestScores : undefined}
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </section>
+        ) : null}
 
         {/* Active Competitions Section */}
         {activeCompetitions.length > 0 && (

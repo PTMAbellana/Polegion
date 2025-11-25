@@ -138,10 +138,30 @@ class CastleRepo extends BaseRepo {
 
             console.log('[CastleRepo] Fetched progress count:', progress?.length);
 
+            // Get chapter counts for all castles
+            const { data: chapterCounts, error: chaptersError } = await this.supabase
+                .from('chapters')
+                .select('castle_id');
+
+            if (chaptersError) {
+                console.error('[CastleRepo] Error fetching chapters:', chaptersError);
+            }
+
+            // Count chapters per castle
+            const chapterCountMap = {};
+            if (chapterCounts) {
+                chapterCounts.forEach(chapter => {
+                    chapterCountMap[chapter.castle_id] = (chapterCountMap[chapter.castle_id] || 0) + 1;
+                });
+            }
+
             // Map castles with their progress
             return castles.map(castle => {
                 const castleData = Castle.fromDatabase(castle).toJSON();
                 const castleProgress = progress?.find(p => p.castle_id === castle.id);
+                
+                // Add chapter count
+                castleData.total_chapters = chapterCountMap[castle.id] || 0;
                 
                 if (castleProgress) {
                     castleData.progress = {

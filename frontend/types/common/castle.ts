@@ -22,6 +22,7 @@ export interface Castle {
     image_number: number
     route: string
     unlock_order: number
+    total_chapters?: number
     created_at?: string
     updated_at?: string
 }

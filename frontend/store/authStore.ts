@@ -196,6 +196,27 @@ export const useAuthStore = create<AuthState>()(
                     return false;
                 }
 
+                // Validate that the stored user matches the token
+                if (authData.user?.id) {
+                    try {
+                        // Check if token and user ID are consistent
+                        const tokenPayload = JSON.parse(atob(authData.accessToken.split('.')[1]));
+                        if (tokenPayload.sub && tokenPayload.sub !== authData.user.id) {
+                            console.warn('⚠️ User ID mismatch detected, clearing stale data');
+                            authUtils.clearAuthData();
+                            localStorage.removeItem('auth-storage');
+                            set({
+                                authToken: null,
+                                userProfile: null,
+                                isLoggedIn: false,
+                            });
+                            return false;
+                        }
+                    } catch (error) {
+                        console.error('❌ Error validating token:', error);
+                    }
+                }
+
                 // ✅ If token expired, refresh it IMMEDIATELY
                 if (authUtils.isTokenExpired()) {
                     try {
@@ -233,9 +254,19 @@ export const useAuthStore = create<AuthState>()(
             },
 
             logout: async () => {
+                const currentUserId = get().userProfile?.id;
+                
                 await apiLogout();
                 authUtils.clearAuthData();
+                
+                // Clear auth storage
                 localStorage.removeItem('auth-storage');
+                
+                // Clear user-specific castle storage
+                if (currentUserId) {
+                    localStorage.removeItem(`castle-storage-${currentUserId}`);
+                    console.log(`[AuthStore] Cleared castle storage for user: ${currentUserId}`);
+                }
                 
                 // Clear all chapter progress when logging out
                 useChapterStore.getState().reset();
