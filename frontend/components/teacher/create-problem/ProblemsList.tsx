@@ -8,7 +8,7 @@ const ProblemsList: React.FC<ExistingProblemsListProps> = ({ problems, onEdit, o
   if (problems.length === 0) {
     return (
       <div className={styles.noProblems}>
-        <div className={styles.noProblemsIcon}>📝</div>
+        <div className={styles.noProblemsIcon}></div>
         <div className={styles.noProblemsText}>No problems created yet.</div>
         <div className={styles.noProblemsSubtext}>Create your first problem to get started!</div>
       </div>

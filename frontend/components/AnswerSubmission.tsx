@@ -76,7 +76,7 @@ export const AnswerSubmission = ({
   if (!currentProblem || !isActive) {
     return (
       <div className="answer-submission waiting">
-        <h3>🎯 Waiting for next problem...</h3>
+        <h3>Waiting for next problem...</h3>
         <p>Get ready! The instructor will start the next problem soon.</p>
       </div>
     );

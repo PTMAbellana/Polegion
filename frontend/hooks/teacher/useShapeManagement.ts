@@ -1,14 +1,5 @@
 import { useState, useCallback } from 'react';
-
-interface Shape {
-  id: number;
-  type: string;
-  x: number;
-  y: number;
-  size: number;
-  fill?: string;
-  points?: any;
-}
+import { Shape } from '@/types/forms/problem';
 
 export const useShapeManagement = () => {
   const [shapes, setShapes] = useState<Shape[]>([]);

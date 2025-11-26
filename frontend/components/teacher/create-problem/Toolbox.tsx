@@ -86,7 +86,7 @@ const Toolbox: React.FC<ToolboxProps> = ({
                 cursor: shapes.length >= 1 ? "not-allowed" : "pointer",
                 opacity: shapes.length >= 1 ? 0.5 : 1,
               }}
-              title={shapes.length >= 1 ? "Shape limit reached" : "Square"}
+              title={shapes.length >= 1 ? "Shape limit reached" : "Quadrilateral"}
             >
               <svg width="100%" height="100%" viewBox="0 0 120 120">
                 <rect
@@ -131,7 +131,7 @@ const Toolbox: React.FC<ToolboxProps> = ({
 
           {shapes.length >= 1 && (
             <div className={styles.shapeLimitIndicator}>
-              ⚠️ Shape limit reached
+              Shape limit reached
             </div>
           )}
         </div>

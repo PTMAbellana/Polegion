@@ -54,7 +54,7 @@ export default function ProfileImageUpload({ onSuccess }: ProfileImageUploadProp
                         className={styles['upload-overlay-large']}
                         onClick={triggerFileSelect}
                     >
-                        <div className={styles['upload-icon']}>📷</div>
+                        <div className={styles['upload-icon']}></div>
                         <span className={styles['upload-text']}>
                             {displayImage ? 'Change Photo' : 'Add Photo'}
                         </span>
@@ -79,9 +79,9 @@ export default function ProfileImageUpload({ onSuccess }: ProfileImageUploadProp
                         
                         {file && (
                             <div className={styles['file-info']}>
-                                <p className={styles['file-name']}>📄 {file.name}</p>
+                                <p className={styles['file-name']}>{file.name}</p>
                                 <p className={styles['file-size']}>
-                                    📏 Size: {(file.size / 1024 / 1024).toFixed(2)} MB
+                                    Size: {(file.size / 1024 / 1024).toFixed(2)} MB
                                 </p>
                             </div>
                         )}

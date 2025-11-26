@@ -14,9 +14,9 @@ export default function LeaderboardRow({ row, rank }: LeaderboardRowProps) {
 
   // Rank styling
   const getRankIcon = () => {
-    if (rank === 0) return '👑'
-    if (rank === 1) return '🥈'
-    if (rank === 2) return '🥉'
+    if (rank === 0) return '#1'
+    if (rank === 1) return '#2'
+    if (rank === 2) return '#3'
     return rank + 1
   }
 

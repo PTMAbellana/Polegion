@@ -46,7 +46,7 @@ export default function CompetitionList({ competitions, onManage }: CompetitionL
         ))
       ) : (
         <div className={styles.emptyState}>
-          <div className={styles.emptyIcon}>🏆</div>
+          <div className={styles.emptyIcon}></div>
           <p className={styles.emptyText}>No competitions found</p>
           <p className={styles.emptySubtext}>Create a competition to get started</p>
         </div>

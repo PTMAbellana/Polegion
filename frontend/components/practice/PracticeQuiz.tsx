@@ -24,6 +24,16 @@ export default function PracticeQuiz({ questions, onComplete, onRestart }: Pract
   const [answeredQuestions, setAnsweredQuestions] = useState(0);
   const [isFinished, setIsFinished] = useState(false);
 
+  const handleRestartClick = () => {
+    setCurrentQuestionIndex(0);
+    setSelectedAnswer(null);
+    setFeedback(null);
+    setScore(0);
+    setAnsweredQuestions(0);
+    setIsFinished(false);
+    onRestart();
+  };
+
   const currentQuestion = questions[currentQuestionIndex];
 
   const handleAnswerSelect = (option: string) => {
@@ -51,12 +61,12 @@ export default function PracticeQuiz({ questions, onComplete, onRestart }: Pract
       setFeedback(null);
     } else {
       setIsFinished(true);
-      onComplete(score + (feedback === 'correct' ? 1 : 0), questions.length);
+      onComplete(score, questions.length);
     }
   };
 
   if (isFinished) {
-    const finalScore = score + (feedback === 'correct' ? 1 : 0);
+    const finalScore = score;
     const percentage = Math.round((finalScore / questions.length) * 100);
 
     return (
@@ -84,7 +94,7 @@ export default function PracticeQuiz({ questions, onComplete, onRestart }: Pract
             </div>
           </div>
 
-          <button className={styles.restartButton} onClick={onRestart}>
+          <button className={styles.restartButton} onClick={handleRestartClick}>
             Practice Again
           </button>
         </div>
@@ -150,7 +160,7 @@ export default function PracticeQuiz({ questions, onComplete, onRestart }: Pract
         ) : (
           <div className={styles.feedbackSection}>
             <div className={`${styles.feedbackMessage} ${styles[feedback]}`}>
-              {feedback === 'correct' ? '✓ Correct!' : '✗ Incorrect'}
+              {feedback === 'correct' ? 'Correct!' : 'Incorrect'}
             </div>
             <button className={styles.nextButton} onClick={handleNext}>
               {currentQuestionIndex < questions.length - 1 ? 'Next Question' : 'Finish'}

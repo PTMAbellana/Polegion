@@ -45,7 +45,7 @@ export default function ProblemsManagement({
       {addedProblems.length > 0 && (
         <div className={styles.section}>
           <div className={styles.sectionHeader}>
-            <h2 className={styles.sectionTitle}>📋 Added Problems</h2>
+            <h2 className={styles.sectionTitle}>Added Problems</h2>
             <span className={styles.badge}>{addedProblems.length}</span>
           </div>
           
@@ -102,7 +102,7 @@ export default function ProblemsManagement({
       {isEditable && (
         <div className={styles.section}>
           <div className={styles.sectionHeader}>
-            <h2 className={styles.sectionTitle}>🎯 Available Problems</h2>
+            <h2 className={styles.sectionTitle}>Available Problems</h2>
             <span className={styles.badge}>
               {availableProblems.filter(p => 
                 !addedProblems.some(ap => ap.problem.id === p.id) && p.visibility === 'show'

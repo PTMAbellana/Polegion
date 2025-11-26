@@ -227,7 +227,7 @@ export default function TeacherDashboard() {
             <div className={competitionStyles.section_header}>
               <div>
                 <h2 className={`${competitionStyles.section_title} ${competitionStyles.teacher}`}>
-                  <span className={competitionStyles.icon}>🏆</span>
+                  <span className={competitionStyles.icon}></span>
                   Recent Competitions
                 </h2>
                 <p className={competitionStyles.section_subtitle}>
@@ -257,14 +257,14 @@ export default function TeacherDashboard() {
                     
                     <div className={`${competitionStyles.competition_meta} ${competitionStyles.teacher_meta}`}>
                       <span className={competitionStyles.meta_item}>
-                        📚 {competition.roomTitle || 'Unknown Room'}
+                        {competition.roomTitle || 'Unknown Room'}
                       </span>
                       <span className={competitionStyles.meta_item}>
-                        🎯 {competition.problems?.length || 0} Problems
+                        {competition.problems?.length || 0} Problems
                       </span>
                       {competition.participants && (
                         <span className={competitionStyles.meta_item}>
-                          👥 {competition.participants.length} Students
+                          {competition.participants.length} Students
                         </span>
                       )}
                     </div>
@@ -307,7 +307,7 @@ export default function TeacherDashboard() {
         {leaderboards.length > 0 && (
           <section className={teacherStyles.leaderboardsSection}>
             <div className={teacherStyles.sectionHeader}>
-              <h2>🏆 Top Students</h2>
+              <h2>Top Students</h2>
               <button 
                 className={teacherStyles.viewAllButton}
                 onClick={() => router.push(TEACHER_ROUTES.LEADERBOARD)}
@@ -320,7 +320,7 @@ export default function TeacherDashboard() {
               {leaderboards.map((leaderboard) => (
                 <div key={leaderboard.id} className={teacherStyles.leaderboardCard}>
                   <h3 className={teacherStyles.leaderboardTitle}>
-                    📚 {leaderboard.title}
+                    {leaderboard.title}
                   </h3>
                   <div className={teacherStyles.leaderboardList}>
                     {leaderboard.data.map((item, index) => {
@@ -330,7 +330,7 @@ export default function TeacherDashboard() {
                       return (
                         <div key={index} className={teacherStyles.leaderboardItem}>
                           <div className={teacherStyles.leaderboardRank}>
-                            {index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `#${index + 1}`}
+                            {index === 0 ? '#1' : index === 1 ? '#2' : index === 2 ? '#3' : `#${index + 1}`}
                           </div>
                           <div className={teacherStyles.leaderboardUser}>
                             <div className={teacherStyles.leaderboardUserAvatar}>

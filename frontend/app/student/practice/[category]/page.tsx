@@ -9,6 +9,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { AuthProtection } from '@/context/AuthProtection';
+import PageHeader from '@/components/PageHeader';
 import PracticeQuiz from '@/components/practice/PracticeQuiz';
 import PracticeProgress, { savePracticeStats } from '@/components/practice/PracticeProgress';
 import { getQuestionsByCategory } from '@/utils/questions/generateQuestions';
@@ -38,7 +39,7 @@ export default function CategoryPracticePage() {
     },
     {
       title: 'Curriculum Aligned',
-      detail: 'Directly mapped to Grade 5–6 competencies and MELCs.',
+      detail: 'Covers Grade 5–6 geometry concepts and competencies.',
     },
     {
       title: 'Quick & Repeatable',
@@ -46,7 +47,7 @@ export default function CategoryPracticePage() {
     },
   ];
 
-  const quickFacts = ['Aligned to DepEd MELCs', 'Fresh questions every run', 'Takes ~5 minutes'];
+  const quickFacts = ['Grade 5-6 geometry', 'Fresh questions every run', 'Takes ~5 minutes'];
 
   useEffect(() => {
     if (category) {
@@ -97,17 +98,16 @@ export default function CategoryPracticePage() {
     return (
       <div className={styles.categoryPageContainer}>
         {/* Page Header */}
-        <div className={styles.pageHeader}>
-          <div className={styles.headerContent}>
-            <div className={styles.headerText}>
-              <h1 className={styles.headerTitle}>{categoryInfo.name}</h1>
-              <p className={styles.headerSubtitle}>Practice Mode - Build mastery through repetition</p>
-            </div>
-            <button onClick={handleBackToPractice} className={styles.backButton}>
-              ← Practice Hub
+        <PageHeader 
+          title={categoryInfo.name}
+          subtitle="Practice Mode - Build mastery through repetition"
+          showAvatar={false}
+          actionButton={
+            <button onClick={handleBackToPractice} className={styles.backButtonHeader}>
+              Practice Hub
             </button>
-          </div>
-        </div>
+          }
+        />
 
         {/* Scrollable Content */}
         <div className={styles.scrollableContent}>
@@ -167,12 +167,6 @@ export default function CategoryPracticePage() {
             >
               Start Practice
             </button>
-            <button
-              className={styles.secondaryAction}
-              onClick={generateNewQuestions}
-            >
-              Shuffle Questions
-            </button>
           </div>
         </div>
         </div>
@@ -183,17 +177,16 @@ export default function CategoryPracticePage() {
   return (
     <div className={styles.categoryPageContainer}>
       {/* Page Header */}
-      <div className={styles.pageHeader}>
-        <div className={styles.headerContent}>
-          <div className={styles.headerText}>
-            <h1 className={styles.headerTitle}>{categoryInfo.name}</h1>
-            <p className={styles.headerSubtitle}>Practice Mode - Active Session</p>
-          </div>
-          <button onClick={handleBackToPractice} className={styles.backButton}>
-            ← Practice Hub
+      <PageHeader 
+        title={categoryInfo.name}
+        subtitle="Practice Mode - Active Session"
+        showAvatar={false}
+        actionButton={
+          <button onClick={handleBackToPractice} className={styles.backButtonHeader}>
+            Practice Hub
           </button>
-        </div>
-      </div>
+        }
+      />
 
       {/* Scrollable Content */}
       <div className={styles.scrollableContent}>

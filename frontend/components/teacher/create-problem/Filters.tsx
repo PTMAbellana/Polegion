@@ -79,7 +79,7 @@ const Filters: React.FC<FiltersProps> = ({
     return (
       <div className={styles.filtersContainer}>
         <div className={styles.filtersEmptyState}>
-          <div className={styles.emptyStateIcon}>📐</div>
+          <div className={styles.emptyStateIcon}></div>
           <div className={styles.emptyStateText}>Add a shape to see properties</div>
         </div>
       </div>
@@ -90,11 +90,11 @@ const Filters: React.FC<FiltersProps> = ({
     <div className={styles.filtersContainer}>
       <div className={styles.quickActions}>
         <button className={`${styles.quickActionBtn} ${styles.showAllBtn}`} onClick={showAllProperties} title="Show all properties">
-          <span className={styles.btnIcon}>👁️</span>
+          <span className={styles.btnIcon}></span>
           <span className={styles.btnText}>All</span>
         </button>
         <button className={`${styles.quickActionBtn} ${styles.hideAllBtn}`} onClick={hideAllProperties} title="Hide all properties">
-          <span className={styles.btnIcon}>👁️‍🗨️</span>
+          <span className={styles.btnIcon}></span>
           <span className={styles.btnText}>None</span>
         </button>
         {activeFiltersCount > 0 && (
@@ -108,7 +108,7 @@ const Filters: React.FC<FiltersProps> = ({
         {shouldShowGlobal && (
           <div className={`${styles.filterSection} ${styles.globalSection}`}>
             <button className={`${styles.filterSectionHeader} ${expandedSection === 'global' ? styles.expanded : ''}`} onClick={() => toggleSection('global')}>
-              <span className={styles.sectionIcon}>🌐</span>
+              <span className={styles.sectionIcon}></span>
               <span className={styles.sectionTitle}>Global</span>
               <span className={styles.expandIcon}>{expandedSection === 'global' ? <FaCaretDown /> : <FaCaretRight />}</span>
             </button>
@@ -128,7 +128,7 @@ const Filters: React.FC<FiltersProps> = ({
         {hasSquare && (
           <div className={`${styles.filterSection} ${styles.squareSection}`}>
             <button className={`${styles.filterSectionHeader} ${expandedSection === 'square' ? styles.expanded : ''}`} onClick={() => toggleSection('square')}>
-              <span className={styles.sectionIcon}>⬜</span>
+              <span className={styles.sectionIcon}>■</span>
               <span className={styles.sectionTitle}>Square</span>
               <span className={styles.expandIcon}>{expandedSection === 'square' ? <FaCaretDown /> : <FaCaretRight />}</span>
             </button>
@@ -145,7 +145,7 @@ const Filters: React.FC<FiltersProps> = ({
         {hasTriangle && (
           <div className={`${styles.filterSection} ${styles.triangleSection}`}>
             <button className={`${styles.filterSectionHeader} ${expandedSection === 'triangle' ? styles.expanded : ''}`} onClick={() => toggleSection('triangle')}>
-              <span className={styles.sectionIcon}>🔺</span>
+              <span className={styles.sectionIcon}>▲</span>
               <span className={styles.sectionTitle}>Triangle</span>
               <span className={styles.expandIcon}>{expandedSection === 'triangle' ? <FaCaretDown /> : <FaCaretRight />}</span>
             </button>
@@ -165,7 +165,7 @@ const Filters: React.FC<FiltersProps> = ({
         {hasCircle && (
           <div className={`${styles.filterSection} ${styles.circleSection}`}>
             <button className={`${styles.filterSectionHeader} ${expandedSection === 'circle' ? styles.expanded : ''}`} onClick={() => toggleSection('circle')}>
-              <span className={styles.sectionIcon}>⭕</span>
+              <span className={styles.sectionIcon}>●</span>
               <span className={styles.sectionTitle}>Circle</span>
               <span className={styles.expandIcon}>{expandedSection === 'circle' ?  <FaCaretDown /> : <FaCaretRight />}</span>
             </button>

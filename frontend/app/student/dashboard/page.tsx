@@ -264,7 +264,6 @@ export default function StudentDashboard() {
               onClick={() => router.push(STUDENT_ROUTES.LEADERBOARD)}
             >
               <div className={studentStyles.quickActionIcon}>
-                🏆
               </div>
               <div className={studentStyles.quickActionContent}>
                 <h4>Leaderboard</h4>

@@ -84,7 +84,7 @@ const LineBasedMinigame: React.FC<LineBasedMinigameProps> = ({
     const isCorrect = correctAnswersArray.every(answer => selection.includes(answer)) &&
                      selection.length === correctAnswersArray.length;
 
-    setFeedback(isCorrect ? '✓ Correct! Well done!' : '✗ Incorrect. Try again!');
+    setFeedback(isCorrect ? 'Correct! Well done!' : 'Incorrect. Try again!');
     setShowFeedback(true);
 
     setTimeout(() => {

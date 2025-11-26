@@ -22,7 +22,7 @@ export default function CompetitionLeaderboardsSplit({
   if (competitions.length === 0) {
     return (
       <div className={styles.empty_state}>
-        <div className={styles.empty_icon}>🏅</div>
+        <div className={styles.empty_icon}></div>
         <h3>No Competition Data</h3>
         <p>Competition rankings will appear here once participants start playing.</p>
       </div>
@@ -62,7 +62,6 @@ export default function CompetitionLeaderboardsSplit({
             {/* Header */}
             <div className={styles.competition_leaderboard_header}>
               <div className={styles.competition_leaderboard_header_icon}>
-                🎯
               </div>
               <div className={styles.competition_leaderboard_header_info}>
                 <h3 className={styles.competition_leaderboard_header_title}>
@@ -79,7 +78,7 @@ export default function CompetitionLeaderboardsSplit({
             <LeaderboardGrid
               items={selectedComp.data}
               emptyMessage="No Participants Yet"
-              emptyIcon="🏅"
+              emptyIcon=""
             />
           </>
         )}

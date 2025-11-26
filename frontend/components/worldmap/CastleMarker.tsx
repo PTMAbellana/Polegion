@@ -30,7 +30,7 @@ export default function CastleMarker({
 
   const getImagePath = () => {
     if (imgError) {
-      return 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200"><rect width="200" height="200" fill="%234a5568"/><text y="50%" x="50%" text-anchor="middle" dominant-baseline="middle" font-size="100">🏰</text></svg>'
+      return 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200"><rect width="200" height="200" fill="%234a5568"/><text y="50%" x="50%" text-anchor="middle" dominant-baseline="middle" font-size="60" fill="white">Castle</text></svg>'
     }
     return `/images/castles/castle${castle.image_number}.png`
   }

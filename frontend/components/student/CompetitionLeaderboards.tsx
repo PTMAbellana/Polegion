@@ -12,7 +12,7 @@ export default function CompetitionLeaderboards({
   if (competitions.length === 0) {
     return (
       <div className={styles.empty_state}>
-        <div className={styles.empty_icon}>🏅</div>
+        <div className={styles.empty_icon}></div>
         <h3>No Competition Data</h3>
         <p>Competition rankings will appear here once participants start playing.</p>
       </div>
@@ -41,7 +41,7 @@ export default function CompetitionLeaderboards({
           <LeaderboardGrid
             items={comp.data}
             emptyMessage="No Participants Yet"
-            emptyIcon="🏅"
+            emptyIcon=""
           />
         </div>
       ))}

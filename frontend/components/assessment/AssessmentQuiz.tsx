@@ -37,7 +37,7 @@ export default function AssessmentQuiz({
     onNavigate,
     onSubmitAssessment,
     currentCategory = '',
-    categoryIcon = '📚',
+    categoryIcon = '',
     elapsedSeconds = 0
 }: AssessmentQuizProps) {
     const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);

@@ -883,7 +883,7 @@
 }
 
 .play-btn.status-done::before {
-  content: '🏆';
+  content: '✓';
 }
 
 .play-btn.status-done:hover {

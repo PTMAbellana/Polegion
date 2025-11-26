@@ -109,7 +109,7 @@ export default function LeaderboardPage({ params }: { params: Promise<{ roomId: 
                     <LeaderboardGrid
                     items={roomBoards}
                     emptyMessage="No Rankings Yet"
-                    emptyIcon="🏆"
+                    emptyIcon=""
                     />
                 </div>
                 )}

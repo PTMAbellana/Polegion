@@ -9,6 +9,7 @@
 import React from 'react';
 import { useRouter } from 'next/navigation';
 import { AuthProtection } from '@/context/AuthProtection';
+import PageHeader from '@/components/PageHeader';
 import CategorySelector from '@/components/practice/CategorySelector';
 import PracticeProgress from '@/components/practice/PracticeProgress';
 import styles from '@/styles/practice.module.css';
@@ -59,17 +60,16 @@ export default function PracticePage() {
     <div className={styles.practicePageContainer}>
 
       {/* Page Header */}
-      <div className={styles.pageHeader}>
-        <div className={styles.headerContent}>
-          <div className={styles.headerText}>
-            <h1 className={styles.headerTitle}>Geometry Practice Hub</h1>
-            <p className={styles.headerSubtitle}>Master geometry concepts through targeted practice</p>
-          </div>
-          <button onClick={() => router.push('/student/dashboard')} className={styles.backButton}>
-            ← Dashboard
+      <PageHeader 
+        title="Geometry Practice Hub"
+        subtitle="Master geometry concepts through targeted practice"
+        showAvatar={false}
+        actionButton={
+          <button onClick={() => router.push('/student/dashboard')} className={styles.backButtonHeader}>
+            Dashboard
           </button>
-        </div>
-      </div>
+        }
+      />
 
       {/* Scrollable Content */}
       <div className={styles.scrollableContent}>

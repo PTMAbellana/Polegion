@@ -94,7 +94,7 @@ export default function RecordsPreview({
   if (records.length === 0) {
     return (
       <div className={styles.records_empty_state}>
-        <div className={styles.records_empty_icon}>📋</div>
+        <div className={styles.records_empty_icon}></div>
         <p>{emptyMessage}</p>
       </div>
     )

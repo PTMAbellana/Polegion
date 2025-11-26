@@ -156,7 +156,7 @@ export default function CastlePageBase({ config }: CastlePageBaseProps) {
   if (error === 'LOCKED') {
     return (
       <div className={styles.error_container}>
-        <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>🔒</div>
+        <div style={{ fontSize: '4rem', marginBottom: '1rem' }}></div>
         <h2>Castle Locked</h2>
         <p>You need to complete previous castles to unlock {castleData?.name || 'this castle'}.</p>
         <p style={{ fontSize: '0.9rem', opacity: 0.8, marginTop: '0.5rem' }}>Progress through the world map to gain access!</p>

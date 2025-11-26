@@ -8,7 +8,7 @@ import LeaderboardRow from './LeaderboardRow'
 export default function LeaderboardGrid({
   items,
   emptyMessage = 'No Rankings Yet',
-  emptyIcon = '🏆'
+  emptyIcon = ''
 }: LeaderboardGridProps) {
   if (items.length === 0) {
     return (

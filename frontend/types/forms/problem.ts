@@ -11,6 +11,7 @@ export interface ProblemPayload {
 }
 
 export interface Shape {
+  [key: string]: unknown;
   id: number;
   type: string;
   x: number;

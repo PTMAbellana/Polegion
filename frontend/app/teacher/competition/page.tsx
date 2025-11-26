@@ -118,14 +118,14 @@ export default function TeacherCompetitionPage() {
             {/* Competitions List */}
             <div className={styles.section}>
               <div className={styles.sectionHeader}>
-                <h2 className={styles.sectionTitle}>🏆 Room Competitions</h2>
+                <h2 className={styles.sectionTitle}>Room Competitions</h2>
                 <span className={styles.badge}>{competitions.length}</span>
               </div>
               
               {competitions.length === 0 ? (
                 <div className={styles.emptyState}>
                   <p className={styles.emptyText}>
-                    No competitions yet. Create your first competition above! 🎯
+                    No competitions yet. Create your first competition above!
                   </p>
                 </div>
               ) : (
@@ -142,7 +142,7 @@ export default function TeacherCompetitionPage() {
             {/* Problems Preview */}
             <div className={styles.section}>
               <div className={styles.sectionHeader}>
-                <h2 className={styles.sectionTitle}>🎯 Available Problems</h2>
+                <h2 className={styles.sectionTitle}>Available Problems</h2>
                 <span className={styles.badge}>
                   {visibleProblems.length}
                 </span>
@@ -152,7 +152,7 @@ export default function TeacherCompetitionPage() {
                 {visibleProblems.length === 0 ? (
                   <div className={styles.emptyState}>
                     <p className={styles.emptyText}>
-                      No visible problems found. Create problems in your room first! 📝
+                      No visible problems found. Create problems in your room first!
                     </p>
                   </div>
                 ) : (
@@ -206,7 +206,7 @@ export default function TeacherCompetitionPage() {
             {/* Participants Section */}
             <div className={styles.section}>
               <div className={styles.sectionHeader}>
-                <h2 className={styles.sectionTitle}>👥 Room Participants</h2>
+                <h2 className={styles.sectionTitle}>Room Participants</h2>
                 <span className={styles.badge}>{participants.length}</span>
               </div>
               
@@ -214,7 +214,7 @@ export default function TeacherCompetitionPage() {
                 {participants.length === 0 ? (
                   <div className={styles.emptyState}>
                     <p className={styles.emptyText}>
-                      No participants yet. Invite students to your room! 👨‍🎓
+                      No participants yet. Invite students to your room!
                     </p>
                   </div>
                 ) : (
@@ -227,9 +227,9 @@ export default function TeacherCompetitionPage() {
                             {participant.first_name} {participant.last_name}
                           </h3>
                           {participant.role && (
-                            <p className={styles.participantRole}>
-                              {participant.role === 'student' ? '🎓 Student' : '👨‍🏫 Teacher'}
-                            </p>
+                            <span className={styles.participantRole}>
+                              {participant.role === 'student' ? 'Student' : 'Teacher'}
+                            </span>
                           )}
                         </div>
                       </div>

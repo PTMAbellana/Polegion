@@ -814,7 +814,7 @@ function ChapterPageBase({ config }: { config: ChapterConfig }) {
                 onClick={() => handleQuizSubmit(currentQuizIndex)}
                 disabled={!quizAnswers[quiz.quiz_config.questions[currentQuizIndex].id] || quizFeedback !== null}
               >
-                {quizFeedback === 'correct' ? '✓ Correct!' : quizFeedback === 'incorrect' ? '✗ Incorrect' : 'Submit Answer'}
+                {quizFeedback === 'correct' ? 'Correct!' : quizFeedback === 'incorrect' ? 'Incorrect' : 'Submit Answer'}
               </button>
             </div>
           )}

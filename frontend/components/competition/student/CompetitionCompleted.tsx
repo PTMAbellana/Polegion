@@ -22,7 +22,7 @@ export default function CompetitionCompleted({
   return (
     <div className={styles.completedSection}>
       <div className={styles.completedContent}>
-        <div className={styles.completedIcon}>🏆</div>
+        <div className={styles.completedIcon}></div>
         
         <h2 className={styles.completedTitle}>Competition Completed!</h2>
         
@@ -48,7 +48,7 @@ export default function CompetitionCompleted({
         </div>
         
         <div className={styles.finalLeaderboard}>
-          <h3 className={styles.leaderboardTitle}>🏆 Final Results</h3>
+          <h3 className={styles.leaderboardTitle}>Final Results</h3>
           
           <div className={styles.leaderboardList}>
             {sortedParticipants.slice(0, 10).map((participant, index) => (
@@ -57,7 +57,7 @@ export default function CompetitionCompleted({
                 className={`${styles.leaderboardItem} ${index < 3 ? styles[`podium${index + 1}`] : ''}`}
               >
                 <span className={styles.rank}>
-                  {index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `#${index + 1}`}
+                  {index === 0 ? '#1' : index === 1 ? '#2' : index === 2 ? '#3' : `#${index + 1}`}
                 </span>
                 
                 <span className={styles.name}>
@@ -73,14 +73,14 @@ export default function CompetitionCompleted({
         <div className={styles.actionButtons}>
           {onRefresh && (
             <button onClick={onRefresh} className={styles.refreshButton}>
-              <span className={styles.buttonIcon}>🔄</span>
+              <span className={styles.buttonIcon}></span>
               Refresh Results
             </button>
           )}
           
           {onCopyLink && (
             <button onClick={onCopyLink} className={styles.shareButton}>
-              <span className={styles.buttonIcon}>📋</span>
+              <span className={styles.buttonIcon}></span>
               Copy Results Link
             </button>
           )}

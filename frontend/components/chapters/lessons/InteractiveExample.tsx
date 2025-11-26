@@ -76,7 +76,7 @@ const InteractiveExample: React.FC<InteractiveExampleProps> = ({
           }`}
         >
           <strong>
-            {selectedOption === correctAnswer ? '✓ Correct!' : '✗ Incorrect'}
+            {selectedOption === correctAnswer ? 'Correct!' : 'Incorrect'}
           </strong>
           <p>{explanation}</p>
         </div>

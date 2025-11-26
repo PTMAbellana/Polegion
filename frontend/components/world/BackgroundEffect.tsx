@@ -52,7 +52,7 @@ const LeavesEffect = () => (
           fontSize: `${12 + Math.random() * 18}px`,
         }}
       >
-        {['🍃', '🍂', '🌿'][Math.floor(Math.random() * 3)]}
+        {['•', '•', '•'][Math.floor(Math.random() * 3)]}
       </div>
     ))}
   </div>

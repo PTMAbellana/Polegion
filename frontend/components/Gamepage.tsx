@@ -609,13 +609,13 @@ export default function Gamepage({
           const feedback = response.feedback || response.attempt?.feedback || 'Solution submitted successfully!';
           
           Swal.fire({
-            title: "Solution Submitted! 🎯",
+            title: "Solution Submitted!",
             html: `
               <div style="text-align: left; margin: 10px;">
                 <p><strong>Submission Status:</strong> Successfully submitted!</p>
-                <p><strong>📝 Feedback:</strong> ${feedback}</p>
-                <p><strong>🏆 XP Gained:</strong> +${xpGained} XP</p>
-                <p><strong>⏱️ Time Taken:</strong> ${Math.round(timeTaken)}s</p>
+                <p><strong>Feedback:</strong> ${feedback}</p>
+                <p><strong>XP Gained:</strong> +${xpGained} XP</p>
+                <p><strong>Time Taken:</strong> ${Math.round(timeTaken)}s</p>
                 <br>
                 <p style="color: #10b981; font-weight: 600;">Your solution has been recorded and cannot be changed.</p>
               </div>

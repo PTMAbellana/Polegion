@@ -24,7 +24,7 @@ export default function ParticipantsLeaderboard({ participants }: ParticipantsLe
     <div className={styles.rightColumn}>
       <div className={styles.section}>
         <div className={styles.sectionHeader}>
-          <h2 className={styles.sectionTitle}>👥 Participants</h2>
+          <h2 className={styles.sectionTitle}>Participants</h2>
           <div className={styles.sortControls}>
             <button
               onClick={toggleSort}
@@ -56,7 +56,7 @@ export default function ParticipantsLeaderboard({ participants }: ParticipantsLe
                 <div className={styles.participantContent}>
                   <div className={styles.participantLeft}>
                     <div className={styles.participantRank}>
-                      {index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `#${index + 1}`}
+                      {index === 0 ? '#1' : index === 1 ? '#2' : index === 2 ? '#3' : `#${index + 1}`}
                     </div>
                     <div className={styles.participantInfo}>
                       <h3 className={styles.participantName}>
@@ -74,7 +74,7 @@ export default function ParticipantsLeaderboard({ participants }: ParticipantsLe
             ))
           ) : (
             <div className={styles.emptyState}>
-              <div className={styles.emptyIcon}>👥</div>
+              <div className={styles.emptyIcon}></div>
               <p className={styles.emptyText}>No participants yet</p>
             </div>
           )}
