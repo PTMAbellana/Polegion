@@ -10,7 +10,7 @@ import TabContainer from '@/components/student/TabContainer'
 import StudentParticipantsList from '@/components/student/StudentParticipantsList'
 import LoadingOverlay from '@/components/LoadingOverlay'
 import { STUDENT_ROUTES } from '@/constants/routes'
-import { FaCopy, FaCheck } from 'react-icons/fa'
+import { FaCopy, FaCheck, FaSyncAlt } from 'react-icons/fa'
 import styles from '@/styles/room-details.module.css'
 import { use } from 'react'
 import Loader from '@/components/Loader'
@@ -18,12 +18,13 @@ import Loader from '@/components/Loader'
 export default function StudentRoomDetailsPage({ params }: { params: Promise<{ roomCode: string }> }) {
     const { roomCode } = use(params)
     const router = useRouter()
-    const { isLoggedIn, appLoading } = useAuthStore()
+    const { userProfile, isLoggedIn, appLoading } = useAuthStore()
     const { 
         currentRoom, 
         roomLoading, 
         error, 
-        fetchRoomDetails, 
+        fetchRoomDetails,
+        fetchJoinedRooms,
         clearCurrentRoom 
     } = useStudentRoomStore()
     
@@ -32,6 +33,15 @@ export default function StudentRoomDetailsPage({ params }: { params: Promise<{ r
         handleLeaveRoom,
         handleCopyRoomCode
     } = useStudentRoomManagement(roomCode, currentRoom?.id)
+
+    const handleRefresh = async () => {
+        if (roomCode) {
+            // First refetch the joined rooms to get latest room data
+            await fetchJoinedRooms()
+            // Then fetch the detailed room data
+            await fetchRoomDetails(roomCode)
+        }
+    }
 
     useEffect(() => {
         if (roomCode && isLoggedIn) {
@@ -121,6 +131,15 @@ export default function StudentRoomDetailsPage({ params }: { params: Promise<{ r
                                 <FaCopy className={styles.roomCodeIcon} />
                             )}
                         </div>
+                        <button 
+                            onClick={handleRefresh}
+                            className={styles.refreshButton}
+                            title="Refresh room data"
+                            disabled={roomLoading}
+                        >
+                            <FaSyncAlt className={roomLoading ? styles.spinning : ''} />
+                            <span>Refresh</span>
+                        </button>
                     </div>
 
                     <StudentParticipantsList participants={participants} />

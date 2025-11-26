@@ -2,7 +2,7 @@
 import { useRouter } from "next/navigation";
 import Head from "next/head";
 import { FaGraduationCap, FaChalkboardTeacher } from "react-icons/fa";
-import { STUDENT_ROUTES, TEACHER_ROUTES } from "@/constants/routes";
+import { STUDENT_ROUTES, TEACHER_ROUTES, ROUTES } from "@/constants/routes";
 import styles from "@/styles/role-selection.module.css";
 
 export default function RoleSelection() {
@@ -14,6 +14,10 @@ export default function RoleSelection() {
 
   const handleTeacherRegister = () => {
     router.push(TEACHER_ROUTES.REGISTER);
+  };
+
+  const handleLogin = () => {
+    router.push(ROUTES.LOGIN);
   };
 
   return (
@@ -64,6 +68,13 @@ export default function RoleSelection() {
                 </button>
               </div>
             </div>
+
+            <p className={styles.loginPrompt}>
+              Already have an account?{" "}
+              <span onClick={handleLogin} className={styles.loginLink}>
+                Login
+              </span>
+            </p>
           </div>
         </div>
       </div>

@@ -15,6 +15,7 @@ import LimitAttempts from "@/components/teacher/create-problem/LimitAttempts";
 import SetVisibility from "@/components/teacher/create-problem/SetVisibility";
 import ShapeLimitPopup from "@/components/teacher/create-problem/ShapeLimitPopup";
 import ProblemsList from "@/components/teacher/create-problem/ProblemsList";
+import PropertiesPanel from "@/components/teacher/create-problem/PropertiesPanel";
 
 // Hooks
 import { useShapeManagement } from "@/hooks/teacher/useShapeManagement";
@@ -40,7 +41,8 @@ export default function CreateProblemPage({ params }: { params: Promise<{ roomCo
     clearCurrentProblem,
     addProblemToRoom,
     updateProblemInRoom,
-    removeProblemFromRoom
+    removeProblemFromRoom,
+    fetchRoomDetails
 } = useTeacherRoomStore();
 console.log("Current Room in CreateProblemPage:", currentRoom);
   const problems : TProblemType[] = currentRoom?.problems || [];
@@ -68,6 +70,14 @@ console.log("Current Room in CreateProblemPage:", currentRoom);
     setShowDiameter,
     showCircumference,
     setShowCircumference,
+    showLength,
+    setShowLength,
+    showMidpoint,
+    setShowMidpoint,
+    showMeasurement,
+    setShowMeasurement,
+    showArcRadius,
+    setShowArcRadius,
     showAreaByShape,
     setShowAreaByShape,
     handleAllShapesDeleted,
@@ -107,14 +117,12 @@ console.log("Current Room in CreateProblemPage:", currentRoom);
     }
   }, [editingPrompt]);
 
-
-  // ADD THIS NEW USEEFFECT:
-  // Load room details (including problems) when page loads
-  // useEffect(() => {
-  //   if (roomCode && (!currentRoom || currentRoom.code !== roomCode)) {
-  //     fetchRoomDetails(roomCode);
-  //   }
-  // }, [roomCode, currentRoom, fetchRoomDetails]);
+  // Load room details when page loads
+  useEffect(() => {
+    if (roomCode && (!currentRoom || currentRoom.code !== roomCode)) {
+      fetchRoomDetails(roomCode);
+    }
+  }, [roomCode, currentRoom, fetchRoomDetails]);
 
   // Handle keyboard delete for shapes
   useEffect(() => {
@@ -293,6 +301,15 @@ console.log("Current Room in CreateProblemPage:", currentRoom);
         Back to Room
       </button>
 
+      {/* Page Instructions */}
+      <div className={styles.pageInstructions}>
+        <h2 className={styles.instructionsTitle}>Create Problem</h2>
+        <p className={styles.instructionsText}>
+          Design questions for your students to solve by creating geometric shapes. 
+          Example: "Create a rectangle with length 5 units and width 3 units."
+        </p>
+      </div>
+
       <div className={styles.workspace}>
         {/* Left Sidebar - Difficulty + Toolbox */}
         <div className={styles.sidebar}>
@@ -311,6 +328,14 @@ console.log("Current Room in CreateProblemPage:", currentRoom);
             setShowDiameter={setShowDiameter}
             showCircumference={showCircumference}
             setShowCircumference={setShowCircumference}
+            showLength={showLength}
+            setShowLength={setShowLength}
+            showMidpoint={showMidpoint}
+            setShowMidpoint={setShowMidpoint}
+            showMeasurement={showMeasurement}
+            setShowMeasurement={setShowMeasurement}
+            showArcRadius={showArcRadius}
+            setShowArcRadius={setShowArcRadius}
             showAreaByShape={showAreaByShape}
             setShowAreaByShape={setShowAreaByShape}
           />
@@ -358,6 +383,10 @@ console.log("Current Room in CreateProblemPage:", currentRoom);
             showDiameter={showDiameter}
             showCircumference={showCircumference}
             showHeight={showHeight}
+            showLength={showLength}
+            showMidpoint={showMidpoint}
+            showMeasurement={showMeasurement}
+            showArcRadius={showArcRadius}
           />
 
           {/* Controls */}
@@ -393,7 +422,15 @@ console.log("Current Room in CreateProblemPage:", currentRoom);
           </div>
         </div>
 
-        {/* Right Sidebar - Problems List */}
+        {/* Right Sidebar - Properties Panel */}
+        <div className={styles.propertiesPanelContainer}>
+          <PropertiesPanel
+            selectedShape={shapes.find(shape => shape.id === selectedId) || null}
+            pxToUnits={pxToUnits}
+          />
+        </div>
+
+        {/* Far Right Sidebar - Problems List */}
         <div className={styles.problemsSidebar}>
           <div className={styles.problemsSidebarHeader}>
             Existing Problems

@@ -2,7 +2,7 @@ import { Problem } from './problem';
 
 // Competition Status Types
 export type CompetitionStatus = 'NEW' | 'ONGOING' | 'DONE';
-export type GameplayIndicator = 'ACTIVE' | 'PAUSE' | 'FINISHED';
+export type GameplayIndicator = 'ACTIVE' | 'PLAY' | 'PAUSE' | 'FINISHED';
 
 // Core Competition Interface
 export interface Competition {

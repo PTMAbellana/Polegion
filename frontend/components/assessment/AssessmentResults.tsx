@@ -52,37 +52,67 @@ export default function AssessmentResults({
     const percentage = results.percentage || 
         Math.round((results.totalScore / results.totalQuestions) * 100);
     
-    // ⭐ DepEd-Aligned Holistic Rubric
+    // Castle-specific theme
+    const getCastleTheme = () => {
+        if (assessmentType === 'pretest') {
+            return {
+                primary: '#37353E',
+                secondary: '#715A5A',
+                accent: '#D3DAD9',
+                buttonGradient: 'linear-gradient(135deg, #715A5A 0%, #5A4848 100%)',
+                buttonHover: 'linear-gradient(135deg, #5A4848 0%, #4A3838 100%)'
+            };
+        } else if (assessmentType === 'posttest') {
+            return {
+                primary: '#000080',
+                secondary: '#FFBF1C',
+                accent: '#FFD60A',
+                buttonGradient: 'linear-gradient(135deg, #FFBF1C 0%, #D1A309 100%)',
+                buttonHover: 'linear-gradient(135deg, #D1A309 0%, #B8900A 100%)'
+            };
+        }
+        return {
+            primary: '#667eea',
+            secondary: '#764ba2',
+            accent: '#f0f4ff',
+            buttonGradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            buttonHover: 'linear-gradient(135deg, #764ba2 0%, #667eea 100%)'
+        };
+    };
+    
+    const castleTheme = getCastleTheme();
+    
+    // DepEd-Aligned Holistic Rubric
     const getProficiencyLevel = (percent: number) => {
         if (percent >= 90) return {
             level: 'Advanced',
             description: 'Demonstrates mastery: deep conceptual understanding, creativity, and flexible application of geometry.',
             color: '#10b981', // green
-            icon: '⭐'
+            icon: 'A'
         };
         if (percent >= 75) return {
             level: 'Proficient',
             description: 'Solid understanding, correct reasoning, and consistent problem-solving.',
             color: '#3b82f6', // blue
-            icon: '✓'
+            icon: 'P'
         };
         if (percent >= 60) return {
             level: 'Approaching Proficiency',
             description: 'Partial understanding; inconsistent or procedural-only.',
             color: '#f59e0b', // amber
-            icon: '~'
+            icon: 'AP'
         };
         if (percent >= 40) return {
             level: 'Developing',
             description: 'Fragmented understanding; struggles with multi-step problems.',
             color: '#ef4444', // red
-            icon: '▽'
+            icon: 'D'
         };
         return {
             level: 'Beginning',
             description: 'Minimal understanding; mostly recall-level responses only.',
             color: '#dc2626', // dark red
-            icon: '○'
+            icon: 'B'
         };
     };
     
@@ -156,9 +186,24 @@ export default function AssessmentResults({
                         </div>
                     </div>
                     {/* ⭐ DepEd Proficiency Level Card */}
-                    <div className={styles['proficiency-card']} style={{ borderColor: proficiency.color }}>
+                    <div className={styles['proficiency-card']} style={{ 
+                        borderColor: proficiency.color,
+                        background: `linear-gradient(135deg, ${proficiency.color}08 0%, ${proficiency.color}15 100%)`
+                    }}>
                         <div className={styles['proficiency-header']}>
-                            <span className={styles['proficiency-icon']} style={{ color: proficiency.color }}>
+                            <span className={styles['proficiency-icon']} style={{ 
+                                color: 'white',
+                                background: proficiency.color,
+                                width: '2.5rem',
+                                height: '2.5rem',
+                                borderRadius: '50%',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                fontWeight: 'bold',
+                                fontSize: '1.125rem',
+                                boxShadow: `0 4px 12px ${proficiency.color}40`
+                            }}>
                                 {proficiency.icon}
                             </span>
                             <h2 className={styles['proficiency-level']} style={{ color: proficiency.color }}>
@@ -240,6 +285,18 @@ export default function AssessmentResults({
                 <button 
                     onClick={onContinue} 
                     className={styles['continue-button']}
+                    style={{
+                        background: castleTheme.buttonGradient,
+                        boxShadow: `0 4px 12px ${castleTheme.primary}40`
+                    }}
+                    onMouseEnter={(e) => {
+                        e.currentTarget.style.background = castleTheme.buttonHover;
+                        e.currentTarget.style.boxShadow = `0 6px 20px ${castleTheme.primary}50`;
+                    }}
+                    onMouseLeave={(e) => {
+                        e.currentTarget.style.background = castleTheme.buttonGradient;
+                        e.currentTarget.style.boxShadow = `0 4px 12px ${castleTheme.primary}40`;
+                    }}
                 >
                     {assessmentType === 'pretest' 
                         ? 'Begin Your Journey' 

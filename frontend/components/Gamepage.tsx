@@ -828,7 +828,7 @@ export default function Gamepage({
         <div style={{ gridArea: "sidebar", display: "flex", flexDirection: "column", alignItems: "center" }}>
           <div style={{ width: "100%", display: "flex", flexDirection: "row", gap: 8, marginBottom: 16 }}>
             <div className={styles.goBackGroup}>
-              <button className={styles.arrowLeft} onClick={() => router.back()}>←</button>
+              <button className={styles.arrowLeft} onClick={() => router.back()}>Back</button>
               <span className={styles.goBackText}>Go back</span>
             </div>
           </div>

@@ -156,6 +156,26 @@
   transform: scale(0.98);
 }
 
+.loginPrompt {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 300;
+  font-size: 14px;
+  line-height: 20px;
+  text-align: center;
+  color: #7D7D7D;
+  margin-top: 24px;
+}
+
+.loginLink {
+  color: #2F3E75;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.loginLink:hover {
+  text-decoration: underline;
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .welcomeTitle {
@@ -244,5 +264,149 @@
   .roleDescription {
     font-size: 14px;
     line-height: 21px;
+  }
+}
+
+/* Mobile Landscape - Optimize layout */
+@media (max-width: 900px) and (orientation: landscape) {
+  .roleSelectionPage {
+    padding: 8px;
+  }
+  
+  .roleSelectionCard {
+    padding: 12px 10px;
+    max-width: 100%;
+  }
+  
+  .logo {
+    max-width: 100px;
+  }
+  
+  .logoContainer {
+    margin-bottom: 8px;
+  }
+  
+  .welcomeTitle {
+    font-size: 18px;
+    line-height: 24px;
+    margin-bottom: 4px;
+  }
+  
+  .welcomeSubtitle {
+    font-size: 12px;
+    line-height: 16px;
+    margin-bottom: 12px;
+  }
+  
+  .roleOptions {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-top: 12px;
+  }
+  
+  .roleCard {
+    padding: 15px 12px;
+    min-height: auto;
+  }
+  
+  .roleIcon {
+    width: 50px;
+    height: 50px;
+    margin-bottom: 10px;
+  }
+  
+  .iconSvg {
+    width: 30px;
+    height: 30px;
+  }
+  
+  .roleTitle {
+    font-size: 16px;
+    line-height: 22px;
+    margin-bottom: 8px;
+  }
+  
+  .roleDescription {
+    font-size: 11px;
+    line-height: 16px;
+    margin-bottom: 12px;
+  }
+  
+  .roleButton {
+    height: 34px;
+    font-size: 13px;
+  }
+  
+  .cardContent {
+    max-width: 100%;
+  }
+}
+
+/* Mobile Portrait - Further optimize */
+@media (max-width: 480px) and (orientation: portrait) {
+  .roleSelectionPage {
+    padding: 10px;
+  }
+  
+  .roleSelectionCard {
+    padding: 15px 12px;
+  }
+  
+  .logo {
+    max-width: 120px;
+  }
+  
+  .logoContainer {
+    margin-bottom: 10px;
+  }
+  
+  .welcomeTitle {
+    font-size: 20px;
+    line-height: 28px;
+    margin-bottom: 4px;
+  }
+  
+  .welcomeSubtitle {
+    font-size: 12px;
+    line-height: 18px;
+    margin-bottom: 15px;
+  }
+  
+  .roleOptions {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  
+  .roleCard {
+    padding: 18px 12px;
+    min-height: auto;
+  }
+  
+  .roleIcon {
+    width: 60px;
+    height: 60px;
+    margin-bottom: 10px;
+  }
+  
+  .iconSvg {
+    width: 36px;
+    height: 36px;
+  }
+  
+  .roleTitle {
+    font-size: 18px;
+    line-height: 24px;
+    margin-bottom: 8px;
+  }
+  
+  .roleDescription {
+    font-size: 12px;
+    line-height: 17px;
+    margin-bottom: 12px;
+  }
+  
+  .roleButton {
+    height: 38px;
+    font-size: 14px;
   }
 }

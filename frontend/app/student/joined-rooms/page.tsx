@@ -1,6 +1,6 @@
 "use client"
 
-import React from 'react'
+import React, { useEffect } from 'react'
 import { useAuthStore } from '@/store/authStore'
 import { useStudentRoomStore } from '@/store/studentRoomStore'
 import { AuthProtection } from '@/context/AuthProtection'
@@ -13,7 +13,7 @@ import styles from '@/styles/dashboard-wow.module.css' // Add this import
 
 export default function JoinedRoomsPage() {
     const { userProfile } = useAuthStore()
-    const { joinedRooms, loading } = useStudentRoomStore()
+    const { joinedRooms, loading, fetchJoinedRooms } = useStudentRoomStore()
     const { isLoading: authLoading } = AuthProtection()
     
     const {
@@ -24,6 +24,11 @@ export default function JoinedRoomsPage() {
         handleCloseJoinModal,
         handleJoinSuccess
     } = useJoinedRoomsManagement()
+
+    // Fetch joined rooms when page loads
+    useEffect(() => {
+        fetchJoinedRooms()
+    }, [])
 
     const joinRoomButton = (
         <button

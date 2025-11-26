@@ -19,6 +19,14 @@ export default function Castle0Chapter1Page() {
     useEffect(() => {
         // Update key when page is visited to force fresh state
         setRemountKey(Date.now());
+        
+        // Apply Castle 0 theme to document body
+        document.body.classList.add('castle-theme-0');
+        
+        return () => {
+            // Remove Castle 0 theme when leaving
+            document.body.classList.remove('castle-theme-0');
+        };
     }, []);
 
     const config: AssessmentConfig = {

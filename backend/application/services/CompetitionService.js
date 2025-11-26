@@ -14,12 +14,11 @@ class CompeService {
 
     // Cache invalidation helper methods
     _invalidateCompetitionCache(roomId, competitionId = null) {
-        const roomCompeKey = cache.generateKey('competition_by_room', roomId);
-        cache.delete(roomCompeKey);
+        // Invalidate all cache entries for this room (all users and types)
+        cache.deletePattern(`competition_by_room:${roomId}`);
         
         if (competitionId) {
-            const compeKey = cache.generateKey('competition', competitionId);
-            cache.delete(compeKey);
+            cache.deletePattern(`competition:${competitionId}`);
         }
         
         console.log('Invalidated competition cache for room:', roomId, 'competition:', competitionId);
@@ -119,7 +118,7 @@ class CompeService {
                 return cached;
             }
             
-            if (type === 'user') {
+            if (type === 'user' || type === 'participant' || type === 'student') {
                 const part = await this.partService.checkPartStatus(user_id, room_id)
                 if (!part) throw new Error("You are not a participant of this room")
             } else {
@@ -155,6 +154,7 @@ class CompeService {
             console.log("Found matching competition problem:", firstCompeProblem)
             
             // Calculate timer duration and start time
+            // Note: timer values from problems are in SECONDS
             const timerDuration = firstCompeProblem?.timer || 30 // Default 30 seconds
             const currentTime = new Date()
             const problemEndTime = new Date(currentTime.getTime() + (timerDuration * 1000))
@@ -186,12 +186,14 @@ class CompeService {
             // 🚀 SEND BROADCAST TO NOTIFY ALL CLIENTS
             try {
                 const channel = supabase.channel(`competition-${compe_id}`)
+                await channel.subscribe() // Must subscribe before broadcasting
                 await channel.send({
                     type: 'broadcast',
                     event: 'competition_update',
                     payload: result
                 })
                 console.log(`📡 Competition ${compe_id} start broadcasted successfully!`)
+                await supabase.removeChannel(channel) // Clean up
             } catch (broadcastError) {
                 console.error('❌ Broadcast failed:', broadcastError)
                 // Don't throw error - continue with operation even if broadcast fails
@@ -215,12 +217,14 @@ class CompeService {
                 // 🚀 SEND BROADCAST FOR COMPETITION FINISH
                 try {
                     const channel = supabase.channel(`competition-${compe_id}`)
+                    await channel.subscribe()
                     await channel.send({
                         type: 'broadcast',
                         event: 'competition_update',
                         payload: { ...data, competition_finished: true }
                     })
                     console.log(`🏁 Competition ${compe_id} finish broadcasted successfully!`)
+                    await supabase.removeChannel(channel)
                 } catch (broadcastError) {
                     console.error('❌ Finish broadcast failed:', broadcastError)
                 }
@@ -261,12 +265,14 @@ class CompeService {
             // 🚀 SEND BROADCAST TO NOTIFY ALL CLIENTS
             try {
                 const channel = supabase.channel(`competition-${compe_id}`)
+                await channel.subscribe()
                 await channel.send({
                     type: 'broadcast',
                     event: 'competition_update',
                     payload: result
                 })
                 console.log(`➡️ Competition ${compe_id} next problem broadcasted successfully!`)
+                await supabase.removeChannel(channel)
             } catch (broadcastError) {
                 console.error('❌ Next problem broadcast failed:', broadcastError)
             }
@@ -303,11 +309,13 @@ class CompeService {
 
             // Broadcast the pause update
             const channel = supabase.channel(`competition-${compe_id}`);
+            await channel.subscribe();
             await channel.send({
                 type: 'broadcast',
                 event: 'competition_update',
                 payload: data
             });
+            await supabase.removeChannel(channel);
             
             console.log(`⏸️ Competition ${compe_id} pause broadcasted successfully!`);
             return data;
@@ -340,11 +348,13 @@ class CompeService {
 
             // Broadcast the resume update
             const channel = supabase.channel(`competition-${compe_id}`);
+            await channel.subscribe();
             await channel.send({
                 type: 'broadcast',
                 event: 'competition_update',
                 payload: data
             });
+            await supabase.removeChannel(channel);
             
             console.log(`▶️ Competition ${compe_id} resume broadcasted successfully!`);
             return data;
@@ -410,6 +420,7 @@ class CompeService {
             // 🚀 SEND BROADCAST TO NOTIFY ALL CLIENTS
             try {
                 const channel = supabase.channel(`competition-${compe_id}`)
+                await channel.subscribe()
                 await channel.send({
                     type: 'broadcast',
                     event: 'competition_update',
@@ -422,9 +433,10 @@ class CompeService {
                         total_problems: problems.length
                     }
                 })
-                console.log(`▶️ Competition ${compe_id} resume broadcasted successfully!`)
+                console.log(`▶️ Competition ${compe_id} auto-advance broadcasted successfully!`)
+                await supabase.removeChannel(channel)
             } catch (broadcastError) {
-                console.error('❌ Resume broadcast failed:', broadcastError)
+                console.error('❌ Auto-advance broadcast failed:', broadcastError)
             }
 
             return {

@@ -6,6 +6,11 @@ import styles from '@/styles/world-map.module.css'
 
 // Learning objectives for each castle
 const CASTLE_TOPICS: Record<string, string[]> = {
+  'castle0': [
+    'Assess your current geometry knowledge baseline',
+    'Identify areas for improvement before starting your journey',
+    'Establish a learning benchmark for future progress tracking'
+  ],
   'castle1': [
     'Identify different geometric figures',
     'Identify parallel, intersecting, perpendicular, and skew lines',
@@ -37,11 +42,22 @@ const CASTLE_TOPICS: Record<string, string[]> = {
     'Find the surface area of solid figures',
     'Find the volume of prisms, pyramids, cylinders, cones, and spheres',
     'Solve word problems involving volume of solid figures'
+  ],
+  'castle6': [
+    'Demonstrate mastery of all geometry concepts learned',
+    'Measure your growth and improvement since the pretest',
+    'Earn your final achievement and complete your geometry journey'
   ]
 }
 
 // Castle color themes
 const CASTLE_THEMES: Record<number, { primary: string; secondary: string; accent: string; border: string }> = {
+  0: {
+    primary: '#715A5A',
+    secondary: '#37353E',
+    accent: '#8B6B6B',
+    border: '#5A4848'
+  },
   1: {
     primary: '#3E5879',
     secondary: '#213555',
@@ -71,6 +87,12 @@ const CASTLE_THEMES: Record<number, { primary: string; secondary: string; accent
     secondary: '#2D1B4E',
     accent: '#8B6BB8',
     border: '#553A7A'
+  },
+  6: {
+    primary: '#FFBF1C',
+    secondary: '#000080',
+    accent: '#FFD60A',
+    border: '#D1A309'
   }
 }
 
@@ -145,7 +167,7 @@ export default function CastleModal({ castle, onClose, onEnter }: CastleModalPro
         </div>
 
         {/* XP Progress */}
-        {castle.progress && (
+        {castle.progress && castle.image_number !== 0 && castle.image_number !== 6 && (
           <div className={styles.xp_section} style={{ borderColor: theme.border, backgroundColor: `${theme.primary}10` }}>
             <div className={styles.xp_info}>
               <span className={styles.xp_label} style={{ color: theme.primary }}>
@@ -153,6 +175,22 @@ export default function CastleModal({ castle, onClose, onEnter }: CastleModalPro
               </span>
               <span className={styles.xp_value}>
                 {castle.progress.total_xp_earned || 0} / {castle.total_xp || 0}
+              </span>
+            </div>
+          </div>
+        )}
+
+        {/* Assessment Note for Castle 0 and 6 */}
+        {castle.progress && (castle.image_number === 0 || castle.image_number === 6) && (
+          <div className={styles.xp_section} style={{ borderColor: theme.border, backgroundColor: `${theme.primary}10` }}>
+            <div className={styles.xp_info}>
+              <span className={styles.xp_label} style={{ color: theme.primary }}>
+                {castle.image_number === 0 ? 'Assessment Only' : 'Final Assessment'}
+              </span>
+              <span className={styles.xp_value} style={{ fontSize: '0.875rem' }}>
+                {castle.image_number === 0 
+                  ? 'No XP awarded - diagnostic purposes only'
+                  : 'No XP awarded - achievement earned upon completion'}
               </span>
             </div>
           </div>

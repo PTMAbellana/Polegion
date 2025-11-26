@@ -29,6 +29,7 @@ class Competition {
         return {
             id: this.id,
             title: this.title,
+            room_id: this.room_id,
             status: this.status,
         };
     }

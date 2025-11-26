@@ -267,21 +267,22 @@
 
 .tabNavigation {
   display: flex;
-  border-bottom: 2px solid rgba(34, 197, 94, 0.2);
-  background: rgba(255, 255, 255, 0.5);
+  background: #f8f9fa;
+  border-bottom: 2px solid #e9ecef;
 }
 
 .tabButton {
   flex: 1;
-  padding: 1rem 1.5rem;
-  font-family: 'Poppins', sans-serif;
-  font-size: 0.95rem;
-  font-weight: 600;
-  color: #6b7280;
-  background: transparent;
+  padding: 15px 20px;
+  background: none;
   border: none;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 500;
+  font-size: 14px;
+  color: #6c757d;
   cursor: pointer;
   transition: all 0.3s ease;
+  border-bottom: 3px solid transparent;
   position: relative;
 }
 
@@ -291,23 +292,19 @@
 }
 
 .tabButton:not(:disabled):hover {
+  background: #e9ecef;
   color: #16a34a;
-  background: rgba(34, 197, 94, 0.05);
 }
 
 .tabButtonActive {
+  background: #FFFFFF;
   color: #16a34a;
-  background: rgba(34, 197, 94, 0.1);
+  border-bottom-color: #FABC60;
+  font-weight: 600;
 }
 
 .tabButtonActive::after {
-  content: '';
-  position: absolute;
-  bottom: -2px;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background: linear-gradient(135deg, #22c55e 0%, #84cc16 100%);
+  display: none;
 }
 
 .tabContent {

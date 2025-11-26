@@ -57,8 +57,7 @@ export default function RecordPage({ params }: { params: Promise<{ roomId: numbe
           {/* Back Button */}
           <div className={styles.back_button_container}>
             <button onClick={handleBackClick} className={styles.back_button}>
-              <FaArrowLeft className={styles.back_icon} />
-              <span>Back</span>
+              <span>Back to Room</span>
             </button>
           </div>
     

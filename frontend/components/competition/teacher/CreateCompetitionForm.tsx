@@ -20,7 +20,7 @@ export default function CreateCompetitionForm({ onSubmit, loading = false }: Cre
   return (
     <div className={styles.section}>
       <div className={styles.sectionHeader}>
-        <h2 className={styles.sectionTitle}>✨ Create Competition</h2>
+        <h2 className={styles.sectionTitle}>Create Competition</h2>
       </div>
       
       <form onSubmit={handleSubmit} className={styles.createForm}>

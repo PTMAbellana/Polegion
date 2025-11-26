@@ -38,7 +38,18 @@ const MainArea: React.FC<MainAreaProps> = ({
   // Handle keyboard delete
   React.useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      // Don't delete shapes if user is typing in an input or textarea
+      const target = e.target as HTMLElement;
+      if (
+        target.tagName === 'INPUT' || 
+        target.tagName === 'TEXTAREA' || 
+        target.isContentEditable
+      ) {
+        return;
+      }
+
       if ((e.key === 'Delete' || e.key === 'Backspace') && selectedId !== null) {
+        e.preventDefault(); // Prevent default browser back navigation
         setShapes(prev => prev.filter(shape => shape.id !== selectedId));
         setSelectedId(null);
         setSelectedTool(null);

@@ -57,18 +57,18 @@ class LeaderboardService {
         }
     }
     
-    async getCompeBoard (room_id) {
+    async getCompeBoard (room_id, competition_id = null) {
         try {
-            const cacheKey = cache.generateKey('competition_leaderboard', room_id);
+            const cacheKey = cache.generateKey('competition_leaderboard', room_id, competition_id || 'all');
             
             // Check cache first
             const cached = cache.get(cacheKey);
             if (cached) {
-                console.log('Cache hit: getCompeBoard', room_id);
+                console.log('Cache hit: getCompeBoard', room_id, competition_id);
                 return cached;
             }
             
-            const data = await this.leaderRepo.getCompeBoard(room_id)
+            const data = await this.leaderRepo.getCompeBoard(room_id, competition_id)
             console.log('from compe board services: ', data)
             
             const compiled = await Promise.all(

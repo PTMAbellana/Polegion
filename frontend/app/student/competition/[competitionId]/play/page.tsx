@@ -19,14 +19,16 @@ export default function PlayPage({ params }: PlayPageProps) {
   const { competitionId } = use(params);
   const router = useRouter();
   const { currentRoom } = useStudentRoomStore();
+  const searchParams = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '');
+  const roomId = searchParams.get('room') || ''; // Always defined, even if empty string
 
   // Real-time hooks
   const {
     competition,
-  } = useCompetitionRealtime(competitionId.toString(), false);
+  } = useCompetitionRealtime(competitionId.toString(), false, roomId);
 
   const liveCompetition = competition as Competition | null;
-  const { formattedTime } = useCompetitionTimer(liveCompetition);
+  const { formattedTime } = useCompetitionTimer(competitionId, liveCompetition);
 
   // Track if we should show pause overlay
   const [showPauseOverlay, setShowPauseOverlay] = useState(false);
@@ -35,15 +37,17 @@ export default function PlayPage({ params }: PlayPageProps) {
   useEffect(() => {
     if (!liveCompetition) return;
 
+    const roomParam = roomId ? `?room=${roomId}` : '';
+
     // Competition not started yet - go to waiting room
     if (liveCompetition.status === "NEW") {
-      router.push(`/student/competition/${competitionId}`);
+      router.push(`/student/competition/${competitionId}${roomParam}`);
       return;
     }
 
     // Competition finished - go to results
     if (liveCompetition.status === "DONE") {
-      router.push(`/student/competition/${competitionId}`);
+      router.push(`/student/competition/${competitionId}${roomParam}`);
       return;
     }
 
@@ -53,7 +57,7 @@ export default function PlayPage({ params }: PlayPageProps) {
     } else {
       setShowPauseOverlay(false);
     }
-  }, [liveCompetition, competitionId, router]);
+  }, [liveCompetition, competitionId, router, roomId]);
 
   if (!liveCompetition) {
     return (

@@ -16,6 +16,7 @@ import competitionStyles from "@/styles/competitions-dashboard.module.css"
 import { Competition } from "@/types/common/competition"
 import { LeaderboardData } from "@/types/common/leaderboard"
 import AnimatedAvatar from "@/components/profile/AnimatedAvatar"
+import { FaChalkboardTeacher, FaPlus, FaRegFileAlt } from 'react-icons/fa'
 
 // Extended type for competitions with room context and additional fields
 interface CompetitionWithRoom extends Competition {
@@ -122,14 +123,14 @@ export default function TeacherDashboard() {
     <div className={dashboardStyles["dashboard-container"]}>
       {/* Fixed Header */}
       <PageHeader 
-        title={`Welcome, Professor ${userProfile?.first_name || 'Teacher'}! 👨‍🏫`}
+        title={`Welcome, Professor ${userProfile?.first_name || 'Teacher'}!`}
         subtitle="Manage your classrooms and track student progress"
         showAvatar={true}
         avatarText={userProfile?.first_name?.charAt(0).toUpperCase() || 'T'}
         actionButton={
           <button 
             onClick={handleCreateRoom}
-            className={dashboardStyles["submit-btn"]}
+            className="btn btn-primary"
             style={{
                 background: 'linear-gradient(135deg, #22c55e 0%, #84cc16 100%)',
                 color: 'white',
@@ -142,7 +143,7 @@ export default function TeacherDashboard() {
                 fontSize: '14px'
             }}
           >
-            ➕ Create Room
+            + Create Room
           </button>
         }
       />
@@ -172,7 +173,6 @@ export default function TeacherDashboard() {
                 {userProfile?.first_name} {userProfile?.last_name}
               </h3>
               <p className={teacherStyles.miniProfileRole}>
-                <span className={teacherStyles.roleIcon}>👨‍🏫</span>
                 Teacher
               </p>
             </div>
@@ -180,7 +180,7 @@ export default function TeacherDashboard() {
               className={teacherStyles.viewProfileButton}
               onClick={() => router.push(TEACHER_ROUTES.PROFILE)}
             >
-              View Full Profile →
+              View Full Profile
             </button>
           </section>
 
@@ -190,7 +190,9 @@ export default function TeacherDashboard() {
               className={teacherStyles.quickActionCard}
               onClick={() => router.push(TEACHER_ROUTES.VIRTUAL_ROOMS)}
             >
-              <div className={teacherStyles.quickActionIcon}>🏫</div>
+              <div className={teacherStyles.quickActionIcon}>
+                <FaChalkboardTeacher />
+              </div>
               <div className={teacherStyles.quickActionContent}>
                 <h4>Manage Rooms</h4>
                 <p>View all classrooms</p>
@@ -201,7 +203,9 @@ export default function TeacherDashboard() {
               className={teacherStyles.quickActionCard}
               onClick={handleCreateRoom}
             >
-              <div className={teacherStyles.quickActionIcon}>➕</div>
+              <div className={teacherStyles.quickActionIcon}>
+                <FaPlus />
+              </div>
               <div className={teacherStyles.quickActionContent}>
                 <h4>Create Room</h4>
                 <p>Start a new classroom</p>
@@ -212,7 +216,9 @@ export default function TeacherDashboard() {
               className={teacherStyles.quickActionCard}
               onClick={() => router.push(TEACHER_ROUTES.LEADERBOARD)}
             >
-              <div className={teacherStyles.quickActionIcon}>�</div>
+              <div className={teacherStyles.quickActionIcon}>
+                <FaRegFileAlt />
+              </div>
               <div className={teacherStyles.quickActionContent}>
                 <h4>View Records</h4>
                 <p>Student performance</p>
@@ -293,7 +299,7 @@ export default function TeacherDashboard() {
 
                     <div className={competitionStyles.competition_action}>
                       <button className={competitionStyles.manage_button}>
-                        ⚙️ Manage →
+                        ⚙️ Manage
                       </button>
                     </div>
                   </div>
@@ -312,7 +318,7 @@ export default function TeacherDashboard() {
                 className={teacherStyles.viewAllButton}
                 onClick={() => router.push(TEACHER_ROUTES.LEADERBOARD)}
               >
-                View All Records →
+                View All Records
               </button>
             </div>
             
@@ -362,7 +368,7 @@ export default function TeacherDashboard() {
                 className={teacherStyles.viewAllButton}
                 onClick={() => router.push(TEACHER_ROUTES.VIRTUAL_ROOMS)}
               >
-                View All Rooms →
+                View All Rooms
               </button>
             )}
           </div>

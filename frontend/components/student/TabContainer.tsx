@@ -36,7 +36,7 @@ export default function TabContainer({ problems, competitions, roomCode }: TabCo
                 {activeTab === 'problems' ? (
                     <ProblemsTab problems={problems} roomCode={roomCode} />
                 ) : (
-                    <CompetitionsTab competitions={competitions} />
+                    <CompetitionsTab competitions={competitions} roomCode={roomCode} />
                 )}
             </div>
         </div>

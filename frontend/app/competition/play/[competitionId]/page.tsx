@@ -695,7 +695,7 @@ const CompetitionDashboard = ({ params } : { params  : Promise<{competitionId : 
               className={styles.headerBackButton}
               title="Return to Room"
             >
-              <span className={styles.backIcon}>←</span>
+              <span className={styles.backIcon}>Back</span>
               <span className={styles.backText}>Back to Room</span>
             </button> */}
           {/* </div> */}

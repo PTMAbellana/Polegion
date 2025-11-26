@@ -68,17 +68,9 @@ export function useCompetitionManagement(roomId: string | number) {
     setState(prev => ({ ...prev, loading: true, error: null }))
     try {
       const result = await createCompe(roomId, title)
-      if (result && result.data && result.data.competition) {
-        setState(prev => ({
-          ...prev,
-          competitions: [result.data.competition, ...prev.competitions],
-          loading: false
-        }))
-        return { success: true, data: result.data.competition }
-      } else {
-        await fetchCompetitions()
-        return { success: true }
-      }
+      // Always refetch to ensure we have the latest data
+      await fetchCompetitions()
+      return { success: true, data: result?.data }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to create competition'
       setState(prev => ({ ...prev, error: errorMessage, loading: false }))
@@ -90,20 +82,29 @@ export function useCompetitionManagement(roomId: string | number) {
   const fetchCompetitionDetails = useCallback(async (competitionId: number) => {
     setState(prev => ({ ...prev, loading: true, error: null }))
     try {
-      const [competition, participants, problems] = await Promise.all([
+      const [competition, participantsResponse, problems] = await Promise.all([
         getCompeById(roomId, competitionId, 'creator'),
         getAllParticipants(roomId, 'creator', true, competitionId),
         getCompeProblems(competitionId)
       ])
 
+      // Handle different response formats for participants
+      let participants = []
+      if (participantsResponse && participantsResponse.data) {
+        participants = participantsResponse.data.participants || participantsResponse.data || []
+      } else if (Array.isArray(participantsResponse)) {
+        participants = participantsResponse
+      }
+
       setState(prev => ({
         ...prev,
         currentCompetition: competition,
-        participants: participants.data.participants || [],
+        participants: participants,
         addedProblems: problems || [],
         loading: false
       }))
     } catch (error) {
+      console.error('Error fetching competition details:', error)
       setState(prev => ({
         ...prev,
         error: error instanceof Error ? error.message : 'Failed to fetch competition details',
@@ -130,11 +131,11 @@ export function useCompetitionManagement(roomId: string | number) {
           ? {
               ...prev.currentCompetition,
               status: 'ONGOING',
-              gameplay_indicator: 'ACTIVE',
+              gameplay_indicator: 'PLAY', // Match backend value
               current_problem_id: Number(problems[0]?.problem?.id || problems[0]?.id),
               current_problem_index: 0,
               timer_started_at: new Date().toISOString(),
-              timer_duration: (problems[0]?.timer || 5) * 60
+              timer_duration: problems[0]?.timer || 30 // Use seconds, not minutes
             }
           : null,
         loading: false
@@ -189,8 +190,8 @@ export function useCompetitionManagement(roomId: string | number) {
                 current_problem_id: Number(nextProblemData?.problem?.id || nextProblemData?.id),
                 current_problem_index: nextIndex,
                 timer_started_at: new Date().toISOString(),
-                timer_duration: (nextProblemData?.timer || 5) * 60,
-                gameplay_indicator: 'ACTIVE'
+                timer_duration: nextProblemData?.timer || 30, // Use seconds
+                gameplay_indicator: 'PLAY' // Match backend value
               }
             : null,
           loading: false
@@ -241,7 +242,7 @@ export function useCompetitionManagement(roomId: string | number) {
       setState(prev => ({
         ...prev,
         currentCompetition: prev.currentCompetition
-          ? { ...prev.currentCompetition, gameplay_indicator: 'ACTIVE' }
+          ? { ...prev.currentCompetition, gameplay_indicator: 'PLAY' } // Match backend value
           : null,
         loading: false
       }))

@@ -64,16 +64,52 @@
   flex-shrink: 0;
 }
 
-/* Main Workspace Grid - Flexible and Responsive */
+/* Page Instructions */
+.pageInstructions {
+  position: absolute;
+  top: 0.75rem;
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
+  z-index: 90;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.9) 100%);
+  backdrop-filter: blur(10px);
+  padding: 0.75rem 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(44, 81, 76, 0.1);
+}
+
+.instructionsTitle {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #2c514c;
+  margin: 0 0 0.375rem 0;
+  font-family: 'Poppins', sans-serif;
+}
+
+.instructionsText {
+  font-size: 0.875rem;
+  color: #4b5563;
+  margin: 0;
+  font-family: 'Poppins', sans-serif;
+  line-height: 1.5;
+  max-width: 600px;
+}
+
+/* Main Workspace Grid - Flexible and Responsive with 4 columns */
 .workspace {
   display: grid;
-  grid-template-columns: 260px 1fr 280px;
-  gap: 1rem;
-  max-width: 100%;
-  margin: 0 auto;
-  margin-top: 2.75rem;
-  height: calc(100vh - 3.75rem);
-  overflow: hidden;
+  grid-template-columns: minmax(200px, 220px) minmax(400px, 1fr) minmax(220px, 260px) minmax(200px, 240px);
+  gap: 0.4rem;
+  height: calc(100vh - 8rem);
+  margin-top: 6rem;
+  padding: 0 0.4rem;
+  width: 100%;
+  max-width: 1920px;
+  margin-left: auto;
+  margin-right: auto;
+  box-sizing: border-box;
 }
 
 /* Playground Root - Container for Header + Workspace */
@@ -164,7 +200,10 @@
 .sidebar {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 0.5rem;
+  height: 100%;
+  max-height: calc(100vh - 8rem);
+  overflow: hidden;
 }
 
 /* Difficulty Dropdown */
@@ -175,7 +214,7 @@
 
 .difficultyBox {
   width: 100%;
-  height: 42px;
+  height: 38px;
   border-radius: 10px;
   display: flex;
   align-items: center;
@@ -188,6 +227,7 @@
   cursor: pointer;
   transition: all 0.2s ease;
   user-select: none;
+  flex-shrink: 0;
 }
 
 .difficultyBox:hover {
@@ -239,13 +279,15 @@
 .toolbox {
   background: linear-gradient(135deg, #ffffff 0%, #f7fee7 100%);
   border-radius: 16px;
-  padding: 0.875rem;
+  padding: 0.625rem;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
   display: flex;
   flex-direction: column;
-  gap: 0.625rem;
+  gap: 0.5rem;
   overflow-y: auto;
-  max-height: calc(95.5vh - 3.75rem - 42px - 1rem);
+  overflow-x: hidden;
+  flex: 1;
+  min-height: 0;
   scrollbar-width: thin;
   scrollbar-color: #22c55e #f0fdf4;
   border: 2px solid #e5e7eb;
@@ -262,8 +304,9 @@
   background: linear-gradient(135deg, #f0fdf4 0%, #fefce8 100%);
   border: 2px solid #86efac;
   border-radius: 8px;
-  padding: 0.75rem;
-  font-size: 0.75rem;
+  padding: 0.5rem;
+  font-size: 0.7rem;
+  flex-shrink: 0;
 }
 
 .instructionsTitle {
@@ -312,13 +355,13 @@
 .toolboxHeader {
   background: linear-gradient(135deg, #2c514c 0%, #3d6b64 100%);
   color: white;
-  padding: 1rem 1.25rem;
-  font-size: 1.1rem;
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
   font-weight: 700;
   font-family: 'Poppins', sans-serif;
   border-radius: 14px 14px 0 0;
   text-align: center;
-  margin: -0.875rem -0.875rem 0.5rem -0.875rem;
+  margin: -0.625rem -0.625rem 0.5rem -0.625rem;
 }
 
 .toolboxSingleColumn {
@@ -334,7 +377,7 @@
 }
 
 .sectionHeader {
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   font-weight: 700;
   color: #1a3a35;
   text-transform: uppercase;
@@ -440,12 +483,12 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.5rem;
+  padding: 0.4rem;
   background: #f9fafb;
   border-radius: 6px;
   cursor: pointer;
   transition: all 0.2s ease;
-  font-size: 0.8rem;
+  font-size: 0.72rem;
   color: #1a3a35;
 }
 
@@ -684,7 +727,8 @@
   flex-direction: column;
   gap: 0.75rem;
   height: 95.5%;
-  overflow: hidden;
+  overflow: visible;
+  padding: 2px;
 }
 
 /* Title Input */
@@ -699,6 +743,7 @@
   transition: background 0.2s ease;
   color: #1a3a35;
   font-weight: 500;
+  box-sizing: border-box;
 }
 
 .input::placeholder {
@@ -707,6 +752,7 @@
 
 .input:focus {
   outline: 2px solid #2c514c;
+  outline-offset: 0px;
   background: #d0d0d0;
 }
 
@@ -830,7 +876,7 @@
 .limitedAttemptsBtn {
   background: #ff9800;
   border-color: #000;
-  color: #ffffff;
+  color: #000000;
 }
 
 .setVisibilityBtn {
@@ -931,17 +977,18 @@
 .problemsSidebar {
   background: white;
   border-radius: 12px;
-  padding: 1rem;
+  padding: 0.75rem;
   box-shadow: 0 2px 8px rgba(0,0,0,0.07);
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
-  height: 95.5%;
+  gap: 0.625rem;
+  height: 100%;
+  max-height: calc(100vh - 8rem);
   overflow: hidden;
 }
 
 .problemsSidebarHeader {
-  font-size: 1rem;
+  font-size: 0.9rem;
   font-weight: 700;
   color: #1a3a35;
   padding-bottom: 0.5rem;
@@ -1160,18 +1207,20 @@
 }
 
 /* Responsive Design */
-@media (max-width: 1200px) {
+@media (max-width: 1024px) {
   .root {
     padding: 1rem;
   }
 
   .workspace {
     grid-template-columns: 1fr;
+    height: auto;
   }
 
   .sidebar,
   .problemsSidebar {
     order: 2;
+    max-height: 500px;
   }
 
   .mainContent {
@@ -1497,6 +1546,7 @@
   display: flex;
   flex-direction: column;
   height: 100%;
+  max-height: calc(100vh - 8rem);
   overflow: hidden;
   border: 2px solid #e5e7eb;
   transition: all 0.3s ease;
@@ -1510,8 +1560,8 @@
 .propertiesPanelHeader {
   background: linear-gradient(135deg, #2c514c 0%, #3d6b64 100%);
   color: white;
-  padding: 1rem 1.25rem;
-  font-size: 1.1rem;
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
   font-weight: 700;
   font-family: 'Poppins', sans-serif;
   border-radius: 14px 14px 0 0;
@@ -1535,10 +1585,10 @@
 .propertiesContent {
   flex: 1;
   overflow-y: auto;
-  padding: 1.5rem;
+  padding: 1rem;
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: 1rem;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
 }

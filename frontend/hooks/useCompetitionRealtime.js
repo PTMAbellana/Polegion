@@ -1,7 +1,8 @@
 import { useEffect, useState, useRef } from 'react';
 import { supabase } from '../lib/supabaseClient';
+import api from '../api/axios';
 
-export const useCompetitionRealtime = (competitionId, isLoading) => {
+export const useCompetitionRealtime = (competitionId, isLoading, roomId = '') => {
   const [competition, setCompetition] = useState(null);
   const [participants, setParticipants] = useState([]);
   const [isConnected, setIsConnected] = useState(false);
@@ -45,47 +46,70 @@ export const useCompetitionRealtime = (competitionId, isLoading) => {
     
     const pollCompetition = async () => {
       try {
-        const { data, error } = await supabase
-          .from('competitions')
-          .select('*')
-          .eq('id', competitionId);
+        console.log('🔍 [Polling] Fetching competition with ID:', competitionId, 'roomId:', roomId);
+        
+        if (!roomId || roomId === '') {
+          console.warn('⚠️ [Polling] Missing roomId in URL - skipping fetch. Please navigate to this page with ?room=X parameter');
+          return;
+        }
 
-        if (!error && data && data.length > 0) {
-          const newCompetition = data[0];
+        // Use backend API with roomId for proper authorization
+        const [compResponse, leaderResponse] = await Promise.all([
+          api.get(`/competitions/${roomId}/${competitionId}?type=participant`),
+          api.get(`/leaderboards/competition/${roomId}?competition_id=${competitionId}`)
+        ]);
+        
+        const data = compResponse.data;
+        const leaderboardData = leaderResponse.data?.data || [];
+        
+        console.log('📊 [Polling] Backend API result:', { data, participants: leaderboardData });
+        
+        // Update participants
+        setParticipants(leaderboardData);
+        
+        if (data) {
+          const newCompetition = data;
+        
+        // ✅ Better change detection with logging
+        setCompetition(prevCompetition => {
+          // Always set on first load
+          if (!prevCompetition) {
+            console.log('🎯 [Polling] Initial competition data loaded:', newCompetition);
+            setPollCount(prev => prev + 1);
+            return newCompetition;
+          }
           
-          // ✅ Better change detection with logging
-          setCompetition(prevCompetition => {
-            const statusChanged = prevCompetition?.status !== newCompetition?.status;
-            const timerStartChanged = prevCompetition?.timer_started_at !== newCompetition?.timer_started_at;
-            const problemChanged = prevCompetition?.current_problem_index !== newCompetition?.current_problem_index;
-            const gameplayChanged = prevCompetition?.gameplay_indicator !== newCompetition?.gameplay_indicator;
+          const statusChanged = prevCompetition?.status !== newCompetition?.status;
+          const timerStartChanged = prevCompetition?.timer_started_at !== newCompetition?.timer_started_at;
+          const problemChanged = prevCompetition?.current_problem_index !== newCompetition?.current_problem_index;
+          const gameplayChanged = prevCompetition?.gameplay_indicator !== newCompetition?.gameplay_indicator;
+          
+          if (statusChanged || timerStartChanged || problemChanged || gameplayChanged) {
+            console.log('🔥 [Polling] Competition update detected:', {
+              changes: {
+                status: statusChanged ? `${prevCompetition?.status} → ${newCompetition?.status}` : 'no change',
+                timer_started: timerStartChanged ? `${prevCompetition?.timer_started_at} → ${newCompetition?.timer_started_at}` : 'no change',
+                problem: problemChanged ? `${prevCompetition?.current_problem_index} → ${newCompetition?.current_problem_index}` : 'no change',
+                gameplay: gameplayChanged ? `${prevCompetition?.gameplay_indicator} → ${newCompetition?.gameplay_indicator}` : 'no change'
+              },
+              newData: {
+                status: newCompetition.status,
+                timer_started_at: newCompetition.timer_started_at,
+                timer_duration: newCompetition.timer_duration,
+                current_problem_index: newCompetition.current_problem_index,
+                gameplay_indicator: newCompetition.gameplay_indicator
+              }
+            });
             
-            if (statusChanged || timerStartChanged || problemChanged || gameplayChanged) {
-              console.log('🔥 [Polling] Competition update detected:', {
-                changes: {
-                  status: statusChanged ? `${prevCompetition?.status} → ${newCompetition?.status}` : 'no change',
-                  timer_started: timerStartChanged ? `${prevCompetition?.timer_started_at} → ${newCompetition?.timer_started_at}` : 'no change',
-                  problem: problemChanged ? `${prevCompetition?.current_problem_index} → ${newCompetition?.current_problem_index}` : 'no change',
-                  gameplay: gameplayChanged ? `${prevCompetition?.gameplay_indicator} → ${newCompetition?.gameplay_indicator}` : 'no change'
-                },
-                newData: {
-                  status: newCompetition.status,
-                  timer_started_at: newCompetition.timer_started_at,
-                  timer_duration: newCompetition.timer_duration,
-                  current_problem_index: newCompetition.current_problem_index,
-                  gameplay_indicator: newCompetition.gameplay_indicator
-                }
-              });
-              
-              setPollCount(prev => prev + 1);
-              return newCompetition;
-            }
-            
-            return prevCompetition;
-          });
+            setPollCount(prev => prev + 1);
+            return newCompetition;
+          }
+          
+          return prevCompetition;
+        });
         }
       } catch (error) {
-        console.log('⚠️ [Polling] Error (ignoring):', error.message);
+        console.error('⚠️ [Polling] Exception:', error.response?.data || error.message);
       }
     };
 

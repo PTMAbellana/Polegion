@@ -39,8 +39,9 @@ class LeaderboardController {
     
     getCompeBoard = async(req, res) => {
         const { room_id } = req.params
+        const { competition_id } = req.query
         try{
-            const data = await this.leaderService.getCompeBoard(room_id)
+            const data = await this.leaderService.getCompeBoard(room_id, competition_id)
             return res.status(200).json({
                 message: 'Competition Leaderboard fetched successfully',
                 data: data

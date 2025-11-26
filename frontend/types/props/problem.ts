@@ -82,7 +82,7 @@ export interface PromptBoxProps {
   setPrompt: (prompt: string) => void;
   editingPrompt: boolean;
   setEditingPrompt: (editing: boolean) => void;
-  promptInputRef: React.RefObject<HTMLTextAreaElement>;
+  promptInputRef: React.RefObject<HTMLTextAreaElement | null>;
 }
 
 export interface SetVisibilityProps {

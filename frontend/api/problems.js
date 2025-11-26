@@ -13,11 +13,10 @@ export const createProblem = async (problemData, room_code) => {
       data: res.data.data
     }
   } catch (error){
-    alert('I am called here fuck');
-    console.log('createProblem error:', error);
+    console.error('createProblem error:', error);
     return {
       success: false,
-      message: error.response?.data?.message || 'Server error failed to create problem',
+      message: error.response?.data?.message || 'Failed to create problem',
       error: error.response?.data?.error || error.message,
       status: error.response?.status || 500
     }

@@ -51,7 +51,7 @@ export default function CompetitionControls({
             onClick={onNext}
             className={`${styles.controlButton} ${
               isLastProblem ? styles.finishButton : styles.nextButton
-            )}
+            }`}
             disabled={!competition.current_problem_id || loading}
           >
             {isLastProblem ? 'Finish Competition' : 'Next Problem'}

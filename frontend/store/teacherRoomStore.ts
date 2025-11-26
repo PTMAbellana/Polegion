@@ -15,6 +15,7 @@ import {
 } from '@/api/participants'
 import { CreateRoomData, UpdateRoomData } from '@/types';
 import { createProblem, deleteProblem, getRoomProblems, updateProblem } from '@/api/problems'
+import { createCompe, getAllCompe } from '@/api/competitions'
 
 export const useTeacherRoomStore = create<ExtendTeacherRoomState>()(
     persist(
@@ -43,15 +44,17 @@ export const useTeacherRoomStore = create<ExtendTeacherRoomState>()(
                         });
                         return;
                     }
-                    const [resPart, resProb] = await Promise.allSettled(
+                    const [resPart, resProb, resComp] = await Promise.allSettled(
                         [
                             getAllParticipants(room.id, 'teacher'), 
-                            getRoomProblems(room.id)
+                            getRoomProblems(room.id),
+                            getAllCompe(room.id, 'admin')
                         ]
                     );
                     
                     let participants;
                     let problems;
+                    let competitions;
 
                     if (resPart.status === 'fulfilled') {
                         participants = resPart.value.success ? resPart.value.data : [];
@@ -65,11 +68,18 @@ export const useTeacherRoomStore = create<ExtendTeacherRoomState>()(
                     } else {
                         problems = [];
                     }
+                    if (resComp.status === 'fulfilled') {
+                        competitions = resComp.value.success ? resComp.value.data : [];
+                        console.log('Fetched competitions:', competitions);
+                    } else {
+                        competitions = [];
+                    }
                     set({
                         currentRoom: {
                             ...room,
                             participants,
-                            problems
+                            problems,
+                            competitions
                         }
                     });
                 } catch (error: unknown) {
@@ -334,8 +344,16 @@ export const useTeacherRoomStore = create<ExtendTeacherRoomState>()(
 
             // Add new problem to currentRoom.problems array
             addProblemToRoom: async(problem) => {
+                const currentRoom = get().currentRoom;
+                if (!currentRoom) {
+                    return {
+                        success: false,
+                        error: 'No current room selected'
+                    };
+                }
+                
                 try {
-                    const response = await createProblem(problem, get().currentRoom?.code || '');
+                    const response = await createProblem(problem, currentRoom.code);
                     if (!response.success) {
                          console.log('Failed to add problem to room');
                          console.log(response.error); 
@@ -454,6 +472,57 @@ export const useTeacherRoomStore = create<ExtendTeacherRoomState>()(
                 return { 
                     success: false, 
                     error: 'Failed to remove participant' 
+                };
+            }
+        },
+
+        // Competition management
+        addCompetitionToRoom: async (title: string) => {
+            const currentRoom = get().currentRoom;
+            if (!currentRoom) {
+                console.error('No current room selected');
+                return {
+                    success: false,
+                    error: 'No current room selected'
+                };
+            }
+
+            console.log('Creating competition:', { roomId: currentRoom.id, title });
+
+            try {
+                const response = await createCompe(currentRoom.id, title);
+                console.log('Create competition response:', response);
+                
+                // Backend returns the competition directly or in response.data
+                const newCompetition = response.data || response;
+                
+                if (!newCompetition || !newCompetition.id) {
+                    console.error('Invalid competition response:', response);
+                    return {
+                        success: false,
+                        error: 'Invalid response from server'
+                    };
+                }
+                
+                // Immediately update local state
+                set(state => ({
+                    currentRoom: state.currentRoom ? {
+                        ...state.currentRoom,
+                        competitions: [newCompetition, ...(state.currentRoom.competitions || [])]
+                    } : null
+                }));
+                
+                console.log('Competition added to local state successfully');
+                return {
+                    success: true,
+                    data: newCompetition
+                };
+            } catch (error: any) {
+                console.error('Failed to create competition:', error);
+                const errorMessage = error?.response?.data?.error || error?.message || 'Failed to create competition';
+                return {
+                    success: false,
+                    error: errorMessage
                 };
             }
         }

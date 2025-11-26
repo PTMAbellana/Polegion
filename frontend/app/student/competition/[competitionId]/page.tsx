@@ -21,12 +21,14 @@ interface CompetitionPageProps {
 export default function CompetitionPage({ params }: CompetitionPageProps) {
   const { competitionId } = use(params);
   const router = useRouter();
+  const searchParams = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '');
+  const roomId = searchParams.get('room') || ''; // Always defined, even if empty string
 
   // Real-time hooks
   const {
     competition,
     participants,
-  } = useCompetitionRealtime(competitionId.toString(), false);
+  } = useCompetitionRealtime(competitionId.toString(), false, roomId);
 
   const liveCompetition = competition as Competition | null;
   const liveParticipants = participants as CompetitionParticipant[];
@@ -35,17 +37,18 @@ export default function CompetitionPage({ params }: CompetitionPageProps) {
     formattedTime,
     isExpired,
     isPaused,
-  } = useCompetitionTimer(liveCompetition);
+  } = useCompetitionTimer(competitionId, liveCompetition);
 
   // Redirect to game page when competition is ONGOING and not paused
   useEffect(() => {
     if (
       liveCompetition?.status === "ONGOING" &&
-      liveCompetition?.gameplay_indicator === "ACTIVE"
+      liveCompetition?.gameplay_indicator === "PLAY" // Match backend value
     ) {
-      router.push(`/student/competition/${competitionId}/play`);
+      const roomParam = roomId ? `?room=${roomId}` : '';
+      router.push(`/student/competition/${competitionId}/play${roomParam}`);
     }
-  }, [liveCompetition, competitionId, router]);
+  }, [liveCompetition, competitionId, router, roomId]);
 
   if (!liveCompetition) {
     return (
@@ -124,23 +127,26 @@ export default function CompetitionPage({ params }: CompetitionPageProps) {
         </div>
       </div>
 
-      {/* Timer Section - Show for ONGOING and DONE */}
-      {(liveCompetition.status === "ONGOING" || liveCompetition.status === "DONE") && (
-        <div className={styles.timerSection}>
-          <CompetitionTimer
-            formattedTime={formattedTime}
-            isActive={!isPaused && !isExpired}
-            isExpired={isExpired}
-            isPaused={isPaused}
-            currentProblemIndex={1}
-            totalProblems={liveParticipants.length}
-            status={liveCompetition.status}
-          />
-        </div>
-      )}
+      {/* Scrollable Content */}
+      <div className={styles.scrollableContent}>
+        {/* Timer Section - Show for ONGOING and DONE */}
+        {(liveCompetition.status === "ONGOING" || liveCompetition.status === "DONE") && (
+          <div className={styles.timerSection}>
+            <CompetitionTimer
+              formattedTime={formattedTime}
+              isActive={!isPaused && !isExpired}
+              isExpired={isExpired}
+              isPaused={isPaused}
+              currentProblemIndex={1}
+              totalProblems={liveParticipants.length}
+              status={liveCompetition.status}
+            />
+          </div>
+        )}
 
-      {/* Content */}
-      {renderContent()}
+        {/* Content */}
+        {renderContent()}
+      </div>
     </div>
   );
 }

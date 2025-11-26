@@ -481,11 +481,16 @@ export default function AssessmentPageBase({ config }: { config: AssessmentConfi
             ) as SubmitAssessmentResponse;
             
             console.log(`[${config.type}] Raw response:`, response);
+            console.log(`[${config.type}] Response type:`, typeof response);
+            console.log(`[${config.type}] Response keys:`, Object.keys(response || {}));
             
             if (response.results || response) {
                 const results = response.results || response;
                 console.log(`[${config.type}] Results data:`, results);
+                console.log(`[${config.type}] Results keys:`, Object.keys(results || {}));
                 console.log(`[${config.type}] Category scores:`, results.categoryScores);
+                console.log(`[${config.type}] Category scores type:`, typeof results.categoryScores);
+                console.log(`[${config.type}] Category scores keys:`, Object.keys(results.categoryScores || {}));
                 
                 // Keep results in the format returned by backend
                 const transformedResults: any = {
@@ -498,6 +503,7 @@ export default function AssessmentPageBase({ config }: { config: AssessmentConfi
                 
                 console.log(`[${config.type}] Transformed results:`, transformedResults);
                 console.log(`[${config.type}] Transformed categoryScores:`, transformedResults.categoryScores);
+                console.log(`[${config.type}] Setting stage to results...`);
                 
                 // For posttest, get comparison data
                 if (config.type === 'posttest' && config.showComparison) {
@@ -517,8 +523,10 @@ export default function AssessmentPageBase({ config }: { config: AssessmentConfi
                     }
                 }
                 
+                console.log(`[${config.type}] About to update state - results and stage`);
                 setResults(transformedResults);
                 setStage('results');
+                console.log(`[${config.type}] State updated - should trigger re-render`);
                 localStorage.removeItem(STORAGE_KEY); // Clear progress after completion
                 setRestoredProgress(false);
                 setStartTime(null);

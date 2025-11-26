@@ -55,9 +55,9 @@ const Toolbox: React.FC<ToolboxProps> = ({
       <div className={styles.toolboxInstructions}>
         <div className={styles.instructionsTitle}>How to use:</div>
         <ul className={styles.instructionsList}>
-          <li>Drag shapes to the Main Area</li>
-          <li>To delete: drag outside or press Delete key</li>
-          <li>Click to select and see properties</li>
+          <li>Drag shapes/tools to the Main Area</li>
+          <li>To delete: drag outside or press Delete/Backspace</li>
+          <li>Click to select and view properties</li>
         </ul>
       </div>
 

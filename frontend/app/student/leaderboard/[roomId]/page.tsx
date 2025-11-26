@@ -2,7 +2,6 @@
 
 import React, { use, useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import { FaArrowLeft } from "react-icons/fa"
 import Loader from "@/components/Loader"
 import LoadingOverlay from "@/components/LoadingOverlay"
 import { useAuthStore } from "@/store/authStore"
@@ -71,8 +70,7 @@ export default function LeaderboardPage({ params }: { params: Promise<{ roomId: 
         {/* Back Button */}
         <div className={styles.back_button_container}>
             <button onClick={handleBackClick} className={styles.back_button}>
-            <FaArrowLeft className={styles.back_icon} />
-            <span>Back</span>
+            <span>Back to Rooms</span>
             </button>
         </div>
 

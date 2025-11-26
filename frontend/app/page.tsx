@@ -114,7 +114,7 @@ export default function Home() {
               ) : (
                 <>
                   Start Your Adventure FREE
-                  <span className={styles.arrow}>→</span>
+
                 </>
               )}
             </button>
@@ -194,6 +194,7 @@ export default function Home() {
             <button 
               className={styles.carouselArrow}
               onClick={() => setActiveSlide((prev) => (prev - 1 + carouselSlides.length) % carouselSlides.length)}
+              aria-label="Previous slide"
             >
               ←
             </button>
@@ -209,6 +210,7 @@ export default function Home() {
             <button 
               className={styles.carouselArrow}
               onClick={() => setActiveSlide((prev) => (prev + 1) % carouselSlides.length)}
+              aria-label="Next slide"
             >
               →
             </button>

@@ -156,37 +156,40 @@ export default function TeacherCompetitionManagementPage({
           onBack={handleBack}
         />
 
-        {/* Competition Controls */}
-        <div className={styles.header}>
-          <div className={styles.headerContent}>
-            <CompetitionControls
-              competition={displayCompetition}
-              addedProblems={addedProblems}
-              onStart={handleStart}
-              onPause={handlePause}
-              onResume={handleResume}
-              onNext={handleNext}
-              loading={loading}
-            />
+        {/* Scrollable Content */}
+        <div className={styles.scrollableContent}>
+          {/* Competition Controls */}
+          <div className={styles.header}>
+            <div className={styles.headerContent}>
+              <CompetitionControls
+                competition={displayCompetition}
+                addedProblems={addedProblems}
+                onStart={handleStart}
+                onPause={handlePause}
+                onResume={handleResume}
+                onNext={handleNext}
+                loading={loading}
+              />
+            </div>
           </div>
-        </div>
 
-        {/* Main Content */}
-        <div className={styles.roomContent}>
-          {/* Problems Management */}
-          <ProblemsManagement
-            availableProblems={availableProblems}
-            addedProblems={addedProblems}
-            competitionStatus={displayCompetition.status}
-            onAddProblem={handleAddProblem}
-            onRemoveProblem={handleRemoveProblem}
-            onUpdateTimer={handleUpdateTimer}
-          />
+          {/* Main Content */}
+          <div className={styles.roomContent}>
+            {/* Problems Management */}
+            <ProblemsManagement
+              availableProblems={availableProblems}
+              addedProblems={addedProblems}
+              competitionStatus={displayCompetition.status}
+              onAddProblem={handleAddProblem}
+              onRemoveProblem={handleRemoveProblem}
+              onUpdateTimer={handleUpdateTimer}
+            />
 
-          {/* Participants Leaderboard */}
-          <ParticipantsLeaderboard participants={displayParticipants} />
+            {/* Participants Leaderboard */}
+            <ParticipantsLeaderboard participants={displayParticipants} />
+          </div>
         </div>
       </div>
     </div>
   )
-}   
+}

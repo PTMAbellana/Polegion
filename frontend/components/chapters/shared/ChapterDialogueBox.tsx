@@ -38,7 +38,7 @@ export default function ChapterDialogueBox({
           </div>
           {!isTyping && showContinuePrompt && (
             <div className={styles.continuePrompt}>
-              Click to continue →
+              Click to continue
             </div>
           )}
         </div>

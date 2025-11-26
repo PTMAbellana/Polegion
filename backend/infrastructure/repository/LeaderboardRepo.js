@@ -32,12 +32,9 @@ class LeaderboardRepo extends BaseRepo {
     }
 
     // competition na leaderboard
-    async getCompeBoard (room_id){
+    async getCompeBoard (room_id, competition_id = null){
         try {
-            const {
-                data, 
-                error
-            } = await this.supabase.from(this.tableCompe)
+            let query = this.supabase.from(this.tableCompe)
             .select(`
                 accumulated_xp,
                 competition: competition_id!inner (
@@ -53,6 +50,13 @@ class LeaderboardRepo extends BaseRepo {
                 )
             `)
             .eq('competition.room_id', room_id)
+            
+            // Filter by specific competition if provided
+            if (competition_id) {
+                query = query.eq('competition_id', competition_id)
+            }
+            
+            const { data, error } = await query
             .order('id', { 
                 ascending: true,
                 foreignTable: 'competition'

@@ -5,7 +5,7 @@ import styles from '@/styles/room-details.module.css'
 import { STUDENT_ROUTES } from '@/constants/routes'
 import { CompetitionsTabProps } from '@/types'
 
-export default function CompetitionsTab({ competitions }: CompetitionsTabProps) {
+export default function CompetitionsTab({ competitions, roomCode }: CompetitionsTabProps & { roomCode: string }) {
     const router = useRouter()
 
     const getStatusClass = (status: string) => {
@@ -21,8 +21,8 @@ export default function CompetitionsTab({ competitions }: CompetitionsTabProps) 
         }
     }
 
-    const handleOpenCompetition = (competitionId: number) => {
-        router.push(`${STUDENT_ROUTES.PLAY}/${competitionId }`);
+    const handleOpenCompetition = (competitionId: number, roomId: number) => {
+        router.push(`${STUDENT_ROUTES.PLAY}/${competitionId}?room=${roomId}`);
     }
 
     return (
@@ -45,7 +45,7 @@ export default function CompetitionsTab({ competitions }: CompetitionsTabProps) 
                                         <div className={styles.problemActions}>
                                             <button 
                                                 className={`${styles.actionButton} ${styles.openButton}`}
-                                                onClick={() => handleOpenCompetition(competition.id)}
+                                                onClick={() => handleOpenCompetition(competition.id, competition.room_id)}
                                                 title="Open competition"
                                             >
                                                 <FaExternalLinkAlt />
