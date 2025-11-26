@@ -23,6 +23,14 @@ export interface FiltersProps {
   setShowDiameter: (show: boolean) => void;
   showCircumference: boolean;
   setShowCircumference: (show: boolean) => void;
+  showLength?: boolean;
+  setShowLength?: (show: boolean) => void;
+  showMidpoint?: boolean;
+  setShowMidpoint?: (show: boolean) => void;
+  showMeasurement?: boolean;
+  setShowMeasurement?: (show: boolean) => void;
+  showArcRadius?: boolean;
+  setShowArcRadius?: (show: boolean) => void;
 }
 
 export interface DropdownProps {
@@ -57,6 +65,10 @@ export interface MainAreaProps {
   showDiameter: boolean;
   showCircumference: boolean;
   showHeight: boolean;
+  showLength?: boolean;
+  showMidpoint?: boolean;
+  showMeasurement?: boolean;
+  showArcRadius?: boolean;
 }
 
 export interface ExistingProblemsListProps {
@@ -100,25 +112,25 @@ export interface ToggleSwitchProps {
 export interface ToolboxProps {
   selectedTool: string | null;
   setSelectedTool: (tool: string | null) => void;
-  showSides: boolean;
-  setShowSides: (show: boolean) => void;
-  showAngles: boolean;
-  setShowAngles: (show: boolean) => void;
-  showAreaByShape: {
-    circle: boolean;
-    triangle: boolean;
-    square: boolean;
-  };
-  setShowAreaByShape: React.Dispatch<React.SetStateAction<{
-    circle: boolean;
-    triangle: boolean;
-    square: boolean;
-  }>>;
-  showDiameter: boolean;
-  setShowDiameter: (show: boolean) => void;
-  showCircumference: boolean;
-  setShowCircumference: (show: boolean) => void;
-  showHeight: boolean;
-  setShowHeight: (show: boolean) => void;
   shapes: Array<{ id: number; type: string; [key: string]: any }>;
+  showSides?: boolean;
+  setShowSides?: (show: boolean) => void;
+  showAngles?: boolean;
+  setShowAngles?: (show: boolean) => void;
+  showHeight?: boolean;
+  setShowHeight?: (show: boolean) => void;
+  showDiameter?: boolean;
+  setShowDiameter?: (show: boolean) => void;
+  showCircumference?: boolean;
+  setShowCircumference?: (show: boolean) => void;
+  showLength?: boolean;
+  setShowLength?: (show: boolean) => void;
+  showMidpoint?: boolean;
+  setShowMidpoint?: (show: boolean) => void;
+  showMeasurement?: boolean;
+  setShowMeasurement?: (show: boolean) => void;
+  showArcRadius?: boolean;
+  setShowArcRadius?: (show: boolean) => void;
+  showAreaByShape?: { circle: boolean; triangle: boolean; square: boolean };
+  setShowAreaByShape?: (show: { circle: boolean; triangle: boolean; square: boolean }) => void;
 }

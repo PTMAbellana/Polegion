@@ -488,7 +488,7 @@ const TriangleShape: React.FC<TriangleShapeProps> = ({
                 if (arcAngle > 180) arcAngle -= 360;
                 if (arcAngle < -180) arcAngle += 360;
                 
-                const startAngle = angle1;
+                const rotationAngle = arcAngle > 0 ? angle1 : angle2;
                 
                 return (
                   <>
@@ -498,7 +498,7 @@ const TriangleShape: React.FC<TriangleShapeProps> = ({
                       innerRadius={19}
                       outerRadius={21}
                       angle={Math.abs(arcAngle)}
-                      rotation={Math.min(startAngle, angle2)}
+                      rotation={rotationAngle}
                       fill="#1864ab"
                       stroke="#1864ab"
                       strokeWidth={0.5}
@@ -545,7 +545,7 @@ const TriangleShape: React.FC<TriangleShapeProps> = ({
                 if (arcAngle > 180) arcAngle -= 360;
                 if (arcAngle < -180) arcAngle += 360;
                 
-                const startAngle = angle1;
+                const rotationAngle = arcAngle > 0 ? angle1 : angle2;
                 
                 return (
                   <>
@@ -555,7 +555,7 @@ const TriangleShape: React.FC<TriangleShapeProps> = ({
                       innerRadius={19}
                       outerRadius={21}
                       angle={Math.abs(arcAngle)}
-                      rotation={Math.min(startAngle, angle2)}
+                      rotation={rotationAngle}
                       fill="#1864ab"
                       stroke="#1864ab"
                       strokeWidth={0.5}
@@ -602,7 +602,7 @@ const TriangleShape: React.FC<TriangleShapeProps> = ({
                 if (arcAngle > 180) arcAngle -= 360;
                 if (arcAngle < -180) arcAngle += 360;
                 
-                const startAngle = angle1;
+                const rotationAngle = arcAngle > 0 ? angle1 : angle2;
                 
                 return (
                   <>
@@ -612,7 +612,7 @@ const TriangleShape: React.FC<TriangleShapeProps> = ({
                       innerRadius={19}
                       outerRadius={21}
                       angle={Math.abs(arcAngle)}
-                      rotation={Math.min(startAngle, angle2)}
+                      rotation={rotationAngle}
                       fill="#1864ab"
                       stroke="#1864ab"
                       strokeWidth={0.5}
@@ -648,78 +648,6 @@ const TriangleShape: React.FC<TriangleShapeProps> = ({
           </>
         )}
       </Group>
-
-      {/* FIXED OVERLAYS - Outside the Group, absolutely positioned */}
-      {/* Area Formula Display - FIXED POSITION with bottom padding */}
-      {showAreaByShape.triangle && isSelected && (
-        <>
-          {(() => {
-            const baseLength = dist(left, right);
-            const height = getHeightFromTopVertex();
-            const area = getTriangleArea();
-            
-            const formulaText = "Area = ½ × Base × Height";
-            const calculationText = `A = ½ × ${baseLength.toFixed(2)} × ${height.toFixed(2)} = ${area.toFixed(2)} u²`;
-            const formulaWidth = Math.max(formulaText.length * 8, calculationText.length * 7) + 20;
-
-            return (
-              <>
-                {/* ABSOLUTE Position - Not affected by shape movement */}
-                <Rect
-                  x={50} // Fixed absolute position
-                  y={70} // Fixed absolute position
-                  width={formulaWidth}
-                  height={85} // Increased height for bottom padding
-                  cornerRadius={8}
-                  fill="white"
-                  stroke="#2c514c"
-                  strokeWidth={2}
-                  shadowColor="rgba(0,0,0,0.1)"
-                  shadowBlur={4}
-                  shadowOffset={{ x: 2, y: 2 }}
-                  shadowOpacity={1}
-                />
-                
-                <Text
-                  x={50 + formulaWidth/2} // Absolute positioning
-                  y={85} // Top padding
-                  text="Area Formula"
-                  fontSize={13}
-                  fill="#2c514c"
-                  align="center"
-                  fontStyle="bold"
-                  offsetX={formulaWidth/2}
-                  width={formulaWidth}
-                />
-                
-                <Text
-                  x={50 + formulaWidth/2}
-                  y={105} // Middle spacing
-                  text={formulaText}
-                  fontSize={11}
-                  fill="#666"
-                  align="center"
-                  fontStyle="italic"
-                  offsetX={formulaWidth/2}
-                  width={formulaWidth}
-                />
-                
-                <Text
-                  x={50 + formulaWidth/2}
-                  y={125} // Bottom spacing with padding
-                  text={calculationText}
-                  fontSize={10}
-                  fill="#1864ab"
-                  align="center"
-                  fontStyle="bold"
-                  offsetX={formulaWidth/2}
-                  width={formulaWidth}
-                />
-              </>
-            );
-          })()}
-        </>
-      )}
     </>
   );
 };

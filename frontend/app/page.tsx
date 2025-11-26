@@ -287,7 +287,7 @@ export default function Home() {
           <div className={styles.previewGrid}>
             <div className={styles.previewCard}>
               <Image 
-                src="/images/world-map.png" 
+                src="/images/world-map-bg.svg" 
                 alt="World Map" 
                 fill 
                 className={styles.previewImage}
@@ -296,7 +296,7 @@ export default function Home() {
             </div>
             <div className={styles.previewCard}>
               <Image 
-                src="/images/2.png" 
+                src="/images/paths-of-power.png" 
                 alt="Fun Puzzles" 
                 fill 
                 className={styles.previewImage}
@@ -305,7 +305,7 @@ export default function Home() {
             </div>
             <div className={styles.previewCard}>
               <Image 
-                src="/images/1.png" 
+                src="/images/wizard-check.png" 
                 alt="Awesome Rewards" 
                 fill 
                 className={styles.previewImage}
