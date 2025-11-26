@@ -1,0 +1,21 @@
+<svg width="240" height="160" viewBox="0 0 240 160" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#6d7fcc;stop-opacity:0.9"/>
+      <stop offset="100%" style="stop-color:#1f2a52;stop-opacity:0.9"/>
+    </linearGradient>
+    <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
+      <path d="M 20 0 L 0 0 0 20" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+    </pattern>
+  </defs>
+  <rect width="240" height="160" fill="url(#grad)"/>
+  <rect width="240" height="160" fill="url(#grid)"/>
+  <g fill="none" stroke="#ffe3a9" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+    <polygon points="60,110 90,50 150,50 180,110"/>
+    <circle cx="165" cy="85" r="18" stroke-dasharray="6 6"/>
+  </g>
+  <text x="120" y="142" text-anchor="middle" font-family="Montserrat, Arial, sans-serif" font-size="14" fill="#ddebff" opacity="0.8">
+    Image coming soon
+  </text>
+</svg>
+

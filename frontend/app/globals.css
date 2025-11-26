@@ -1,3 +1,13 @@
+/* ========================================
+   FONT IMPORTS - Must be at the top
+   ======================================== */
+@import url('https://fonts.googleapis.com/css2?family=MedievalSharp&family=Cinzel:wght@400;600;700;800&family=Nunito:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=UnifrakturMaguntia&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
+
+/* ========================================
+   CSS VARIABLES
+   ======================================== */
 .variables {
   --primary-color: #2C514C;
   --secondary-color: #122932;

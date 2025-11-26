@@ -1,0 +1,810 @@
+/* ============================================
+   LESSON COMPONENT STYLES
+   For concept cards, grids, and interactive examples
+   ============================================ */
+
+/* Concept Card - Horizontal layout by default (desktop/landscape) */
+.conceptCard {
+  display: flex;
+  flex-direction: row;
+  padding: 0.75rem;
+  background: rgba(244, 228, 193, 0.95);
+  border: 2px solid #8b7355;
+  border-radius: 10px;
+  transition: all 0.3s ease;
+  overflow: hidden;
+  min-height: 180px;
+  min-width: 0;
+  word-wrap: break-word;
+  gap: 1rem;
+  box-shadow: 0 2px 8px rgba(90, 62, 43, 0.2);
+}
+
+.conceptCard:hover {
+  background: rgba(244, 228, 193, 1);
+  transform: scale(1.02);
+  box-shadow: 0 4px 12px rgba(90, 62, 43, 0.3);
+  border-color: #5a3e2b;
+  z-index: 1;
+}
+
+.conceptCardHighlighted {
+  border-color: #5a3e2b;
+  background: rgba(244, 228, 193, 1);
+  box-shadow: 0 0 20px rgba(139, 115, 85, 0.4);
+}
+
+.conceptCardClickable {
+  cursor: pointer;
+}
+
+/* Icon/Image Section - Fixed width for horizontal layout */
+.conceptImageSection {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 160px;
+  max-width: 160px;
+  min-height: 120px;
+  padding: 0.5rem;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 6px;
+  overflow: hidden;
+  flex-shrink: 0;
+  border: 1px solid #8b7355;
+}
+
+.conceptImage {
+  max-width: 100%;
+  height: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 3rem;
+  color: #8b7355;
+  filter: drop-shadow(0 0 10px rgba(139, 115, 85, 0.3));
+}
+
+.conceptImage img {
+  max-width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+
+.conceptPlaceholder {
+  width: 120px;
+  height: 120px;
+  border-radius: 8px;
+  border: 2px dashed #8b7355;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.6) 0%, rgba(244, 228, 193, 0.4) 100%);
+}
+
+:global(.castle1Theme) .conceptPlaceholder {
+  border-color: #D8C4B6;
+  background: linear-gradient(135deg, rgba(245, 239, 231, 0.5) 0%, rgba(62, 88, 121, 0.25) 100%);
+}
+
+:global(.castle2Theme) .conceptPlaceholder {
+  border-color: #B0CE88;
+  background: linear-gradient(135deg, rgba(255, 253, 143, 0.5) 0%, rgba(76, 118, 59, 0.25) 100%);
+}
+
+:global(.castle3Theme) .conceptPlaceholder {
+  border-color: #A0C878;
+  background: linear-gradient(135deg, rgba(221, 235, 157, 0.5) 0%, rgba(38, 102, 123, 0.25) 100%);
+}
+
+:global(.castle4Theme) .conceptPlaceholder {
+  border-color: #E2B59A;
+  background: linear-gradient(135deg, rgba(255, 225, 175, 0.5) 0%, rgba(149, 124, 98, 0.25) 100%);
+}
+
+:global(.castle5Theme) .conceptPlaceholder {
+  border-color: #8CCDEB;
+  background: linear-gradient(135deg, rgba(255, 227, 169, 0.5) 0%, rgba(11, 29, 81, 0.25) 100%);
+}
+
+/* Text Section - Title and description aligned left for horizontal layout */
+.conceptTextSection {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  justify-content: center;
+}
+
+.conceptContent {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.conceptTitle {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #3d2a1f;
+  margin: 0 0 0.5rem 0;
+  text-align: left;
+  min-height: 1.5rem;
+  font-family: 'Cinzel', serif;
+}
+
+.conceptDescription {
+  font-size: 0.95rem;
+  color: #5a3e2b;
+  line-height: 1.5;
+  margin: 0;
+  text-align: left;
+}
+
+/* Lesson Grid */
+.lessonGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr));
+  gap: 1rem;
+  width: 100%;
+  max-width: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 0.5rem;
+}
+
+.lessonGrid1Col {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+  width: 100%;
+  max-width: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 0.5rem;
+}
+
+.lessonGrid2Col {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  width: 100%;
+  max-width: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 0.5rem;
+}
+
+.lessonGrid3Col {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(300px, 1fr));
+  gap: 1.5rem;
+  width: 100%;
+  height: auto;
+  max-height: none;
+  overflow-y: visible;
+  overflow-x: hidden;
+  padding: 1rem;
+}
+
+/* Custom Scrollbar for Lesson Grids */
+.lessonGrid::-webkit-scrollbar,
+.lessonGrid1Col::-webkit-scrollbar,
+.lessonGrid2Col::-webkit-scrollbar,
+.lessonGrid3Col::-webkit-scrollbar,
+.lessonGrid4Col::-webkit-scrollbar {
+  width: 10px;
+}
+
+.lessonGrid::-webkit-scrollbar-track,
+.lessonGrid1Col::-webkit-scrollbar-track,
+.lessonGrid2Col::-webkit-scrollbar-track,
+.lessonGrid3Col::-webkit-scrollbar-track,
+.lessonGrid4Col::-webkit-scrollbar-track {
+  background: rgba(139, 115, 85, 0.2);
+  border-radius: 5px;
+}
+
+.lessonGrid::-webkit-scrollbar-thumb,
+.lessonGrid1Col::-webkit-scrollbar-thumb,
+.lessonGrid2Col::-webkit-scrollbar-thumb,
+.lessonGrid3Col::-webkit-scrollbar-thumb,
+.lessonGrid4Col::-webkit-scrollbar-thumb {
+  background: rgba(139, 115, 85, 0.5);
+  border-radius: 5px;
+  transition: background 0.3s ease;
+}
+
+.lessonGrid::-webkit-scrollbar-thumb:hover,
+.lessonGrid1Col::-webkit-scrollbar-thumb:hover,
+.lessonGrid2Col::-webkit-scrollbar-thumb:hover,
+.lessonGrid3Col::-webkit-scrollbar-thumb:hover,
+.lessonGrid4Col::-webkit-scrollbar-thumb:hover {
+  background: rgba(139, 115, 85, 0.7);
+}
+
+.lessonGrid4Col {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(180px, 100%), 1fr));
+  gap: 1rem;
+  width: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 0.5rem;
+}
+
+:global(.castle1Theme) .conceptCard {
+  background: linear-gradient(135deg, rgba(62, 88, 121, 0.12) 0%, rgba(33, 53, 85, 0.1) 100%);
+  border-color: #D8C4B6;
+  box-shadow: 0 2px 8px rgba(33, 53, 85, 0.2);
+}
+
+:global(.castle1Theme) .conceptCardHighlighted {
+  border-color: #D8C4B6;
+  box-shadow: 0 0 20px rgba(216, 196, 182, 0.4);
+}
+
+:global(.castle1Theme) .conceptTitle {
+  color: #F5EFE7;
+}
+
+:global(.castle1Theme) .conceptDescription {
+  color: #D8C4B6;
+}
+
+:global(.castle1Theme) .conceptImageSection {
+  background: rgba(245, 239, 231, 0.85);
+  border-color: #D8C4B6;
+}
+
+:global(.castle1Theme) .conceptImage {
+  color: #D8C4B6;
+  filter: drop-shadow(0 0 10px rgba(216, 196, 182, 0.4));
+}
+
+:global(.castle2Theme) .conceptCard {
+  background: linear-gradient(135deg, rgba(176, 206, 136, 0.12) 0%, rgba(255, 253, 143, 0.1) 100%);
+  border-color: #B0CE88;
+  box-shadow: 0 2px 8px rgba(76, 118, 59, 0.2);
+}
+
+:global(.castle2Theme) .conceptCardHighlighted {
+  border-color: #FFFD8F;
+  box-shadow: 0 0 20px rgba(255, 253, 143, 0.4);
+}
+
+:global(.castle2Theme) .conceptTitle {
+  color: #FFFD8F;
+}
+
+:global(.castle2Theme) .conceptDescription {
+  color: #B0CE88;
+}
+
+:global(.castle2Theme) .conceptImageSection {
+  background: rgba(255, 253, 143, 0.85);
+  border-color: #B0CE88;
+}
+
+:global(.castle2Theme) .conceptImage {
+  color: #B0CE88;
+  filter: drop-shadow(0 0 10px rgba(176, 206, 136, 0.4));
+}
+
+:global(.castle3Theme) .conceptCard {
+  background: linear-gradient(135deg, rgba(38, 102, 123, 0.12) 0%, rgba(20, 61, 96, 0.1) 100%);
+  border-color: #A0C878;
+  box-shadow: 0 2px 8px rgba(38, 102, 123, 0.2);
+}
+
+:global(.castle3Theme) .conceptCardHighlighted {
+  border-color: #DDEB9D;
+  box-shadow: 0 0 20px rgba(221, 235, 157, 0.4);
+}
+
+:global(.castle3Theme) .conceptTitle {
+  color: #DDEB9D;
+}
+
+:global(.castle3Theme) .conceptDescription {
+  color: #A0C878;
+}
+
+:global(.castle3Theme) .conceptImageSection {
+  background: rgba(221, 235, 157, 0.85);
+  border-color: #A0C878;
+}
+
+:global(.castle3Theme) .conceptImage {
+  color: #A0C878;
+  filter: drop-shadow(0 0 10px rgba(160, 200, 120, 0.4));
+}
+
+:global(.castle4Theme) .conceptCard {
+  background: linear-gradient(135deg, rgba(183, 116, 102, 0.12) 0%, rgba(149, 124, 98, 0.1) 100%);
+  border-color: #E2B59A;
+  box-shadow: 0 2px 8px rgba(149, 124, 98, 0.2);
+}
+
+:global(.castle4Theme) .conceptCardHighlighted {
+  border-color: #FFE1AF;
+  background: rgba(255, 225, 175, 0.2);
+  box-shadow: 0 0 22px rgba(255, 225, 175, 0.55), inset 0 0 6px rgba(0, 0, 0, 0.15);
+  transform: scale(1.015);
+}
+
+:global(.castle4Theme) .conceptCardHighlighted .conceptTitle {
+  color: #FFE1AF;
+  text-shadow: 0 0 10px rgba(255, 225, 175, 0.8);
+}
+
+:global(.castle4Theme) .conceptCardHighlighted .conceptDescription {
+  color: #FFE1AF;
+}
+
+:global(.castle4Theme) .conceptCardHighlighted .conceptImageSection {
+  background: rgba(255, 225, 175, 0.9);
+  border-color: #FFE1AF;
+  box-shadow: 0 0 10px rgba(255, 225, 175, 0.5);
+}
+
+:global(.castle4Theme) .conceptCardHighlighted .conceptImage {
+  color: #FFE1AF;
+  filter: drop-shadow(0 0 10px rgba(255, 225, 175, 0.6));
+}
+
+:global(.castle4Theme) .conceptTitle {
+  color: #FFE1AF;
+}
+
+:global(.castle4Theme) .conceptDescription {
+  color: #E2B59A;
+}
+
+:global(.castle4Theme) .conceptImageSection {
+  background: rgba(255, 225, 175, 0.85);
+  border-color: #E2B59A;
+}
+
+:global(.castle4Theme) .conceptImage {
+  color: #E2B59A;
+  filter: drop-shadow(0 0 10px rgba(226, 181, 154, 0.4));
+}
+
+:global(.castle5Theme) .conceptCard {
+  background: linear-gradient(135deg, rgba(114, 92, 173, 0.12) 0%, rgba(11, 29, 81, 0.1) 100%);
+  border-color: #8CCDEB;
+  box-shadow: 0 2px 8px rgba(11, 29, 81, 0.2);
+}
+
+:global(.castle5Theme) .conceptCardHighlighted {
+  border-color: #FFE3A9;
+  box-shadow: 0 0 20px rgba(255, 227, 169, 0.4);
+}
+
+:global(.castle5Theme) .conceptTitle {
+  color: #FFE3A9;
+}
+
+:global(.castle5Theme) .conceptDescription {
+  color: #8CCDEB;
+}
+
+:global(.castle5Theme) .conceptImageSection {
+  background: rgba(255, 227, 169, 0.85);
+  border-color: #8CCDEB;
+}
+
+:global(.castle5Theme) .conceptImage {
+  color: #8CCDEB;
+  filter: drop-shadow(0 0 10px rgba(140, 205, 235, 0.4));
+}
+
+:global(.castle1Theme) .lessonGrid::-webkit-scrollbar-track,
+:global(.castle1Theme) .lessonGrid1Col::-webkit-scrollbar-track,
+:global(.castle1Theme) .lessonGrid2Col::-webkit-scrollbar-track,
+:global(.castle1Theme) .lessonGrid3Col::-webkit-scrollbar-track,
+:global(.castle1Theme) .lessonGrid4Col::-webkit-scrollbar-track {
+  background: rgba(216, 196, 182, 0.25);
+}
+
+:global(.castle1Theme) .lessonGrid::-webkit-scrollbar-thumb,
+:global(.castle1Theme) .lessonGrid1Col::-webkit-scrollbar-thumb,
+:global(.castle1Theme) .lessonGrid2Col::-webkit-scrollbar-thumb,
+:global(.castle1Theme) .lessonGrid3Col::-webkit-scrollbar-thumb,
+:global(.castle1Theme) .lessonGrid4Col::-webkit-scrollbar-thumb {
+  background: rgba(216, 196, 182, 0.5);
+}
+
+:global(.castle2Theme) .lessonGrid::-webkit-scrollbar-track,
+:global(.castle2Theme) .lessonGrid1Col::-webkit-scrollbar-track,
+:global(.castle2Theme) .lessonGrid2Col::-webkit-scrollbar-track,
+:global(.castle2Theme) .lessonGrid3Col::-webkit-scrollbar-track,
+:global(.castle2Theme) .lessonGrid4Col::-webkit-scrollbar-track {
+  background: rgba(176, 206, 136, 0.25);
+}
+
+:global(.castle2Theme) .lessonGrid::-webkit-scrollbar-thumb,
+:global(.castle2Theme) .lessonGrid1Col::-webkit-scrollbar-thumb,
+:global(.castle2Theme) .lessonGrid2Col::-webkit-scrollbar-thumb,
+:global(.castle2Theme) .lessonGrid3Col::-webkit-scrollbar-thumb,
+:global(.castle2Theme) .lessonGrid4Col::-webkit-scrollbar-thumb {
+  background: rgba(255, 253, 143, 0.5);
+}
+
+:global(.castle3Theme) .lessonGrid::-webkit-scrollbar-track,
+:global(.castle3Theme) .lessonGrid1Col::-webkit-scrollbar-track,
+:global(.castle3Theme) .lessonGrid2Col::-webkit-scrollbar-track,
+:global(.castle3Theme) .lessonGrid3Col::-webkit-scrollbar-track,
+:global(.castle3Theme) .lessonGrid4Col::-webkit-scrollbar-track {
+  background: rgba(160, 200, 120, 0.25);
+}
+
+:global(.castle3Theme) .lessonGrid::-webkit-scrollbar-thumb,
+:global(.castle3Theme) .lessonGrid1Col::-webkit-scrollbar-thumb,
+:global(.castle3Theme) .lessonGrid2Col::-webkit-scrollbar-thumb,
+:global(.castle3Theme) .lessonGrid3Col::-webkit-scrollbar-thumb,
+:global(.castle3Theme) .lessonGrid4Col::-webkit-scrollbar-thumb {
+  background: rgba(221, 235, 157, 0.5);
+}
+
+:global(.castle4Theme) .lessonGrid::-webkit-scrollbar-track,
+:global(.castle4Theme) .lessonGrid1Col::-webkit-scrollbar-track,
+:global(.castle4Theme) .lessonGrid2Col::-webkit-scrollbar-track,
+:global(.castle4Theme) .lessonGrid3Col::-webkit-scrollbar-track,
+:global(.castle4Theme) .lessonGrid4Col::-webkit-scrollbar-track {
+  background: rgba(226, 181, 154, 0.25);
+}
+
+:global(.castle4Theme) .lessonGrid::-webkit-scrollbar-thumb,
+:global(.castle4Theme) .lessonGrid1Col::-webkit-scrollbar-thumb,
+:global(.castle4Theme) .lessonGrid2Col::-webkit-scrollbar-thumb,
+:global(.castle4Theme) .lessonGrid3Col::-webkit-scrollbar-thumb,
+:global(.castle4Theme) .lessonGrid4Col::-webkit-scrollbar-thumb {
+  background: rgba(255, 225, 175, 0.5);
+}
+
+:global(.castle5Theme) .lessonGrid::-webkit-scrollbar-track,
+:global(.castle5Theme) .lessonGrid1Col::-webkit-scrollbar-track,
+:global(.castle5Theme) .lessonGrid2Col::-webkit-scrollbar-track,
+:global(.castle5Theme) .lessonGrid3Col::-webkit-scrollbar-track,
+:global(.castle5Theme) .lessonGrid4Col::-webkit-scrollbar-track {
+  background: rgba(140, 205, 235, 0.25);
+}
+
+:global(.castle5Theme) .lessonGrid::-webkit-scrollbar-thumb,
+:global(.castle5Theme) .lessonGrid1Col::-webkit-scrollbar-thumb,
+:global(.castle5Theme) .lessonGrid2Col::-webkit-scrollbar-thumb,
+:global(.castle5Theme) .lessonGrid3Col::-webkit-scrollbar-thumb,
+:global(.castle5Theme) .lessonGrid4Col::-webkit-scrollbar-thumb {
+  background: rgba(255, 227, 169, 0.5);
+}
+
+.gapSmall {
+  gap: 0.75rem !important;
+}
+
+.gapMedium {
+  gap: 1.5rem !important;
+}
+
+.gapLarge {
+  gap: 2rem !important;
+}
+
+/* Responsive - adjust grid for smaller viewports */
+@media (max-width: 968px) {
+  .lessonGrid2Col {
+    grid-template-columns: 1fr;
+  }
+  
+  .lessonGrid3Col,
+  .lessonGrid4Col {
+    grid-template-columns: repeat(auto-fit, minmax(min(160px, 100%), 1fr));
+  }
+}
+
+/* Visual Demo */
+.visualDemo {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 100%;
+  margin: 1.5rem 0;
+}
+
+.visualDemoTitle {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #E8F4FD;
+  margin: 0;
+  text-align: center;
+}
+
+.visualDemoContent {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  min-height: 200px;
+}
+
+.visualDemoCaption {
+  font-size: 0.9rem;
+  color: #B8C5D6;
+  font-style: italic;
+  text-align: center;
+  margin: 0;
+}
+
+/* Interactive Example */
+.interactiveExample {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 2rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  width: 100%;
+}
+
+.exampleQuestion {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #E8F4FD;
+  text-align: center;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.explanation {
+  padding: 1.5rem;
+  border-radius: 6px;
+  margin-top: 1rem;
+  animation: slideDown 0.3s ease-out;
+}
+
+.explanation strong {
+  display: block;
+  font-size: 1.1rem;
+  margin-bottom: 0.75rem;
+}
+
+.explanation p {
+  margin: 0;
+  color: #E8F4FD;
+  line-height: 1.6;
+}
+
+.explanationCorrect {
+  background: rgba(76, 175, 80, 0.2);
+  border: 1px solid rgba(76, 175, 80, 0.4);
+  color: #4CAF50;
+}
+
+.explanationIncorrect {
+  background: rgba(244, 67, 54, 0.2);
+  border: 1px solid rgba(244, 67, 54, 0.4);
+  color: #F44336;
+}
+
+@keyframes slideDown {
+  0% {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Lesson Section */
+.lessonSection {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  padding: 2rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  margin: 1.5rem 0;
+}
+
+.lessonSectionTitle {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #FFD700;
+  margin: 0 0 1rem 0;
+  text-align: center;
+  text-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+}
+
+.lessonSectionDescription {
+  font-size: 1.05rem;
+  color: #B8C5D6;
+  line-height: 1.7;
+  margin: 0;
+  text-align: center;
+}
+
+/* Progress Indicator */
+.lessonProgress {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 1rem 0;
+}
+
+.progressDot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease;
+}
+
+.progressDotActive {
+  background: #FFD700;
+  box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+  transform: scale(1.3);
+}
+
+.progressDotCompleted {
+  background: #4CAF50;
+}
+
+/* Responsive */
+@media (max-width: 968px) {
+  .lessonGrid,
+  .lessonGrid2Col,
+  .lessonGrid3Col,
+  .lessonGrid4Col {
+    grid-template-columns: 1fr;
+  }
+
+  .conceptCard {
+    padding: 1rem;
+  }
+
+  .lessonSection {
+    padding: 1.5rem;
+  }
+
+  .interactiveExample {
+    padding: 1.5rem;
+  }
+}
+
+/* Portrait Mode - Super Compact - Switch to vertical layout */
+@media (max-width: 768px) and (orientation: portrait) {
+  .lessonGrid,
+  .lessonGrid2Col {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+  }
+
+  .lessonGrid3Col,
+  .lessonGrid4Col {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+  }
+
+  /* Vertical layout for portrait */
+  .conceptCard {
+    flex-direction: column;
+    padding: 0.5rem;
+    gap: 0.5rem;
+  }
+
+  .conceptImageSection {
+    min-width: auto;
+    max-width: none;
+    min-height: 80px;
+    max-height: 80px;
+    margin-bottom: 0.5rem;
+  }
+
+  .conceptTextSection {
+    justify-content: flex-start;
+  }
+
+  .conceptImage {
+    font-size: 2rem;
+  }
+
+  .conceptTitle {
+    font-size: 0.85rem;
+    text-align: center;
+  }
+
+  .conceptDescription {
+    font-size: 0.7rem;
+    line-height: 1.3;
+    text-align: center;
+  }
+
+  .lessonSection {
+    padding: 0.75rem;
+    gap: 1rem;
+  }
+
+  .lessonSectionTitle {
+    font-size: 1rem;
+  }
+
+  .lessonSectionDescription {
+    font-size: 0.8rem;
+  }
+
+  .interactiveExample {
+    padding: 0.75rem;
+    gap: 0.75rem;
+  }
+
+  .exampleQuestion {
+    font-size: 0.9rem;
+    padding-bottom: 0.5rem;
+  }
+
+  .visualDemo {
+    margin: 0.75rem 0;
+    gap: 0.5rem;
+  }
+
+  .visualDemoContent {
+    padding: 0.75rem;
+    min-height: 120px;
+  }
+
+  .visualDemoTitle {
+    font-size: 0.9rem;
+  }
+
+  .visualDemoCaption {
+    font-size: 0.75rem;
+  }
+}
+
+/* Landscape Mode - Keep horizontal layout with smaller sizing */
+@media (max-width: 768px) and (orientation: landscape) {
+  .lessonGrid2Col {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+  }
+
+  .lessonGrid3Col,
+  .lessonGrid4Col {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+  }
+
+  /* Maintain horizontal layout for landscape */
+  .conceptCard {
+    flex-direction: row;
+    padding: 0.75rem;
+    gap: 0.75rem;
+  }
+
+  .conceptImageSection {
+    min-width: 100px;
+    max-width: 100px;
+    min-height: auto;
+    max-height: none;
+  }
+
+  .conceptImage {
+    font-size: 2.5rem;
+  }
+
+  .conceptTitle {
+    font-size: 1rem;
+    text-align: left;
+  }
+
+  .conceptDescription {
+    font-size: 0.8rem;
+    text-align: left;
+  }
+}

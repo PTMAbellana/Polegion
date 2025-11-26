@@ -1,5 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
-
 .variables {
   --primary-color: #2C514C;
   --secondary-color: #122932;
@@ -885,7 +883,7 @@
 }
 
 .play-btn.status-done::before {
-  content: '🏆';
+  content: '✓';
 }
 
 .play-btn.status-done:hover {

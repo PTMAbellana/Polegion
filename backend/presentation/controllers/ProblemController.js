@@ -7,24 +7,56 @@ class ProblemController {
     try { 
       console.log(req.body)
       // console.log(req.user)
-      const problem = await this.problemService.createProblem(req.body, req.user);
-      res.status(201).json('message: Successfully saved the problem');
+      const data = await this.problemService.createProblem(req.body, req.user);
+      res.status(201).json({
+        message: "Problem created successfully",
+        data: data
+      });
 
     } catch (err) {
       console.error(err);
-      res.status(500).json({ error: "Failed to create problem" });
+      if (err.message === 'Room not found or not authorized') {
+        return res.status(404).json({ 
+          message: "Room not found or not authorized",
+          error: "Not found"
+        });
+      }
+      if (err.status === 401) {
+        return res.status(401).json({ 
+          message: "Unauthorized",
+          error: "Invalid token"
+        });
+      }
+      res.status(500).json({ 
+        message: "Failed to create problem",
+        error: err.message
+      });
     }
   }
 
   getRoomProblems = async (req, res) => {
-    const { room_id } = req.params
+    const { room_id, type } = req.params
     try{
-      const problems = await this.problemService.fetchRoomProblems(room_id, req.user.id)
-      res.status(200).json(problems)
+      const problems = await this.problemService.fetchRoomProblems(room_id, type)
+      return res.status(200).json({
+        message: 'Successfully fetched problems',
+        data: problems
+      })
     } catch (error){
       console.log(error)
-      res.status(500).json({
-        error: 'Server error failed to get problems'
+      if (error.message === 'Room not found or not authorized')
+        return res.status(404).json({
+          message: 'Room not found or not authorized',
+          error: 'Not found'
+        })
+      if (error.status === 401)
+        return res.status(401).json({
+          message: 'Unauthorized',
+          error: 'Invalid token'
+        })
+      return res.status(500).json({
+        message: 'Server error failed to get problems',
+        error: error.message
       })
     }
   }
@@ -68,21 +100,56 @@ class ProblemController {
     const { problem_id } = req.params
     try {
       await this.problemService.deleteProblem(problem_id, req.user.id)
-      res.status(200).json({ message: 'Problem deleted successfully' })
+      res.status(200).json({ 
+        message: 'Problem deleted successfully' 
+      })
     } catch (error) {
       console.error('Error deleting problem:', error);
-      res.status(500).json({ error: 'Server Error: Failed to delete problem' });
+      if (error.message === 'Problem not found or not authorized') {
+        return res.status(404).json({ 
+          message: 'Problem not found or not authorized',
+          error: 'Not found' 
+        });
+      }
+      if (error.status === 401) {
+        return res.status(401).json({ 
+          message: 'Unauthorized',
+          error: 'Invalid token' 
+        });
+      }
+      res.status(500).json({ 
+        message: 'Server Error: Failed to delete problem',
+        error: error.message 
+      });
     }
   }
 
   updateProblem = async (req, res) => {
     const { problem_id } = req.params
     try {
-      const updatedProblem = await this.problemService.updateProblem(problem_id, req.user.id, req.body)
-      res.status(200).json(updatedProblem)
+      const data = await this.problemService.updateProblem(problem_id, req.user.id, req.body)
+      res.status(200).json({
+        message: 'Problem updated successfully',
+        data: data
+      })
     } catch (error) {
       console.error('Error updating problem:', error);
-      res.status(500).json({ error: 'Server Error: Failed to update problem' });
+      if (error.message === 'Problem not found or not authorized') {
+        return res.status(404).json({ 
+          message: 'Problem not found or not authorized',
+          error: 'Not found' 
+        });
+      }
+      if (error.status === 401) {
+        return res.status(401).json({ 
+          message: 'Unauthorized',
+          error: 'Invalid token' 
+        });
+      }
+      res.status(500).json({ 
+        message: 'Server Error: Failed to update problem',
+        error: error.message 
+      });
     }
   }
 

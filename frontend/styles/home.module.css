@@ -587,3 +587,88 @@
     padding: 1.5rem;
   }
 }
+
+/* Button Groups for Role Selection */
+.buttonGroup {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 2rem;
+}
+
+.buttonIcon {
+  margin-right: 0.5rem;
+  font-size: 1.2em;
+}
+
+.studentButton {
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  border: 2px solid transparent;
+}
+
+.studentButton:hover {
+  background: linear-gradient(135deg, #16a34a, #15803d);
+  transform: translateY(-3px);
+  box-shadow: 0 10px 30px rgba(34, 197, 94, 0.4);
+}
+
+.teacherButton {
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  border: 2px solid transparent;
+}
+
+.teacherButton:hover {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  transform: translateY(-3px);
+  box-shadow: 0 10px 30px rgba(59, 130, 246, 0.4);
+}
+
+.ctaButtonGroup {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.studentCta {
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+}
+
+.studentCta:hover {
+  background: linear-gradient(135deg, #16a34a, #15803d);
+  transform: translateY(-3px);
+  box-shadow: 0 10px 30px rgba(34, 197, 94, 0.4);
+}
+
+.teacherCta {
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+}
+
+.teacherCta:hover {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  transform: translateY(-3px);
+  box-shadow: 0 10px 30px rgba(59, 130, 246, 0.4);
+}
+
+@media (max-width: 768px) {
+  .buttonGroup {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .buttonGroup .headerButton {
+    width: 100%;
+    max-width: 300px;
+  }
+
+  .ctaButtonGroup {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .ctaButtonGroup .ctaButton {
+    width: 100%;
+    max-width: 300px;
+  }
+}

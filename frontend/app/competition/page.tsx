@@ -5,7 +5,7 @@ import { ChevronDown, ChevronUp, ArrowLeft } from 'lucide-react';
 import styles from '@/styles/competition.module.css';
 import { useSearchParams } from 'next/navigation';
 import { useRouter } from 'next/navigation';
-import { useMyApp } from '@/context/AppUtils';
+import { useAuthStore } from '@/store/authStore';
 import { AuthProtection } from '@/context/AuthProtection';
 import Loader from '@/components/Loader';
 import { getRoomProblems } from '@/api/problems';
@@ -45,7 +45,7 @@ const CompetitionDashboard = () => {
 
   // const [participants, setParticipants] = useState<Participant[]>([]);
   const [sortOrder, setSortOrder] = useState('desc');
-  const [isPaused, setIsPaused] = useState(false);
+  // const [isPaused, setIsPaused] = useState(false);
   const [fetched, setFetched] = useState(false);
   const [ isLoading, setIsLoading ] = useState(true)
   const [ competition, setCompetition ] = useState<Competition[]>([])
@@ -56,8 +56,7 @@ const CompetitionDashboard = () => {
   const [newCompetitionTitle, setNewCompetitionTitle] = useState("");
   const [creating, setCreating] = useState(false);
 
-  const { isLoggedIn } = useMyApp()
-  const { isLoading: authLoading } = AuthProtection()
+  const { isLoggedIn } = useAuthStore()
   // const router = useRouter();
 
 
@@ -108,15 +107,15 @@ const CompetitionDashboard = () => {
   }, [fetchParticipants, fetchProblems, fetchCompetitions]);
 
   useEffect(() => {
-    if (isLoggedIn && !authLoading && !fetched) {
+    if (isLoggedIn && !fetched) {
       fetchAll();
       setFetched(true);
     } else {
-      if (authLoading || !isLoggedIn) {
+      if (!isLoggedIn) {
         setIsLoading(true);
       }
     }
-  }, [isLoggedIn, authLoading, fetched, fetchAll]);
+  }, [isLoggedIn, fetched, fetchAll]);
 
     // callMe is now replaced by fetchAll, fetchCompetitions, etc.
 
@@ -135,12 +134,13 @@ const CompetitionDashboard = () => {
         setNewCompetitionTitle("");
       } catch (error) {
         // Handle error (show message, etc.)
+        console.error('Error creating competition:', error);
       } finally {
         setCreating(false);
       }
     };
 
-    if (isLoading || authLoading) {
+    if (isLoading) {
         return (
             <div className={styles["dashboard-container"]}>
                 <div className={styles["loading-container"]}>
@@ -162,9 +162,9 @@ const CompetitionDashboard = () => {
     setSortOrder(sortOrder === 'desc' ? 'asc' : 'desc');
   };
 
-  const togglePause = () => {
-    setIsPaused(!isPaused);
-  };
+  // const togglePause = () => {
+  //   setIsPaused(!isPaused);
+  // };
 
   console.log('competion: ', competition)
 

@@ -1,6 +1,7 @@
 const express = require('express')
 const cors = require('cors')
 const bodyParser = require('body-parser')
+const { swaggerSpec, swaggerServe, swaggerSetup } = require('./config/swagger')
 require('dotenv').config()
 
 const {
@@ -11,7 +12,16 @@ const {
     problemRoutes,
     leaderboardRoutes,
     attemptsRoutes,
-    competitionRoutes
+    competitionRoutes,
+    castleRoutes,          // Newly Added
+    chapterQuizRoutes,     // Newly Added
+    chapterRoutes,         // Newly Added
+    minigameRoutes,       // Newly Added
+    userCastleProgressRoutes, // Newly Added
+    userChapterProgressRoutes, // Newly Added
+    userMinigameAttemptRoutes, // Newly Added
+    userQuizAttemptRoutes,      // Newly Added
+    assessmentRoutes           // Assessment system
 } = require('./container')
 
 const app = express()
@@ -33,10 +43,31 @@ app.use('/api/problems', problemRoutes)
 app.use('/api/leaderboards', leaderboardRoutes)
 app.use('/api/attempts', attemptsRoutes)
 app.use('/api/competitions', competitionRoutes)
+app.use('/api/castles', castleRoutes)                     // Newly Added
+app.use('/api/chapter-quizzes', chapterQuizRoutes)        // Newly Added
+app.use('/api/chapters', chapterRoutes)                   // Newly Added
+app.use('/api/minigames', minigameRoutes)                 // Newly Added
+app.use('/api/user-castle-progress', userCastleProgressRoutes) // Newly Added
+app.use('/api/user-chapter-progress', userChapterProgressRoutes) // Newly Added
+app.use('/api/user-minigame-attempts', userMinigameAttemptRoutes) // Newly Added
+app.use('/api/user-quiz-attempts', userQuizAttemptRoutes)       // Newly Added
+app.use('/api/assessments', assessmentRoutes)                   // Assessment system
+//swagger documentation
+app.use('/api-docs', swaggerServe, swaggerSetup)
+
+//docs.json for postman integration
+app.get('/docs.json', (req, res) => {
+    res.setHeader('Content-Type', 'application/json')
+    res.send(swaggerSpec)
+})
 
 //basic route
 app.get('/', (req, res) => {
-    res.send('API is running')
+    res.json({
+        message: 'Polegion API is running',
+        documentation: `http://localhost:${PORT}/api-docs`,
+        openapi: `http://localhost:${PORT}/docs.json`
+    })
 })
 
 //start server

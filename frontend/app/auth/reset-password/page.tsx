@@ -11,7 +11,6 @@ import { useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
 import { yupResolver } from "@hookform/resolvers/yup"
 import toast from "react-hot-toast"
-import { useMyApp } from "@/context/AppUtils"
 import api from "@/api/axios"
 
 interface ResetPasswordFormData {
@@ -30,14 +29,10 @@ class PasswordResetHandler {
 
     public async resetPassword(password: string): Promise<boolean> {
         try {
-            console.log('reset token', this.token)
-            console.log('reset password', password)
             if (!this.token) {
                 throw new Error('Reset token not found');
             }
 
-            console.log('na pasar')
-            
             //kani ang error
             const response = await api.post('/auth/reset-password/confirm', {
                 token: this.token,
@@ -72,7 +67,6 @@ const passwordSchema = yup.object().shape({
 export default function ResetPassword() {
     const router = useRouter();
     const searchParams = useSearchParams();
-    const { refreshUserSession } = useMyApp();
 
     const [loading, setLoading] = useState(true);
     const [tokenError, setTokenError] = useState(false);
@@ -94,38 +88,6 @@ export default function ResetPassword() {
     useEffect(() => {
         const checkToken = () => {
             try {
-                // const resetToken = searchParams.get('access_token');
-                // if (typeof window === 'undefined') {
-                //     console.error('Undefined')
-                //     return
-                // }
-                
-                // const hash = window.location.hash
-                // console.log('hash', hash)
-                
-                // if (!hash){
-                //     setTokenError(true)
-                //     setLoading(false)
-                //     return
-                // }
-
-                // const accessToken = new URLSearchParams(hash.substring(1)).get("access_token")
-                // console.log('accesstoken ', !accessToken)
-                // const type = new URLSearchParams(hash.substring(1)).get("type")
-                // console.log('type ', type)
-
-                // if (
-                //     !accessToken || 
-                //     type !== "recovery"
-                // ) {
-                //     console.log('twag')
-                //     setTokenError(true);
-                //     setLoading(false);
-                //     return;
-                // }
-                
-                // setToken(accessToken)
-                
                 console.log('Current URL:', window.location.href);
                 console.log('Query params:', Object.fromEntries(searchParams.entries()));
                 
@@ -170,8 +132,6 @@ export default function ResetPassword() {
             
             if (success) {
                 toast.success("Password reset successfully!");
-                
-                await refreshUserSession();
                 
                 setTimeout(() => {
                     passwordHandler.redirectToLogin();

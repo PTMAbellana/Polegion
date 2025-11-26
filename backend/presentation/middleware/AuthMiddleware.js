@@ -32,7 +32,10 @@ class AuthMiddleware {
     
                 next()
             } catch (error) {
-                console.error('Middleware error: ',error)
+                // Suppress logging for expected auth failures (like after logout)
+                if (!error.message?.includes('Auth session missing')) {
+                    console.error('Middleware error: ', error)
+                }
                 
                 // Check if the error is specifically about token expiration
                 if (error.message === 'Token expired') {
@@ -51,9 +54,8 @@ class AuthMiddleware {
                 
                 if (error.message && error.message.includes('Token validation failed')) {
                     return res.status(401).json({
-                        error: 'Token validation failed',
-                        code: 'TOKEN_INVALID',
-                        details: error.message
+                        error: 'Not authorized',
+                        code: 'TOKEN_INVALID'
                     })
                 }
                 

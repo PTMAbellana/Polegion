@@ -4,7 +4,7 @@ import React, { use, useEffect, useState, useCallback, useMemo } from 'react';
 import { ArrowLeft, ChevronDown, ChevronUp, Edit3 } from 'lucide-react';
 import styles from '@/styles/competition.module.css';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { useMyApp } from '@/context/AppUtils';
+import { useAuthStore } from '@/store/authStore';
 import { AuthProtection } from '@/context/AuthProtection';
 import Loader from '@/components/Loader';
 import { addCompeProblem, getCompeProblems, getRoomProblems, removeCompeProblem, updateTimer } from '@/api/problems';
@@ -12,10 +12,6 @@ import { getAllParticipants } from '@/api/participants';
 import { getCompeById, startCompetition, nextProblem, pauseCompetition, resumeCompetition } from '@/api/competitions';
 import { useCompetitionRealtime } from '@/hooks/useCompetitionRealtime';
 import { useCompetitionTimer } from '@/hooks/useCompetitionTimer';
-import { ConnectionStatus } from '@/components/ConnectionStatus';
-import { RealtimeDebug } from '@/components/RealtimeDebug';
-import { RealtimeTestButtons } from '@/components/RealtimeTestButtons';
-import RealtimeTestComponent from '@/components/RealtimeTestComponent';
 
 interface Participant {
   id: number;
@@ -79,13 +75,11 @@ const CompetitionDashboard = ({ params } : { params  : Promise<{competitionId : 
     participants: liveParticipants,
     isConnected,
     connectionStatus,
-    setParticipants: setLiveParticipants,
     pollCount
   } = useCompetitionRealtime(compe_id.competitionId, isLoading);
   
   // Real-time timer management
   const {
-    timeRemaining,
     isTimerActive,
     formattedTime,
     isExpired
@@ -106,7 +100,7 @@ const CompetitionDashboard = ({ params } : { params  : Promise<{competitionId : 
     console.log('  - connectionStatus:', connectionStatus);
   }, [liveCompetition, competition, currentCompetition, isConnected, connectionStatus]);
     
-  const { isLoggedIn } = useMyApp()
+  const { isLoggedIn } = useAuthStore()
   const { isLoading: authLoading } = AuthProtection()
   // const router = useRouter();
 
@@ -203,9 +197,9 @@ const CompetitionDashboard = ({ params } : { params  : Promise<{competitionId : 
           }
         }, 1000);
         
-      } catch (error) {
+      } catch (error: unknown) {
         console.error('❌ [Admin] Error starting competition:', error);
-        alert('Failed to start competition: ' + error.message);
+        alert('Failed to start competition: ' + error);
       }
     };
 

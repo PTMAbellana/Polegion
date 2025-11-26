@@ -1,73 +1,82 @@
-import api, { authUtils } from './axios';
+import api from './axios';
 
 export const getUserProfile = async () => {
-  return await api.get("/users/profile");
+  const res = await api.get("/users/profile");
+  return res.data;
 };
 
 export const updateUserProfile = async (profileData) => {
   try {
-    const response = await api.put("/users/profile", profileData);
-    const curr = authUtils.getAuthData();
-    if (response.data) {
-      localStorage.setItem(
-        "user",
-        JSON.stringify({
-          ...curr.user,
-          ...response.data,
-        }),
-      );
+    const response = await api.patch("/users/profile", profileData);
+    
+    return {
+      success: true,
+      message: response.data.message,
+      data: response.data.data
     }
-    return response;
   } catch (error) {
-    throw error;
+    return {
+      success: false,
+      error: error.response?.data?.error || 'Profile update failed',
+      message: error.response?.data?.message || 'An error occurred',
+      status: error.response?.status
+    };
   }
 };
 
 export const updateEmail = async (newEmail) => {
   console.log(newEmail);
   try {
-    const response = await api.put('/users/change-email', { newEmail });
-    const curr = authUtils.getAuthData();
-    if (response.data) {
-      localStorage.setItem(
-        'user',
-        JSON.stringify({
-          ...curr.user,
-          ...response.data
-        })
-      );
-    }
-    return response;
+    const response = await api.patch('/users/change-email', { newEmail });
+    console.log('Email update response:', response);
+    
+    return {
+      success: true,
+      message: response.data.message
+    };
   } catch (error) {
-    throw error;
+    console.error('Error updating email:', error);
+    return {
+      success: false,
+      error: error.response?.data?.error || 'Email update failed',
+      message: error.response?.data?.message || 'An error occurred',
+      status: error.response?.status
+    };
   }
 };
 
 export const updatePassword = async (newPassword) => {
   try {
-    const response = await api.put('/users/change-password', { newPassword });
-    const curr = authUtils.getAuthData();
-    if (response.data) {
-      localStorage.setItem(
-        'user',
-        JSON.stringify({
-          ...curr.user,
-          ...response.data
-        })
-      );
-    }
-    return response;
+    const response = await api.patch('/users/change-password', { newPassword });
+    return {
+      success: true,
+      message: response.data.message
+    };
   } catch (error) {
-    throw error;
+    return {
+      success: false,
+      error: error.response?.data?.error || 'Password update failed',
+      message: error.response?.data?.message || 'An error occurred',
+      status: error.response?.status
+    }
   }
 };
 
 export const deactivateAccount = async () => {
   try {
-    const response = await api.put('/users/deactivate');
-    return response;
+    const response = await api.patch('/users/deactivate');
+    
+    return {
+      success: true,
+      message: response.data.message
+    };
   } catch (error) {
-    throw error;
+    return {
+      success: false,
+      error: error.response?.data?.error || 'Account deactivation failed',
+      message: error.response?.data?.message || 'An error occurred',
+      status: error.response?.status
+    };
   }
 };
 
@@ -84,21 +93,50 @@ export const uploadImage = async (formData) => {
     });
 
     console.log("Image upload response:", response.data);
-    return response;
+    return {
+      success: true,
+      imageUrl: response.data.data.imageUrl,
+      message: response.data.message || 'Image uploaded successfully'
+    };
   } catch (error) {
     console.error("Error uploading banner image:", error);
 
     // Enhanced error handling for file uploads
     if (error.response?.data?.error) {
-      throw new Error(error.response.data.error);
+      return {
+        success: false,
+        error: error.response.data.error,
+        message: error.response.data.message || 'Image upload failed',
+        status: error.response.status
+      }
     } else if (error.code === "ECONNABORTED") {
-      throw new Error("Upload timeout - file may be too large");
+      return {
+        success: false,
+        error: 'Upload timeout - please try again with a smaller file or check your connection',
+        message: 'The upload took too long and was aborted.',
+        status: 408 // Request Timeout
+      }
     } else if (error.message === "Network Error") {
-      throw new Error("Network error - please check your connection");
+      return {
+        success: false,
+        error: 'Network error - please check your internet connection',
+        message: 'A network error occurred while trying to upload the image.',
+        status: 503 // Service Unavailable
+      }
     } else if (error.response?.status === 404) {
-      throw new Error("Upload endpoint not found - check server configuration");
+      return {
+        success: false,
+        error: 'Endpoint not found - please contact support',
+        message: 'The upload endpoint could not be found.',
+        status: 404
+      }
     } else {
-      throw new Error(`Failed to upload image: ${error.message}`);
+      return {
+        success: false,
+        error: 'An unknown error occurred during image upload',
+        message: 'Please try again later.',
+        status: error.response?.status || 500
+      }
     }
   } 
 }

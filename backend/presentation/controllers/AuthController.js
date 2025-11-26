@@ -6,16 +6,14 @@ class AuthController {
     refreshToken = async (req, res) => {
         const { refresh_token } = req.body;
         if (!refresh_token)
-            return res.status(400).json({ error: 'Refresh token is required' });
+            return res.status(400).json({
+                message: 'Refresh token is required',
+                error: 'Bad request' 
+            });
 
         try {
             const data = await this.authService.refreshToken(refresh_token);
-            
-            // Log the data for debugging
-            console.log('Refresh session data:', data);
-            console.log('Session exists:', !!data?.session);
-            console.log('Session access token exists:', !!data?.session?.access_token);
-            
+                        
             // The data object contains the session directly
             if (!data || !data.session || !data.session.access_token) {
                 console.log('Invalid session data structure:', {
@@ -23,48 +21,55 @@ class AuthController {
                     hasSession: !!data?.session,
                     hasAccessToken: !!data?.session?.access_token
                 });
-                return res.status(401).json({ error: 'No valid session returned from Supabase' });
+                return res.status(401).json({ 
+                    message: 'Invalid session data',
+                    error: 'No valid session returned from Supabase' 
+                });
             }
             
             // Return the session object in the expected format
             return res.status(200).json({ 
-                session: data.session,
-                user: data.user || data.session.user 
+                message: 'Token refreshed successfully',
+                data: data 
             });
         } catch (error) {
-            // Log the error for debugging
-            console.error('Refresh token error:', error);
-            return res.status(401).json({ error: 'Invalid or expired refresh token', details: error.message });
+            if (error.status === 400)
+                return res.status(400).json({ 
+                    message: 'Invalid refresh token',
+                    error: 'Bad request' 
+                });
+            return res.status(401).json({ 
+                message: 'Invalid or expired refresh token', 
+                error: error.message
+            });
         }
     }
 
     loginUser = async (req, res) => {
-        // console.log('auth controller')
-        // console.log(req.body)
         const { email, password } = req.body
-    
         try {
             const data = await this.authService.login(email, password)
     
-            if (!data) res.status(400).json({
-                error: error.message
-            })
+            if (!data) 
+                return res.status(400).json({
+                    message: 'Login failed',
+                    error: 'No data returned'
+                })
 
-            console.log(data)
-    
-            res.status(200).json(data)
-        } catch (error) {
-            // console.log(error.code)
-            // res.status(error.status).json({
-            //     error: error.code
-            // })
-            if (error.status === 400)
-            res.status(400).json({
-                error: 'Invalid credentials'
+            res.status(200).json({
+                message: 'Login successful',
+                data: data
             })
-            else
-            res.status(500).json({
-                error: 'Server error during login'
+        } catch (error) {
+            if (error.status === 400)
+                return res.status(400).json({
+                    message: 'Invalid credentials',
+                    error: 'Email or password is incorrect'
+                })
+            
+            return res.status(500).json({
+                message: 'Server error during login',
+                error: error.message // as is ka jan kay internal server error ka rar
             })
         }
     }
@@ -74,32 +79,49 @@ class AuthController {
         const { 
             email, 
             password, 
-            fullName, 
+            firstName, 
+            lastName,
             gender, 
-            phone 
+            phone,
+            role 
         } = req.body
     
         try {
             const data = await this.authService.register(
                 email,
                 password,
-                fullName, 
-                gender,
-                phone
+                {
+                    firstName,
+                    lastName,
+                    gender,
+                    phone,
+                    role
+                }
             )
     
             if (!data) return res.status(400).json({
-                error: error.message
+                message: 'Registration failed',
+                error: 'No data returned'
             })
-            return res.status(201).json(data)
+
+            return res.status(201).json({
+                message: 'Registration successful',
+                data: data
+            })
         } catch (error) {
-            if (error.status === 422) 
-            res.status(422).json({
-                error: 'Email already exist'
-            })
-            else 
-            res.status(500).json({
-                error: 'Server error during registration'
+            if (error.status === 422)  //unprocessed man ni sha, so tanawn nato nganu
+                return res.status(422).json({
+                    message: 'Registration failed', 
+                    error: error.message
+                });
+            if (error.status === 409)
+                return res.status(409).json({
+                    message: 'User already exists',
+                    error: 'Email already exist'
+                })
+            return res.status(500).json({
+                message: 'Server error during registration',
+                error: error.message
             })
         }
     }
@@ -123,7 +145,7 @@ class AuthController {
         }
     }
     
-    logout = async (req, res) => {
+    logout = async ( _, res) => {
         try {
             await this.authService.logout()
             return res.status(200).json({
@@ -131,43 +153,33 @@ class AuthController {
             })
         } catch (error) {
             return res.status(500).json({
-                error: 'Server error during logout'
+                message: 'Server error during logout',
+                error: error.message
             })
         }
     }
 
     resetPasswordConfirm = async (req, res) => {
-
-        // Extract token from query parameters or body
-        let token;
         
-        // Get token from URL query parameters if it exists there
-        if (req.query && req.query.token) {
-            token = req.query.token;
-        } 
-        // Otherwise get it from request body
-        else if (req.body && req.body.token) {
-            token = req.body.token;
-        }
-        
-        const { password } = req.body;
+        const { token, password } = req.body;
 
         if (!token || !password) {
             return res.status(400).json({
-                error: 'Token and new password are required'
+                messsage: 'Token and new password are required',
+                error: error.message
             });
         }
 
         try {
-            const result = await this.authService.resetPasswordWithToken(token, password);
+            await this.authService.resetPasswordWithToken(token, password);
             
             return res.status(200).json({
                 message: 'Password reset successfully'
             });
         } catch (error) {
-            console.error('Password reset error in controller:', error);
             
             return res.status(401).json({
+                message: 'Unauthorized',
                 error: 'Invalid or expired reset token'
             });
         }

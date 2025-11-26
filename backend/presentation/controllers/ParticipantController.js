@@ -4,14 +4,10 @@ class ParticipantController {
     }
 
     joinRoom = async (req, res) => {
-        console.log('join is called')
-        // console.log(req.body)
-        // console.log(req.user)
         const { room_code } = req.body
-        // const { room_code } = req.params
-        // console.log(room_code)
 
         if (!room_code) return res.status(400).json({
+            message: 'Join room failed',
             error: 'Room code is required'
         })
 
@@ -22,21 +18,39 @@ class ParticipantController {
                 data: data
             })
         } catch (error) {
-            //  console.error('Error joining room:', error.message)
+             console.error('Error joining room:', error)
             
             if (error.message === 'Room not found') 
-                return res.status(404).json({ error: 'Room not found' })
+                return res.status(404).json({ 
+                    message: 'Join room failed',
+                    error: 'Room not found' 
+                })
             
             if (
                 error.message === 'Room owner cannot be added as participant' || 
                 error.message === 'Already an admin'
             ) 
-                return res.status(400).json({ error: 'Room owner cannot join as participant' })
+                return res.status(400).json({ 
+                    message: 'Join room failed',
+                    error: 'Room owner cannot join as participant' 
+                })
 
             if (error.message === 'User is already a participant in this room') 
-                return res.status(400).json({ error: 'Already a participant in this room' })
-            
-            res.status(500).json({ error: 'Server error joining room' })
+                return res.status(400).json({ 
+                    message: 'Join room failed',
+                    error: 'Already a participant in this room' 
+                })
+
+            if (error.status === 401) 
+                return res.status(401).json({ 
+                    message: 'Unauthorized',
+                    error: 'Invalid token' 
+                })
+
+            return res.status(500).json({ 
+                message: 'Server error joining room',
+                error: error.message
+            })
         }
     }
 
@@ -45,12 +59,13 @@ class ParticipantController {
         const { room_id } = req.params
 
         if (!room_id) return res.status(400).json({
+            message: 'Leave room failed',
             error: 'Room ID required'
         })
 
         try {
             await this.participantService.leaveRoom(req.user.id, room_id)
-            res.status(200).json({
+            return res.status(200).json({
                 message: 'Successfully left room'
             })
         } catch (error) {
@@ -58,11 +73,19 @@ class ParticipantController {
 
             if (error.message === 'Participant not found')
                 return res.status(404).json({
-                    error: 'Not a participant in this room'
+                    message: 'Leave room failed',
+                    error: 'Participant not found'
                 })
 
-            res.status(500).json({
-                error: 'Server error leaving room'
+            if (error.status === 401) 
+                return res.status(401).json({
+                    message: 'Unauthorized',
+                    error: 'Invalid token'
+                })
+
+            return res.status(500).json({
+                message: 'Server error leaving room',
+                error: error.message
             })
         }
     }
@@ -79,8 +102,9 @@ class ParticipantController {
         try {
             const participants = await this.participantService.getRoomParticipantsForAdmin(room_id, req.user.id, withXp, compe_id)
             // console.log('getRoomParticipants called 2: ', participants)
-            res.status(200).json({
-                participants
+            return res.status(200).json({
+               message: 'Successfully fetched participants',
+               data: participants 
             })
             // console.log('getRoomParticipants called 3: ', res.data)
         } catch (error) {
@@ -88,11 +112,18 @@ class ParticipantController {
 
             if (error.message === 'Room not found or not authorized')
                 return res.status(404).json({
-                    error: 'Room not found or not authorized'
+                    message: 'Room not found or not authorized',
+                    error: 'Not found'
+                })
+            if (error.status === 401)
+                return res.status(401).json({
+                    message: 'Unauthorized',
+                    error: 'Invalid token'
                 })
 
-            res.status(500).json({
-                error: 'Server error fetching participants'
+            return res.status(500).json({
+                message: 'Server error fetching participants',
+                error: error.message
             })
         }
     }
@@ -104,17 +135,25 @@ class ParticipantController {
         const compe_id = req.query.compe_id ? parseInt(req.query.compe_id) : -1; 
         try {
             const participants = await this.participantService.getRoomParticipantsForUser(room_id, req.user.id, withXp, compe_id)
-            // console.log(participants)
-            res.status(200).json({
-                participants
+            console.log('participants: ', participants)
+            return res.status(200).json({
+                message: 'Successfully fetched participants',
+                data: participants
             })
         } catch (error) {
             if (error.message === 'Room not found or not authorized')
                 return res.status(404).json({
-                    error: 'Room not found or not authorized'
+                    message: 'Room not found or not authorized',
+                    error: 'Not found'
                 })
-            res.status(500).json({
-                error: 'Server error fetching participants'
+            if (error.status === 401)
+                return res.status(401).json({
+                    message: 'Unauthorized',
+                    error: 'Invalid token'
+                })
+            return res.status(500).json({
+                message: 'Server error fetching participants',
+                error: error.message
             })
         }
     }
@@ -161,13 +200,26 @@ class ParticipantController {
 
         try {
             await this.participantService.removeParticipant(req.user.id, user_id, room_id)
-            res.status(201).json({
+            return res.status(201).json({
                 message: 'Successfully removed a participant'
             })
         } catch (error) {
             // console.error('Error removing participant: ', error)
-            res.status(500).json({
-                error: 'Server error removing participant'
+            if (error.message === 'Participant not found') {
+                return res.status(404).json({
+                    message: 'Participant not found',
+                    error: 'Not found'
+                })
+            }
+            if (error.status === 401) {
+                return res.status(401).json({
+                    message: 'Unauthorized - Invalid token',
+                    error: 'Invalid token'
+                })
+            }
+            return res.status(500).json({
+                message: 'Server error removing participant',
+                error: error.message
             })
         }
     }
@@ -175,31 +227,70 @@ class ParticipantController {
     joinedRooms = async (req, res) => {
         // console.log('joinedRooms called: ', req.user.id)
         try {
-            const rooms = await this.participantService.getJoinedRooms(req.user.id)
-            res.status(200).json({
-                rooms
+            const data = await this.participantService.getJoinedRooms(req.user.id)
+            if (!data) {
+                return res.status(404).json({
+                    message: 'No joined rooms found',
+                    error: 'Not found'
+                })
+            }
+            return res.status(200).json({
+                message: 'Successfully fetched joined rooms',
+                data: data
             })
         } catch (error) {
             console.error('Error fetching joined rooms: ', error)
-            res.status(500).json({
-                error: 'Server error fetching joined rooms'
+            if (error.status === 400) {
+                return res.status(400).json({
+                    message: 'Bad request',
+                    error: error.message
+                })
+            }
+            if (error.status === 401) {
+                return res.status(401).json({
+                    message: 'Unauthorized',
+                    error: 'Invalid token'
+                })
+            }
+            return res.status(500).json({
+                message: 'Server error fetching joined rooms',
+                error: error.message
             })
         }
     }
 
     async inviteByEmail(req, res) {
         const { email, roomCode } = req.body;
-        const inviter = {
-          name: req.user.fullName,
-          email: req.user.email,
-        };
         try {
-          await this.participantService.inviteByEmail(inviter, email, roomCode);
-          res.json({ success: true });
-        } catch (error) {
-          res.status(500).json({ error: 'Failed to send invitation.' });
+            await this.participantService.inviteByEmail(email, roomCode);
+                return res.json({ 
+                    message: 'Invitation sent successfully' 
+                });
+            } catch (error) {
+                if (error.status === 400) {
+                    return res.status(400).json({ 
+                        message: 'Failed to send invitation.',
+                        error: error.message 
+                    });
+                }
+                if (error.status === 404) {
+                    return res.status(404).json({ 
+                        message: 'Failed to send invitation.',
+                        error: error.message 
+                    });
+                }
+                if (error.status === 401) {
+                    return res.status(401).json({ 
+                        message: 'Unauthorized',
+                        error: 'Invalid token' 
+                    });
+                }
+                return res.status(500).json({ 
+                    message: 'Failed to send invitation.',
+                    error: error.message 
+                });
+            }
         }
-      }
 }
 
 module.exports = ParticipantController

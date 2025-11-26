@@ -21,10 +21,24 @@ class CompeController {
         const { type } = req.query || 'admin'
         try {
             const data = await this.compeService.getCompeByRoomId(room_id, req.user.id, type)
-            res.status(200).json(data)
+            return res.status(200).json({
+                message: 'Successfully fetched competitions',
+                data: data
+            })
         } catch (error) {
             console.error(error)
-            res.status(400).json({
+            if (error.message === 'Room not found or not authorized')
+                return res.status(404).json({
+                    message: 'Room not found or not authorized',
+                    error: 'Not found'
+                })
+            if (error.status === 401)
+                return res.status(401).json({
+                    message: 'Unauthorized',
+                    error: 'Invalid token'
+                })
+            return res.status(500).json({
+                message: 'Server error fetching competitions',
                 error: error.message
             })
         }
