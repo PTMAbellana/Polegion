@@ -18,13 +18,23 @@ const Filters: React.FC<FiltersProps> = ({
   setShowDiameter,
   showCircumference,
   setShowCircumference,
+  showLength,
+  setShowLength,
+  showMidpoint,
+  setShowMidpoint,
+  showMeasurement,
+  setShowMeasurement,
+  showArcRadius,
+  setShowArcRadius,
 }) => {
   const [expandedSection, setExpandedSection] = useState<string | null>("circle");
 
   const hasCircle = shapes.some((s) => s.type === "circle");
   const hasSquare = shapes.some((s) => s.type === "square");
   const hasTriangle = shapes.some((s) => s.type === "triangle");
-  const hasOnlyCircle = hasCircle && !hasSquare && !hasTriangle;
+  const hasLine = shapes.some((s) => s.type === "line");
+  const hasAngle = shapes.some((s) => s.type === "angle");
+  const hasOnlyCircle = hasCircle && !hasSquare && !hasTriangle && !hasLine && !hasAngle;
   const shouldShowGlobal = !hasOnlyCircle;
 
   const getActiveFiltersCount = () => {
@@ -37,6 +47,10 @@ const Filters: React.FC<FiltersProps> = ({
     if (hasCircle && showAreaByShape.circle) count++;
     if (hasCircle && showDiameter) count++;
     if (hasCircle && showCircumference) count++;
+    if (hasLine && showLength) count++;
+    if (hasLine && showMidpoint) count++;
+    if (hasAngle && showMeasurement) count++;
+    if (hasAngle && showArcRadius) count++;
     return count;
   };
 
@@ -58,6 +72,10 @@ const Filters: React.FC<FiltersProps> = ({
       setShowDiameter(true);
       setShowCircumference(true);
     }
+    if (hasLine && setShowLength) setShowLength(true);
+    if (hasLine && setShowMidpoint) setShowMidpoint(true);
+    if (hasAngle && setShowMeasurement) setShowMeasurement(true);
+    if (hasAngle && setShowArcRadius) setShowArcRadius(true);
   };
 
   const hideAllProperties = () => {
@@ -69,6 +87,10 @@ const Filters: React.FC<FiltersProps> = ({
     setShowHeight(false);
     setShowDiameter(false);
     setShowCircumference(false);
+    if (setShowLength) setShowLength(false);
+    if (setShowMidpoint) setShowMidpoint(false);
+    if (setShowMeasurement) setShowMeasurement(false);
+    if (setShowArcRadius) setShowArcRadius(false);
   };
 
   const toggleSection = (section: string) => {
@@ -179,6 +201,46 @@ const Filters: React.FC<FiltersProps> = ({
                 </div>
                 <div className={styles.filterOption}>
                   <ToggleSwitch checked={showCircumference} onChange={() => setShowCircumference(!showCircumference)} label="Circumference" />
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {hasLine && setShowLength && setShowMidpoint && (
+          <div className={`${styles.filterSection} ${styles.lineSection}`}>
+            <button className={`${styles.filterSectionHeader} ${expandedSection === 'line' ? styles.expanded : ''}`} onClick={() => toggleSection('line')}>
+              <span className={styles.sectionIcon}>━</span>
+              <span className={styles.sectionTitle}>Line</span>
+              <span className={styles.expandIcon}>{expandedSection === 'line' ? <FaCaretDown /> : <FaCaretRight />}</span>
+            </button>
+            {expandedSection === 'line' && (
+              <div className={styles.filterSectionContent}>
+                <div className={styles.filterOption}>
+                  <ToggleSwitch checked={showLength ?? false} onChange={() => setShowLength(!showLength)} label="Length" description="Distance formula" />
+                </div>
+                <div className={styles.filterOption}>
+                  <ToggleSwitch checked={showMidpoint ?? false} onChange={() => setShowMidpoint(!showMidpoint)} label="Midpoint" description="Center point" />
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {hasAngle && setShowMeasurement && setShowArcRadius && (
+          <div className={`${styles.filterSection} ${styles.angleSection}`}>
+            <button className={`${styles.filterSectionHeader} ${expandedSection === 'angle' ? styles.expanded : ''}`} onClick={() => toggleSection('angle')}>
+              <span className={styles.sectionIcon}>∠</span>
+              <span className={styles.sectionTitle}>Angle</span>
+              <span className={styles.expandIcon}>{expandedSection === 'angle' ? <FaCaretDown /> : <FaCaretRight />}</span>
+            </button>
+            {expandedSection === 'angle' && (
+              <div className={styles.filterSectionContent}>
+                <div className={styles.filterOption}>
+                  <ToggleSwitch checked={showMeasurement ?? false} onChange={() => setShowMeasurement(!showMeasurement)} label="Measurement" description="Angle in degrees" />
+                </div>
+                <div className={styles.filterOption}>
+                  <ToggleSwitch checked={showArcRadius ?? false} onChange={() => setShowArcRadius(!showArcRadius)} label="Arc Radius" description="Larger arc display" />
                 </div>
               </div>
             )}

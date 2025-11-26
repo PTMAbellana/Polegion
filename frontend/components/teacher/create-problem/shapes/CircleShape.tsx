@@ -178,7 +178,7 @@ const CircleShape: React.FC<CircleShapeProps> = ({
         )}
 
         {/* Diameter label */}
-        {isSelected && showDiameter && (
+        {showDiameter && (
           <Group>
             <Rect
               x={-35}
@@ -206,7 +206,7 @@ const CircleShape: React.FC<CircleShapeProps> = ({
         )}
 
         {/* Circumference label */}
-        {isSelected && showCircumference && (
+        {showCircumference && (
           <Group>
             <Rect
               x={-45}
@@ -233,141 +233,6 @@ const CircleShape: React.FC<CircleShapeProps> = ({
           </Group>
         )}
       </Group>
-
-      {/* FIXED OVERLAYS - Outside the Group, absolutely positioned */}
-      {/* Area Formula Display - FIXED POSITION */}
-      {showAreaByShape.circle && isSelected && (
-        <>
-          {(() => {
-            const formulaText = "Area = π × r²";
-            const calculationText = `A = π × ${unitRadius.toFixed(2)}² = ${unitArea.toFixed(2)} u²`;
-            const formulaWidth = Math.max(formulaText.length * 8, calculationText.length * 7) + 20;
-
-            return (
-              <>
-                {/* ABSOLUTE Position - Not affected by shape movement */}
-                <Rect
-                  x={50} // Fixed absolute position
-                  y={70} // Fixed absolute position
-                  width={formulaWidth}
-                  height={85}
-                  cornerRadius={8}
-                  fill="white"
-                  stroke="#2c514c"
-                  strokeWidth={2}
-                  shadowColor="rgba(0,0,0,0.1)"
-                  shadowBlur={4}
-                  shadowOffset={{ x: 2, y: 2 }}
-                  shadowOpacity={1}
-                />
-                
-                <Text
-                  x={50 + formulaWidth/2} // Absolute positioning
-                  y={85}
-                  text="Area Formula"
-                  fontSize={13}
-                  fill="#2c514c"
-                  align="center"
-                  fontStyle="bold"
-                  offsetX={formulaWidth/2}
-                  width={formulaWidth}
-                />
-                
-                <Text
-                  x={50 + formulaWidth/2}
-                  y={105}
-                  text={formulaText}
-                  fontSize={11}
-                  fill="#666"
-                  align="center"
-                  fontStyle="italic"
-                  offsetX={formulaWidth/2}
-                  width={formulaWidth}
-                />
-                
-                <Text
-                  x={50 + formulaWidth/2}
-                  y={125}
-                  text={calculationText}
-                  fontSize={10}
-                  fill="#1864ab"
-                  align="center"
-                  fontStyle="bold"
-                  offsetX={formulaWidth/2}
-                  width={formulaWidth}
-                />
-              </>
-            );
-          })()}
-        </>
-      )}
-
-      {/* Circumference Formula Display - FIXED POSITION */}
-      {showCircumference && isSelected && (
-        <>
-          {(() => {
-            const formulaText = "Circumference = 2 × π × r";
-            const calculationText = `C = 2 × π × ${unitRadius.toFixed(2)} = ${unitCircumference.toFixed(2)} u`;
-            const formulaWidth = Math.max(formulaText.length * 8, calculationText.length * 7) + 20;
-
-            return (
-              <>
-                {/* ABSOLUTE Position - Not affected by shape movement */}
-                <Rect
-                  x={50} // Fixed absolute position
-                  y={170} // Fixed absolute position (below area box)
-                  width={formulaWidth}
-                  height={85}
-                  cornerRadius={8}
-                  fill="white"
-                  stroke="#ff6b35"
-                  strokeWidth={2}
-                  shadowColor="rgba(0,0,0,0.1)"
-                  shadowBlur={4}
-                  shadowOffset={{ x: 2, y: 2 }}
-                  shadowOpacity={1}
-                />
-                
-                <Text
-                  x={50 + formulaWidth/2} // Absolute positioning
-                  y={185}
-                  text="Circumference Formula"
-                  fontSize={13}
-                  fill="#ff6b35"
-                  align="center"
-                  fontStyle="bold"
-                  offsetX={formulaWidth/2}
-                  width={formulaWidth}
-                />
-                
-                <Text
-                  x={50 + formulaWidth/2}
-                  y={205}
-                  text="C = 2 × π × r"
-                  fontSize={11}
-                  fill="#666"
-                  align="center"
-                  fontStyle="italic"
-                  offsetX={formulaWidth/2}
-                  width={formulaWidth}
-                />
-                
-                <Text
-                  x={50 + formulaWidth/2}
-                  y={225}
-                  text={calculationText}
-                  fontSize={10}
-                  fill="#ff6b35"
-                  align="center"
-                  fontStyle="bold"
-                  offsetX={formulaWidth/2}
-                  width={formulaWidth}
-                />
-              </>
-            );
-          })()}
-        </>
-      )}
     </>
   );
 };

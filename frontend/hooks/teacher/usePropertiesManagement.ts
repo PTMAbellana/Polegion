@@ -7,6 +7,10 @@ export const usePropertiesManagement = (shapes: Array<{ id: number; type: string
   const [showHeight, setShowHeight] = useState(false);
   const [showDiameter, setShowDiameter] = useState(false);
   const [showCircumference, setShowCircumference] = useState(false);
+  const [showLength, setShowLength] = useState(false);
+  const [showMidpoint, setShowMidpoint] = useState(false);
+  const [showMeasurement, setShowMeasurement] = useState(false);
+  const [showArcRadius, setShowArcRadius] = useState(false);
   const [showAreaByShape, setShowAreaByShape] = useState({
     circle: false,
     triangle: false,
@@ -20,6 +24,10 @@ export const usePropertiesManagement = (shapes: Array<{ id: number; type: string
     setShowHeight(false);
     setShowDiameter(false);
     setShowCircumference(false);
+    setShowLength(false);
+    setShowMidpoint(false);
+    setShowMeasurement(false);
+    setShowArcRadius(false);
     setShowAreaByShape({
       circle: false,
       triangle: false,
@@ -46,6 +54,14 @@ export const usePropertiesManagement = (shapes: Array<{ id: number; type: string
     setShowDiameter,
     showCircumference,
     setShowCircumference,
+    showLength,
+    setShowLength,
+    showMidpoint,
+    setShowMidpoint,
+    showMeasurement,
+    setShowMeasurement,
+    showArcRadius,
+    setShowArcRadius,
     showAreaByShape,
     setShowAreaByShape,
     handleAllShapesDeleted,

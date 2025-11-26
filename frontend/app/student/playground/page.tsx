@@ -5,14 +5,16 @@ import styles from "@/styles/create-problem-teacher.module.css";
 import PageHeader from "@/components/PageHeader";
 import Toolbox from "@/components/teacher/create-problem/Toolbox";
 import MainArea from "@/components/teacher/create-problem/MainArea";
+import PropertiesPanel from "@/components/teacher/create-problem/PropertiesPanel";
 import ShapeLimitPopup from "@/components/teacher/create-problem/ShapeLimitPopup";
+import LandscapePrompt from "@/components/LandscapePrompt";
 
 // Hooks
 import { useShapeManagement } from "@/hooks/teacher/useShapeManagement";
 import { usePropertiesManagement } from "@/hooks/teacher/usePropertiesManagement";
 import { useAuthStore } from "@/store/authStore";
 
-const MAX_SHAPES = 1;
+const MAX_SHAPES = 5; // Allow up to 5 shapes in playground
 
 export default function PlaygroundPage() {
   const { userProfile } = useAuthStore();
@@ -39,6 +41,14 @@ export default function PlaygroundPage() {
     setShowDiameter,
     showCircumference,
     setShowCircumference,
+    showLength,
+    setShowLength,
+    showMidpoint,
+    setShowMidpoint,
+    showMeasurement,
+    setShowMeasurement,
+    showArcRadius,
+    setShowArcRadius,
     showAreaByShape,
     setShowAreaByShape,
     handleAllShapesDeleted,
@@ -51,8 +61,14 @@ export default function PlaygroundPage() {
     setShowLimitPopup(true);
   };
 
+  // Get selected shape
+  const selectedShape = shapes.find(shape => shape.id === selectedId) || null;
+
   return (
     <div className={styles.playgroundRoot}>
+      {/* Landscape Prompt for Mobile Portrait */}
+      <LandscapePrompt />
+      
       <PageHeader
         title="Geometry Playground"
         userName={userProfile?.first_name}
@@ -60,7 +76,7 @@ export default function PlaygroundPage() {
         showAvatar={true}
       />
 
-      <div className={styles.playgroundWorkspace}>
+      <div className={styles.playgroundWorkspaceWithPanel}>
         {/* Left Sidebar - Toolbox */}
         <div className={styles.sidebar}>
           <Toolbox
@@ -77,6 +93,14 @@ export default function PlaygroundPage() {
             setShowDiameter={setShowDiameter}
             showCircumference={showCircumference}
             setShowCircumference={setShowCircumference}
+            showLength={showLength}
+            setShowLength={setShowLength}
+            showMidpoint={showMidpoint}
+            setShowMidpoint={setShowMidpoint}
+            showMeasurement={showMeasurement}
+            setShowMeasurement={setShowMeasurement}
+            showArcRadius={showArcRadius}
+            setShowArcRadius={setShowArcRadius}
             showAreaByShape={showAreaByShape}
             setShowAreaByShape={setShowAreaByShape}
           />
@@ -101,6 +125,18 @@ export default function PlaygroundPage() {
             showDiameter={showDiameter}
             showCircumference={showCircumference}
             showHeight={showHeight}
+            showLength={showLength}
+            showMidpoint={showMidpoint}
+            showMeasurement={showMeasurement}
+            showArcRadius={showArcRadius}
+          />
+        </div>
+
+        {/* Properties Panel - Right Side */}
+        <div className={styles.propertiesPanelContainer}>
+          <PropertiesPanel
+            selectedShape={selectedShape}
+            pxToUnits={pxToUnits}
           />
         </div>
       </div>
