@@ -313,6 +313,17 @@
   z-index: 1;
   display: flex;
   align-items: center;
+  gap: 0.75rem;
+}
+
+.activeCount {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #10b981;
+  background: rgba(16, 185, 129, 0.15);
+  padding: 0.25rem 0.75rem;
+  border-radius: 50px;
+  border: 1px solid rgba(16, 185, 129, 0.3);
 }
 
 .badge {
@@ -626,6 +637,28 @@
   transform: translateX(4px);
   box-shadow: 0 8px 25px -8px rgba(59, 130, 246, 0.2);
   border-color: rgba(59, 130, 246, 0.4);
+}
+
+.participantCard.activeParticipant {
+  border-color: #10b981;
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.05), rgba(5, 150, 105, 0.02));
+}
+
+.onlineBadge {
+  margin-left: 0.5rem;
+  font-size: 0.7rem;
+  color: #10b981;
+  font-weight: 600;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
 }
 
 .participantCard.rank1 {

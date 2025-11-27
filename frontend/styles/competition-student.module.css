@@ -252,12 +252,34 @@
   overflow: hidden;
   border: 2px solid white;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  position: relative;
 }
 
 .participantAvatar img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+
+.onlineIndicator {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 0.75rem;
+  height: 0.75rem;
+  background: #10b981;
+  border: 2px solid white;
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(16, 185, 129, 0);
+  }
 }
 
 .avatarPlaceholder {
@@ -284,6 +306,14 @@
   font-weight: 600;
   font-size: 0.85rem;
   color: #2C514C;
+}
+
+.noActiveParticipants {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 2rem;
+  color: rgba(255, 255, 255, 0.6);
+  font-style: italic;
 }
 
 /* Paused Overlay */

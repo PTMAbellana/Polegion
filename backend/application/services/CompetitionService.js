@@ -177,7 +177,8 @@ class CompeService {
                 ...data,
                 timer_started_at: currentTime,
                 timer_duration: timerDuration,
-                timer_end_at: problemEndTime
+                timer_end_at: problemEndTime,
+                gameplay_indicator: data.gameplay_indicator || 'PLAY' // ✅ Ensure gameplay_indicator is always present
             }
             
             // Invalidate competition cache since status changed
@@ -193,6 +194,11 @@ class CompeService {
                     payload: result
                 })
                 console.log(`📡 Competition ${compe_id} start broadcasted successfully!`)
+                console.log(`📋 Broadcast payload:`, { 
+                    status: result.status, 
+                    gameplay_indicator: result.gameplay_indicator,
+                    current_problem_index: result.current_problem_index
+                })
                 await supabase.removeChannel(channel) // Clean up
             } catch (broadcastError) {
                 console.error('❌ Broadcast failed:', broadcastError)

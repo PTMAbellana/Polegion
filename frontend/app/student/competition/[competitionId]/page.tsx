@@ -28,10 +28,12 @@ export default function CompetitionPage({ params }: CompetitionPageProps) {
   const {
     competition,
     participants,
+    activeParticipants,
   } = useCompetitionRealtime(competitionId.toString(), false, roomId);
 
   const liveCompetition = competition as Competition | null;
   const liveParticipants = participants as CompetitionParticipant[];
+  const liveActiveParticipants = activeParticipants || [];
 
   const {
     formattedTime,
@@ -41,10 +43,17 @@ export default function CompetitionPage({ params }: CompetitionPageProps) {
 
   // Redirect to game page when competition is ONGOING and not paused
   useEffect(() => {
+    console.log('🔍 [Student Redirect Check]', {
+      status: liveCompetition?.status,
+      gameplay_indicator: liveCompetition?.gameplay_indicator,
+      shouldRedirect: liveCompetition?.status === "ONGOING" && liveCompetition?.gameplay_indicator === "PLAY"
+    });
+    
     if (
       liveCompetition?.status === "ONGOING" &&
       liveCompetition?.gameplay_indicator === "PLAY" // Match backend value
     ) {
+      console.log('✅ [Student Redirect] Redirecting to play page!');
       const roomParam = roomId ? `?room=${roomId}` : '';
       router.push(`/student/competition/${competitionId}/play${roomParam}`);
     }
@@ -70,6 +79,7 @@ export default function CompetitionPage({ params }: CompetitionPageProps) {
           <CompetitionWaitingRoom
             competition={liveCompetition}
             participants={liveParticipants}
+            activeParticipants={liveActiveParticipants}
           />
         );
 

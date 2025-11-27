@@ -5,9 +5,10 @@ import styles from '@/styles/competition-student.module.css'
 interface CompetitionWaitingRoomProps {
   competition: Competition
   participants: CompetitionParticipant[]
+  activeParticipants?: any[]
 }
 
-export default function CompetitionWaitingRoom({ competition, participants }: CompetitionWaitingRoomProps) {
+export default function CompetitionWaitingRoom({ competition, participants, activeParticipants = [] }: CompetitionWaitingRoomProps) {
   return (
     <div className={styles.waitingRoom}>
       <div className={styles.waitingContent}>
@@ -29,29 +30,42 @@ export default function CompetitionWaitingRoom({ competition, participants }: Co
             </div>
             
             <div className={styles.infoItem}>
-              <span className={styles.infoLabel}>Participants</span>
+              <span className={styles.infoLabel}>Active Now</span>
+              <span className={styles.infoValue} style={{ color: '#10b981' }}>{activeParticipants.length}</span>
+            </div>
+            
+            <div className={styles.infoItem}>
+              <span className={styles.infoLabel}>Total Joined</span>
               <span className={styles.infoValue}>{participants.length}</span>
             </div>
           </div>
         </div>
         
         <div className={styles.participantsPreview}>
-          <h3 className={styles.previewTitle}>Joined Participants</h3>
+          <h3 className={styles.previewTitle}>
+            Currently Active ({activeParticipants.length})
+          </h3>
           <div className={styles.avatarGrid}>
-            {participants.slice(0, 12).map(p => (
-              <div key={p.id} className={styles.participantAvatar} title={p.fullName}>
+            {activeParticipants.slice(0, 12).map((p, idx) => (
+              <div key={idx} className={styles.participantAvatar} title={`${p.first_name} ${p.last_name}`}>
                 {p.profile_pic ? (
-                  <img src={p.profile_pic} alt={p.fullName} />
+                  <img src={p.profile_pic} alt={`${p.first_name} ${p.last_name}`} />
                 ) : (
                   <div className={styles.avatarPlaceholder}>
-                    {p.fullName?.charAt(0) || '?'}
+                    {p.first_name?.charAt(0) || '?'}
                   </div>
                 )}
+                <div className={styles.onlineIndicator} />
               </div>
             ))}
-            {participants.length > 12 && (
+            {activeParticipants.length > 12 && (
               <div className={styles.moreParticipants}>
-                +{participants.length - 12}
+                +{activeParticipants.length - 12}
+              </div>
+            )}
+            {activeParticipants.length === 0 && (
+              <div className={styles.noActiveParticipants}>
+                Waiting for participants to join...
               </div>
             )}
           </div>

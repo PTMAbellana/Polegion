@@ -79,7 +79,7 @@ export function useCompetitionManagement(roomId: string | number) {
   }, [roomId, fetchCompetitions])
 
   // Fetch specific competition details
-  const fetchCompetitionDetails = useCallback(async (competitionId: number) => {
+  const fetchCompetitionDetails = useCallback(async (competitionId: number, forceRefreshProblems = false) => {
     setState(prev => ({ ...prev, loading: true, error: null }))
     try {
       const [competition, participantsResponse, problems] = await Promise.all([
@@ -100,7 +100,8 @@ export function useCompetitionManagement(roomId: string | number) {
         ...prev,
         currentCompetition: competition,
         participants: participants,
-        addedProblems: problems || [],
+        // Only update addedProblems if forced or if it's empty (initial load)
+        addedProblems: forceRefreshProblems || prev.addedProblems.length === 0 ? (problems || []) : prev.addedProblems,
         loading: false
       }))
     } catch (error) {
@@ -258,29 +259,63 @@ export function useCompetitionManagement(roomId: string | number) {
   }, [fetchCompetitionDetails])
 
   // Add problem to competition
-  const addProblemToCompetition = useCallback(async (problemId: string, competitionId: number) => {
+  const addProblemToCompetition = useCallback(async (problemId: string, competitionId: number, problemData?: any) => {
     try {
+      // Optimistically add if we have problem data
+      if (problemData) {
+        const optimisticProblem = {
+          id: `temp-${Date.now()}`,
+          competition_id: competitionId,
+          problem_id: problemId,
+          timer: problemData.timer || null,
+          sequence_order: state.addedProblems.length,
+          problem: problemData
+        }
+        setState(prev => ({ 
+          ...prev, 
+          addedProblems: [...prev.addedProblems, optimisticProblem] 
+        }))
+      }
+      
+      // Send to backend (but don't refetch - trust optimistic update)
       await addCompeProblem(problemId, competitionId)
-      const updatedProblems = await getCompeProblems(competitionId)
-      setState(prev => ({ ...prev, addedProblems: updatedProblems || [] }))
+      
       return { success: true }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to add problem'
-      setState(prev => ({ ...prev, error: errorMessage }))
+      // On error, revert by refetching
+      try {
+        const updatedProblems = await getCompeProblems(competitionId)
+        setState(prev => ({ ...prev, addedProblems: updatedProblems || [], error: errorMessage }))
+      } catch {
+        setState(prev => ({ ...prev, error: errorMessage }))
+      }
       return { success: false, error: errorMessage }
     }
-  }, [])
+  }, [state.addedProblems])
 
   // Remove problem from competition
   const removeProblemFromCompetition = useCallback(async (problemId: string, competitionId: number) => {
     try {
+      // Optimistically remove from UI
+      setState(prev => ({ 
+        ...prev, 
+        addedProblems: prev.addedProblems.filter(p => p.problem_id !== problemId && p.problem.id !== problemId) 
+      }))
+      
+      // Send to backend (but don't refetch - trust optimistic update)
       await removeCompeProblem(problemId, competitionId)
-      const updatedProblems = await getCompeProblems(competitionId)
-      setState(prev => ({ ...prev, addedProblems: updatedProblems || [] }))
+      
       return { success: true }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to remove problem'
-      setState(prev => ({ ...prev, error: errorMessage }))
+      // On error, revert by refetching
+      try {
+        const updatedProblems = await getCompeProblems(competitionId)
+        setState(prev => ({ ...prev, addedProblems: updatedProblems || [], error: errorMessage }))
+      } catch {
+        setState(prev => ({ ...prev, error: errorMessage }))
+      }
       return { success: false, error: errorMessage }
     }
   }, [])

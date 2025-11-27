@@ -302,12 +302,12 @@ class ProblemRepo {
         .delete()
         .eq('problem_id', prob_id)
         .eq('competition_id', compe_id)
-        .select()
-        .single();
+        .select();
   
       if (error) throw error;
       return data;
     } catch (error) {
+      console.error('Error removing competition problem:', error);
       throw error
     }
   }

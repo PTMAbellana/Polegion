@@ -5,14 +5,14 @@ import { useRouter } from "next/navigation";
 import React, { useState, useRef, useEffect, useCallback, useMemo } from "react";
 
 // Import create-problem components (these are already Konva-based)
-import Toolbox from '@/app/virtual-rooms/[roomCode]/create-problem/components/Toolbox';
-import DifficultyDropdown from '@/app/virtual-rooms/[roomCode]/create-problem/components/DifficultyDropdown';
-import MainArea from '@/app/virtual-rooms/[roomCode]/create-problem/components/MainArea';
-import PromptBox from '@/app/virtual-rooms/[roomCode]/create-problem/components/PromptBox';
-import Timer from '@/app/virtual-rooms/[roomCode]/create-problem/components/Timer';
-import LimitAttempts from '@/app/virtual-rooms/[roomCode]/create-problem/components/LimitAttempts';
-import SetVisibility from '@/app/virtual-rooms/[roomCode]/create-problem/components/SetVisibility';
-import ShapeLimitPopup from '@/app/virtual-rooms/[roomCode]/create-problem/components/ShapeLimitPopup';
+import Toolbox from '@/components/teacher/create-problem/Toolbox';
+import DifficultyDropdown from '@/components/teacher/create-problem/DifficultyDropdown';
+import MainArea from '@/components/teacher/create-problem/MainArea';
+import PromptBox from '@/components/teacher/create-problem/PromptBox';
+import Timer from '@/components/teacher/create-problem/Timer';
+import LimitAttempts from '@/components/teacher/create-problem/LimitAttempts';
+import SetVisibility from '@/components/teacher/create-problem/SetVisibility';
+import ShapeLimitPopup from '@/components/teacher/create-problem/ShapeLimitPopup';
 
 // ADD MISSING IMPORT
 import { getRoomProblemsByCode } from '@/api/problems';

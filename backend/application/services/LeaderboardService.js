@@ -88,10 +88,17 @@ class LeaderboardService {
                 })
             )
 
-            console.log('compiled: ', compiled)
+            // Filter out null results, admins, and teachers - only keep students
+            const validCompiled = compiled.filter(item => 
+                item !== null && 
+                item.participant && 
+                item.participant.role === 'student'
+            );
+            
+            console.log('compiled (students only):', validCompiled)
             
             // Fix the grouping logic
-            const grouped = compiled.reduce((acc, r) => {
+            const grouped = validCompiled.reduce((acc, r) => {
                 const comp_id = r.competition.id
                 
                 if(!acc[comp_id]) {

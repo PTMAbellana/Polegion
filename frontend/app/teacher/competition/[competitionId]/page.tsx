@@ -30,6 +30,7 @@ export default function TeacherCompetitionManagementPage({
   const { isLoggedIn, appLoading } = useAuthStore()
   const [availableProblems, setAvailableProblems] = useState<Problem[]>([])
   const [fetched, setFetched] = useState(false)
+  const [localAddedProblems, setLocalAddedProblems] = useState<any[]>([])
 
   const {
     currentCompetition,
@@ -47,11 +48,19 @@ export default function TeacherCompetitionManagementPage({
     updateProblemTimer
   } = useCompetitionManagement(roomId || '')
 
+  // Sync hook state to local state on initial load
+  useEffect(() => {
+    if (addedProblems.length > 0 && localAddedProblems.length === 0) {
+      setLocalAddedProblems(addedProblems)
+    }
+  }, [addedProblems, localAddedProblems.length])
+
   // Real-time updates
   const {
     competition: liveCompetition,
-    participants: liveParticipants
-  } = useCompetitionRealtime(competitionId, loading)
+    participants: liveParticipants,
+    activeParticipants
+  } = useCompetitionRealtime(competitionId, loading, roomId || '', 'creator')
 
   // Timer management
   const {
@@ -61,6 +70,7 @@ export default function TeacherCompetitionManagementPage({
   // Use live data when available
   const displayCompetition = liveCompetition || currentCompetition
   const displayParticipants = liveParticipants.length > 0 ? liveParticipants : participants
+  const displayActiveParticipants = activeParticipants || []
 
   // Fetch available problems
   const fetchAvailableProblems = async () => {
@@ -89,7 +99,7 @@ export default function TeacherCompetitionManagementPage({
 
   // Handle control actions
   const handleStart = async () => {
-    await handleStartCompetition(competitionId, addedProblems)
+    await handleStartCompetition(competitionId, localAddedProblems)
   }
 
   const handlePause = async () => {
@@ -102,20 +112,48 @@ export default function TeacherCompetitionManagementPage({
 
   const handleNext = async () => {
     const currentIndex = displayCompetition?.current_problem_index || 0
-    await handleNextProblem(competitionId, addedProblems, currentIndex)
+    await handleNextProblem(competitionId, localAddedProblems, currentIndex)
   }
 
   const handleAddProblem = async (problem: Problem) => {
-    await addProblemToCompetition(problem.id, competitionId)
+    // Instantly update local state
+    const newProblem = {
+      id: `temp-${Date.now()}`,
+      competition_id: competitionId,
+      problem_id: problem.id,
+      timer: problem.timer || null,
+      sequence_order: localAddedProblems.length,
+      problem: problem
+    }
+    setLocalAddedProblems(prev => [...prev, newProblem])
+    
+    // Send to backend in background
+    await addProblemToCompetition(problem.id, competitionId, problem)
   }
 
   const handleRemoveProblem = async (problem: Problem) => {
+    // Instantly update local state
+    setLocalAddedProblems(prev => 
+      prev.filter(p => p.problem_id !== problem.id && p.problem?.id !== problem.id)
+    )
+    
+    // Send to backend in background
     await removeProblemFromCompetition(problem.id, competitionId)
   }
 
   const handleUpdateTimer = async (problemId: string, timer: number) => {
-    await updateProblemTimer(problemId, timer)
-    await fetchAvailableProblems()
+    // Optimistically update UI immediately
+    setAvailableProblems(prev => 
+      prev.map(p => p.id === problemId ? { ...p, timer } : p)
+    )
+    
+    // Update backend
+    const result = await updateProblemTimer(problemId, timer)
+    
+    // If update failed, revert by refetching
+    if (!result.success) {
+      await fetchAvailableProblems()
+    }
   }
 
   const handleBack = () => {
@@ -178,7 +216,7 @@ export default function TeacherCompetitionManagementPage({
             {/* Problems Management */}
             <ProblemsManagement
               availableProblems={availableProblems}
-              addedProblems={addedProblems}
+              addedProblems={localAddedProblems}
               competitionStatus={displayCompetition.status}
               onAddProblem={handleAddProblem}
               onRemoveProblem={handleRemoveProblem}
@@ -186,7 +224,10 @@ export default function TeacherCompetitionManagementPage({
             />
 
             {/* Participants Leaderboard */}
-            <ParticipantsLeaderboard participants={displayParticipants} />
+            <ParticipantsLeaderboard 
+              participants={displayParticipants} 
+              activeParticipants={displayActiveParticipants}
+            />
           </div>
         </div>
       </div>

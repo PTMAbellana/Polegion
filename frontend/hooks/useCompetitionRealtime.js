@@ -2,9 +2,10 @@ import { useEffect, useState, useRef } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import api from '../api/axios';
 
-export const useCompetitionRealtime = (competitionId, isLoading, roomId = '') => {
+export const useCompetitionRealtime = (competitionId, isLoading, roomId = '', userType = 'participant') => {
   const [competition, setCompetition] = useState(null);
   const [participants, setParticipants] = useState([]);
+  const [activeParticipants, setActiveParticipants] = useState([]);
   const [isConnected, setIsConnected] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState('DISCONNECTED');
   const channelRef = useRef(null);
@@ -55,7 +56,7 @@ export const useCompetitionRealtime = (competitionId, isLoading, roomId = '') =>
 
         // Use backend API with roomId for proper authorization
         const [compResponse, leaderResponse] = await Promise.all([
-          api.get(`/competitions/${roomId}/${competitionId}?type=participant`),
+          api.get(`/competitions/${roomId}/${competitionId}?type=${userType}`),
           api.get(`/leaderboards/competition/${roomId}?competition_id=${competitionId}`)
         ]);
         
@@ -64,8 +65,23 @@ export const useCompetitionRealtime = (competitionId, isLoading, roomId = '') =>
         
         console.log('📊 [Polling] Backend API result:', { data, participants: leaderboardData });
         
+        // Extract participants from grouped leaderboard response
+        // Backend returns: [{ id, title, data: [{accumulated_xp, participants}] }]
+        // We need to flatten to get just the participants
+        const participantsArray = leaderboardData.length > 0 && leaderboardData[0]?.data 
+          ? leaderboardData[0].data.map((item, idx) => ({
+              id: item.participants.id || `participant-${idx}`, // Unique ID (UUID from User)
+              user_id: item.participants.id, // User ID
+              fullName: `${item.participants.firstName || item.participants.first_name || ''} ${item.participants.lastName || item.participants.last_name || ''}`.trim(),
+              profile_pic: item.participants.profile_pic,
+              accumulated_xp: item.accumulated_xp
+            }))
+          : [];
+        
+        console.log('✅ [Polling] Formatted participants:', participantsArray);
+        
         // Update participants
-        setParticipants(leaderboardData);
+        setParticipants(participantsArray);
         
         if (data) {
           const newCompetition = data;
@@ -122,28 +138,75 @@ export const useCompetitionRealtime = (competitionId, isLoading, roomId = '') =>
     // Start polling immediately
     startPolling();
 
-    // Also create a broadcast channel for real-time updates
-    const channel = supabase
-      .channel(`competition-${competitionId}`)
+    // Setup Realtime Presence for tracking active participants
+    const channel = supabase.channel(`competition-${competitionId}`, {
+      config: {
+        presence: {
+          key: competitionId,
+        },
+      },
+    });
+
+    // Track presence state changes
+    channel
+      .on('presence', { event: 'sync' }, () => {
+        const presenceState = channel.presenceState();
+        console.log('👥 [Presence] Current participants:', presenceState);
+        
+        // Extract active participants from presence state
+        const active = Object.values(presenceState).flatMap(presences => 
+          presences.map(p => p.user)
+        );
+        setActiveParticipants(active);
+      })
+      .on('presence', { event: 'join' }, ({ key, newPresences }) => {
+        console.log('✅ [Presence] User joined:', newPresences);
+      })
+      .on('presence', { event: 'leave' }, ({ key, leftPresences }) => {
+        console.log('❌ [Presence] User left:', leftPresences);
+      })
       .on('broadcast', { event: 'competition_update' }, (payload) => {
         if (payload?.payload) {
           console.log('🔥 [Broadcast] Received update:', payload.payload);
+          console.log('🎯 [Broadcast] Key fields:', {
+            status: payload.payload.status,
+            gameplay_indicator: payload.payload.gameplay_indicator,
+            current_problem_index: payload.payload.current_problem_index,
+            timer_started_at: payload.payload.timer_started_at
+          });
           setCompetition(payload.payload);
           setPollCount(prev => prev + 1);
         }
       })
-      .subscribe();
+      .subscribe(async (status) => {
+        if (status === 'SUBSCRIBED') {
+          // Get current user info from localStorage or auth
+          const userProfile = JSON.parse(localStorage.getItem('userProfile') || '{}');
+          
+          // Track this user's presence
+          await channel.track({
+            user: {
+              id: userProfile.id,
+              first_name: userProfile.first_name,
+              last_name: userProfile.last_name,
+              profile_pic: userProfile.profile_pic,
+              online_at: new Date().toISOString(),
+            },
+          });
+        }
+      });
 
     return () => {
       console.log('🧹 [Realtime] Cleanup for competition:', competitionId);
       if (pollInterval) clearInterval(pollInterval);
       if (channel) supabase.removeChannel(channel);
     };
-  }, [shouldConnect, competitionId]);
+  }, [shouldConnect, competitionId, roomId]);
 
   return {
     competition,
     participants,
+    activeParticipants,
     isConnected,
     connectionStatus,
     setParticipants: (newParticipants) => setParticipants(newParticipants),

@@ -34,6 +34,16 @@ class LeaderboardRepo extends BaseRepo {
     // competition na leaderboard
     async getCompeBoard (room_id, competition_id = null){
         try {
+            // First, get the room creator's user_id
+            const { data: roomData, error: roomError } = await this.supabase
+                .from('rooms')
+                .select('user_id')
+                .eq('id', room_id)
+                .single();
+            
+            if (roomError) throw roomError;
+            const creatorUserId = roomData?.user_id;
+            
             let query = this.supabase.from(this.tableCompe)
             .select(`
                 accumulated_xp,
@@ -66,8 +76,16 @@ class LeaderboardRepo extends BaseRepo {
     
             if (error) throw error
             if (!data) throw error
+            
+            // Filter out the room creator from participants and null participants
+            const filteredData = data.filter(row => 
+                row.participant && 
+                row.participant.user_id && 
+                row.participant.user_id !== creatorUserId
+            );
+            
             // console.log(data)
-            return data
+            return filteredData
         } catch (error){
             // console.log('ako gi tawag ', error)
             throw error
