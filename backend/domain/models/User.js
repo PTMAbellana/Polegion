@@ -55,6 +55,7 @@ class User {
 
     toJSON(){
         return {
+            id: this.id,
             first_name: this.firstName,
             last_name: this.lastName,
             gender: this.gender,

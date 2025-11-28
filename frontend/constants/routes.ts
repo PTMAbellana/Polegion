@@ -17,8 +17,8 @@ export const ROUTES = {
     COMPETITION: '/competition',
     PLAY: '/competition/play',
 
-    // leaderboards
-    LEADERBOARD: '/leaderboard',
+    // records
+    RECORDS: '/records',
     
     //profile
     PROFILE: '/profile',
@@ -46,7 +46,7 @@ export const STUDENT_ROUTES = {
     PLAYGROUND: `/student/playground`,
     
     // wall of fame or leaderboards
-    LEADERBOARD: `/student${ROUTES.LEADERBOARD}`,
+    LEADERBOARD: `/student/leaderboard`,
     
     // profile
     PROFILE: `/student${ROUTES.PROFILE}`,
@@ -67,8 +67,8 @@ export const TEACHER_ROUTES = {
     // virtual rooms
     VIRTUAL_ROOMS: `/teacher/virtual-rooms`,
     
-    // leaderboards
-    LEADERBOARD: `/teacher${ROUTES.LEADERBOARD}`,
+    // records
+    RECORDS: `/teacher${ROUTES.RECORDS}`,
     
     // profile
     PROFILE: `/teacher${ROUTES.PROFILE}`,

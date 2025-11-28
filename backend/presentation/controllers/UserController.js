@@ -206,6 +206,66 @@ class UserController {
     getUploadMiddleware() {
         return this.uploadMiddleware;
     }
+
+    // Get student progress (castles + competitions)
+    getStudentProgress = async (req, res) => {
+        try {
+            const { userId } = req.params;
+            const progress = await this.userService.getStudentProgress(userId);
+            
+            return res.status(200).json({
+                success: true,
+                data: progress
+            });
+        } catch (error) {
+            console.error('Error fetching student progress:', error);
+            return res.status(500).json({
+                success: false,
+                error: 'Failed to fetch student progress',
+                message: error.message
+            });
+        }
+    }
+
+    // Get user castle progress
+    getUserCastleProgress = async (req, res) => {
+        try {
+            const { userId } = req.params;
+            const castleProgress = await this.userService.getUserCastleProgress(userId);
+            
+            return res.status(200).json({
+                success: true,
+                data: castleProgress
+            });
+        } catch (error) {
+            console.error('Error fetching castle progress:', error);
+            return res.status(500).json({
+                success: false,
+                error: 'Failed to fetch castle progress',
+                message: error.message
+            });
+        }
+    }
+
+    // Get user assessment scores
+    getUserAssessmentScores = async (req, res) => {
+        try {
+            const { userId } = req.params;
+            const assessmentScores = await this.userService.getUserAssessmentScores(userId);
+            
+            return res.status(200).json({
+                success: true,
+                data: assessmentScores
+            });
+        } catch (error) {
+            console.error('Error fetching assessment scores:', error);
+            return res.status(500).json({
+                success: false,
+                error: 'Failed to fetch assessment scores',
+                message: error.message
+            });
+        }
+    }
 }
 
 module.exports = UserController

@@ -58,6 +58,13 @@ function TeacherCompetitionContent({ competitionId }: { competitionId: number })
     activeParticipants
   } = useCompetitionRealtime(competitionId, false, roomId || '', 'creator')
 
+  console.log('📊 [Teacher Page] Real-time hook returned:', {
+    liveCompetition: !!liveCompetition,
+    liveParticipantsCount: liveParticipants.length,
+    activeParticipantsCount: activeParticipants?.length || 0,
+    activeParticipantsRaw: activeParticipants
+  });
+
   // Mark initial loading as complete once we have data OR the fetch has completed
   useEffect(() => {
     if (currentCompetition || liveCompetition || (!loading && fetched)) {
@@ -111,8 +118,11 @@ function TeacherCompetitionContent({ competitionId }: { competitionId: number })
   const displayActiveParticipants = (() => {
     const allActive = activeParticipants || [];
     
-    console.log('🔍 [Teacher Filter] Active participants before filter:', allActive);
+    console.log('🔍 [Teacher Filter] Active participants RAW:', allActive);
+    console.log('🔍 [Teacher Filter] Active count:', allActive.length);
     console.log('🔍 [Teacher Filter] Participants list:', displayParticipants);
+    console.log('🔍 [Teacher Filter] Competition ID:', competitionId);
+    console.log('🔍 [Teacher Filter] Room ID:', roomId);
     
     // Get participant IDs (students who joined the competition)
     const participantIds = new Set(displayParticipants.map((p: any) => p.user_id || p.id));
@@ -125,15 +135,17 @@ function TeacherCompetitionContent({ competitionId }: { competitionId: number })
       }
       // If role is 'student', include them
       if (ap.role === 'student') {
+        console.log('✅ [Teacher Filter] Including student:', ap);
         return true;
       }
       // If role is undefined (old presence data), check if they're in participants list
       if (!ap.role && participantIds.size > 0) {
         const isParticipant = participantIds.has(ap.id);
-        console.log(`🔍 [Teacher Filter] No role for ${ap.id}, isParticipant: ${isParticipant}`);
+        console.log(`🔍 [Teacher Filter] No role for ${ap.id}, isParticipant: ${isParticipant}`, ap);
         return isParticipant;
       }
       // Default: include if we can't determine
+      console.log('❓ [Teacher Filter] Unknown role, including by default:', ap);
       return true;
     });
     
@@ -243,6 +255,10 @@ function TeacherCompetitionContent({ competitionId }: { competitionId: number })
     router.back()
   }
 
+  const handlePrintResults = () => {
+    window.print()
+  }
+
   // Only show full loading overlay for initial load, not for action loading (pause/resume/etc)
   if (appLoading || !isLoggedIn || initialLoading) {
     return <LoadingOverlay isLoading={true} />
@@ -277,8 +293,9 @@ function TeacherCompetitionContent({ competitionId }: { competitionId: number })
           status={displayCompetition.status}
           timer={formattedTime}
           participantCount={displayParticipants.length}
-          activeCount={displayActiveParticipants.length}
+          activeCount={displayParticipants.length}
           onBack={handleBack}
+          onPrint={handlePrintResults}
         />
 
         {/* Scrollable Content */}
@@ -314,6 +331,7 @@ function TeacherCompetitionContent({ competitionId }: { competitionId: number })
             <ParticipantsLeaderboard 
               participants={displayParticipants} 
               activeParticipants={displayActiveParticipants}
+              currentProblemIndex={displayCompetition.current_problem_index}
             />
           </div>
         </div>

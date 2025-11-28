@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect, useState, Suspense } from "react";
+import { useEffect, useState, Suspense, useMemo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { use } from "react";
 import Gamepage from "@/components/Gamepage";
 import { CompetitionPaused } from "@/components/competition";
 import { useCompetitionRealtime } from "@/hooks/useCompetitionRealtime";
 import { useCompetitionTimer } from "@/hooks/useCompetitionTimer";
+import { useAuthStore } from "@/store/authStore";
 import type { Competition } from "@/types/common/competition";
 import { useStudentRoomStore } from "@/store/studentRoomStore";
 import styles from "@/styles/competition-student.module.css";
@@ -20,6 +21,7 @@ function PlayPageContent({ competitionId }: { competitionId: number }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { currentRoom } = useStudentRoomStore();
+  const { userProfile } = useAuthStore();
   const roomId = searchParams.get('room') || currentRoom?.id?.toString() || '';
   const roomCode = searchParams.get('roomCode') || '';
 
@@ -30,7 +32,17 @@ function PlayPageContent({ competitionId }: { competitionId: number }) {
   const {
     competition,
     isConnected,
-  } = useCompetitionRealtime(competitionId, false, roomId, 'participant');
+    participants,
+    activeParticipants,
+  } = useCompetitionRealtime(competitionId.toString(), false, roomId, 'participant');
+
+  console.log('🎮 [PlayPage] Real-time hook returned:', {
+    competition: !!competition,
+    isConnected,
+    participantsCount: participants.length,
+    activeParticipantsCount: activeParticipants?.length || 0,
+    activeParticipantsRaw: activeParticipants
+  });
 
   // Debug logging for competition data
   console.log('🎮 [PlayPage] competition:', competition, 'isConnected:', isConnected);
@@ -41,6 +53,32 @@ function PlayPageContent({ competitionId }: { competitionId: number }) {
   // Track if we should show pause overlay
   const [showPauseOverlay, setShowPauseOverlay] = useState(false);
   const [loadTimeout, setLoadTimeout] = useState(false);
+
+  // Get user's XP from participants data (updated in real-time via polling)
+  const userAccumulatedXP = useMemo(() => {
+    console.log('📊 [PlayPage] === XP CALCULATION DEBUG ===');
+    console.log('📊 [PlayPage] User Profile ID:', userProfile?.id, 'Type:', typeof userProfile?.id);
+    console.log('📊 [PlayPage] Participants Count:', participants.length);
+    console.log('📊 [PlayPage] All Participants:', participants);
+    console.log('📊 [PlayPage] Participant Details:', participants.map((p: any) => ({ 
+      id: p.id, 
+      user_id: p.user_id, 
+      xp: p.accumulated_xp,
+      fullName: p.fullName,
+      idType: typeof p.id,
+      userIdType: typeof p.user_id
+    })));
+    
+    const found = participants.find(
+      (p: any) => String(p.user_id) === String(userProfile?.id) || String(p.id) === String(userProfile?.id)
+    );
+    
+    console.log('📊 [PlayPage] Found participant:', found);
+    console.log('📊 [PlayPage] Returning XP:', found?.accumulated_xp || 0);
+    console.log('📊 [PlayPage] === END XP CALCULATION ===');
+    
+    return found?.accumulated_xp || 0;
+  }, [participants, userProfile?.id]);
 
   // Set a timeout to show error message if loading takes too long
   useEffect(() => {
@@ -161,6 +199,7 @@ function PlayPageContent({ competitionId }: { competitionId: number }) {
         currentCompetition={liveCompetition}
         roomId={roomId || currentRoom?.id?.toString() || ""}
         isFullScreenMode={true}
+        userAccumulatedXP={userAccumulatedXP}
       />
     </>
   );

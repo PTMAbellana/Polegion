@@ -8,10 +8,15 @@ export interface RecordStudent {
   first_name?: string
   last_name?: string
   xp?: number
+  total_xp?: number
   competitions_completed?: number
   average_score?: number
   problems_solved?: number
   success_rate?: string
+  castles_completed?: number
+  total_castles?: number
+  pretest_score?: number
+  posttest_score?: number
 }
 
 export interface RecordsData {

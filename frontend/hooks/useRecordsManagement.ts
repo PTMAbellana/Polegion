@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useCallback } from 'react'
-import { downloadRoomRecordsCSV, downloadCompetitionRecordsCSV } from '@/api/leaderboards'
+import { downloadRoomRecordsCSV, downloadCompetitionRecordsCSV } from '@/api/records'
 
 interface UseRecordsManagementReturn {
     isLoading: boolean

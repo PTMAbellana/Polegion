@@ -4,7 +4,7 @@ import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { useAuthStore } from "@/store/authStore"
 import { useTeacherRoomStore } from "@/store/teacherRoomStore"
-import { getRoomLeaderboards } from "@/api/leaderboards"
+import { getRoomLeaderboards } from "@/api/records"
 import Loader from "@/components/Loader"
 import LoadingOverlay from "@/components/LoadingOverlay"
 import PageHeader from "@/components/PageHeader"
@@ -214,7 +214,7 @@ export default function TeacherDashboard() {
 
             <button 
               className={teacherStyles.quickActionCard}
-              onClick={() => router.push(TEACHER_ROUTES.LEADERBOARD)}
+              onClick={() => router.push(TEACHER_ROUTES.RECORDS)}
             >
               <div className={teacherStyles.quickActionIcon}>
                 <FaRegFileAlt />
@@ -316,7 +316,7 @@ export default function TeacherDashboard() {
               <h2>Top Students</h2>
               <button 
                 className={teacherStyles.viewAllButton}
-                onClick={() => router.push(TEACHER_ROUTES.LEADERBOARD)}
+                onClick={() => router.push(TEACHER_ROUTES.RECORDS)}
               >
                 View All Records
               </button>

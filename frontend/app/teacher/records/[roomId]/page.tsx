@@ -9,7 +9,7 @@ import { useRecordsManagement } from '@/hooks/useRecordsManagement'
 import { useRecordsPreview } from '@/hooks/useRecordsPreview'
 import RecordsHeader from '@/components/teacher/RecordsHeader'
 import RecordsDownloadSection from '@/components/teacher/RecordsDownloadSection'
-import styles from '@/styles/leaderboard.module.css'
+import styles from '@/styles/records.module.css'
 import { useTeacherRoomStore } from '@/store/teacherRoomStore'
 
 export default function RecordPage({ params }: { params: Promise<{ roomId: number }> }) {
@@ -73,10 +73,6 @@ export default function RecordPage({ params }: { params: Promise<{ roomId: numbe
               competitionRecords={competitionRecords}
               competitions={competitions}
             />
-          </div>
-        </div>
-      )}
-    </LoadingOverlay>
           </div>
         </div>
       )}

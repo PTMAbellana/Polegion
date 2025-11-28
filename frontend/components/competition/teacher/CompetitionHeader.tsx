@@ -1,4 +1,5 @@
 import React from 'react'
+import { Printer } from 'lucide-react'
 import styles from '@/styles/competition-teacher.module.css'
 
 interface CompetitionHeaderProps {
@@ -8,6 +9,7 @@ interface CompetitionHeaderProps {
   participantCount?: number
   activeCount?: number
   onBack: () => void
+  onPrint?: () => void
 }
 
 export default function CompetitionHeader({ 
@@ -16,7 +18,8 @@ export default function CompetitionHeader({
   timer, 
   participantCount = 0,
   activeCount = 0,
-  onBack 
+  onBack,
+  onPrint
 }: CompetitionHeaderProps) {
   const getStatusColor = (status: string) => {
     switch (status?.toUpperCase()) {
@@ -44,11 +47,24 @@ export default function CompetitionHeader({
             Back
           </button>
           
-          {status && status.toUpperCase() !== 'DONE' && (
-            <div className={`${styles.statusBadgeLarge} ${getStatusColor(status)}`}>
-              {status}
-            </div>
-          )}
+          <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+            {onPrint && (
+              <button
+                onClick={onPrint}
+                className={styles.printButton}
+                title="Print competition results"
+              >
+                <Printer size={16} />
+                Print Results
+              </button>
+            )}
+            
+            {status && status.toUpperCase() !== 'DONE' && (
+              <div className={`${styles.statusBadgeLarge} ${getStatusColor(status)}`}>
+                {status}
+              </div>
+            )}
+          </div>
         </div>
         
         {/* Title */}

@@ -220,6 +220,88 @@
   transform: translateY(0);
 }
 
+.printButton {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  justify-content: center;
+  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.3);
+  padding: 0.75rem 1.25rem;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.printButton:hover {
+  background: linear-gradient(135deg, #059669, #047857);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(16, 185, 129, 0.4);
+}
+
+.printButton:active {
+  transform: translateY(0);
+}
+
+@media print {
+  .printButton {
+    display: none;
+  }
+  
+  .backButton {
+    display: none;
+  }
+  
+  .statusBadgeLarge {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  
+  .container {
+    background: white;
+  }
+  
+  .competitionHeader {
+    background: linear-gradient(135deg, #2C514C, #122932);
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    page-break-after: avoid;
+  }
+  
+  .scrollableContent {
+    overflow: visible;
+    max-height: none;
+  }
+  
+  .header {
+    display: none; /* Hide controls during print */
+  }
+  
+  .leftColumn {
+    display: none; /* Hide problem management during print */
+  }
+  
+  .rightColumn {
+    width: 100%;
+    max-width: none;
+  }
+  
+  .participantCard {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    page-break-inside: avoid;
+  }
+  
+  .participantXp {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}
+
 .title {
   font-size: 2.5rem;
   font-weight: 900;
@@ -244,6 +326,63 @@
   justify-content: center;
   flex-wrap: wrap;
   margin-top: 1.5rem;
+}
+
+/* Countdown Container */
+.countdownContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1.5rem 2rem;
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(5, 150, 105, 0.15));
+  border: 2px solid #10b981;
+  border-radius: 16px;
+  animation: pulse 1s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 10px rgba(16, 185, 129, 0);
+  }
+}
+
+.countdownNumber {
+  font-size: 3rem;
+  font-weight: 800;
+  color: #059669;
+  line-height: 1;
+  animation: countdownPulse 1s ease-in-out infinite;
+}
+
+@keyframes countdownPulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+.countdownText {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #047857;
+}
+
+.cancelButton {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  color: white;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+}
+
+.cancelButton:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
 }
 
 .controlButton {
@@ -955,6 +1094,39 @@
   display: flex;
   align-items: center;
   flex-wrap: wrap;
+  gap: 0.25rem;
+}
+
+.participantStatus {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+}
+
+.statusSubmitted {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #10b981;
+  background: rgba(16, 185, 129, 0.1);
+  padding: 0.15rem 0.5rem;
+  border-radius: 6px;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.statusAnswering {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #f59e0b;
+  background: rgba(245, 158, 11, 0.1);
+  padding: 0.15rem 0.5rem;
+  border-radius: 6px;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  display: inline-flex;
+  align-items: center;
   gap: 0.25rem;
 }
 

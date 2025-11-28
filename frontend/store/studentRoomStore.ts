@@ -25,15 +25,20 @@ export const useStudentRoomStore = create<ExtendedStudentRoomState>()(
             fetchRoomDetails: async (roomCode: string) => {
                 set({ roomLoading: true, error: null });
                 try {
+                    // Get the room from current state
                     const room = get().joinedRooms.find(r => r.code === roomCode);
+                    
                     if (!room) {
                         console.log('Room not found with code:', roomCode);
                         set ({
                             error: 'Room not found',
                             currentRoom: null,
+                            roomLoading: false
                         });
                         return;
                     }
+
+                    console.log('📡 Fetching fresh data for room:', room.id);
 
                     const [resPart, resProb, resCompe] = await Promise.allSettled([
                         getAllParticipants(room.id, 'student'), 
@@ -117,12 +122,14 @@ export const useStudentRoomStore = create<ExtendedStudentRoomState>()(
                             joinedRooms: response.data,
                             loading: false 
                         });
+                        return { success: true, data: response.data };
                     } else {
                         set({ 
                             joinedRooms: [],
                             loading: false,
                             error: response.error || 'No rooms found'
                         });
+                        return { success: false, error: response.error };
                     }
                 } catch (error: unknown) {
                     const errorMessage = error instanceof Error ? error.message : 'Failed to fetch joined rooms';
@@ -130,6 +137,7 @@ export const useStudentRoomStore = create<ExtendedStudentRoomState>()(
                         error: errorMessage,
                         loading: false 
                     });
+                    return { success: false, error: errorMessage };
                 } 
             },
 

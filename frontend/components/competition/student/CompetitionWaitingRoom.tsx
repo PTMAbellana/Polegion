@@ -9,6 +9,14 @@ interface CompetitionWaitingRoomProps {
 }
 
 export default function CompetitionWaitingRoom({ competition, participants, activeParticipants = [] }: CompetitionWaitingRoomProps) {
+  console.log('🖼️ [WaitingRoom] Active participants with profile pics:', 
+    activeParticipants.map(p => ({
+      name: `${p.first_name} ${p.last_name}`,
+      id: p.id,
+      profile_pic: p.profile_pic
+    }))
+  );
+  
   return (
     <div className={styles.waitingRoom}>
       <div className={styles.waitingContent}>
@@ -46,18 +54,22 @@ export default function CompetitionWaitingRoom({ competition, participants, acti
             Currently Active ({activeParticipants.length})
           </h3>
           <div className={styles.avatarGrid}>
-            {activeParticipants.slice(0, 12).map((p, idx) => (
-              <div key={idx} className={styles.participantAvatar} title={`${p.first_name} ${p.last_name}`}>
-                {p.profile_pic ? (
-                  <img src={p.profile_pic} alt={`${p.first_name} ${p.last_name}`} />
-                ) : (
-                  <div className={styles.avatarPlaceholder}>
-                    {p.first_name?.charAt(0) || '?'}
-                  </div>
-                )}
-                <div className={styles.onlineIndicator} />
-              </div>
-            ))}
+            {activeParticipants.slice(0, 12).map((p, idx) => {
+              const displayName = p.first_name && p.last_name ? `${p.first_name} ${p.last_name}` : 'User'
+              const initials = p.first_name?.charAt(0) || '?'
+              return (
+                <div key={idx} className={styles.participantAvatar} title={displayName}>
+                  {p.profile_pic ? (
+                    <img src={p.profile_pic} alt={displayName} />
+                  ) : (
+                    <div className={styles.avatarPlaceholder}>
+                      {initials}
+                    </div>
+                  )}
+                  <div className={styles.onlineIndicator} />
+                </div>
+              )
+            })}
             {activeParticipants.length > 12 && (
               <div className={styles.moreParticipants}>
                 +{activeParticipants.length - 12}

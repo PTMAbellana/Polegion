@@ -1,4 +1,5 @@
 export interface UserType {
+  user_id?: string;
   participant_id?: number;
   first_name?: string;
   last_name?: string;

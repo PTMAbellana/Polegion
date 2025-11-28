@@ -27,7 +27,7 @@ import { useTeacherRoomStore } from "@/store/teacherRoomStore";
 import { Problem, ProblemPayload, TProblemType } from "@/types";
 
 const XP_MAP = { Easy: 10, Intermediate: 20, Hard: 30 };
-const MAX_SHAPES = 1;
+const MAX_SHAPES = 5;
 
 export default function CreateProblemPage({ params }: { params: Promise<{ roomCode: string }> }) {
   const router = useRouter();

@@ -218,6 +218,78 @@ class UserRoutes {
             this.userController.getUploadMiddleware(),
             this.userController.uploadProfileImage,
         )
+
+        /**
+         * @swagger
+         * /users/{userId}/progress:
+         *   get:
+         *     tags: [Users]
+         *     summary: Get student progress
+         *     description: Get complete student progress including castle and competition data
+         *     security:
+         *       - bearerAuth: []
+         *     parameters:
+         *       - in: path
+         *         name: userId
+         *         required: true
+         *         schema:
+         *           type: string
+         *         description: User ID
+         *     responses:
+         *       200:
+         *         description: Student progress retrieved successfully
+         *       404:
+         *         description: Student not found
+         */
+        this.router.get('/:userId/progress', this.userController.getStudentProgress.bind(this.userController))
+
+        /**
+         * @swagger
+         * /users/{userId}/castle-progress:
+         *   get:
+         *     tags: [Users]
+         *     summary: Get student castle progress
+         *     description: Get student's worldmap/castle progress details
+         *     security:
+         *       - bearerAuth: []
+         *     parameters:
+         *       - in: path
+         *         name: userId
+         *         required: true
+         *         schema:
+         *           type: string
+         *         description: User ID
+         *     responses:
+         *       200:
+         *         description: Castle progress retrieved successfully
+         *       404:
+         *         description: Student not found
+         */
+        this.router.get('/:userId/castle-progress', this.userController.getUserCastleProgress.bind(this.userController))
+
+        /**
+         * @swagger
+         * /users/{userId}/assessment-scores:
+         *   get:
+         *     tags: [Users]
+         *     summary: Get student assessment scores
+         *     description: Get student's pretest and posttest scores
+         *     security:
+         *       - bearerAuth: []
+         *     parameters:
+         *       - in: path
+         *         name: userId
+         *         required: true
+         *         schema:
+         *           type: string
+         *         description: User ID
+         *     responses:
+         *       200:
+         *         description: Assessment scores retrieved successfully
+         *       404:
+         *         description: Student not found
+         */
+        this.router.get('/:userId/assessment-scores', this.userController.getUserAssessmentScores.bind(this.userController))
     }
 
     getRouter(){

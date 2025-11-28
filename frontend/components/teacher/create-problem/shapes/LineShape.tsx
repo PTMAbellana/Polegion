@@ -119,11 +119,18 @@ const LineShape: React.FC<LineShapeProps> = ({
       <Group
         x={shape.x}
         y={shape.y}
-        draggable={true}
+        draggable
         onDragEnd={handleDragEnd}
         onClick={(e) => {
           e.cancelBubble = true;
           onSelect();
+        }}
+        onTap={(e) => {
+          e.cancelBubble = true;
+          onSelect();
+        }}
+        onMouseDown={(e) => {
+          e.cancelBubble = true;
         }}
       >
         {/* Main Line */}

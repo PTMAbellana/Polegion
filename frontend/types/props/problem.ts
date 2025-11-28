@@ -93,6 +93,7 @@ export interface SetVisibilityProps {
 
 export interface ShapeLimitPopupProps {
   onClose: () => void;
+  limit?: number;
 }
 
 export interface TimerProps {

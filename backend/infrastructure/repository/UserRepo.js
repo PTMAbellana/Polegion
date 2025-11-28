@@ -334,6 +334,146 @@ class UserRepo extends BaseRepo{
     //         throw error
     //     }
     // }
+
+    // Get user castle progress with details
+    async getUserCastleProgress(userId) {
+        try {
+            const { data, error } = await this.supabase
+                .from('user_castle_progress')
+                .select(`
+                    *,
+                    castles (
+                        id,
+                        name,
+                        route,
+                        unlock_order
+                    )
+                `)
+                .eq('user_id', userId);
+
+            if (error) throw error;
+
+            // Return empty array if no data
+            if (!data || data.length === 0) {
+                console.log(`No castle progress found for user ${userId}`);
+                return [];
+            }
+
+            // Sort by castle unlock_order
+            const sortedData = data.sort((a, b) => {
+                const orderA = a.castles?.unlock_order || 0;
+                const orderB = b.castles?.unlock_order || 0;
+                return orderA - orderB;
+            });
+
+            // Get total chapters for each castle
+            const castleProgress = await Promise.all(sortedData.map(async (progress) => {
+                // Count chapters for this castle
+                const { count: totalChapters } = await this.supabase
+                    .from('chapters')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('castle_id', progress.castle_id);
+
+                const chaptersCompleted = progress.completion_percentage 
+                    ? Math.round((progress.completion_percentage / 100) * (totalChapters || 0))
+                    : 0;
+
+                return {
+                    castle_id: progress.castle_id,
+                    castle_name: progress.castles?.name || 'Unknown Castle',
+                    chapters_completed: chaptersCompleted,
+                    total_chapters: totalChapters || 0,
+                    total_xp: progress.total_xp_earned || 0,
+                    progress_percentage: progress.completion_percentage || 0,
+                    unlocked: progress.unlocked || false,
+                    completed: progress.completed || false
+                };
+            }));
+
+            console.log(`Found ${castleProgress.length} castles for user ${userId}`);
+            return castleProgress;
+        } catch (error) {
+            console.error('Error in getUserCastleProgress:', error);
+            throw error;
+        }
+    }
+
+    // Get user competition history
+    async getUserCompetitionHistory(userId) {
+        try {
+            const { data, error } = await this.supabase
+                .from('competition_participants')
+                .select(`
+                    *,
+                    competitions (
+                        id,
+                        title,
+                        status,
+                        created_at
+                    )
+                `)
+                .eq('user_id', userId)
+                .order('created_at', { ascending: false });
+
+            if (error) throw error;
+
+            // Transform data
+            const competitionHistory = data.map(participant => ({
+                competition_id: participant.competition_id,
+                title: participant.competitions?.title || 'Unknown Competition',
+                accumulated_xp: participant.accumulated_xp || 0,
+                rank: participant.rank || 0,
+                status: participant.competitions?.status || 'UNKNOWN',
+                date: participant.competitions?.created_at || participant.created_at
+            }));
+
+            return competitionHistory;
+        } catch (error) {
+            console.error('Error in getUserCompetitionHistory:', error);
+            throw error;
+        }
+    }
+
+    // Get user assessment scores (pretest and posttest)
+    async getUserAssessmentScores(userId) {
+        try {
+            const { data, error } = await this.supabase
+                .from('user_assessment_results')
+                .select('test_type, percentage, total_score, max_score, completed_at')
+                .eq('user_id', userId)
+                .order('completed_at', { ascending: false });
+
+            if (error) throw error;
+
+            // Handle empty results
+            if (!data || data.length === 0) {
+                console.log(`No assessment results found for user ${userId}`);
+                return {
+                    pretest_score: null,
+                    posttest_score: null,
+                    pretest_completed_at: null,
+                    posttest_completed_at: null
+                };
+            }
+
+            // Get the most recent pretest and posttest
+            const pretest = data.find(result => result.test_type === 'pretest');
+            const posttest = data.find(result => result.test_type === 'posttest');
+
+            const result = {
+                pretest_score: pretest ? Math.round(pretest.percentage) : null,
+                posttest_score: posttest ? Math.round(posttest.percentage) : null,
+                pretest_completed_at: pretest?.completed_at || null,
+                posttest_completed_at: posttest?.completed_at || null
+            };
+
+            console.log(`Assessment scores for user ${userId}:`, result);
+            return result;
+        } catch (error) {
+            console.error('Error in getUserAssessmentScores:', error);
+            throw error;
+        }
+    }
 }
 
 module.exports = UserRepo

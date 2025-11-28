@@ -1,5 +1,5 @@
 import React from 'react'
-import { FaUsers, FaPlus, FaUserSlash } from 'react-icons/fa'
+import { FaUsers, FaPlus, FaUserSlash, FaPrint } from 'react-icons/fa'
 import styles from '@/styles/room-details.module.css'
 import { ParticipantsSidebarProps } from '@/types'
 
@@ -9,6 +9,13 @@ export default function ParticipantsSidebar({
     onInviteParticipants,
     onKickParticipant 
 }: ParticipantsSidebarProps) {
+    
+    const handlePrintProgress = (participant: any) => {
+        // Open student progress in new window for printing
+        const userId = participant.user_id || participant.id;
+        window.open(`/teacher/student-progress/${userId}`, '_blank');
+    };
+    
     return (
         <div className={styles.participantsContainer}>
             <div className={styles.participantsHeader}>
@@ -57,9 +64,16 @@ export default function ParticipantsSidebar({
                                     </p>
                                 </div>
                                 <button
+                                    className={styles.printProgressButton}
+                                    title="Print student progress"
+                                    onClick={() => handlePrintProgress(participant)}
+                                >
+                                    <FaPrint />
+                                </button>
+                                <button
                                     className={styles.kickButton}
                                     title="Kick participant"
-                                    onClick={() => onKickParticipant(participant)} // You handle this
+                                    onClick={() => onKickParticipant(participant)}
                                 >
                                     <FaUserSlash />
                                 </button>

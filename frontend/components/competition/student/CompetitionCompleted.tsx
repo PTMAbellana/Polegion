@@ -7,7 +7,6 @@ interface CompetitionCompletedProps {
   formattedTime: string
   participants: CompetitionParticipant[]
   onRefresh?: () => void
-  onCopyLink?: () => void
 }
 
 // Confetti component for celebration effect
@@ -44,29 +43,18 @@ export default function CompetitionCompleted({
   competitionTitle,
   formattedTime,
   participants,
-  onRefresh,
-  onCopyLink
+  onRefresh
 }: CompetitionCompletedProps) {
   const [showConfetti, setShowConfetti] = useState(true)
-  const [copied, setCopied] = useState(false)
   
   const sortedParticipants = [...participants].sort((a, b) => b.accumulated_xp - a.accumulated_xp)
   const winner = sortedParticipants[0]
-  const totalXP = sortedParticipants.reduce((acc, p) => acc + p.accumulated_xp, 0)
 
   // Stop confetti after 5 seconds
   useEffect(() => {
     const timer = setTimeout(() => setShowConfetti(false), 5000)
     return () => clearTimeout(timer)
   }, [])
-
-  const handleCopyLink = () => {
-    if (onCopyLink) {
-      onCopyLink()
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
-    }
-  }
 
   return (
     <div className={styles.completedSection}>
@@ -114,8 +102,8 @@ export default function CompetitionCompleted({
           </div>
           
           <div className={styles.statCard}>
-            <span className={styles.statValue}>{totalXP}</span>
-            <span className={styles.statLabel}>Total XP Earned</span>
+            <span className={styles.statValue}>{formattedTime}</span>
+            <span className={styles.statLabel}>Time</span>
           </div>
         </div>
         
@@ -164,12 +152,6 @@ export default function CompetitionCompleted({
           {onRefresh && (
             <button onClick={onRefresh} className={styles.refreshButton}>
               Refresh Results
-            </button>
-          )}
-          
-          {onCopyLink && (
-            <button onClick={handleCopyLink} className={`${styles.shareButton} ${copied ? styles.copied : ''}`}>
-              {copied ? 'Link Copied!' : 'Copy Results Link'}
             </button>
           )}
         </div>

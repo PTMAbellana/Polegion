@@ -152,6 +152,106 @@ class UserService {
         }
     }
 
+    // Get student progress (castles + competitions)
+    async getStudentProgress(userId) {
+        try {
+            const cacheKey = cache.generateKey('student_progress', userId);
+            
+            // Check cache first
+            const cached = cache.get(cacheKey);
+            if (cached) {
+                console.log('Cache hit: getStudentProgress', userId);
+                return cached;
+            }
+
+            // Get user info
+            const user = await this.userRepo.getUserByUid(userId);
+            if (!user) {
+                throw new Error('User not found');
+            }
+
+            // Get castle progress
+            const castleProgress = await this.userRepo.getUserCastleProgress(userId);
+            
+            // Get competition history
+            const competitionHistory = await this.userRepo.getUserCompetitionHistory(userId);
+
+            const result = {
+                user: {
+                    first_name: user.first_name,
+                    last_name: user.last_name,
+                    email: user.email,
+                    profile_pic: user.profile_pic || ''
+                },
+                castles: castleProgress || [],
+                competitions: competitionHistory || []
+            };
+
+            // Cache the result
+            cache.set(cacheKey, result, this.CACHE_TTL);
+            console.log('Cached: getStudentProgress', userId);
+
+            return result;
+        } catch (error) {
+            console.error('Error in getStudentProgress:', error);
+            throw error;
+        }
+    }
+
+    // Get user castle progress
+    async getUserCastleProgress(userId) {
+        try {
+            const cacheKey = cache.generateKey('user_castle_progress', userId);
+            
+            // Check cache first
+            const cached = cache.get(cacheKey);
+            if (cached) {
+                console.log('Cache hit: getUserCastleProgress', userId);
+                return cached;
+            }
+
+            const result = await this.userRepo.getUserCastleProgress(userId);
+            
+            // Cache the result
+            if (result) {
+                cache.set(cacheKey, result, this.CACHE_TTL);
+                console.log('Cached: getUserCastleProgress', userId);
+            }
+
+            return result;
+        } catch (error) {
+            console.error('Error in getUserCastleProgress:', error);
+            throw error;
+        }
+    }
+
+    // Get user assessment scores (pretest and posttest)
+    async getUserAssessmentScores(userId) {
+        try {
+            const cacheKey = cache.generateKey('user_assessment_scores', userId);
+            
+            // Check cache first
+            const cached = cache.get(cacheKey);
+            if (cached) {
+                console.log('Cache hit: getUserAssessmentScores', userId);
+                return cached;
+            }
+
+            const result = await this.userRepo.getUserAssessmentScores(userId);
+            
+            // Cache the result
+            if (result) {
+                cache.set(cacheKey, result, this.CACHE_TTL);
+                console.log('Cached: getUserAssessmentScores', userId);
+            }
+
+            return result;
+        } catch (error) {
+            console.error('Error in getUserAssessmentScores:', error);
+            throw error;
+        }
+    }
+
 }
 
 module.exports = UserService

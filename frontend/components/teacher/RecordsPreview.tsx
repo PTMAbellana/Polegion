@@ -2,13 +2,16 @@
 
 import React, { useState, useMemo } from 'react'
 import { RecordStudent } from '@/types'
-import styles from '@/styles/leaderboard.module.css'
-import { ChevronUp, ChevronDown } from 'lucide-react'
+import styles from '@/styles/records.module.css'
+import { ChevronUp, ChevronDown, Eye } from 'lucide-react'
 
 interface RecordsPreviewProps {
   records: RecordStudent[]
   searchTerm?: string
   emptyMessage?: string
+  showProgressButton?: boolean
+  onViewProgress?: (userId: string) => void
+  isWorldmapView?: boolean
 }
 
 type SortField = 'firstName' | 'lastName' | 'xp'
@@ -17,7 +20,10 @@ type SortDirection = 'asc' | 'desc'
 export default function RecordsPreview({
   records,
   searchTerm = '',
-  emptyMessage = 'No records available'
+  emptyMessage = 'No records available',
+  showProgressButton = false,
+  onViewProgress,
+  isWorldmapView = false
 }: RecordsPreviewProps) {
   const [sortField, setSortField] = useState<SortField>('xp')
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc')
@@ -100,11 +106,23 @@ export default function RecordsPreview({
     )
   }
 
+  // Dynamic grid columns based on view type
+  const gridColumns = isWorldmapView && showProgressButton
+    ? '80px 1fr 1fr 100px 100px 100px 100px 120px' // Rank, First, Last, Castles, Pretest, Posttest, XP, Actions
+    : isWorldmapView
+    ? '80px 1fr 1fr 100px 100px 100px 100px' // Rank, First, Last, Castles, Pretest, Posttest, XP
+    : showProgressButton
+    ? '80px 1fr 1fr 100px 120px' // Rank, First, Last, XP, Actions
+    : '80px 1fr 1fr 100px' // Rank, First, Last, XP
+
   return (
     <div className={styles.records_preview_wrapper}>
       {/* Scrollable Table */}
       <div className={styles.records_preview_container}>
-        <div className={styles.records_table_header}>
+        <div 
+          className={styles.records_table_header}
+          style={{ gridTemplateColumns: gridColumns }}
+        >
           <div className={styles.records_table_header_cell}>
             <span>Rank</span>
           </div>
@@ -122,6 +140,19 @@ export default function RecordsPreview({
             <span>Last Name</span>
             <SortIcon field="lastName" />
           </button>
+          {isWorldmapView && (
+            <>
+              <div className={styles.records_table_header_cell}>
+                <span>Castles</span>
+              </div>
+              <div className={styles.records_table_header_cell}>
+                <span>Pretest</span>
+              </div>
+              <div className={styles.records_table_header_cell}>
+                <span>Posttest</span>
+              </div>
+            </>
+          )}
           <button
             onClick={() => handleSort('xp')}
             className={styles.records_table_header_cell}
@@ -129,11 +160,20 @@ export default function RecordsPreview({
             <span>XP</span>
             <SortIcon field="xp" />
           </button>
+          {showProgressButton && (
+            <div className={styles.records_table_header_cell}>
+              <span>Actions</span>
+            </div>
+          )}
         </div>
 
         <div className={styles.records_table_body}>
           {sortedRecords.map((record, idx) => (
-            <div key={`record-${idx}-${record.xp}`} className={styles.records_table_row}>
+            <div 
+              key={`record-${idx}-${record.xp}-${record.user_id || idx}`} 
+              className={styles.records_table_row}
+              style={{ gridTemplateColumns: gridColumns }}
+            >
                 <div className={styles.records_table_cell}>#{rankMap.get(record)}</div>
                 <div className={styles.records_table_cell}>
                     {record.first_name || 'Unknown'}
@@ -141,9 +181,35 @@ export default function RecordsPreview({
                 <div className={styles.records_table_cell}>
                     {record.last_name || ''}
                 </div>
+                {isWorldmapView && (
+                  <>
+                    <div className={styles.records_table_cell}>
+                      <strong>{record.castles_completed || 0}/{record.total_castles || 7}</strong>
+                    </div>
+                    <div className={styles.records_table_cell}>
+                      {record.pretest_score !== undefined ? `${record.pretest_score}%` : 'N/A'}
+                    </div>
+                    <div className={styles.records_table_cell}>
+                      {record.posttest_score !== undefined ? `${record.posttest_score}%` : 'N/A'}
+                    </div>
+                  </>
+                )}
                 <div className={styles.records_table_cell}>
                     <strong>{record.xp || 0}</strong>
                 </div>
+                {showProgressButton && (
+                  <div className={styles.records_table_cell}>
+                    <button
+                      onClick={() => onViewProgress && record.user_id && onViewProgress(String(record.user_id))}
+                      className={styles.records_view_progress_btn}
+                      title="View detailed progress"
+                      disabled={!record.user_id}
+                    >
+                      <Eye size={16} />
+                      <span>View</span>
+                    </button>
+                  </div>
+                )}
             </div>
           ))}
         </div>

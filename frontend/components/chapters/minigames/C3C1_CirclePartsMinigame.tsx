@@ -15,6 +15,7 @@ const C3C1_CirclePartsMinigame: React.FC<Props> = ({ question, onComplete, style
   const [feedback, setFeedback] = useState<string>('')
   const [showFeedback, setShowFeedback] = useState(false)
   const [hoveredPart, setHoveredPart] = useState<string | null>(null)
+  const [clickedPart, setClickedPart] = useState<string | null>(null)
 
   const canvasWidth = 480
   const canvasHeight = 320
@@ -25,15 +26,30 @@ const C3C1_CirclePartsMinigame: React.FC<Props> = ({ question, onComplete, style
   const radiusEndX = centerX + radius * Math.cos(angleRad)
   const radiusEndY = centerY - radius * Math.sin(angleRad)
 
+  // Calculate chord endpoints ON the circle circumference
+  const chordStartAngle = 120 * Math.PI / 180
+  const chordEndAngle = 20 * Math.PI / 180
+  const chordStartX = centerX + radius * Math.cos(chordStartAngle)
+  const chordStartY = centerY - radius * Math.sin(chordStartAngle)
+  const chordEndX = centerX + radius * Math.cos(chordEndAngle)
+  const chordEndY = centerY - radius * Math.sin(chordEndAngle)
+
   const target = (question.partType || '').toLowerCase()
   const handleShapeClick = (partId: string) => {
     const correct = target === partId
+    setClickedPart(partId)
     setFeedback(correct ? 'Correct!' : 'Try again')
     setShowFeedback(true)
     setTimeout(() => {
       setShowFeedback(false)
+      setClickedPart(null)
       onComplete(!!correct, partId)
     }, 900)
+  }
+
+  const isHighlighted = (partId: string) => {
+    // Only highlight if it's the target, being hovered, or was just clicked and correct
+    return target === partId || hoveredPart === partId || (clickedPart === partId && target === partId)
   }
 
   const renderCircle = () => (
@@ -43,7 +59,7 @@ const C3C1_CirclePartsMinigame: React.FC<Props> = ({ question, onComplete, style
         points={[centerX, centerY, radiusEndX, radiusEndY]}
         stroke="#2d6cdf"
         strokeWidth={4}
-        opacity={target === 'radius' || hoveredPart === 'radius' ? 1 : 0.25}
+        opacity={isHighlighted('radius') ? 1 : 0.25}
         hitStrokeWidth={20}
         name="radius"
         shadowColor="#2d6cdf"
@@ -53,12 +69,12 @@ const C3C1_CirclePartsMinigame: React.FC<Props> = ({ question, onComplete, style
         onMouseLeave={(e) => { setHoveredPart(null); e.target?.getStage()?.container().style && (e.target.getStage()!.container().style.cursor = 'default') }}
         onClick={() => handleShapeClick('radius')}
       />
-      <Text x={radiusEndX - 24} y={radiusEndY - 22} text={'r'} fontSize={18} fill="#2d6cdf" opacity={target === 'radius' || hoveredPart === 'radius' ? 1 : 0.25} />
+      <Text x={radiusEndX - 24} y={radiusEndY - 22} text={'r'} fontSize={18} fill="#2d6cdf" opacity={isHighlighted('radius') ? 1 : 0.25} />
       <Line
         points={[centerX - radius, centerY, centerX + radius, centerY]}
         stroke="#c23b22"
         strokeWidth={4}
-        opacity={target === 'diameter' || hoveredPart === 'diameter' ? 1 : 0.25}
+        opacity={isHighlighted('diameter') ? 1 : 0.25}
         hitStrokeWidth={16}
         name="diameter"
         shadowColor="#c23b22"
@@ -68,12 +84,12 @@ const C3C1_CirclePartsMinigame: React.FC<Props> = ({ question, onComplete, style
         onMouseLeave={(e) => { setHoveredPart(null); e.target?.getStage()?.container().style && (e.target.getStage()!.container().style.cursor = 'default') }}
         onClick={() => handleShapeClick('diameter')}
       />
-      <Text x={centerX - 8} y={centerY - 34} text={'d'} fontSize={18} fill="#c23b22" opacity={target === 'diameter' || hoveredPart === 'diameter' ? 1 : 0.25} />
+      <Text x={centerX - 8} y={centerY - 34} text={'d'} fontSize={18} fill="#c23b22" opacity={isHighlighted('diameter') ? 1 : 0.25} />
       <Line
-        points={[centerX - 60, centerY - 70, centerX + 90, centerY - 10]}
+        points={[chordStartX, chordStartY, chordEndX, chordEndY]}
         stroke="#7a3ea8"
         strokeWidth={4}
-        opacity={target === 'chord' || hoveredPart === 'chord' ? 1 : 0.25}
+        opacity={isHighlighted('chord') ? 1 : 0.25}
         hitStrokeWidth={16}
         name="chord"
         shadowColor="#7a3ea8"
@@ -99,7 +115,7 @@ const C3C1_CirclePartsMinigame: React.FC<Props> = ({ question, onComplete, style
           const r = toRad(a)
           points.push(centerX + radius * Math.cos(r), centerY - radius * Math.sin(r))
         }
-        const visible = target === 'arc' || hoveredPart === 'arc'
+        const visible = isHighlighted('arc')
         return (
           <>
             <Line

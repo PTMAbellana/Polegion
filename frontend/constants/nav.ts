@@ -6,7 +6,7 @@ import { FaHome, FaUser, FaChalkboardTeacher, FaDungeon, FaMedal, FaUserAstronau
 export const teacherNavItems = [
     { path: TEACHER_ROUTES.DASHBOARD, icon: FaHome, label: 'Dashboard', title: 'Home' },
     { path: TEACHER_ROUTES.VIRTUAL_ROOMS, icon: FaChalkboardTeacher, label: 'Virtual Rooms', title: 'Virtual Rooms' },
-    { path: TEACHER_ROUTES.LEADERBOARD, icon: FaRegFileAlt, label: 'Records', title: 'Leaderboard' },
+    { path: TEACHER_ROUTES.RECORDS, icon: FaRegFileAlt, label: 'Records', title: 'Records' },
     { path: TEACHER_ROUTES.PROFILE, icon: FaUser, label: 'Profile', title: 'Profile' },
 ];
 

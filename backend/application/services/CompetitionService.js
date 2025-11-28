@@ -164,7 +164,8 @@ class CompeService {
             
             // Calculate timer duration and start time
             // Note: timer values from problems are in SECONDS
-            const timerDuration = firstCompeProblem?.timer || 30 // Default 30 seconds
+            // Add 5 seconds buffer for page load time
+            const timerDuration = (firstCompeProblem?.timer || 30) + 5 // Add 5s buffer for loading
             const currentTime = new Date()
             const problemEndTime = new Date(currentTime.getTime() + (timerDuration * 1000))
             
@@ -262,7 +263,8 @@ class CompeService {
             const nextCompeProblem = nextCompeProblems.find(cp => cp.problem.id === nextProblem.problem.id)
             
             // Calculate timer for next problem
-            const timerDuration = nextCompeProblem?.timer || 30
+            // Add 5 seconds buffer for page load time
+            const timerDuration = (nextCompeProblem?.timer || 30) + 5 // Add 5s buffer for loading
             const currentTime = new Date()
             const problemEndTime = new Date(currentTime.getTime() + (timerDuration * 1000))
             
@@ -431,7 +433,8 @@ class CompeService {
             const nextCompeProblem = compeProblems.find(cp => cp.problem.id === nextProblem.problem.id)
             console.log("Found matching next competition problem:", nextCompeProblem)
             
-            const timerDuration = nextCompeProblem?.timer || 30
+            // Add 5 seconds buffer for page load time
+            const timerDuration = (nextCompeProblem?.timer || 30) + 5 // Add 5s buffer for loading
             const currentTime = new Date()
             const problemEndTime = new Date(currentTime.getTime() + (timerDuration * 1000))
 

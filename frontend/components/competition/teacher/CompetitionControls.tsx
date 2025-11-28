@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { Competition, CompetitionProblem } from '@/types/common/competition'
 import styles from '@/styles/competition-teacher.module.css'
 
@@ -24,6 +24,39 @@ export default function CompetitionControls({
   const currentIndex = competition.current_problem_index || 0
   const isLastProblem = currentIndex + 1 >= addedProblems.length
   const isPaused = competition.gameplay_indicator === 'PAUSE'
+  
+  // Countdown state for start delay
+  const [isCountingDown, setIsCountingDown] = useState(false)
+  const [countdown, setCountdown] = useState(5)
+
+  // Handle countdown logic
+  useEffect(() => {
+    if (!isCountingDown) return
+    
+    if (countdown === 0) {
+      setIsCountingDown(false)
+      onStart()
+      return
+    }
+    
+    const timer = setTimeout(() => {
+      setCountdown(prev => prev - 1)
+    }, 1000)
+    
+    return () => clearTimeout(timer)
+  }, [isCountingDown, countdown, onStart])
+
+  // Start countdown instead of immediately starting
+  const handleStartClick = useCallback(() => {
+    setCountdown(5)
+    setIsCountingDown(true)
+  }, [])
+
+  // Cancel countdown
+  const handleCancelCountdown = useCallback(() => {
+    setIsCountingDown(false)
+    setCountdown(5)
+  }, [])
 
   // Determine button text based on state
   const getPauseResumeText = () => {
@@ -39,13 +72,28 @@ export default function CompetitionControls({
   return (
     <div className={styles.competitionControls}>
       {competition.status === 'NEW' && (
-        <button
-          onClick={onStart}
-          className={`${styles.controlButton} ${styles.startButton}`}
-          disabled={addedProblems.length === 0 || loading}
-        >
-          {loading ? 'Starting...' : 'Start Competition'}
-        </button>
+        <>
+          {isCountingDown ? (
+            <div className={styles.countdownContainer}>
+              <div className={styles.countdownNumber}>{countdown}</div>
+              <div className={styles.countdownText}>Competition starting in...</div>
+              <button
+                onClick={handleCancelCountdown}
+                className={`${styles.controlButton} ${styles.cancelButton}`}
+              >
+                Cancel
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={handleStartClick}
+              className={`${styles.controlButton} ${styles.startButton}`}
+              disabled={addedProblems.length === 0 || loading}
+            >
+              {loading ? 'Starting...' : 'Start Competition'}
+            </button>
+          )}
+        </>
       )}
       
       {competition.status === 'ONGOING' && (

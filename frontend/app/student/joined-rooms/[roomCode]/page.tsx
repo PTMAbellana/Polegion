@@ -14,6 +14,7 @@ import { FaCopy, FaCheck, FaSyncAlt } from 'react-icons/fa'
 import styles from '@/styles/room-details.module.css'
 import { use } from 'react'
 import Loader from '@/components/Loader'
+import { cacheControl } from '@/api/axios'
 
 export default function StudentRoomDetailsPage({ params }: { params: Promise<{ roomCode: string }> }) {
     const { roomCode } = use(params)
@@ -35,11 +36,27 @@ export default function StudentRoomDetailsPage({ params }: { params: Promise<{ r
     } = useStudentRoomManagement(roomCode, currentRoom?.id)
 
     const handleRefresh = async () => {
-        if (roomCode) {
-            // First refetch the joined rooms to get latest room data
-            await fetchJoinedRooms()
-            // Then fetch the detailed room data
-            await fetchRoomDetails(roomCode)
+        console.log('🔘 Refresh button clicked!', { roomCode, hasCurrentRoom: !!currentRoom });
+        
+        if (!roomCode) {
+            console.log('❌ No roomCode, aborting refresh');
+            return;
+        }
+        
+        // Clear axios cache to force fresh data
+        cacheControl.clear();
+        console.log('🔄 Refreshing room data for:', roomCode);
+        
+        try {
+            // Force refetch of joined rooms first
+            const roomsResult = await fetchJoinedRooms();
+            console.log('✅ Joined rooms refreshed:', roomsResult);
+            
+            // Then fetch detailed room data
+            await fetchRoomDetails(roomCode);
+            console.log('✅ Room details refreshed');
+        } catch (error) {
+            console.error('❌ Error refreshing:', error);
         }
     }
 

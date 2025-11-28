@@ -52,6 +52,7 @@ interface GamepageProps {
   currentCompetition?: any;
   roomId?: string;
   isFullScreenMode?: boolean;
+  userAccumulatedXP?: number;
 }
 
 const FILL_COLORS = [
@@ -73,7 +74,8 @@ export default function Gamepage({
   competitionId,
   currentCompetition,
   roomId,
-  isFullScreenMode = false
+  isFullScreenMode = false,
+  userAccumulatedXP = 0
 }: GamepageProps) {
   const router = useRouter();
   const { userProfile } = useAuthStore();  // Basic state management (removed old drag/resize states)
@@ -810,17 +812,40 @@ export default function Gamepage({
   //   );
   // }
 
-  // NEW: Check submission status from localStorage (fixes refresh bug)
+  // Track previous problem ID to detect problem changes
+  const previousProblemIdRef = useRef<number | null>(null);
+
+  // NEW: Check submission status from localStorage and handle problem changes
   useEffect(() => {
     if (competitionId && activeCompetition?.current_problem_id) {
-      const submissionKey = `submitted_${competitionId}_${activeCompetition.current_problem_id}`;
+      const currentProblemId = activeCompetition.current_problem_id;
+      const submissionKey = `submitted_${competitionId}_${currentProblemId}`;
       const wasSubmitted = localStorage.getItem(submissionKey) === 'true';
+      
+      // Check if this is a NEW problem (teacher clicked next)
+      const isNewProblem = previousProblemIdRef.current !== null && 
+                           previousProblemIdRef.current !== currentProblemId;
+      
+      if (isNewProblem) {
+        console.log('🆕 [Gamepage] New problem detected! Resetting state...', {
+          previous: previousProblemIdRef.current,
+          current: currentProblemId
+        });
+        // Clear shapes for the new problem
+        setShapes([]);
+        setSelectedId(null);
+      }
+      
+      // Update the ref AFTER checking for new problem
+      previousProblemIdRef.current = currentProblemId;
+      
+      // Set submission state based on localStorage
       setHasSubmitted(wasSubmitted);
       setIsSubmitting(false);
       
-      // NEW: Load submitted shapes from localStorage if user already submitted
-      if (wasSubmitted) {
-        const shapesKey = `submitted_shapes_${competitionId}_${activeCompetition.current_problem_id}`;
+      // Load submitted shapes from localStorage if user already submitted for THIS problem
+      if (wasSubmitted && !isNewProblem) {
+        const shapesKey = `submitted_shapes_${competitionId}_${currentProblemId}`;
         const savedShapes = localStorage.getItem(shapesKey);
         if (savedShapes) {
           try {
@@ -842,20 +867,9 @@ export default function Gamepage({
         submissionKey,
         wasSubmitted,
         competitionId,
-        problemId: activeCompetition.current_problem_id
+        problemId: currentProblemId,
+        isNewProblem
       });
-    }
-  }, [competitionId, activeCompetition?.current_problem_id]);
-
-  // NEW: Reset submission state when problem changes (but keep localStorage)
-  useEffect(() => {
-    if (competitionId && activeCompetition?.current_problem_id) {
-      // Check if this is a different problem
-      const currentProblemKey = `submitted_${competitionId}_${activeCompetition.current_problem_id}`;
-      const wasSubmitted = localStorage.getItem(currentProblemKey) === 'true';
-      
-      setHasSubmitted(wasSubmitted);
-      setIsSubmitting(false);
     }
   }, [competitionId, activeCompetition?.current_problem_id]);
 
@@ -937,7 +951,9 @@ export default function Gamepage({
                   gap: '8px',
                   minWidth: '120px'
                 }}>
-                  <span style={{ fontSize: '12px', color: '#6b7280' }}>{isPaused ? '⏸️' : '⏱️'}</span>
+                  <span style={{ fontSize: '14px', color: '#6b7280', fontWeight: 'bold' }}>
+                    {isPaused ? '||' : '🕐'}
+                  </span>
                   <span style={{
                     fontSize: '18px',
                     fontWeight: 700,
@@ -964,6 +980,21 @@ export default function Gamepage({
                 <div style={{ fontSize: '12px', color: '#6b7280', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                   {prompt || "No description"}
                 </div>
+              </div>
+
+              {/* XP Display Badge */}
+              <div style={{
+                background: 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)',
+                border: '2px solid #fcd34d',
+                borderRadius: '8px',
+                padding: '8px 12px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                minWidth: '100px',
+                justifyContent: 'center'
+              }}>
+                <span style={{ fontSize: '14px', fontWeight: 700, color: '#78350f' }}>⭐ {userAccumulatedXP}</span>
               </div>
             </div>
           )}
@@ -1055,7 +1086,7 @@ export default function Gamepage({
                   </button>
                 )
               }
-              shapeLimit={MAX_SHAPES}
+              shapeLimit={currentProblem?.problem?.expected_solution?.length || MAX_SHAPES}
               shapeCount={shapes.length}
               onLimitReached={() => setShowLimitPopup(true)}
               onAllShapesDeleted={handleAllShapesDeleted}
@@ -1204,7 +1235,10 @@ export default function Gamepage({
 
       {/* Shape Limit Popup */}
       {showLimitPopup && (
-        <ShapeLimitPopup onClose={() => setShowLimitPopup(false)} />
+        <ShapeLimitPopup 
+          onClose={() => setShowLimitPopup(false)} 
+          limit={currentProblem?.problem?.expected_solution?.length || MAX_SHAPES}
+        />
       )}
     </div>
   );

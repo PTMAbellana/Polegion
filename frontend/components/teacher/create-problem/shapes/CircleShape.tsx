@@ -103,6 +103,14 @@ const CircleShape: React.FC<CircleShapeProps> = ({
           e.cancelBubble = true;
           onSelect();
         }}
+        onTap={(e) => {
+          e.cancelBubble = true;
+          onSelect();
+        }}
+        onMouseDown={(e) => {
+          // Prevent stage click from deselecting when clicking on shape
+          e.cancelBubble = true;
+        }}
       >
         {/* Main Circle */}
         <Circle

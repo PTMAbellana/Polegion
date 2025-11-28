@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useMemo } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useMemo, useState, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { use } from "react";
 import { useCompetitionRealtime } from "@/hooks/useCompetitionRealtime";
 import { useCompetitionTimer } from "@/hooks/useCompetitionTimer";
@@ -13,24 +13,37 @@ import {
 } from "@/components/competition";
 import type { Competition, CompetitionParticipant } from "@/types/common/competition";
 import styles from "@/styles/competition-student.module.css";
+import { useStudentRoomStore } from "@/store/studentRoomStore";
 
 interface CompetitionPageProps {
   params: Promise<{ competitionId: number }>;
 }
 
-export default function CompetitionPage({ params }: CompetitionPageProps) {
-  const { competitionId } = use(params);
+// Inner component that uses useSearchParams
+function CompetitionPageContent({ competitionId }: { competitionId: number }) {
   const router = useRouter();
-  const searchParams = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '');
-  const roomId = searchParams.get('room') || ''; // Always defined, even if empty string
-  const roomCode = searchParams.get('roomCode') || ''; // Room code for navigation
+  const searchParams = useSearchParams();
+  const { currentRoom } = useStudentRoomStore();
+  
+  // Get roomId from URL or fallback to store
+  const roomId = searchParams.get('room') || currentRoom?.id?.toString() || '';
+  const roomCode = searchParams.get('roomCode') || currentRoom?.code || '';
+  
+  // Track if we're ready to connect (have roomId)
+  const [isReady, setIsReady] = useState(false);
+  
+  useEffect(() => {
+    if (roomId) {
+      setIsReady(true);
+    }
+  }, [roomId]);
 
-  // Real-time hooks
+  // Real-time hooks - only connect when ready
   const {
     competition,
     participants,
     activeParticipants,
-  } = useCompetitionRealtime(competitionId.toString(), false, roomId);
+  } = useCompetitionRealtime(competitionId.toString(), !isReady, roomId);
 
   const liveCompetition = competition as Competition | null;
   const liveParticipants = participants as CompetitionParticipant[];
@@ -137,11 +150,6 @@ export default function CompetitionPage({ params }: CompetitionPageProps) {
             formattedTime={formattedTime}
             participants={liveParticipants}
             onRefresh={() => window.location.reload()}
-            onCopyLink={() => {
-              const url = window.location.href;
-              navigator.clipboard.writeText(url);
-              alert("Competition link copied to clipboard!");
-            }}
           />
         );
 
@@ -208,5 +216,29 @@ export default function CompetitionPage({ params }: CompetitionPageProps) {
         {renderContent()}
       </div>
     </div>
+  );
+}
+
+// Loading fallback for Suspense
+function LoadingFallback() {
+  return (
+    <div className={styles.mainContainer}>
+      <div className={styles.header}>
+        <div className={styles.headerContent}>
+          <h1 className={styles.title}>Loading...</h1>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Main page component wraps content in Suspense
+export default function CompetitionPage({ params }: CompetitionPageProps) {
+  const { competitionId } = use(params);
+
+  return (
+    <Suspense fallback={<LoadingFallback />}>
+      <CompetitionPageContent competitionId={competitionId} />
+    </Suspense>
   );
 }

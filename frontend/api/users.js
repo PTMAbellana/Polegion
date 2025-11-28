@@ -140,3 +140,58 @@ export const uploadImage = async (formData) => {
     }
   } 
 }
+
+// Get student progress by user ID (castles + competitions)
+export const getStudentProgress = async (userId) => {
+  try {
+    const response = await api.get(`/users/${userId}/progress`);
+    return {
+      success: true,
+      data: response.data.data || response.data
+    };
+  } catch (error) {
+    console.error('Error fetching student progress:', error);
+    return {
+      success: false,
+      error: error.response?.data?.error || 'Failed to fetch student progress',
+      message: error.response?.data?.message || 'An error occurred',
+      status: error.response?.status
+    };
+  }
+};
+
+// Get user's castle progress
+export const getUserCastleProgress = async (userId) => {
+  try {
+    const response = await api.get(`/users/${userId}/castle-progress`);
+    return {
+      success: true,
+      data: response.data.data || response.data
+    };
+  } catch (error) {
+    console.error('Error fetching castle progress:', error);
+    return {
+      success: false,
+      error: error.response?.data?.error || 'Failed to fetch castle progress',
+      status: error.response?.status
+    };
+  }
+};
+
+// Get user's assessment scores (pretest and posttest)
+export const getUserAssessmentScores = async (userId) => {
+  try {
+    const response = await api.get(`/users/${userId}/assessment-scores`);
+    return {
+      success: true,
+      data: response.data.data || response.data
+    };
+  } catch (error) {
+    console.error('Error fetching assessment scores:', error);
+    return {
+      success: false,
+      error: error.response?.data?.error || 'Failed to fetch assessment scores',
+      status: error.response?.status
+    };
+  }
+};

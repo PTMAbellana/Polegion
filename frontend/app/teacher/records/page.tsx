@@ -15,28 +15,28 @@ export default function TeacherRecordPage() {
     const { userProfile } = useAuthStore()
     const { createdRooms, loading } = useTeacherRoomStore()
 
-    const handleViewLeaderboard = (roomId: string | number) => {
-        // Navigate to individual room leaderboard
-        router.push(`${TEACHER_ROUTES.LEADERBOARD}/${roomId}`)
+    const handleViewRecords = (roomId: string | number) => {
+        // Navigate to individual room records
+        router.push(`${TEACHER_ROUTES.RECORDS}/${roomId}`)
     }
 
     return (
         <LoadingOverlay isLoading={loading}>
             <PageHeader
-                title="Leaderboards"
+                title="Records"
                 userName={userProfile?.first_name}
-                subtitle="View leaderboards for your created rooms"
+                subtitle="View records for your created rooms"
             />
 
             <div className={styles["scrollable-content"]}>
                 <RoomCardsList
                     rooms={createdRooms}
-                    onViewRoom={handleViewLeaderboard}
+                    onViewRoom={handleViewRecords}
                     useRoomCode={false}
                     showClickableCard={true}
                     showDeleteButton={false}
                     showRoomCode={false}
-                    emptyMessage="No rooms created yet. Create rooms to view their leaderboards!"
+                    emptyMessage="No rooms created yet. Create rooms to view their records!"
                     isLoading={loading}
                     viewButtonText="View Records"
                 />
