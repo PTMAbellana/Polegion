@@ -5,14 +5,6 @@ import { useRouter } from "next/navigation";
 import React, { useState, useRef, useEffect, useCallback, useMemo } from "react";
 
 // Import create-problem components (these are already Konva-based)
-import Toolbox from '@/app/virtual-rooms/[roomCode]/create-problem/components/Toolbox';
-import DifficultyDropdown from '@/app/virtual-rooms/[roomCode]/create-problem/components/DifficultyDropdown';
-import MainArea from '@/app/virtual-rooms/[roomCode]/create-problem/components/MainArea';
-import PromptBox from '@/app/virtual-rooms/[roomCode]/create-problem/components/PromptBox';
-import Timer from '@/app/virtual-rooms/[roomCode]/create-problem/components/Timer';
-import LimitAttempts from '@/app/virtual-rooms/[roomCode]/create-problem/components/LimitAttempts';
-import SetVisibility from '@/app/virtual-rooms/[roomCode]/create-problem/components/SetVisibility';
-import ShapeLimitPopup from '@/app/virtual-rooms/[roomCode]/create-problem/components/ShapeLimitPopup';
 
 // ADD MISSING IMPORT
 import { getRoomProblemsByCode } from '@/api/problems';
@@ -21,6 +13,8 @@ import { submitSolution } from '@/api/attempt';
 import Swal from "sweetalert2";
 import { useCompetitionTimer } from '@/hooks/useCompetitionTimer';
 import { useCompetitionRealtime } from '@/hooks/useCompetitionRealtime';
+import { DifficultyDropdown, LimitAttempts, MainArea, PromptBox, SetVisibility, ShapeLimitPopup, Toolbox } from "./teacher/create-problem";
+import { Timer } from "lucide-react";
 
 interface CompetitionProblem {
   id: number
