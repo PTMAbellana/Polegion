@@ -20,6 +20,115 @@
   --transition: all 0.3s ease;
 }
 
+/* ========================================
+   CASTLE THEMES - Color Palettes
+   ======================================== */
+/* Castle 0 - Trial Grounds */
+.castle-theme-0 {
+  --castle-primary: #37353E;
+  --castle-secondary: #44444E;
+  --castle-tertiary: #715A5A;
+  --castle-accent: #D3DAD9;
+  --scrollbar-track: #37353E;
+  --scrollbar-thumb: #715A5A;
+  --scrollbar-thumb-hover: #8B6B6B;
+}
+
+/* Castle 1 */
+.castle-theme-1 {
+  --castle-primary: #213555;
+  --castle-secondary: #3E5879;
+  --castle-tertiary: #D8C4B6;
+  --castle-accent: #F5EFE7;
+  --scrollbar-track: #213555;
+  --scrollbar-thumb: #3E5879;
+  --scrollbar-thumb-hover: #4E6889;
+}
+
+/* Castle 2 */
+.castle-theme-2 {
+  --castle-primary: #043915;
+  --castle-secondary: #4C763B;
+  --castle-tertiary: #B0CE88;
+  --castle-accent: #FFFD8F;
+  --scrollbar-track: #043915;
+  --scrollbar-thumb: #4C763B;
+  --scrollbar-thumb-hover: #5C864B;
+}
+
+/* Castle 3 */
+.castle-theme-3 {
+  --castle-primary: #143D60;
+  --castle-secondary: #27667B;
+  --castle-tertiary: #A0C878;
+  --castle-accent: #DDEB9D;
+  --scrollbar-track: #143D60;
+  --scrollbar-thumb: #27667B;
+  --scrollbar-thumb-hover: #37768B;
+}
+
+/* Castle 4 */
+.castle-theme-4 {
+  --castle-primary: #957C62;
+  --castle-secondary: #B77466;
+  --castle-tertiary: #E2B59A;
+  --castle-accent: #FFE1AF;
+  --scrollbar-track: #957C62;
+  --scrollbar-thumb: #B77466;
+  --scrollbar-thumb-hover: #C78476;
+}
+
+/* Castle 5 */
+.castle-theme-5 {
+  --castle-primary: #0B1D51;
+  --castle-secondary: #725CAD;
+  --castle-tertiary: #8CCDEB;
+  --castle-accent: #FFE3A9;
+  --scrollbar-track: #0B1D51;
+  --scrollbar-thumb: #725CAD;
+  --scrollbar-thumb-hover: #826CBD;
+}
+
+/* Castle 6 - Grand Championship */
+.castle-theme-6 {
+  --castle-primary: #000080;
+  --castle-secondary: #00044A;
+  --castle-tertiary: #FFBF1C;
+  --castle-accent: #FFD60A;
+  --scrollbar-track: #000080;
+  --scrollbar-thumb: #FFBF1C;
+  --scrollbar-thumb-hover: #D1A309;
+}
+
+/* ========================================
+   CASTLE 0 SCROLLBAR STYLING
+   ======================================== */
+.castle-theme-0 *::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+.castle-theme-0 *::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+  border-radius: 6px;
+}
+
+.castle-theme-0 *::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 6px;
+  border: 2px solid var(--scrollbar-track);
+}
+
+.castle-theme-0 *::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover);
+}
+
+/* Firefox scrollbar */
+.castle-theme-0 * {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+}
+
 
 @media (prefers-color-scheme: dark) {
   :root {
@@ -101,4 +210,23 @@ body > div:first-child /* For other React setups */ {
   border-radius: 8px;
   padding: 1.5rem;
   box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+/* ========================================
+   PRINT STYLES
+   ======================================== */
+@media print {
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  body {
+    background: white !important;
+  }
+
+  @page {
+    margin: 1cm;
+    size: auto;
+  }
 }

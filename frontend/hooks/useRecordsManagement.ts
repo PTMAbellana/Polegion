@@ -1,27 +1,27 @@
 "use client"
 
 import { useState, useCallback } from 'react'
-import { downloadRoomRecordsCSV, downloadCompetitionRecordsCSV } from '@/api/leaderboards'
+import { downloadRoomRecordsCSV, downloadCompetitionRecordsCSV } from '@/api/records'
 
 interface UseRecordsManagementReturn {
     isLoading: boolean
-    handleDownloadRoom: () => Promise<void>
+    handleDownloadRoom: (type?: string) => Promise<void>
     handleDownloadCompetition: (competitionId?: string) => Promise<void>
 }
 
 export function useRecordsManagement(roomId: number): UseRecordsManagementReturn {
     const [isLoading, setIsLoading] = useState(false)
 
-    const handleDownloadRoom = useCallback(async () => {
+    const handleDownloadRoom = useCallback(async (type?: string) => {
         setIsLoading(true)
         try {
         console.log('📥 Download initiated:', {
-            type: 'room',
+            type: type || 'room',
             roomId,
             timestamp: new Date().toISOString()
         })
 
-        const result = await downloadRoomRecordsCSV(roomId)
+        const result = await downloadRoomRecordsCSV(roomId, type)
         
         if (result.success) {
             // Create download link and trigger download

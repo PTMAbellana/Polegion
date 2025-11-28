@@ -55,9 +55,9 @@ const Toolbox: React.FC<ToolboxProps> = ({
       <div className={styles.toolboxInstructions}>
         <div className={styles.instructionsTitle}>How to use:</div>
         <ul className={styles.instructionsList}>
-          <li>Drag shapes to the Main Area</li>
-          <li>To delete: drag outside or press Delete key</li>
-          <li>Click to select and see properties</li>
+          <li>Drag shapes/tools to the Main Area</li>
+          <li>To delete: drag outside or press Delete/Backspace</li>
+          <li>Click to select and view properties</li>
         </ul>
       </div>
 
@@ -251,7 +251,7 @@ const Toolbox: React.FC<ToolboxProps> = ({
                     onChange={(e) => setShowSides(e.target.checked)}
                     className={styles.toggleCheckbox}
                   />
-                  <span>Side Lengths</span>
+                  <span>Side Lengths (Triangle & Quadrilateral)</span>
                 </label>
               )}
               
@@ -263,7 +263,7 @@ const Toolbox: React.FC<ToolboxProps> = ({
                     onChange={(e) => setShowAngles(e.target.checked)}
                     className={styles.toggleCheckbox}
                   />
-                  <span>Corner Angles</span>
+                  <span>Corner Angles (Triangle & Quadrilateral)</span>
                 </label>
               )}
               

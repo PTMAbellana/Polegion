@@ -22,7 +22,16 @@ class CastleController {
             console.log('[CastleController] req.method:', req.method);
             
             const userId = req.query?.userId;
-            console.log('[CastleController] Extracted userId:', userId);
+            console.log('[CastleController] Extracted userId:', userId, 'type:', typeof userId);
+            
+            // Validate userId format if provided (should be UUID)
+            if (userId && !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(userId)) {
+                console.error('[CastleController] Invalid userId format:', userId);
+                return res.status(400).json({ 
+                    success: false, 
+                    error: `Invalid userId format: ${userId}. Expected UUID format.` 
+                });
+            }
             
             if (userId) {
                 console.log('[CastleController] Fetching castles with user progress for userId:', userId);
@@ -41,7 +50,14 @@ class CastleController {
             console.error('[CastleController] ===== ERROR in getAll =====');
             console.error('[CastleController] Error message:', err.message);
             console.error('[CastleController] Error stack:', err.stack);
-            res.status(400).json({ success: false, error: err.message });
+            console.error('[CastleController] Error code:', err.code);
+            console.error('[CastleController] Error details:', err.details);
+            res.status(400).json({ 
+                success: false, 
+                error: err.message || 'Unknown error occurred',
+                code: err.code,
+                details: err.details
+            });
         }
     }
 

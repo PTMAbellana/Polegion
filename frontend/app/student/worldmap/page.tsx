@@ -247,6 +247,12 @@ export default function WorldMapPage() {
       if (newIndex !== -1) {
         setCurrentCastleIndex(newIndex);
         setSelectedCastle(null);
+        // Play whoosh sound when switching castles
+        playWhoosh();
+        setIsTransitioning(true);
+        setTimeout(() => {
+          setIsTransitioning(false);
+        }, 500);
       }
     } else {
       setSelectedCastle(selectedCastle?.id === castle.id ? null : castle);

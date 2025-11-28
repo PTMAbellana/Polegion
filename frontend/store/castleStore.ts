@@ -40,6 +40,15 @@ export const useCastleStore = create<CastleState>()(
 
             // Actions
             fetchCastles: async (userId: string) => {
+                // Validate userId before making request
+                const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+                
+                if (!userId || !uuidRegex.test(userId)) {
+                    console.warn('[CastleStore] Invalid or missing userId, skipping fetch:', userId)
+                    set({ loading: false, error: null })
+                    return
+                }
+                
                 set({ loading: true, error: null })
                 
                 try {

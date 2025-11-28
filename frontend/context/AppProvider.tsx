@@ -6,7 +6,7 @@ import { useTeacherRoomStore } from '@/store/teacherRoomStore';
 import { useStudentRoomStore } from '@/store/studentRoomStore';
 import { useCastleStore } from '@/store/castleStore';
 import Loader from '@/components/Loader';
-import { ROUTES, PUBLIC_ROUTES, STUDENT_ROUTES } from '@/constants/routes';
+import { ROUTES, PUBLIC_ROUTES, STUDENT_ROUTES, TEACHER_ROUTES } from '@/constants/routes';
 
 export default function AppProvider({ children }: { children: React.ReactNode }) {
   const { 
@@ -67,7 +67,17 @@ export default function AppProvider({ children }: { children: React.ReactNode })
 
         // Redirect to dashboard if authenticated and on public routes
         if (isLoggedIn && PUBLIC_ROUTES.includes(pathname)) {
-          router.replace(STUDENT_ROUTES.DASHBOARD);
+          switch (userProfile?.role) {
+            case 'student':
+              router.replace(STUDENT_ROUTES.DASHBOARD);
+              break;
+            case 'teacher':
+            case 'admin':
+              router.replace(TEACHER_ROUTES.DASHBOARD);
+              break;
+            default:
+              router.replace(STUDENT_ROUTES.DASHBOARD);
+          }
           return;
         }
 

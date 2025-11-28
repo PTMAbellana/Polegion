@@ -1,7 +1,8 @@
 "use client"
 
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { getRoomLeaderboards, getCompetitionLeaderboards } from '@/api/leaderboards'
+import { getRoomLeaderboards, getCompetitionLeaderboards } from '@/api/records'
+import { getUserCastleProgress, getUserAssessmentScores } from '@/api/users'
 import { LeaderboardItem, LeaderboardData, RecordStudent } from '@/types'
 
 interface UseRecordsPreviewReturn {
@@ -23,9 +24,15 @@ function convertToRecordStudent(item: LeaderboardItem): RecordStudent {
     : item.participants
 
   return {
+    user_id: participant?.user_id || '',
     first_name: participant?.first_name || 'Unknown',
     last_name: participant?.last_name || '',
-    xp: item.accumulated_xp
+    xp: item.accumulated_xp,
+    total_xp: item.accumulated_xp,
+    castles_completed: 0,
+    total_castles: 7,
+    pretest_score: undefined,
+    posttest_score: undefined
   }
 }
 
@@ -57,7 +64,51 @@ export function useRecordsPreview(roomId: number): UseRecordsPreviewReturn {
       const cached = dataCache.get(cacheKey)
       if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
         console.log('Using cached data for room', roomId)
-        setRoomRecords(cached.data.roomRecords)
+        
+        // Still need to enrich cached data with fresh castle/assessment data
+        const enrichedCachedRecords = await Promise.all(
+          cached.data.roomRecords.map(async (record: RecordStudent) => {
+            console.log(`[CACHE] Processing record:`, { user_id: record.user_id, first_name: record.first_name })
+            if (record.user_id) {
+              try {
+                const [castleProgressRes, assessmentScoresRes] = await Promise.all([
+                  getUserCastleProgress(String(record.user_id)),
+                  getUserAssessmentScores(String(record.user_id))
+                ])
+
+                let enrichedRecord = { ...record }
+
+                if (castleProgressRes.success && castleProgressRes.data) {
+                  const castleData = castleProgressRes.data
+                  const completedCastles = castleData.filter((c: any) => c.completed).length
+                  console.log(`[CACHE] User ${record.user_id}: ${completedCastles} of ${castleData.length} castles completed`)
+                  enrichedRecord = {
+                    ...enrichedRecord,
+                    castles_completed: completedCastles,
+                    total_castles: castleData.length || 7
+                  }
+                }
+
+                if (assessmentScoresRes.success && assessmentScoresRes.data) {
+                  const { pretest_score, posttest_score } = assessmentScoresRes.data
+                  console.log(`[CACHE] User ${record.user_id}: Pretest=${pretest_score}%, Posttest=${posttest_score}%`)
+                  enrichedRecord = {
+                    ...enrichedRecord,
+                    pretest_score: pretest_score,
+                    posttest_score: posttest_score
+                  }
+                }
+
+                return enrichedRecord
+              } catch (error) {
+                console.error('Error enriching cached record for user:', record.user_id, error)
+              }
+            }
+            return record
+          })
+        )
+        
+        setRoomRecords(enrichedCachedRecords)
         setCompetitionRecords(cached.data.competitionRecords)
         setCompetitions(cached.data.competitions)
         setLoading(false)
@@ -77,7 +128,57 @@ export function useRecordsPreview(roomId: number): UseRecordsPreviewReturn {
       const roomRecordsConverted = roomLeaderboards.map((item: LeaderboardItem) =>
         convertToRecordStudent(item)
       )
-      setRoomRecords(roomRecordsConverted)
+
+      // Enrich room records with castle progress and assessment scores
+      const enrichedRoomRecords = await Promise.all(
+        roomRecordsConverted.map(async (record) => {
+          console.log(`[FRESH] Processing record:`, { user_id: record.user_id, first_name: record.first_name })
+          if (record.user_id) {
+            try {
+              // Fetch castle progress and assessment scores in parallel
+              const [castleProgressRes, assessmentScoresRes] = await Promise.all([
+                getUserCastleProgress(String(record.user_id)),
+                getUserAssessmentScores(String(record.user_id))
+              ])
+
+              console.log(`User ${record.user_id} castle progress:`, castleProgressRes)
+              console.log(`User ${record.user_id} assessment scores:`, assessmentScoresRes)
+
+              let enrichedRecord = { ...record }
+
+              // Add castle progress
+              if (castleProgressRes.success && castleProgressRes.data) {
+                const castleData = castleProgressRes.data
+                const completedCastles = castleData.filter((c: any) => c.completed).length
+                console.log(`User ${record.user_id}: ${completedCastles} of ${castleData.length} castles completed`)
+                enrichedRecord = {
+                  ...enrichedRecord,
+                  castles_completed: completedCastles,
+                  total_castles: 7 // Always show out of 7 total castles
+                }
+              }
+
+              // Add assessment scores
+              if (assessmentScoresRes.success && assessmentScoresRes.data) {
+                const { pretest_score, posttest_score } = assessmentScoresRes.data
+                console.log(`User ${record.user_id}: Pretest=${pretest_score}%, Posttest=${posttest_score}%`)
+                enrichedRecord = {
+                  ...enrichedRecord,
+                  pretest_score: pretest_score,
+                  posttest_score: posttest_score
+                }
+              }
+
+              return enrichedRecord
+            } catch (error) {
+              console.error('Error enriching record for user:', record.user_id, error)
+            }
+          }
+          return record
+        })
+      )
+      
+      setRoomRecords(enrichedRoomRecords)
 
       // Extract competitions and convert their records
       const competitionMap = new Map<number, RecordStudent[]>()

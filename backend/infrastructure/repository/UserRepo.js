@@ -13,19 +13,33 @@ class UserRepo extends BaseRepo{
     // for getProfile na route /profile
     async getUserByUid(userId) {
         try {
+            // Get user profile data
             const {
-                data,
-                error
+                data: profileData,
+                error: profileError
             } = await this.supabase.from(this.tableName)
             .select('*')
             .eq('user_id', userId)
             .single()
 
-            if (error) throw error
+            if (profileError) throw profileError
 
-            console.log('User profile data:', data)
+            // Get email from auth.users
+            const {
+                data: authData,
+                error: authError
+            } = await this.supabase.auth.admin.getUserById(userId)
 
-            return userModel.fromDbUser(data)
+            console.log('User profile data:', profileData)
+            console.log('Auth data:', authData?.user?.email)
+
+            // Combine profile data with email from auth
+            const userData = {
+                ...profileData,
+                email: authData?.user?.email || ''
+            }
+
+            return userModel.fromDbUser(userData)
         } catch (error) {
             console.error('Error in getUserByUid:', error)
             throw error
@@ -334,6 +348,169 @@ class UserRepo extends BaseRepo{
     //         throw error
     //     }
     // }
+
+    // Get user castle progress with details
+    async getUserCastleProgress(userId) {
+        try {
+            const { data, error } = await this.supabase
+                .from('user_castle_progress')
+                .select(`
+                    *,
+                    castles (
+                        id,
+                        name,
+                        route,
+                        unlock_order
+                    )
+                `)
+                .eq('user_id', userId);
+
+            if (error) throw error;
+
+            // Return empty array if no data
+            if (!data || data.length === 0) {
+                console.log(`No castle progress found for user ${userId}`);
+                return [];
+            }
+
+            // Sort by castle unlock_order
+            const sortedData = data.sort((a, b) => {
+                const orderA = a.castles?.unlock_order || 0;
+                const orderB = b.castles?.unlock_order || 0;
+                return orderA - orderB;
+            });
+
+            // Get total chapters for each castle
+            const castleProgress = await Promise.all(sortedData.map(async (progress) => {
+                // Count chapters for this castle
+                const { count: totalChapters } = await this.supabase
+                    .from('chapters')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('castle_id', progress.castle_id);
+
+                const chaptersCompleted = progress.completion_percentage 
+                    ? Math.round((progress.completion_percentage / 100) * (totalChapters || 0))
+                    : 0;
+
+                return {
+                    castle_id: progress.castle_id,
+                    castle_name: progress.castles?.name || 'Unknown Castle',
+                    chapters_completed: chaptersCompleted,
+                    total_chapters: totalChapters || 0,
+                    total_xp: progress.total_xp_earned || 0,
+                    progress_percentage: progress.completion_percentage || 0,
+                    unlocked: progress.unlocked || false,
+                    completed: progress.completed || false
+                };
+            }));
+
+            console.log(`Found ${castleProgress.length} castles for user ${userId}`);
+            return castleProgress;
+        } catch (error) {
+            console.error('Error in getUserCastleProgress:', error);
+            throw error;
+        }
+    }
+
+    // Get user competition history
+    async getUserCompetitionHistory(userId) {
+        try {
+            // First get the room_participant_id for this user
+            const { data: participantData, error: participantError } = await this.supabase
+                .from('room_participants')
+                .select('id')
+                .eq('user_id', userId);
+
+            if (participantError) throw participantError;
+
+            if (!participantData || participantData.length === 0) {
+                console.log(`No room participants found for user ${userId}`);
+                return [];
+            }
+
+            const participantIds = participantData.map(p => p.id);
+
+            // Get competition leaderboard entries for these participants
+            const { data, error } = await this.supabase
+                .from('competition_leaderboards')
+                .select(`
+                    *,
+                    competition:competition_id (
+                        id,
+                        title,
+                        status,
+                        created_at
+                    )
+                `)
+                .in('room_participant_id', participantIds)
+                .order('id', { ascending: false });
+
+            if (error) throw error;
+
+            if (!data || data.length === 0) {
+                console.log(`No competition history found for user ${userId}`);
+                return [];
+            }
+
+            // Transform data
+            const competitionHistory = data.map(entry => ({
+                competition_id: entry.competition_id,
+                title: entry.competition?.title || 'Unknown Competition',
+                accumulated_xp: entry.accumulated_xp || 0,
+                rank: 0, // Rank would need to be calculated separately
+                status: entry.competition?.status || 'UNKNOWN',
+                date: entry.competition?.created_at || new Date().toISOString()
+            }));
+
+            console.log(`Found ${competitionHistory.length} competitions for user ${userId}`);
+            return competitionHistory;
+        } catch (error) {
+            console.error('Error in getUserCompetitionHistory:', error);
+            // Return empty array instead of throwing to allow page to load
+            return [];
+        }
+    }
+
+    // Get user assessment scores (pretest and posttest)
+    async getUserAssessmentScores(userId) {
+        try {
+            const { data, error } = await this.supabase
+                .from('user_assessment_results')
+                .select('test_type, percentage, total_score, max_score, completed_at')
+                .eq('user_id', userId)
+                .order('completed_at', { ascending: false });
+
+            if (error) throw error;
+
+            // Handle empty results
+            if (!data || data.length === 0) {
+                console.log(`No assessment results found for user ${userId}`);
+                return {
+                    pretest_score: null,
+                    posttest_score: null,
+                    pretest_completed_at: null,
+                    posttest_completed_at: null
+                };
+            }
+
+            // Get the most recent pretest and posttest
+            const pretest = data.find(result => result.test_type === 'pretest');
+            const posttest = data.find(result => result.test_type === 'posttest');
+
+            const result = {
+                pretest_score: pretest ? Math.round(pretest.percentage) : null,
+                posttest_score: posttest ? Math.round(posttest.percentage) : null,
+                pretest_completed_at: pretest?.completed_at || null,
+                posttest_completed_at: posttest?.completed_at || null
+            };
+
+            console.log(`Assessment scores for user ${userId}:`, result);
+            return result;
+        } catch (error) {
+            console.error('Error in getUserAssessmentScores:', error);
+            throw error;
+        }
+    }
 }
 
 module.exports = UserRepo

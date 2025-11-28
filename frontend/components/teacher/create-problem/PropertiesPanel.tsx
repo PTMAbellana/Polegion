@@ -11,6 +11,18 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
   selectedShape,
   pxToUnits,
 }) => {
+  // Helper to safely convert and format values
+  const safeToFixed = (value: number | string, decimals: number = 2): string => {
+    const num = Number(value);
+    return isNaN(num) ? '0' : num.toFixed(decimals);
+  };
+  
+  // Safe pxToUnits that always returns a number
+  const safePxToUnits = (px: number): number => {
+    const result = pxToUnits(px);
+    return typeof result === 'number' ? result : Number(result) || 0;
+  };
+
   if (!selectedShape) {
     return (
       <div className={styles.propertiesPanel}>
@@ -30,7 +42,7 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
     const dx = end.x - start.x;
     const dy = end.y - start.y;
     const length = Math.sqrt(dx * dx + dy * dy);
-    const lengthUnits = pxToUnits(length);
+    const lengthUnits = safePxToUnits(length);
     const midX = (start.x + end.x) / 2;
     const midY = (start.y + end.y) / 2;
 
@@ -38,19 +50,19 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
       <>
         <div className={styles.propertyGroup}>
           <div className={styles.propertyLabel}>Length</div>
-          <div className={styles.propertyValue}>{lengthUnits.toFixed(2)} units</div>
+          <div className={styles.propertyValue}>{safeToFixed(lengthUnits, 2)} units</div>
           <div className={styles.propertyFormula}>
             √[(x₂-x₁)² + (y₂-y₁)²]
           </div>
           <div className={styles.propertyDetails}>
-            √[({end.x.toFixed(0)}-{start.x.toFixed(0)})² + ({end.y.toFixed(0)}-{start.y.toFixed(0)})²] = {lengthUnits.toFixed(2)}
+            √[({safeToFixed(end.x, 0)}-{safeToFixed(start.x, 0)})² + ({safeToFixed(end.y, 0)}-{safeToFixed(start.y, 0)})²] = {safeToFixed(lengthUnits, 2)}
           </div>
         </div>
 
         <div className={styles.propertyGroup}>
           <div className={styles.propertyLabel}>Midpoint</div>
           <div className={styles.propertyValue}>
-            ({pxToUnits(midX).toFixed(1)}, {pxToUnits(midY).toFixed(1)})
+            ({safeToFixed(safePxToUnits(midX), 1)}, {safeToFixed(safePxToUnits(midY), 1)})
           </div>
           <div className={styles.propertyFormula}>
             ((x₁+x₂)/2, (y₁+y₂)/2)
@@ -60,14 +72,14 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
         <div className={styles.propertyGroup}>
           <div className={styles.propertyLabel}>Point A (Start)</div>
           <div className={styles.propertyValue}>
-            ({pxToUnits(start.x).toFixed(1)}, {pxToUnits(start.y).toFixed(1)})
+            ({safeToFixed(safePxToUnits(start.x), 1)}, {safeToFixed(safePxToUnits(start.y), 1)})
           </div>
         </div>
 
         <div className={styles.propertyGroup}>
           <div className={styles.propertyLabel}>Point B (End)</div>
           <div className={styles.propertyValue}>
-            ({pxToUnits(end.x).toFixed(1)}, {pxToUnits(end.y).toFixed(1)})
+            ({safeToFixed(safePxToUnits(end.x), 1)}, {safeToFixed(safePxToUnits(end.y), 1)})
           </div>
         </div>
       </>
@@ -130,36 +142,36 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
 
   const renderCircleProperties = () => {
     const radius = selectedShape.size ? selectedShape.size / 2 : 0;
-    const radiusUnits = pxToUnits(radius);
+    const radiusUnits = safePxToUnits(radius);
     const diameter = radius * 2;
-    const diameterUnits = pxToUnits(diameter);
+    const diameterUnits = safePxToUnits(diameter);
     const circumference = 2 * Math.PI * radius;
-    const circumferenceUnits = pxToUnits(circumference);
+    const circumferenceUnits = safePxToUnits(circumference);
     const area = Math.PI * radius * radius;
-    const areaUnits = pxToUnits(area);
+    const areaUnits = safePxToUnits(area);
 
     return (
       <>
         <div className={styles.propertyGroup}>
           <div className={styles.propertyLabel}>Radius</div>
-          <div className={styles.propertyValue}>{radiusUnits.toFixed(2)} units</div>
+          <div className={styles.propertyValue}>{safeToFixed(radiusUnits, 2)} units</div>
         </div>
 
         <div className={styles.propertyGroup}>
           <div className={styles.propertyLabel}>Diameter</div>
-          <div className={styles.propertyValue}>{diameterUnits.toFixed(2)} units</div>
+          <div className={styles.propertyValue}>{safeToFixed(diameterUnits, 2)} units</div>
           <div className={styles.propertyFormula}>d = 2r</div>
         </div>
 
         <div className={styles.propertyGroup}>
           <div className={styles.propertyLabel}>Circumference</div>
-          <div className={styles.propertyValue}>{circumferenceUnits.toFixed(2)} units</div>
+          <div className={styles.propertyValue}>{safeToFixed(circumferenceUnits, 2)} units</div>
           <div className={styles.propertyFormula}>C = 2πr</div>
         </div>
 
         <div className={styles.propertyGroup}>
           <div className={styles.propertyLabel}>Area</div>
-          <div className={styles.propertyValue}>{areaUnits.toFixed(2)} units²</div>
+          <div className={styles.propertyValue}>{safeToFixed(areaUnits, 2)} units²</div>
           <div className={styles.propertyFormula}>A = πr²</div>
         </div>
       </>
@@ -185,22 +197,22 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
       <>
         <div className={styles.propertyGroup}>
           <div className={styles.propertyLabel}>Side Lengths</div>
-          <div className={styles.propertyValue}>a = {pxToUnits(sideA).toFixed(2)} units</div>
-          <div className={styles.propertyValue}>b = {pxToUnits(sideB).toFixed(2)} units</div>
-          <div className={styles.propertyValue}>c = {pxToUnits(sideC).toFixed(2)} units</div>
+          <div className={styles.propertyValue}>a = {safeToFixed(safePxToUnits(sideA), 2)} units</div>
+          <div className={styles.propertyValue}>b = {safeToFixed(safePxToUnits(sideB), 2)} units</div>
+          <div className={styles.propertyValue}>c = {safeToFixed(safePxToUnits(sideC), 2)} units</div>
         </div>
 
         <div className={styles.propertyGroup}>
           <div className={styles.propertyLabel}>Perimeter</div>
           <div className={styles.propertyValue}>
-            {pxToUnits(sideA + sideB + sideC).toFixed(2)} units
+            {safeToFixed(safePxToUnits(sideA + sideB + sideC), 2)} units
           </div>
           <div className={styles.propertyFormula}>P = a + b + c</div>
         </div>
 
         <div className={styles.propertyGroup}>
           <div className={styles.propertyLabel}>Area</div>
-          <div className={styles.propertyValue}>{pxToUnits(area).toFixed(2)} units²</div>
+          <div className={styles.propertyValue}>{safeToFixed(safePxToUnits(area), 2)} units²</div>
           <div className={styles.propertyFormula}>A = √[s(s-a)(s-b)(s-c)]</div>
         </div>
       </>
@@ -248,22 +260,22 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
 
         <div className={styles.propertyGroup}>
           <div className={styles.propertyLabel}>Side Lengths</div>
-          <div className={styles.propertyValue}>Top: {pxToUnits(sideTop).toFixed(2)} units</div>
-          <div className={styles.propertyValue}>Right: {pxToUnits(sideRight).toFixed(2)} units</div>
-          <div className={styles.propertyValue}>Bottom: {pxToUnits(sideBottom).toFixed(2)} units</div>
-          <div className={styles.propertyValue}>Left: {pxToUnits(sideLeft).toFixed(2)} units</div>
+          <div className={styles.propertyValue}>Top: {safeToFixed(safePxToUnits(sideTop), 2)} units</div>
+          <div className={styles.propertyValue}>Right: {safeToFixed(safePxToUnits(sideRight), 2)} units</div>
+          <div className={styles.propertyValue}>Bottom: {safeToFixed(safePxToUnits(sideBottom), 2)} units</div>
+          <div className={styles.propertyValue}>Left: {safeToFixed(safePxToUnits(sideLeft), 2)} units</div>
         </div>
 
         <div className={styles.propertyGroup}>
           <div className={styles.propertyLabel}>Perimeter</div>
           <div className={styles.propertyValue}>
-            {pxToUnits(perimeter).toFixed(2)} units
+            {safeToFixed(safePxToUnits(perimeter), 2)} units
           </div>
         </div>
 
         <div className={styles.propertyGroup}>
           <div className={styles.propertyLabel}>Area</div>
-          <div className={styles.propertyValue}>{pxToUnits(area).toFixed(2)} units²</div>
+          <div className={styles.propertyValue}>{safeToFixed(safePxToUnits(area), 2)} units²</div>
         </div>
       </>
     );

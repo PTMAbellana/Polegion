@@ -534,6 +534,13 @@ const SquareShape: React.FC<SquareShapeProps> = ({
           e.cancelBubble = true;
           onSelect();
         }}
+        onTap={(e) => {
+          e.cancelBubble = true;
+          onSelect();
+        }}
+        onMouseDown={(e) => {
+          e.cancelBubble = true;
+        }}
       >
         {/* Main Quadrilateral */}
         <Line

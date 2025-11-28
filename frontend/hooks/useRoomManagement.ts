@@ -138,7 +138,7 @@ export const useRoomManagement = (roomCode: string) => {
     }
 
     const handleCompetitionDashboard = () => {
-        router.push(TEACHER_ROUTES.COMPETITION) // Temporary until competitions are implemented
+        router.push(`${TEACHER_ROUTES.COMPETITION}?roomCode=${roomCode}`)
     }
 
     const handleInviteSubmit = async (email: string) => {

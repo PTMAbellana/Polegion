@@ -69,6 +69,7 @@ export interface MainAreaProps {
   showMidpoint?: boolean;
   showMeasurement?: boolean;
   showArcRadius?: boolean;
+  disabled?: boolean; // Prevent shape addition/modification when true (e.g., after submission)
 }
 
 export interface ExistingProblemsListProps {
@@ -82,7 +83,7 @@ export interface PromptBoxProps {
   setPrompt: (prompt: string) => void;
   editingPrompt: boolean;
   setEditingPrompt: (editing: boolean) => void;
-  promptInputRef: React.RefObject<HTMLTextAreaElement>;
+  promptInputRef: React.RefObject<HTMLTextAreaElement | null>;
 }
 
 export interface SetVisibilityProps {
@@ -92,6 +93,7 @@ export interface SetVisibilityProps {
 
 export interface ShapeLimitPopupProps {
   onClose: () => void;
+  limit?: number;
 }
 
 export interface TimerProps {

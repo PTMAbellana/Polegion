@@ -111,10 +111,17 @@ let refreshPromise = null;
 // Request interceptor - Check token validity BEFORE making request
 api.interceptors.request.use(
 	async (config) => {
-		// Skip token check for auth endpoints
+		// Skip token check for auth endpoints and public endpoints (castles, chapters)
 		if (config.url?.includes('/auth/login') || 
 		    config.url?.includes('/auth/register') || 
-		    config.url?.includes('/auth/refresh-token')) {
+		    config.url?.includes('/auth/refresh-token') ||
+		    (config.url?.startsWith('castles') && config.method?.toLowerCase() === 'get') ||
+		    (config.url?.startsWith('chapters') && config.method?.toLowerCase() === 'get')) {
+			// Still add token if available for public endpoints (to get user-specific data)
+			const accessToken = localStorage.getItem("access_token");
+			if (accessToken && !authUtils.isTokenExpired()) {
+				config.headers.Authorization = `Bearer ${accessToken}`;
+			}
 			return config;
 		}
 

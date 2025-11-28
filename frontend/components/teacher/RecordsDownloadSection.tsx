@@ -3,7 +3,7 @@
 import React, { useState, useMemo, useRef } from 'react'
 import { Download } from 'lucide-react'
 import { RecordsDownloadSectionProps, RecordStudent } from '@/types/common/records'
-import styles from '@/styles/leaderboard.module.css'
+import styles from '@/styles/records.module.css'
 import RecordsPreview from './RecordsPreview'
 
 interface RecordsDownloadSectionWithPreviewProps extends RecordsDownloadSectionProps {
@@ -20,7 +20,7 @@ export default function RecordsDownloadSection({
   competitionRecords = new Map(),
   competitions = []
 }: RecordsDownloadSectionWithPreviewProps) {
-  const [recordType, setRecordType] = useState<'room' | 'competition'>('room')
+  const [recordType, setRecordType] = useState<'room' | 'competition' | 'worldmap'>('room')
   const [selectedCompetitionId, setSelectedCompetitionId] = useState<number | ''>('')
   const [searchTerm, setSearchTerm] = useState('')
   const searchInputRef = useRef<HTMLInputElement>(null)
@@ -30,6 +30,9 @@ export default function RecordsDownloadSection({
     if (recordType === 'room') {
       return roomRecords
     }
+    if (recordType === 'worldmap') {
+      return roomRecords // Use room records for worldmap too
+    }
     if (selectedCompetitionId && competitionRecords.has(selectedCompetitionId)) {
       return competitionRecords.get(selectedCompetitionId) || []
     }
@@ -37,8 +40,12 @@ export default function RecordsDownloadSection({
   }, [recordType, selectedCompetitionId, roomRecords, competitionRecords])
 
   const handleDownload = async () => {
+    console.log('🔽 Download button clicked, recordType:', recordType)
     if (recordType === 'room') {
       await onDownloadRoomAction()
+    } else if (recordType === 'worldmap') {
+      console.log('📍 Downloading WORLDMAP CSV')
+      await onDownloadRoomAction('worldmap')
     } else {
       if (!selectedCompetitionId) {
         alert('Please select a competition')
@@ -46,6 +53,10 @@ export default function RecordsDownloadSection({
       }
       await onDownloadCompetitionAction(selectedCompetitionId.toString())
     }
+  }
+
+  const handleViewProgress = (userId: string) => {
+    window.open(`/teacher/student-progress/${userId}`, '_blank')
   }
 
   return (
@@ -58,7 +69,7 @@ export default function RecordsDownloadSection({
             name="recordType"
             value="room"
             checked={recordType === 'room'}
-            onChange={(e) => setRecordType(e.target.value as 'room' | 'competition')}
+            onChange={(e) => setRecordType(e.target.value as 'room' | 'competition' | 'worldmap')}
             disabled={isLoading}
           />
           <span>Total Room Ranking</span>
@@ -69,10 +80,21 @@ export default function RecordsDownloadSection({
             name="recordType"
             value="competition"
             checked={recordType === 'competition'}
-            onChange={(e) => setRecordType(e.target.value as 'room' | 'competition')}
+            onChange={(e) => setRecordType(e.target.value as 'room' | 'competition' | 'worldmap')}
             disabled={isLoading}
           />
           <span>Competition Ranking</span>
+        </label>
+        <label className={styles.records_type_option}>
+          <input
+            type="radio"
+            name="recordType"
+            value="worldmap"
+            checked={recordType === 'worldmap'}
+            onChange={(e) => setRecordType(e.target.value as 'room' | 'competition' | 'worldmap')}
+            disabled={isLoading}
+          />
+          <span>Worldmap Progress</span>
         </label>
       </div>
 
@@ -112,6 +134,9 @@ export default function RecordsDownloadSection({
           records={previewRecords}
           searchTerm={searchTerm}
           emptyMessage="No records to display"
+          showProgressButton={recordType === 'worldmap'}
+          onViewProgress={handleViewProgress}
+          isWorldmapView={recordType === 'worldmap'}
         />
       </div>
 

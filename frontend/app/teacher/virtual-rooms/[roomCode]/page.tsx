@@ -19,7 +19,7 @@ import InviteParticipantModal from '@/components/teacher/InviteParticipantModal'
 export default function RoomDetailsPage({ params }: { params: Promise<{ roomCode: string }> }) {
     const { roomCode } = use(params)
     const router = useRouter()
-    const { isLoggedIn, appLoading } = useAuthStore()
+    const { userProfile, isLoggedIn, appLoading } = useAuthStore()
     const { 
         currentRoom, 
         roomLoading, 

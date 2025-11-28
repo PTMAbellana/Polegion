@@ -28,7 +28,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 2rem;
+    padding: 1.5rem;
     overflow: hidden;
     position: relative;
     z-index: 1;
@@ -36,27 +36,27 @@
 
 @media (max-width: 1024px) {
     .assessment-main {
-        padding: 1.5rem;
+        padding: 1rem;
     }
 }
 
 @media (max-width: 768px) {
     .assessment-main {
-        padding: 1rem;
+        padding: 0.75rem;
     }
 }
 
 /* Dialogue Box */
 .dialogue-box {
     width: 100%;
-    max-width: 900px;
+    max-width: 800px;
     background: var(--dialogue-panel, #ffffff);
-    border-radius: 20px;
-    padding: 2rem;
+    border-radius: 16px;
+    padding: 1.5rem;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
     display: flex;
     flex-direction: column;
-    gap: 1.25rem;
+    gap: 1rem;
     border: 2px solid rgba(255, 255, 255, 0.15);
     margin: 0 auto;
 }
@@ -226,10 +226,10 @@
 /* Intro Screen */
 .assessment-intro {
     width: 100%;
-    max-width: 700px;
+    max-width: 650px;
     background: white;
-    border-radius: 16px;
-    padding: 2rem;
+    border-radius: 14px;
+    padding: 1.5rem;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
     animation: slideIn 0.5s ease-out;
     display: flex;
@@ -241,13 +241,13 @@
 .intro-hero {
     display: flex;
     flex-direction: column;
-    gap: 0.6rem;
+    gap: 0.5rem;
     background: var(--castle-panel-bg, var(--castle-card-gradient, #f8f9ff));
-    border-radius: 12px;
+    border-radius: 10px;
     border: 1px solid var(--castle-light, #e5e7eb);
-    border-left: 6px solid var(--castle-accent, #667eea);
-    padding: 0.85rem 1rem;
-    margin-bottom: 0.85rem;
+    border-left: 5px solid var(--castle-accent, #667eea);
+    padding: 0.75rem 0.875rem;
+    margin-bottom: 0.75rem;
 }
 
 @media (min-width: 700px) {
@@ -259,14 +259,14 @@
 }
 
 .intro-text h1 {
-    font-size: 1.4rem;
+    font-size: 1.25rem;
     font-weight: 700;
     color: var(--castle-primary, #1a202c);
-    margin: 0 0 0.35rem 0;
+    margin: 0 0 0.3rem 0;
 }
 
 .intro-text p {
-    font-size: 0.9rem;
+    font-size: 0.825rem;
     color: var(--castle-secondary, #4a5568);
     margin: 0;
 }
@@ -284,10 +284,10 @@
 .hero-pill {
     background: var(--castle-gradient, linear-gradient(135deg, #667eea 0%, #764ba2 100%));
     color: white;
-    padding: 0.85rem 1rem;
-    border-radius: 10px;
+    padding: 0.75rem 0.875rem;
+    border-radius: 8px;
     text-align: left;
-    min-width: 200px;
+    min-width: 180px;
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
 }
 
@@ -381,12 +381,12 @@
 .assessment-info {
     display: flex;
     justify-content: space-around;
-    gap: 0.6rem;
+    gap: 0.5rem;
     margin-bottom: 0.5rem;
     margin-top: 0.25rem;
-    padding: 0.65rem;
+    padding: 0.5rem;
     background: var(--castle-panel-bg, var(--castle-card-gradient, #f8f9ff));
-    border-radius: 10px;
+    border-radius: 8px;
     border: 1px solid var(--castle-light, #f0f4ff);
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
 }
@@ -407,7 +407,7 @@
 }
 
 .categories-preview {
-    margin-bottom: 0.75rem;
+    margin-bottom: 0.625rem;
     margin-top: 0;
     padding-top: 0;
     flex: 1;
@@ -415,7 +415,7 @@
 }
 
 .categories-preview h3 {
-    font-size: 0.95rem;
+    font-size: 0.875rem;
     font-weight: bold;
     color: var(--castle-primary, #1a202c);
     text-align: center;
@@ -432,9 +432,9 @@
 .category-card-intro {
     background: var(--castle-panel-bg, #f8f9ff);
     border: 1px solid var(--castle-light, #e5e7eb);
-    border-top: 4px solid var(--castle-accent, #667eea);
-    border-radius: 8px;
-    padding: 0.55rem;
+    border-top: 3px solid var(--castle-accent, #667eea);
+    border-radius: 7px;
+    padding: 0.5rem;
     text-align: left;
     transition: all 0.3s ease;
     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
@@ -446,14 +446,14 @@
 }
 
 .category-card-intro h4 {
-    font-size: 0.78rem;
+    font-size: 0.75rem;
     font-weight: 700;
     color: var(--castle-primary, #1a202c);
     margin: 0 0 0.2rem 0;
 }
 
 .category-card-intro p {
-    font-size: 0.65rem;
+    font-size: 0.625rem;
     color: var(--castle-secondary, #6b7280);
     margin: 0;
     line-height: 1.35;
@@ -464,9 +464,9 @@
     background: var(--castle-button-gradient, linear-gradient(135deg, #10b981 0%, #059669 100%));
     color: white;
     border: none;
-    padding: 0.75rem 1.25rem;
-    border-radius: 10px;
-    font-size: 0.95rem;
+    padding: 0.625rem 1rem;
+    border-radius: 8px;
+    font-size: 0.875rem;
     font-weight: bold;
     cursor: pointer;
     transition: all 0.3s ease;
@@ -833,7 +833,7 @@
     grid-template-columns: 1fr 1fr;
     gap: 1rem;
     margin-bottom: 1rem;
-    align-items: start;
+    align-items: stretch;
 }
 
 .left-column,
@@ -1038,18 +1038,24 @@
 /* ⭐ DepEd Proficiency Level Card */
 .proficiency-card {
     background: white;
-    border: 2px solid;
-    border-radius: 10px;
-    padding: 0.875rem;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border: 3px solid;
+    border-radius: 12px;
+    padding: 1.125rem;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+    transition: all 0.3s ease;
+}
+
+.proficiency-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.15);
 }
 
 .proficiency-header {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 0.5rem;
-    margin-bottom: 0.5rem;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
 }
 
 .proficiency-icon {
@@ -1058,17 +1064,18 @@
 }
 
 .proficiency-level {
-    font-size: 1rem;
+    font-size: 1.125rem;
     font-weight: bold;
     margin: 0;
 }
 
 .proficiency-description {
     text-align: center;
-    font-size: 0.75rem;
-    color: #4b5563;
-    line-height: 1.4;
-    margin-bottom: 0.625rem;
+    font-size: 0.8125rem;
+    color: #374151;
+    line-height: 1.5;
+    margin-bottom: 0.75rem;
+    font-weight: 500;
 }
 
 .rubric-scale {
@@ -1148,7 +1155,7 @@
     border-radius: 12px;
     display: flex;
     flex-direction: column;
-    min-height: 400px;
+    height: 100%;
 }
 
 .section-title {
@@ -1342,16 +1349,16 @@
 /* Quiz Component Styles - Matches Chapter Pattern */
 .quiz-container {
     width: 100%;
-    max-width: 1200px;
+    max-width: 1100px;
     height: 100%;
-    max-height: calc(100vh - 4rem);
-    padding: 1.5rem;
+    max-height: calc(100vh - 3rem);
+    padding: 1.25rem;
     background: rgba(255, 255, 255, 0.95);
     border-radius: 16px;
     box-shadow: 0 16px 40px rgba(0, 0, 0, 0.25);
     display: grid;
-    grid-template-columns: 280px 1fr;
-    gap: 1.5rem;
+    grid-template-columns: 260px 1fr;
+    gap: 1.25rem;
     box-sizing: border-box;
     overflow: hidden;
 }
@@ -1359,19 +1366,19 @@
 .quiz-left {
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+    gap: 0.875rem;
     background: #f8fafc;
     border-radius: 12px;
-    padding: 1rem;
+    padding: 0.875rem;
     overflow: hidden;
 }
 
 .quiz-right {
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+    gap: 0.875rem;
     overflow-y: auto;
-    padding: 0.5rem;
+    padding: 0.375rem;
 }
 
 /* Custom scrollbar for quiz right panel */
@@ -1517,6 +1524,12 @@
     color: white;
 }
 
+.answer-color-0.selected .answer-label {
+    background: #c0392b;
+    color: white;
+    border-color: white;
+}
+
 .answer-color-1 {
     color: #3498db;
     background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
@@ -1527,14 +1540,26 @@
     color: white;
 }
 
+.answer-color-1.selected .answer-label {
+    background: #2980b9;
+    color: white;
+    border-color: white;
+}
+
 .answer-color-2 {
-    color: #f39c12;
+    color: #f1c40f;
     background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
 }
 
 .answer-color-2.selected {
-    background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+    background: linear-gradient(135deg, #f1c40f 0%, #f39c12 100%);
     color: white;
+}
+
+.answer-color-2.selected .answer-label {
+    background: #f39c12;
+    color: white;
+    border-color: white;
 }
 
 .answer-color-3 {
@@ -1547,23 +1572,25 @@
     color: white;
 }
 
+.answer-color-3.selected .answer-label {
+    background: #27ae60;
+    color: white;
+    border-color: white;
+}
+
 .answer-label {
     font-size: 1rem;
     font-weight: bold;
     width: 36px;
     height: 36px;
     border-radius: 50%;
-    background: currentColor;
-    color: white;
+    background: white;
+    color: currentColor;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-}
-
-.answer-button.selected .answer-label {
-    background: white;
-    color: inherit;
+    border: 2px solid currentColor;
 }
 
 .answer-text {
@@ -1571,6 +1598,11 @@
     font-weight: 600;
     text-align: center;
     line-height: 1.4;
+    color: currentColor;
+}
+
+.answer-button.selected .answer-text {
+    color: white;
 }
 
 @media (max-width: 1024px) {

@@ -60,7 +60,7 @@ const config: ChapterConfig = {
   
   wizard: {
     name: 'Archim, Keeper of the Euclidean Spire',
-    image: '/images/archim-wizard.png',
+    image: '/images/wizards/archim-wizard.png',
   },
   
   relic: {

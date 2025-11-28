@@ -178,7 +178,7 @@ export const CHAPTER1_RELIC = {
 // Wizard information
 export const CHAPTER1_WIZARD = {
   name: "Sylvan, Guardian of the Polygon Citadel",
-  image: "/images/sylvan-wizard.png"
+  image: "/images/wizards/sylvan-wizard.png"
 };
 
 // Chapter metadata

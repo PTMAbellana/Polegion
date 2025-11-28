@@ -161,8 +161,10 @@ const C4C2_PolygonDrawingMinigame: React.FC<Props> = ({ question, onComplete, st
         // all sides roughly equal
         if (!sides.every(s => within(s, avg, 0.2))) return false
       } else {
-        // rectangle: opposite sides roughly equal
-        if (!(within(sides[0], sides[2], 0.25) && within(sides[1], sides[3], 0.25))) return false
+        // rectangle: opposite sides roughly equal BUT adjacent sides NOT equal (to exclude squares)
+        const oppositeSidesEqual = within(sides[0], sides[2], 0.25) && within(sides[1], sides[3], 0.25)
+        const adjacentSidesDifferent = !within(sides[0], sides[1], 0.15) || !within(sides[1], sides[2], 0.15)
+        if (!oppositeSidesEqual || !adjacentSidesDifferent) return false
       }
     }
     return true

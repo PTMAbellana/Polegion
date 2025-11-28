@@ -73,6 +73,11 @@ export const getAssessmentComparison = async (userId) => {
     const response = await api.get(`/assessments/comparison/${userId}`);
     return response.data?.data ?? response.data;
   } catch (error) {
+    // 404 is expected when user hasn't completed pretest yet
+    if (error.response?.status === 404) {
+      console.log('[Assessment API] No comparison data available (pretest not completed)');
+      return null;
+    }
     console.error("Error fetching assessment comparison:", error);
     throw error;
   }

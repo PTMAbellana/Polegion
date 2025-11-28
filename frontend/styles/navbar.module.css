@@ -222,20 +222,30 @@
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background-color: var(--primary-color);
-  color: white;
-  border: none;
+  background-color: #1a3a36;
+  color: #ffffff;
+  border: 2px solid #ffffff;
   display: none;
   justify-content: center;
   align-items: center;
   cursor: pointer;
   z-index: 1000;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
   transition: left 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  font-size: 18px;
 }
 
 .mobile-toggle-btn.sidebar-open {
   left: 200px;
+}
+
+.mobile-toggle-btn:hover {
+  background-color: #2c514c;
+  transform: scale(1.05);
+}
+
+.mobile-toggle-btn:active {
+  transform: scale(0.95);
 }
 
 /* Footer positioning */

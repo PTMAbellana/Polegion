@@ -1,10 +1,22 @@
 "use client";
 
-import styles from "@/styles/create-problem.module.css";
+import styles from "@/styles/create-problem-teacher.module.css";
 import { useRouter } from "next/navigation";
 import React, { useState, useRef, useEffect, useCallback, useMemo } from "react";
 
 // Import create-problem components (these are already Konva-based)
+import Toolbox from '@/components/teacher/create-problem/Toolbox';
+import DifficultyDropdown from '@/components/teacher/create-problem/DifficultyDropdown';
+import MainArea from '@/components/teacher/create-problem/MainArea';
+import PromptBox from '@/components/teacher/create-problem/PromptBox';
+import Timer from '@/components/teacher/create-problem/Timer';
+import LimitAttempts from '@/components/teacher/create-problem/LimitAttempts';
+import SetVisibility from '@/components/teacher/create-problem/SetVisibility';
+import ShapeLimitPopup from '@/components/teacher/create-problem/ShapeLimitPopup';
+import PropertiesPanel from '@/components/teacher/create-problem/PropertiesPanel';
+import PageHeader from '@/components/PageHeader';
+import LandscapePrompt from '@/components/LandscapePrompt';
+import { useAuthStore } from '@/store/authStore';
 
 // ADD MISSING IMPORT
 import { getRoomProblemsByCode } from '@/api/problems';
@@ -42,6 +54,7 @@ interface GamepageProps {
   currentCompetition?: any;
   roomId?: string;
   isFullScreenMode?: boolean;
+  userAccumulatedXP?: number;
 }
 
 const FILL_COLORS = [
@@ -56,18 +69,18 @@ const DIFFICULTY_COLORS = {
 };
 
 const XP_MAP = { Easy: 10, Intermediate: 20, Hard: 30 };
-const MAX_SHAPES = 1;
+const MAX_SHAPES = 5; // Allow up to 5 shapes like teacher mode
 
-export default function Gamepage({ 
+export default function Gamepage({
   roomCode,
   competitionId,
   currentCompetition,
   roomId,
-  isFullScreenMode = false
+  isFullScreenMode = false,
+  userAccumulatedXP = 0
 }: GamepageProps) {
   const router = useRouter();
-
-  // Basic state management (removed old drag/resize states)
+  const { userProfile } = useAuthStore();  // Basic state management (removed old drag/resize states)
   const [problems, setProblems] = useState<Problem[]>([]);
   const [problemId, setProblemId] = useState<string | null>(null);
   const [title, setTitle] = useState("");
@@ -94,6 +107,10 @@ export default function Gamepage({
   const [showHeight, setShowHeight] = useState(false);
   const [showDiameter, setShowDiameter] = useState(false);
   const [showCircumference, setShowCircumference] = useState(false);
+  const [showLength, setShowLength] = useState(false);
+  const [showMidpoint, setShowMidpoint] = useState(false);
+  const [showMeasurement, setShowMeasurement] = useState(false);
+  const [showArcRadius, setShowArcRadius] = useState(false);
   const [showAreaByShape, setShowAreaByShape] = useState({
     circle: false,
     triangle: false,
@@ -118,7 +135,12 @@ export default function Gamepage({
     competition: realtimeCompetition, 
     isConnected,
     connectionStatus 
-  } = useCompetitionRealtime(memoizedCompetitionId, shouldUseHooks);
+  } = useCompetitionRealtime(
+    memoizedCompetitionId, 
+    !shouldUseHooks, // isLoading: true when NOT using hooks (to prevent connection)
+    roomId || '', // Pass roomId for proper API calls
+    'participant' // userType
+  );
 
   const {
     timeRemaining = 0,
@@ -404,9 +426,9 @@ export default function Gamepage({
     e.dataTransfer.setData("shape-type", type);
   };
 
-  // Pixel to units conversion
-  const pxToUnits = (px: number): string => {
-    return (px / 10).toFixed(1);
+  // Pixel to units conversion - returns number for mathematical operations
+  const pxToUnits = (px: number): number => {
+    return px / 10;
   };
 
   // SAFER SHAPE PROPERTIES CALCULATION
@@ -598,6 +620,12 @@ export default function Gamepage({
           setHasSubmitted(true);
           localStorage.setItem(`submitted_${competitionId}_${activeCompetition.current_problem_id}`, 'true');
           
+          // NEW: Save submitted shapes to localStorage for viewing after refresh
+          localStorage.setItem(
+            `submitted_shapes_${competitionId}_${activeCompetition.current_problem_id}`, 
+            JSON.stringify(shapesWithProps)
+          );
+          
           // Enhanced success message with grading details
           const xpGained = response.xp_gained || 0;
           const feedback = response.feedback || response.attempt?.feedback || 'Solution submitted successfully!';
@@ -786,83 +814,100 @@ export default function Gamepage({
   //   );
   // }
 
-  // NEW: Check submission status from localStorage (fixes refresh bug)
+  // Track previous problem ID to detect problem changes
+  const previousProblemIdRef = useRef<number | null>(null);
+
+  // NEW: Check submission status from localStorage and handle problem changes
   useEffect(() => {
     if (competitionId && activeCompetition?.current_problem_id) {
-      const submissionKey = `submitted_${competitionId}_${activeCompetition.current_problem_id}`;
+      const currentProblemId = activeCompetition.current_problem_id;
+      const submissionKey = `submitted_${competitionId}_${currentProblemId}`;
       const wasSubmitted = localStorage.getItem(submissionKey) === 'true';
+      
+      // Check if this is a NEW problem (teacher clicked next)
+      const isNewProblem = previousProblemIdRef.current !== null && 
+                           previousProblemIdRef.current !== currentProblemId;
+      
+      if (isNewProblem) {
+        console.log('🆕 [Gamepage] New problem detected! Resetting state...', {
+          previous: previousProblemIdRef.current,
+          current: currentProblemId
+        });
+        // Clear shapes for the new problem
+        setShapes([]);
+        setSelectedId(null);
+      }
+      
+      // Update the ref AFTER checking for new problem
+      previousProblemIdRef.current = currentProblemId;
+      
+      // Set submission state based on localStorage
       setHasSubmitted(wasSubmitted);
       setIsSubmitting(false);
+      
+      // Load submitted shapes from localStorage if user already submitted for THIS problem
+      if (wasSubmitted && !isNewProblem) {
+        const shapesKey = `submitted_shapes_${competitionId}_${currentProblemId}`;
+        const savedShapes = localStorage.getItem(shapesKey);
+        if (savedShapes) {
+          try {
+            const parsedShapes = JSON.parse(savedShapes);
+            // Reconstruct shapes with IDs for display
+            const shapesWithIds = parsedShapes.map((shape: any, index: number) => ({
+              ...shape,
+              id: shape.id || Date.now() + index,
+            }));
+            setShapes(shapesWithIds);
+            console.log('📦 Loaded submitted shapes from localStorage:', shapesWithIds);
+          } catch (e) {
+            console.error('Failed to parse saved shapes:', e);
+          }
+        }
+      }
       
       console.log('🔍 Checking submission status:', {
         submissionKey,
         wasSubmitted,
         competitionId,
-        problemId: activeCompetition.current_problem_id
+        problemId: currentProblemId,
+        isNewProblem
       });
     }
   }, [competitionId, activeCompetition?.current_problem_id]);
 
-  // NEW: Reset submission state when problem changes (but keep localStorage)
-  useEffect(() => {
-    if (competitionId && activeCompetition?.current_problem_id) {
-      // Check if this is a different problem
-      const currentProblemKey = `submitted_${competitionId}_${activeCompetition.current_problem_id}`;
-      const wasSubmitted = localStorage.getItem(currentProblemKey) === 'true';
-      
-      setHasSubmitted(wasSubmitted);
-      setIsSubmitting(false);
-    }
-  }, [competitionId, activeCompetition?.current_problem_id]);
+  // Get selected shape for PropertiesPanel
+  const selectedShape = shapes.find(shape => shape.id === selectedId) || null;
 
   return (
-    <div className={`${styles.root} ${isFullScreenMode ? styles.fullScreenGame : ''}`}>
-      <div className={styles.scalableWorkspace}>
-        {/* Sidebar */}
-        <div style={{ gridArea: "sidebar", display: "flex", flexDirection: "column", alignItems: "center" }}>
-          <div style={{ width: "100%", display: "flex", flexDirection: "row", gap: 8, marginBottom: 16 }}>
-            <div className={styles.goBackGroup}>
-              <button className={styles.arrowLeft} onClick={() => router.back()}>←</button>
-              <span className={styles.goBackText}>Go back</span>
-            </div>
-          </div>
-          
-          {/* Difficulty - read-only in competition mode */}
-          {competitionId ? (
-            <div className={styles.difficultyDisplay}>
-              <div className={styles.difficultyLabel}>Problem Difficulty</div>
-              <div 
-                className={styles.difficultyValue}
-                style={{
-                  backgroundColor: DIFFICULTY_COLORS[difficulty as keyof typeof DIFFICULTY_COLORS],
-                  padding: '8px 16px',
-                  borderRadius: '6px',
-                  fontWeight: '600',
-                  textAlign: 'center'
-                }}
-              >
-                {difficulty}
-              </div>
-            </div>
-          ) : (
-            <DifficultyDropdown difficulty={difficulty} setDifficulty={setDifficulty} />
-          )}
-          
+    <div className={styles.playgroundRoot}>
+      {/* Landscape Prompt for Mobile Portrait */}
+      <LandscapePrompt />
+      
+      {/* Header */}
+      {competitionId && currentCompetition ? (
+        <PageHeader
+          title={currentCompetition.title || "Competition"}
+          userName={userProfile?.first_name}
+          subtitle={`Problem ${(currentCompetition.current_problem_index || 0) + 1} of ${currentCompetition.total_problems || currentCompetition.problem_count || 0}`}
+          showAvatar={true}
+        />
+      ) : (
+        <PageHeader
+          title="Problem Creation"
+          userName={userProfile?.first_name}
+          subtitle="Design and test geometry problems"
+          showAvatar={true}
+        />
+      )}
+
+      {/* 3-Column Playground Layout */}
+      <div className={styles.playgroundWorkspaceWithPanel}>
+        {/* Left Sidebar - Toolbox */}
+        <div className={styles.sidebar} style={{ opacity: hasSubmitted ? 0.5 : 1, pointerEvents: hasSubmitted ? 'none' : 'auto' }}>
           <Toolbox
             shapes={shapes}
-            disableDrag={shapes.length >= MAX_SHAPES}
             selectedTool={selectedTool}
             setSelectedTool={setSelectedTool}
-            fillMode={fillMode}
-            setFillMode={setFillMode}
-            fillColor={fillColor}
-            setFillColor={setFillColor}
-            FILL_COLORS={FILL_COLORS}
-            showProperties={showProperties}
-            setShowProperties={setShowProperties}
-            handleDragStart={handleDragStart}
-            showAreaByShape={showAreaByShape}
-            setShowAreaByShape={setShowAreaByShape}
             showSides={showSides}
             setShowSides={setShowSides}
             showAngles={showAngles}
@@ -873,300 +918,329 @@ export default function Gamepage({
             setShowDiameter={setShowDiameter}
             showCircumference={showCircumference}
             setShowCircumference={setShowCircumference}
+            showLength={showLength}
+            setShowLength={setShowLength}
+            showMidpoint={showMidpoint}
+            setShowMidpoint={setShowMidpoint}
+            showMeasurement={showMeasurement}
+            setShowMeasurement={setShowMeasurement}
+            showArcRadius={showArcRadius}
+            setShowArcRadius={setShowArcRadius}
+            showAreaByShape={showAreaByShape}
+            setShowAreaByShape={setShowAreaByShape}
           />
         </div>
 
-        {/* Main Column */}
-        <div className={styles.mainColumn}>
-          <div style={{ height: 32 }} />
-          
-          {/* Title - read-only in competition mode */}
-          <div className={styles.formRow}>
-            <input 
-              className={styles.input} 
-              placeholder="Title" 
-              value={title} 
-              onChange={e => setTitle(e.target.value)}
-              readOnly={!!competitionId}
-              style={{
-                backgroundColor: competitionId ? '#f5f5f5' : 'white',
-                cursor: competitionId ? 'default' : 'text'
-              }}
-            />
-          </div>
-          
-          {/* Prompt - read-only in competition mode */}
-          <div className={styles.promptGroup}>
-            <PromptBox
-              prompt={prompt}
-              setPrompt={setPrompt}
-              editingPrompt={editingPrompt && !competitionId}
-              setEditingPrompt={setEditingPrompt}
-              promptInputRef={promptInputRef}
-              readOnly={!!competitionId}
-            />
-          </div>
-          
-          {/* Timer - read-only in competition mode */}
-          {/* Main Area with Konva */}
-          <MainArea
-            shapes={shapes}
-            setShapes={setShapes}
-            selectedId={selectedId}
-            setSelectedId={setSelectedId}
-            setSelectedTool={setSelectedTool}
-            saveButton={
-              <button 
-                className={`${styles.saveBtn} ${styles.rowBtn} ${styles.saveBtnFloating}`} 
-                onClick={handleSave}
-                disabled={competitionId && (hasSubmitted || isSubmitting)} // NEW: Disable after submission
-                style={{
-                  opacity: competitionId && (hasSubmitted || isSubmitting) ? 0.5 : 1,
-                  cursor: competitionId && (hasSubmitted || isSubmitting) ? 'not-allowed' : 'pointer',
-                  backgroundColor: competitionId && hasSubmitted ? '#10b981' : undefined // Green when submitted
-                }}
-              >
-                {(() => {
-                  if (competitionId) {
-                    if (isSubmitting) return "Submitting...";
-                    if (hasSubmitted) return "Submitted";
-                    return "Submit Solution";
-                  }
-                  return "Save";
-                })()}
-              </button>
-            }
-            shapeLimit={MAX_SHAPES}
-            shapeCount={shapes.length}
-            onLimitReached={() => setShowLimitPopup(true)}
-            pxToUnits={pxToUnits}
-            showAreaByShape={showAreaByShape}
-            showSides={showSides}
-            showAngles={showAngles}
-            showDiameter={showDiameter}
-            showCircumference={showCircumference}
-            showHeight={showHeight}
-          />
-          
-          {/* FIXED: Progress bar with correct logic */}
-          {competitionId && activeCompetition && currentProblem?.timer && (
-            <div className={styles.timerProgress} style={{ position: 'relative', width: '100%', marginTop: '16px' }}>
-              {/* Progress bar container */}
-              <div style={{ position: 'relative', height: '8px' }}>
-                {/* Background track */}
-                <div 
-                  className={styles.progressTrack}
-                  style={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    height: '8px',
-                    backgroundColor: '#e5e7eb',
-                    borderRadius: '4px',
-                    zIndex: 1
-                  }}
-                />
-                
-                {/* Progress bar */}
-                <div 
-                  className={styles.progressBar}
-                  style={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    height: '8px',
-                    borderRadius: '4px',
-                    zIndex: 2,
-                    transition: 'width 0.5s ease-out',
-                    width: `${(() => {
-                      // FIXED: Remove * 60 multiplication - timer is already in seconds
-                      if (!currentProblem?.timer) return 0;
-                      
-                      const totalSeconds = currentProblem.timer; // Already in seconds, don't multiply by 60!
-                      
-                      // Handle initial state when timer hasn't started yet
-                      if (timeRemaining === 0 || timeRemaining === undefined || timeRemaining === null) {
-                        if (activeCompetition?.status === 'ONGOING' && isTimerActive) {
-                          return 0; // Timer expired
-                        } else if (activeCompetition?.status === 'NEW') {
-                          return 100; // Competition not started, show full bar
-                        } else {
-                          return 0; // Other states
-                        }
-                      }
-                      
-                      // Normal calculation for active timer
-                      const percentage = (timeRemaining / totalSeconds) * 100;
-                      return Math.max(0, Math.min(100, percentage));
-                    })()}%`,
-                    backgroundColor: (() => {
-                      // FIXED: Remove * 60 multiplication
-                      if (!currentProblem?.timer) return '#6b7280';
-                      
-                      const totalSeconds = currentProblem.timer; // Already in seconds
-                      
-                      // Handle initial states
-                      if (timeRemaining === 0 || timeRemaining === undefined || timeRemaining === null) {
-                        if (activeCompetition?.status === 'NEW') {
-                          return '#10b981'; // Green for not started
-                        } else if (isExpired) {
-                          return '#dc2626'; // Red for expired
-                        } else {
-                          return '#6b7280'; // Gray for other states
-                        }
-                      }
-                      
-                      // Normal color calculation
-                      const percentage = (timeRemaining / totalSeconds) * 100;
-                      
-                      if (percentage <= 10) return '#dc2626'; // Red - Critical (10% or less)
-                      if (percentage <= 25) return '#ef4444'; // Light Red - Urgent (25% or less) 
-                      if (percentage <= 50) return '#f59e0b'; // Orange - Warning (50% or less)
-                      return '#10b981'; // Green - Safe (more than 50%)
-                    })(),
-                    boxShadow: timeRemaining < 60 && timeRemaining > 0 ? '0 0 8px rgba(239, 68, 68, 0.5)' : 'none',
-                    animation: timeRemaining < 30 && timeRemaining > 0 ? 'pulse 1s infinite' : 'none'
-                  }}
-                />
-              </div>
+        {/* Main Content Area - Optimized for maximum canvas space */}
+        <div className={styles.mainContent} style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: 0 }}>
+          {/* Compact Competition Header (Timer + Title + Prompt in one row) */}
+          {competitionId && (
+            <div style={{
+              display: 'flex',
+              gap: '12px',
+              marginBottom: '8px',
+              flexShrink: 0
+            }}>
+              {/* Timer Badge */}
+              {currentProblem?.timer && (
+                <div style={{
+                  background: isPaused ? '#fef3c7' : isExpired ? '#fef2f2' : timeRemaining && timeRemaining < 30 ? '#fffbeb' : '#f0fdf4',
+                  border: `2px solid ${isPaused ? '#fde68a' : isExpired ? '#fecaca' : timeRemaining && timeRemaining < 30 ? '#fde68a' : '#bbf7d0'}`,
+                  borderRadius: '8px',
+                  padding: '8px 12px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  minWidth: '120px'
+                }}>
+                  <span style={{ fontSize: '14px', color: '#6b7280', fontWeight: 'bold' }}>
+                    {isPaused ? '||' : '🕐'}
+                  </span>
+                  <span style={{
+                    fontSize: '18px',
+                    fontWeight: 700,
+                    color: isPaused ? '#d97706' : isExpired ? '#dc2626' : timeRemaining && timeRemaining < 30 ? '#d97706' : '#16a34a',
+                    fontFamily: 'monospace'
+                  }}>
+                    {isPaused ? 'PAUSED' : formattedTime}
+                  </span>
+                </div>
+              )}
               
-              {/* NEW: Countdown timer display */}
+              {/* Title + Prompt Combined */}
               <div style={{
-                marginTop: '12px',
-                textAlign: 'center',
-                fontSize: '24px',
-                fontWeight: '700',
-                fontFamily: 'monospace',
-                color: (() => {
-                  if (!timeRemaining || timeRemaining <= 0) {
-                    return isExpired ? '#dc2626' : '#6b7280';
-                  }
-                  if (timeRemaining < 30) return '#dc2626'; // Red when critical
-                  if (timeRemaining < 60) return '#f59e0b'; // Orange when low
-                  return '#10b981'; // Green when safe
-                })(),
-                textShadow: timeRemaining < 30 && timeRemaining > 0 ? '0 0 10px rgba(239, 68, 68, 0.5)' : 'none'
+                flex: 1,
+                background: '#f9fafb',
+                border: '2px solid #e5e7eb',
+                borderRadius: '8px',
+                padding: '8px 12px',
+                overflow: 'hidden'
               }}>
-                {(() => {
-                  if (!timeRemaining || timeRemaining <= 0) {
-                    if (activeCompetition?.status === 'NEW') return 'Waiting to start...';
-                    if (isExpired) return 'Time up!';
-                    return '00:00';
-                  }
-                  
-                  const minutes = Math.floor(timeRemaining / 60);
-                  const seconds = timeRemaining % 60;
-                  return `${minutes}:${seconds.toString().padStart(2, '0')}`;
-                })()}
+                <div style={{ fontSize: '14px', fontWeight: 600, color: '#1f2937', marginBottom: '2px' }}>
+                  {title || "Untitled Problem"}
+                </div>
+                <div style={{ fontSize: '12px', color: '#6b7280', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  {prompt || "No description"}
+                </div>
               </div>
-              
-              {/* OPTIONAL: Percentage display */}
+
+              {/* XP Display Badge */}
               <div style={{
-                marginTop: '4px',
-                textAlign: 'center',
-                fontSize: '12px',
-                color: '#6b7280',
-                fontWeight: '500'
+                background: 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)',
+                border: '2px solid #fcd34d',
+                borderRadius: '8px',
+                padding: '8px 12px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                minWidth: '100px',
+                justifyContent: 'center'
               }}>
-                {(() => {
-                  if (timeRemaining === 0 || timeRemaining === undefined || timeRemaining === null) {
-                    if (activeCompetition?.status === 'NEW') return '100%';
-                    if (isExpired) return '0%';
-                    return '0%';
-                  }
-                  // FIXED: Remove * 60 multiplication
-                  return `${Math.round((timeRemaining / currentProblem.timer) * 100)}%`;
-                })()}
+                <span style={{ fontSize: '14px', fontWeight: 700, color: '#78350f' }}>⭐ {userAccumulatedXP}</span>
               </div>
             </div>
           )}
-          
-          <div className={styles.controlsRow}>
-            <div style={{ display: "flex", gap: 12 }}>
-              {/* Attempts - read-only in competition mode */}
-              {competitionId ? (
-                <div className={styles.attemptsDisplay}>
-                  <span className={styles.attemptsLabel}>Max Attempts:</span>
-                  <span className={styles.attemptsValue}>{limitAttempts}</span>
-                </div>
-              ) : (
-                <LimitAttempts limit={limitAttempts} setLimit={setLimitAttempts} />
-              )}
-              
-              {/* Timer - read-only in competition mode */}
-              {competitionId ? (
-                <div className={styles.timerDisplayControl}>
-                  <span className={styles.timerLabel}>Timer:</span>
-                  <span className={styles.timerValue}>{timerValue} sec</span>
-                </div>
-              ) : (
-                !timerOpen ? (
-                  <button className={`${styles.addTimerBtn} ${styles.rowBtn}`} onClick={() => setTimerOpen(true)}>
-                    Add Timer
+
+          {/* Non-competition mode: Title input */}
+          {!competitionId && (
+            <input 
+              className={styles.input} 
+              placeholder="Problem Title" 
+              value={title} 
+              onChange={e => setTitle(e.target.value)}
+              style={{ marginBottom: '8px', flexShrink: 0 }}
+            />
+          )}
+
+          {/* Non-competition mode: Prompt */}
+          {!competitionId && (
+            <div style={{ marginBottom: '8px', flexShrink: 0 }}>
+              <PromptBox
+                prompt={prompt}
+                setPrompt={setPrompt}
+                editingPrompt={editingPrompt}
+                setEditingPrompt={setEditingPrompt}
+                promptInputRef={promptInputRef}
+              />
+            </div>
+          )}
+
+          {/* Main Drawing Area - Takes all remaining space */}
+          <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
+            <MainArea
+              shapes={shapes}
+              setShapes={setShapes}
+              selectedId={selectedId}
+              setSelectedId={setSelectedId}
+              setSelectedTool={setSelectedTool}
+              saveButton={
+                competitionId ? (
+                  <button 
+                    onClick={handleSave}
+                    disabled={hasSubmitted || isSubmitting}
+                    style={{
+                      position: 'absolute',
+                      bottom: '24px',
+                      right: '24px',
+                      zIndex: 20,
+                      background: hasSubmitted ? '#10b981' : '#fabc60',
+                      borderRadius: '12px',
+                      fontFamily: 'Poppins',
+                      fontSize: '16px',
+                      fontWeight: 600,
+                      color: hasSubmitted ? '#ffffff' : '#000',
+                      border: 'none',
+                      cursor: hasSubmitted || isSubmitting ? 'not-allowed' : 'pointer',
+                      padding: '12px 32px',
+                      minWidth: '160px',
+                      minHeight: '48px',
+                      transition: 'all 0.2s',
+                      opacity: hasSubmitted || isSubmitting ? 0.7 : 1,
+                      boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
+                    }}
+                  >
+                    {isSubmitting ? "Submitting..." : hasSubmitted ? "✓ Submitted" : "Submit Solution"}
                   </button>
                 ) : (
-                  <Timer timerOpen={timerOpen} setTimerOpen={setTimerOpen} timerValue={timerValue} setTimerValue={setTimerValue} />
-                )
-              )}
-              
-              {/* Hint - read-only in competition mode */}
-              {(hintOpen || hint) ? (
-                <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
-                  <span style={{ fontSize: "0.85rem", fontWeight: 500, marginLeft: 4, marginBottom: 2 }}>
-                    Hint
-                  </span>
-                  <input
-                    className={styles.hintInput}
-                    type="text"
-                    value={hint}
-                    onChange={e => setHint(e.target.value)}
-                    onBlur={() => { if (!hint && !competitionId) setHintOpen(false); }}
-                    placeholder="Enter hint..."
-                    autoFocus={hintOpen && !competitionId}
-                    readOnly={!!competitionId}
+                  <button 
+                    onClick={handleSave}
                     style={{
-                      backgroundColor: competitionId ? '#f5f5f5' : 'white',
-                      cursor: competitionId ? 'default' : 'text'
+                      position: 'absolute',
+                      bottom: '24px',
+                      right: '24px',
+                      zIndex: 20,
+                      background: '#fabc60',
+                      borderRadius: '12px',
+                      fontFamily: 'Poppins',
+                      fontSize: '16px',
+                      fontWeight: 600,
+                      color: '#000',
+                      border: 'none',
+                      cursor: 'pointer',
+                      padding: '12px 32px',
+                      minWidth: '160px',
+                      minHeight: '48px',
+                      transition: 'all 0.2s',
+                      boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
                     }}
-                  />
-                </div>
-              ) : (
-                !competitionId && (
-                  <button className={`${styles.addHintBtn} ${styles.rowBtn}`} onClick={() => setHintOpen(true)}>
-                    Add Hint
+                  >
+                    Save Problem
                   </button>
                 )
-              )}
-              
-              {/* Visibility - only show in non-competition mode */}
-              {!competitionId && (
-                <SetVisibility visible={visible} setVisible={setVisible} />
-              )}
-            </div>
+              }
+              shapeLimit={currentProblem?.problem?.expected_solution?.length || MAX_SHAPES}
+              shapeCount={shapes.length}
+              onLimitReached={() => setShowLimitPopup(true)}
+              onAllShapesDeleted={handleAllShapesDeleted}
+              pxToUnits={pxToUnits}
+              showAreaByShape={showAreaByShape}
+              showSides={showSides}
+              showAngles={showAngles}
+              showDiameter={showDiameter}
+              showCircumference={showCircumference}
+              showHeight={showHeight}
+              showLength={showLength}
+              showMidpoint={showMidpoint}
+              showMeasurement={showMeasurement}
+              showArcRadius={showArcRadius}
+              disabled={hasSubmitted} // Prevent modifications after submission
+            />
           </div>
         </div>
-      </div>
-      
-      {showLimitPopup && (
-        <ShapeLimitPopup onClose={() => setShowLimitPopup(false)} />
-      )}
 
-      {/* NEW: Submission status indicator */}
-      {competitionId && hasSubmitted && (
-        <div style={{
-          marginTop: '12px',
-          textAlign: 'center',
-          padding: '8px 16px',
-          backgroundColor: '#10b981',
-          color: 'white',
-          borderRadius: '6px',
-          fontSize: '14px',
-          fontWeight: '600',
-          boxShadow: '0 2px 4px rgba(16, 185, 129, 0.3)'
-        }}>
-          Solution Submitted Successfully
+        {/* Right Sidebar - Properties Panel */}
+        <div className={styles.propertiesPanelContainer}>
+          {/* Competition Info Panel */}
+          {competitionId && (
+            <div style={{
+              background: 'linear-gradient(135deg, #ffffff 0%, #f7fee7 100%)',
+              borderRadius: '1.5rem',
+              padding: '1.5rem',
+              boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
+              marginBottom: '1rem',
+              border: '2px solid #e5e7eb'
+            }}>
+              <h3 style={{
+                fontSize: '1.1rem',
+                fontWeight: 700,
+                color: '#2c514c',
+                marginBottom: '1rem',
+                fontFamily: 'Poppins, sans-serif',
+                textAlign: 'center',
+                borderBottom: '2px solid #e5e7eb',
+                paddingBottom: '0.5rem'
+              }}>
+                Problem Info
+              </h3>
+              
+              {/* Difficulty */}
+              <div style={{ marginBottom: '0.75rem' }}>
+                <div style={{ fontSize: '0.75rem', fontWeight: 600, color: '#6b7280', marginBottom: '0.25rem' }}>
+                  Difficulty
+                </div>
+                <div style={{
+                  backgroundColor: DIFFICULTY_COLORS[difficulty as keyof typeof DIFFICULTY_COLORS],
+                  padding: '6px 12px',
+                  borderRadius: '8px',
+                  fontWeight: 600,
+                  fontSize: '0.9rem',
+                  textAlign: 'center',
+                  color: '#1a3a35'
+                }}>
+                  {difficulty}
+                </div>
+              </div>
+
+              {/* Max Attempts */}
+              <div style={{ marginBottom: '0.75rem' }}>
+                <div style={{ fontSize: '0.75rem', fontWeight: 600, color: '#6b7280', marginBottom: '0.25rem' }}>
+                  Max Attempts
+                </div>
+                <div style={{
+                  background: '#f3f4f6',
+                  padding: '6px 12px',
+                  borderRadius: '8px',
+                  fontWeight: 600,
+                  fontSize: '0.9rem',
+                  textAlign: 'center',
+                  color: '#374151'
+                }}>
+                  {limitAttempts}
+                </div>
+              </div>
+
+              {/* Timer Value */}
+              {currentProblem?.timer && (
+                <div style={{ marginBottom: '0.75rem' }}>
+                  <div style={{ fontSize: '0.75rem', fontWeight: 600, color: '#6b7280', marginBottom: '0.25rem' }}>
+                    Time Limit
+                  </div>
+                  <div style={{
+                    background: '#f3f4f6',
+                    padding: '6px 12px',
+                    borderRadius: '8px',
+                    fontWeight: 600,
+                    fontSize: '0.9rem',
+                    textAlign: 'center',
+                    color: '#374151'
+                  }}>
+                    {currentProblem.timer} seconds
+                  </div>
+                </div>
+              )}
+
+              {/* Hint */}
+              {hint && (
+                <div style={{ marginTop: '0.75rem' }}>
+                  <div style={{ fontSize: '0.75rem', fontWeight: 600, color: '#6b7280', marginBottom: '0.25rem' }}>
+                    💡 Hint
+                  </div>
+                  <div style={{
+                    background: '#fef3c7',
+                    padding: '8px 12px',
+                    borderRadius: '8px',
+                    fontSize: '0.85rem',
+                    color: '#92400e',
+                    lineHeight: '1.4',
+                    fontStyle: 'italic'
+                  }}>
+                    {hint}
+                  </div>
+                </div>
+              )}
+
+              {/* Submission Status */}
+              {hasSubmitted && (
+                <div style={{
+                  marginTop: '1rem',
+                  padding: '8px 12px',
+                  background: '#d1fae5',
+                  borderRadius: '8px',
+                  textAlign: 'center',
+                  fontSize: '0.85rem',
+                  fontWeight: 600,
+                  color: '#065f46'
+                }}>
+                  ✓ Solution Submitted
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Properties Panel */}
+          <PropertiesPanel
+            selectedShape={selectedShape}
+            pxToUnits={pxToUnits}
+          />
         </div>
+      </div>
+
+      {/* Shape Limit Popup */}
+      {showLimitPopup && (
+        <ShapeLimitPopup 
+          onClose={() => setShowLimitPopup(false)} 
+          limit={currentProblem?.problem?.expected_solution?.length || MAX_SHAPES}
+        />
       )}
     </div>
   );

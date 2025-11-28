@@ -258,25 +258,132 @@
     }
   }
 
+  /* Mobile Landscape - Optimize layout */
+  @media (max-width: 900px) and (orientation: landscape) {
+    .registerPage {
+      padding: 3px;
+      min-height: 100vh;
+    }
+    
+    .registerCard {
+      padding: 8px 10px;
+      max-width: 680px;
+    }
+    
+    .logo {
+      max-width: 80px;
+      margin-bottom: 4px;
+    }
+    
+    .welcomeTitle {
+      font-size: 14px;
+      line-height: 20px;
+      margin-bottom: 2px;
+    }
+    
+    .welcomeSubtitle {
+      font-size: 10px;
+      line-height: 14px;
+      margin-bottom: 8px;
+    }
+    
+    .formGroup {
+      margin-bottom: 5px;
+    }
+    
+    .inputField, .selectField {
+      height: 28px;
+      font-size: 11px;
+      padding: 0 8px;
+    }
+    
+    .formGrid {
+      grid-template-columns: 1fr 1fr;
+      gap: 5px;
+    }
+    
+    .fullWidth {
+      grid-column: span 2;
+    }
+    
+    .registerButton {
+      height: 28px;
+      font-size: 12px;
+      margin-bottom: 6px;
+    }
+    
+    .socialDivider {
+      margin: 6px 0;
+      font-size: 10px;
+    }
+    
+    .dividerText {
+      padding: 0 6px;
+      font-size: 10px;
+    }
+    
+    .socialButtons {
+      gap: 6px;
+      margin-bottom: 6px;
+      flex-direction: row;
+    }
+    
+    .socialButton {
+      height: 28px;
+      font-size: 11px;
+    }
+    
+    .socialIcon {
+      font-size: 13px;
+      margin-right: 5px;
+    }
+    
+    .loginPrompt {
+      font-size: 11px;
+      line-height: 14px;
+    }
+    
+    .cardContent {
+      max-width: 100%;
+    }
+    
+    .backButton {
+      top: 8px;
+      left: 8px;
+      font-size: 11px;
+      padding: 3px 6px;
+    }
+    
+    .error {
+      font-size: 10px;
+      margin-top: 3px;
+    }
+  }
+
   .backButton {
     position: absolute;
     top: 20px;
     left: 20px;
-    background: none;
-    border: none;
-    color: #666;
+    background: rgba(44, 81, 76, 0.08);
+    border: 1px solid rgba(44, 81, 76, 0.2);
+    color: #2c514c;
     cursor: pointer;
     font-size: 14px;
-    font-weight: 500;
-    padding: 8px 12px;
-    border-radius: 6px;
+    font-weight: 600;
+    padding: 8px 16px;
+    border-radius: 8px;
     transition: all 0.2s ease;
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
+  }
+  
+  .backButton svg {
+    font-size: 16px;
   }
   
   .backButton:hover {
-    color: #2c514c;
-    background: rgba(44, 81, 76, 0.1);
+    background: rgba(44, 81, 76, 0.15);
+    border-color: rgba(44, 81, 76, 0.4);
+    transform: translateX(-2px);
   }

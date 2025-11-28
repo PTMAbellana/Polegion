@@ -178,6 +178,13 @@ const TriangleShape: React.FC<TriangleShapeProps> = ({
           e.cancelBubble = true;
           onSelect();
         }}
+        onTap={(e) => {
+          e.cancelBubble = true;
+          onSelect();
+        }}
+        onMouseDown={(e) => {
+          e.cancelBubble = true;
+        }}
       >
         {/* Main Triangle */}
         <Line

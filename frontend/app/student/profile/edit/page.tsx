@@ -46,7 +46,7 @@ export default function StudentEditProfilePage() {
             onClick={handleCancel}
             className={styles['back-button']}
         >
-            ← Back to Profile
+            Back to Profile
         </button>
     )
 

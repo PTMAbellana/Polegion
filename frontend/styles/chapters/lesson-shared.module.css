@@ -32,6 +32,17 @@
   border-color: #5a3e2b;
   background: rgba(244, 228, 193, 1);
   box-shadow: 0 0 20px rgba(139, 115, 85, 0.4);
+  animation: pulse 2s ease-in-out infinite;
+  transform: scale(1.02);
+}
+
+@keyframes pulse {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(139, 115, 85, 0.4), 0 0 30px rgba(139, 115, 85, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(139, 115, 85, 0.6), 0 0 45px rgba(139, 115, 85, 0.3);
+  }
 }
 
 .conceptCardClickable {
@@ -236,8 +247,39 @@
 }
 
 :global(.castle1Theme) .conceptCardHighlighted {
-  border-color: #D8C4B6;
-  box-shadow: 0 0 20px rgba(216, 196, 182, 0.4);
+  border-color: #F5EFE7;
+  background: linear-gradient(135deg, rgba(62, 88, 121, 0.25) 0%, rgba(33, 53, 85, 0.2) 100%);
+  box-shadow: 0 0 25px rgba(245, 239, 231, 0.6), 0 0 40px rgba(216, 196, 182, 0.4), inset 0 0 15px rgba(245, 239, 231, 0.1);
+  transform: scale(1.02);
+  animation: castle1Pulse 2s ease-in-out infinite;
+}
+
+@keyframes castle1Pulse {
+  0%, 100% {
+    box-shadow: 0 0 25px rgba(245, 239, 231, 0.6), 0 0 40px rgba(216, 196, 182, 0.4), inset 0 0 15px rgba(245, 239, 231, 0.1);
+  }
+  50% {
+    box-shadow: 0 0 35px rgba(245, 239, 231, 0.8), 0 0 55px rgba(216, 196, 182, 0.6), inset 0 0 20px rgba(245, 239, 231, 0.15);
+  }
+}
+
+:global(.castle1Theme) .conceptCardHighlighted .conceptTitle {
+  color: #F5EFE7;
+  text-shadow: 0 0 10px rgba(245, 239, 231, 0.8), 0 0 20px rgba(245, 239, 231, 0.4);
+}
+
+:global(.castle1Theme) .conceptCardHighlighted .conceptDescription {
+  color: #F5EFE7;
+}
+
+:global(.castle1Theme) .conceptCardHighlighted .conceptImageSection {
+  background: rgba(255, 255, 255, 0.98);
+  border-color: #F5EFE7;
+  box-shadow: 0 0 15px rgba(245, 239, 231, 0.5);
+}
+
+:global(.castle1Theme) .conceptCardHighlighted .conceptImage {
+  filter: drop-shadow(0 0 12px rgba(245, 239, 231, 0.7));
 }
 
 :global(.castle1Theme) .conceptTitle {
@@ -249,7 +291,7 @@
 }
 
 :global(.castle1Theme) .conceptImageSection {
-  background: rgba(245, 239, 231, 0.85);
+  background: rgba(255, 255, 255, 0.95);
   border-color: #D8C4B6;
 }
 
@@ -266,7 +308,38 @@
 
 :global(.castle2Theme) .conceptCardHighlighted {
   border-color: #FFFD8F;
-  box-shadow: 0 0 20px rgba(255, 253, 143, 0.4);
+  background: linear-gradient(135deg, rgba(176, 206, 136, 0.25) 0%, rgba(255, 253, 143, 0.2) 100%);
+  box-shadow: 0 0 25px rgba(255, 253, 143, 0.7), 0 0 40px rgba(176, 206, 136, 0.5), inset 0 0 15px rgba(255, 253, 143, 0.15);
+  transform: scale(1.02);
+  animation: castle2Pulse 2s ease-in-out infinite;
+}
+
+@keyframes castle2Pulse {
+  0%, 100% {
+    box-shadow: 0 0 25px rgba(255, 253, 143, 0.7), 0 0 40px rgba(176, 206, 136, 0.5), inset 0 0 15px rgba(255, 253, 143, 0.15);
+  }
+  50% {
+    box-shadow: 0 0 35px rgba(255, 253, 143, 0.9), 0 0 55px rgba(176, 206, 136, 0.7), inset 0 0 20px rgba(255, 253, 143, 0.2);
+  }
+}
+
+:global(.castle2Theme) .conceptCardHighlighted .conceptTitle {
+  color: #FFFD8F;
+  text-shadow: 0 0 10px rgba(255, 253, 143, 0.9), 0 0 20px rgba(255, 253, 143, 0.5);
+}
+
+:global(.castle2Theme) .conceptCardHighlighted .conceptDescription {
+  color: #FFFD8F;
+}
+
+:global(.castle2Theme) .conceptCardHighlighted .conceptImageSection {
+  background: rgba(255, 255, 255, 0.98);
+  border-color: #FFFD8F;
+  box-shadow: 0 0 15px rgba(255, 253, 143, 0.6);
+}
+
+:global(.castle2Theme) .conceptCardHighlighted .conceptImage {
+  filter: drop-shadow(0 0 12px rgba(255, 253, 143, 0.8));
 }
 
 :global(.castle2Theme) .conceptTitle {
@@ -278,7 +351,7 @@
 }
 
 :global(.castle2Theme) .conceptImageSection {
-  background: rgba(255, 253, 143, 0.85);
+  background: rgba(255, 255, 255, 0.95);
   border-color: #B0CE88;
 }
 
@@ -295,7 +368,38 @@
 
 :global(.castle3Theme) .conceptCardHighlighted {
   border-color: #DDEB9D;
-  box-shadow: 0 0 20px rgba(221, 235, 157, 0.4);
+  background: linear-gradient(135deg, rgba(38, 102, 123, 0.25) 0%, rgba(20, 61, 96, 0.2) 100%);
+  box-shadow: 0 0 25px rgba(221, 235, 157, 0.7), 0 0 40px rgba(160, 200, 120, 0.5), inset 0 0 15px rgba(221, 235, 157, 0.15);
+  transform: scale(1.02);
+  animation: castle3Pulse 2s ease-in-out infinite;
+}
+
+@keyframes castle3Pulse {
+  0%, 100% {
+    box-shadow: 0 0 25px rgba(221, 235, 157, 0.7), 0 0 40px rgba(160, 200, 120, 0.5), inset 0 0 15px rgba(221, 235, 157, 0.15);
+  }
+  50% {
+    box-shadow: 0 0 35px rgba(221, 235, 157, 0.9), 0 0 55px rgba(160, 200, 120, 0.7), inset 0 0 20px rgba(221, 235, 157, 0.2);
+  }
+}
+
+:global(.castle3Theme) .conceptCardHighlighted .conceptTitle {
+  color: #DDEB9D;
+  text-shadow: 0 0 10px rgba(221, 235, 157, 0.9), 0 0 20px rgba(221, 235, 157, 0.5);
+}
+
+:global(.castle3Theme) .conceptCardHighlighted .conceptDescription {
+  color: #DDEB9D;
+}
+
+:global(.castle3Theme) .conceptCardHighlighted .conceptImageSection {
+  background: rgba(255, 255, 255, 0.98);
+  border-color: #DDEB9D;
+  box-shadow: 0 0 15px rgba(221, 235, 157, 0.6);
+}
+
+:global(.castle3Theme) .conceptCardHighlighted .conceptImage {
+  filter: drop-shadow(0 0 12px rgba(221, 235, 157, 0.8));
 }
 
 :global(.castle3Theme) .conceptTitle {
@@ -307,7 +411,7 @@
 }
 
 :global(.castle3Theme) .conceptImageSection {
-  background: rgba(221, 235, 157, 0.85);
+  background: rgba(255, 255, 255, 0.95);
   border-color: #A0C878;
 }
 
@@ -324,9 +428,19 @@
 
 :global(.castle4Theme) .conceptCardHighlighted {
   border-color: #FFE1AF;
-  background: rgba(255, 225, 175, 0.2);
-  box-shadow: 0 0 22px rgba(255, 225, 175, 0.55), inset 0 0 6px rgba(0, 0, 0, 0.15);
-  transform: scale(1.015);
+  background: linear-gradient(135deg, rgba(183, 116, 102, 0.25) 0%, rgba(149, 124, 98, 0.2) 100%);
+  box-shadow: 0 0 25px rgba(255, 225, 175, 0.7), 0 0 40px rgba(226, 181, 154, 0.5), inset 0 0 15px rgba(255, 225, 175, 0.15);
+  transform: scale(1.02);
+  animation: castle4Pulse 2s ease-in-out infinite;
+}
+
+@keyframes castle4Pulse {
+  0%, 100% {
+    box-shadow: 0 0 25px rgba(255, 225, 175, 0.7), 0 0 40px rgba(226, 181, 154, 0.5), inset 0 0 15px rgba(255, 225, 175, 0.15);
+  }
+  50% {
+    box-shadow: 0 0 35px rgba(255, 225, 175, 0.9), 0 0 55px rgba(226, 181, 154, 0.7), inset 0 0 20px rgba(255, 225, 175, 0.2);
+  }
 }
 
 :global(.castle4Theme) .conceptCardHighlighted .conceptTitle {
@@ -339,7 +453,7 @@
 }
 
 :global(.castle4Theme) .conceptCardHighlighted .conceptImageSection {
-  background: rgba(255, 225, 175, 0.9);
+  background: rgba(255, 255, 255, 0.95);
   border-color: #FFE1AF;
   box-shadow: 0 0 10px rgba(255, 225, 175, 0.5);
 }
@@ -358,7 +472,7 @@
 }
 
 :global(.castle4Theme) .conceptImageSection {
-  background: rgba(255, 225, 175, 0.85);
+  background: rgba(255, 255, 255, 0.95);
   border-color: #E2B59A;
 }
 
@@ -375,7 +489,38 @@
 
 :global(.castle5Theme) .conceptCardHighlighted {
   border-color: #FFE3A9;
-  box-shadow: 0 0 20px rgba(255, 227, 169, 0.4);
+  background: linear-gradient(135deg, rgba(114, 92, 173, 0.25) 0%, rgba(11, 29, 81, 0.2) 100%);
+  box-shadow: 0 0 25px rgba(255, 227, 169, 0.7), 0 0 40px rgba(140, 205, 235, 0.5), inset 0 0 15px rgba(255, 227, 169, 0.15);
+  transform: scale(1.02);
+  animation: castle5Pulse 2s ease-in-out infinite;
+}
+
+@keyframes castle5Pulse {
+  0%, 100% {
+    box-shadow: 0 0 25px rgba(255, 227, 169, 0.7), 0 0 40px rgba(140, 205, 235, 0.5), inset 0 0 15px rgba(255, 227, 169, 0.15);
+  }
+  50% {
+    box-shadow: 0 0 35px rgba(255, 227, 169, 0.9), 0 0 55px rgba(140, 205, 235, 0.7), inset 0 0 20px rgba(255, 227, 169, 0.2);
+  }
+}
+
+:global(.castle5Theme) .conceptCardHighlighted .conceptTitle {
+  color: #FFE3A9;
+  text-shadow: 0 0 10px rgba(255, 227, 169, 0.9), 0 0 20px rgba(255, 227, 169, 0.5);
+}
+
+:global(.castle5Theme) .conceptCardHighlighted .conceptDescription {
+  color: #FFE3A9;
+}
+
+:global(.castle5Theme) .conceptCardHighlighted .conceptImageSection {
+  background: rgba(255, 255, 255, 0.98);
+  border-color: #FFE3A9;
+  box-shadow: 0 0 15px rgba(255, 227, 169, 0.6);
+}
+
+:global(.castle5Theme) .conceptCardHighlighted .conceptImage {
+  filter: drop-shadow(0 0 12px rgba(255, 227, 169, 0.8));
 }
 
 :global(.castle5Theme) .conceptTitle {
@@ -387,7 +532,7 @@
 }
 
 :global(.castle5Theme) .conceptImageSection {
-  background: rgba(255, 227, 169, 0.85);
+  background: rgba(255, 255, 255, 0.95);
   border-color: #8CCDEB;
 }
 

@@ -111,6 +111,12 @@ class CastleRepo extends BaseRepo {
     async getAllCastlesWithUserProgress(userId) {
         try {
             console.log('[CastleRepo] getAllCastlesWithUserProgress for userId:', userId);
+            console.log('[CastleRepo] userId type:', typeof userId);
+            
+            // Validate userId
+            if (!userId) {
+                throw new Error('userId is required for getAllCastlesWithUserProgress');
+            }
             
             // Get all castles
             const { data: castles, error: castlesError } = await this.supabase
@@ -126,6 +132,7 @@ class CastleRepo extends BaseRepo {
             console.log('[CastleRepo] Fetched castles count:', castles?.length);
 
             // Get user progress for all castles
+            console.log('[CastleRepo] Fetching progress for user_id:', userId);
             const { data: progress, error: progressError } = await this.supabase
                 .from('user_castle_progress')
                 .select('*')
@@ -133,6 +140,8 @@ class CastleRepo extends BaseRepo {
 
             if (progressError) {
                 console.error('[CastleRepo] Error fetching progress:', progressError);
+                console.error('[CastleRepo] Progress error code:', progressError.code);
+                console.error('[CastleRepo] Progress error details:', progressError.details);
                 throw progressError;
             }
 

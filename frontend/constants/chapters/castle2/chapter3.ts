@@ -17,12 +17,12 @@ export const CHAPTER3_DIALOGUE: ChapterDialogue[] = [
   { scene: 'opening', text: "Supplementary angles unite to create 180° — a straight line!" },
   
   // Lesson scene (indices 4-9)
-  { scene: 'lesson', text: "Two angles are complementary if their measures add up to exactly 90°.", key: 'lesson-1', taskId: 'task-0' },
-  { scene: 'lesson', text: "Example: 30° and 60° are complementary because 30° + 60° = 90°.", key: 'lesson-2', taskId: 'task-0' },
-  { scene: 'lesson', text: "Two angles are supplementary if their measures add up to exactly 180°.", key: 'lesson-3', taskId: 'task-1' },
-  { scene: 'lesson', text: "Example: 110° and 70° are supplementary because 110° + 70° = 180°.", key: 'lesson-4', taskId: 'task-1' },
-  { scene: 'lesson', text: "To find a missing angle: subtract the known angle from 90° (complement) or 180° (supplement).", key: 'lesson-5', taskId: 'task-2' },
-  { scene: 'lesson', text: "Now, let us forge angle pairs together and solve for the missing measures!", key: 'lesson-6', taskId: 'task-2' },
+  { scene: 'lesson', text: "Two angles are complementary if their measures add up to exactly 90°.", key: 'complementary', taskId: 'task-0' },
+  { scene: 'lesson', text: "Example: 30° and 60° are complementary because 30° + 60° = 90°.", key: 'complementary', taskId: 'task-0' },
+  { scene: 'lesson', text: "Two angles are supplementary if their measures add up to exactly 180°.", key: 'supplementary', taskId: 'task-1' },
+  { scene: 'lesson', text: "Example: 110° and 70° are supplementary because 110° + 70° = 180°.", key: 'supplementary', taskId: 'task-1' },
+  { scene: 'lesson', text: "To find a missing angle: subtract the known angle from 90° (complement) or 180° (supplement).", key: 'finding-missing', taskId: 'task-2' },
+  { scene: 'lesson', text: "Now, let us forge angle pairs together and solve for the missing measures!", key: 'finding-missing', taskId: 'task-2' },
   
   // Minigame scene (indices 10-12)
   { scene: 'minigame', text: "Complementa challenges you! Find the missing angle to complete the pair." },
@@ -89,7 +89,7 @@ export const CHAPTER3_MINIGAME_LEVELS = [
   {
     id: 3,
     givenAngle: 42,
-    relationship: 'complementary' as const,
+    relationship: 'complementary1' as const,
     correctAnswer: 48,
     description: 'Find the complement of 42°',
     hint: 'Remember: complementary angles add to 90°',
@@ -98,7 +98,7 @@ export const CHAPTER3_MINIGAME_LEVELS = [
   {
     id: 4,
     givenAngle: 75,
-    relationship: 'supplementary' as const,
+    relationship: 'supplementary1' as const,
     correctAnswer: 105,
     description: 'Find the supplement of 75°',
     hint: 'Remember: supplementary angles add to 180°',
@@ -107,7 +107,7 @@ export const CHAPTER3_MINIGAME_LEVELS = [
   {
     id: 5,
     givenAngle: 60,
-    relationship: 'complementary' as const,
+    relationship: 'complementary2' as const,
     correctAnswer: 30,
     description: 'Find the complement of 60°',
     hint: 'What angle adds with 60° to make 90°?',
@@ -116,7 +116,7 @@ export const CHAPTER3_MINIGAME_LEVELS = [
   {
     id: 6,
     givenAngle: 135,
-    relationship: 'supplementary' as const,
+    relationship: 'supplementary2' as const,
     correctAnswer: 45,
     description: 'Find the supplement of 135°',
     hint: 'What angle adds with 135° to make 180°?',
@@ -183,7 +183,7 @@ export const CHAPTER3_RELIC = {
 // Wizard information
 export const CHAPTER3_WIZARD = {
   name: "Complementa, Master of Angle Relationships",
-  image: "/images/complementa-wizard.png"
+  image: "/images/wizards/complementa-wizard.png"
 };
 
 // Chapter metadata

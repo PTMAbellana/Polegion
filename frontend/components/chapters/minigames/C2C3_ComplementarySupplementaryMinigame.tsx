@@ -66,7 +66,7 @@ const ComplementarySupplementaryMinigame: React.FC<ComplementarySupplementaryMin
           width: '100%',
           maxWidth: '400px',
           height: '300px',
-          backgroundColor: 'rgba(244, 228, 193, 0.2)',
+          backgroundColor: 'rgba(255, 255, 255, 0.95)',
           border: '2px dashed #B0CE88',
           borderRadius: '8px',
           display: 'flex',
@@ -143,7 +143,7 @@ const ComplementarySupplementaryMinigame: React.FC<ComplementarySupplementaryMin
             <label style={{ color: '#FFFD8F', fontSize: '1.1rem', marginBottom: '0.5rem', display: 'block', textAlign: 'center', fontFamily: "'Cinzel', serif", fontWeight: 'bold' }}>
               What is the missing angle?
             </label>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
               <input
                 type="number"
                 value={userAnswer}
@@ -153,36 +153,35 @@ const ComplementarySupplementaryMinigame: React.FC<ComplementarySupplementaryMin
                 disabled={showFeedback}
                 className={styleModule.angleInput}
                 style={{
-                  padding: '0.7rem',
-                  fontSize: '1.1rem',
-                  width: '160px',
-                  borderRadius: '8px',
+                  flex: 1,
+                  padding: '10px 14px',
+                  fontSize: '1rem',
+                  fontWeight: '600',
+                  background: 'rgba(26, 26, 46, 0.6)',
                   border: '2px solid #B0CE88',
-                  textAlign: 'center',
-                  fontFamily: "'Nunito', sans-serif",
-                  backgroundColor: 'rgba(255, 255, 255, 0.95)',
-                  color: '#043915',
-                  fontWeight: 'bold'
+                  borderRadius: '8px',
+                  color: '#FFFD8F',
+                  textAlign: 'center'
                 }}
               />
-              <span style={{ color: '#FFFD8F', fontSize: '1.1rem', marginLeft: '0.5rem', fontWeight: 'bold' }}>°</span>
+              <span style={{ fontSize: '1.2rem', color: '#FFFD8F', fontWeight: 'bold' }}>°</span>
             </div>
           </div>
 
           {question.hint && !showFeedback && (
-            <div style={{ 
-              padding: '0.8rem', 
-              backgroundColor: 'rgba(255, 253, 143, 0.2)',
-              border: '2px solid #B0CE88',
+            <div style={{
+              padding: '10px 12px',
+              fontSize: '0.8rem',
+              background: 'linear-gradient(135deg, rgba(255, 253, 143, 0.15) 0%, rgba(176, 206, 136, 0.1) 100%)',
+              border: '1.5px solid rgba(176, 206, 136, 0.3)',
               borderRadius: '8px',
-              color: '#043915',
-              fontSize: '0.95rem',
-              width: '100%',
-              textAlign: 'center',
-              fontFamily: "'Nunito', sans-serif",
-              fontWeight: '600'
+              color: '#FFFD8F',
+              lineHeight: '1.4',
+              width: '100%'
             }}>
-              Hint: {question.hint}
+              <strong style={{ color: '#B0CE88', fontSize: '0.7rem' }}>Hint:</strong>
+              <br />
+              {question.hint}
             </div>
           )}
 

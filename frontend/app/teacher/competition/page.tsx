@@ -1,67 +1,73 @@
 "use client"
 
-import React, { useEffect, useState, useCallback } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuthStore } from '@/store/authStore'
 import { useTeacherRoomStore } from '@/store/teacherRoomStore'
-import { useCompetitionManagement } from '@/hooks/useCompetitionManagement'
 import {
   CompetitionHeader,
   CreateCompetitionForm,
   CompetitionList
 } from '@/components/competition'
-import Loader from '@/components/Loader'
+import { FaUsers } from 'react-icons/fa'
 import LoadingOverlay from '@/components/LoadingOverlay'
 import styles from '@/styles/competition-teacher.module.css'
 
 export default function TeacherCompetitionPage() {
   const router = useRouter()
   const { isLoggedIn, appLoading } = useAuthStore()
-  const { currentRoom } = useTeacherRoomStore()
-  const [fetched, setFetched] = useState(false)
+  const { currentRoom, fetchRoomDetails, addCompetitionToRoom, createdRooms, fetchCreatedRooms, roomLoading } = useTeacherRoomStore()
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  
+  // Get roomCode from URL params
+  const searchParams = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '')
+  const roomCode = searchParams.get('roomCode')
   const roomId = currentRoom?.id
 
-  console.log('🏠 TeacherCompetitionPage - roomId:', roomId, 'currentRoom:', currentRoom)
+  console.log('🏠 TeacherCompetitionPage - roomCode:', roomCode, 'roomId:', roomId, 'currentRoom:', currentRoom, 'createdRooms:', createdRooms?.length)
 
-  const {
-    competitions,
-    loading,
-    error,
-    fetchCompetitions,
-    createCompetition
-  } = useCompetitionManagement(roomId || '')
-
-  // Get problems and participants from currentRoom (already fetched by teacherRoomStore)
+  // Get competitions, problems and participants from currentRoom (already fetched by teacherRoomStore)
+  const competitions = currentRoom?.competitions || []
   const visibleProblems = currentRoom?.problems?.filter(p => p.visibility === 'show') || []
   const participants = currentRoom?.participants || []
 
-  console.log('📊 Available data - Problems:', visibleProblems.length, 'Participants:', participants.length)
+  // Check if data is still loading
+  const isDataLoading = roomLoading || (roomCode && createdRooms.length === 0) || (roomCode && !currentRoom)
 
-  // Fetch competitions only
-  const fetchAll = useCallback(async () => {
-    if (!roomId) return
-    
-    console.log('🚀 Fetching competitions for room:', roomId)
-    try {
-      await fetchCompetitions()
-      console.log('✅ Competitions fetched successfully')
-    } catch (error) {
-      console.error('❌ Error fetching competitions:', error)
-    }
-  }, [roomId, fetchCompetitions])
+  console.log('📊 Available data - Competitions:', competitions.length, 'Problems:', visibleProblems.length, 'Participants:', participants.length, 'isDataLoading:', isDataLoading)
 
+  // First, ensure createdRooms are loaded
   useEffect(() => {
-    if (isLoggedIn && !appLoading && !fetched && roomId) {
-      fetchAll()
-      setFetched(true)
+    if (isLoggedIn && !appLoading && createdRooms.length === 0) {
+      console.log('🔄 Fetching created rooms first...')
+      fetchCreatedRooms()
     }
-  }, [isLoggedIn, appLoading, fetched, roomId, fetchAll])
+  }, [isLoggedIn, appLoading, createdRooms.length, fetchCreatedRooms])
+
+  // Then fetch room details once we have createdRooms
+  useEffect(() => {
+    if (isLoggedIn && !appLoading && roomCode && createdRooms.length > 0) {
+      // Check if we need to fetch - either no currentRoom, different room, or participants not loaded
+      const needsFetch = !currentRoom || 
+                        currentRoom.code !== roomCode || 
+                        !Array.isArray(currentRoom.participants)
+      
+      if (needsFetch) {
+        console.log('🔄 Fetching room details for roomCode:', roomCode)
+        fetchRoomDetails(roomCode, true) // Force refresh to get fresh data
+      }
+    }
+  }, [isLoggedIn, appLoading, roomCode, createdRooms.length])
 
   // Handle create competition
   const handleCreateCompetition = async (title: string) => {
-    const result = await createCompetition(title)
-    if (result.success) {
-      await fetchCompetitions()
+    setLoading(true)
+    setError(null)
+    const result = await addCompetitionToRoom(title)
+    setLoading(false)
+    if (!result.success) {
+      setError(result.error || 'Failed to create competition')
     }
   }
 
@@ -75,18 +81,107 @@ export default function TeacherCompetitionPage() {
     router.back()
   }
 
-  if (appLoading || !isLoggedIn || loading) {
-    return <LoadingOverlay isLoading={true}><Loader /></LoadingOverlay>
+  // Redirect if no roomCode in URL
+  if (!roomCode && !appLoading && isLoggedIn) {
+    return (
+      <div className={styles.container}>
+        <div className={styles.mainContainer}>
+          <div style={{ 
+            textAlign: 'center', 
+            padding: '3rem',
+            maxWidth: '500px',
+            margin: '2rem auto',
+            background: 'rgba(255, 255, 255, 0.95)',
+            borderRadius: '12px',
+            boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
+          }}>
+            <div style={{ 
+              fontSize: '3rem', 
+              marginBottom: '1rem',
+              color: '#3b82f6'
+            }}>🏠</div>
+            <h2 style={{ 
+              color: '#1a202c', 
+              marginBottom: '1rem',
+              fontSize: '1.5rem'
+            }}>No Room Selected</h2>
+            <p style={{ 
+              color: '#4a5568',
+              marginBottom: '2rem',
+              lineHeight: '1.6'
+            }}>Please access the competition dashboard from a virtual room.</p>
+            <button 
+              onClick={() => router.push('/teacher/virtual-rooms')} 
+              style={{
+                padding: '0.75rem 2rem',
+                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                color: 'white',
+                border: 'none',
+                borderRadius: '8px',
+                fontSize: '1rem',
+                fontWeight: '600',
+                cursor: 'pointer',
+                transition: 'transform 0.2s',
+              }}
+              onMouseOver={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
+              onMouseOut={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+            >
+              Go to Virtual Rooms
+            </button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  if (appLoading || !isLoggedIn || loading || isDataLoading) {
+    return <LoadingOverlay isLoading={true} />
   }
 
   if (error) {
     return (
       <div className={styles.container}>
         <div className={styles.mainContainer}>
-          <div style={{ textAlign: 'center', padding: '3rem', color: 'white' }}>
-            <h2>Error</h2>
-            <p>{error}</p>
-            <button onClick={() => router.back()} className={styles.backButton}>
+          <div style={{ 
+            textAlign: 'center', 
+            padding: '3rem',
+            maxWidth: '500px',
+            margin: '2rem auto',
+            background: 'rgba(255, 255, 255, 0.95)',
+            borderRadius: '12px',
+            boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
+          }}>
+            <div style={{ 
+              fontSize: '3rem', 
+              marginBottom: '1rem',
+              color: '#ef4444'
+            }}>⚠️</div>
+            <h2 style={{ 
+              color: '#1a202c', 
+              marginBottom: '1rem',
+              fontSize: '1.5rem'
+            }}>Error</h2>
+            <p style={{ 
+              color: '#4a5568',
+              marginBottom: '2rem',
+              lineHeight: '1.6'
+            }}>{error}</p>
+            <button 
+              onClick={() => router.back()} 
+              style={{
+                padding: '0.75rem 2rem',
+                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                color: 'white',
+                border: 'none',
+                borderRadius: '8px',
+                fontSize: '1rem',
+                fontWeight: '600',
+                cursor: 'pointer',
+                transition: 'transform 0.2s',
+              }}
+              onMouseOver={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
+              onMouseOut={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+            >
               Go Back
             </button>
           </div>
@@ -101,14 +196,17 @@ export default function TeacherCompetitionPage() {
         {/* Header */}
         <CompetitionHeader
           title="Competition Dashboard"
-          description="Create and manage competitions for your students. Track their progress and XP earnings."
+          participantCount={participants.length}
+          activeCount={participants.length} // On dashboard, show total participants as active since we don't have real-time presence here
           onBack={handleBack}
         />
 
-        {/* Main Content */}
-        <div className={styles.roomContent}>
-          {/* Left Column - Competitions */}
-          <div className={styles.leftColumn}>
+        {/* Scrollable Content */}
+        <div className={styles.scrollableContent}>
+          {/* Main Content */}
+          <div className={styles.roomContent}>
+            {/* Left Column - Competitions */}
+            <div className={styles.leftColumn}>
             {/* Create Competition Form */}
             <CreateCompetitionForm
               onSubmit={handleCreateCompetition}
@@ -130,15 +228,16 @@ export default function TeacherCompetitionPage() {
                 </div>
               ) : (
                 <CompetitionList
-                  competitions={competitions}
+                  competitions={competitions as any}
                   onManage={handleManageCompetition}
                 />
               )}
             </div>
-          </div>
+            </div>
+            {/* End Left Column */}
 
-          {/* Right Column - Sidebar */}
-          <div className={styles.rightColumn}>
+            {/* Right Column - Sidebar */}
+            <div className={styles.rightColumn}>
             {/* Problems Preview */}
             <div className={styles.section}>
               <div className={styles.sectionHeader}>
@@ -206,7 +305,10 @@ export default function TeacherCompetitionPage() {
             {/* Participants Section */}
             <div className={styles.section}>
               <div className={styles.sectionHeader}>
-                <h2 className={styles.sectionTitle}>Room Participants</h2>
+                <h2 className={styles.sectionTitle}>
+                  <FaUsers style={{ marginRight: '0.5rem' }} />
+                  Participants
+                </h2>
                 <span className={styles.badge}>{participants.length}</span>
               </div>
               
@@ -221,7 +323,17 @@ export default function TeacherCompetitionPage() {
                   <>
                     {participants.slice(0, 10).map((participant, index) => (
                       <div key={participant.participant_id || index} className={styles.participantCard}>
-                        <div className={styles.participantRank}>{index + 1}</div>
+                        <div className={styles.participantAvatar}>
+                          {participant.profile_pic ? (
+                            <img
+                              src={participant.profile_pic}
+                              alt={`${participant.first_name} ${participant.last_name}`}
+                              className={styles.avatarImage}
+                            />
+                          ) : (
+                            participant.first_name?.charAt(0)?.toUpperCase() || 'U'
+                          )}
+                        </div>
                         <div className={styles.participantInfo}>
                           <h3 className={styles.participantName}>
                             {participant.first_name} {participant.last_name}
@@ -247,6 +359,7 @@ export default function TeacherCompetitionPage() {
               </div>
             </div>
           </div>
+        </div>
         </div>
       </div>
     </div>

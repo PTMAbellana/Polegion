@@ -3,7 +3,7 @@
 import React from 'react'
 import { FileText } from 'lucide-react'
 import { RecordsHeaderProps } from '@/types'
-import styles from '@/styles/leaderboard.module.css'
+import styles from '@/styles/records.module.css'
 
 export default function RecordsHeader({ roomTitle, roomCode, totalStudents }: RecordsHeaderProps) {
   return (

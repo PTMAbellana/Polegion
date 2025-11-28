@@ -41,49 +41,65 @@ export const CHAPTER3_CONCEPTS = [
     key: 'interior-angles',
     title: 'Interior Angles',
     summary: 'The angles inside a polygon',
-    description: 'Angles formed inside a polygon’s sides.'
+    description: 'Angles formed inside a polygon\'s sides.',
+    image: '/images/castle4/chapter3/interior-angles.png',
+    taskId: 'task-0'
   },
   {
     key: 'formula',
     title: 'Angle Sum Formula',
     summary: 'Sum = (n - 2) × 180°',
-    description: 'Sum equals (n − 2) times 180 degrees.'
+    description: 'Sum equals (n − 2) times 180 degrees.',
+    image: '/images/castle4/chapter3/formula.png',
+    taskId: 'task-1'
   },
   {
     key: 'triangle',
     title: 'Triangle Angles',
     summary: '(3-2) × 180° = 180°',
-    description: 'Three sides give a total of 180 degrees.'
+    description: 'Three sides give a total of 180 degrees.',
+    image: '/images/castle4/chapter3/triangle.png',
+    taskId: 'task-2'
   },
   {
     key: 'quadrilateral',
     title: 'Quadrilateral Angles',
     summary: '(4-2) × 180° = 360°',
-    description: 'Four sides give a total of 360 degrees.'
+    description: 'Four sides give a total of 360 degrees.',
+    image: '/images/castle4/chapter3/quadrilateral.png',
+    taskId: 'task-3'
   },
   {
     key: 'pentagon',
     title: 'Pentagon Angles',
     summary: '(5-2) × 180° = 540°',
-    description: 'Five sides give a total of 540 degrees.'
+    description: 'Five sides give a total of 540 degrees.',
+    image: '/images/castle4/chapter3/pentagon.png',
+    taskId: 'task-4'
   },
   {
     key: 'hexagon',
     title: 'Hexagon Angles',
     summary: '(6-2) × 180° = 720°',
-    description: 'Six sides give a total of 720 degrees.'
+    description: 'Six sides give a total of 720 degrees.',
+    image: '/images/castle4/chapter3/hexagon.png',
+    taskId: 'task-5'
   },
   {
     key: 'regular',
     title: 'Regular Polygons',
     summary: 'Each angle = Sum ÷ n',
-    description: 'Equal sides and angles; each angle is Sum divided by n.'
+    description: 'Equal sides and angles; each angle is Sum divided by n.',
+    image: '/images/castle4/chapter3/regular.png',
+    taskId: 'task-6'
   },
   {
     key: 'regular-example',
     title: 'Regular Pentagon',
     summary: '540° ÷ 5 = 108° per angle',
-    description: 'Each angle in a regular pentagon is 108 degrees.'
+    description: 'Each angle in a regular pentagon is 108 degrees.',
+    image: '/images/castle4/chapter3/regular-example.png',
+    taskId: 'task-7'
   }
 ];
 
@@ -152,7 +168,7 @@ export const CHAPTER3_RELIC = {
 
 export const CHAPTER3_WIZARD = {
   name: "Polymus, Master of Many Sides",
-  image: "/images/polymus-wizard.png"
+  image: "/images/wizards/polymus-wizard.png"
 };
 
 export const CHAPTER3_METADATA = {

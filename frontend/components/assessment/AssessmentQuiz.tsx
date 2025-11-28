@@ -191,7 +191,7 @@ export default function AssessmentQuiz({
                         className={styles['nav-button']}
                         disabled={currentQuestionIndex === 0}
                     >
-                        ← Previous
+                        Previous
                     </button>
                     
                     {allQuestionsAnswered ? (
@@ -212,7 +212,7 @@ export default function AssessmentQuiz({
                         className={styles['nav-button']}
                         disabled={currentQuestionIndex === questions.length - 1}
                     >
-                        Next →
+                        Next
                     </button>
                 </div>
             </div>

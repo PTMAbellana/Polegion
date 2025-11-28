@@ -261,7 +261,13 @@ class ProblemService {
   async addCompeProblem(problem_id, competition_id) {
     try {
       const data = await this.problemRepo.fetchCompeProblemByProbId(problem_id)
-      return await this.problemRepo.addProbToCompe(problem_id,competition_id, data.timer)
+      const result = await this.problemRepo.addProbToCompe(problem_id, competition_id, data.timer)
+      
+      // Invalidate competition problems cache
+      cache.delete(cache.generateKey('competition_problems', competition_id));
+      this._invalidateProblemCache(problem_id);
+      
+      return result
     } catch (error) {
       throw error
     }

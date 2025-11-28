@@ -74,7 +74,7 @@ const C2C4_WordProblemSolverMinigame: React.FC<C2C4_WordProblemSolverMinigamePro
           width: '100%',
           maxWidth: '400px',
           minHeight: '250px',
-          backgroundColor: 'rgba(244, 228, 193, 0.2)',
+          backgroundColor: 'rgba(255, 255, 255, 0.95)',
           border: '2px dashed #B0CE88',
           borderRadius: '12px',
           display: 'flex',

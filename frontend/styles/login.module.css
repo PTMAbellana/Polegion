@@ -436,6 +436,91 @@
     }
   }
 
+  /* Mobile Landscape - Optimize layout */
+  @media (max-width: 900px) and (orientation: landscape) {
+    .loginPage {
+      padding: 3px;
+      min-height: 100vh;
+    }
+    
+    .loginCard {
+      padding: 10px 10px;
+      max-width: 550px;
+    }
+    
+    .logo {
+      max-width: 90px;
+      margin-bottom: 5px;
+    }
+    
+    .welcomeTitle {
+      font-size: 16px;
+      line-height: 22px;
+      margin-bottom: 3px;
+    }
+    
+    .welcomeSubtitle {
+      font-size: 11px;
+      line-height: 16px;
+      margin-bottom: 8px;
+    }
+    
+    .formGroup {
+      margin-bottom: 8px;
+    }
+    
+    .inputField {
+      height: 34px;
+      font-size: 12px;
+      padding: 0 10px;
+    }
+    
+    .loginButton {
+      height: 34px;
+      font-size: 13px;
+      margin-bottom: 8px;
+    }
+    
+    .rememberForgot {
+      margin-bottom: 8px;
+      font-size: 11px;
+    }
+    
+    .forgotPassword {
+      font-size: 11px;
+      padding: 2px 4px;
+    }
+    
+    .socialDivider {
+      margin: 8px 0;
+      font-size: 11px;
+    }
+    
+    .socialButtons {
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+    
+    .socialButton {
+      height: 32px;
+      font-size: 12px;
+    }
+    
+    .socialIcon {
+      font-size: 14px;
+      margin-right: 6px;
+    }
+    
+    .registerPrompt {
+      font-size: 12px;
+      margin-top: 3px;
+    }
+    
+    .cardContent {
+      max-width: 100%;
+    }
+  }
+
 /* Modal Styles */
 .modalOverlay {
   position: fixed;

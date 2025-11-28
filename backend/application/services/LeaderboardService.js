@@ -37,9 +37,13 @@ class LeaderboardService {
                 data.map(async (row) => {
                     try {
                     const userData = await this.userService.getUserById(row.participant.user_id)
+                    const userDTO = userData.toDTO()
                     return {
                         accumulated_xp: row.accumulated_xp,
-                        participants: userData 
+                        participants: {
+                            ...userDTO,
+                            user_id: userDTO.id // Ensure user_id is included
+                        }
                     };
                     } catch (err) {
                         return null;
@@ -57,28 +61,32 @@ class LeaderboardService {
         }
     }
     
-    async getCompeBoard (room_id) {
+    async getCompeBoard (room_id, competition_id = null) {
         try {
-            const cacheKey = cache.generateKey('competition_leaderboard', room_id);
+            const cacheKey = cache.generateKey('competition_leaderboard', room_id, competition_id || 'all');
             
             // Check cache first
             const cached = cache.get(cacheKey);
             if (cached) {
-                console.log('Cache hit: getCompeBoard', room_id);
+                console.log('Cache hit: getCompeBoard', room_id, competition_id);
                 return cached;
             }
             
-            const data = await this.leaderRepo.getCompeBoard(room_id)
+            const data = await this.leaderRepo.getCompeBoard(room_id, competition_id)
             console.log('from compe board services: ', data)
             
             const compiled = await Promise.all(
                 data.map(async (row) => {
                     try {
                     const userData = await this.userService.getUserById(row.participant.user_id)
+                    const userDTO = userData.toDTO()
                     return {
                         competition: row.competition,
                         accumulated_xp: row.accumulated_xp,
-                        participant: userData
+                        participant: {
+                            ...userDTO,
+                            user_id: userDTO.id // Ensure user_id is included
+                        }
                         
                     };
                     } catch (err) {
@@ -88,10 +96,17 @@ class LeaderboardService {
                 })
             )
 
-            console.log('compiled: ', compiled)
+            // Filter out null results, admins, and teachers - only keep students
+            const validCompiled = compiled.filter(item => 
+                item !== null && 
+                item.participant && 
+                item.participant.role === 'student'
+            );
+            
+            console.log('compiled (students only):', validCompiled)
             
             // Fix the grouping logic
-            const grouped = compiled.reduce((acc, r) => {
+            const grouped = validCompiled.reduce((acc, r) => {
                 const comp_id = r.competition.id
                 
                 if(!acc[comp_id]) {
@@ -248,6 +263,71 @@ class LeaderboardService {
             return {
                 content: csvContent,
                 filename: `${roomTitle}-records-${new Date().toISOString().split('T')[0]}.csv`
+            }
+        } catch (error) {
+            throw error
+        }
+    }
+
+    async generateWorldmapRecordsCSV(room_id) {
+        try {
+            const data = await this.getRoomBoard(room_id)
+            
+            if (!data || data.length === 0) {
+                throw new Error('No records found for this room')
+            }
+
+            const roomTitle = data[0]?.participants?.rooms?.[0]?.title || `Room ${room_id}`
+            
+            let csvContent = `Room: ${roomTitle}\n`
+            csvContent += `First Name,Last Name,Castles Completed,Pretest Score,Posttest Score,XP\n`
+            
+            const sortedData = data.sort((a, b) => (b.accumulated_xp || 0) - (a.accumulated_xp || 0))
+            
+            // Fetch castle progress and assessment scores for each student
+            for (const row of sortedData) {
+                const firstName = row.participants?.first_name || ''
+                const lastName = row.participants?.last_name || ''
+                const xp = row.accumulated_xp || 0
+                const userId = row.participants?.user_id || ''
+                
+                let castlesCompleted = 'N/A'
+                let pretestScore = 'N/A'
+                let posttestScore = 'N/A'
+                
+                if (userId) {
+                    try {
+                        // Get castle progress
+                        const castleProgress = await this.userService.getUserCastleProgress(userId)
+                        if (castleProgress && castleProgress.length > 0) {
+                            const completedCount = castleProgress.filter(c => c.progress_percentage === 100).length
+                            castlesCompleted = `${completedCount}/7`
+                        }
+                        
+                        // Get assessment scores
+                        const assessmentScores = await this.userService.getUserAssessmentScores(userId)
+                        if (assessmentScores && assessmentScores.length > 0) {
+                            const pretest = assessmentScores.find(a => a.assessment_type === 'pretest')
+                            const posttest = assessmentScores.find(a => a.assessment_type === 'posttest')
+                            
+                            if (pretest && pretest.score !== null && pretest.score !== undefined) {
+                                pretestScore = `${pretest.score}%`
+                            }
+                            if (posttest && posttest.score !== null && posttest.score !== undefined) {
+                                posttestScore = `${posttest.score}%`
+                            }
+                        }
+                    } catch (error) {
+                        console.error(`Error fetching worldmap data for user ${userId}:`, error)
+                    }
+                }
+                
+                csvContent += `"${firstName}","${lastName}","${castlesCompleted}","${pretestScore}","${posttestScore}","${xp}"\n`
+            }
+
+            return {
+                content: csvContent,
+                filename: `${roomTitle}-worldmap-${new Date().toISOString().split('T')[0]}.csv`
             }
         } catch (error) {
             throw error

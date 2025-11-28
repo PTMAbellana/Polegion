@@ -9,7 +9,7 @@ import LoadingOverlay from "@/components/LoadingOverlay"
 import PageHeader from "@/components/PageHeader"
 import RoomCardsList from "@/components/RoomCardsList"
 import { STUDENT_ROUTES } from "@/constants/routes"
-import { getRoomLeaderboards } from "@/api/leaderboards"
+import { getRoomLeaderboards } from "@/api/records"
 import dashboardStyles from "@/styles/dashboard-wow.module.css"
 import studentStyles from "@/styles/dashboard.module.css"
 import competitionStyles from "@/styles/competitions-dashboard.module.css"
@@ -19,6 +19,7 @@ import AnimatedAvatar from "@/components/profile/AnimatedAvatar"
 import { getAssessmentResults } from "@/api/assessments"
 import AssessmentRadarChart from "@/components/assessment/AssessmentRadarChart"
 import { getAllCastles } from "@/api/castles"
+import { FaFortAwesome, FaDungeon, FaMedal } from 'react-icons/fa'
 
 // Extended type for competitions with room context and additional fields
 interface CompetitionWithRoom extends Competition {
@@ -152,8 +153,9 @@ export default function StudentDashboard() {
           )
           competitions.push(...activeOnes.map((comp: Competition) => ({
             ...comp,
-            roomTitle: room.title, // Add room context
-            roomCode: room.code
+            roomTitle: room.title,
+            roomCode: room.code,
+            room_id: comp.room_id ?? room.id // Use nullish coalescing to ensure room_id is set
           })))
         }
       })
@@ -176,15 +178,16 @@ export default function StudentDashboard() {
   }
 
   const handleCompetitionClick = (competition: CompetitionWithRoom) => {
+    const roomParam = competition.room_id ? `?room=${competition.room_id}` : '';
     if (competition.status === 'ONGOING') {
-      router.push(`/student/competition/${competition.id}/play`)
+      router.push(`/student/competition/${competition.id}/play${roomParam}`)
     } else {
-      router.push(`/student/competition/${competition.id}`)
+      router.push(`/student/competition/${competition.id}${roomParam}`)
     }
   }
 
   if (appLoading || !isLoggedIn) {
-    return <LoadingOverlay isLoading={true}><Loader /></LoadingOverlay>
+    return <LoadingOverlay isLoading={true} />
   }
 
   return (
@@ -227,7 +230,7 @@ export default function StudentDashboard() {
               className={studentStyles.viewProfileButton}
               onClick={() => router.push(STUDENT_ROUTES.PROFILE)}
             >
-              View Full Profile →
+              View Full Profile
             </button>
           </section>
 
@@ -238,7 +241,7 @@ export default function StudentDashboard() {
               onClick={() => router.push(STUDENT_ROUTES.WORLD_MAP)}
             >
               <div className={studentStyles.quickActionIcon}>
-                🗺️
+                <FaFortAwesome />
               </div>
               <div className={studentStyles.quickActionContent}>
                 <h4>Adventure Mode</h4>
@@ -251,7 +254,7 @@ export default function StudentDashboard() {
               onClick={handleJoinRoom}
             >
               <div className={studentStyles.quickActionIcon}>
-                🚪
+                <FaDungeon />
               </div>
               <div className={studentStyles.quickActionContent}>
                 <h4>Join Room</h4>
@@ -264,6 +267,7 @@ export default function StudentDashboard() {
               onClick={() => router.push(STUDENT_ROUTES.LEADERBOARD)}
             >
               <div className={studentStyles.quickActionIcon}>
+                <FaMedal />
               </div>
               <div className={studentStyles.quickActionContent}>
                 <h4>Leaderboard</h4>
@@ -434,7 +438,7 @@ export default function StudentDashboard() {
                   <div className={competitionStyles.competition_action}>
                     {competition.status === 'ONGOING' ? (
                       <button className={competitionStyles.join_button}>
-                        🎮 Join Now →
+                        🎮 Join Now
                       </button>
                     ) : (
                       <button className={competitionStyles.view_button}>
@@ -457,7 +461,7 @@ export default function StudentDashboard() {
                 className={studentStyles.viewAllButton}
                 onClick={() => router.push(STUDENT_ROUTES.LEADERBOARD)}
               >
-                View All Rankings →
+                View All Rankings
               </button>
             </div>
             
@@ -507,7 +511,7 @@ export default function StudentDashboard() {
                 className={studentStyles.viewAllButton}
                 onClick={() => router.push(STUDENT_ROUTES.JOINED_ROOMS)}
               >
-                View All Rooms →
+                View All Rooms
               </button>
             )}
           </div>

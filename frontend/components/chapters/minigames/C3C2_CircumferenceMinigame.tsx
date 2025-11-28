@@ -143,22 +143,47 @@ const C3C2_CircumferenceMinigame: React.FC<Props> = ({ question, onComplete, sty
         </div>
         <div className={styleModule.controlsContainer}>
           <div className={styleModule.questionText}>{question.instruction}</div>
-          <div className={styleModule.hint}>{question.hint || 'Enter the circumference value.'}</div>
-          <input 
-            className={styleModule.answerInput}
-            value={answer}
-            onChange={(e) => setAnswer(e.target.value)}
-            placeholder={question.unit ? `Answer (${question.unit})` : 'Answer'}
-          />
-          <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
-            <button className={styleModule.submitButton} onClick={insertPi}>π</button>
-            <button className={styleModule.submitButton} onClick={check}>Submit</button>
+          <div 
+            className={styleModule.hint}
+            style={{
+              backgroundColor: 'rgba(221, 235, 157, 0.25)',
+              border: '2px solid rgba(221, 235, 157, 0.5)',
+              padding: '14px 16px',
+              borderRadius: '10px',
+              fontSize: '15px',
+              fontWeight: '500',
+              lineHeight: '1.5',
+              textAlign: 'left',
+              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.25)',
+              animation: 'gentleGlow 2s ease-in-out infinite',
+            }}
+          >
+            {question.hint || 'Enter the circumference value.'}
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', gap: '12px', marginTop: '12px' }}>
+            <input 
+              className={styleModule.answerInput}
+              value={answer}
+              onChange={(e) => setAnswer(e.target.value)}
+              placeholder={question.unit ? `Answer (${question.unit})` : 'Answer'}
+              style={{ width: '100%', maxWidth: '280px' }}
+            />
+            <div style={{ display: 'flex', gap: 10, justifyContent: 'center' }}>
+              <button className={styleModule.submitButton} onClick={insertPi} style={{ minWidth: '60px' }}>π</button>
+              <button className={styleModule.submitButton} onClick={check} style={{ minWidth: '100px' }}>Submit</button>
+            </div>
           </div>
           {showFeedback && (
             <div className={`${styleModule.feedback} ${feedback === 'Correct!' ? styleModule.feedbackSuccess : styleModule.feedbackError}`}>{feedback}</div>
           )}
         </div>
       </div>
+      <style jsx>{`
+        @keyframes gentleGlow {
+          0%, 100% { box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25), 0 0 15px rgba(221, 235, 157, 0.3); }
+          50% { box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25), 0 0 25px rgba(221, 235, 157, 0.5); }
+        }
+      `}</style>
     </div>
   )
 }

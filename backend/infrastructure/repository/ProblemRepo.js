@@ -93,24 +93,55 @@ class ProblemRepo {
   async fetchCompeById(compe_prob_id) {
     try {
       console.log('fetchCompeById prob_id', compe_prob_id)
-      const {
-        data, error
-      } = await this.supabase
-      .from(this.tableCompe)
-      .select(`
-        id,
-        timer, 
-        problem:problem_id(
+      
+      // Try to find by competition_problems.id first, then by problem_id
+      let data, error;
+      
+      // First, try querying by competition_problems.id
+      const result1 = await this.supabase
+        .from(this.tableCompe)
+        .select(`
           id,
-          title, 
-          description,
-          difficulty,
-          max_attempts,
-          expected_xp,
-          hint
-        )`)
-      .eq('id', compe_prob_id)
-      .single()
+          timer, 
+          problem:problem_id(
+            id,
+            title, 
+            description,
+            difficulty,
+            max_attempts,
+            expected_xp,
+            hint
+          )`)
+        .eq('id', compe_prob_id)
+        .single()
+      
+      if (result1.data) {
+        data = result1.data;
+        error = result1.error;
+      } else {
+        // If not found, try querying by problem_id (for when current_problem_id is passed)
+        console.log('fetchCompeById: Not found by id, trying by problem_id...');
+        const result2 = await this.supabase
+          .from(this.tableCompe)
+          .select(`
+            id,
+            timer, 
+            problem:problem_id(
+              id,
+              title, 
+              description,
+              difficulty,
+              max_attempts,
+              expected_xp,
+              hint
+            )`)
+          .eq('problem_id', compe_prob_id)
+          .limit(1)
+          .single()
+        
+        data = result2.data;
+        error = result2.error;
+      }
 
       console.log('fetchCompeById', data, error)
       if (error) throw error
@@ -302,12 +333,12 @@ class ProblemRepo {
         .delete()
         .eq('problem_id', prob_id)
         .eq('competition_id', compe_id)
-        .select()
-        .single();
+        .select();
   
       if (error) throw error;
       return data;
     } catch (error) {
+      console.error('Error removing competition problem:', error);
       throw error
     }
   }

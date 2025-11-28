@@ -1,0 +1,437 @@
+.container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  padding: 2rem;
+}
+
+.header {
+  background: white;
+  border-radius: 16px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.headerContent {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 2rem;
+}
+
+.studentInfo {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #2C514C;
+}
+
+.title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1a202c;
+  margin: 0 0 0.5rem 0;
+}
+
+.studentName {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #2C514C;
+  margin: 0;
+}
+
+.studentEmail {
+  font-size: 0.9rem;
+  color: #6b7280;
+  margin: 0.25rem 0 0 0;
+}
+
+.printButton {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 0.875rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.3s;
+  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.3);
+}
+
+.printButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(16, 185, 129, 0.4);
+}
+
+.content {
+  background: white;
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.section {
+  margin-bottom: 3rem;
+}
+
+.section:last-child {
+  margin-bottom: 0;
+}
+
+.sectionTitle {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1a202c;
+  margin: 0 0 1.5rem 0;
+  padding-bottom: 0.75rem;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.castlesGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.castleCard {
+  background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 1.5rem;
+  transition: all 0.3s;
+}
+
+.castleCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+}
+
+.castleHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.castleName {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #1a202c;
+  margin: 0;
+}
+
+.castleProgress {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #2C514C;
+}
+
+.castleStats {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.stat {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.statLabel {
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.statValue {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #1a202c;
+}
+
+.progressBar {
+  width: 100%;
+  height: 8px;
+  background: #e5e7eb;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  background: linear-gradient(90deg, #2C514C 0%, #10b981 100%);
+  transition: width 0.3s;
+}
+
+.competitionsTable {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table thead {
+  background: #f9fafb;
+}
+
+.table th {
+  text-align: left;
+  padding: 1rem;
+  font-weight: 600;
+  color: #1a202c;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.table td {
+  padding: 1rem;
+  border-bottom: 1px solid #e5e7eb;
+  color: #374151;
+}
+
+.table tbody tr:hover {
+  background: #f9fafb;
+}
+
+.xpCell {
+  font-weight: 600;
+  color: #2C514C;
+}
+
+.rankCell {
+  font-weight: 600;
+  color: #10b981;
+}
+
+.statusBadge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.statusDONE {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.statusONGOING {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.statusNEW {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.emptyState {
+  text-align: center;
+  padding: 3rem;
+  color: #6b7280;
+}
+
+.summaryGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+}
+
+.summaryCard {
+  background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.summaryLabel {
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin-bottom: 0.5rem;
+}
+
+.summaryValue {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #2C514C;
+}
+
+.footer {
+  background: white;
+  border-radius: 16px;
+  padding: 1rem 2rem;
+  margin-top: 2rem;
+  text-align: center;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.footer p {
+  margin: 0;
+  color: #6b7280;
+  font-size: 0.875rem;
+}
+
+.loading,
+.error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  color: white;
+}
+
+.spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #10b981;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Print Styles */
+@media print {
+  .container {
+    background: white !important;
+    padding: 0.5cm !important;
+    min-height: 0 !important;
+    height: auto !important;
+  }
+
+  .printButton {
+    display: none !important;
+  }
+
+  .header {
+    background: white !important;
+    box-shadow: none !important;
+    border: 1px solid #e5e7eb !important;
+    border-radius: 0 !important;
+    page-break-inside: avoid;
+    page-break-after: avoid;
+    margin-bottom: 0.5cm !important;
+    padding: 0.5cm !important;
+  }
+
+  .content {
+    background: white !important;
+    box-shadow: none !important;
+    border: none !important;
+    border-radius: 0 !important;
+    page-break-inside: auto;
+    page-break-after: auto;
+    padding: 0 !important;
+  }
+
+  .footer {
+    background: white !important;
+    box-shadow: none !important;
+    border: 1px solid #e5e7eb !important;
+    page-break-inside: avoid;
+    page-break-before: auto;
+    margin-top: 0.5cm !important;
+    padding: 0.5cm !important;
+  }
+
+  .castleCard {
+    page-break-inside: avoid;
+    background: white !important;
+    border: 1px solid #e5e7eb !important;
+    margin-bottom: 0.3cm !important;
+  }
+
+  .castlesGrid {
+    display: block !important;
+  }
+
+  .section {
+    page-break-inside: auto;
+    page-break-after: auto;
+    margin-bottom: 0.5cm !important;
+  }
+
+  .sectionTitle {
+    page-break-after: avoid;
+    margin-bottom: 0.3cm !important;
+  }
+
+  .summaryGrid {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 0.5cm !important;
+    page-break-inside: avoid;
+  }
+
+  .summarySection {
+    page-break-inside: avoid;
+  }
+
+  .summaryCard {
+    background: white !important;
+    border: 1px solid #e5e7eb !important;
+    page-break-inside: avoid;
+  }
+
+  .table {
+    page-break-inside: auto;
+  }
+
+  .table tr {
+    page-break-inside: avoid;
+    page-break-after: auto;
+  }
+
+  .table thead {
+    background: #f9fafb !important;
+  }
+
+  .progressBar {
+    border: 1px solid #e5e7eb !important;
+  }
+
+  .progressFill {
+    background: #2C514C !important;
+  }
+
+  /* Ensure all text is black for print */
+  .title,
+  .studentName,
+  .studentEmail,
+  .sectionTitle,
+  .castleName,
+  .castleProgress,
+  .statLabel,
+  .statValue,
+  .summaryLabel,
+  .summaryValue {
+    color: #000 !important;
+  }
+
+  .footer p {
+    color: #666 !important;
+  }
+}

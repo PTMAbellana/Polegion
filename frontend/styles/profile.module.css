@@ -347,7 +347,7 @@
 }
 
 .edit-profile-container {
-  max-width: 90%;
+  max-width: 1200px;
   margin: 20px auto;
   background: #FFFFFF;
   border-radius: var(--border-radius);
@@ -389,8 +389,8 @@
 }
 
 .tab-content {
-  padding: 30px;
-  min-height: 500px;
+  padding: 24px;
+  min-height: 400px;
 }
 
 /* Profile Edit Form */
@@ -886,7 +886,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 20px;
+  padding: 14px 16px;
   border: 1px solid #e9ecef;
   border-radius: 8px;
   background: #f8f9fa;
@@ -899,35 +899,39 @@
 .security-label {
   font-family: 'Poppins', sans-serif;
   font-weight: 600;
-  font-size: 16px;
+  font-size: 14px;
   color: var(--text-primary);
-  margin-bottom: 5px;
+  margin-bottom: 4px;
 }
 
 .security-value {
   font-family: 'Poppins', sans-serif;
-  font-size: 14px;
+  font-size: 13px;
   color: var(--text-secondary);
-  margin-bottom: 5px;
+  margin-bottom: 4px;
 }
 
 .security-description {
   font-family: 'Poppins', sans-serif;
-  font-size: 12px;
+  font-size: 11px;
   color: #6c757d;
 }
 
 .security-button, .change-button {
-  padding: 10px 20px;
+  padding: 0.625rem 1.5rem;
   border: none;
-  border-radius: 6px;
+  border-radius: 0.5rem;
   font-family: 'Poppins', sans-serif;
-  font-weight: 500;
-  font-size: 14px;
+  font-weight: 600;
+  font-size: 0.875rem;
   cursor: pointer;
   transition: all 0.3s ease;
   background: var(--primary-color);
   color: white;
+  min-width: 180px;
+  width: 180px;
+  white-space: nowrap;
+  text-align: center;
 }
 
 .security-button:hover, .change-button:hover {
@@ -1168,20 +1172,25 @@
 }
 
 .back-button {
-  padding: 10px 20px;
-  background: none;
-  border: 1px solid #6c757d;
-  border-radius: 6px;
-  color: #6c757d;
+  padding: 8px 16px;
+  background: rgba(44, 81, 76, 0.08);
+  border: 1px solid rgba(44, 81, 76, 0.2);
+  border-radius: 8px;
+  color: #2c514c;
   font-family: 'Poppins', sans-serif;
   font-size: 14px;
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .back-button:hover {
-  background: #6c757d;
-  color: white;
+  background: rgba(44, 81, 76, 0.15);
+  border-color: rgba(44, 81, 76, 0.4);
+  transform: translateX(-2px);
 }
 
 /* Responsive Design */

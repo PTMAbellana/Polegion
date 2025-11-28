@@ -39,8 +39,9 @@ class LeaderboardController {
     
     getCompeBoard = async(req, res) => {
         const { room_id } = req.params
+        const { competition_id } = req.query
         try{
-            const data = await this.leaderService.getCompeBoard(room_id)
+            const data = await this.leaderService.getCompeBoard(room_id, competition_id)
             return res.status(200).json({
                 message: 'Competition Leaderboard fetched successfully',
                 data: data
@@ -103,6 +104,37 @@ class LeaderboardController {
             }
             return res.status(500).json({
                 message: 'Failed to generate CSV export',
+                error: error.message
+            })
+        }
+    }
+
+    downloadWorldmapRecordsCSV = async(req, res) => {
+        const { room_id } = req.params
+        console.log('[CSV] downloadWorldmapRecordsCSV called for room:', room_id)
+        try {
+            const { content, filename } = await this.leaderService.generateWorldmapRecordsCSV(room_id)
+            
+            res.setHeader('Content-Type', 'text/csv; charset=utf-8')
+            res.setHeader('Content-Disposition', `attachment; filename="${filename}"`)
+            
+            return res.send(content)
+        } catch (error) {
+            console.log(error)
+            if (error.message === 'No records found for this room') {
+                return res.status(404).json({
+                    message: 'No records found for this room',
+                    error: 'The specified room has no student records'
+                })
+            }
+            if (error.message === 'Room not found') {
+                return res.status(404).json({
+                    message: 'Room not found',
+                    error: 'The specified room does not exist'
+                })
+            }
+            return res.status(500).json({
+                message: 'Failed to generate worldmap CSV export',
                 error: error.message
             })
         }

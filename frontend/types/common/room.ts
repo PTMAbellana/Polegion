@@ -20,6 +20,7 @@ export interface RoomDetails extends RoomType {
   visibility?: string;
   participants: UserType[];
   problems: TProblemType[];
+  competitions?: CompetitionType[];
 }
 
 // for students detailed view

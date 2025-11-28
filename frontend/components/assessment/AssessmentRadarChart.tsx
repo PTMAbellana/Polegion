@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   Radar,
   RadarChart,
@@ -35,8 +35,23 @@ interface ChartDataPoint {
  * Shows comparison between pretest (if available) and current results
  */
 const AssessmentRadarChart = ({ currentScores, pretestScores = null }: RadarChartProps) => {
+  const [showRefreshButton, setShowRefreshButton] = useState(false);
+
   // Check if we have valid data
   const hasData = currentScores && Object.keys(currentScores).length > 0;
+  
+  // Show refresh button after 5 seconds if still loading
+  useEffect(() => {
+    if (!hasData) {
+      const timer = setTimeout(() => {
+        setShowRefreshButton(true);
+      }, 5000);
+      
+      return () => clearTimeout(timer);
+    } else {
+      setShowRefreshButton(false);
+    }
+  }, [hasData]);
   
   // Transform category scores into radar chart data
   const categories = [
@@ -54,13 +69,35 @@ const AssessmentRadarChart = ({ currentScores, pretestScores = null }: RadarChar
       <div style={{ 
         width: '100%', 
         display: 'flex', 
+        flexDirection: 'column',
         alignItems: 'center', 
         justifyContent: 'center',
         minHeight: '280px',
         color: '#9ca3af',
-        fontSize: '0.875rem'
+        fontSize: '0.875rem',
+        gap: '1rem'
       }}>
-        Loading category data...
+        <div>Loading category data...</div>
+        {showRefreshButton && (
+          <button
+            onClick={() => window.location.reload()}
+            style={{
+              padding: '0.5rem 1rem',
+              backgroundColor: '#3b82f6',
+              color: 'white',
+              border: 'none',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontSize: '0.875rem',
+              fontWeight: '600',
+              transition: 'background-color 0.2s'
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#2563eb'}
+            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#3b82f6'}
+          >
+            Refresh Page
+          </button>
+        )}
       </div>
     );
   }

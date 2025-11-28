@@ -5,6 +5,10 @@ class Participant {
         this.room = room
     }
 
+    // Getter for backward compatibility
+    get participant_id() {
+        return this.id;
+    }
 
     static fromDBParticipant(id, user, room){
         return new Participant(

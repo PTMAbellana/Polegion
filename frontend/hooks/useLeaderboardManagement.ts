@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { getCompetitionLeaderboards, getRoomLeaderboards } from '@/api/leaderboards'
+import { getCompetitionLeaderboards, getRoomLeaderboards } from '@/api/records'
 import { LeaderboardData, LeaderboardItem } from '@/types'
 
 export function useLeaderboardManagement(roomId: number) {

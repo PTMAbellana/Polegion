@@ -115,7 +115,7 @@ export const CHAPTER2_MINIGAME_LEVELS = [
   },
   {
     id: 4,
-    type: 'vertical-angles',
+    type: 'vertical-angles1',
     givenAngles: [135],
     missingAngleIndex: 2,
     correctAnswer: 135,
@@ -125,7 +125,7 @@ export const CHAPTER2_MINIGAME_LEVELS = [
   },
   {
     id: 5,
-    type: 'linear-pair',
+    type: 'linear-pair1',
     givenAngles: [45],
     missingAngleIndex: 1,
     correctAnswer: 135,
@@ -135,7 +135,7 @@ export const CHAPTER2_MINIGAME_LEVELS = [
   },
   {
     id: 6,
-    type: 'around-point',
+    type: 'around-point1',
     givenAngles: [95, 105, 85],
     missingAngleIndex: 3,
     correctAnswer: 75,
@@ -207,7 +207,7 @@ export const CHAPTER2_RELIC = {
 // Wizard information
 export const CHAPTER2_WIZARD = {
   name: "Vertex, Master of Angle Positions",
-  image: "/images/vertex-wizard.png"
+  image: "/images/wizards/vertex-wizard.png"
 };
 
 // Chapter metadata

@@ -1,127 +1,418 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useMemo, useCallback } from 'react';
 import { supabase } from '../lib/supabaseClient';
+import api from '../api/axios';
 
-export const useCompetitionRealtime = (competitionId, isLoading) => {
+export const useCompetitionRealtime = (competitionId, isLoading, roomId = '', userType = 'participant') => {
+  console.log('🎣 [HOOK] useCompetitionRealtime called with:', { competitionId, isLoading, roomId, userType });
+  
   const [competition, setCompetition] = useState(null);
   const [participants, setParticipants] = useState([]);
+  const [activeParticipants, setActiveParticipants] = useState([]);
   const [isConnected, setIsConnected] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState('DISCONNECTED');
-  const channelRef = useRef(null);
-  const mountedRef = useRef(true);
   const [pollCount, setPollCount] = useState(0);
-  const [shouldConnect, setShouldConnect] = useState(false);
+  const [presenceReady, setPresenceReady] = useState(false);
+  
+  // Refs for cleanup and tracking
+  const channelRef = useRef(null);
+  const pollIntervalRef = useRef(null);
+  const mountedRef = useRef(true);
+  const setupCompleteRef = useRef(false);
+  const currentCompIdRef = useRef(null);
+  const retryCountRef = useRef(0);
+  const retryTimeoutRef = useRef(null);
+  const maxRetries = 3;
+  const isCleaningUpRef = useRef(false);
+  
+  // Memoize the competition ID string to prevent unnecessary re-renders
+  const compIdStr = useMemo(() => {
+    const result = competitionId ? String(competitionId) : null;
+    console.log('🔢 [HOOK] compIdStr computed:', result);
+    return result;
+  }, [competitionId]);
+  
+  // Memoize roomId to prevent reference changes
+  const stableRoomId = useMemo(() => {
+    const result = roomId || '';
+    console.log('🏠 [HOOK] stableRoomId computed:', result);
+    return result;
+  }, [roomId]);
 
+  console.log('🎯 [HOOK] About to set up useEffects. compIdStr:', compIdStr, 'stableRoomId:', stableRoomId);
+
+  // Cleanup on unmount
   useEffect(() => {
+    console.log('🧹 [HOOK] Mount effect running');
+    mountedRef.current = true;
     return () => {
+      console.log('🧹 [HOOK] Mount effect cleanup');
       mountedRef.current = false;
     };
   }, []);
 
-  // Effect to determine when we should connect
+  // Main effect for polling and presence
   useEffect(() => {
-    console.log('🔄 [Realtime] Connection readiness check - isLoading:', isLoading, 'competitionId:', competitionId);
+    console.log('🔄 [Realtime] Effect running with:', { 
+      compIdStr, 
+      isLoading, 
+      stableRoomId,
+      currentCompId: currentCompIdRef.current,
+      hasChannel: !!channelRef.current
+    });
     
-    if (!isLoading && competitionId) {
-      console.log('✅ [Realtime] Ready to connect!');
-      setShouldConnect(true);
-    } else {
-      console.log('⏳ [Realtime] Not ready yet - isLoading:', isLoading, 'competitionId:', competitionId);
-      setShouldConnect(false);
-    }
-  }, [isLoading, competitionId]);
-
-  // Effect to handle the actual connection
-  useEffect(() => {
-    if (!shouldConnect || !competitionId) {
+    // Don't connect if still loading or no competitionId
+    if (isLoading || !compIdStr || !stableRoomId) {
+      console.log('⏳ [Realtime] Not ready:', { isLoading, compIdStr, stableRoomId, userType });
       return;
     }
 
-    console.log('🚀 [Realtime] Starting connection for competition:', competitionId);
-    
-    setConnectionStatus('CONNECTED');
-    setIsConnected(true);
-    
-    let pollInterval = null;
-    
-    const pollCompetition = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('competitions')
-          .select('*')
-          .eq('id', competitionId);
+    // Skip if already set up for this competition
+    if (currentCompIdRef.current === compIdStr && channelRef.current && !isCleaningUpRef.current) {
+      console.log('🔄 [Realtime] Already set up for:', compIdStr, 'skipping setup');
+      return;
+    }
 
-        if (!error && data && data.length > 0) {
-          const newCompetition = data[0];
-          
-          // ✅ Better change detection with logging
-          setCompetition(prevCompetition => {
-            const statusChanged = prevCompetition?.status !== newCompetition?.status;
-            const timerStartChanged = prevCompetition?.timer_started_at !== newCompetition?.timer_started_at;
-            const problemChanged = prevCompetition?.current_problem_index !== newCompetition?.current_problem_index;
-            const gameplayChanged = prevCompetition?.gameplay_indicator !== newCompetition?.gameplay_indicator;
-            
-            if (statusChanged || timerStartChanged || problemChanged || gameplayChanged) {
-              console.log('🔥 [Polling] Competition update detected:', {
-                changes: {
-                  status: statusChanged ? `${prevCompetition?.status} → ${newCompetition?.status}` : 'no change',
-                  timer_started: timerStartChanged ? `${prevCompetition?.timer_started_at} → ${newCompetition?.timer_started_at}` : 'no change',
-                  problem: problemChanged ? `${prevCompetition?.current_problem_index} → ${newCompetition?.current_problem_index}` : 'no change',
-                  gameplay: gameplayChanged ? `${prevCompetition?.gameplay_indicator} → ${newCompetition?.gameplay_indicator}` : 'no change'
-                },
-                newData: {
-                  status: newCompetition.status,
-                  timer_started_at: newCompetition.timer_started_at,
-                  timer_duration: newCompetition.timer_duration,
-                  current_problem_index: newCompetition.current_problem_index,
-                  gameplay_indicator: newCompetition.gameplay_indicator
-                }
-              });
-              
-              setPollCount(prev => prev + 1);
-              return newCompetition;
+    console.log('🚀 [Realtime] Setting up for competition:', compIdStr, 'userType:', userType, 'roomId:', stableRoomId);
+    currentCompIdRef.current = compIdStr;
+    isCleaningUpRef.current = false;
+
+    // Polling function
+    const pollCompetition = async () => {
+      if (!mountedRef.current) return;
+      
+      try {
+        const timestamp = Date.now();
+        console.log(`🔄 [Polling] Starting poll for competition ${compIdStr}, room ${stableRoomId}, userType ${userType}`);
+        
+        const [compResponse, leaderResponse] = await Promise.all([
+          api.get(`/competitions/${stableRoomId}/${compIdStr}?type=${userType}&_t=${timestamp}`, {
+            headers: { 'Cache-Control': 'no-cache' },
+            cache: false
+          }),
+          api.get(`/leaderboards/competition/${stableRoomId}?competition_id=${compIdStr}&_t=${timestamp}`, {
+            headers: { 'Cache-Control': 'no-cache' },
+            cache: false
+          })
+        ]);
+        
+        if (!mountedRef.current) return;
+        
+        const data = compResponse.data;
+        const leaderboardData = leaderResponse.data?.data || [];
+        
+        console.log('📊 [Polling] Leaderboard response:', leaderResponse.data);
+        console.log('📊 [Polling] Leaderboard data array:', leaderboardData);
+        
+        // Extract participants
+        const participantsArray = leaderboardData.length > 0 && leaderboardData[0]?.data 
+          ? leaderboardData[0].data.map((item, idx) => {
+              console.log(`📊 [Polling] Processing participant ${idx}:`, item);
+              return {
+                id: item.participants?.id || `participant-${idx}`,
+                user_id: item.participants?.id,
+                fullName: `${item.participants?.first_name || ''} ${item.participants?.last_name || ''}`.trim(),
+                profile_pic: item.participants?.profile_pic,
+                accumulated_xp: item.accumulated_xp
+              };
+            })
+          : [];
+        
+        console.log('📊 [Polling] Participants with XP:', participantsArray.map(p => ({ 
+          name: p.fullName, 
+          id: p.id,
+          user_id: p.user_id,
+          xp: p.accumulated_xp
+        })));
+        
+        // Always update participants to ensure XP changes are reflected
+        setParticipants(participantsArray);
+        
+        if (data) {
+          setCompetition(prev => {
+            if (!prev) {
+              setPollCount(c => c + 1);
+              return data;
             }
             
-            return prevCompetition;
+            // Check for any significant changes
+            const changed = 
+              prev.status !== data.status ||
+              prev.timer_started_at !== data.timer_started_at ||
+              prev.current_problem_index !== data.current_problem_index ||
+              prev.current_problem_id !== data.current_problem_id ||
+              prev.gameplay_indicator !== data.gameplay_indicator ||
+              prev.timer_duration !== data.timer_duration;
+            
+            if (changed) {
+              console.log('🔥 [Polling] Competition updated:', {
+                status: data.status,
+                gameplay_indicator: data.gameplay_indicator,
+                current_problem_index: data.current_problem_index,
+                current_problem_id: data.current_problem_id,
+                timer_started_at: data.timer_started_at
+              });
+              setPollCount(c => c + 1);
+              return data;
+            }
+            return prev;
           });
         }
       } catch (error) {
-        console.log('⚠️ [Polling] Error (ignoring):', error.message);
+        console.error('⚠️ [Polling] Error:', error.message);
       }
     };
 
-    // ✅ More frequent polling during competition start
-    const startPolling = () => {
-      pollCompetition(); // Initial poll
-      pollInterval = setInterval(pollCompetition, 1500); // Poll every 1.5 seconds
-    };
+    // Start polling
+    pollCompetition();
+    pollIntervalRef.current = setInterval(pollCompetition, 2000);
 
-    // Start polling immediately
-    startPolling();
+    // Remove any existing channel with the same name first
+    const existingChannels = supabase.getChannels();
+    const existingChannel = existingChannels.find(ch => ch.topic === `realtime:competition-${compIdStr}`);
+    if (existingChannel) {
+      console.log(`🗑️ [Presence] Removing existing channel: competition-${compIdStr}`);
+      supabase.removeChannel(existingChannel);
+    }
 
-    // Also create a broadcast channel for real-time updates
-    const channel = supabase
-      .channel(`competition-${competitionId}`)
-      .on('broadcast', { event: 'competition_update' }, (payload) => {
-        if (payload?.payload) {
-          console.log('🔥 [Broadcast] Received update:', payload.payload);
-          setCompetition(payload.payload);
-          setPollCount(prev => prev + 1);
+    // Setup presence channel
+    const channel = supabase.channel(`competition-${compIdStr}`, {
+      config: {
+        presence: { key: compIdStr },
+      },
+    });
+
+    console.log(`🔌 [Presence] Setting up channel: competition-${compIdStr} (roomId: ${stableRoomId})`);
+    console.log(`🔌 [Presence] Supabase client state:`, {
+      hasClient: !!supabase,
+      clientType: typeof supabase,
+    });
+
+    channel
+      .on('presence', { event: 'sync' }, () => {
+        if (!mountedRef.current) return;
+        
+        const presenceState = channel.presenceState();
+        const stateKeys = Object.keys(presenceState);
+        console.log(`👥 [Presence] Sync for competition-${compIdStr}: ${stateKeys.length} presence keys`);
+        console.log(`👥 [Presence] Full state:`, JSON.stringify(presenceState, null, 2));
+        console.log(`👥 [Presence] Channel name: competition-${compIdStr}`);
+        console.log(`👥 [Presence] My user type: ${userType}`);
+        
+        const active = Object.values(presenceState).flatMap(presences => 
+          presences.map(p => p.user).filter(Boolean)
+        );
+        
+        console.log('👥 [Presence] Active users:', active.length, active);
+        console.log('👥 [Presence] User details:', active.map(u => ({ id: u?.id, name: u?.first_name, role: u?.role })));
+        
+        // Always trust the sync event - it's the source of truth
+        setActiveParticipants(active);
+        console.log('✅ [Presence] Set activeParticipants to:', active.length, 'users');
+        
+        // If no users detected, log a warning
+        if (active.length === 0) {
+          console.warn('⚠️ [Presence] No users detected in presence state. Are students on the competition page?');
         }
       })
-      .subscribe();
+      .on('presence', { event: 'join' }, ({ newPresences }) => {
+        console.log(`✅ [Presence] Join:`, newPresences?.map(p => p.user?.first_name));
+      })
+      .on('presence', { event: 'leave' }, ({ leftPresences }) => {
+        console.log(`❌ [Presence] Leave:`, leftPresences?.map(p => p.user?.first_name));
+      })
+      .on('broadcast', { event: 'competition_update' }, (payload) => {
+        if (!mountedRef.current) return;
+        if (payload?.payload) {
+          console.log('🔥 [Broadcast] Update received');
+          setCompetition(payload.payload);
+          setPollCount(c => c + 1);
+        }
+      })
+      .subscribe(async (status, err) => {
+        console.log(`📡 [Presence] Status: ${status} for competition-${compIdStr}`);
+        if (err) {
+          console.error(`❌ [Presence] Subscription error:`, err);
+        }
+        console.log(`📡 [Presence] Channel details:`, {
+          channelName: `competition-${compIdStr}`,
+          state: channel.state,
+          userType: userType,
+          error: err
+        });
+        
+        if (status === 'SUBSCRIBED' && mountedRef.current) {
+          setIsConnected(true);
+          setConnectionStatus('CONNECTED');
+          retryCountRef.current = 0; // Reset retry count on success
+          
+          // Mark presence as ready after a short delay to allow sync
+          setTimeout(() => {
+            if (mountedRef.current) {
+              setPresenceReady(true);
+              console.log('✅ [Presence] Marked as ready');
+            }
+          }, 1000);
+          
+          // Track this user's presence
+          let userProfile = null;
+          try {
+            // Try auth-storage first (Zustand persist)
+            const authStorage = localStorage.getItem('auth-storage');
+            if (authStorage) {
+              const parsed = JSON.parse(authStorage);
+              userProfile = parsed?.state?.userProfile;
+            }
+            
+            // Fallback to 'user' key if auth-storage doesn't have profile
+            if (!userProfile?.id) {
+              const userStr = localStorage.getItem('user');
+              userProfile = userStr ? JSON.parse(userStr) : null;
+            }
+          } catch (e) {
+            console.error('❌ [Presence] Failed to parse user from localStorage:', e);
+          }
+          
+          if (userProfile?.id) {
+            console.log(`🎯 [Presence] Tracking user: ${userProfile.first_name} (${userProfile.role}) with ID: ${userProfile.id}`);
+            
+            try {
+              await channel.track({
+                user: {
+                  id: userProfile.id,
+                  first_name: userProfile.first_name,
+                  last_name: userProfile.last_name,
+                  profile_pic: userProfile.profile_pic,
+                  role: userProfile.role,
+                  online_at: new Date().toISOString(),
+                },
+              });
+              
+              setupCompleteRef.current = true;
+              console.log(`✅ [Presence] User tracked successfully`);
+              
+              // Force an immediate sync after tracking
+              setTimeout(() => {
+                if (!mountedRef.current) return;
+                const presenceState = channel.presenceState();
+                console.log(`👥 [Presence] Forced sync after track - state:`, presenceState);
+                
+                const active = Object.values(presenceState).flatMap(presences => 
+                  presences.map(p => p.user).filter(Boolean)
+                );
+                console.log(`👥 [Presence] Forced sync - active count: ${active.length}`);
+                setActiveParticipants(active);
+              }, 500); // 500ms delay to allow presence propagation
+            } catch (trackError) {
+              console.error('❌ [Presence] Failed to track user:', trackError);
+            }
+          } else {
+            console.warn('⚠️ [Presence] No user profile found in localStorage');
+          }
+        } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+          const errorType = status === 'CHANNEL_ERROR' ? 'Channel error' : 'Connection timed out';
+          console.warn(`⚠️ [Presence] ${errorType} (attempt ${retryCountRef.current + 1}/${maxRetries})`);
+          setConnectionStatus(status === 'CHANNEL_ERROR' ? 'ERROR' : 'TIMEOUT');
+          setIsConnected(false);
+          
+          // Retry with exponential backoff
+          if (retryCountRef.current < maxRetries && mountedRef.current) {
+            retryCountRef.current += 1;
+            const retryDelay = Math.min(1000 * Math.pow(2, retryCountRef.current - 1), 8000); // 1s, 2s, 4s, max 8s
+            
+            console.log(`🔄 [Presence] Retrying in ${retryDelay}ms...`);
+            
+            retryTimeoutRef.current = setTimeout(() => {
+              if (!mountedRef.current) return;
+              
+              // Remove old channel and resubscribe
+              if (channelRef.current) {
+                supabase.removeChannel(channelRef.current);
+                channelRef.current = null;
+              }
+              
+              // Trigger re-setup by clearing currentCompIdRef
+              currentCompIdRef.current = null;
+              // Force a re-render to trigger the effect again
+              setPollCount(c => c + 1);
+            }, retryDelay);
+          } else if (retryCountRef.current >= maxRetries) {
+            console.error(`❌ [Presence] Max retries (${maxRetries}) exceeded. Polling will continue working.`);
+            // Polling still works even if presence fails
+          }
+        }
+      });
 
+    channelRef.current = channel;
+    console.log(`✅ [Presence] Channel stored in ref, waiting for SUBSCRIBED status...`);
+    
+    // Add a small delay to prevent immediate cleanup in strict mode
+    const setupTimeoutRef = setTimeout(() => {
+      setupCompleteRef.current = true;
+    }, 100);
+    
+    // Add timeout to detect if subscription hangs
+    const subscriptionTimeout = setTimeout(() => {
+      if (channelRef.current && channelRef.current.state !== 'joined') {
+        console.error(`⏱️ [Presence] Subscription timeout! Channel state: ${channelRef.current.state}`);
+        console.error(`⏱️ [Presence] The subscription callback was never called. Possible issues:`);
+        console.error(`  1. Supabase Realtime not enabled in dashboard`);
+        console.error(`  2. Network/firewall blocking WebSocket connections`);
+        console.error(`  3. Invalid Supabase credentials`);
+      }
+    }, 5000); // 5 second timeout
+    
+    // Cleanup function - only runs on unmount or when competition actually changes
     return () => {
-      console.log('🧹 [Realtime] Cleanup for competition:', competitionId);
-      if (pollInterval) clearInterval(pollInterval);
-      if (channel) supabase.removeChannel(channel);
+      clearTimeout(subscriptionTimeout);
+      clearTimeout(setupTimeoutRef);
+      
+      // Don't cleanup if setup just started (within 100ms) - strict mode workaround
+      if (!setupCompleteRef.current) {
+        console.log('⏭️ [Realtime] Skipping premature cleanup (strict mode remount)');
+        return;
+      }
+      
+      isCleaningUpRef.current = true;
+      console.log('🧹 [Realtime] Cleaning up for competition:', compIdStr);
+      
+      if (retryTimeoutRef.current) {
+        clearTimeout(retryTimeoutRef.current);
+        retryTimeoutRef.current = null;
+      }
+      
+      if (pollIntervalRef.current) {
+        clearInterval(pollIntervalRef.current);
+        pollIntervalRef.current = null;
+      }
+      
+      if (channelRef.current) {
+        // Explicitly untrack presence before removing channel
+        channelRef.current.untrack().then(() => {
+          console.log('✅ [Realtime] Untracked presence successfully');
+        }).catch((error) => {
+          console.error('⚠️ [Realtime] Error untracking presence:', error);
+        });
+        
+        supabase.removeChannel(channelRef.current);
+        channelRef.current = null;
+      }
+      
+      retryCountRef.current = 0;
+      setupCompleteRef.current = false;
+      currentCompIdRef.current = null;
+      setIsConnected(false);
+      setConnectionStatus('DISCONNECTED');
+      setPresenceReady(false);
     };
-  }, [shouldConnect, competitionId]);
+  }, [compIdStr, isLoading, stableRoomId]); // Include stableRoomId in dependencies
 
   return {
     competition,
     participants,
+    activeParticipants,
     isConnected,
     connectionStatus,
+    presenceReady,
     setParticipants: (newParticipants) => setParticipants(newParticipants),
     pollCount
   };

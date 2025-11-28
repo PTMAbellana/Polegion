@@ -1,15 +1,20 @@
 "use client";
 import Head from "next/head";
 import { useRouter } from "next/navigation";
+import { IoChevronBack } from "react-icons/io5";
 import RegisterForm from "@/components/auth/RegisterForm";
 import styles from "@/styles/register.module.css";
-import { STUDENT_ROUTES } from "@/constants/routes";
+import { STUDENT_ROUTES, ROUTES } from "@/constants/routes";
 
 export default function StudentRegister() {
   const router = useRouter();
 
   const handleLoginRedirect = () => {
     router.push(STUDENT_ROUTES.LOGIN);
+  };
+
+  const handleBackToRoleSelection = () => {
+    router.push(ROUTES.REGISTER);
   };
 
   return (
@@ -20,6 +25,13 @@ export default function StudentRegister() {
 
       <div className={styles.registerPage}>
         <div className={styles.registerCard}>
+          <button 
+            onClick={handleBackToRoleSelection}
+            className={styles.backButton}
+            type="button"
+          >
+            <IoChevronBack /> Back
+          </button>
           <div className={styles.cardContent}>
             <div className={styles.logoContainer}>
               <img

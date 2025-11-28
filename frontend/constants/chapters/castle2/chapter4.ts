@@ -221,7 +221,7 @@ export const CHAPTER4_RELIC = {
 // Wizard information
 export const CHAPTER4_WIZARD = {
   name: "Solvera, Keeper of Geometric Wisdom",
-  image: "/images/solvera-wizard.png"
+  image: "/images/wizards/solvera-wizard.png"
 };
 
 // Chapter metadata

@@ -13,11 +13,10 @@ export const createProblem = async (problemData, room_code) => {
       data: res.data.data
     }
   } catch (error){
-    alert('I am called here fuck');
-    console.log('createProblem error:', error);
+    console.error('createProblem error:', error);
     return {
       success: false,
-      message: error.response?.data?.message || 'Server error failed to create problem',
+      message: error.response?.data?.message || 'Failed to create problem',
       error: error.response?.data?.error || error.message,
       status: error.response?.status || 500
     }
@@ -128,6 +127,10 @@ export const getCompeProblems = async(competition_id) => {
 export const addCompeProblem = async(problem_id, competition_id) => {
   try {
     const res = await api.post(`/problems/${problem_id}/${competition_id}`);
+    
+    // Clear cache for this competition's problems
+    await api.storage.remove(`get-/problems/compe-problems/${competition_id}`);
+    
     return res.data;
   } catch (error) {
     throw error;
@@ -137,6 +140,10 @@ export const addCompeProblem = async(problem_id, competition_id) => {
 export const removeCompeProblem = async(problem_id, competition_id) => {
   try {
     const res = await api.delete(`/problems/${problem_id}/${competition_id}`);
+    
+    // Clear cache for this competition's problems
+    await api.storage.remove(`get-/problems/compe-problems/${competition_id}`);
+    
     return res.data;
   } catch (error) {
     throw error;
