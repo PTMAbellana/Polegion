@@ -58,37 +58,43 @@ export const CHAPTER1_CONCEPTS = [
     key: 'center',
     title: 'Center',
     summary: 'The point equidistant from all points on the circle, usually labeled O',
-    description: 'The fixed point at the middle of a circle, often labeled O.'
+    description: 'The fixed point at the middle of a circle, often labeled O.',
+    image: '/images/castle3/circle-center.png'
   },
   {
     key: 'radius',
     title: 'Radius',
     summary: 'A line segment from the center to any point on the circle',
-    description: 'A segment from the center to a point on the circle.'
+    description: 'A segment from the center to a point on the circle.',
+    image: '/images/castle3/radius.png'
   },
   {
     key: 'diameter',
     title: 'Diameter',
     summary: 'A line segment through the center connecting two opposite points. Diameter = 2 × Radius',
-    description: 'A segment through the center connecting two points; equals 2 × radius.'
+    description: 'A segment through the center connecting two points; equals 2 × radius.',
+    image: '/images/castle3/diameter.png'
   },
   {
     key: 'chord',
     title: 'Chord',
     summary: 'A line segment connecting two points on the circle (not through center)',
-    description: 'A segment between two points on the circle that does not pass through the center.'
+    description: 'A segment between two points on the circle that does not pass through the center.',
+    image: '/images/castle3/chord.png'
   },
   {
     key: 'arc',
     title: 'Arc',
     summary: 'A curved portion of the circle between two points',
-    description: 'A curved portion of the circle between two points.'
+    description: 'A curved portion of the circle between two points.',
+    image: '/images/castle3/arc.png'
   },
   {
     key: 'sector',
     title: 'Sector',
     summary: 'A pie-shaped region between two radii and an arc',
-    description: 'A pie-shaped region bounded by two radii and the arc.'
+    description: 'A pie-shaped region bounded by two radii and the arc.',
+    image: '/images/castle3/sector.png'
   }
 ];
 
