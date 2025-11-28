@@ -25,6 +25,8 @@ import { submitSolution } from '@/api/attempt';
 import Swal from "sweetalert2";
 import { useCompetitionTimer } from '@/hooks/useCompetitionTimer';
 import { useCompetitionRealtime } from '@/hooks/useCompetitionRealtime';
+import { DifficultyDropdown, LimitAttempts, MainArea, PromptBox, SetVisibility, ShapeLimitPopup, Toolbox } from "./teacher/create-problem";
+import { Timer } from "lucide-react";
 
 interface CompetitionProblem {
   id: number
