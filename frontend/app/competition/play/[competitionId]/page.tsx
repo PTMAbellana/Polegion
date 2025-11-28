@@ -67,7 +67,7 @@ const CompetitionDashboard = ({ params } : { params  : Promise<{competitionId : 
     connectionStatus,
     setParticipants: setLiveParticipants,
     pollCount
-  } = useCompetitionRealtime(compe_id.competitionId, isLoading);
+  } = useCompetitionRealtime(compe_id.competitionId, isLoading, roomId || '', 'participant');
   
   // ✅ ENHANCED: Better timer hook with immediate updates
   const {

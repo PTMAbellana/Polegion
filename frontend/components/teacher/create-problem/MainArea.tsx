@@ -30,6 +30,7 @@ const MainArea: React.FC<MainAreaProps> = ({
   showMidpoint,
   showMeasurement,
   showArcRadius,
+  disabled = false, // New prop to prevent modifications after submission
 }) => {
   const stageRef = useRef<any>(null);
   const mainAreaRef = useRef<HTMLDivElement>(null);
@@ -38,7 +39,9 @@ const MainArea: React.FC<MainAreaProps> = ({
   // Handle keyboard delete
   React.useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Don't delete shapes if user is typing in an input or textarea
+      // Don't delete shapes if disabled or user is typing in an input or textarea
+      if (disabled) return;
+      
       const target = e.target as HTMLElement;
       if (
         target.tagName === 'INPUT' || 
@@ -98,6 +101,10 @@ const MainArea: React.FC<MainAreaProps> = ({
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
+    
+    // Don't allow dropping shapes if disabled (e.g., after submission)
+    if (disabled) return;
+    
     const shapeType = e.dataTransfer.getData("shape-type");
     
     if (!shapeType) return;
@@ -166,6 +173,9 @@ const MainArea: React.FC<MainAreaProps> = ({
   };
 
   const handleShapeDragEnd = (updatedShape: Shape) => {
+    // Don't allow dragging shapes if disabled
+    if (disabled) return;
+    
     const tolerance = 10;
     const isOutsideBounds = 
       updatedShape.x < -tolerance || 
@@ -185,33 +195,44 @@ const MainArea: React.FC<MainAreaProps> = ({
   };
 
   const handleCircleResize = (id: number, newSize: number) => {
+    if (disabled) return;
     setShapes(prev => prev.map(shape => 
       shape.id === id ? { ...shape, size: newSize } : shape
     ));
   };
 
   const handleSquareResize = (id: number, newPoints: any) => {
+    if (disabled) return;
     setShapes(prev => prev.map(shape => 
       shape.id === id ? { ...shape, points: newPoints } : shape
     ));
   };
 
   const handleTriangleResize = (id: number, newPoints: any) => {
+    if (disabled) return;
     setShapes(prev => prev.map(shape => 
       shape.id === id ? { ...shape, points: newPoints } : shape
     ));
   };
 
   const handleLineResize = (id: number, newPoints: any) => {
+    if (disabled) return;
     setShapes(prev => prev.map(shape => 
       shape.id === id ? { ...shape, points: newPoints } : shape
     ));
   };
 
   const handleAngleResize = (id: number, newPoints: any) => {
+    if (disabled) return;
     setShapes(prev => prev.map(shape => 
       shape.id === id ? { ...shape, points: newPoints } : shape
     ));
+  };
+
+  // Helper function to handle shape selection (respects disabled state)
+  const handleShapeSelect = (shapeId: number) => {
+    if (disabled) return; // Don't allow selection when disabled
+    setSelectedId(shapeId);
   };
 
   return (
@@ -220,8 +241,9 @@ const MainArea: React.FC<MainAreaProps> = ({
       className={styles.mainArea}
       onDragOver={(e) => e.preventDefault()}
       onDrop={handleDrop}
+      style={{ opacity: disabled ? 0.7 : 1 }} // Visual feedback when disabled
     >
-      <div className={styles.mainAreaHeader}>Main Area</div>
+      <div className={styles.mainAreaHeader}>Main Area {disabled && '(Submitted)'}</div>
       
       <div className={styles.stageContainer}>
         <Stage
@@ -232,7 +254,7 @@ const MainArea: React.FC<MainAreaProps> = ({
         >
           <Layer>
             {shapes.map((shape) => {
-              const isSelected = shape.id === selectedId;
+              const isSelected = shape.id === selectedId && !disabled;
               
               if (shape.type === "circle") {
                 return (
@@ -240,7 +262,7 @@ const MainArea: React.FC<MainAreaProps> = ({
                     key={shape.id}
                     shape={shape}
                     isSelected={isSelected}
-                    onSelect={() => setSelectedId(shape.id)}
+                    onSelect={() => handleShapeSelect(shape.id)}
                     onChange={handleShapeDragEnd}
                     onResize={handleCircleResize}
                     pxToUnits={pxToUnits}
@@ -257,7 +279,7 @@ const MainArea: React.FC<MainAreaProps> = ({
                     key={shape.id}
                     shape={shape}
                     isSelected={isSelected}
-                    onSelect={() => setSelectedId(shape.id)}
+                    onSelect={() => handleShapeSelect(shape.id)}
                     onChange={handleShapeDragEnd}
                     onResize={handleSquareResize}
                     pxToUnits={pxToUnits}
@@ -274,7 +296,7 @@ const MainArea: React.FC<MainAreaProps> = ({
                     key={shape.id}
                     shape={shape}
                     isSelected={isSelected}
-                    onSelect={() => setSelectedId(shape.id)}
+                    onSelect={() => handleShapeSelect(shape.id)}
                     onChange={handleShapeDragEnd}
                     onResize={handleTriangleResize}
                     pxToUnits={pxToUnits}
@@ -292,7 +314,7 @@ const MainArea: React.FC<MainAreaProps> = ({
                     key={shape.id}
                     shape={shape}
                     isSelected={isSelected}
-                    onSelect={() => setSelectedId(shape.id)}
+                    onSelect={() => handleShapeSelect(shape.id)}
                     onChange={handleShapeDragEnd}
                     onResize={handleLineResize}
                     pxToUnits={pxToUnits}
@@ -308,7 +330,7 @@ const MainArea: React.FC<MainAreaProps> = ({
                     key={shape.id}
                     shape={shape}
                     isSelected={isSelected}
-                    onSelect={() => setSelectedId(shape.id)}
+                    onSelect={() => handleShapeSelect(shape.id)}
                     onChange={handleShapeDragEnd}
                     onResize={handleAngleResize}
                     showMeasurement={showMeasurement ?? false}

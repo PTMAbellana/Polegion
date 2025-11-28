@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { use } from "react";
 import { useCompetitionRealtime } from "@/hooks/useCompetitionRealtime";
@@ -23,6 +23,7 @@ export default function CompetitionPage({ params }: CompetitionPageProps) {
   const router = useRouter();
   const searchParams = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '');
   const roomId = searchParams.get('room') || ''; // Always defined, even if empty string
+  const roomCode = searchParams.get('roomCode') || ''; // Room code for navigation
 
   // Real-time hooks
   const {
@@ -34,6 +35,39 @@ export default function CompetitionPage({ params }: CompetitionPageProps) {
   const liveCompetition = competition as Competition | null;
   const liveParticipants = participants as CompetitionParticipant[];
   const liveActiveParticipants = activeParticipants || [];
+
+  // Filter out teachers from active participants count
+  // Only show students (role === 'student' or role is undefined but they're in participants list)
+  const filteredActiveParticipants = useMemo(() => {
+    console.log('🔍 [Filter] Active participants before filter:', liveActiveParticipants);
+    console.log('🔍 [Filter] Participants list:', liveParticipants);
+    
+    // Get participant IDs (students who joined the competition)
+    const participantIds = new Set(liveParticipants.map(p => p.user_id || p.id));
+    
+    const filtered = liveActiveParticipants.filter((ap: { id: string; role?: string }) => {
+      // If role is explicitly 'teacher', exclude them
+      if (ap.role === 'teacher') {
+        console.log('🚫 [Filter] Excluding teacher:', ap);
+        return false;
+      }
+      // If role is 'student', include them
+      if (ap.role === 'student') {
+        return true;
+      }
+      // If role is undefined (old presence data), check if they're in participants list
+      if (!ap.role && participantIds.size > 0) {
+        const isParticipant = participantIds.has(ap.id);
+        console.log(`🔍 [Filter] No role for ${ap.id}, isParticipant: ${isParticipant}`);
+        return isParticipant;
+      }
+      // Default: include if we can't determine
+      return true;
+    });
+    
+    console.log('✅ [Filter] Filtered active participants:', filtered);
+    return filtered;
+  }, [liveActiveParticipants, liveParticipants]);
 
   const {
     formattedTime,
@@ -54,10 +88,10 @@ export default function CompetitionPage({ params }: CompetitionPageProps) {
       liveCompetition?.gameplay_indicator === "PLAY" // Match backend value
     ) {
       console.log('✅ [Student Redirect] Redirecting to play page!');
-      const roomParam = roomId ? `?room=${roomId}` : '';
+      const roomParam = roomId ? `?room=${roomId}${roomCode ? `&roomCode=${roomCode}` : ''}` : '';
       router.push(`/student/competition/${competitionId}/play${roomParam}`);
     }
-  }, [liveCompetition, competitionId, router, roomId]);
+  }, [liveCompetition, competitionId, router, roomId, roomCode]);
 
   if (!liveCompetition) {
     return (
@@ -79,7 +113,7 @@ export default function CompetitionPage({ params }: CompetitionPageProps) {
           <CompetitionWaitingRoom
             competition={liveCompetition}
             participants={liveParticipants}
-            activeParticipants={liveActiveParticipants}
+            activeParticipants={filteredActiveParticipants}
           />
         );
 
@@ -125,10 +159,26 @@ export default function CompetitionPage({ params }: CompetitionPageProps) {
     }
   };
 
+  const handleGoBack = () => {
+    // Navigate to the joined room page using roomCode
+    if (roomCode) {
+      router.push(`/student/joined-rooms/${roomCode}`);
+    } else {
+      router.push('/student/joined-rooms');
+    }
+  };
+
   return (
     <div className={styles.mainContainer}>
       {/* Header */}
       <div className={styles.header}>
+        <button 
+          onClick={handleGoBack}
+          className={styles.backButton}
+          title="Go back"
+        >
+          Back
+        </button>
         <div className={styles.headerContent}>
           <h1 className={styles.title}>{liveCompetition.title}</h1>
           <p className={styles.status}>
@@ -139,8 +189,8 @@ export default function CompetitionPage({ params }: CompetitionPageProps) {
 
       {/* Scrollable Content */}
       <div className={styles.scrollableContent}>
-        {/* Timer Section - Show for ONGOING and DONE */}
-        {(liveCompetition.status === "ONGOING" || liveCompetition.status === "DONE") && (
+        {/* Timer Section - Show for ONGOING only, hide for DONE */}
+        {liveCompetition.status === "ONGOING" && (
           <div className={styles.timerSection}>
             <CompetitionTimer
               formattedTime={formattedTime}

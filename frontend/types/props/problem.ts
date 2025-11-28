@@ -69,6 +69,7 @@ export interface MainAreaProps {
   showMidpoint?: boolean;
   showMeasurement?: boolean;
   showArcRadius?: boolean;
+  disabled?: boolean; // Prevent shape addition/modification when true (e.g., after submission)
 }
 
 export interface ExistingProblemsListProps {

@@ -3,7 +3,6 @@
 import { use } from 'react'
 import { useRouter } from 'next/navigation'
 import { FaArrowLeft } from 'react-icons/fa'
-import Loader from '@/components/Loader'
 import LoadingOverlay from '@/components/LoadingOverlay'
 import { useAuthStore } from '@/store/authStore'
 import { useRecordsManagement } from '@/hooks/useRecordsManagement'
@@ -43,7 +42,7 @@ export default function RecordPage({ params }: { params: Promise<{ roomId: numbe
   }
 
   if (appLoading || !isLoggedIn) {
-    return <LoadingOverlay isLoading={true}><Loader /></LoadingOverlay>
+    return <LoadingOverlay isLoading={true} />
   }
 
   return (

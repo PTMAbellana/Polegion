@@ -10,14 +10,13 @@ import {
   CompetitionList
 } from '@/components/competition'
 import { FaUsers } from 'react-icons/fa'
-import Loader from '@/components/Loader'
 import LoadingOverlay from '@/components/LoadingOverlay'
 import styles from '@/styles/competition-teacher.module.css'
 
 export default function TeacherCompetitionPage() {
   const router = useRouter()
   const { isLoggedIn, appLoading } = useAuthStore()
-  const { currentRoom, fetchRoomDetails, addCompetitionToRoom } = useTeacherRoomStore()
+  const { currentRoom, fetchRoomDetails, addCompetitionToRoom, createdRooms, fetchCreatedRooms, roomLoading } = useTeacherRoomStore()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   
@@ -26,22 +25,40 @@ export default function TeacherCompetitionPage() {
   const roomCode = searchParams.get('roomCode')
   const roomId = currentRoom?.id
 
-  console.log('🏠 TeacherCompetitionPage - roomCode:', roomCode, 'roomId:', roomId, 'currentRoom:', currentRoom)
+  console.log('🏠 TeacherCompetitionPage - roomCode:', roomCode, 'roomId:', roomId, 'currentRoom:', currentRoom, 'createdRooms:', createdRooms?.length)
 
   // Get competitions, problems and participants from currentRoom (already fetched by teacherRoomStore)
   const competitions = currentRoom?.competitions || []
   const visibleProblems = currentRoom?.problems?.filter(p => p.visibility === 'show') || []
   const participants = currentRoom?.participants || []
 
-  console.log('📊 Available data - Competitions:', competitions.length, 'Problems:', visibleProblems.length, 'Participants:', participants.length)
+  // Check if data is still loading
+  const isDataLoading = roomLoading || (roomCode && createdRooms.length === 0) || (roomCode && !currentRoom)
 
-  // Fetch room details if we have roomCode but no currentRoom
+  console.log('📊 Available data - Competitions:', competitions.length, 'Problems:', visibleProblems.length, 'Participants:', participants.length, 'isDataLoading:', isDataLoading)
+
+  // First, ensure createdRooms are loaded
   useEffect(() => {
-    if (isLoggedIn && !appLoading && roomCode && (!currentRoom || currentRoom.code !== roomCode)) {
-      console.log('🔄 Fetching room details for roomCode:', roomCode)
-      fetchRoomDetails(roomCode)
+    if (isLoggedIn && !appLoading && createdRooms.length === 0) {
+      console.log('🔄 Fetching created rooms first...')
+      fetchCreatedRooms()
     }
-  }, [isLoggedIn, appLoading, roomCode, currentRoom, fetchRoomDetails])
+  }, [isLoggedIn, appLoading, createdRooms.length, fetchCreatedRooms])
+
+  // Then fetch room details once we have createdRooms
+  useEffect(() => {
+    if (isLoggedIn && !appLoading && roomCode && createdRooms.length > 0) {
+      // Check if we need to fetch - either no currentRoom, different room, or participants not loaded
+      const needsFetch = !currentRoom || 
+                        currentRoom.code !== roomCode || 
+                        !Array.isArray(currentRoom.participants)
+      
+      if (needsFetch) {
+        console.log('🔄 Fetching room details for roomCode:', roomCode)
+        fetchRoomDetails(roomCode, true) // Force refresh to get fresh data
+      }
+    }
+  }, [isLoggedIn, appLoading, roomCode, createdRooms.length])
 
   // Handle create competition
   const handleCreateCompetition = async (title: string) => {
@@ -117,8 +134,8 @@ export default function TeacherCompetitionPage() {
     )
   }
 
-  if (appLoading || !isLoggedIn || loading) {
-    return <LoadingOverlay isLoading={true}><Loader /></LoadingOverlay>
+  if (appLoading || !isLoggedIn || loading || isDataLoading) {
+    return <LoadingOverlay isLoading={true} />
   }
 
   if (error) {
@@ -179,7 +196,8 @@ export default function TeacherCompetitionPage() {
         {/* Header */}
         <CompetitionHeader
           title="Competition Dashboard"
-          description="Create and manage competitions for your students. Track their progress and XP earnings."
+          participantCount={participants.length}
+          activeCount={participants.length} // On dashboard, show total participants as active since we don't have real-time presence here
           onBack={handleBack}
         />
 

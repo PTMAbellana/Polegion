@@ -28,11 +28,14 @@ export const useTeacherRoomStore = create<ExtendTeacherRoomState>()(
             currentRoom: null,
             roomLoading: false,
 
-            fetchRoomDetails: async (roomCode: string) => {
+            fetchRoomDetails: async (roomCode: string, forceRefresh: boolean = false) => {
                 set({ roomLoading: true });
                 try {
                     const currentRoom = get().currentRoom;
-                    if (currentRoom !== null && currentRoom.code === roomCode) {
+                    // Only skip if we already have this room WITH participants loaded
+                    // (participants array exists and has been fetched - even if empty, it should be an array)
+                    if (!forceRefresh && currentRoom !== null && currentRoom.code === roomCode && Array.isArray(currentRoom.participants)) {
+                        set({ roomLoading: false });
                         return;
                     }
                     const room = get().createdRooms.find(r => r.code === roomCode);

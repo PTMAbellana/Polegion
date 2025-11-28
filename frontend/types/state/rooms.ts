@@ -44,7 +44,7 @@ export interface ExtendTeacherRoomState extends TeacherRoomState {
     roomLoading: boolean;
     inviteParticipant: (roomCode: string, email: string) => Promise<{ success: boolean; error?: string; message?: string }>;
     
-    fetchRoomDetails: (roomCode: string) => Promise<void>;
+    fetchRoomDetails: (roomCode: string, forceRefresh?: boolean) => Promise<void>;
     clearCurrentRoom: () => void;
 
     // Problem Management

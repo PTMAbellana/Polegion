@@ -116,7 +116,7 @@ export default function TeacherDashboard() {
   }
 
   if (appLoading || !isLoggedIn) {
-    return <LoadingOverlay isLoading={true}><Loader /></LoadingOverlay>
+    return <LoadingOverlay isLoading={true} />
   }
 
   return (

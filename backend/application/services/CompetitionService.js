@@ -128,11 +128,20 @@ class CompeService {
             const data = await this.compeRepo.getCompeById(compe_id, room_id)
             if (!data) throw new Error("Competition not found")
             
+            // Fetch total problems count
+            const compeProblems = await this.probService.fetchCompeProblems(compe_id)
+            const totalProblems = compeProblems ? compeProblems.length : 0
+            
+            const result = {
+                ...data,
+                total_problems: totalProblems
+            }
+            
             // Cache the result
-            cache.set(cacheKey, data);
+            cache.set(cacheKey, result);
             console.log('Cache miss: getCompeById', compe_id);
             
-            return data
+            return result
         } catch (error) {
             throw error
         }
@@ -175,11 +184,18 @@ class CompeService {
             
             const result = {
                 ...data,
-                timer_started_at: currentTime,
+                timer_started_at: currentTime.toISOString(), // Ensure it's serialized as ISO string
                 timer_duration: timerDuration,
-                timer_end_at: problemEndTime,
+                timer_end_at: problemEndTime.toISOString(), // Ensure it's serialized as ISO string
                 gameplay_indicator: data.gameplay_indicator || 'PLAY' // ✅ Ensure gameplay_indicator is always present
             }
+            
+            console.log('📋 [StartCompetition] Result being returned:', {
+                status: result.status,
+                gameplay_indicator: result.gameplay_indicator,
+                timer_started_at: result.timer_started_at,
+                timer_duration: result.timer_duration
+            });
             
             // Invalidate competition cache since status changed
             this._invalidateCompetitionCache(data.room_id, compe_id);
@@ -219,6 +235,9 @@ class CompeService {
             if (nextIndex >= problems.length) {
                 // Competition is done
                 const data = await this.compeRepo.updateCompeStatus(compe_id, 'DONE')
+                
+                // Invalidate cache when competition ends
+                this._invalidateCompetitionCache(data.room_id, compe_id);
                 
                 // 🚀 SEND BROADCAST FOR COMPETITION FINISH
                 try {
@@ -268,6 +287,9 @@ class CompeService {
                 timer_end_at: problemEndTime
             }
             
+            // Invalidate cache when problem changes
+            this._invalidateCompetitionCache(data.room_id, compe_id);
+            
             // 🚀 SEND BROADCAST TO NOTIFY ALL CLIENTS
             try {
                 const channel = supabase.channel(`competition-${compe_id}`)
@@ -313,6 +335,9 @@ class CompeService {
                 updated_at: new Date().toISOString()
             });
 
+            // Invalidate cache when pausing
+            this._invalidateCompetitionCache(data.room_id, compe_id);
+
             // Broadcast the pause update
             const channel = supabase.channel(`competition-${compe_id}`);
             await channel.subscribe();
@@ -351,6 +376,9 @@ class CompeService {
                 time_remaining: null, 
                 updated_at: new Date().toISOString()
             });
+
+            // Invalidate cache when resuming
+            this._invalidateCompetitionCache(data.room_id, compe_id);
 
             // Broadcast the resume update
             const channel = supabase.channel(`competition-${compe_id}`);

@@ -1,26 +1,44 @@
 import api from './axios'
 
+// UUID validation regex
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+
 // Get all castles with optional user progress
 export const getAllCastles = async (userId) => {
     try {
         // Add timestamp to bypass all caching layers
         const timestamp = Date.now()
-        const endpoint = userId ? `castles?userId=${userId}&_t=${timestamp}` : `castles?_t=${timestamp}`
-        console.log('[CastleAPI] Fetching from endpoint:', endpoint)
         
-        // Bypass cache for user-specific castle data to ensure fresh progress
-        const config = {
-            cache: {
-                ttl: 0, // No caching
-                interpretHeader: false
-            },
-            headers: {
-                'Cache-Control': 'no-cache, no-store, must-revalidate',
-                'Pragma': 'no-cache'
+        // Validate userId - must be a valid UUID string
+        let validUserId = null
+        if (userId) {
+            // Convert to string if needed
+            const userIdStr = String(userId).trim()
+            
+            // Only use userId if it's a valid UUID
+            if (UUID_REGEX.test(userIdStr)) {
+                validUserId = userIdStr
+            } else {
+                console.warn('[CastleAPI] Invalid userId format, fetching without user progress:', userIdStr)
             }
         }
         
-        const res = await api.get(endpoint, config)
+        const endpoint = validUserId 
+            ? `castles?userId=${encodeURIComponent(validUserId)}&_t=${timestamp}` 
+            : `castles?_t=${timestamp}`
+        
+        console.log('[CastleAPI] Fetching from endpoint:', endpoint)
+        
+        // Simple config without cache interceptor options that may cause issues in Edge
+        // The axios-cache-interceptor may not handle all browsers consistently
+        const res = await api.get(endpoint, {
+            headers: {
+                'Cache-Control': 'no-cache',
+                'Pragma': 'no-cache'
+            },
+            // Disable axios-cache-interceptor for this request
+            cache: false
+        })
         
         console.log('[CastleAPI] Response:', res.data)
         return res.data.data || []
@@ -36,7 +54,6 @@ export const getAllCastles = async (userId) => {
         } else if (error.request) {
             // Request made but no response received
             console.error('[CastleAPI] No response received from server')
-            console.error('[CastleAPI] Is backend running on', endpoint, '?')
         } else {
             // Error in request setup
             console.error('[CastleAPI] Request setup error:', error.message)

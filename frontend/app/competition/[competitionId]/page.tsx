@@ -76,7 +76,7 @@ const CompetitionDashboard = ({ params } : { params  : Promise<{competitionId : 
     isConnected,
     connectionStatus,
     pollCount
-  } = useCompetitionRealtime(compe_id.competitionId, isLoading);
+  } = useCompetitionRealtime(compe_id.competitionId, isLoading, roomId || '', 'creator');
   
   // Real-time timer management
   const {

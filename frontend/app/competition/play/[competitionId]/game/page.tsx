@@ -16,6 +16,8 @@ interface Competition {
   current_problem_index?: number;
   timer_started_at?: string;
   timer_duration?: number;
+  total_problems?: number;
+  problem_count?: number;
 }
 
 const CompetitionGamePage = ({ params }: { params: Promise<{ competitionId: string }> }) => {
@@ -106,7 +108,9 @@ const CompetitionGamePage = ({ params }: { params: Promise<{ competitionId: stri
     connectionStatus,
   } = useCompetitionRealtime(
     competitionId ? Number(competitionId) : null, 
-    !competitionId || isLoading // Don't start realtime until we have basic data
+    !competitionId || isLoading, // Don't start realtime until we have basic data
+    roomId || '', // Pass roomId for proper API calls and presence tracking
+    'participant' // userType
   );
   
   // ✅ ENHANCED: Use live data when available, fallback to initial fetch

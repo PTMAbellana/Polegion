@@ -22,7 +22,7 @@ export default function CompetitionsTab({ competitions, roomCode }: Competitions
     }
 
     const handleOpenCompetition = (competitionId: number, roomId: number) => {
-        router.push(`${STUDENT_ROUTES.PLAY}/${competitionId}?room=${roomId}`);
+        router.push(`${STUDENT_ROUTES.PLAY}/${competitionId}?room=${roomId}&roomCode=${roomCode}`);
     }
 
     return (

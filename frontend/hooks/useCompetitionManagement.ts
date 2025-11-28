@@ -121,37 +121,58 @@ export function useCompetitionManagement(roomId: string | number) {
       return { success: false, error: 'Cannot start competition without problems' }
     }
 
-    setState(prev => ({ ...prev, loading: true, error: null }))
+    // Optimistic update FIRST - immediate UI feedback
+    const now = new Date().toISOString()
+    setState(prev => ({
+      ...prev,
+      loading: true,
+      error: null,
+      currentCompetition: prev.currentCompetition
+        ? {
+            ...prev.currentCompetition,
+            status: 'ONGOING',
+            gameplay_indicator: 'PLAY',
+            current_problem_id: Number(problems[0]?.problem?.id || problems[0]?.id),
+            current_problem_index: 0,
+            timer_started_at: now,
+            timer_duration: problems[0]?.timer || 30
+          }
+        : null
+    }))
+    
     try {
-      await startCompetition(competitionId, problems)
+      const result = await startCompetition(competitionId, problems)
       
-      // Optimistically update local state
+      console.log('🚀 [StartCompetition] API result:', result);
+      console.log('🚀 [StartCompetition] Timer data:', {
+        timer_started_at: result?.timer_started_at,
+        timer_duration: result?.timer_duration
+      });
+      
+      // Update with actual server response
       setState(prev => ({
         ...prev,
         currentCompetition: prev.currentCompetition
-          ? {
-              ...prev.currentCompetition,
-              status: 'ONGOING',
-              gameplay_indicator: 'PLAY', // Match backend value
-              current_problem_id: Number(problems[0]?.problem?.id || problems[0]?.id),
-              current_problem_index: 0,
-              timer_started_at: new Date().toISOString(),
-              timer_duration: problems[0]?.timer || 30 // Use seconds, not minutes
-            }
+          ? { ...prev.currentCompetition, ...result }
           : null,
         loading: false
       }))
 
-      // Fetch fresh data after a short delay
-      setTimeout(() => fetchCompetitionDetails(competitionId), 1000)
-
       return { success: true }
     } catch (error) {
+      // Revert optimistic update on error
       const errorMessage = error instanceof Error ? error.message : 'Failed to start competition'
-      setState(prev => ({ ...prev, error: errorMessage, loading: false }))
+      setState(prev => ({
+        ...prev,
+        currentCompetition: prev.currentCompetition
+          ? { ...prev.currentCompetition, status: 'NEW', gameplay_indicator: null }
+          : null,
+        error: errorMessage,
+        loading: false
+      }))
       return { success: false, error: errorMessage }
     }
-  }, [fetchCompetitionDetails])
+  }, [])
 
   // Move to next problem
   const handleNextProblem = useCallback(async (
@@ -159,104 +180,161 @@ export function useCompetitionManagement(roomId: string | number) {
     problems: CompetitionProblem[],
     currentIndex: number
   ) => {
-    setState(prev => ({ ...prev, loading: true, error: null }))
+    const nextIndex = currentIndex + 1
+    const isLastProblem = nextIndex >= problems.length
+    const now = new Date().toISOString()
+    
+    // Optimistic update FIRST - immediate UI feedback
+    if (isLastProblem) {
+      setState(prev => ({
+        ...prev,
+        loading: true,
+        error: null,
+        currentCompetition: prev.currentCompetition
+          ? {
+              ...prev.currentCompetition,
+              status: 'DONE',
+              gameplay_indicator: 'FINISHED',
+              current_problem_id: undefined,
+              current_problem_index: problems.length,
+              timer_started_at: null,
+              timer_duration: null
+            }
+          : null
+      }))
+    } else {
+      const nextProblemData = problems[nextIndex]
+      setState(prev => ({
+        ...prev,
+        loading: true,
+        error: null,
+        currentCompetition: prev.currentCompetition
+          ? {
+              ...prev.currentCompetition,
+              current_problem_id: Number(nextProblemData?.problem?.id || nextProblemData?.id),
+              current_problem_index: nextIndex,
+              timer_started_at: now,
+              timer_duration: nextProblemData?.timer || 30,
+              gameplay_indicator: 'PLAY'
+            }
+          : null
+      }))
+    }
+    
     try {
       const result = await nextProblem(competitionId, problems, currentIndex)
       
-      const nextIndex = currentIndex + 1
-
-      if (result.competition_finished) {
-        setState(prev => ({
-          ...prev,
-          currentCompetition: prev.currentCompetition
-            ? {
-                ...prev.currentCompetition,
-                status: 'DONE',
-                gameplay_indicator: 'FINISHED',
-                current_problem_id: undefined,
-                current_problem_index: problems.length,
-                timer_started_at: null,
-                timer_duration: null
-              }
-            : null,
-          loading: false
-        }))
-      } else {
-        const nextProblemData = problems[nextIndex]
-        setState(prev => ({
-          ...prev,
-          currentCompetition: prev.currentCompetition
-            ? {
-                ...prev.currentCompetition,
-                current_problem_id: Number(nextProblemData?.problem?.id || nextProblemData?.id),
-                current_problem_index: nextIndex,
-                timer_started_at: new Date().toISOString(),
-                timer_duration: nextProblemData?.timer || 30, // Use seconds
-                gameplay_indicator: 'PLAY' // Match backend value
-              }
-            : null,
-          loading: false
-        }))
-      }
-
-      // Fetch fresh data
-      setTimeout(() => fetchCompetitionDetails(competitionId), 1000)
+      // Update with actual server response
+      setState(prev => ({
+        ...prev,
+        currentCompetition: prev.currentCompetition
+          ? { ...prev.currentCompetition, ...result }
+          : null,
+        loading: false
+      }))
 
       return { success: true, finished: result.competition_finished }
     } catch (error) {
+      // Revert optimistic update on error - go back to previous state
       const errorMessage = error instanceof Error ? error.message : 'Failed to move to next problem'
-      setState(prev => ({ ...prev, error: errorMessage, loading: false }))
+      const currentProblemData = problems[currentIndex]
+      setState(prev => ({
+        ...prev,
+        currentCompetition: prev.currentCompetition
+          ? {
+              ...prev.currentCompetition,
+              status: 'ONGOING',
+              gameplay_indicator: 'PLAY',
+              current_problem_index: currentIndex,
+              current_problem_id: Number(currentProblemData?.problem?.id || currentProblemData?.id)
+            }
+          : null,
+        error: errorMessage,
+        loading: false
+      }))
       return { success: false, error: errorMessage }
     }
-  }, [fetchCompetitionDetails])
+  }, [])
 
   // Pause competition
   const handlePauseCompetition = useCallback(async (competitionId: number) => {
-    setState(prev => ({ ...prev, loading: true, error: null }))
+    // Optimistic update FIRST - immediate UI feedback
+    setState(prev => ({
+      ...prev,
+      loading: true,
+      error: null,
+      currentCompetition: prev.currentCompetition
+        ? { ...prev.currentCompetition, gameplay_indicator: 'PAUSE' }
+        : null
+    }))
+    
     try {
-      await pauseCompetition(competitionId)
+      const result = await pauseCompetition(competitionId)
       
+      // Update with server response
+      setState(prev => ({
+        ...prev,
+        currentCompetition: prev.currentCompetition
+          ? { ...prev.currentCompetition, ...result, gameplay_indicator: 'PAUSE' }
+          : null,
+        loading: false
+      }))
+
+      return { success: true }
+    } catch (error) {
+      // Revert optimistic update on error
+      const errorMessage = error instanceof Error ? error.message : 'Failed to pause competition'
+      setState(prev => ({
+        ...prev,
+        currentCompetition: prev.currentCompetition
+          ? { ...prev.currentCompetition, gameplay_indicator: 'PLAY' }
+          : null,
+        error: errorMessage,
+        loading: false
+      }))
+      return { success: false, error: errorMessage }
+    }
+  }, [])
+
+  // Resume competition
+  const handleResumeCompetition = useCallback(async (competitionId: number) => {
+    // Optimistic update FIRST - immediate UI feedback
+    setState(prev => ({
+      ...prev,
+      loading: true,
+      error: null,
+      currentCompetition: prev.currentCompetition
+        ? { ...prev.currentCompetition, gameplay_indicator: 'PLAY' }
+        : null
+    }))
+    
+    try {
+      const result = await resumeCompetition(competitionId)
+      
+      // Update with server response
+      setState(prev => ({
+        ...prev,
+        currentCompetition: prev.currentCompetition
+          ? { ...prev.currentCompetition, ...result, gameplay_indicator: 'PLAY' }
+          : null,
+        loading: false
+      }))
+
+      return { success: true }
+    } catch (error) {
+      // Revert optimistic update on error
+      const errorMessage = error instanceof Error ? error.message : 'Failed to resume competition'
       setState(prev => ({
         ...prev,
         currentCompetition: prev.currentCompetition
           ? { ...prev.currentCompetition, gameplay_indicator: 'PAUSE' }
           : null,
+        error: errorMessage,
         loading: false
       }))
-
-      setTimeout(() => fetchCompetitionDetails(competitionId), 500)
-
-      return { success: true }
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to pause competition'
-      setState(prev => ({ ...prev, error: errorMessage, loading: false }))
       return { success: false, error: errorMessage }
     }
-  }, [fetchCompetitionDetails])
-
-  // Resume competition
-  const handleResumeCompetition = useCallback(async (competitionId: number) => {
-    setState(prev => ({ ...prev, loading: true, error: null }))
-    try {
-      await resumeCompetition(competitionId)
-      
-      setState(prev => ({
-        ...prev,
-        currentCompetition: prev.currentCompetition
-          ? { ...prev.currentCompetition, gameplay_indicator: 'PLAY' } // Match backend value
-          : null,
-        loading: false
-      }))
-
-      setTimeout(() => fetchCompetitionDetails(competitionId), 500)
-
-      return { success: true }
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to resume competition'
-      setState(prev => ({ ...prev, error: errorMessage, loading: false }))
-      return { success: false, error: errorMessage }
-    }
-  }, [fetchCompetitionDetails])
+  }, [])
 
   // Add problem to competition
   const addProblemToCompetition = useCallback(async (problemId: string, competitionId: number, problemData?: any) => {

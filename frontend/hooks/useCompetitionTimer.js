@@ -24,6 +24,13 @@ export const useCompetitionTimer = (competitionId, competition) => {
       return;
     }
 
+    console.log('⏱️ [Timer] Competition data received:', {
+      status: competition.status,
+      gameplay_indicator: competition.gameplay_indicator,
+      timer_started_at: competition.timer_started_at,
+      timer_duration: competition.timer_duration
+    });
+
     const isPausedState = competition.gameplay_indicator === 'PAUSE';
     setIsPaused(isPausedState);
 
@@ -43,6 +50,10 @@ export const useCompetitionTimer = (competitionId, competition) => {
     // ✅ FIXED: Timer calculation with correct duration handling
     const calculateTimeRemaining = () => {
       if (!competition.timer_started_at || !competition.timer_duration) {
+        console.log('⏱️ [Timer] Missing timer data:', { 
+          timer_started_at: competition.timer_started_at, 
+          timer_duration: competition.timer_duration 
+        });
         return 0;
       }
 
@@ -78,14 +89,15 @@ export const useCompetitionTimer = (competitionId, competition) => {
         const newRemaining = calculateTimeRemaining();
         setTimeRemaining(newRemaining);
         
+        // Always update formatted time first
+        const newMinutes = Math.floor(newRemaining / 60);
+        const newSeconds = newRemaining % 60;
+        setFormattedTime(`${newMinutes.toString().padStart(2, '0')}:${newSeconds.toString().padStart(2, '0')}`);
+        
         if (newRemaining <= 0) {
           setIsExpired(true);
           setIsTimerActive(false);
           clearInterval(interval);
-        } else {
-          const newMinutes = Math.floor(newRemaining / 60);
-          const newSeconds = newRemaining % 60;
-          setFormattedTime(`${newMinutes.toString().padStart(2, '0')}:${newSeconds.toString().padStart(2, '0')}`);
         }
       }, 1000);
 

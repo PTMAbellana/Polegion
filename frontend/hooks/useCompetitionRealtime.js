@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useMemo } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import api from '../api/axios';
 
@@ -8,200 +8,213 @@ export const useCompetitionRealtime = (competitionId, isLoading, roomId = '', us
   const [activeParticipants, setActiveParticipants] = useState([]);
   const [isConnected, setIsConnected] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState('DISCONNECTED');
-  const channelRef = useRef(null);
-  const mountedRef = useRef(true);
   const [pollCount, setPollCount] = useState(0);
-  const [shouldConnect, setShouldConnect] = useState(false);
+  
+  // Refs for cleanup and tracking
+  const channelRef = useRef(null);
+  const pollIntervalRef = useRef(null);
+  const mountedRef = useRef(true);
+  const setupCompleteRef = useRef(false);
+  const currentCompIdRef = useRef(null);
+  
+  // Memoize the competition ID string to prevent unnecessary re-renders
+  const compIdStr = useMemo(() => {
+    return competitionId ? String(competitionId) : null;
+  }, [competitionId]);
+  
+  // Memoize roomId to prevent reference changes
+  const stableRoomId = useMemo(() => roomId || '', [roomId]);
 
+  // Cleanup on unmount
   useEffect(() => {
+    mountedRef.current = true;
     return () => {
       mountedRef.current = false;
     };
   }, []);
 
-  // Effect to determine when we should connect
+  // Main effect for polling and presence
   useEffect(() => {
-    console.log('🔄 [Realtime] Connection readiness check - isLoading:', isLoading, 'competitionId:', competitionId);
-    
-    if (!isLoading && competitionId) {
-      console.log('✅ [Realtime] Ready to connect!');
-      setShouldConnect(true);
-    } else {
-      console.log('⏳ [Realtime] Not ready yet - isLoading:', isLoading, 'competitionId:', competitionId);
-      setShouldConnect(false);
-    }
-  }, [isLoading, competitionId]);
-
-  // Effect to handle the actual connection
-  useEffect(() => {
-    if (!shouldConnect || !competitionId) {
+    // Don't connect if still loading or no competitionId
+    if (isLoading || !compIdStr || !stableRoomId) {
+      console.log('⏳ [Realtime] Not ready:', { isLoading, compIdStr, stableRoomId });
       return;
     }
 
-    console.log('🚀 [Realtime] Starting connection for competition:', competitionId);
-    
-    setConnectionStatus('CONNECTED');
-    setIsConnected(true);
-    
-    let pollInterval = null;
-    
-    const pollCompetition = async () => {
-      try {
-        console.log('🔍 [Polling] Fetching competition with ID:', competitionId, 'roomId:', roomId);
-        
-        if (!roomId || roomId === '') {
-          console.warn('⚠️ [Polling] Missing roomId in URL - skipping fetch. Please navigate to this page with ?room=X parameter');
-          return;
-        }
+    // Skip if already set up for this competition
+    if (currentCompIdRef.current === compIdStr && channelRef.current) {
+      console.log('🔄 [Realtime] Already set up for:', compIdStr);
+      return;
+    }
 
-        // Use backend API with roomId for proper authorization
+    console.log('🚀 [Realtime] Setting up for competition:', compIdStr);
+    currentCompIdRef.current = compIdStr;
+
+    // Polling function
+    const pollCompetition = async () => {
+      if (!mountedRef.current) return;
+      
+      try {
+        const timestamp = Date.now();
         const [compResponse, leaderResponse] = await Promise.all([
-          api.get(`/competitions/${roomId}/${competitionId}?type=${userType}`),
-          api.get(`/leaderboards/competition/${roomId}?competition_id=${competitionId}`)
+          api.get(`/competitions/${stableRoomId}/${compIdStr}?type=${userType}&_t=${timestamp}`, {
+            headers: { 'Cache-Control': 'no-cache' },
+            cache: false
+          }),
+          api.get(`/leaderboards/competition/${stableRoomId}?competition_id=${compIdStr}&_t=${timestamp}`, {
+            headers: { 'Cache-Control': 'no-cache' },
+            cache: false
+          })
         ]);
+        
+        if (!mountedRef.current) return;
         
         const data = compResponse.data;
         const leaderboardData = leaderResponse.data?.data || [];
         
-        console.log('📊 [Polling] Backend API result:', { data, participants: leaderboardData });
-        
-        // Extract participants from grouped leaderboard response
-        // Backend returns: [{ id, title, data: [{accumulated_xp, participants}] }]
-        // We need to flatten to get just the participants
+        // Extract participants
         const participantsArray = leaderboardData.length > 0 && leaderboardData[0]?.data 
           ? leaderboardData[0].data.map((item, idx) => ({
-              id: item.participants.id || `participant-${idx}`, // Unique ID (UUID from User)
-              user_id: item.participants.id, // User ID
+              id: item.participants.id || `participant-${idx}`,
+              user_id: item.participants.id,
               fullName: `${item.participants.firstName || item.participants.first_name || ''} ${item.participants.lastName || item.participants.last_name || ''}`.trim(),
               profile_pic: item.participants.profile_pic,
               accumulated_xp: item.accumulated_xp
             }))
           : [];
         
-        console.log('✅ [Polling] Formatted participants:', participantsArray);
-        
-        // Update participants
         setParticipants(participantsArray);
         
         if (data) {
-          const newCompetition = data;
-        
-        // ✅ Better change detection with logging
-        setCompetition(prevCompetition => {
-          // Always set on first load
-          if (!prevCompetition) {
-            console.log('🎯 [Polling] Initial competition data loaded:', newCompetition);
-            setPollCount(prev => prev + 1);
-            return newCompetition;
-          }
-          
-          const statusChanged = prevCompetition?.status !== newCompetition?.status;
-          const timerStartChanged = prevCompetition?.timer_started_at !== newCompetition?.timer_started_at;
-          const problemChanged = prevCompetition?.current_problem_index !== newCompetition?.current_problem_index;
-          const gameplayChanged = prevCompetition?.gameplay_indicator !== newCompetition?.gameplay_indicator;
-          
-          if (statusChanged || timerStartChanged || problemChanged || gameplayChanged) {
-            console.log('🔥 [Polling] Competition update detected:', {
-              changes: {
-                status: statusChanged ? `${prevCompetition?.status} → ${newCompetition?.status}` : 'no change',
-                timer_started: timerStartChanged ? `${prevCompetition?.timer_started_at} → ${newCompetition?.timer_started_at}` : 'no change',
-                problem: problemChanged ? `${prevCompetition?.current_problem_index} → ${newCompetition?.current_problem_index}` : 'no change',
-                gameplay: gameplayChanged ? `${prevCompetition?.gameplay_indicator} → ${newCompetition?.gameplay_indicator}` : 'no change'
-              },
-              newData: {
-                status: newCompetition.status,
-                timer_started_at: newCompetition.timer_started_at,
-                timer_duration: newCompetition.timer_duration,
-                current_problem_index: newCompetition.current_problem_index,
-                gameplay_indicator: newCompetition.gameplay_indicator
-              }
-            });
+          setCompetition(prev => {
+            if (!prev) {
+              setPollCount(c => c + 1);
+              return data;
+            }
             
-            setPollCount(prev => prev + 1);
-            return newCompetition;
-          }
-          
-          return prevCompetition;
-        });
+            // Check for any significant changes
+            const changed = 
+              prev.status !== data.status ||
+              prev.timer_started_at !== data.timer_started_at ||
+              prev.current_problem_index !== data.current_problem_index ||
+              prev.current_problem_id !== data.current_problem_id ||
+              prev.gameplay_indicator !== data.gameplay_indicator ||
+              prev.timer_duration !== data.timer_duration;
+            
+            if (changed) {
+              console.log('🔥 [Polling] Competition updated:', {
+                status: data.status,
+                gameplay_indicator: data.gameplay_indicator,
+                current_problem_index: data.current_problem_index,
+                current_problem_id: data.current_problem_id,
+                timer_started_at: data.timer_started_at
+              });
+              setPollCount(c => c + 1);
+              return data;
+            }
+            return prev;
+          });
         }
       } catch (error) {
-        console.error('⚠️ [Polling] Exception:', error.response?.data || error.message);
+        console.error('⚠️ [Polling] Error:', error.message);
       }
     };
 
-    // ✅ More frequent polling during competition start
-    const startPolling = () => {
-      pollCompetition(); // Initial poll
-      pollInterval = setInterval(pollCompetition, 1500); // Poll every 1.5 seconds
-    };
+    // Start polling
+    pollCompetition();
+    pollIntervalRef.current = setInterval(pollCompetition, 2000);
 
-    // Start polling immediately
-    startPolling();
-
-    // Setup Realtime Presence for tracking active participants
-    const channel = supabase.channel(`competition-${competitionId}`, {
+    // Setup presence channel
+    const channel = supabase.channel(`competition-${compIdStr}`, {
       config: {
-        presence: {
-          key: competitionId,
-        },
+        presence: { key: compIdStr },
       },
     });
 
-    // Track presence state changes
+    console.log(`🔌 [Presence] Setting up channel: competition-${compIdStr}`);
+
     channel
       .on('presence', { event: 'sync' }, () => {
-        const presenceState = channel.presenceState();
-        console.log('👥 [Presence] Current participants:', presenceState);
+        if (!mountedRef.current) return;
         
-        // Extract active participants from presence state
+        const presenceState = channel.presenceState();
+        console.log(`👥 [Presence] Sync:`, presenceState);
+        
         const active = Object.values(presenceState).flatMap(presences => 
-          presences.map(p => p.user)
+          presences.map(p => p.user).filter(Boolean)
         );
+        
+        console.log('👥 [Presence] Active users:', active.length, active.map(u => u?.first_name));
+        
+        // Always trust the sync event - it's the source of truth
         setActiveParticipants(active);
       })
-      .on('presence', { event: 'join' }, ({ key, newPresences }) => {
-        console.log('✅ [Presence] User joined:', newPresences);
+      .on('presence', { event: 'join' }, ({ newPresences }) => {
+        console.log(`✅ [Presence] Join:`, newPresences?.map(p => p.user?.first_name));
       })
-      .on('presence', { event: 'leave' }, ({ key, leftPresences }) => {
-        console.log('❌ [Presence] User left:', leftPresences);
+      .on('presence', { event: 'leave' }, ({ leftPresences }) => {
+        console.log(`❌ [Presence] Leave:`, leftPresences?.map(p => p.user?.first_name));
       })
       .on('broadcast', { event: 'competition_update' }, (payload) => {
+        if (!mountedRef.current) return;
         if (payload?.payload) {
-          console.log('🔥 [Broadcast] Received update:', payload.payload);
-          console.log('🎯 [Broadcast] Key fields:', {
-            status: payload.payload.status,
-            gameplay_indicator: payload.payload.gameplay_indicator,
-            current_problem_index: payload.payload.current_problem_index,
-            timer_started_at: payload.payload.timer_started_at
-          });
+          console.log('🔥 [Broadcast] Update received');
           setCompetition(payload.payload);
-          setPollCount(prev => prev + 1);
+          setPollCount(c => c + 1);
         }
       })
       .subscribe(async (status) => {
-        if (status === 'SUBSCRIBED') {
-          // Get current user info from localStorage or auth
-          const userProfile = JSON.parse(localStorage.getItem('userProfile') || '{}');
+        console.log(`📡 [Presence] Status: ${status}`);
+        
+        if (status === 'SUBSCRIBED' && mountedRef.current) {
+          setIsConnected(true);
+          setConnectionStatus('CONNECTED');
           
           // Track this user's presence
-          await channel.track({
-            user: {
-              id: userProfile.id,
-              first_name: userProfile.first_name,
-              last_name: userProfile.last_name,
-              profile_pic: userProfile.profile_pic,
-              online_at: new Date().toISOString(),
-            },
-          });
+          const userProfile = JSON.parse(localStorage.getItem('user') || '{}');
+          
+          if (userProfile.id) {
+            console.log(`🎯 [Presence] Tracking user: ${userProfile.first_name} (${userProfile.role})`);
+            
+            await channel.track({
+              user: {
+                id: userProfile.id,
+                first_name: userProfile.first_name,
+                last_name: userProfile.last_name,
+                profile_pic: userProfile.profile_pic,
+                role: userProfile.role,
+                online_at: new Date().toISOString(),
+              },
+            });
+            
+            setupCompleteRef.current = true;
+            console.log(`✅ [Presence] User tracked successfully`);
+          }
         }
       });
 
+    channelRef.current = channel;
+
+    // Cleanup function - only runs on unmount or when competition actually changes
     return () => {
-      console.log('🧹 [Realtime] Cleanup for competition:', competitionId);
-      if (pollInterval) clearInterval(pollInterval);
-      if (channel) supabase.removeChannel(channel);
+      console.log('🧹 [Realtime] Cleaning up for competition:', compIdStr);
+      currentCompIdRef.current = null;
+      
+      if (pollIntervalRef.current) {
+        clearInterval(pollIntervalRef.current);
+        pollIntervalRef.current = null;
+      }
+      
+      if (channelRef.current) {
+        supabase.removeChannel(channelRef.current);
+        channelRef.current = null;
+      }
+      
+      setupCompleteRef.current = false;
+      setIsConnected(false);
+      setConnectionStatus('DISCONNECTED');
     };
-  }, [shouldConnect, competitionId, roomId]);
+  }, [compIdStr, stableRoomId, isLoading, userType]);
 
   return {
     competition,

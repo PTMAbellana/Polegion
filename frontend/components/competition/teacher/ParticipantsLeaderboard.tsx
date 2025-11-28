@@ -29,8 +29,9 @@ export default function ParticipantsLeaderboard({ participants, activeParticipan
     return activeParticipants.some(ap => ap.id === participant.user_id)
   }
   
-  // Count only active students (exclude teacher/admin from count)
-  const activeStudentCount = participants.filter(p => isActive(p)).length
+  // Use direct active count from presence (already filtered for students in parent)
+  // This is more accurate than computing from participant matches
+  const activeStudentCount = activeParticipants.length
 
   return (
     <div className={styles.rightColumn}>

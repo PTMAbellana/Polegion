@@ -4,7 +4,7 @@ import styles from '@/styles/dashboard-wow.module.css';
 
 interface LoadingOverlayProps {
   isLoading: boolean;
-  children: React.ReactNode;
+  children?: React.ReactNode;
   className?: string;
 }
 

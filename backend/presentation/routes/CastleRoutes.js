@@ -15,6 +15,25 @@ class CastleRoutes {
     }
 
     initializeRoutes() {
+        /**
+         * @swagger
+         * /castles:
+         *   get:
+         *     tags: [Castles]
+         *     summary: Get all castles (public endpoint)
+         */
+        this.router.get('/', this.castleController.getAll.bind(this.castleController));
+
+        /**
+         * @swagger
+         * /castles/{id}:
+         *   get:
+         *     tags: [Castles]
+         *     summary: Get a castle by ID (public endpoint)
+         */
+        this.router.get('/:id', this.castleController.getById.bind(this.castleController));
+
+        // Apply authentication middleware to all routes below this point
         this.router.use(this.authMiddleware.protect);
 
         /**
@@ -43,24 +62,6 @@ class CastleRoutes {
          *     summary: Create a new castle
          */
         this.router.post('/', this.castleController.create.bind(this.castleController));
-
-        /**
-         * @swagger
-         * /castles:
-         *   get:
-         *     tags: [Castles]
-         *     summary: Get all castles
-         */
-        this.router.get('/', this.castleController.getAll.bind(this.castleController));
-
-        /**
-         * @swagger
-         * /castles/{id}:
-         *   get:
-         *     tags: [Castles]
-         *     summary: Get a castle by ID
-         */
-        this.router.get('/:id', this.castleController.getById.bind(this.castleController));
 
         /**
          * @swagger

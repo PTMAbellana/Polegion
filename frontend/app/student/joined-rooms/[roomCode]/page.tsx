@@ -76,7 +76,7 @@ export default function StudentRoomDetailsPage({ params }: { params: Promise<{ r
     }
 
     if (!currentRoom) {
-        return <LoadingOverlay isLoading={true}><Loader /></LoadingOverlay>
+        return <LoadingOverlay isLoading={true} />
     }
 
     const { participants = [], problems = [], competitions = [] } = currentRoom

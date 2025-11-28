@@ -44,7 +44,7 @@ export default function LeaderboardPage({ params }: { params: Promise<{ roomId: 
   }
 
   if (appLoading || !isLoggedIn || loading) {
-    return <LoadingOverlay isLoading={true}><Loader /></LoadingOverlay>
+    return <LoadingOverlay isLoading={true} />
   }
 
   if (error && roomBoards.length === 0) {
