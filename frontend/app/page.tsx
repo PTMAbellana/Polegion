@@ -16,21 +16,21 @@ export default function Home() {
       id: 1,
       title: "7 Interactive Worlds",
       description: "Navigate through 2 assessment levels and 5 castle realms, each with unique geometry challenges and lessons!",
-      image: "/images/placeholders/app-carousel-1.svg",
+      image: "/images/worldmap-page.png",
       color: "#2F3E75",
     },
     {
       id: 2,
       title: "Collaborative Learning",
       description: "Join virtual rooms, compete with classmates, and participate in real-time geometry challenges!",
-      image: "/images/placeholders/app-carousel-2.svg",
+      image: "/images/dashboard-page.png",
       color: "#3A9679",
     },
     {
       id: 3,
       title: "Collect Relics & Track Progress",
       description: "Earn relics as you master concepts, complete assessments, and unlock achievements!",
-      image: "/images/placeholders/app-carousel-3.svg",
+      image: "/images/chapter-complete-page.png",
       color: "#FABC60",
     },
   ];
@@ -122,25 +122,6 @@ export default function Home() {
               Safe & Focused • Built for Students • Developed with AI Assistance
             </p>
           </div>
-          
-          <div className={styles.heroVisual}>
-            <div className={styles.statCard}>
-              <div className={styles.statNumber}>7</div>
-              <div className={styles.statLabel}>Interactive Worlds</div>
-            </div>
-            <div className={styles.statCard}>
-              <div className={styles.statNumber}>5</div>
-              <div className={styles.statLabel}>Castle Realms</div>
-            </div>
-            <div className={styles.statCard}>
-              <div className={styles.statNumber}>2</div>
-              <div className={styles.statLabel}>Assessment Levels</div>
-            </div>
-            <div className={styles.statCard}>
-              <div className={styles.statNumber}>6</div>
-              <div className={styles.statLabel}>Learning Categories</div>
-            </div>
-          </div>
         </section>
 
         {/* Credit Section */}
@@ -157,9 +138,9 @@ export default function Home() {
           <div className={styles.sectionHeader}>
             <span className={styles.sectionBadge}>See It In Action</span>
             <h2 className={styles.sectionTitle}>What Makes It Awesome?</h2>
-            <p className={styles.sectionSubtitle}>
-              Scroll through to see how fun learning can be!
-            </p>
+              {/* <p className={styles.sectionSubtitle}>
+                Scroll through to see how fun learning can be!
+              </p> */}
           </div>
 
           <div className={styles.carouselWrapper}>
@@ -183,6 +164,11 @@ export default function Home() {
                       alt={slide.title}
                       fill
                       className={styles.slideImg}
+                      unoptimized
+                      style={{ objectFit: 'cover' }}
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none';
+                      }}
                     />
                   </div>
                 </div>
@@ -280,7 +266,7 @@ export default function Home() {
         </section>
 
         {/* Social Proof - Preview Images */}
-        <section className={styles.previewSection}>
+        {/* <section className={styles.previewSection}>
           <div className={styles.sectionHeader}>
             <span className={styles.sectionBadge}>Sneak Peek</span>
             <h2 className={styles.sectionTitle}>Take A Look Inside</h2>
@@ -315,7 +301,7 @@ export default function Home() {
               <div className={styles.previewLabel}>Achievement Rewards</div>
             </div>
           </div>
-        </section>
+        </section> */}
 
         {/* Final CTA */}
         <section className={styles.finalCtaSection}>

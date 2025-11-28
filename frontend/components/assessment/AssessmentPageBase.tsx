@@ -194,8 +194,13 @@ export default function AssessmentPageBase({ config }: { config: AssessmentConfi
                             if (comparison) {
                                 formattedResults.comparison = comparison;
                             }
-                        } catch (err) {
-                            console.warn('Could not load comparison:', err);
+                        } catch (err: any) {
+                            // 404 means no pretest completed yet - this is expected
+                            if (err?.response?.status === 404) {
+                                console.log('[posttest] No pretest results found for comparison');
+                            } else {
+                                console.warn('Could not load comparison:', err);
+                            }
                         }
                     }
                     
@@ -381,8 +386,13 @@ export default function AssessmentPageBase({ config }: { config: AssessmentConfi
                                     if (comparison) {
                                         formattedResults.comparison = comparison;
                                     }
-                                } catch (err) {
-                                    console.warn('Could not load comparison:', err);
+                                } catch (err: any) {
+                                    // 404 means no pretest completed yet - this is expected
+                                    if (err?.response?.status === 404) {
+                                        console.log('[posttest] No pretest results found for comparison');
+                                    } else {
+                                        console.warn('Could not load comparison:', err);
+                                    }
                                 }
                             }
                             
