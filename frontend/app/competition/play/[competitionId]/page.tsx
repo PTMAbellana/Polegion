@@ -1,11 +1,9 @@
 "use client";
 
 import React, { use, useEffect, useState, useCallback } from 'react';
-import { ChevronDown, ChevronUp } from 'lucide-react';
 import styles from '@/styles/competition.module.css';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuthStore } from '@/store/authStore';
-import { AuthProtection } from '@/context/AuthProtection';
 import Loader from '@/components/Loader';
 import { getRoomProblems } from '@/api/problems';
 import { getAllParticipants } from '@/api/participants';
@@ -507,10 +505,10 @@ const CompetitionDashboard = ({ params } : { params  : Promise<{competitionId : 
             <div className={styles.competitionStatus}>
               Status: {currentCompetition?.status || 'Loading...'}
             </div>
-            <ConnectionStatus 
+            {/* <ConnectionStatus 
               isConnected={isConnected} 
               connectionStatus={connectionStatus}
-            />
+            /> */}
           </div>
 
           {/* ✅ Return button for default state */}
