@@ -249,7 +249,7 @@
 }
 
 :global(.castle1Theme) .conceptImageSection {
-  background: rgba(245, 239, 231, 0.85);
+  background: rgba(255, 255, 255, 0.95);
   border-color: #D8C4B6;
 }
 
@@ -278,7 +278,7 @@
 }
 
 :global(.castle2Theme) .conceptImageSection {
-  background: rgba(255, 253, 143, 0.85);
+  background: rgba(255, 255, 255, 0.95);
   border-color: #B0CE88;
 }
 
@@ -307,7 +307,7 @@
 }
 
 :global(.castle3Theme) .conceptImageSection {
-  background: rgba(221, 235, 157, 0.85);
+  background: rgba(255, 255, 255, 0.95);
   border-color: #A0C878;
 }
 
@@ -339,7 +339,7 @@
 }
 
 :global(.castle4Theme) .conceptCardHighlighted .conceptImageSection {
-  background: rgba(255, 225, 175, 0.9);
+  background: rgba(255, 255, 255, 0.95);
   border-color: #FFE1AF;
   box-shadow: 0 0 10px rgba(255, 225, 175, 0.5);
 }
@@ -358,7 +358,7 @@
 }
 
 :global(.castle4Theme) .conceptImageSection {
-  background: rgba(255, 225, 175, 0.85);
+  background: rgba(255, 255, 255, 0.95);
   border-color: #E2B59A;
 }
 
@@ -387,7 +387,7 @@
 }
 
 :global(.castle5Theme) .conceptImageSection {
-  background: rgba(255, 227, 169, 0.85);
+  background: rgba(255, 255, 255, 0.95);
   border-color: #8CCDEB;
 }
 
