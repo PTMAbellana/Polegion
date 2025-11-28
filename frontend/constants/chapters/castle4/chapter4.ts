@@ -25,13 +25,13 @@ export const CHAPTER4_LESSON_DIALOGUE = CHAPTER4_DIALOGUE.filter(d => d.scene ==
 export const CHAPTER4_MINIGAME_DIALOGUE = CHAPTER4_DIALOGUE.filter(d => d.scene === 'minigame').map(d => d.text);
 
 export const CHAPTER4_MINIGAME_LEVELS = [
-  { id: 1, shape: 'rectangle', length: 8, width: 5, type: 'perimeter', correctAnswer: 26, instruction: 'Find perimeter of rectangle (l=8, w=5)', hint: 'P = 2(l + w)' },
-  { id: 2, shape: 'square', side: 6, type: 'perimeter', correctAnswer: 24, instruction: 'Find perimeter of square (side=6)', hint: 'P = 4 × side' },
-  { id: 3, shape: 'rectangle', length: 7, width: 4, type: 'area', correctAnswer: 28, instruction: 'Find area of rectangle (l=7, w=4)', hint: 'A = l × w' },
-  { id: 4, shape: 'square', side: 5, type: 'area', correctAnswer: 25, instruction: 'Find area of square (side=5)', hint: 'A = side²' },
-  { id: 5, shape: 'triangle', base: 10, height: 6, type: 'area', correctAnswer: 30, instruction: 'Find area of triangle (b=10, h=6)', hint: 'A = (b × h) ÷ 2' },
-  { id: 6, shape: 'parallelogram', base: 9, height: 5, type: 'area', correctAnswer: 45, instruction: 'Find area of parallelogram (b=9, h=5)', hint: 'A = b × h' },
-  { id: 7, shape: 'trapezoid', base1: 8, base2: 6, height: 4, type: 'area', correctAnswer: 28, instruction: 'Find area of trapezoid (b₁=8, b₂=6, h=4)', hint: 'A = [(b₁ + b₂) × h] ÷ 2' },
+  { id: 1, shape: 'rectangle', length: 8, width: 5, type: 'perimeter', correctAnswer: 26, instruction: 'Find perimeter of rectangle (l=8, w=5)', hint: 'P = 2(l + w)', image: '/images/castle4/chapter4/perimeter-problem.png' },
+  { id: 2, shape: 'square', side: 6, type: 'perimeter', correctAnswer: 24, instruction: 'Find perimeter of square (side=6)', hint: 'P = 4 × side', image: '/images/castle4/chapter4/perimeter-problem1.png'  },
+  { id: 3, shape: 'rectangle', length: 7, width: 4, type: 'area', correctAnswer: 28, instruction: 'Find area of rectangle (l=7, w=4)', hint: 'A = l × w' , image: '/images/castle4/chapter4/perimeter-problem2.png'},
+  { id: 4, shape: 'square', side: 5, type: 'area', correctAnswer: 25, instruction: 'Find area of square (side=5)', hint: 'A = side²' , image: '/images/castle4/chapter4/perimeter-problem3.png'},
+  { id: 5, shape: 'triangle', base: 10, height: 6, type: 'area', correctAnswer: 30, instruction: 'Find area of triangle (b=10, h=6)', hint: 'A = (b × h) ÷ 2' , image: '/images/castle4/chapter4/perimeter-problem4.png'},
+  { id: 6, shape: 'parallelogram', base: 9, height: 5, type: 'area', correctAnswer: 45, instruction: 'Find area of parallelogram (b=9, h=5)', hint: 'A = b × h' , image: '/images/castle4/chapter4/perimeter-problem5.png'},
+  { id: 7, shape: 'trapezoid', base1: 8, base2: 6, height: 4, type: 'area', correctAnswer: 28, instruction: 'Find area of trapezoid (b₁=8, b₂=6, h=4)', hint: 'A = [(b₁ + b₂) × h] ÷ 2', image: '/images/castle4/chapter4/perimeter-problem6.png'},
 ];
 
 export const CHAPTER4_CONCEPTS = [

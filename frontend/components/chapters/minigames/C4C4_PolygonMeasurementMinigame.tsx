@@ -49,27 +49,42 @@ const C4C4_PolygonMeasurementMinigame: React.FC<Props> = ({ question, onComplete
       <div className={styleModule.gameAreaWrapper}>
         <div className={styleModule.canvasContainer}>
           <div className={styleModule.canvasWrapper}>
-            <div
-              style={{
-                width: '100%',
-                maxWidth: 420,
-                height: 260,
-                border: '2px dashed rgba(255, 225, 175, 0.6)',
-                borderRadius: 8,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                background: 'rgba(255, 255, 255, 0.04)',
-                color: '#FFE1AF'
-              }}
-            >
-              <div style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: 18, fontWeight: 700 }}>Image Placeholder</div>
-                <div style={{ fontSize: 12, opacity: 0.85 }}>
-                  {(question as any).shape} · {(question as any).type}
+            {(question as any).image ? (
+              <img
+                src={(question as any).image}
+                alt={`${(question as any).shape} ${(question as any).type}`}
+                style={{
+                  width: '100%',
+                  maxWidth: 420,
+                  height: 260,
+                  objectFit: 'contain',
+                  borderRadius: 8,
+                  background: 'rgba(255, 255, 255, 0.04)',
+                }}
+              />
+            ) : (
+              <div
+                style={{
+                  width: '100%',
+                  maxWidth: 420,
+                  height: 260,
+                  border: '2px dashed rgba(255, 225, 175, 0.6)',
+                  borderRadius: 8,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  background: 'rgba(255, 255, 255, 0.04)',
+                  color: '#FFE1AF'
+                }}
+              >
+                <div style={{ textAlign: 'center' }}>
+                  <div style={{ fontSize: 18, fontWeight: 700 }}>Image Placeholder</div>
+                  <div style={{ fontSize: 12, opacity: 0.85 }}>
+                    {(question as any).shape} · {(question as any).type}
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
         <div className={styleModule.controlsContainer}>
