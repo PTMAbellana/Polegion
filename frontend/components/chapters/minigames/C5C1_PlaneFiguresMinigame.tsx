@@ -203,21 +203,6 @@ const C5C1_PlaneFiguresMinigame: React.FC<Props> = ({ question, onComplete, styl
       >
         {shapeMeta?.description || 'Study the figure and decide which portal it belongs to.'}
       </div>
-      <div
-        style={{
-          marginTop: '0.5rem',
-          padding: '0.35rem 0.75rem',
-          borderRadius: '999px',
-          border: '1px solid rgba(255,255,255,0.4)',
-          textTransform: 'uppercase',
-          fontSize: '0.75rem',
-          letterSpacing: 1,
-          color: '#8CCDEB',
-          background: 'rgba(12, 22, 55, 0.5)',
-        }}
-      >
-        {(shapeMeta?.dimension || normalizedType || 'plane').toUpperCase()} FIGURE
-      </div>
       {imageSrc === PLACEHOLDER_IMAGE && (
         <div style={{ fontSize: '0.75rem', color: '#9FB3D6', marginTop: '0.35rem' }}>Preview image coming soon</div>
       )}

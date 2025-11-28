@@ -27,7 +27,6 @@ const AngleRelationshipsMinigame: React.FC<AngleRelationshipsMinigameProps> = ({
 }) => {
   const [userAnswer, setUserAnswer] = useState('');
   const [feedback, setFeedback] = useState<'correct' | 'incorrect' | null>(null);
-  const [showHint, setShowHint] = useState(false);
 
   const handleSubmit = () => {
     const answer = parseInt(userAnswer);
@@ -40,7 +39,6 @@ const AngleRelationshipsMinigame: React.FC<AngleRelationshipsMinigameProps> = ({
       onComplete(isCorrect);
       setUserAnswer('');
       setFeedback(null);
-      setShowHint(false);
     }, 1500);
   };
 
@@ -51,9 +49,9 @@ const AngleRelationshipsMinigame: React.FC<AngleRelationshipsMinigameProps> = ({
       <div style={{ textAlign: 'center' }}>
         <div style={{
           width: '100%',
-          maxWidth: '400px',
-          height: '250px',
-          backgroundColor: 'rgba(244, 228, 193, 0.2)',
+          maxWidth: '550px',
+          height: '350px',
+          backgroundColor: 'rgba(255, 255, 255, 0.95)',
           border: '2px dashed #B0CE88',
           borderRadius: '8px',
           display: 'flex',
@@ -131,7 +129,7 @@ const AngleRelationshipsMinigame: React.FC<AngleRelationshipsMinigameProps> = ({
             <label style={{ color: '#FFFD8F', fontSize: '1.1rem', marginBottom: '0.5rem', display: 'block', textAlign: 'center', fontFamily: "'Cinzel', serif", fontWeight: 'bold' }}>
               What is the missing angle?
             </label>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
               <input
                 type="number"
                 value={userAnswer}
@@ -139,56 +137,34 @@ const AngleRelationshipsMinigame: React.FC<AngleRelationshipsMinigameProps> = ({
                 placeholder="Enter angle"
                 className={styleModule.angleInput}
                 style={{
-                  padding: '0.7rem',
-                  fontSize: '1.1rem',
-                  width: '160px',
-                  borderRadius: '8px',
+                  flex: 1,
+                  padding: '10px 14px',
+                  fontSize: '1rem',
+                  fontWeight: '600',
+                  background: 'rgba(26, 26, 46, 0.6)',
                   border: '2px solid #B0CE88',
-                  textAlign: 'center',
-                  fontFamily: "'Nunito', sans-serif",
-                  backgroundColor: 'rgba(255, 255, 255, 0.95)',
-                  color: '#043915',
-                  fontWeight: 'bold'
+                  borderRadius: '8px',
+                  color: '#FFFD8F',
+                  textAlign: 'center'
                 }}
               />
-              <span style={{ color: '#FFFD8F', fontSize: '1.1rem', marginLeft: '0.5rem', fontWeight: 'bold' }}>°</span>
+              <span style={{ fontSize: '1.2rem', color: '#FFFD8F', fontWeight: 'bold' }}>°</span>
             </div>
           </div>
 
-          {!showHint && (
-            <button
-              onClick={() => setShowHint(true)}
-              className={styleModule.hintButton}
-              style={{
-                padding: '0.5rem 1rem',
-                background: 'linear-gradient(135deg, #B0CE88, #4C763B)',
-                color: '#fff',
-                border: '2px solid #4C763B',
-                borderRadius: '6px',
-                cursor: 'pointer',
-                fontSize: '1rem',
-                width: '100%',
-                fontFamily: "'Cinzel', serif",
-                transition: 'all 0.3s ease'
-              }}
-            >
-              Show Hint
-            </button>
-          )}
-
-          {showHint && (
-            <div style={{ 
-              padding: '0.8rem', 
-              backgroundColor: 'rgba(255, 253, 143, 0.2)',
-              border: '2px solid #B0CE88',
+          {question.hint && (
+            <div style={{
+              padding: '10px 12px',
+              fontSize: '0.8rem',
+              background: 'linear-gradient(135deg, rgba(255, 253, 143, 0.15) 0%, rgba(176, 206, 136, 0.1) 100%)',
+              border: '1.5px solid rgba(176, 206, 136, 0.3)',
               borderRadius: '8px',
-              color: '#043915',
-              fontSize: '1rem',
-              width: '100%',
-              textAlign: 'center',
-              fontFamily: "'Nunito', sans-serif",
-              fontWeight: '600'
+              color: '#FFFD8F',
+              lineHeight: '1.4',
+              width: '100%'
             }}>
+              <strong style={{ color: '#B0CE88', fontSize: '0.7rem' }}>Hint:</strong>
+              <br />
               {question.hint}
             </div>
           )}

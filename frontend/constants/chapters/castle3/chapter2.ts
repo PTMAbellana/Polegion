@@ -158,7 +158,7 @@ export const CHAPTER2_RELIC = {
 
 export const CHAPTER2_WIZARD = {
   name: "Arcana, Keeper of the Curved Path",
-  image: "/images/arcana-wizard.png"
+  image: "/images/wizards/arcana-wizard.png"
 };
 
 export const CHAPTER2_METADATA = {

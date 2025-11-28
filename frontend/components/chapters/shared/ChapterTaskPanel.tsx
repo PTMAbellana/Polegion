@@ -33,58 +33,42 @@ export default function ChapterTaskPanel({
 
   useEffect(() => {
     if (taskListRef.current) {
-      // Find the index of the most recently completed task
-      let lastCompletedIndex = -1
-      
+      const taskItems = taskListRef.current.querySelectorAll(`.${styles.taskItem}`)
+      let scrollToIndex = -1
+
+      // Find the last completed task
       for (let i = 0; i < tasks.length; i++) {
         const taskKey = tasks[i].id || tasks[i].key || ''
         if (completedTasks[taskKey]) {
-          lastCompletedIndex = i
+          scrollToIndex = i
         } else {
-          // Stop at the first incomplete task
           break
         }
       }
-      
-      if (lastCompletedIndex >= 0) {
-        const taskItems = taskListRef.current.querySelectorAll(`.${styles.taskItem}`)
-        if (taskItems[lastCompletedIndex]) {
-          setTimeout(() => {
-            taskItems[lastCompletedIndex].scrollIntoView({
-              behavior: 'smooth',
-              block: 'nearest',
-              inline: 'nearest'
-            })
-          }, 300)
-        }
-      }
-    }
-  }, [completedTasks, tasks, styles.taskItem])
 
-  useEffect(() => {
-    if (taskListRef.current) {
-      // Find the most recent failed task index
-      let lastFailedIndex = -1
-      for (let i = 0; i < tasks.length; i++) {
-        const taskKey = tasks[i].id || tasks[i].key || ''
-        if (failedTasks[taskKey]) {
-          lastFailedIndex = i
+      // If no completed task found, check for the most recent failed task
+      if (scrollToIndex === -1) {
+        for (let i = tasks.length - 1; i >= 0; i--) {
+          const taskKey = tasks[i].id || tasks[i].key || ''
+          if (failedTasks[taskKey] && !completedTasks[taskKey]) {
+            scrollToIndex = i
+            break
+          }
         }
       }
-      if (lastFailedIndex >= 0) {
-        const taskItems = taskListRef.current.querySelectorAll(`.${styles.taskItem}`)
-        if (taskItems[lastFailedIndex]) {
-          setTimeout(() => {
-            taskItems[lastFailedIndex].scrollIntoView({
-              behavior: 'smooth',
-              block: 'nearest',
-              inline: 'nearest'
-            })
-          }, 300)
-        }
+
+      // Scroll to the determined index
+      if (scrollToIndex >= 0 && taskItems[scrollToIndex]) {
+        setTimeout(() => {
+          taskItems[scrollToIndex].scrollIntoView({
+            behavior: 'smooth',
+            block: 'nearest',
+            inline: 'nearest'
+          })
+        }, 300)
       }
     }
-  }, [failedTasks, tasks, styles.taskItem])
+  }, [completedTasks, failedTasks, tasks, styles.taskItem])
 
   const completedCount = Object.values(completedTasks).filter(Boolean).length
   const failedCount = Object.values(failedTasks).filter(Boolean).length

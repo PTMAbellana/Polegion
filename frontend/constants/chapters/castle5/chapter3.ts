@@ -155,7 +155,7 @@ export const CHAPTER3_RELIC = {
 
 export const CHAPTER3_WIZARD = {
   name: "Dimensius, Guardian of Space",
-  image: "/images/dimensius-wizard.png"
+  image: "/images/wizards/dimensius-wizard.png"
 };
 
 export const CHAPTER3_METADATA = {

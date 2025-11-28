@@ -211,3 +211,22 @@ body > div:first-child /* For other React setups */ {
   padding: 1.5rem;
   box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
+
+/* ========================================
+   PRINT STYLES
+   ======================================== */
+@media print {
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  body {
+    background: white !important;
+  }
+
+  @page {
+    margin: 1cm;
+    size: auto;
+  }
+}

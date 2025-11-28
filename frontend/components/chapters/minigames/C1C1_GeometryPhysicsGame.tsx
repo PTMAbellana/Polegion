@@ -742,25 +742,11 @@ export default function GeometryPhysicsGame({
   return (
     <div className={styles.minigameContainer}>
       {/* Level Info - Horizontal Layout */}
-      <div className={styles.levelInfoContainer} style={{
-        display: 'flex',
-        gap: '1rem',
-        marginBottom: '1rem',
-        alignItems: 'center',
-        flexWrap: 'wrap',
-      }}>
-        <h3 className={styles.levelTitle} style={{ 
-          margin: 0, 
-          minWidth: '150px',
-          color: '#F5EFE7',
-        }}>
+      <div className={styles.levelInfoContainer}>
+        <h3 className={styles.levelTitle}>
           {level.title}
         </h3>
-        <p className={styles.levelInstruction} style={{ 
-          margin: 0, 
-          flex: 1,
-          color: '#D8C4B6',
-        }}>
+        <p className={styles.levelInstruction}>
           {level.instruction}
         </p>
       </div>
@@ -774,16 +760,9 @@ export default function GeometryPhysicsGame({
             width={canvasSize.width}
             height={canvasSize.height}
             onClick={handleCanvasClick}
+            className={styles.gameCanvas}
             style={{
-              border: '2px solid #D8C4B6',
-              borderRadius: '8px',
               cursor: isSimulating || gameResult ? 'default' : 'crosshair',
-              backgroundColor: '#1a1a2e',
-              width: '100%',
-              height: 'auto',
-              display: 'block',
-              maxWidth: '100%',
-              maxHeight: 'calc(100vh - 450px)', /* Ensure canvas fits in viewport */
             }}
           />
         </div>
@@ -793,69 +772,14 @@ export default function GeometryPhysicsGame({
           <button
             onClick={handlePlay}
             disabled={!canPlay}
-            style={{
-              opacity: canPlay ? 1 : 0.5,
-              cursor: canPlay ? 'pointer' : 'not-allowed',
-              padding: '10px 20px',
-              fontSize: '14px',
-              fontWeight: '700',
-              background: canPlay 
-                ? 'linear-gradient(135deg, #5a9663 0%, #6fa876 100%)' 
-                : 'linear-gradient(135deg, rgba(62, 88, 121, 0.3) 0%, rgba(33, 53, 85, 0.3) 100%)',
-              color: canPlay ? 'white' : 'rgba(245, 239, 231, 0.5)',
-              border: canPlay ? '2px solid #5a9663' : '2px solid rgba(216, 196, 182, 0.2)',
-              borderRadius: '10px',
-              boxShadow: canPlay ? '0 4px 12px rgba(90, 150, 99, 0.4)' : 'none',
-              transition: 'all 0.3s ease',
-              backdropFilter: 'blur(5px)',
-              textTransform: 'uppercase',
-              letterSpacing: '0.5px',
-            }}
-            onMouseEnter={(e) => {
-              if (canPlay) {
-                e.currentTarget.style.background = 'linear-gradient(135deg, #4f8558 0%, #62976b 100%)';
-                e.currentTarget.style.transform = 'translateY(-2px)';
-                e.currentTarget.style.boxShadow = '0 6px 16px rgba(90, 150, 99, 0.5)';
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (canPlay) {
-                e.currentTarget.style.background = 'linear-gradient(135deg, #5a9663 0%, #6fa876 100%)';
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = '0 4px 12px rgba(90, 150, 99, 0.4)';
-              }
-            }}
+            className={`${styles.playButton} ${!canPlay ? styles.disabled : ''}`}
           >
             Play
           </button>
 
           <button 
             onClick={handleClear}
-            style={{
-              padding: '10px 20px',
-              fontSize: '14px',
-              fontWeight: '700',
-              background: 'linear-gradient(135deg, #c75450 0%, #d16965 100%)',
-              color: 'white',
-              border: '2px solid #c75450',
-              borderRadius: '10px',
-              cursor: 'pointer',
-              boxShadow: '0 4px 12px rgba(199, 84, 80, 0.4)',
-              transition: 'all 0.3s ease',
-              backdropFilter: 'blur(5px)',
-              textTransform: 'uppercase',
-              letterSpacing: '0.5px',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = 'linear-gradient(135deg, #b34946 0%, #c75450 100%)';
-              e.currentTarget.style.transform = 'translateY(-2px)';
-              e.currentTarget.style.boxShadow = '0 6px 16px rgba(199, 84, 80, 0.5)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = 'linear-gradient(135deg, #c75450 0%, #d16965 100%)';
-              e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.boxShadow = '0 4px 12px rgba(199, 84, 80, 0.4)';
-            }}
+            className={styles.clearButton}
           >
             Clear
           </button>
@@ -863,36 +787,11 @@ export default function GeometryPhysicsGame({
           {/* Status Messages Area - Timer, Success, or Failure (same position) */}
           {/* Timer Countdown Indicator */}
           {((level.type === 'line' && timeOnLine > 0) || (level.type !== 'line' && timeInBox > 0)) && isSimulating && (
-            <div style={{
-              padding: '12px',
-              background: 'linear-gradient(135deg, rgba(33, 150, 243, 0.9) 0%, rgba(30, 136, 229, 0.9) 100%)',
-              color: 'white',
-              borderRadius: '10px',
-              textAlign: 'center',
-              fontWeight: '700',
-              border: '2px solid #2196F3',
-              boxShadow: '0 4px 12px rgba(33, 150, 243, 0.4)',
-              backdropFilter: 'blur(5px)',
-              minWidth: '140px',
-              maxWidth: '100%',
-            }}>
-              <div style={{ 
-                marginBottom: '6px',
-                fontSize: '12px',
-                textTransform: 'uppercase',
-                letterSpacing: '0.5px',
-                color: '#F5EFE7',
-              }}>
+            <div className={styles.timerDisplay}>
+              <div className={styles.timerLabel}>
                 {level.type === 'line' ? 'On the Line!' : 'Ball in Box!'}
               </div>
-              <div style={{ 
-                fontSize: '36px',
-                fontWeight: '700',
-                letterSpacing: '2px',
-                textShadow: '0 2px 4px rgba(0, 0, 0, 0.3)',
-                color: '#FFD700',
-                lineHeight: '1',
-              }}>
+              <div className={styles.timerValue}>
                 {level.type === 'line' 
                   ? Math.ceil((SUCCESS_TIMER_DURATION - timeOnLine) / 1000)
                   : Math.ceil((SUCCESS_TIMER_DURATION - timeInBox) / 1000)}
@@ -902,19 +801,7 @@ export default function GeometryPhysicsGame({
 
           {/* Success Message */}
           {gameResult === 'success' && (
-            <div className={styles.successMessage} style={{ 
-              margin: 0,
-              padding: '12px',
-              fontSize: '13px',
-              background: 'linear-gradient(135deg, rgba(76, 175, 80, 0.9) 0%, rgba(102, 187, 106, 0.9) 100%)',
-              border: '2px solid #4CAF50',
-              borderRadius: '10px',
-              boxShadow: '0 4px 12px rgba(76, 175, 80, 0.4)',
-              backdropFilter: 'blur(5px)',
-              textAlign: 'center',
-              fontWeight: '700',
-              color: 'white',
-            }}>
+            <div className={styles.successMessage}>
             {level.type === 'line' 
               ? 'Success! You kept the ball balanced on the line!' 
               : 'Success! The ball reached the box!'}
@@ -923,19 +810,7 @@ export default function GeometryPhysicsGame({
 
           {/* Failure Message */}
           {gameResult === 'failure' && (
-            <div className={styles.failureMessage} style={{ 
-              margin: 0,
-              padding: '12px',
-              fontSize: '13px',
-              background: 'linear-gradient(135deg, rgba(244, 67, 54, 0.9) 0%, rgba(239, 83, 80, 0.9) 100%)',
-              border: '2px solid #F44336',
-              borderRadius: '10px',
-              boxShadow: '0 4px 12px rgba(244, 67, 54, 0.4)',
-              backdropFilter: 'blur(5px)',
-              textAlign: 'center',
-              fontWeight: '700',
-              color: 'white',
-            }}>
+            <div className={styles.failureMessage}>
             {level.type === 'line' 
               ? 'Try again! The ball fell off the line or hit a wall!' 
               : 'Try again! The ball missed the box!'}
@@ -943,19 +818,7 @@ export default function GeometryPhysicsGame({
           )}
 
           {/* Hints and Messages */}
-          <div className={styles.hint} style={{ 
-            margin: 0,
-            padding: '10px 12px',
-            fontSize: '13px',
-            background: 'linear-gradient(135deg, rgba(216, 196, 182, 0.3) 0%, rgba(245, 239, 231, 0.2) 100%)',
-            border: '2px solid rgba(216, 196, 182, 0.4)',
-            borderRadius: '8px',
-            color: '#F5EFE7',
-            textAlign: 'center',
-            backdropFilter: 'blur(5px)',
-            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2)',
-            visibility: needsMorePoints && !isSimulating ? 'visible' : 'hidden',
-          }}>
+          <div className={`${styles.hint} ${!(needsMorePoints && !isSimulating) ? styles.hidden : ''}`}>
             Click on the grid to place {2 - points.length} more point(s)
           </div>
         </div>

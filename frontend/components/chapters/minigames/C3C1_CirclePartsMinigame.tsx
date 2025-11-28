@@ -48,8 +48,8 @@ const C3C1_CirclePartsMinigame: React.FC<Props> = ({ question, onComplete, style
   }
 
   const isHighlighted = (partId: string) => {
-    // Only highlight if it's the target, being hovered, or was just clicked and correct
-    return target === partId || hoveredPart === partId || (clickedPart === partId && target === partId)
+    // Only highlight if being hovered, or was just clicked and correct
+    return hoveredPart === partId || (clickedPart === partId && target === partId)
   }
 
   const renderCircle = () => (
@@ -166,7 +166,7 @@ const C3C1_CirclePartsMinigame: React.FC<Props> = ({ question, onComplete, style
         fill="#f8d28b"
         stroke="#b7825f"
         strokeWidth={2}
-        opacity={target === 'sector' || hoveredPart === 'sector' ? 0.9 : 0.15}
+        opacity={isHighlighted('sector') ? 0.9 : 0.15}
         name="sector"
         shadowColor="#b7825f"
         shadowBlur={hoveredPart === 'sector' ? 10 : 0}
@@ -180,7 +180,7 @@ const C3C1_CirclePartsMinigame: React.FC<Props> = ({ question, onComplete, style
         y={centerY}
         radius={6}
         fill="#111"
-        opacity={target === 'center' || hoveredPart === 'center' ? 1 : 0.4}
+        opacity={isHighlighted('center') ? 1 : 0.4}
         name="center"
         shadowColor="#111"
         shadowBlur={hoveredPart === 'center' ? 10 : 0}
@@ -189,7 +189,7 @@ const C3C1_CirclePartsMinigame: React.FC<Props> = ({ question, onComplete, style
         onMouseLeave={(e) => { setHoveredPart(null); e.target?.getStage()?.container().style && (e.target.getStage()!.container().style.cursor = 'default') }}
         onClick={() => handleShapeClick('center')}
       />
-      <Text x={centerX + 8} y={centerY + 8} text={'O'} fontSize={16} fill="#111" opacity={target === 'center' || hoveredPart === 'center' ? 1 : 0.4} />
+      <Text x={centerX + 8} y={centerY + 8} text={'O'} fontSize={16} fill="#111" opacity={isHighlighted('center') ? 1 : 0.4} />
     </>
   )
 

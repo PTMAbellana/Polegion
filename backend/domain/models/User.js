@@ -6,7 +6,8 @@ class User {
         gender, 
         phone, 
         profile_pic = 'https://uwllqanzveqanfpfnndu.supabase.co/storage/v1/object/public/profile-images/1751777126476.png',
-        role = 'admin'){
+        role = 'admin',
+        email = ''){
         this.id = id
         this.firstName = firstName
         this.lastName = lastName
@@ -14,6 +15,7 @@ class User {
         this.phone = phone
         this.profile_pic = profile_pic
         this.role = role
+        this.email = email
     }
 
     static fromDbUser(dbUser){
@@ -25,7 +27,8 @@ class User {
             dbUser.gender,
             dbUser.phone,
             dbUser.profile_pic,
-            dbUser.role || 'student'
+            dbUser.role || 'student',
+            dbUser.email || ''
         )
     }
 
@@ -37,7 +40,8 @@ class User {
             input.gender || 'Others',
             input.phone,
             input.profile_pic || 'https://uwllqanzveqanfpfnndu.supabase.co/storage/v1/object/public/profile-images/1751777126476.png',
-            input.role || 'student'
+            input.role || 'student',
+            input.email || ''
         )
     }
 
@@ -49,7 +53,8 @@ class User {
             gender: this.gender,
             phone: this.phone,
             profile_pic: this.profile_pic,
-            role: this.role
+            role: this.role,
+            email: this.email
         }
     }
 
@@ -61,7 +66,8 @@ class User {
             gender: this.gender,
             phone: this.phone,
             profile_pic: this.profile_pic,
-            role: this.role
+            role: this.role,
+            email: this.email
         }
     }
 }

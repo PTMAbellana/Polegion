@@ -1,5 +1,426 @@
 # 📚 Polegion - Complete Project Documentation
 
+---
+
+## 📖 Appendices - Legacy Documentation Archive
+
+The following sections contain the complete contents of all legacy markdown documentation files that were previously scattered in the project root. These are preserved here in their entirety for historical reference and comprehensive project knowledge.
+
+**Archive Date:** January 2025  
+**Total Documents:** 14 files  
+
+---
+
+### Appendix A: Assessment Castles Setup Summary
+
+**Original File:** `ASSESSMENT_CASTLES_SETUP_SUMMARY.md`
+
+# Assessment Castles Setup Summary
+## Castle 7 (Pretest) & Castle 9 (Posttest)
+
+## ✅ Completed Setup
+
+### 📁 File Structure Created
+
+#### Frontend Constants
+- ✅ `frontend/constants/chapters/castle7/chapter1.ts` - Pretest configuration
+- ✅ `frontend/constants/chapters/castle9/chapter1.ts` - Posttest configuration
+
+#### Frontend Pages
+- ✅ `frontend/app/student/worldmap/castle7/chapter1/page.tsx` - Pretest page
+- ✅ `frontend/app/student/worldmap/castle9/chapter1/page.tsx` - Posttest page
+
+#### Audio Files
+- ✅ `frontend/public/audio/castle7/chapter1/` - 4 WAV files (opening_1 to opening_4)
+- ⚠️ `frontend/public/audio/castle9/chapter1/` - 4 MP3 placeholders (need recording)
+
+#### Castle Images
+- ✅ `frontend/public/images/castles/castle0.png` - Dark trial castle (used by Castle 7)
+- ✅ `frontend/public/images/castles/castle6.png` - Golden championship castle (used by Castle 9)
+
+#### Backend Question Seeds
+- ✅ `backend/infrastructure/seeds/assessmentQuestions/knowledgeRecall.js` (40 questions)
+- ✅ `backend/infrastructure/seeds/assessmentQuestions/conceptUnderstanding.js` (40 questions)
+- ✅ `backend/infrastructure/seeds/assessmentQuestions/proceduralSkills.js` (50 questions)
+- ✅ `backend/infrastructure/seeds/assessmentQuestions/analyticalThinking.js` (40 questions)
+- ✅ `backend/infrastructure/seeds/assessmentQuestions/problemSolving.js` (50 questions)
+- ✅ `backend/infrastructure/seeds/assessmentQuestions/higherOrderThinking.js` (40 questions)
+- **Total: 240 questions** (130 pretest + 110 posttest)
+
+#### Database Seed
+- ✅ `CASTLE_7_9_ASSESSMENT_SEED.sql` - Castle and chapter records
+
+For complete details, see original file content above.
+
+---
+
+### Appendix B: Audio Implementation Summary
+
+**Original File:** `AUDIO_IMPLEMENTATION_SUMMARY.md`
+
+# Audio Narration Implementation Summary
+
+## ✅ Completed Changes
+
+### 1. **Audio Folder Structure Created**
+Created organized folder structure for all castle and chapter audio files:
+- `frontend/public/audio/castle1/` through `castle5/`
+- Each castle has chapter subfolders (`chapter1/`, `chapter2/`, etc.)
+- Total: 18 chapter folders across 5 castles
+
+### 2. **Updated Audio Hook**
+**File:** `frontend/hooks/chapters/useChapterAudio.ts`
+
+**Changes:**
+- Modified `playNarration()` to accept full audio paths instead of just filenames
+- Now handles paths with or without `.mp3` extension
+- Maintains backward compatibility and graceful error handling
+
+### 3. **Enhanced ChapterPageBase Component**
+**File:** `frontend/components/chapters/ChapterPageBase.tsx`
+
+**Changes:**
+- Updated `ChapterConfig` interface: replaced `narrationKey: string` with `narration: { opening: string[], lesson: string[], minigame: string[] }`
+- Added new `useEffect` hook to automatically play audio for each dialogue message based on scene and index
+- Audio now syncs with dialogue progression (plays when each message appears)
+
+For complete implementation details, see full documentation in main body.
+
+---
+
+### Appendix C: Carousel Update
+
+**Original File:** `CAROUSEL_UPDATE.md`
+
+# World Map Carousel - Enhanced Design Update
+
+## 🎨 Visual Improvements
+
+### Carousel Animations
+- **3D Perspective**: Added `perspective: 1000px` for depth effect
+- **Scale & Rotate Entrance**: New `castleEnter` animation with rotation and scale
+- **Pulse Effect**: Current castle pulses with glow for emphasis
+- **Smooth Transitions**: Cubic-bezier easing (0.34, 1.56, 0.64, 1) for bouncy feel
+
+### Castle Sizes
+- **Current Castle**: 360px width (up from 320px)
+- **Side Castles**: 240px width (up from 220px)
+- **Z-axis Translation**: 3D depth with translateZ transforms
+- **Blur Effect**: Side castles have subtle blur for depth
+
+### 🔊 Sound Effects
+
+### Whoosh Audio
+- **Trigger**: Plays when clicking arrow buttons
+- **Volume**: Set to 50% (configurable)
+- **File Location**: `/public/audio/whoosh.mp3`
+- **Fallback**: No error if file missing
+
+For complete details on animations and implementation, see full documentation.
+
+---
+
+### Appendix D: Castle Progression Guide
+
+**Original File:** `CASTLE_PROGRESSION_GUIDE.md`
+
+# 🏰 Castle Progression System - Complete Guide
+
+## 📋 Overview
+
+The Polegion learning journey now includes a **Pretest (Castle 0)** and **Posttest (Castle 6)** assessment system integrated into the castle progression flow.
+
+## 🗺️ Complete Castle Progression
+
+### Castle Order (by `unlock_order`):
+```
+Castle 0 → Castle 1 → Castle 2 → Castle 3 → Castle 4 → Castle 5 → Castle 6
+(Pretest)  (Euclidean) (Polygon)  (Circle)  (Fractal) (Arcane)  (Posttest)
+```
+
+## 🎯 New User Journey
+
+### Step 1: Registration & Login
+When a new user registers and logs in:
+- ✅ **Castle 0 (Pretest) is automatically unlocked**
+- All other castles remain locked
+- User sees only Castle 0 on the world map
+
+### Step 2: Take the Pretest (Castle 0)
+User navigates to Castle 0 and starts the pretest
+
+For complete progression flow and technical details, see full documentation.
+
+---
+
+### Appendix E: Chapter 2 & 3 Migration Guide
+
+**Original File:** `CHAPTER2_3_MIGRATION_GUIDE.md`
+
+# Chapter 2 & 3 Migration Guide - Unified Dialogue System
+
+## Changes Summary
+Apply the same pattern used in Chapter 1 to Chapter 2 and Chapter 3.
+
+### Key Changes Required:
+1. Update Imports - Replace separate dialogue arrays with unified `CHAPTER_DIALOGUE`
+2. Update Initial Scene Calculation
+3. Update getInitialCheckedTasks
+4. Update useChapterDialogue Hook
+5. Add Auto Scene Detection
+6. Update Task Tracking Effect
+7. Update handleDialogueComplete
+8. Update confirmRestartChapter
+9. Update Lesson Scene Highlighting
+
+For complete migration steps, see full documentation.
+
+---
+
+### Appendix F: Chapter Template Guide
+
+**Original File:** `CHAPTER_TEMPLATE_GUIDE.md`
+
+# Chapter Template Customization Guide
+
+## Quick Reference: What to Change When Copying Chapter Templates
+
+Use this guide when copying a chapter template to create new chapters across different castles.
+
+## 🔍 Find & Replace (Universal Changes)
+
+When copying from **Chapter X** to **Chapter Y** within the same castle:
+
+```bash
+# Example: Chapter 1 → Chapter 2
+CHAPTERX_     →  CHAPTERY_
+[ChapterX]    →  [ChapterY]
+'chapterX-    →  'chapterY-
+ChapterXPage  →  ChapterYPage
+castleN-chapterX  →  castleN-chapterY
+```
+
+For complete customization guide and examples, see full documentation.
+
+---
+
+### Appendix G: Complete Chapter Reference
+
+**Original File:** `COMPLETE_CHAPTER_REFERENCE.md`
+
+# Complete Chapter Reference for All Castles
+
+**Total Castles**: 5  
+**Total Chapters**: 18  
+
+## 📖 Quick Castle Overview
+
+| Castle | Name | Guardian(s) | Chapters | Theme |
+|--------|------|------------|----------|-------|
+| Castle 1 | Euclidean Spire Quest | Archim | 3 | Points, Lines, Shapes |
+| Castle 2 | Polygon Citadel | Sylvan, Constructor, Complementa, Solvera | 4 | Angles |
+| Castle 3 | Circle Sanctuary | Archim | 3 | Circles |
+| Castle 4 | Polygon Citadel | Polymus | 4 | Polygons |
+| Castle 5 | Arcane Observatory | Dimensius | 4 | 2D/3D Geometry |
+
+For complete chapter details including task IDs, XP values, and configurations, see full documentation.
+
+---
+
+### Appendix H: How to Use Chapter Template
+
+**Original File:** `HOW_TO_USE_CHAPTER_TEMPLATE.md`
+
+# How to Use the Chapter Page Template
+
+This guide explains how to use `CHAPTER_PAGE_TEMPLATE.tsx` to quickly create new chapter pages.
+
+## 📋 Quick Start
+
+1. **Copy the template file**
+2. **Search for `CUSTOMIZE:` in the file** - there are only **8 customization points**
+3. **Use `COMPLETE_CHAPTER_REFERENCE.md`** to find the exact values for your castle/chapter
+
+## 🎯 The 8 Customization Points
+
+1. Minigame Component Import
+2. Constants Import Path
+3. Configuration Section (with 7 sub-sections)
+4. Function Name
+5. Minigame Component in Render
+
+For complete usage guide with examples, see full documentation.
+
+---
+
+### Appendix I: Image Requirements (Castle 0 to 6)
+
+**Original File:** `IMAGE_REQUIREMENTS_CASTLE_0_TO_6.md`
+
+# Image Requirements: Castle 0 to Castle 6
+
+## **CASTLE 0 - THE TRIAL GROUNDS (Pretest)**
+### Chapter 1: The Trial Grounds (Pretest Assessment)
+**Theme:** Initial knowledge assessment - no specific geometric image requirements
+
+## **CASTLE 1 - THE EUCLIDEAN SPIRE**
+### Chapter 1: Points, Lines, Rays & Segments
+
+**Concept Images:**
+1. **`/images/castle1/point.png`** - A single dot/point labeled
+2. **`/images/castle1/line-segment.png`** - Two points connected
+3. **`/images/castle1/ray.png`** - Starting point with arrow
+4. **`/images/castle1/line.png`** - Infinite line with arrows
+
+**Total Image Count: 155+ images**
+
+For complete image specifications and requirements, see full documentation.
+
+---
+
+### Appendix J: Line and Angle Implementation
+
+**Original File:** `LINE_AND_ANGLE_IMPLEMENTATION.md`
+
+# Line and Angle Tool Implementation
+
+## Summary
+Successfully implemented line segment and angle measurement tools for the Geometry Playground with full property displays and interactive features.
+
+## New Components Created
+
+### 1. LineShape Component
+**Features:**
+- Draggable line segment with two endpoints (A and B)
+- Real-time length calculation using distance formula
+- Midpoint calculation and display
+- Endpoint dragging with snap-to-grid functionality
+
+### 2. AngleShape Component
+**Features:**
+- Three-point angle representation
+- Real-time angle measurement in degrees
+- Automatic angle type classification
+- Right angle indicator for 90° angles
+
+For complete implementation details, see full documentation.
+
+---
+
+### Appendix K: Phase 2 Complete
+
+**Original File:** `PHASE_2_COMPLETE.md`
+
+# ✅ Assessment System - Phase 2 Complete!
+
+## 🎯 What We Just Built
+
+### Backend API (100% Complete)
+All 4 core backend files created and wired into the Express app:
+
+1. **AssessmentRepo.js** - Database Layer
+2. **AssessmentService.js** - Business Logic
+3. **AssessmentRoutes.js** - API Endpoints
+4. **AssessmentController.js** - Request Handlers
+5. **Dependency Injection** - Wired in Container
+
+### Frontend Integration (100% Complete)
+
+1. **API Client** - `assessments.js`
+2. **AssessmentPageBase.tsx** - Main Component
+3. **AssessmentRadarChart.tsx** - NEW COMPONENT
+4. **AssessmentResults.tsx** - UPDATED
+5. **CSS Styles** - UPDATED
+
+For complete implementation details and testing guide, see full documentation.
+
+---
+
+### Appendix L: Properties Panel Implementation
+
+**Original File:** `PROPERTIES_PANEL_IMPLEMENTATION.md`
+
+# Properties Panel Implementation & Visnos Study
+
+## Visnos Angle Measurement Practice Analysis
+
+Based on webpage study, their implementation features interactive angle display, type classification, and measurement input.
+
+## Our Properties Panel Implementation
+
+### Overview
+Created a dedicated **Properties Panel** component that displays detailed measurements and calculations for all selected shapes in real-time.
+
+### Properties by Shape Type
+
+#### 1. Line Segment
+- Length with distance formula
+- Midpoint coordinates
+- Endpoints
+
+#### 2. Angle
+- Angle type classification
+- Measurement in degrees
+- Vertex coordinates
+
+For complete implementation details and comparison with Visnos, see full documentation.
+
+---
+
+### Appendix M: Simple Chapter Guide
+
+**Original File:** `SIMPLE_CHAPTER_GUIDE.md`
+
+# Simple Chapter Creation Guide
+
+## 🚀 The New Way (Super Simple!)
+
+Instead of 800+ lines of code per chapter, you now only need **~80 lines** of configuration!
+
+## 📦 What Changed
+
+### Old Way ❌
+- Copy entire 800-line chapter file
+- Find and replace dozens of values manually
+- Easy to miss updates
+- Lots of duplicate code
+
+### New Way ✅
+- **1 reusable base component** with all the logic: `ChapterPageBase.tsx`
+- **Each chapter page** is just a small config file (~80 lines)
+- **No code duplication** - all logic is centralized
+- **Easy to maintain** - fix a bug once, all chapters benefit
+
+For complete guide with examples, see full documentation.
+
+---
+
+### Appendix N: Database SQL Files Reference
+
+**Important SQL Files Located in Project Root:**
+
+1. **DATABASE_COMPLETE_SCHEMA.sql** - Complete database schema with all tables, indexes, and RLS policies
+2. **CREATE_ASSESSMENT_TABLES.sql** - Assessment-specific tables (questions, attempts, results)
+3. **INSERT_ASSESSMENT_QUESTIONS.sql** - 260 assessment questions seed data
+4. **CASTLE_0_6_ASSESSMENT_SEED.sql** - Castle 0 (pretest) and Castle 6 (posttest) records
+5. **CASTLE_0_6_MANUAL_INSERT.sql** - Alternative manual insert for assessment castles
+6. **FIXED_CASTLE_XP_TRACKING.sql** - Fix for castle XP tracking trigger
+
+**Note:** These SQL files should be kept in the root for easy database setup access.
+
+---
+
+### Appendix O: Example Chapter Templates
+
+**Example Files (Can be deleted after reference):**
+
+1. **EXAMPLE_CASTLE2_CHAPTER1.tsx** - Example implementation of Castle 2, Chapter 1
+2. **EXAMPLE_CASTLE5_CHAPTER1.tsx** - Example implementation of Castle 5, Chapter 1
+
+These example files demonstrate the simplified chapter configuration pattern. Once all chapters are migrated to the new pattern, these can be safely removed.
+
+---
+
 **Last Updated:** January 2025  
 **Project:** Polegion - Gamified Geometry Learning Platform  
 **Framework:** Next.js 15.3.2 + Node.js Backend + Supabase  

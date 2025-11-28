@@ -239,11 +239,37 @@
   width: 100%;
 }
 
+/* Level Info Container */
+.levelInfoContainer {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  align-items: center;
+  flex-wrap: wrap;
+  width: 100%;
+}
+
+.levelTitle {
+  margin: 0;
+  min-width: 150px;
+  color: #F5EFE7;
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+.levelInstruction {
+  margin: 0;
+  flex: 1;
+  color: #D8C4B6;
+  font-size: 1rem;
+}
+
 /* Game Area Wrapper (canvas + controls side-by-side) */
 .gameAreaWrapper {
   display: flex;
-  gap: 1rem;
+  gap: 1.5rem;
   align-items: flex-start;
+  justify-content: center;
   flex-wrap: wrap;
   width: 100%;
   max-height: none;
@@ -251,23 +277,155 @@
 
 /* Canvas Container */
 .canvasContainer {
-  flex: 1 1 50%;
+  flex: 1 1 auto;
   min-width: 280px;
-  max-width: 500px;
+  max-width: 600px;
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
+.gameCanvas {
+  border: 2px solid #D8C4B6;
+  border-radius: 8px;
+  backgroundColor: #1a1a2e;
+  width: 100%;
+  height: auto;
+  display: block;
+  max-width: 100%;
+  max-height: calc(100vh - 450px);
+}
+
+/* Game Control Buttons */
+.playButton,
+.clearButton {
+  padding: 10px 20px;
+  fontSize: 14px;
+  font-weight: 700;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(5px);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border: 2px solid;
+}
+
+.playButton {
+  background: linear-gradient(135deg, #5a9663 0%, #6fa876 100%);
+  color: white;
+  border-color: #5a9663;
+  box-shadow: 0 4px 12px rgba(90, 150, 99, 0.4);
+}
+
+.playButton:hover:not(.disabled) {
+  background: linear-gradient(135deg, #4f8558 0%, #62976b 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(90, 150, 99, 0.5);
+}
+
+.playButton.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: linear-gradient(135deg, rgba(62, 88, 121, 0.3) 0%, rgba(33, 53, 85, 0.3) 100%);
+  color: rgba(245, 239, 231, 0.5);
+  border-color: rgba(216, 196, 182, 0.2);
+  box-shadow: none;
+}
+
+.clearButton {
+  background: linear-gradient(135deg, #c75450 0%, #d16965 100%);
+  color: white;
+  border-color: #c75450;
+  box-shadow: 0 4px 12px rgba(199, 84, 80, 0.4);
+}
+
+.clearButton:hover {
+  background: linear-gradient(135deg, #b34946 0%, #c75450 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(199, 84, 80, 0.5);
+}
+
 /* Controls Container (buttons, hints) */
 .controlsContainer {
-  flex: 1 1 40%;
+  flex: 0 0 auto;
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
-  min-width: 240px;
-  max-width: 360px;
-  width: 100%;
+  min-width: 200px;
+  max-width: 280px;
+}
+
+.hint {
+  margin: 0;
+  padding: 10px 12px;
+  font-size: 13px;
+  background: linear-gradient(135deg, rgba(216, 196, 182, 0.3) 0%, rgba(245, 239, 231, 0.2) 100%);
+  border: 2px solid rgba(216, 196, 182, 0.4);
+  border-radius: 8px;
+  color: #F5EFE7;
+  text-align: center;
+  backdrop-filter: blur(5px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.hint.hidden {
+  visibility: hidden;
+}
+
+.successMessage,
+.failureMessage {
+  margin: 0;
+  padding: 12px;
+  font-size: 13px;
+  border-radius: 10px;
+  text-align: center;
+  font-weight: 700;
+  color: white;
+  backdrop-filter: blur(5px);
+}
+
+.successMessage {
+  background: linear-gradient(135deg, rgba(76, 175, 80, 0.9) 0%, rgba(102, 187, 106, 0.9) 100%);
+  border: 2px solid #4CAF50;
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
+}
+
+.failureMessage {
+  background: linear-gradient(135deg, rgba(244, 67, 54, 0.9) 0%, rgba(239, 83, 80, 0.9) 100%);
+  border: 2px solid #F44336;
+  box-shadow: 0 4px 12px rgba(244, 67, 54, 0.4);
+}
+
+.timerDisplay {
+  padding: 12px;
+  background: linear-gradient(135deg, rgba(33, 150, 243, 0.9) 0%, rgba(30, 136, 229, 0.9) 100%);
+  color: white;
+  border-radius: 10px;
+  text-align: center;
+  font-weight: 700;
+  border: 2px solid #2196F3;
+  box-shadow: 0 4px 12px rgba(33, 150, 243, 0.4);
+  backdrop-filter: blur(5px);
+  min-width: 140px;
+  max-width: 100%;
+}
+
+.timerLabel {
+  margin-bottom: 6px;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #F5EFE7;
+}
+
+.timerValue {
+  font-size: 36px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  color: #FFD700;
+  line-height: 1;
 }
 
 /* For screens that need more compact layout */
@@ -568,6 +726,8 @@
   justify-content: center;
   gap: 1.5rem;
   padding: 1rem;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 12px;
 }
 
 .shapeCard {
@@ -577,7 +737,7 @@
   gap: 0.75rem;
   padding: 1.5rem;
   background: rgba(255, 255, 255, 0.05);
-  border: 2px solid rgba(255, 255, 255, 0.1);
+  border: 3px solid rgba(255, 255, 255, 0.2);
   border-radius: 6px;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -585,9 +745,10 @@
 }
 
 .shapeCard:hover {
-  background: rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.3);
-  transform: scale(1.05);
+  background: rgba(102, 126, 234, 0.15);
+  border-color: #667eea;
+  box-shadow: 0 0 20px rgba(102, 126, 234, 0.5), 0 0 40px rgba(102, 126, 234, 0.3);
+  transform: scale(1.08);
 }
 
 .shapeCardSelected {

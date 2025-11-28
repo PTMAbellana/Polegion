@@ -40,8 +40,12 @@ export default function RecordsDownloadSection({
   }, [recordType, selectedCompetitionId, roomRecords, competitionRecords])
 
   const handleDownload = async () => {
-    if (recordType === 'room' || recordType === 'worldmap') {
+    console.log('🔽 Download button clicked, recordType:', recordType)
+    if (recordType === 'room') {
       await onDownloadRoomAction()
+    } else if (recordType === 'worldmap') {
+      console.log('📍 Downloading WORLDMAP CSV')
+      await onDownloadRoomAction('worldmap')
     } else {
       if (!selectedCompetitionId) {
         alert('Please select a competition')

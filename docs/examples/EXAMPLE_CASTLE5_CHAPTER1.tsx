@@ -46,7 +46,7 @@ const config: ChapterConfig = {
   
   wizard: {
     name: 'Dimensius, Guardian of Space',
-    image: '/images/dimensius-wizard.png',
+    image: '/images/wizards/dimensius-wizard.png',
   },
   
   relic: {

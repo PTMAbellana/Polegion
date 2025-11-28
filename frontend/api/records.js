@@ -38,9 +38,13 @@ export const getCompetitionLeaderboards = async (room_id) => {
     }
 }
 
-export const downloadRoomRecordsCSV = async (room_id) => {
+export const downloadRoomRecordsCSV = async (room_id, type) => {
     try {
-        const res = await api.get(`leaderboards/room/${room_id}/export-csv`, {
+        const endpoint = type === 'worldmap' 
+            ? `leaderboards/room/${room_id}/export-worldmap-csv`
+            : `leaderboards/room/${room_id}/export-csv`
+        console.log('📥 Downloading CSV:', { room_id, type, endpoint })
+        const res = await api.get(endpoint, {
             responseType: 'blob'
         })
         return {

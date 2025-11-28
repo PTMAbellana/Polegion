@@ -207,7 +207,7 @@ export const CHAPTER2_RELIC = {
 // Wizard information
 export const CHAPTER2_WIZARD = {
   name: "Vertex, Master of Angle Positions",
-  image: "/images/vertex-wizard.png"
+  image: "/images/wizards/vertex-wizard.png"
 };
 
 // Chapter metadata

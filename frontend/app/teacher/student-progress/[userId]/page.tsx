@@ -64,7 +64,14 @@ export default function StudentProgressReport({ params }: { params: Promise<{ us
   }, [userId])
 
   const handlePrint = () => {
-    window.print()
+    if (!progress) {
+      alert('Please wait for the report to load before printing.')
+      return
+    }
+    // Small delay to ensure all content is rendered
+    setTimeout(() => {
+      window.print()
+    }, 100)
   }
 
   if (loading) {
@@ -193,7 +200,7 @@ export default function StudentProgressReport({ params }: { params: Promise<{ us
         </section>
 
         {/* Summary Section */}
-        <section className={styles.section}>
+        <section className={`${styles.section} ${styles.summarySection}`}>
           <h2 className={styles.sectionTitle}>Summary</h2>
           <div className={styles.summaryGrid}>
             <div className={styles.summaryCard}>

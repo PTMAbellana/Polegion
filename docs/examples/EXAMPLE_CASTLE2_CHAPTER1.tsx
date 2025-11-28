@@ -45,7 +45,7 @@ const config: ChapterConfig = {
   
   wizard: {
     name: 'Sylvan, Guardian of the Polygon Citadel',
-    image: '/images/sylvan-wizard.png',
+    image: '/images/wizards/sylvan-wizard.png',
   },
   
   relic: {

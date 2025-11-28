@@ -37,9 +37,13 @@ class LeaderboardService {
                 data.map(async (row) => {
                     try {
                     const userData = await this.userService.getUserById(row.participant.user_id)
+                    const userDTO = userData.toDTO()
                     return {
                         accumulated_xp: row.accumulated_xp,
-                        participants: userData 
+                        participants: {
+                            ...userDTO,
+                            user_id: userDTO.id // Ensure user_id is included
+                        }
                     };
                     } catch (err) {
                         return null;
@@ -75,10 +79,14 @@ class LeaderboardService {
                 data.map(async (row) => {
                     try {
                     const userData = await this.userService.getUserById(row.participant.user_id)
+                    const userDTO = userData.toDTO()
                     return {
                         competition: row.competition,
                         accumulated_xp: row.accumulated_xp,
-                        participant: userData
+                        participant: {
+                            ...userDTO,
+                            user_id: userDTO.id // Ensure user_id is included
+                        }
                         
                     };
                     } catch (err) {
@@ -255,6 +263,71 @@ class LeaderboardService {
             return {
                 content: csvContent,
                 filename: `${roomTitle}-records-${new Date().toISOString().split('T')[0]}.csv`
+            }
+        } catch (error) {
+            throw error
+        }
+    }
+
+    async generateWorldmapRecordsCSV(room_id) {
+        try {
+            const data = await this.getRoomBoard(room_id)
+            
+            if (!data || data.length === 0) {
+                throw new Error('No records found for this room')
+            }
+
+            const roomTitle = data[0]?.participants?.rooms?.[0]?.title || `Room ${room_id}`
+            
+            let csvContent = `Room: ${roomTitle}\n`
+            csvContent += `First Name,Last Name,Castles Completed,Pretest Score,Posttest Score,XP\n`
+            
+            const sortedData = data.sort((a, b) => (b.accumulated_xp || 0) - (a.accumulated_xp || 0))
+            
+            // Fetch castle progress and assessment scores for each student
+            for (const row of sortedData) {
+                const firstName = row.participants?.first_name || ''
+                const lastName = row.participants?.last_name || ''
+                const xp = row.accumulated_xp || 0
+                const userId = row.participants?.user_id || ''
+                
+                let castlesCompleted = 'N/A'
+                let pretestScore = 'N/A'
+                let posttestScore = 'N/A'
+                
+                if (userId) {
+                    try {
+                        // Get castle progress
+                        const castleProgress = await this.userService.getUserCastleProgress(userId)
+                        if (castleProgress && castleProgress.length > 0) {
+                            const completedCount = castleProgress.filter(c => c.progress_percentage === 100).length
+                            castlesCompleted = `${completedCount}/7`
+                        }
+                        
+                        // Get assessment scores
+                        const assessmentScores = await this.userService.getUserAssessmentScores(userId)
+                        if (assessmentScores && assessmentScores.length > 0) {
+                            const pretest = assessmentScores.find(a => a.assessment_type === 'pretest')
+                            const posttest = assessmentScores.find(a => a.assessment_type === 'posttest')
+                            
+                            if (pretest && pretest.score !== null && pretest.score !== undefined) {
+                                pretestScore = `${pretest.score}%`
+                            }
+                            if (posttest && posttest.score !== null && posttest.score !== undefined) {
+                                posttestScore = `${posttest.score}%`
+                            }
+                        }
+                    } catch (error) {
+                        console.error(`Error fetching worldmap data for user ${userId}:`, error)
+                    }
+                }
+                
+                csvContent += `"${firstName}","${lastName}","${castlesCompleted}","${pretestScore}","${posttestScore}","${xp}"\n`
+            }
+
+            return {
+                content: csvContent,
+                filename: `${roomTitle}-worldmap-${new Date().toISOString().split('T')[0]}.csv`
             }
         } catch (error) {
             throw error

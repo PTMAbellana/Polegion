@@ -160,8 +160,14 @@ export default function PracticeQuiz({ questions, onComplete, onRestart }: Pract
         ) : (
           <div className={styles.feedbackSection}>
             <div className={`${styles.feedbackMessage} ${styles[feedback]}`}>
-              {feedback === 'correct' ? 'Correct!' : 'Incorrect'}
+              {feedback === 'correct' ? '✓ Correct!' : '✗ Incorrect'}
             </div>
+            {currentQuestion.explanation && (
+              <div className={styles.explanationBox}>
+                <div className={styles.explanationLabel}>Explanation:</div>
+                <p className={styles.explanationText}>{currentQuestion.explanation}</p>
+              </div>
+            )}
             <button className={styles.nextButton} onClick={handleNext}>
               {currentQuestionIndex < questions.length - 1 ? 'Next Question' : 'Finish'}
             </button>

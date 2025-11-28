@@ -13,19 +13,33 @@ class UserRepo extends BaseRepo{
     // for getProfile na route /profile
     async getUserByUid(userId) {
         try {
+            // Get user profile data
             const {
-                data,
-                error
+                data: profileData,
+                error: profileError
             } = await this.supabase.from(this.tableName)
             .select('*')
             .eq('user_id', userId)
             .single()
 
-            if (error) throw error
+            if (profileError) throw profileError
 
-            console.log('User profile data:', data)
+            // Get email from auth.users
+            const {
+                data: authData,
+                error: authError
+            } = await this.supabase.auth.admin.getUserById(userId)
 
-            return userModel.fromDbUser(data)
+            console.log('User profile data:', profileData)
+            console.log('Auth data:', authData?.user?.email)
+
+            // Combine profile data with email from auth
+            const userData = {
+                ...profileData,
+                email: authData?.user?.email || ''
+            }
+
+            return userModel.fromDbUser(userData)
         } catch (error) {
             console.error('Error in getUserByUid:', error)
             throw error
@@ -401,36 +415,59 @@ class UserRepo extends BaseRepo{
     // Get user competition history
     async getUserCompetitionHistory(userId) {
         try {
+            // First get the room_participant_id for this user
+            const { data: participantData, error: participantError } = await this.supabase
+                .from('room_participants')
+                .select('id')
+                .eq('user_id', userId);
+
+            if (participantError) throw participantError;
+
+            if (!participantData || participantData.length === 0) {
+                console.log(`No room participants found for user ${userId}`);
+                return [];
+            }
+
+            const participantIds = participantData.map(p => p.id);
+
+            // Get competition leaderboard entries for these participants
             const { data, error } = await this.supabase
-                .from('competition_participants')
+                .from('competition_leaderboards')
                 .select(`
                     *,
-                    competitions (
+                    competition:competition_id (
                         id,
                         title,
                         status,
                         created_at
                     )
                 `)
-                .eq('user_id', userId)
-                .order('created_at', { ascending: false });
+                .in('room_participant_id', participantIds)
+                .order('id', { ascending: false });
 
             if (error) throw error;
 
+            if (!data || data.length === 0) {
+                console.log(`No competition history found for user ${userId}`);
+                return [];
+            }
+
             // Transform data
-            const competitionHistory = data.map(participant => ({
-                competition_id: participant.competition_id,
-                title: participant.competitions?.title || 'Unknown Competition',
-                accumulated_xp: participant.accumulated_xp || 0,
-                rank: participant.rank || 0,
-                status: participant.competitions?.status || 'UNKNOWN',
-                date: participant.competitions?.created_at || participant.created_at
+            const competitionHistory = data.map(entry => ({
+                competition_id: entry.competition_id,
+                title: entry.competition?.title || 'Unknown Competition',
+                accumulated_xp: entry.accumulated_xp || 0,
+                rank: 0, // Rank would need to be calculated separately
+                status: entry.competition?.status || 'UNKNOWN',
+                date: entry.competition?.created_at || new Date().toISOString()
             }));
 
+            console.log(`Found ${competitionHistory.length} competitions for user ${userId}`);
             return competitionHistory;
         } catch (error) {
             console.error('Error in getUserCompetitionHistory:', error);
-            throw error;
+            // Return empty array instead of throwing to allow page to load
+            return [];
         }
     }
 

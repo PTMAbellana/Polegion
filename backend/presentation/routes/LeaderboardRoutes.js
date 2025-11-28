@@ -143,6 +143,35 @@ class LeaderboardRoutes {
 
     /**
      * @swagger
+     * /leaderboards/room/{room_id}/export-worldmap-csv:
+     *   get:
+     *     tags:
+     *       - Leaderboards
+     *     summary: Download worldmap progress records as CSV
+     *     description: Export all student worldmap progress (castles, assessments) for a room as CSV file
+     *     parameters:
+     *       - in: path
+     *         name: room_id
+     *         required: true
+     *         schema:
+     *           type: integer
+     *         description: Room ID
+     *     responses:
+     *       200:
+     *         description: CSV file with worldmap progress data
+     *         content:
+     *           text/csv:
+     *             schema:
+     *               type: string
+     *       404:
+     *         description: Room not found or no records found
+     *       500:
+     *         description: Failed to generate CSV export
+     */
+        this.router.get('/room/:room_id/export-worldmap-csv', this.leaderController.downloadWorldmapRecordsCSV)
+
+    /**
+     * @swagger
      * /leaderboards/room/{room_id}/competition/{competition_id}/export-csv:
      *   get:
      *     tags:

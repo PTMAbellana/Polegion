@@ -187,10 +187,10 @@ export default function RecordsPreview({
                       <strong>{record.castles_completed || 0}/{record.total_castles || 7}</strong>
                     </div>
                     <div className={styles.records_table_cell}>
-                      {record.pretest_score !== undefined ? `${record.pretest_score}%` : 'N/A'}
+                      {record.pretest_score !== null && record.pretest_score !== undefined ? `${record.pretest_score}%` : 'N/A'}
                     </div>
                     <div className={styles.records_table_cell}>
-                      {record.posttest_score !== undefined ? `${record.posttest_score}%` : 'N/A'}
+                      {record.posttest_score !== null && record.posttest_score !== undefined ? `${record.posttest_score}%` : 'N/A'}
                     </div>
                   </>
                 )}

@@ -164,7 +164,7 @@ export const CHAPTER1_RELIC = {
 
 export const CHAPTER1_WIZARD = {
   name: "Polymus, Master of Many Sides",
-  image: "/images/polymus-wizard.png"
+  image: "/images/wizards/polymus-wizard.png"
 };
 
 export const CHAPTER1_METADATA = {

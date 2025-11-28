@@ -164,17 +164,24 @@ class UserService {
                 return cached;
             }
 
+            console.log('Fetching student progress for user:', userId);
+
             // Get user info
             const user = await this.userRepo.getUserByUid(userId);
             if (!user) {
+                console.error('User not found:', userId);
                 throw new Error('User not found');
             }
 
+            console.log('User found:', user.first_name, user.last_name);
+
             // Get castle progress
             const castleProgress = await this.userRepo.getUserCastleProgress(userId);
+            console.log('Castle progress fetched:', castleProgress?.length || 0, 'castles');
             
             // Get competition history
             const competitionHistory = await this.userRepo.getUserCompetitionHistory(userId);
+            console.log('Competition history fetched:', competitionHistory?.length || 0, 'competitions');
 
             const result = {
                 user: {
