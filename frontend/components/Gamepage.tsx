@@ -5,14 +5,6 @@ import { useRouter } from "next/navigation";
 import React, { useState, useRef, useEffect, useCallback, useMemo } from "react";
 
 // Import create-problem components (these are already Konva-based)
-import Toolbox from '@/components/teacher/create-problem/Toolbox';
-import DifficultyDropdown from '@/components/teacher/create-problem/DifficultyDropdown';
-import MainArea from '@/components/teacher/create-problem/MainArea';
-import PromptBox from '@/components/teacher/create-problem/PromptBox';
-import Timer from '@/components/teacher/create-problem/Timer';
-import LimitAttempts from '@/components/teacher/create-problem/LimitAttempts';
-import SetVisibility from '@/components/teacher/create-problem/SetVisibility';
-import ShapeLimitPopup from '@/components/teacher/create-problem/ShapeLimitPopup';
 import PropertiesPanel from '@/components/teacher/create-problem/PropertiesPanel';
 import PageHeader from '@/components/PageHeader';
 import LandscapePrompt from '@/components/LandscapePrompt';
@@ -25,8 +17,7 @@ import { submitSolution } from '@/api/attempt';
 import Swal from "sweetalert2";
 import { useCompetitionTimer } from '@/hooks/useCompetitionTimer';
 import { useCompetitionRealtime } from '@/hooks/useCompetitionRealtime';
-import { DifficultyDropdown, LimitAttempts, MainArea, PromptBox, SetVisibility, ShapeLimitPopup, Toolbox } from "./teacher/create-problem";
-import { Timer } from "lucide-react";
+import { MainArea, PromptBox, ShapeLimitPopup, Toolbox } from "./teacher/create-problem";
 
 interface CompetitionProblem {
   id: number
@@ -57,11 +48,6 @@ interface GamepageProps {
   userAccumulatedXP?: number;
 }
 
-const FILL_COLORS = [
-  "#ffadad", "#ffd6a5", "#fdffb6", "#caffbf",
-  "#9bf6ff", "#a0c4ff", "#bdb2ff", "#ffc6ff", "#E3DCC2"
-];
-
 const DIFFICULTY_COLORS = {
   Easy: "#8FFFC2",
   Intermediate: "#FFFD9B",
@@ -76,10 +62,8 @@ export default function Gamepage({
   competitionId,
   currentCompetition,
   roomId,
-  isFullScreenMode = false,
   userAccumulatedXP = 0
 }: GamepageProps) {
-  const router = useRouter();
   const { userProfile } = useAuthStore();  // Basic state management (removed old drag/resize states)
   const [problems, setProblems] = useState<Problem[]>([]);
   const [problemId, setProblemId] = useState<string | null>(null);
@@ -90,8 +74,6 @@ export default function Gamepage({
   const [prompt, setPrompt] = useState("");
   const [editingPrompt, setEditingPrompt] = useState(false);
   const promptInputRef = useRef<HTMLTextAreaElement>(null);
-  const [fillMode, setFillMode] = useState(false);
-  const [fillColor, setFillColor] = useState("#E3DCC2");
   const [selectedTool, setSelectedTool] = useState<string | null>(null);
   const [timerOpen, setTimerOpen] = useState(false);
   const [timerValue, setTimerValue] = useState(5);
@@ -133,8 +115,6 @@ export default function Gamepage({
   
   const { 
     competition: realtimeCompetition, 
-    isConnected,
-    connectionStatus 
   } = useCompetitionRealtime(
     memoizedCompetitionId, 
     !shouldUseHooks, // isLoading: true when NOT using hooks (to prevent connection)
@@ -144,7 +124,6 @@ export default function Gamepage({
 
   const {
     timeRemaining = 0,
-    isTimerActive = false,
     formattedTime = '00:00',
     isExpired = false,
     isPaused = false
@@ -420,11 +399,6 @@ export default function Gamepage({
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [selectedId]);
-
-  // Drag start handler
-  const handleDragStart = (type: string) => (e: React.DragEvent) => {
-    e.dataTransfer.setData("shape-type", type);
-  };
 
   // Pixel to units conversion - returns number for mathematical operations
   const pxToUnits = (px: number): number => {
@@ -804,15 +778,6 @@ export default function Gamepage({
       }
     }
   }, [competitionId, activeCompetition, timeRemaining, formattedTime, isExpired, isPaused]);
-
-  // LOADING STATE FOR COMPETITION MODE
-  // if (competitionId && isLoadingProblem) {
-  //   return (
-  //     <div className={styles.loadingContainer}>
-  //       <div className={styles.loadingSpinner}>Loading problem...</div>
-  //     </div>
-  //   );
-  // }
 
   // Track previous problem ID to detect problem changes
   const previousProblemIdRef = useRef<number | null>(null);
