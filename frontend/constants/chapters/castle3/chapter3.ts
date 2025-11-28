@@ -58,43 +58,50 @@ export const CHAPTER3_CONCEPTS = [
     key: 'area',
     title: 'Area of Circle',
     summary: 'The amount of space inside the circle',
-    description: 'Space enclosed by the circle’s boundary.'
+    description: 'Space enclosed by the circle\'s boundary.',
+    image: '/images/castle3/chapter3/area.png'
   },
   {
     key: 'formula',
     title: 'Area Formula',
     summary: 'A = πr² (pi times radius squared)',
-    description: 'Multiply π by the square of the radius.'
+    description: 'Multiply π by the square of the radius.',
+    image: '/images/castle3/chapter3/formula.png'
   },
   {
     key: 'squared',
     title: 'Squaring the Radius',
     summary: 'r² means r × r (multiply radius by itself)',
-    description: 'r² means radius multiplied by itself.'
+    description: 'r² means radius multiplied by itself.',
+    image: '/images/castle3/chapter3/squared.png'
   },
   {
     key: 'example1',
     title: 'Example: Full Circle',
     summary: 'If r = 4, then A = π(16) ≈ 50.3 cm²',
-    description: 'With r = 4 cm, A ≈ 50.3 cm² using πr².'
+    description: 'With r = 4 cm, A ≈ 50.3 cm² using πr².',
+    image: '/images/castle3/chapter3/example1.png'
   },
   {
     key: 'semicircle',
     title: 'Semi-Circle',
     summary: 'Half of a circle, area = πr²/2',
-    description: 'Half a circle has area equal to πr² ÷ 2.'
+    description: 'Half a circle has area equal to πr² ÷ 2.',
+    image: '/images/castle3/chapter3/semicircle.png'
   },
   {
     key: 'example2',
     title: 'Example: Semi-Circle',
     summary: 'If r = 6, then A = 18π ≈ 56.5 cm²',
-    description: 'With r = 6 cm, A ≈ 56.5 cm² for a semicircle.'
+    description: 'With r = 6 cm, A ≈ 56.5 cm² for a semicircle.',
+    image: '/images/castle3/chapter3/example2.png'
   },
   {
     key: 'sector',
     title: 'Sector',
     summary: 'A pie-shaped portion of the circle',
-    description: 'A slice of the circle defined by a central angle.'
+    description: 'A slice of the circle defined by a central angle.',
+    image: '/images/castle3/chapter3/sector.png'
   }
 ];
 

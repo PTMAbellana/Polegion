@@ -57,37 +57,49 @@ export const CHAPTER1_CONCEPTS = [
     key: 'polygon',
     title: 'Polygon',
     summary: 'A closed figure made of straight line segments',
-    description: 'A closed shape formed by straight line segments called sides.'
+    description: 'A closed shape formed by straight line segments called sides.',
+    image: '/images/castle4/chapter1/polygon.png',
+    taskId: 'task-0'
   },
   {
     key: 'naming',
     title: 'Naming Polygons',
     summary: 'Named by number of sides: Pentagon (5), Hexagon (6), Octagon (8), etc.',
-    description: 'Named by side count (e.g., triangle=3, quadrilateral=4, pentagon=5, hexagon=6, octagon=8).'
+    description: 'Named by side count (e.g., triangle=3, quadrilateral=4, pentagon=5, hexagon=6, octagon=8).',
+    image: '/images/castle4/chapter1/naming.png',
+    taskId: 'task-1'
   },
   {
     key: 'congruent',
     title: 'Congruent Polygons',
     summary: 'Same shape AND same size',
-    description: 'Polygons that match in shape and size (equal corresponding sides and angles).'
+    description: 'Polygons that match in shape and size (equal corresponding sides and angles).',
+    image: '/images/castle4/chapter1/congruent.png',
+    taskId: 'task-2'
   },
   {
     key: 'congruent-example',
     title: 'Congruent Example',
     summary: 'Two identical squares are congruent',
-    description: 'Squares with equal side lengths (e.g., both 5 cm) are congruent.'
+    description: 'Squares with equal side lengths (e.g., both 5 cm) are congruent.',
+    image: '/images/castle4/chapter1/congruent-example.png',
+    taskId: 'task-3'
   },
   {
     key: 'similar',
     title: 'Similar Polygons',
     summary: 'Same shape but different sizes',
-    description: 'Same shape with proportional sides and equal angles; sizes differ.'
+    description: 'Same shape with proportional sides and equal angles; sizes differ.',
+    image: '/images/castle4/chapter1/similar.png',
+    taskId: 'task-4'
   },
   {
     key: 'similar-example',
     title: 'Similar Example',
     summary: 'A small and large square are similar',
-    description: 'Squares with side lengths in proportion (e.g., 3 cm and 6 cm) are similar.'
+    description: 'Squares with side lengths in proportion (e.g., 3 cm and 6 cm) are similar.',
+    image: '/images/castle4/chapter1/similar-example.png',
+    taskId: 'task-5'
   }
 ];
 

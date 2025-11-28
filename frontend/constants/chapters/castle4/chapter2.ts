@@ -49,37 +49,49 @@ export const CHAPTER2_CONCEPTS = [
     key: 'drawing',
     title: 'Drawing Polygons',
     summary: 'Plan sides and angles carefully to construct polygons',
-    description: 'Sketch polygons by planning sides and angle measures.'
+    description: 'Sketch polygons by planning sides and angle measures.',
+    image: '/images/castle4/chapter2/drawing.png',
+    taskId: 'task-0'
   },
   {
     key: 'triangle',
     title: 'Drawing Triangles',
     summary: 'Use protractor to measure angles between three sides',
-    description: 'Draw three sides with angles measured accurately.'
+    description: 'Draw three sides with angles measured accurately.',
+    image: '/images/castle4/chapter2/triangle.png',
+    taskId: 'task-1'
   },
   {
     key: 'quadrilateral',
     title: 'Drawing Quadrilaterals',
     summary: 'Four sides, interior angles sum to 360°',
-    description: 'Four connected sides; interior angles add to 360°.'
+    description: 'Four connected sides; interior angles add to 360°.',
+    image: '/images/castle4/chapter2/quadrilateral.png',
+    taskId: 'task-2'
   },
   {
     key: 'pentagon',
     title: 'Drawing Pentagons',
     summary: 'Five sides, regular pentagon has 108° angles',
-    description: 'Five sides; each angle is 108° in a regular pentagon.'
+    description: 'Five sides; each angle is 108° in a regular pentagon.',
+    image: '/images/castle4/chapter2/pentagon.png',
+    taskId: 'task-3'
   },
   {
     key: 'hexagon',
     title: 'Drawing Hexagons',
     summary: 'Six sides, regular hexagon has 120° angles',
-    description: 'Six sides; each angle is 120° in a regular hexagon.'
+    description: 'Six sides; each angle is 120° in a regular hexagon.',
+    image: '/images/castle4/chapter2/hexagon.png',
+    taskId: 'task-4'
   },
   {
     key: 'tools',
     title: 'Drawing Tools',
     summary: 'Ruler for sides, protractor for angles',
-    description: 'Use a ruler for straight lines and a protractor for angles.'
+    description: 'Use a ruler for straight lines and a protractor for angles.',
+    image: '/images/castle4/chapter2/tools.png',
+    taskId: 'task-5'
   }
 ];
 

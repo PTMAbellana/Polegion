@@ -39,61 +39,81 @@ export const CHAPTER4_CONCEPTS = [
     key: 'perimeter',
     title: 'Perimeter',
     summary: 'The distance around a polygon',
-    description: 'Total length around a polygon.'
+    description: 'Total length around a polygon.',
+    image: '/images/castle4/chapter4/perimeter.png',
+    taskId: 'task-0'
   },
   {
     key: 'rectangle-perimeter',
     title: 'Rectangle Perimeter',
     summary: 'P = 2(l + w)',
-    description: 'Add length and width, then double.'
+    description: 'Add length and width, then double.',
+    image: '/images/castle4/chapter4/rectangle-perimeter.png',
+    taskId: 'task-1'
   },
   {
     key: 'square-perimeter',
     title: 'Square Perimeter',
     summary: 'P = 4 × side',
-    description: 'Four equal sides; multiply side by 4.'
+    description: 'Four equal sides; multiply side by 4.',
+    image: '/images/castle4/chapter4/square-perimeter.png',
+    taskId: 'task-2'
   },
   {
     key: 'area',
     title: 'Area',
     summary: 'The space inside a polygon (square units)',
-    description: 'Space inside a shape measured in square units.'
+    description: 'Space inside a shape measured in square units.',
+    image: '/images/castle4/chapter4/area.png',
+    taskId: 'task-3'
   },
   {
     key: 'rectangle-area',
     title: 'Rectangle Area',
     summary: 'A = length × width',
-    description: 'Multiply length by width.'
+    description: 'Multiply length by width.',
+    image: '/images/castle4/chapter4/rectangle-area.png',
+    taskId: 'task-4'
   },
   {
     key: 'square-area',
     title: 'Square Area',
     summary: 'A = side²',
-    description: 'Multiply the side by itself.'
+    description: 'Multiply the side by itself.',
+    image: '/images/castle4/chapter4/square-area.png',
+    taskId: 'task-5'
   },
   {
     key: 'triangle-area',
     title: 'Triangle Area',
     summary: 'A = (base × height) ÷ 2',
-    description: 'Half the product of base and height.'
+    description: 'Half the product of base and height.',
+    image: '/images/castle4/chapter4/triangle-area.png',
+    taskId: 'task-6'
   },
   {
     key: 'parallelogram-area',
     title: 'Parallelogram Area',
     summary: 'A = base × height',
-    description: 'Base times height.'
+    description: 'Base times height.',
+    image: '/images/castle4/chapter4/parallelogram-area.png',
+    taskId: 'task-7'
   },
   {
     key: 'trapezoid-area',
     title: 'Trapezoid Area',
     summary: 'A = [(b₁ + b₂) × h] ÷ 2',
-    description: 'Average of bases times height.'
+    description: 'Average of bases times height.',
+    image: '/images/castle4/chapter4/trapezoid-area.png',
+    taskId: 'task-8'
   },
   {
     key: 'word-problems',
     title: 'Word Problems',
     summary: 'Apply formulas to real-world situations',
-    description: 'Apply formulas to practical scenarios.'
+    description: 'Apply formulas to practical scenarios.',
+    image: '/images/castle4/chapter4/word-problems.png',
+    taskId: 'task-9'
   }
 ];
 
