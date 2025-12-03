@@ -109,6 +109,7 @@ class AuthController {
                 data: data
             })
         } catch (error) {
+            console.log('Registration error:', error);
             if (error.status === 422)  //unprocessed man ni sha, so tanawn nato nganu
                 return res.status(422).json({
                     message: 'Registration failed', 
