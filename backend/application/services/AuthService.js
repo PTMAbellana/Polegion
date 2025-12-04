@@ -143,7 +143,7 @@ class AuthService {
 
             const userId = data.user.id
             // Save additional user info in the database
-            const userData = await this.userRepo.createUserProfile(userId, inputData)
+            const userData = await this.userRepo.createUserProfile(userId, inputData, email)
             return {
                 user: {
                     id: data.user.id,

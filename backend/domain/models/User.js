@@ -32,7 +32,7 @@ class User {
         )
     }
 
-    static fromInputUser(input, id){
+    static fromInputUser(input, id, email){
         return new User (
             id,
             input.firstName || input.first_name || 'John',
@@ -41,7 +41,7 @@ class User {
             input.phone,
             input.profile_pic || 'https://uwllqanzveqanfpfnndu.supabase.co/storage/v1/object/public/profile-images/1751777126476.png',
             input.role || 'student',
-            input.email || ''
+            email || ''
         )
     }
 
@@ -55,6 +55,17 @@ class User {
             profile_pic: this.profile_pic,
             role: this.role,
             email: this.email
+        }
+    }
+
+    addUsertoJSON(){
+        return {
+            first_name: this.firstName,
+            last_name: this.lastName,
+            gender: this.gender,
+            phone: this.phone,
+            profile_pic: this.profile_pic,
+            role: this.role,
         }
     }
 

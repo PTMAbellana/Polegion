@@ -173,8 +173,8 @@ class UserRepo extends BaseRepo{
         }
     }
 
-    async createUserProfile (userId, userData){
-        const newUser = userModel.fromInputUser(userData, userId).toJSON()
+    async createUserProfile (userId, userData, email){
+        const newUser = userModel.fromInputUser(userData, userId, email).addUsertoJSON()
         try {
             const { 
                 data, 
