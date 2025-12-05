@@ -42,55 +42,73 @@ export const CHAPTER2_CONCEPTS = [
     key: 'perimeter-review',
     title: 'Perimeter Review',
     summary: 'Total distance around a shape',
-    description: 'Add all side lengths to get the boundary length.'
+    description: 'Add all side lengths to get the boundary length.',
+    image: '/images/castle5/perimeter-review.png',
+    taskId: 'task-0'
   },
   {
     key: 'area-review',
     title: 'Area Review',
     summary: 'Space inside a shape (square units)',
-    description: 'Measure the space inside; units are squared.'
+    description: 'Measure the space inside; units are squared.',
+    image: '/images/castle5/area-review.png',
+    taskId: 'task-1'
   },
   {
     key: 'rectangle',
     title: 'Rectangle Formulas',
     summary: 'P = 2(l + w), A = l × w',
-    description: 'Perimeter doubles sum of length and width; area is l × w.'
+    description: 'Perimeter doubles sum of length and width; area is l × w.',
+    image: '/images/castle5/rectangle-formulas.png',
+    taskId: 'task-2'
   },
   {
     key: 'square',
     title: 'Square Formulas',
     summary: 'P = 4s, A = s²',
-    description: 'Four equal sides; area equals side squared.'
+    description: 'Four equal sides; area equals side squared.',
+    image: '/images/castle5/square-formulas.png',
+    taskId: 'task-3'
   },
   {
     key: 'triangle',
     title: 'Triangle Formulas',
     summary: 'P = a + b + c, A = (b × h) ÷ 2',
-    description: 'Sum three sides for P; A is base × height ÷ 2.'
+    description: 'Sum three sides for P; A is base × height ÷ 2.',
+    image: '/images/castle5/triangle-formulas.png',
+    taskId: 'task-4'
   },
   {
     key: 'parallelogram',
     title: 'Parallelogram Formulas',
     summary: 'P = 2(a + b), A = b × h',
-    description: 'Perimeter doubles sum of adjacent sides; area is b × h.'
+    description: 'Perimeter doubles sum of adjacent sides; area is b × h.',
+    image: '/images/castle5/parallelogram-formulas.png',
+    taskId: 'task-5'
   },
   {
     key: 'trapezoid',
     title: 'Trapezoid Formulas',
     summary: 'A = [(b₁ + b₂) × h] ÷ 2',
-    description: 'Area equals average of bases times height.'
+    description: 'Area equals average of bases times height.',
+    image: '/images/castle5/trapezoid-formulas.png',
+    taskId: 'task-6'
   },
   {
     key: 'circle',
     title: 'Circle Formulas',
     summary: 'C = 2πr, A = πr²',
-    description: 'Use circumference 2πr or πd; area is πr².'
+    description: 'Use circumference 2πr or πd; area is πr².',
+    image: '/images/castle5/circle-formulas.png',
+    taskId: 'task-7'
   },
   {
     key: 'word-problems',
     title: 'Word Problems',
     summary: 'Apply formulas to real situations',
-    description: 'Choose formulas to model and solve practical tasks.'
+    description: 'Choose formulas to model and solve practical tasks.',
+    image: '/images/castle5/word-problems.png',
+    taskId: 'task-8'
   }
 ];
 
