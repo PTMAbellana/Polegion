@@ -2,14 +2,13 @@
    PRACTICE MODE STYLES - APP THEME (Green-Yellow)
    ============================================================================ */
 
+/* CSS Variables */
 /* Container Styles */
-.practicePageContainer,
+/* .practicePageContainer,
 .categoryPageContainer {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  height: 100vh;
-  background: linear-gradient(135deg, #f0fdf4 0%, #fefce8 50%, #fffbeb 100%);
   position: relative;
   overflow: hidden;
 }
@@ -28,11 +27,12 @@
     radial-gradient(circle at 40% 60%, rgba(132, 204, 22, 0.06) 0%, transparent 50%);
   pointer-events: none;
   z-index: 0;
-}
+} */
 
 /* Page Header Section */
-.pageHeader {
+/* .pageHeader {
   background: rgba(255, 255, 255, 0.95);
+  background: #0000; 
   backdrop-filter: blur(10px);
   border-bottom: 3px solid transparent;
   border-image: linear-gradient(90deg, #22c55e, #84cc16, #eab308, #f59e0b) 1;
@@ -98,7 +98,7 @@
   color: #4b5563;
   font-size: 0.95rem;
   margin: 0;
-}
+} */
 
 .backButton {
   padding: 0.5rem 1rem;
