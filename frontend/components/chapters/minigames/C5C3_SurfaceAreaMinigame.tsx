@@ -177,13 +177,13 @@ const C5C3_SurfaceAreaMinigame: React.FC<{
               }}
             >
               <div style={{ fontSize: '1.1rem', fontWeight: 700, color: '#FFE3A9' }}>{toFriendlyShape(question.shape)}</div>
-              <div style={{ width: '100%', position: 'relative', borderRadius: 10, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.12)', background: 'rgba(12,22,55,0.6)', aspectRatio: '420 / 190' }}>
+              <div style={{ width: '100%', maxWidth: 'min(500px, 80vw)', minHeight: '300px', position: 'relative', borderRadius: 10, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.12)', background: 'rgba(12,22,55,0.6)', aspectRatio: '4 / 3', margin: '0 auto' }}>
                 <Image
                   src={imageSrc}
                   alt={`${toFriendlyShape(question.shape)} preview`}
                   fill
-                  sizes="(max-width: 768px) 100vw, 420px"
-                  style={{ objectFit: 'contain', padding: '0.75rem' }}
+                  sizes="(max-width: 768px) 100vw, 400px"
+                  style={{ objectFit: 'contain', padding: '0.5rem' }}
                   onError={handleImageError}
                 />
               </div>
