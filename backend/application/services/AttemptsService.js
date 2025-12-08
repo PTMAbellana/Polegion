@@ -20,6 +20,41 @@ class AttemptsService {
                 solutionLength: Array.isArray(solution) ? solution.length : 'Not array'
             });
             
+            // ✅ Check if competition timer has expired
+            const { data: competition, error: compError } = await supabase
+                .from('competitions')
+                .select('timer_end_at, status')
+                .eq('id', competitionId)
+                .single();
+            
+            if (compError) {
+                console.error('❌ Error fetching competition:', compError);
+                throw new Error('Failed to validate competition timer');
+            }
+            
+            if (!competition) {
+                throw new Error('Competition not found');
+            }
+            
+            // Check if timer has expired
+            if (competition.timer_end_at) {
+                const timerEndTime = new Date(competition.timer_end_at).getTime();
+                const currentTime = Date.now();
+                
+                if (currentTime > timerEndTime) {
+                    console.log('⏰ Timer expired:', {
+                        timerEndTime: new Date(timerEndTime).toISOString(),
+                        currentTime: new Date(currentTime).toISOString()
+                    });
+                    throw new Error('Time has expired. Submissions are no longer allowed for this problem.');
+                }
+            }
+            
+            // Check if competition is still ongoing
+            if (competition.status !== 'ONGOING') {
+                throw new Error('Competition is not active. Submissions are not allowed.');
+            }
+            
             const part = await this.participantService.getPartInfoByUserId(user_id, room_id);
             console.log('👤 Participant found:', part);
             

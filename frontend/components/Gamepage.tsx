@@ -497,6 +497,17 @@ export default function Gamepage({
     console.log("Saving problem...");
     
     if (competitionId && activeCompetition) {
+      // NEW: Check if timer has expired
+      if (isExpired) {
+        Swal.fire({
+          title: "Time Expired",
+          text: "The timer has expired. You can no longer submit solutions for this problem.",
+          icon: "warning",
+          confirmButtonText: "OK",
+        });
+        return;
+      }
+      
       // NEW: Check if already submitted
       if (hasSubmitted) {
         Swal.fire({
@@ -560,7 +571,7 @@ export default function Gamepage({
         setIsSubmitting(true); // NEW: Set submitting state
         
         // KEEP ORIGINAL: Don't change calculation logic
-        const totalTimeAllowedInSeconds = currentProblem?.timer
+        const totalTimeAllowedInSeconds = currentProblem?.timer || 0;
         const timeSpentInSeconds = totalTimeAllowedInSeconds - timeRemaining;
         const timeTaken = Math.max(0, timeSpentInSeconds); // Ensure non-negative
 
@@ -868,7 +879,7 @@ export default function Gamepage({
       {/* 3-Column Playground Layout */}
       <div className={styles.playgroundWorkspaceWithPanel}>
         {/* Left Sidebar - Toolbox */}
-        <div className={styles.sidebar} style={{ opacity: hasSubmitted ? 0.5 : 1, pointerEvents: hasSubmitted ? 'none' : 'auto' }}>
+        <div className={styles.sidebar} style={{ opacity: hasSubmitted || isExpired ? 0.5 : 1, pointerEvents: hasSubmitted || isExpired ? 'none' : 'auto' }}>
           <Toolbox
             shapes={shapes}
             selectedTool={selectedTool}
@@ -966,6 +977,31 @@ export default function Gamepage({
             </div>
           )}
 
+          {/* Timer Expired Banner */}
+          {competitionId && isExpired && !hasSubmitted && (
+            <div style={{
+              background: 'linear-gradient(135deg, #fee2e2 0%, #fecaca 100%)',
+              border: '2px solid #ef4444',
+              borderRadius: '8px',
+              padding: '12px',
+              marginBottom: '8px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px',
+              boxShadow: '0 4px 6px rgba(239, 68, 68, 0.2)'
+            }}>
+              <span style={{ fontSize: '24px' }}>⏰</span>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: '14px', fontWeight: 700, color: '#991b1b', marginBottom: '2px' }}>
+                  Time Expired!
+                </div>
+                <div style={{ fontSize: '12px', color: '#7f1d1d' }}>
+                  You can no longer modify or submit solutions for this problem.
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Non-competition mode: Title input */}
           {!competitionId && (
             <input 
@@ -1002,29 +1038,29 @@ export default function Gamepage({
                 competitionId ? (
                   <button 
                     onClick={handleSave}
-                    disabled={hasSubmitted || isSubmitting}
+                    disabled={hasSubmitted || isSubmitting || isExpired}
                     style={{
                       position: 'absolute',
                       bottom: '24px',
                       right: '24px',
                       zIndex: 20,
-                      background: hasSubmitted ? '#10b981' : '#fabc60',
+                      background: hasSubmitted ? '#10b981' : isExpired ? '#6b7280' : '#fabc60',
                       borderRadius: '12px',
                       fontFamily: 'Poppins',
                       fontSize: '16px',
                       fontWeight: 600,
-                      color: hasSubmitted ? '#ffffff' : '#000',
+                      color: hasSubmitted || isExpired ? '#ffffff' : '#000',
                       border: 'none',
-                      cursor: hasSubmitted || isSubmitting ? 'not-allowed' : 'pointer',
+                      cursor: hasSubmitted || isSubmitting || isExpired ? 'not-allowed' : 'pointer',
                       padding: '12px 32px',
                       minWidth: '160px',
                       minHeight: '48px',
                       transition: 'all 0.2s',
-                      opacity: hasSubmitted || isSubmitting ? 0.7 : 1,
+                      opacity: hasSubmitted || isSubmitting || isExpired ? 0.7 : 1,
                       boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
                     }}
                   >
-                    {isSubmitting ? "Submitting..." : hasSubmitted ? "✓ Submitted" : "Submit Solution"}
+                    {isSubmitting ? "Submitting..." : hasSubmitted ? "✓ Submitted" : isExpired ? "⏰ Time Expired" : "Submit Solution"}
                   </button>
                 ) : (
                   <button 
@@ -1068,7 +1104,7 @@ export default function Gamepage({
               showMidpoint={showMidpoint}
               showMeasurement={showMeasurement}
               showArcRadius={showArcRadius}
-              disabled={hasSubmitted} // Prevent modifications after submission
+              disabled={hasSubmitted || isExpired} // Prevent modifications after submission or timer expiry
             />
           </div>
         </div>
