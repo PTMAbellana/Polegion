@@ -537,9 +537,16 @@ export default function AssessmentPageBase({ config }: { config: AssessmentConfi
                 }
                 
                 console.log(`[${config.type}] About to update state - results and stage`);
+                
+                // Update results first
                 setResults(transformedResults);
-                setStage('results');
-                console.log(`[${config.type}] State updated - should trigger re-render`);
+                
+                // Use setTimeout to ensure state is updated before changing stage
+                setTimeout(() => {
+                    setStage('results');
+                    console.log(`[${config.type}] State updated to results - rendering now`);
+                }, 100);
+                
                 localStorage.removeItem(STORAGE_KEY); // Clear progress after completion
                 setRestoredProgress(false);
                 setStartTime(null);
@@ -733,13 +740,16 @@ export default function AssessmentPageBase({ config }: { config: AssessmentConfi
 
     // RESULTS STAGE
     if (stage === 'results') {
+        console.log(`[${config.type}] Rendering results stage with:`, results);
+        
         return renderStage(
             <AssessmentResults
+                key={`results-${results?.completedAt || Date.now()}`}
                 results={results || {
                     totalScore: 0,
                     totalQuestions: config.totalQuestions,
                     percentage: 0,
-                    categoryScores: [],
+                    categoryScores: {},
                     completedAt: new Date().toISOString()
                 }}
                 assessmentType={config.type}

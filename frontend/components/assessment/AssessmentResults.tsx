@@ -4,8 +4,10 @@
 // ============================================================================
 'use client';
 
-import React from 'react';
+import React, { useRef, useState } from 'react';
 import AssessmentRadarChart from './AssessmentRadarChart';
+import Certificate from './Certificate';
+import { useAuthStore } from '@/store/authStore';
 import styles from '@/styles/assessment.module.css';
 
 interface CategoryScore {
@@ -49,8 +51,61 @@ export default function AssessmentResults({
     assessmentType,
     onContinue 
 }: AssessmentResultsProps) {
+    const { userProfile } = useAuthStore();
+    const certificateRef = useRef<HTMLDivElement>(null);
+    const [showCertificate, setShowCertificate] = useState(false);
+    
     const percentage = results.percentage || 
         Math.round((results.totalScore / results.totalQuestions) * 100);
+    
+    // Format completion date
+    const formatDate = (dateString?: string) => {
+        if (!dateString) return new Date().toLocaleDateString('en-US', { 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric' 
+        });
+        
+        const date = new Date(dateString);
+        return date.toLocaleDateString('en-US', { 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric' 
+        });
+    };
+    
+    // Download certificate as image
+    const handleDownloadCertificate = async () => {
+        if (!certificateRef.current) return;
+        
+        try {
+            // Dynamically import html2canvas
+            const html2canvas = (await import('html2canvas')).default;
+            
+            const canvas = await html2canvas(certificateRef.current, {
+                scale: 2,
+                backgroundColor: '#ffffff',
+                logging: false
+            });
+            
+            // Convert to blob and download
+            canvas.toBlob((blob) => {
+                if (!blob) return;
+                
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `Polegion-Certificate-${userProfile?.first_name || 'Student'}-${new Date().getTime()}.png`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+            });
+        } catch (error) {
+            console.error('Error downloading certificate:', error);
+            alert('Failed to download certificate. Please try again.');
+        }
+    };
     
     // Castle-specific theme
     const getCastleTheme = () => {
@@ -152,8 +207,13 @@ export default function AssessmentResults({
                     {/* Overall Score Card */}
                     <div className={styles['overall-score-card']}>
                         <div className={styles['score-main']}>
-                            <div className={styles['score-circle']}>
-                                <div className={styles['score-value']}>{percentage}%</div>
+                            <div 
+                                className={styles['score-circle']}
+                                style={{
+                                    '--percentage': percentage
+                                } as React.CSSProperties}
+                            >
+                                <div className={styles['score-value']}>{percentage.toFixed(1)}%</div>
                                 <div className={styles['score-label']}>Overall</div>
                             </div>
                             <div className={styles['score-info']}>
@@ -279,6 +339,48 @@ export default function AssessmentResults({
                     </div>
                 </div>
             </div>
+            
+            {/* Certificate Section (Posttest Only) */}
+            {assessmentType === 'posttest' && (
+                <div className={styles['certificate-section']}>
+                    <div className={styles['certificate-header']}>
+                        <h2 className={styles['certificate-title']}>
+                            🏆 Congratulations, Geometry Master! 🏆
+                        </h2>
+                        <p className={styles['certificate-subtitle']}>
+                            You've completed your journey through the Kingdom of Geometry!
+                        </p>
+                        <button
+                            onClick={() => setShowCertificate(!showCertificate)}
+                            className={styles['certificate-toggle-btn']}
+                            style={{
+                                background: castleTheme.buttonGradient,
+                            }}
+                        >
+                            {showCertificate ? 'Hide Certificate' : 'View Your Certificate'}
+                        </button>
+                    </div>
+                    
+                    {showCertificate && (
+                        <div className={styles['certificate-display']}>
+                            <Certificate 
+                                ref={certificateRef}
+                                userName={`${userProfile?.first_name || ''} ${userProfile?.last_name || ''}`.trim() || 'Student'}
+                                completionDate={formatDate(results.completedAt)}
+                            />
+                            <button
+                                onClick={handleDownloadCertificate}
+                                className={styles['download-certificate-btn']}
+                                style={{
+                                    background: castleTheme.buttonGradient,
+                                }}
+                            >
+                                📥 Download Certificate
+                            </button>
+                        </div>
+                    )}
+                </div>
+            )}
             
             {/* Continue Button */}
             <div className={styles['action-section']}>

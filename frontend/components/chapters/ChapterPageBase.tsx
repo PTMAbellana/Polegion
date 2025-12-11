@@ -106,6 +106,7 @@ function ChapterPageBase({ config }: { config: ChapterConfig }) {
   
   // Restart modal state
   const [showRestartModal, setShowRestartModal] = useState(false);
+  const [navigating, setNavigating] = useState(false);
   
   // Initialize chapter in store if not exists
   useEffect(() => {
@@ -680,6 +681,7 @@ function ChapterPageBase({ config }: { config: ChapterConfig }) {
   };
 
   const handleReturnToCastle = () => {
+    setNavigating(true);
     router.push(config.castleRoute);
   };
 
@@ -852,6 +854,30 @@ function ChapterPageBase({ config }: { config: ChapterConfig }) {
           onClick={handleDialogueClick}
           styleModule={baseStyles}
         />
+      )}
+
+      {/* Loading Overlay */}
+      {navigating && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.85)',
+          backdropFilter: 'blur(8px)',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          alignItems: 'center',
+          zIndex: 10000,
+          gap: '1.5rem'
+        }}>
+          <div className={baseStyles.loader}></div>
+          <p style={{ color: '#fff', fontSize: '1.25rem', fontWeight: '600' }}>
+            Loading...
+          </p>
+        </div>
       )}
     </div>
   );

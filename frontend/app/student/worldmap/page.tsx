@@ -39,6 +39,7 @@ export default function WorldMapPage() {
   const [backgroundError, setBackgroundError] = useState(false);
   const [preloadedImages, setPreloadedImages] = useState<Set<number>>(new Set());
   const [isTransitioning, setIsTransitioning] = useState(false); // Track if castles are transitioning
+  const [isNavigating, setIsNavigating] = useState(false); // Track navigation loading state
   
   // Refs for touch/swipe, fetching, and animation
   const touchStartX = useRef<number>(0);
@@ -265,9 +266,11 @@ export default function WorldMapPage() {
     }
 
     try {
+      setIsNavigating(true);
       router.push(`/student/worldmap/${castle.route}`);
     } catch (err) {
       console.error('Failed to enter castle:', err);
+      setIsNavigating(false);
     }
   };
 
@@ -461,6 +464,14 @@ export default function WorldMapPage() {
           onClose={() => setSelectedCastle(null)}
           onEnter={handleEnterCastle}
         />
+      )}
+
+      {/* Loading Overlay */}
+      {(isNavigating || loading) && (
+        <div className={styles.loadingOverlay}>
+          <Loader />
+          <p className={styles.loadingText}>Loading...</p>
+        </div>
       )}
     </div>
   );

@@ -1,0 +1,288 @@
+/* Certificate Container */
+.certificateContainer {
+  width: 100%;
+  max-width: 900px;
+  margin: 2rem auto;
+  padding: 1rem;
+  background: #ffffff;
+}
+
+/* Certificate Border - Using Castle 6 colors (Navy Blue and Gold) */
+.certificateBorder {
+  padding: 2rem;
+  background: linear-gradient(135deg, #000080 0%, #00044A 100%);
+  border-radius: 20px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+  position: relative;
+}
+
+.certificateBorder::before {
+  content: '';
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  right: 10px;
+  bottom: 10px;
+  border: 3px solid #FFD60A;
+  border-radius: 15px;
+  pointer-events: none;
+}
+
+/* Certificate Inner */
+.certificateInner {
+  background: linear-gradient(to bottom, #ffffff 0%, #f8f9fa 100%);
+  padding: 3rem 2.5rem;
+  border-radius: 10px;
+  position: relative;
+  box-shadow: inset 0 0 30px rgba(0, 4, 74, 0.1);
+}
+
+/* Header */
+.header {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.logo {
+  width: 120px;
+  height: auto;
+  margin-bottom: 1rem;
+  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
+}
+
+.mainTitle {
+  font-family: 'Cinzel', serif;
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #000080;
+  margin: 0;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+/* Decorative Line */
+.decorativeLine {
+  height: 3px;
+  background: linear-gradient(90deg, 
+    transparent 0%, 
+    #FFD60A 20%, 
+    #FFBF1C 50%, 
+    #FFD60A 80%, 
+    transparent 100%
+  );
+  margin: 1.5rem 0;
+}
+
+/* Body */
+.body {
+  text-align: center;
+  padding: 2rem 1rem;
+}
+
+.subtitle {
+  font-family: 'Poppins', sans-serif;
+  font-size: 1.1rem;
+  color: #2C514C;
+  margin: 0 0 1rem 0;
+  font-style: italic;
+}
+
+.userName {
+  font-family: 'Cinzel', serif;
+  font-size: 2.8rem;
+  font-weight: 700;
+  color: #00044A;
+  margin: 1rem 0;
+  padding: 0.5rem 0;
+  border-bottom: 3px solid #FFD60A;
+  display: inline-block;
+  min-width: 300px;
+}
+
+.description {
+  font-family: 'Poppins', sans-serif;
+  font-size: 1.1rem;
+  color: #2C514C;
+  margin: 2rem 0 0.5rem 0;
+}
+
+.programName {
+  font-family: 'Cinzel', serif;
+  font-size: 2rem;
+  font-weight: 600;
+  color: #000080;
+  margin: 0.5rem 0 2rem 0;
+  letter-spacing: 1px;
+}
+
+.achievement {
+  font-family: 'Poppins', sans-serif;
+  font-size: 1rem;
+  line-height: 1.8;
+  color: #555555;
+  max-width: 700px;
+  margin: 0 auto 2rem auto;
+}
+
+/* Date Section */
+.dateSection {
+  margin-top: 3rem;
+  padding-top: 2rem;
+  border-top: 2px dashed #FFBF1C;
+}
+
+.dateLabel {
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.95rem;
+  color: #2C514C;
+  margin: 0 0 0.5rem 0;
+  font-weight: 500;
+}
+
+.date {
+  font-family: 'Cinzel', serif;
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #000080;
+  margin: 0;
+}
+
+/* Footer with Seal */
+.footer {
+  display: flex;
+  justify-content: center;
+  margin-top: 3rem;
+  padding-top: 2rem;
+}
+
+.seal {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #000080 0%, #00044A 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 15px rgba(0, 0, 128, 0.3);
+  border: 4px solid #FFD60A;
+  position: relative;
+}
+
+.seal::before {
+  content: '';
+  position: absolute;
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  border: 2px dashed #FFBF1C;
+  animation: rotate 20s linear infinite;
+}
+
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.sealInner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.sealText {
+  font-family: 'Cinzel', serif;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #FFD60A;
+  letter-spacing: 1px;
+  line-height: 1.2;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .certificateContainer {
+    padding: 0.5rem;
+  }
+
+  .certificateBorder {
+    padding: 1rem;
+  }
+
+  .certificateInner {
+    padding: 2rem 1.5rem;
+  }
+
+  .mainTitle {
+    font-size: 1.8rem;
+  }
+
+  .userName {
+    font-size: 2rem;
+    min-width: 250px;
+  }
+
+  .programName {
+    font-size: 1.5rem;
+  }
+
+  .achievement {
+    font-size: 0.9rem;
+  }
+
+  .logo {
+    width: 80px;
+  }
+
+  .seal {
+    width: 80px;
+    height: 80px;
+  }
+
+  .seal::before {
+    width: 90px;
+    height: 90px;
+  }
+}
+
+@media (max-width: 480px) {
+  .mainTitle {
+    font-size: 1.5rem;
+    letter-spacing: 1px;
+  }
+
+  .userName {
+    font-size: 1.5rem;
+    min-width: 200px;
+  }
+
+  .programName {
+    font-size: 1.2rem;
+  }
+
+  .achievement {
+    font-size: 0.85rem;
+  }
+}
+
+/* Print Styles */
+@media print {
+  .certificateContainer {
+    max-width: 100%;
+    margin: 0;
+    padding: 0;
+  }
+
+  .certificateBorder {
+    box-shadow: none;
+  }
+
+  .seal::before {
+    animation: none;
+  }
+}
