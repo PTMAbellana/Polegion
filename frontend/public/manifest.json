@@ -1,0 +1,35 @@
+{
+  "name": "Polegion - Geometry Learning Platform",
+  "short_name": "Polegion",
+  "description": "Your geometry visualizer and competitive learning platform",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "landscape",
+  "background_color": "#ffffff",
+  "theme_color": "#2C514C",
+  "icons": [
+    {
+      "src": "/images/polegionIcon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/images/polegionIcon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["education", "games"],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "World Map",
+      "short_name": "Map",
+      "description": "Access the geometry world map",
+      "url": "/student/worldmap",
+      "icons": []
+    }
+  ]
+}
