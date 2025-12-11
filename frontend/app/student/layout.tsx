@@ -47,6 +47,12 @@ export default function StudentLayout({
     return null;
   }
 
+  // For auth routes, render without sidebar
+  if (isAuthRoute) {
+    return <>{children}</>;
+  }
+
+  // For protected student routes, check role
   if (userProfile?.role !== 'student' && userProfile?.role !== 'admin') {
     return (
       <div className={styles['page-layout']}>

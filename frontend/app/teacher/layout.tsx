@@ -47,6 +47,12 @@ export default function TeacherLayout({
     return null;
   }
 
+  // For auth routes, render without sidebar
+  if (isAuthRoute) {
+    return <>{children}</>;
+  }
+
+  // For protected teacher routes, check role
   if (userProfile?.role !== 'teacher' && userProfile?.role !== 'admin') {
     return (
       <div className={styles['page-layout']}>
