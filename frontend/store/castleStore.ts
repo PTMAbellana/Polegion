@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import { persist, createJSONStorage } from 'zustand/middleware'
 import { CastleState } from '@/types/state/castle'
 import { getAllCastles } from '@/api/castles'
+import { logger } from '@/utils/logger'
 
 // Helper to get user-specific storage key
 const getUserStorageKey = () => {
@@ -20,7 +21,7 @@ const getUserStorageKey = () => {
             }
         }
     } catch (error) {
-        console.error('[CastleStore] Error getting user storage key:', error)
+        logger.error('[CastleStore] Error getting user storage key:', error)
     }
     return 'castle-storage-guest'
 }
@@ -44,7 +45,7 @@ export const useCastleStore = create<CastleState>()(
                 const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
                 
                 if (!userId || !uuidRegex.test(userId)) {
-                    console.warn('[CastleStore] Invalid or missing userId, skipping fetch:', userId)
+                    logger.warn('[CastleStore] Invalid or missing userId, skipping fetch:', userId)
                     set({ loading: false, error: null })
                     return
                 }
@@ -52,10 +53,10 @@ export const useCastleStore = create<CastleState>()(
                 set({ loading: true, error: null })
                 
                 try {
-                    console.log('[CastleStore] Fetching castles for user:', userId)
+                    logger.log('[CastleStore] Fetching castles for user:', userId)
                     const castles = await getAllCastles(userId)
-                    console.log('[CastleStore] Fetched castles:', castles)
-                    console.log('[CastleStore] Castle progress details:', castles.map((c: any) => ({
+                    logger.log('[CastleStore] Fetched castles:', castles)
+                    logger.log('[CastleStore] Castle progress details:', castles.map((c: any) => ({
                         name: c.name,
                         unlocked: c.progress?.unlocked,
                         completed: c.progress?.completed,
@@ -71,7 +72,7 @@ export const useCastleStore = create<CastleState>()(
                         (c: any) => c.progress?.unlocked
                     )
                     
-                    console.log('[CastleStore] First unlocked castle index:', firstUnlockedIndex)
+                    logger.log('[CastleStore] First unlocked castle index:', firstUnlockedIndex)
                     
                     set({
                         castles: sortedCastles,
@@ -81,8 +82,8 @@ export const useCastleStore = create<CastleState>()(
                         initialized: true
                     })
                 } catch (error: any) {
-                    console.error('[CastleStore] Error fetching castles:', error)
-                    console.error('[CastleStore] Error details:', {
+                    logger.error('[CastleStore] Error fetching castles:', error)
+                    logger.error('[CastleStore] Error details:', {
                         message: error.message,
                         response: error.response?.data,
                         status: error.response?.status
@@ -132,9 +133,9 @@ export const useCastleStore = create<CastleState>()(
                     try {
                         const storageKey = getUserStorageKey()
                         localStorage.removeItem(storageKey)
-                        console.log(`[CastleStore] Cleared storage: ${storageKey}`)
+                        logger.log(`[CastleStore] Cleared storage: ${storageKey}`)
                     } catch (error) {
-                        console.error('[CastleStore] Error clearing storage:', error)
+                        logger.error('[CastleStore] Error clearing storage:', error)
                     }
                 }
             },

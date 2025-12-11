@@ -213,6 +213,44 @@ body > div:first-child /* For other React setups */ {
 }
 
 /* ========================================
+   MOBILE OPTIMIZATION
+   ======================================== */
+* {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  touch-action: manipulation;
+}
+
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Prevent zoom on input focus (mobile) */
+input, select, textarea {
+  font-size: 16px !important;
+}
+
+/* Smooth scrolling for touch devices */
+@media (hover: none) and (pointer: coarse) {
+  * {
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* Landscape-only content optimization */
+@media (max-width: 900px) and (orientation: landscape) {
+  body {
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+}
+
+/* ========================================
    PRINT STYLES
    ======================================== */
 @media print {

@@ -58,10 +58,67 @@
   box-shadow: 0 6px 25px rgba(58, 150, 121, 0.4);
 }
 
+/* Hamburger Menu - Hidden on desktop */
+.hamburger {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem;
+  z-index: 1001;
+}
+
+.hamburger span {
+  width: 25px;
+  height: 3px;
+  background: #3A9679;
+  border-radius: 3px;
+  transition: all 0.3s ease;
+}
+
+.hamburger:hover span {
+  background: #2F3E75;
+}
+
+/* Mobile Menu */
+.mobileMenu {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(10px);
+  padding: 1rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  border-top: 1px solid rgba(58, 150, 121, 0.2);
+}
+
+.mobileSignInBtn {
+  width: 100%;
+  padding: 0.875rem 1.5rem;
+  background: linear-gradient(135deg, #3A9679 0%, #2F3E75 100%);
+  color: white;
+  border: none;
+  border-radius: 50px;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(58, 150, 121, 0.3);
+}
+
+.mobileSignInBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 25px rgba(58, 150, 121, 0.4);
+}
+
 /* ========== HERO SECTION ========== */
 .heroSection {
-  padding: 140px 2rem 60px;
-  max-width: 1400px;
+  padding: 140px 1.5rem 50px;
+  max-width: 1200px;
   margin: 0 auto;
   display: flex;
   justify-content: center;
@@ -74,10 +131,10 @@
 
 .heroContent {
   text-align: center;
-  max-width: 900px;
+  max-width: 800px;
   background: rgba(255, 255, 255, 0.95);
-  padding: 3rem 2.5rem;
-  border-radius: 30px;
+  padding: 2.5rem 2rem;
+  border-radius: 24px;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
   backdrop-filter: blur(10px);
 }
@@ -101,10 +158,10 @@
 }
 
 .heroTitle {
-  font-size: 3.5rem;
+  font-size: 2.75rem;
   font-weight: 900;
-  line-height: 1.1;
-  margin-bottom: 1.5rem;
+  line-height: 1.15;
+  margin-bottom: 1.25rem;
   background: linear-gradient(135deg, #2F3E75 0%, #3A9679 60%, #FABC60 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -113,23 +170,23 @@
 }
 
 .heroSubtitle {
-  font-size: 1.125rem;
+  font-size: 1rem;
   color: #2F3E75;
-  line-height: 1.7;
-  margin-bottom: 2rem;
+  line-height: 1.6;
+  margin-bottom: 1.75rem;
   font-weight: 600;
   opacity: 1;
   text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
 }
 
 .ctaButton {
-  padding: 1.25rem 2.5rem;
+  padding: 1rem 2rem;
   background: linear-gradient(135deg, #3A9679 0%, #FABC60 100%);
   color: white;
   border: none;
   border-radius: 50px;
   font-weight: 800;
-  font-size: 1.125rem;
+  font-size: 1rem;
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: 0 8px 30px rgba(58, 150, 121, 0.4);
@@ -222,8 +279,8 @@
 
 /* ========== CREDIT SECTION ========== */
 .creditSection {
-  padding: 2rem 2rem 4rem;
-  max-width: 1400px;
+  padding: 1.5rem 1.5rem 3rem;
+  max-width: 1200px;
   margin: 0 auto;
 }
 
@@ -247,29 +304,29 @@
 /* ========== SECTION HEADERS ========== */
 .sectionHeader {
   text-align: center;
-  margin-bottom: 3rem;
+  margin-bottom: 2.5rem;
 }
 
 .sectionBadge {
   display: inline-block;
-  padding: 0.5rem 1.25rem;
+  padding: 0.4rem 1rem;
   background: rgba(58, 150, 121, 0.1);
   color: #3A9679;
   border-radius: 50px;
   font-weight: 700;
-  font-size: 0.875rem;
-  margin-bottom: 1rem;
+  font-size: 0.8rem;
+  margin-bottom: 0.875rem;
 }
 
 .sectionTitle {
-  font-size: 2.5rem;
+  font-size: 2rem;
   font-weight: 900;
   color: #2F3E75;
-  margin-bottom: 1rem;
+  margin-bottom: 0.875rem;
 }
 
 .sectionSubtitle {
-  font-size: 1.125rem;
+  font-size: 1rem;
   color: #333333;
   max-width: 600px;
   margin: 0 auto;
@@ -278,7 +335,7 @@
 
 /* ========== CAROUSEL SECTION ========== */
 .carouselSection {
-  padding: 80px 2rem;
+  padding: 60px 1.5rem;
   background: linear-gradient(180deg, #ffffff 0%, #F3F9E3 100%);
   overflow: hidden;
   cursor: grab;
@@ -289,10 +346,10 @@
 }
 
 .carouselWrapper {
-  max-width: 700px;
+  max-width: 650px;
   margin: 0 auto 2rem;
   overflow: hidden;
-  border-radius: 30px;
+  border-radius: 24px;
 }
 
 .carouselTrack {
@@ -303,13 +360,13 @@
 .carouselSlide {
   min-width: 100%;
   background: white;
-  border-radius: 30px;
-  padding: 3rem;
+  border-radius: 24px;
+  padding: 2rem;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 3rem;
+  gap: 2rem;
   align-items: center;
-  border: 4px solid;
+  border: 3px solid;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
 }
 
@@ -318,14 +375,14 @@
 }
 
 .slideTitle {
-  font-size: 2rem;
+  font-size: 1.5rem;
   font-weight: 800;
   color: #2F3E75;
-  margin-bottom: 1rem;
+  margin-bottom: 0.75rem;
 }
 
 .slideDescription {
-  font-size: 1.125rem;
+  font-size: 0.95rem;
   color: #333333;
   line-height: 1.6;
 }
@@ -333,7 +390,7 @@
 .slideImage {
   position: relative;
   width: 100%;
-  height: 260px;
+  height: 220px;
   border-radius: 0;
   overflow: hidden;
   background: #F3F9E3;
@@ -399,7 +456,7 @@
 
 /* ========== FEATURES SECTION ========== */
 .featuresSection {
-  padding: 80px 2rem;
+  padding: 60px 1.5rem;
   max-width: 1200px;
   margin: 0 auto;
 }
@@ -407,13 +464,13 @@
 .featuresGrid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 2rem;
+  gap: 1.5rem;
 }
 
 .featureCard {
   background: white;
-  border-radius: 20px;
-  padding: 2rem;
+  border-radius: 16px;
+  padding: 1.5rem;
   text-align: center;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
   transition: all 0.3s ease;
@@ -432,21 +489,21 @@
 }
 
 .featureCard h3 {
-  font-size: 1.25rem;
+  font-size: 1.125rem;
   font-weight: 700;
   color: #2F3E75;
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.625rem;
 }
 
 .featureCard p {
-  font-size: 1rem;
+  font-size: 0.9rem;
   color: #333333;
   line-height: 1.5;
 }
 
 /* ========== PARENTS SECTION ========== */
 .parentsSection {
-  padding: 100px 2rem;
+  padding: 60px 1.5rem;
   background: linear-gradient(135deg, #2F3E75 0%, #3A9679 100%);
   color: white;
   position: relative;
@@ -479,26 +536,26 @@
 
 .parentsSection .sectionTitle {
   color: white;
-  font-size: 3rem;
+  font-size: 2rem;
 }
 
 .parentsSection .sectionSubtitle {
   color: rgba(255, 255, 255, 0.9);
-  font-size: 1.25rem;
+  font-size: 1rem;
 }
 
 .parentGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 2.5rem;
-  margin-top: 3rem;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  margin-top: 2rem;
 }
 
 .parentCard {
   background: rgba(255, 255, 255, 0.15);
   backdrop-filter: blur(20px);
-  border-radius: 25px;
-  padding: 2.5rem;
+  border-radius: 20px;
+  padding: 1.75rem;
   text-align: left;
   border: 2px solid rgba(255, 255, 255, 0.25);
   transition: all 0.4s ease;
@@ -529,14 +586,14 @@
 }
 
 .parentCard h3 {
-  font-size: 1.25rem;
+  font-size: 1.125rem;
   font-weight: 700;
   color: white;
   margin: 0;
 }
 
 .parentCard p {
-  font-size: 0.95rem;
+  font-size: 0.875rem;
   line-height: 1.6;
   color: rgba(255, 255, 255, 0.9);
   margin: 0;
@@ -587,42 +644,42 @@
 
 /* ========== FINAL CTA SECTION ========== */
 .finalCtaSection {
-  padding: 80px 2rem;
+  padding: 60px 1.5rem;
   background: linear-gradient(135deg, #F3F9E3 0%, #FABC60 100%);
 }
 
 .ctaBox {
-  max-width: 800px;
+  max-width: 700px;
   margin: 0 auto;
   text-align: center;
   background: white;
-  border-radius: 30px;
-  padding: 4rem 3rem;
+  border-radius: 24px;
+  padding: 3rem 2.5rem;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
 }
 
 .ctaTitle {
-  font-size: 2.5rem;
+  font-size: 2rem;
   font-weight: 900;
   color: #2F3E75;
-  margin-bottom: 1rem;
+  margin-bottom: 0.875rem;
 }
 
 .ctaSubtitle {
-  font-size: 1.25rem;
+  font-size: 1rem;
   color: #333333;
-  margin-bottom: 2.5rem;
+  margin-bottom: 2rem;
   line-height: 1.6;
 }
 
 .ctaButtonLarge {
-  padding: 1.5rem 3rem;
+  padding: 1.125rem 2.5rem;
   background: linear-gradient(135deg, #E16262 0%, #FABC60 100%);
   color: white;
   border: none;
   border-radius: 50px;
   font-weight: 800;
-  font-size: 1.25rem;
+  font-size: 1.05rem;
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: 0 10px 40px rgba(225, 98, 98, 0.4);
@@ -703,16 +760,20 @@
 @media (max-width: 1024px) {
   .heroSection {
     max-width: 100%;
-    padding: 120px 2.5rem 60px;
-    gap: 3.5rem;
+    padding: 120px 1.5rem 50px;
+    gap: 2.5rem;
   }
 
   .heroTitle {
-    font-size: 3rem;
+    font-size: 2.25rem;
   }
 
   .heroSubtitle {
-    font-size: 1.05rem;
+    font-size: 0.95rem;
+  }
+
+  .heroContent {
+    padding: 2rem 1.75rem;
   }
 
   .featuresGrid, .parentGrid, .previewGrid {
@@ -727,37 +788,38 @@
   }
 
   .headerContent {
-    padding: 0.875rem 1.5rem;
+    padding: 0.75rem 1.25rem;
   }
 
   .signInBtn {
-    padding: 0.625rem 1.5rem;
-    font-size: 0.9rem;
+    padding: 0.625rem 1.25rem;
+    font-size: 0.875rem;
   }
 
   .heroSection {
     grid-template-columns: 1fr;
-    gap: 3rem;
-    padding: 110px 1.5rem 50px;
+    gap: 2rem;
+    padding: 120px 1.25rem 45px;
   }
 
   .heroContent {
     text-align: center;
+    padding: 1.75rem 1.5rem;
   }
 
   .heroTitle {
-    font-size: 2.5rem;
+    font-size: 2rem;
     line-height: 1.15;
   }
 
   .heroSubtitle {
-    font-size: 1rem;
-    margin-bottom: 1.75rem;
+    font-size: 0.9rem;
+    margin-bottom: 1.5rem;
   }
 
   .ctaButton {
-    padding: 1.125rem 2.25rem;
-    font-size: 1.05rem;
+    padding: 0.95rem 1.75rem;
+    font-size: 0.95rem;
   }
 
   .heroVisual {
@@ -850,36 +912,50 @@
     height: auto;
   }
 
+  /* Hide desktop sign-in button on mobile */
   .signInBtn {
-    padding: 0.5rem 1.25rem;
-    font-size: 0.85rem;
+    display: none;
+  }
+
+  /* Show hamburger menu on mobile */
+  .hamburger {
+    display: flex;
+  }
+
+  /* Show mobile menu when toggled */
+  .mobileMenu {
+    display: block;
   }
 
   .heroSection {
-    padding: 100px 1rem 40px;
-    gap: 2.5rem;
+    padding: 110px 1rem 35px;
+    gap: 1.5rem;
+  }
+
+  .heroContent {
+    padding: 1.25rem 1rem;
   }
 
   .heroBadge {
-    font-size: 0.75rem;
-    padding: 0.4rem 1rem;
+    font-size: 0.7rem;
+    padding: 0.35rem 0.875rem;
   }
 
   .heroTitle {
-    font-size: 1.875rem;
+    font-size: 1.625rem;
     line-height: 1.2;
-    margin-bottom: 1.25rem;
+    margin-bottom: 1rem;
   }
 
   .heroSubtitle {
-    font-size: 0.9rem;
-    line-height: 1.6;
-    margin-bottom: 1.5rem;
+    font-size: 0.825rem;
+    line-height: 1.5;
+    margin-bottom: 1.25rem;
   }
 
   .ctaButton {
-    padding: 1rem 1.75rem;
-    font-size: 0.95rem;
+    padding: 0.875rem 1.5rem;
+    font-size: 0.875rem;
     width: 100%;
     justify-content: center;
   }
@@ -907,11 +983,11 @@
   }
 
   .creditSection {
-    padding: 1.25rem 1rem 2.5rem;
+    padding: 1rem 0.875rem 2rem;
   }
 
   .creditContent {
-    padding: 1rem 1.25rem;
+    padding: 0.875rem 1rem;
   }
 
   .creditText {
@@ -920,39 +996,39 @@
   }
 
   .sectionBadge {
-    font-size: 0.75rem;
-    padding: 0.4rem 1rem;
+    font-size: 0.7rem;
+    padding: 0.35rem 0.875rem;
   }
 
   .sectionTitle {
-    font-size: 1.75rem;
+    font-size: 1.5rem;
     line-height: 1.3;
   }
 
   .sectionSubtitle {
-    font-size: 0.9rem;
+    font-size: 0.825rem;
     line-height: 1.5;
   }
 
   .carouselSection {
-    padding: 50px 1rem;
+    padding: 40px 0.875rem;
   }
 
   .carouselSlide {
-    padding: 1.5rem;
-    gap: 1rem;
+    padding: 1rem;
+    gap: 0.875rem;
   }
 
   .slideTitle {
-    font-size: 1.25rem;
+    font-size: 1rem;
   }
 
   .slideDescription {
-    font-size: 0.85rem;
+    font-size: 0.75rem;
   }
 
   .slideImage {
-    height: 240px;
+    height: 180px;
   }
 
   .carouselControls {
@@ -966,32 +1042,32 @@
   }
 
   .featureCard {
-    padding: 1.25rem;
+    padding: 1rem;
   }
 
   .featureCard h3 {
-    font-size: 1rem;
-  }
-
-  .featureCard p {
-    font-size: 0.85rem;
-  }
-
-  .parentCard {
-    padding: 1.25rem;
-  }
-
-  .parentCardIcon {
-    font-size: 0.65rem;
-    padding: 0.375rem 0.625rem;
-  }
-
-  .parentCard h3 {
     font-size: 0.95rem;
   }
 
-  .parentCard p {
+  .featureCard p {
     font-size: 0.8rem;
+  }
+
+  .parentCard {
+    padding: 1rem;
+  }
+
+  .parentCardIcon {
+    font-size: 0.6rem;
+    padding: 0.3rem 0.5rem;
+  }
+
+  .parentCard h3 {
+    font-size: 0.875rem;
+  }
+
+  .parentCard p {
+    font-size: 0.75rem;
   }
 
   .previewCard {
@@ -1004,21 +1080,25 @@
   }
 
   .ctaButtonLarge {
-    padding: 1rem 1.75rem;
-    font-size: 0.95rem;
+    padding: 0.875rem 1.5rem;
+    font-size: 0.875rem;
     width: 100%;
   }
 
+  .ctaBox {
+    padding: 1.5rem 1.25rem;
+  }
+
   .ctaTitle {
-    font-size: 1.5rem;
+    font-size: 1.25rem;
   }
 
   .ctaSubtitle {
-    font-size: 0.9rem;
+    font-size: 0.8rem;
   }
 
   .noCardText {
-    font-size: 0.75rem;
+    font-size: 0.7rem;
   }
 
   .footer {

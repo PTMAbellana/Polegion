@@ -13,11 +13,34 @@
     position: relative;
     width: 100%;
     max-width: 520px;
+    max-height: 90vh;
     background: #FFFFFF;
     border: 0.5px solid #000000;
     border-radius: 10px;
     padding: 24px 20px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+
+  /* Custom Scrollbar for Register Card */
+  .registerCard::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  .registerCard::-webkit-scrollbar-track {
+    background: #F3F9E3;
+    border-radius: 4px;
+    margin: 4px;
+  }
+
+  .registerCard::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #3A9679 0%, #2F3E75 100%);
+    border-radius: 4px;
+  }
+
+  .registerCard::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #2F3E75 0%, #3A9679 100%);
   }
   
   .cardContent {
@@ -117,6 +140,72 @@
   .registerButton:disabled {
     background-color: #9aa0b5;
     cursor: not-allowed;
+  }
+  
+  /* Terms and Conditions Section */
+  .termsContainer {
+    margin: 20px 0;
+    padding: 16px;
+    background-color: #f0fdf4;
+    border: 2px solid #3A9679;
+    border-radius: 8px;
+  }
+  
+  .termsLabel {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    cursor: pointer;
+    font-size: 14px;
+    color: #333;
+    line-height: 1.5;
+  }
+  
+  .termsCheckbox {
+    width: 18px;
+    height: 18px;
+    margin-top: 2px;
+    cursor: pointer;
+    accent-color: #3A9679;
+    flex-shrink: 0;
+  }
+  
+  .termsLink {
+    background: none;
+    border: none;
+    color: #2F3E75;
+    font-weight: 600;
+    text-decoration: underline;
+    cursor: pointer;
+    padding: 0;
+    font-size: 14px;
+    transition: color 0.2s ease;
+  }
+  
+  .termsLink:hover {
+    color: #3A9679;
+  }
+  
+  .confirmationList {
+    margin: 12px 0 0 28px;
+    padding: 0;
+    list-style: none;
+    font-size: 13px;
+    color: #4b5563;
+  }
+  
+  .confirmationList li {
+    padding: 4px 0;
+    position: relative;
+    padding-left: 20px;
+  }
+  
+  .confirmationList li::before {
+    content: "✓";
+    position: absolute;
+    left: 0;
+    color: #3A9679;
+    font-weight: bold;
   }
   
   .socialDivider {

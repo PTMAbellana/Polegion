@@ -17,7 +17,7 @@ class AssessmentService {
     }
 
     /**
-     * Generate a new assessment with 60 random questions (10 per category)
+     * Generate a new assessment with 30 questions for pretest (5 per category) or 60 for posttest (10 per category)
      * @param {string} userId - User UUID
      * @param {string} testType - 'pretest' or 'posttest'
      * @returns {Promise<Object>} Assessment with questions array
@@ -32,15 +32,18 @@ class AssessmentService {
 
             const questions = [];
 
-            // Get 10 random questions from each category
+            // Pretest: 5 questions per category, Posttest: 10 questions per category
+            const questionsPerCategory = testType === 'pretest' ? 5 : 10;
+
+            // Get random questions from each category
             for (const category of this.categories) {
                 const categoryQuestions = await this.assessmentRepo.getQuestionsByCategory(
                     category,
                     testType,
-                    10
+                    questionsPerCategory
                 );
 
-                if (categoryQuestions.length < 10) {
+                if (categoryQuestions.length < questionsPerCategory) {
                     console.warn(`Warning: Only ${categoryQuestions.length} questions found for ${category}`);
                 }
 
@@ -427,6 +430,11 @@ class AssessmentService {
                     console.log('[AssessmentService] Castle 1 unlocked (created new)');
                 }
 
+                // Clear castle cache for this user to ensure frontend gets fresh data
+                const cache = require('../cache');
+                cache.clearUserCache(userId);
+                console.log('[AssessmentService] Cleared castle cache for user after pretest');
+
                 // Unlock first chapter of Castle 1
                 if (this.chapterRepo && this.userChapterProgressRepo) {
                     const castle1Chapters = await this.chapterRepo.getChaptersByCastleId(castle1.id);
@@ -473,6 +481,11 @@ class AssessmentService {
                     });
                     console.log('[AssessmentService] Castle 6 marked as completed - Journey complete!');
                 }
+
+                // Clear castle cache for this user to ensure frontend gets fresh data
+                const cache = require('../cache');
+                cache.clearUserCache(userId);
+                console.log('[AssessmentService] Cleared castle cache for user after posttest');
             }
 
         } catch (error) {

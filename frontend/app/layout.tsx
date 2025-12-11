@@ -4,6 +4,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import { Toaster } from "react-hot-toast";
 import Footer from "@/components/Footer";
 import AppProvider from "@/context/AppProvider";
+import GlobalLandscapePrompt from "@/components/GlobalLandscapePrompt";
 
 export const metadata: Metadata = {
   title: "Polegion",
@@ -18,11 +19,18 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+        <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <meta name="theme-color" content="#2C514C" />
+        <link rel="manifest" href="/manifest.json" />
         <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;700&display=swap" rel="stylesheet" />
         <link rel="icon" type="image/x-icon" href="images/polegionIcon.png" />
+        <link rel="apple-touch-icon" href="images/polegionIcon.png" />
       </head>
       <body>
+        <GlobalLandscapePrompt />
         <Toaster />
         <AppProvider>
           {children}

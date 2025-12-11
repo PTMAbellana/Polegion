@@ -27,17 +27,23 @@ const Sidebar = (
 
     useEffect(() => {
         const checkMobile = () => {
-            setIsMobile(window.innerWidth <= 768);
-            if (window.innerWidth <= 768) {
+            const isPortrait = window.innerWidth <= 768;
+            const isLandscape = window.innerWidth <= 900 && window.innerHeight <= 500;
+            const isMobileDevice = isPortrait || isLandscape;
+            
+            setIsMobile(isMobileDevice);
+            if (isMobileDevice) {
                 setIsCollapsed(true);
             }
         };
 
         checkMobile();
         window.addEventListener('resize', checkMobile);
+        window.addEventListener('orientationchange', checkMobile);
 
         return () => {
             window.removeEventListener('resize', checkMobile);
+            window.removeEventListener('orientationchange', checkMobile);
         };
     }, []);
 

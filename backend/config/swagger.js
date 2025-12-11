@@ -23,6 +23,10 @@ const swaggerOptions = {
       {
         url: `http://localhost:${process.env.PORT || 5000}/api`,
         description: 'Development server'
+      },
+      {
+        url: 'https://api.polegion.com/api',
+        description: 'Production server (if deployed)'
       }
     ],
     tags: [
@@ -37,7 +41,9 @@ const swaggerOptions = {
       { name: 'Problems', description: 'Programming problem management' },
       { name: 'Competitions', description: 'Competition management and lifecycle' },
       { name: 'Attempts', description: 'Solution submission and grading' },
-      { name: 'Leaderboards', description: 'Rankings and statistics' }
+      { name: 'Leaderboards', description: 'Rankings and statistics' },
+      { name: 'Assessments', description: 'Pre-test and post-test assessments' },
+      { name: 'User Progress', description: 'Castle and chapter progress tracking' }
     ],
     components: {
       securitySchemes: {
@@ -61,6 +67,40 @@ const swaggerOptions = {
           properties: {
             message: { type: 'string' },
             data: { type: 'object' }
+          }
+        },
+        User: {
+          type: 'object',
+          properties: {
+            id: { type: 'string', format: 'uuid' },
+            email: { type: 'string', format: 'email' },
+            first_name: { type: 'string' },
+            last_name: { type: 'string' },
+            role: { type: 'string', enum: ['student', 'teacher'] },
+            gender: { type: 'string', enum: ['male', 'female', 'other'] },
+            profile_pic: { type: 'string', nullable: true }
+          }
+        },
+        Castle: {
+          type: 'object',
+          properties: {
+            id: { type: 'string', format: 'uuid' },
+            name: { type: 'string' },
+            description: { type: 'string' },
+            order_index: { type: 'integer' },
+            image_number: { type: 'integer' },
+            total_xp: { type: 'integer' }
+          }
+        },
+        Chapter: {
+          type: 'object',
+          properties: {
+            id: { type: 'string', format: 'uuid' },
+            castle_id: { type: 'string', format: 'uuid' },
+            title: { type: 'string' },
+            description: { type: 'string' },
+            chapter_number: { type: 'integer' },
+            xp_reward: { type: 'integer' }
           }
         }
       },
@@ -105,10 +145,33 @@ const swaggerOptions = {
             }
           }
         }
+      },
+      parameters: {
+        CastleId: {
+          name: 'castleId',
+          in: 'path',
+          required: true,
+          schema: { type: 'string', format: 'uuid' },
+          description: 'Castle UUID'
+        },
+        ChapterId: {
+          name: 'chapterId',
+          in: 'path',
+          required: true,
+          schema: { type: 'string', format: 'uuid' },
+          description: 'Chapter UUID'
+        },
+        RoomId: {
+          name: 'roomId',
+          in: 'path',
+          required: true,
+          schema: { type: 'string', format: 'uuid' },
+          description: 'Room UUID'
+        }
       }
     }
   },
-  apis: ['./presentation/routes/*.js'] // JSDoc will scan these files
+  apis: ['./presentation/routes/*.js', './presentation/controllers/*.js'] // JSDoc will scan these files
 };
 
 // Generate the Swagger specification

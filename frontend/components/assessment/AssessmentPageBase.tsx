@@ -161,7 +161,10 @@ export default function AssessmentPageBase({ config }: { config: AssessmentConfi
         );
     };
 
-    const STORAGE_KEY = `assessment_${config.type}_${config.castleId}`;
+    // Get user ID for storage key
+    const authData = authUtils.getAuthData();
+    const userId = authData.user?.id || 'guest';
+    const STORAGE_KEY = `assessment_${config.type}_${config.castleId}_${userId}`;
 
     // Check if assessment is already completed on mount
     useEffect(() => {
@@ -180,8 +183,8 @@ export default function AssessmentPageBase({ config }: { config: AssessmentConfi
                     
                     // Keep results in the format returned by backend
                     const formattedResults = {
-                        totalScore: existingResults.totalScore || Math.round((existingResults.percentage / 100) * (existingResults.totalQuestions || 60)),
-                        totalQuestions: existingResults.totalQuestions || 60,
+                        totalScore: existingResults.totalScore || Math.round((existingResults.percentage / 100) * (existingResults.totalQuestions || config.totalQuestions)),
+                        totalQuestions: existingResults.totalQuestions || config.totalQuestions,
                         percentage: existingResults.percentage,
                         categoryScores: existingResults.categoryScores || {}, // Keep as object
                         completedAt: existingResults.completedAt

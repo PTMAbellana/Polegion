@@ -71,10 +71,7 @@ class ParticipantRepo extends BaseRepo {
         }
     }
     async getAllParticipants(room_id){
-        // todo:
-        // get all participants in the current room
-        // para ni sa admin na part 
-        // console.log('getAllParticipants called: ', room_id)
+        // Get all participants in the current room for admin/teacher view
         try {
             const {
                 data,

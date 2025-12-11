@@ -10,6 +10,7 @@ import { registerSchema } from '@/schemas/authSchemas';
 import { ROUTES, STUDENT_ROUTES, TEACHER_ROUTES } from '@/constants/routes';
 import PasswordInput from '@/components/auth/inputs/PasswordInput';
 import EmailInput from '@/components/auth/inputs/EmailInput';
+import TermsAndConditionsModal from '@/components/auth/TermsAndConditionsModal';
 import styles from '@/styles/register.module.css';
 
 export default function RegisterForm(
@@ -25,6 +26,8 @@ export default function RegisterForm(
   
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
+  const [showTermsModal, setShowTermsModal] = useState(false);
 
   const {
     register,
@@ -35,6 +38,11 @@ export default function RegisterForm(
   });
 
   const onSubmit = async (formData: RegisterFormData) => {
+    if (!agreedToTerms) {
+      toast.error("Please agree to the Terms and Conditions to continue");
+      return;
+    }
+
     const result = await registerUser(formData, userType);
     
     if (result.success) {
@@ -156,13 +164,47 @@ export default function RegisterForm(
         </div>
       </div>
 
+      {/* Terms and Conditions */}
+      <div className={styles.termsContainer}>
+        <label className={styles.termsLabel}>
+          <input
+            type="checkbox"
+            checked={agreedToTerms}
+            onChange={(e) => setAgreedToTerms(e.target.checked)}
+            className={styles.termsCheckbox}
+          />
+          <span>
+            I agree to the{' '}
+            <button
+              type="button"
+              onClick={() => setShowTermsModal(true)}
+              className={styles.termsLink}
+            >
+              Terms and Conditions
+            </button>
+            {' '}and confirm that:
+          </span>
+        </label>
+        <ul className={styles.confirmationList}>
+          <li>I have read and understood the data collection practices</li>
+          <li>I understand this is a research platform for educational purposes</li>
+          <li>If I am under 18, my parent/guardian has provided consent</li>
+        </ul>
+      </div>
+
       <button
         type="submit"
         className={styles.registerButton}
-        disabled={loginLoading}
+        disabled={loginLoading || !agreedToTerms}
       >
         {loginLoading ? "Registering..." : "Register"}
       </button>
+
+      {/* Terms Modal */}
+      <TermsAndConditionsModal
+        isOpen={showTermsModal}
+        onClose={() => setShowTermsModal(false)}
+      />
     </form>
   );
 }

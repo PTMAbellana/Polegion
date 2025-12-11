@@ -1,7 +1,8 @@
 // ============================================================================
 // SEED ASSESSMENT QUESTIONS
 // ============================================================================
-// Inserts all 240 assessment questions into the database
+// Inserts all 175 assessment questions into the database
+// 30 Pretest questions (5 per category) + 145 Posttest questions
 // Usage: node infrastructure/seeds/seedAssessmentQuestions.js
 
 const supabase = require('../../config/supabase');

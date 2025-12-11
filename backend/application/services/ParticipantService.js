@@ -1,5 +1,4 @@
-// const userModel = require('../../domain/models/User')
-const Mailer = require('../../utils/Mailer'); // Adjust path as needed
+const Mailer = require('../../utils/Mailer');
 const cache = require('../cache');
 const participantModel = require('../../domain/models/Participant');
 

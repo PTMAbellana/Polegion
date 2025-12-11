@@ -9,6 +9,7 @@ import styles from "./page.module.css";
 export default function Home() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const carouselRef = useRef<HTMLDivElement>(null);
   
   const carouselSlides = [
@@ -84,10 +85,29 @@ export default function Home() {
                 style={{ objectFit: 'contain' }}
               />
             </div>
+            <button 
+              className={styles.hamburger}
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              aria-label="Toggle menu"
+            >
+              <span></span>
+              <span></span>
+              <span></span>
+            </button>
             <button className={styles.signInBtn} onClick={handleSignIn}>
               Sign In
             </button>
           </div>
+          {isMobileMenuOpen && (
+            <div className={styles.mobileMenu}>
+              <button className={styles.mobileSignInBtn} onClick={() => {
+                handleSignIn();
+                setIsMobileMenuOpen(false);
+              }}>
+                Sign In
+              </button>
+            </div>
+          )}
         </header>
 
         {/* Hero Section - Big and Exciting */}

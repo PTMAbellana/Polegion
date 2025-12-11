@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { persist, createJSONStorage } from 'zustand/middleware'
 import { ExtendTeacherRoomState } from '@/types/state/rooms'
+import logger from '@/utils/logger'
 import { 
     getRooms, 
     createRoom as apiCreateRoom, 
@@ -61,7 +62,7 @@ export const useTeacherRoomStore = create<ExtendTeacherRoomState>()(
 
                     if (resPart.status === 'fulfilled') {
                         participants = resPart.value.success ? resPart.value.data : [];
-                        console.log('Fetched participants:', participants);
+                        logger.log('Fetched participants:', participants);
                     } else {
                         participants = [];
                     }
@@ -73,7 +74,7 @@ export const useTeacherRoomStore = create<ExtendTeacherRoomState>()(
                     }
                     if (resComp.status === 'fulfilled') {
                         competitions = resComp.value.success ? resComp.value.data : [];
-                        console.log('Fetched competitions:', competitions);
+                        logger.log('Fetched competitions:', competitions);
                     } else {
                         competitions = [];
                     }
@@ -133,14 +134,14 @@ export const useTeacherRoomStore = create<ExtendTeacherRoomState>()(
                     // First, handle image upload if there's a file
                     if (roomData.banner_image instanceof File) {
                         try {
-                            console.log('Uploading banner image...');
+                            logger.log('Uploading banner image...');
                             const formData = new FormData();
                             formData.append('image', roomData.banner_image);
                             
                             const uploadResponse = await uploadImage(formData);
                             if (uploadResponse.success) {
                                 bannerImageUrl = uploadResponse.imageUrl;
-                                console.log('Banner uploaded successfully:', bannerImageUrl);
+                                logger.log('Banner uploaded successfully:', bannerImageUrl);
                             } else {
                                 return { 
                                     success: false, 
@@ -149,7 +150,7 @@ export const useTeacherRoomStore = create<ExtendTeacherRoomState>()(
                             }
                         } catch (uploadError: unknown) {
                             const uploadErrorMessage = uploadError instanceof Error ? uploadError.message : 'Failed to upload banner image';
-                            console.error('Banner upload failed:', uploadError);
+                            logger.error('Banner upload failed:', uploadError);
                             set({ 
                                 error: `Failed to upload banner image: ${uploadErrorMessage}`,
                                 loading: false 
@@ -205,14 +206,14 @@ export const useTeacherRoomStore = create<ExtendTeacherRoomState>()(
                     // First, handle image upload if there's a new file
                     if (roomData.banner_image instanceof File) {
                         try {
-                            console.log('Uploading updated banner image...');
+                            logger.log('Uploading updated banner image...');
                             const formData = new FormData();
                             formData.append('image', roomData.banner_image);
                             
                             const uploadResponse = await uploadImage(formData);
                             if (uploadResponse.success) {
                                 bannerImageUrl = uploadResponse.imageUrl;
-                                console.log('Updated banner uploaded successfully:', bannerImageUrl);
+                                logger.log('Updated banner uploaded successfully:', bannerImageUrl);
                             } else {
                                 return { 
                                     success: false, 
@@ -221,7 +222,7 @@ export const useTeacherRoomStore = create<ExtendTeacherRoomState>()(
                             }
                         } catch (uploadError: unknown) {
                             const uploadErrorMessage = uploadError instanceof Error ? uploadError.message : 'Failed to upload banner image';
-                            console.error('Banner upload failed:', uploadError);
+                            logger.error('Banner upload failed:', uploadError);
                             set({ 
                                 error: `Failed to upload banner image: ${uploadErrorMessage}`,
                                 loading: false 
@@ -301,13 +302,9 @@ export const useTeacherRoomStore = create<ExtendTeacherRoomState>()(
             inviteParticipant: async (roomCode: string, email: string) => {
                 set({ loading: true, error: null });
                 try {
-                    // TODO: Replace with your actual API call
                     const response = await apiInviteParticipant(email, roomCode);
                     
-                    console.log('API: Inviting participant:', email, 'to room:', roomCode);
-                    
-                    // Optionally refresh room details to update participants list
-                    // const updatedRoom = await get().fetchRoomDetails(roomCode);
+                    logger.log('API: Inviting participant:', email, 'to room:', roomCode);
                     
                     set({ loading: false });
                     return { 
@@ -358,8 +355,8 @@ export const useTeacherRoomStore = create<ExtendTeacherRoomState>()(
                 try {
                     const response = await createProblem(problem, currentRoom.code);
                     if (!response.success) {
-                         console.log('Failed to add problem to room');
-                         console.log(response.error); 
+                         logger.log('Failed to add problem to room');
+                         logger.log(response.error); 
                          return { 
                              success: false, 
                              error: 'Failed to add problem to room'  
@@ -376,7 +373,7 @@ export const useTeacherRoomStore = create<ExtendTeacherRoomState>()(
                          message: response.message
                      }
                 } catch (error) {
-                    console.error('Error adding problem to room:', error);
+                    logger.error('Error adding problem to room:', error);
                     return { success: false, error: 'Error adding problem to room' };
                 }
             },
@@ -386,8 +383,8 @@ export const useTeacherRoomStore = create<ExtendTeacherRoomState>()(
                 try {
                     const response = await updateProblem(problemId, updatedProblem);
                     if (!response.success) {
-                        console.log('Failed to update problem in room');
-                        console.log(response.error);
+                        logger.log('Failed to update problem in room');
+                        logger.log(response.error);
                         return {
                             success: false,
                             error: response.error
@@ -406,7 +403,7 @@ export const useTeacherRoomStore = create<ExtendTeacherRoomState>()(
                         message: response.message
                     }
                 } catch (error) {
-                    console.error('Error updating problem in room:', error);
+                    logger.error('Error updating problem in room:', error);
                     return {
                         success: false,
                         error: 'Error updating problem in room'
@@ -419,8 +416,8 @@ export const useTeacherRoomStore = create<ExtendTeacherRoomState>()(
                 try {
                     const response = await deleteProblem(problemId);
                     if (!response.success) {
-                        console.log('Failed to delete problem from room');
-                        console.log(response.error);
+                        logger.log('Failed to delete problem from room');
+                        logger.log(response.error);
                         return {
                             success: false,
                             error: response.error
@@ -437,7 +434,7 @@ export const useTeacherRoomStore = create<ExtendTeacherRoomState>()(
                         message: response.message
                     };
                 } catch (error) {
-                    console.error('Error removing problem from room:', error);
+                    logger.error('Error removing problem from room:', error);
                     return {
                         success: false,
                         error: 'Error removing problem from room'
@@ -471,7 +468,7 @@ export const useTeacherRoomStore = create<ExtendTeacherRoomState>()(
                     message: response.message 
                 };
             } catch (error) {
-                console.error('Failed to remove participant:', error);
+                logger.error('Failed to remove participant:', error);
                 return { 
                     success: false, 
                     error: 'Failed to remove participant' 
@@ -483,24 +480,24 @@ export const useTeacherRoomStore = create<ExtendTeacherRoomState>()(
         addCompetitionToRoom: async (title: string) => {
             const currentRoom = get().currentRoom;
             if (!currentRoom) {
-                console.error('No current room selected');
+                logger.error('No current room selected');
                 return {
                     success: false,
                     error: 'No current room selected'
                 };
             }
 
-            console.log('Creating competition:', { roomId: currentRoom.id, title });
+            logger.log('Creating competition:', { roomId: currentRoom.id, title });
 
             try {
                 const response = await createCompe(currentRoom.id, title);
-                console.log('Create competition response:', response);
+                logger.log('Create competition response:', response);
                 
                 // Backend returns the competition directly or in response.data
                 const newCompetition = response.data || response;
                 
                 if (!newCompetition || !newCompetition.id) {
-                    console.error('Invalid competition response:', response);
+                    logger.error('Invalid competition response:', response);
                     return {
                         success: false,
                         error: 'Invalid response from server'
@@ -515,13 +512,13 @@ export const useTeacherRoomStore = create<ExtendTeacherRoomState>()(
                     } : null
                 }));
                 
-                console.log('Competition added to local state successfully');
+                logger.log('Competition added to local state successfully');
                 return {
                     success: true,
                     data: newCompetition
                 };
             } catch (error: any) {
-                console.error('Failed to create competition:', error);
+                logger.error('Failed to create competition:', error);
                 const errorMessage = error?.response?.data?.error || error?.message || 'Failed to create competition';
                 return {
                     success: false,

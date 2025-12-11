@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { authUtils } from '@/api/axios';
+import logger from '@/utils/logger';
 import { 
     login as apiLogin, 
     register as apiRegister,
@@ -53,14 +54,14 @@ export const useAuthStore = create<AuthState>()(
                     const data = response.data;
                     
                     if (!data.user) {
-                        console.warn("Login successful but user data is missing in response");
+                        logger.warn("Login successful but user data is missing in response");
                         return {
                             success: false,
                             error: "Login successful but user profile data is missing. Please try again."
                         };
                     }
                     const user = data.user;
-                    console.log('Logged in user data:', user.role);
+                    logger.log('Logged in user data:', user.role);
                     const profile: UserProfileDTO = {
                         id: user.id,
                         email: user.email,
@@ -91,7 +92,7 @@ export const useAuthStore = create<AuthState>()(
                     };
                     
                 } catch (error: unknown) {
-                    console.error("Login error: ", error);
+                    logger.error("Login error: ", error);
                     const errorMessage = error instanceof Error ? error.message : "An error occurred during login";
                     return { 
                         success: false, 
@@ -130,7 +131,7 @@ export const useAuthStore = create<AuthState>()(
                         };
                     }
                 } catch (error: unknown) {
-                    console.error('Register Error: ', error);
+                    logger.error('Register Error: ', error);
                     const errorMessage = error instanceof Error ? error.message : "An error occurred during registration";
                     return {
                         success: false,
@@ -155,7 +156,7 @@ export const useAuthStore = create<AuthState>()(
                         return { success: false, error: "Failed to reset password" };
                     }
                 } catch (error: unknown) {
-                    console.error('Error resetting password:', error);
+                    logger.error('Error resetting password:', error);
                     let errorMessage = 'An error occurred while resetting your password';
                     if (error && typeof error === 'object' && 'response' in error) {
                         const axiosError = error as { response?: { data?: { error?: string } } };
@@ -177,17 +178,17 @@ export const useAuthStore = create<AuthState>()(
                         authToken: authData.accessToken,
                         isLoggedIn: true
                     });
-                    console.log('✅ Auth token synced from localStorage');
+                    logger.log('✅ Auth token synced from localStorage');
                 }
             },
 
             refreshUserSession: async (): Promise<boolean> => {
                 const authData = authUtils.getAuthData();
                 
-                console.log('🔄 Refreshing user session...');
+                logger.log('🔄 Refreshing user session...');
                 
                 if (!authData.accessToken) {
-                    console.log('❌ No access token found');
+                    logger.log('❌ No access token found');
                     set({
                         authToken: null,
                         userProfile: null,
@@ -202,7 +203,7 @@ export const useAuthStore = create<AuthState>()(
                         // Check if token and user ID are consistent
                         const tokenPayload = JSON.parse(atob(authData.accessToken.split('.')[1]));
                         if (tokenPayload.sub && tokenPayload.sub !== authData.user.id) {
-                            console.warn('⚠️ User ID mismatch detected, clearing stale data');
+                            logger.warn('⚠️ User ID mismatch detected, clearing stale data');
                             authUtils.clearAuthData();
                             localStorage.removeItem('auth-storage');
                             set({
@@ -213,14 +214,14 @@ export const useAuthStore = create<AuthState>()(
                             return false;
                         }
                     } catch (error) {
-                        console.error('❌ Error validating token:', error);
+                        logger.error('❌ Error validating token:', error);
                     }
                 }
 
                 // ✅ If token expired, refresh it IMMEDIATELY
                 if (authUtils.isTokenExpired()) {
                     try {
-                        console.log('🔄 Token expired on init, refreshing...');
+                        logger.log('🔄 Token expired on init, refreshing...');
                         const refreshResult = await api.post('/auth/refresh-token', {
                             refresh_token: authData.refreshToken
                         });
@@ -233,11 +234,11 @@ export const useAuthStore = create<AuthState>()(
                                 isLoggedIn: true,
                                 userProfile: newData.user
                             });
-                            console.log('✅ Token refreshed successfully on init');
+                            logger.log('✅ Token refreshed successfully on init');
                             return true;
                         }
                     } catch (error) {
-                        console.error('❌ Failed to refresh token on init:', error);
+                        logger.error('❌ Failed to refresh token on init:', error);
                         set({ isLoggedIn: false, authToken: null });
                         return false;
                     }
@@ -249,7 +250,7 @@ export const useAuthStore = create<AuthState>()(
                     userProfile: authData.user,
                     isLoggedIn: true
                 });
-                console.log('✅ Session restored from localStorage with valid token');
+                logger.log('✅ Session restored from localStorage with valid token');
                 return true;
             },
 
@@ -265,7 +266,7 @@ export const useAuthStore = create<AuthState>()(
                 // Clear user-specific castle storage
                 if (currentUserId) {
                     localStorage.removeItem(`castle-storage-${currentUserId}`);
-                    console.log(`[AuthStore] Cleared castle storage for user: ${currentUserId}`);
+                    logger.log(`[AuthStore] Cleared castle storage for user: ${currentUserId}`);
                 }
                 
                 // Clear all chapter progress when logging out
@@ -284,12 +285,13 @@ export const useAuthStore = create<AuthState>()(
                     const isValid = await get().refreshUserSession();
                     
                     if (!isValid) {
-                        console.log('Session invalid, user not logged in');
+                        logger.log('Session invalid, user not logged in');
                     } else {
-                        console.log('Session valid, user logged in');
+                        logger.log('Session valid, user logged in');
                     }
-                } catch (error) {
-                    console.error('Initialization error:', error);
+                } catch (error: unknown) {
+                    const errorMessage = error instanceof Error ? error.message : 'Initialization failed';
+                    logger.error('Initialization error:', errorMessage);
                 } finally {
                     set({ appLoading: false });
                 }
@@ -300,6 +302,10 @@ export const useAuthStore = create<AuthState>()(
                 set({ authLoading: true });
                 try {
                     const response = await updateUserProfile(data); 
+                    
+                    if (!response) {
+                        return { success: false, error: 'No response from server' };
+                    }
                     
                     if (response.success) {
                         // Update user profile in store
@@ -325,7 +331,7 @@ export const useAuthStore = create<AuthState>()(
                         };
                     }
                 } catch (error: unknown) {
-                    console.error('Profile update error:', error);
+                    logger.error('Profile update error:', error);
                     const errorMessage = error instanceof Error ? error.message : "An error occurred while updating your profile";
                     return { success: false, error: errorMessage };
                 } finally {
@@ -338,8 +344,12 @@ export const useAuthStore = create<AuthState>()(
                 try {
                     const response = await apiUpdateEmail(email);
 
+                    if (!response) {
+                        return { success: false, error: 'No response from server' };
+                    }
+
                     if (!response.success) {
-                        console.log('Email update failed response:', response);
+                        logger.log('Email update failed response:', response);
                         alert(response || 'Failed to update email');
                         return { 
                             success: false, 
@@ -353,7 +363,7 @@ export const useAuthStore = create<AuthState>()(
                         message: 'Email updated successfully' 
                     };
                 } catch (error: unknown) {
-                    console.error('Email update error:', error);
+                    logger.error('Email update error:', error);
                     const errorMessage = error instanceof Error ? error.message : "An error occurred while updating your email";
                     return { success: false, error: errorMessage };
                 } finally {
@@ -379,7 +389,7 @@ export const useAuthStore = create<AuthState>()(
                         message: 'Password updated successfully' 
                     };
                 } catch (error: unknown) {
-                    console.error('Password update error:', error);
+                    logger.error('Password update error:', error);
                     const errorMessage = error instanceof Error ? error.message : "An error occurred while updating your password";
                     return { 
                         success: false, 
@@ -395,7 +405,7 @@ export const useAuthStore = create<AuthState>()(
                 try {
                     const response = await deactivateAccount();
                     if (!response.success) {
-                        console.log('Account deactivation failed response:', response);
+                        logger.log('Account deactivation failed response:', response);
                         alert(response || 'Failed to deactivate account');
                         return {
                             success: false,
@@ -409,7 +419,7 @@ export const useAuthStore = create<AuthState>()(
                         message: 'Account deactivated successfully'
                     };
                 } catch (error: unknown) {
-                    console.error('Account deactivation error:', error);
+                    logger.error('Account deactivation error:', error);
                     const errorMessage = error instanceof Error ? error.message : "An error occurred while deactivating your account";
                     return { success: false, error: errorMessage };
                 } finally {
@@ -448,7 +458,7 @@ export const useAuthStore = create<AuthState>()(
                         };
                     }
                 } catch (error: unknown) {
-                    console.error('Profile image upload error:', error);
+                    logger.error('Profile image upload error:', error);
                     const errorMessage = error instanceof Error ? error.message : "An error occurred while uploading your profile image";
                     return { 
                         success: false, 

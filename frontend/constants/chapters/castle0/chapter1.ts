@@ -37,8 +37,8 @@ export const CASTLE0_CHAPTER1_ASSESSMENT_CONFIG = {
     type: 'pretest' as const,
     castleId: 'castle0',
     chapterId: 'castle0-chapter1',
-    totalQuestions: 60,
-    questionsPerCategory: 10,
+    totalQuestions: 30,
+    questionsPerCategory: 5,
     categories: [
         { 
             id: 'knowledge_recall', 

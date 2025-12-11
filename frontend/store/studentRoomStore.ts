@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { persist, createJSONStorage } from 'zustand/middleware'
 import { ExtendedStudentRoomState } from '@/types/state/rooms'
+import logger from '@/utils/logger'
 import { 
     getJoinedRooms as apiGetJoinedRooms, 
     joinRoom as apiJoinRoom, 
@@ -29,7 +30,7 @@ export const useStudentRoomStore = create<ExtendedStudentRoomState>()(
                     const room = get().joinedRooms.find(r => r.code === roomCode);
                     
                     if (!room) {
-                        console.log('Room not found with code:', roomCode);
+                        logger.log('Room not found with code:', roomCode);
                         set ({
                             error: 'Room not found',
                             currentRoom: null,
@@ -38,7 +39,7 @@ export const useStudentRoomStore = create<ExtendedStudentRoomState>()(
                         return;
                     }
 
-                    console.log('📡 Fetching fresh data for room:', room.id);
+                    logger.log('📡 Fetching fresh data for room:', room.id);
 
                     const [resPart, resProb, resCompe] = await Promise.allSettled([
                         getAllParticipants(room.id, 'student'), 
@@ -55,25 +56,25 @@ export const useStudentRoomStore = create<ExtendedStudentRoomState>()(
                     }];
 
                     if (resPart.status === 'fulfilled') {
-                        console.log('Fetched participants:', resPart.value);
+                        logger.log('Fetched participants:', resPart.value);
                         participants = resPart.value.success ? resPart.value.data : [];
                     } else {
-                        console.log('Failed to fetch participants:', resPart.reason);
+                        logger.log('Failed to fetch participants:', resPart.reason);
                         participants = [];
                     }
                     if (resProb.status === 'fulfilled') {
-                        console.log('Fetched problems:', resProb.value);
+                        logger.log('Fetched problems:', resProb.value);
                         problems = resProb.value.success ? resProb.value.data : [];
                     } else {
-                        console.log('Failed to fetch problems:', resProb.reason);
+                        logger.log('Failed to fetch problems:', resProb.reason);
                         problems = [];
                     }
 
                     if (resCompe.status === 'fulfilled') {
-                        console.log('Fetched competitions:', resCompe.value);
+                        logger.log('Fetched competitions:', resCompe.value);
                         competitions = resCompe.value.success ? resCompe.value.data : [];
                     } else {
-                        console.log('Failed to fetch competitions:', resCompe.reason);
+                        logger.log('Failed to fetch competitions:', resCompe.reason);
                         competitions = [];
                     }
                     
@@ -94,7 +95,7 @@ export const useStudentRoomStore = create<ExtendedStudentRoomState>()(
                     });
                 } catch (error: unknown) {
                     const errorMessage = error instanceof Error ? error.message : 'Failed to fetch room details';
-                    console.error('Fetch room details error:', error);
+                    logger.error('Fetch room details error:', error);
                     set({ 
                         error: errorMessage,
                         roomLoading: false,
@@ -113,9 +114,9 @@ export const useStudentRoomStore = create<ExtendedStudentRoomState>()(
                 set({ loading: true, error: null });
                 try {
                     const response = await apiGetJoinedRooms();
-                    console.log('Fetched joined rooms:', response);
+                    logger.log('Fetched joined rooms:', response);
                     if (response.success) {
-                        console.log('Raw joined rooms data:', response.data);
+                        logger.log('Raw joined rooms data:', response.data);
                         
                         
                         set({ 

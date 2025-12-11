@@ -58,8 +58,7 @@ export function AuthProtection() {
             }
         }
 
-        const timer = setTimeout(handleRouteProtection, 100);
-        return () => clearTimeout(timer);
+        handleRouteProtection();
     }, [pathname, router, isLoggedIn, globalLoading, authToken])
 
     return { 

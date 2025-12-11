@@ -14,7 +14,7 @@ class AssessmentRoutes {
          *   post:
          *     tags: [Assessments]
          *     summary: Generate a new assessment
-         *     description: Generate 60 random questions (10 per category) for pretest or posttest
+         *     description: Generate 30 questions (5 per category) for pretest or 60 questions (10 per category) for posttest
          *     parameters:
          *       - in: path
          *         name: testType
