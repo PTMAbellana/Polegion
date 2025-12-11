@@ -44,43 +44,57 @@ export const CHAPTER1_CONCEPTS = [
     key: 'plane',
     title: 'Plane Figures (2D)',
     summary: 'Flat shapes with only length and width',
-    description: 'Flat 2D shapes with length and width only (no depth).'
+    description: 'Flat 2D shapes with length and width only (no depth).',
+    image: '/images/castle5/plane-figures.png',
+    taskId: 'task-0'
   },
   {
     key: 'plane-examples',
     title: 'Plane Examples',
     summary: 'Circle, square, triangle, rectangle, pentagon, hexagon',
-    description: 'Common plane figures include circle, square, triangle, rectangle, pentagon, and hexagon.'
+    description: 'Common plane figures include circle, square, triangle, rectangle, pentagon, and hexagon.',
+    image: '/images/castle5/plane-examples.png',
+    taskId: 'task-1'
   },
   {
     key: 'solid',
     title: 'Solid Figures (3D)',
     summary: 'Shapes with length, width, AND height',
-    description: '3D shapes with length, width, and height (depth).'
+    description: '3D shapes with length, width, and height (depth).',
+    image: '/images/castle5/solid-figures.png',
+    taskId: 'task-2'
   },
   {
     key: 'solid-examples',
     title: 'Solid Examples',
     summary: 'Cube, sphere, cylinder, cone, pyramid, prism',
-    description: 'Common solid figures include cube, sphere, cylinder, cone, pyramid, and prism.'
+    description: 'Common solid figures include cube, sphere, cylinder, cone, pyramid, and prism.',
+    image: '/images/castle5/solid-examples.png',
+    taskId: 'task-3'
   },
   {
     key: 'difference',
     title: 'Key Difference',
     summary: 'Plane = flat, Solid = has volume',
-    description: 'Plane figures are flat; solid figures occupy space and have volume.'
+    description: 'Plane figures are flat; solid figures occupy space and have volume.',
+    image: '/images/castle5/difference.png',
+    taskId: 'task-4'
   },
   {
     key: 'prism',
     title: 'Prism',
     summary: 'Two parallel bases connected by rectangular faces',
-    description: 'A solid with two parallel congruent bases and rectangular lateral faces.'
+    description: 'A solid with two parallel congruent bases and rectangular lateral faces.',
+    image: '/images/castle5/prism.png',
+    taskId: 'task-5'
   },
   {
     key: 'pyramid',
     title: 'Pyramid',
     summary: 'Polygon base with triangular faces meeting at apex',
-    description: 'A solid with a polygon base and triangular faces meeting at a single apex.'
+    description: 'A solid with a polygon base and triangular faces meeting at a single apex.',
+    image: '/images/castle5/pyramid.png',
+    taskId: 'task-6'
   }
 ];
 

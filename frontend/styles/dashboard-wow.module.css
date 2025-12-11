@@ -151,7 +151,7 @@
   font-weight: 800;
   font-size: 2rem;
   line-height: 1.2;
-  background: var(--primary-gradient);
+  background: linear-gradient(135deg, #2C514C 0%, #6D8A72 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -171,7 +171,7 @@
   font-weight: 500;
   font-size: 1rem;
   line-height: 1.5;
-  color: var(--text-secondary);
+  color: #4b5563;
   margin: 0;
 }
 

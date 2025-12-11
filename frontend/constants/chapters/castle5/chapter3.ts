@@ -43,49 +43,65 @@ export const CHAPTER3_CONCEPTS = [
     key: 'surface-area',
     title: 'Surface Area',
     summary: 'Total area of all faces of a 3D solid',
-    description: 'Total covering area of a solid’s outer surfaces.'
+    description: 'Total covering area of a solid’s outer surfaces.',
+    image: '/images/castle5/surface-area.png',
+    taskId: 'task-0'
   },
   {
     key: 'cube',
     title: 'Cube Surface Area',
     summary: 'SA = 6s² (6 equal square faces)',
-    description: 'Six identical squares; multiply 6 by side squared.'
+    description: 'Six identical squares; multiply 6 by side squared.',
+    image: '/images/castle5/cube.png',
+    taskId: 'task-1'
   },
   {
     key: 'rectangular-prism',
     title: 'Rectangular Prism',
     summary: 'SA = 2(lw + lh + wh)',
-    description: 'Sum areas of all rectangular faces.'
+    description: 'Sum areas of all rectangular faces.',
+    image: '/images/castle5/rectangular-prism.png',
+    taskId: 'task-2'
   },
   {
     key: 'cylinder',
     title: 'Cylinder Surface Area',
     summary: 'SA = 2πr² + 2πrh',
-    description: 'Two circular ends plus curved side area.'
+    description: 'Two circular ends plus curved side area.',
+    image: '/images/castle5/cylinder.png',
+    taskId: 'task-3'
   },
   {
     key: 'sphere',
     title: 'Sphere Surface Area',
     summary: 'SA = 4πr²',
-    description: 'Area depends only on radius: 4 × π × r².'
+    description: 'Area depends only on radius: 4 × π × r².',
+    image: '/images/castle5/sphere.png',
+    taskId: 'task-4'
   },
   {
     key: 'cone',
     title: 'Cone Surface Area',
     summary: 'SA = πr² + πrl (l = slant height)',
-    description: 'Base circle plus lateral surface using slant height.'
+    description: 'Base circle plus lateral surface using slant height.',
+    image: '/images/castle5/cone-surface-area.png',
+    taskId: 'task-5'
   },
   {
     key: 'square-pyramid',
     title: 'Square Pyramid',
     summary: 'SA = b² + 2bl (l = slant height)',
-    description: 'Square base plus four triangular faces.'
+    description: 'Square base plus four triangular faces.',
+    image: '/images/castle5/square-pyramid-surface-area.png',
+    taskId: 'task-6'
   },
   {
     key: 'triangular-prism',
     title: 'Triangular Prism',
     summary: 'SA = 2(½bh) + perimeter × H',
-    description: 'Two triangular bases plus three rectangles; sum all face areas.'
+    description: 'Two triangular bases plus three rectangles; sum all face areas.',
+    image: '/images/castle5/triangular-prism.png',
+    taskId: 'task-7'
   }
 ];
 
