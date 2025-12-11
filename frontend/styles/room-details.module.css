@@ -149,7 +149,7 @@
 
 .problemsHeader {
   background: linear-gradient(135deg, var(--primary-green) 0%, var(--primary-green-dark) 100%);
-  padding: 1.5rem;
+  padding: 1rem 1.5rem;
   color: white;
   position: relative;
   overflow: hidden;
@@ -308,8 +308,8 @@
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.9) 100%);
   backdrop-filter: blur(12px);
   border-radius: 20px;
-  padding: 1.75rem;
-  margin-bottom: 1.25rem;
+  padding: 1.25rem 1.75rem;
+  margin-bottom: 1rem;
   border: 2px solid rgba(16, 185, 129, 0.1);
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -524,7 +524,7 @@
 
 .participantsHeader {
   background: linear-gradient(135deg, var(--success-green) 0%, var(--primary-green) 100%);
-  padding: 1.5rem;
+  padding: 1rem 1.5rem;
   color: white;
   position: relative;
   overflow: hidden;

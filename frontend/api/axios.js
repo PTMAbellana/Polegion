@@ -4,6 +4,15 @@ import { setupCache } from "axios-cache-interceptor";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
 
+// Create completely isolated axios instance for refresh token calls (NO INTERCEPTORS)
+const refreshAxios = axios.create({
+	baseURL: API_URL,
+	headers: {
+		"Content-Type": "application/json",
+	},
+	timeout: 10000,
+});
+
 // Create base axios instance
 const baseAxios = axios.create({
 	baseURL: API_URL,
@@ -25,22 +34,32 @@ const api = setupCache(baseAxios, {
 	etag: false,
 	modifiedSince: false,
 	// Debug mode
-	debug: process.env.NODE_ENV === 'development' ? console.log : undefined,
+	// debug: process.env.NODE_ENV === 'development' ? console.log : undefined,
 });
 
 // Auth utilities
 export const authUtils = {
+	// In authUtils.saveAuthData, add:
 	saveAuthData: (authData) => {
-		if (authData?.session) {
-			const { session, user } = authData;
-			const expiresAt = session.expires_at;
-			console.log("💾 Saving auth data - Token expires at:", new Date(expiresAt * 1000).toLocaleString());
-			
-			localStorage.setItem("access_token", session.access_token);
-			localStorage.setItem("refresh_token", session.refresh_token);
-			localStorage.setItem("user", JSON.stringify(user));
-			localStorage.setItem("expires_at", expiresAt.toString());
-		}
+	    if (authData?.session) {
+	        const { session, user } = authData;
+	        const expiresAt = session.expires_at;
+	        console.log("💾 Saving auth data:", {
+	            accessToken: session.access_token ? "✅ Present" : "❌ Missing",
+	            refreshToken: session.refresh_token ? "✅ Present" : "❌ Missing",
+	            expiresAt: new Date(expiresAt * 1000).toLocaleString(),
+	            user: user ? "✅ Present" : "❌ Missing"
+	        });
+	        
+	        localStorage.setItem("access_token", session.access_token);
+	        localStorage.setItem("refresh_token", session.refresh_token);
+	        localStorage.setItem("user", JSON.stringify(user));
+	        localStorage.setItem("expires_at", expiresAt.toString());
+	        
+	        console.log("✅ Auth data saved to localStorage");
+	    } else {
+	        console.error("❌ Invalid authData structure:", authData);
+	    }
 	},
 
 	getAuthData: () => {
@@ -109,12 +128,18 @@ let isRefreshing = false;
 let refreshPromise = null;
 
 // Request interceptor - Check token validity BEFORE making request
+// Request interceptor - Check token validity BEFORE making request
 api.interceptors.request.use(
 	async (config) => {
-		// Skip token check for auth endpoints and public endpoints (castles, chapters)
+		// 🚨 CRITICAL: Skip ALL processing for refresh-token endpoint to prevent circular dependency
+		if (config.url?.includes('/auth/refresh-token')) {
+			// Return config as-is, no auth headers, no token checks
+			return config;
+		}
+
+		// Skip token check for other auth endpoints and public endpoints
 		if (config.url?.includes('/auth/login') || 
-		    config.url?.includes('/auth/register') || 
-		    config.url?.includes('/auth/refresh-token') ||
+		    config.url?.includes('/auth/register') ||
 		    (config.url?.startsWith('castles') && config.method?.toLowerCase() === 'get') ||
 		    (config.url?.startsWith('chapters') && config.method?.toLowerCase() === 'get')) {
 			// Still add token if available for public endpoints (to get user-specific data)
@@ -125,6 +150,7 @@ api.interceptors.request.use(
 			return config;
 		}
 
+		// Rest of the interceptor logic for protected endpoints...
 		const accessToken = localStorage.getItem("access_token");
 		
 		if (!accessToken) {
@@ -189,38 +215,45 @@ async function refreshAccessToken() {
 	try {
 		console.log("🔄 Refreshing access token...");
 		
-		// // Use plain axios for refresh to avoid interceptor loop
-		// const plainAxios = axios.create({
-		// 	baseURL: API_URL,
-		// 	timeout: 10000,
-		// });
-
-		const response = await api.post("/auth/refresh-token", {
+		// 🚨 CRITICAL: Use the completely isolated axios instance (NO INTERCEPTORS)
+		const response = await refreshAxios.post("/auth/refresh-token", {
 			refresh_token: refreshToken
 		});
 
+		// Rest of the function remains the same...
 		if (response.status === 200) {
-			const newData = response.data.data;
-			const newAccessToken = newData.session.access_token;
-			
+		    const newData = response.data.data;
+		    
+		    // ✅ Validate response structure
+		    if (!newData?.session?.access_token || !newData?.session?.refresh_token) {
+		        console.error("❌ Invalid response structure from backend:", newData);
+		        throw new Error("Invalid token refresh response");
+		    }
+		    
 			console.log("✅ Token refresh successful!");
+			console.log("📋 New session data:", {
+				hasAccessToken: !!newData.session.access_token,
+				hasRefreshToken: !!newData.session.refresh_token,
+				hasExpiresAt: !!newData.session.expires_at,
+				hasUser: !!newData.user
+			});
 			
-			// Update localStorage
+			// ✅ Update localStorage with COMPLETE data
 			authUtils.saveAuthData(newData);
 			
-			// Update Zustand store
+			// ✅ Update Zustand store properly
 			if (typeof window !== 'undefined') {
 				try {
-					const authStorage = localStorage.getItem('auth-storage');
-					if (authStorage) {
-						const parsed = JSON.parse(authStorage);
-						parsed.state.authToken = newAccessToken;
-						parsed.state.userProfile = newData.user;
-						parsed.state.isLoggedIn = true;
-						localStorage.setItem('auth-storage', JSON.stringify(parsed));
-					}
+					// Get the current Zustand state and update it properly
+                    const { useAuthStore } = await import("@/store/useAuthStore");
+					const authStore = useAuthStore.getState();
+					authStore.setAuthToken(newData.session.access_token);
+					authStore.setUserProfile(newData.user);
+					authStore.setIsLoggedIn(true);
+					
+					console.log("✅ Zustand store updated successfully");
 				} catch (e) {
-					console.error("Failed to update Zustand store:", e);
+					console.error("❌ Failed to update Zustand store:", e);
 				}
 				
 				// Dispatch event to notify other parts of the app
@@ -231,7 +264,7 @@ async function refreshAccessToken() {
 			api.storage.clear();
 			console.log("🗑️ Cache cleared after token refresh");
 
-			return newAccessToken;
+			return newData.session.access_token;
 		} else {
 			throw new Error("Token refresh failed");
 		}
