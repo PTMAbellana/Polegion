@@ -245,7 +245,7 @@ async function refreshAccessToken() {
 			if (typeof window !== 'undefined') {
 				try {
 					// Get the current Zustand state and update it properly
-                    const { useAuthStore } = await import("@/store/useAuthStore");
+                    const { useAuthStore } = await import("@/store/authStore");
 					const authStore = useAuthStore.getState();
 					authStore.setAuthToken(newData.session.access_token);
 					authStore.setUserProfile(newData.user);
