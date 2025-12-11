@@ -57,8 +57,9 @@ export default function PracticePage() {
   }
 
   return (
-    <div className={styles.practicePageContainer}>
+    // <div className={styles.practicePageContainer}>
 
+    <div>
       {/* Page Header */}
       <PageHeader 
         title="Geometry Practice Hub"

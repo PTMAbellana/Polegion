@@ -46,61 +46,81 @@ export const CHAPTER4_CONCEPTS = [
     key: 'volume',
     title: 'Volume',
     summary: 'Space inside a 3D solid (cubic units)',
-    description: 'Amount of 3D space a solid contains; measured in cubes.'
+    description: 'Amount of 3D space a solid contains; measured in cubes.',
+    image: '/images/castle5/volume.png',
+    taskId: 'task-0'
   },
   {
     key: 'cube',
     title: 'Cube Volume',
     summary: 'V = s³',
-    description: 'Multiply side by itself three times (side cubed).'
+    description: 'Multiply side by itself three times (side cubed).',
+    image: '/images/castle5/cube.png',
+    taskId: 'task-1'
   },
   {
     key: 'rectangular-prism',
     title: 'Rectangular Prism',
     summary: 'V = l × w × h',
-    description: 'Length times width times height gives the volume.'
+    description: 'Length times width times height gives the volume.',
+    image: '/images/castle5/rectangular-prism.png',
+    taskId: 'task-2'
   },
   {
     key: 'cylinder',
     title: 'Cylinder Volume',
     summary: 'V = πr²h',
-    description: 'Area of circular base (πr²) times height.'
+    description: 'Area of circular base (πr²) times height.',
+    image: '/images/castle5/cylinder.png',
+    taskId: 'task-3'
   },
   {
     key: 'sphere',
     title: 'Sphere Volume',
     summary: 'V = (4/3)πr³',
-    description: 'Four-thirds times π times radius cubed.'
+    description: 'Four-thirds times π times radius cubed.',
+    image: '/images/castle5/sphere.png',
+    taskId: 'task-4'
   },
   {
     key: 'cone',
     title: 'Cone Volume',
     summary: 'V = (1/3)πr²h',
-    description: 'One-third of a cylinder with same base and height.'
+    description: 'One-third of a cylinder with same base and height.',
+    image: '/images/castle5/cone-volume.png',
+    taskId: 'task-5'
   },
   {
     key: 'square-pyramid',
     title: 'Square Pyramid',
     summary: 'V = (1/3)b²h',
-    description: 'One-third of a prism with square base b and height h.'
+    description: 'One-third of a prism with square base b and height h.',
+    image: '/images/castle5/square-pyramid-volume.png',
+    taskId: 'task-6'
   },
   {
     key: 'triangular-prism',
     title: 'Triangular Prism',
     summary: 'V = (½bh) × H',
-    description: 'Base triangle area (½bh) multiplied by prism height H.'
+    description: 'Base triangle area (½bh) multiplied by prism height H.',
+    image: '/images/castle5/triangular-prism.png',
+    taskId: 'task-7'
   },
   {
     key: 'pattern',
     title: 'Volume Pattern',
     summary: 'Pyramids/cones = 1/3 of prisms/cylinders',
-    description: 'Cones and pyramids have one-third the volume counterparts.'
+    description: 'Cones and pyramids have one-third the volume counterparts.',
+    image: '/images/castle5/volume-patterns.png',
+    taskId: 'task-8'
   },
   {
     key: 'word-problems',
     title: 'Volume Word Problems',
     summary: 'Calculate capacity of containers',
-    description: 'Use volume formulas to find how much a container holds.'
+    description: 'Use volume formulas to find how much a container holds.',
+    image: '/images/castle5/volume-word-problems.png',
+    taskId: 'task-9'
   }
 ];
 
@@ -140,29 +160,29 @@ export const CHAPTER4_NUMBER = 4;
 // Audio narration paths - matches dialogue indices
 export const CHAPTER4_NARRATION = {
   opening: [
-    '/audio/castle5/chapter4/opening_0.mp3',
-    '/audio/castle5/chapter4/opening_1.mp3',
-    '/audio/castle5/chapter4/opening_2.mp3',
-    '/audio/castle5/chapter4/opening_3.mp3',
-    '/audio/castle5/chapter4/opening_4.mp3',
+    '/audio/castle5/chapter4/opening_0.wav',
+    '/audio/castle5/chapter4/opening_1.wav',
+    '/audio/castle5/chapter4/opening_2.wav',
+    '/audio/castle5/chapter4/opening_3.wav',
+    '/audio/castle5/chapter4/opening_4.wav',
   ],
   lesson: [
-    '/audio/castle5/chapter4/lesson_0.mp3',
-    '/audio/castle5/chapter4/lesson_1.mp3',
-    '/audio/castle5/chapter4/lesson_2.mp3',
-    '/audio/castle5/chapter4/lesson_3.mp3',
-    '/audio/castle5/chapter4/lesson_4.mp3',
-    '/audio/castle5/chapter4/lesson_5.mp3',
-    '/audio/castle5/chapter4/lesson_6.mp3',
-    '/audio/castle5/chapter4/lesson_7.mp3',
-    '/audio/castle5/chapter4/lesson_8.mp3',
-    '/audio/castle5/chapter4/lesson_9.mp3',
-    '/audio/castle5/chapter4/lesson_10.mp3',
+    '/audio/castle5/chapter4/lesson_0.wav',
+    '/audio/castle5/chapter4/lesson_1.wav',
+    '/audio/castle5/chapter4/lesson_2.wav',
+    '/audio/castle5/chapter4/lesson_3.wav',
+    '/audio/castle5/chapter4/lesson_4.wav',
+    '/audio/castle5/chapter4/lesson_5.wav',
+    '/audio/castle5/chapter4/lesson_6.wav',
+    '/audio/castle5/chapter4/lesson_7.wav',
+    '/audio/castle5/chapter4/lesson_8.wav',
+    '/audio/castle5/chapter4/lesson_9.wav',
+    '/audio/castle5/chapter4/lesson_10.wav',
   ],
   minigame: [
-    '/audio/castle5/chapter4/minigame_0.mp3',
-    '/audio/castle5/chapter4/minigame_1.mp3',
-    '/audio/castle5/chapter4/minigame_2.mp3',
+    '/audio/castle5/chapter4/minigame_0.wav',
+    '/audio/castle5/chapter4/minigame_1.wav',
+    '/audio/castle5/chapter4/minigame_2.wav',
   ],
 };
 
