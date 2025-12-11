@@ -24,6 +24,17 @@ export default function TeacherLayout({
     }
   }, [isLoggedIn, userProfile?.role, fetchCreatedRooms]);
 
+  if (userProfile?.role !== 'teacher' && userProfile?.role !== 'admin') {
+    return (
+      <div className={styles['page-layout']}>
+        <Sidebar userRole="student" />
+        <main className={styles['main-content']}>
+          <h1>You are not authorized to access this page.</h1>
+        </main>
+      </div>
+    );
+  }
+
   return (
     <div className={styles['page-layout']}>
       <Sidebar userRole="teacher" />

@@ -120,7 +120,7 @@ export default function PracticePage() {
             </div>
             <div className={styles.infoNote}>
               <span className={styles.noteIcon}>ℹ️</span>
-              <p>Practice progress is saved on this device only. If you switch devices, your stats won't transfer.</p>
+              <p>Practice progress is saved on this device only. If you switch devices, your stats won&apos;t transfer.</p>
             </div>
           </div>
         </section>

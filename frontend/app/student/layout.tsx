@@ -24,6 +24,17 @@ export default function StudentLayout({
     }
   }, [isLoggedIn, userProfile?.role, fetchJoinedRooms]);
 
+  if (userProfile?.role !== 'student' && userProfile?.role !== 'admin') {
+    return (
+      <div className={styles['page-layout']}>
+        <Sidebar userRole="teacher" />
+        <main className={styles['main-content']}>
+          <h1>You are not authorized to access this page.</h1>
+        </main>
+      </div>
+    );
+  }
+
   return (
     <div className={styles['page-layout']}>
       <Sidebar userRole="student" />

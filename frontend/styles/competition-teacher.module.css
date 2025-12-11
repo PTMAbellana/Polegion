@@ -59,7 +59,7 @@
 
 /* New Competition Header Styles */
 .competitionHeader {
-  padding: 1.5rem 2rem;
+  padding: 1.5rem 2.75rem;
   margin: 1rem;
   background: linear-gradient(135deg, #2C514C 0%, #1a3a3a 100%);
   position: relative;
@@ -82,7 +82,7 @@
 
 .competitionHeaderContent {
   max-width: 1200px;
-  margin: 0 auto;
+  /* margin: 0 auto; */
   position: relative;
   z-index: 1;
 }
@@ -611,7 +611,7 @@
 
 .sectionHeader {
   background: linear-gradient(135deg, #2C514C 0%, #1a3a3a 100%);
-  padding: 1.5rem;
+  padding: 1.25rem 1.5rem;
   color: white;
   position: relative;
   overflow: hidden;
@@ -1247,6 +1247,7 @@
 
 /* Competition Grid */
 .competitionGrid {
+  padding: 1rem;
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 1.5rem;
@@ -1382,6 +1383,7 @@
   resize: vertical;
   transition: all 0.3s ease;
   background: rgba(255, 255, 255, 0.8);
+  -webkit-text-fill-color: #2c514c;
 }
 
 .textarea:focus {
