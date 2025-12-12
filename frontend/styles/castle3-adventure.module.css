@@ -1061,6 +1061,7 @@
   .chapterSelectionContainer {
     height: auto;
     min-height: 100vh;
+    overflow-y: auto;
   }
   
   .mainContent {
@@ -1090,18 +1091,110 @@
     flex-direction: row;
     text-align: left;
     gap: 0.6rem;
+    padding: 0.75rem;
   }
   
   .backButton {
     top: 0.75rem;
     right: 0.75rem;
     padding: 0.4rem 0.8rem;
+    font-size: 0.9rem;
+    min-width: 44px;
+    min-height: 44px;
   }
 
   .startButton {
     min-width: 200px;
     font-size: 1rem;
     padding: 0.75rem 1.5rem;
+    min-height: 44px;
+  }
+}
+
+@media (max-width: 480px) {
+  .chapterSelectionContainer {
+    padding: 0;
+  }
+
+  .mainContent {
+    padding: 0.25rem;
+    gap: 0.75rem;
+  }
+
+  .titlePanel {
+    width: 95%;
+    padding: 1rem;
+  }
+
+  .castleTitle {
+    font-size: 1.5rem;
+  }
+
+  .castleSubtitle {
+    font-size: 0.85rem;
+  }
+
+  .chapterPanel {
+    max-width: 100%;
+    padding: 0.75rem;
+  }
+
+  .chapterList {
+    gap: 0.5rem;
+  }
+
+  .chapterItem {
+    padding: 0.6rem;
+    gap: 0.5rem;
+  }
+
+  .chapterNumber {
+    width: 35px;
+    height: 35px;
+    font-size: 0.85rem;
+    min-width: 35px;
+  }
+
+  .chapterInfo {
+    gap: 0.2rem;
+  }
+
+  .chapterTitle {
+    font-size: 0.9rem;
+  }
+
+  .chapterObjective {
+    font-size: 0.75rem;
+  }
+
+  .backButton {
+    top: 0.5rem;
+    right: 0.5rem;
+    padding: 0.35rem 0.7rem;
+    font-size: 0.85rem;
+  }
+
+  .startButton {
+    min-width: 180px;
+    font-size: 0.95rem;
+    padding: 0.7rem 1.25rem;
+  }
+
+  .castleInfoCard {
+    max-width: 220px;
+  }
+
+  .rewardBadge {
+    padding: 0.25rem 0.5rem;
+  }
+
+  .rewardBadge span {
+    font-size: 0.65rem;
+  }
+
+  .rewardBadge svg {
+    width: 12px;
+    height: 12px;
   }
 }
 

@@ -8,9 +8,12 @@
   min-height: 100vh;
   height: 100vh;
   width: 100%;
+  max-width: 100vw;
   overflow: hidden;
+  overflow-x: hidden;
   position: relative;
   font-family: 'Cinzel', serif;
+  box-sizing: border-box;
 }
 
 /* ========================================
@@ -396,10 +399,11 @@
 
 .world_map_logo {
   position: fixed;
-  top: 2rem;
-  right: 2rem;
+  top: clamp(0.5rem, 3vw, 2rem);
+  right: clamp(0.5rem, 3vw, 2rem);
   z-index: 100;
-  width: 200px;
+  width: clamp(100px, 15vw, 200px);
+  max-width: 200px;
   height: auto;
   filter: drop-shadow(0 4px 15px rgba(0, 0, 0, 0.5));
   transition: transform 0.3s ease;
@@ -467,7 +471,9 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 1.5rem;
+  gap: clamp(0.75rem, 2vw, 1.5rem);
+  max-width: 100vw;
+  overflow: hidden;
 }
 
 /* Carousel Indicators */
@@ -545,11 +551,14 @@
 .carousel_container {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 2rem;
+  justify-content: center;
+  gap: clamp(0.3rem, 2vw, 2rem);
   user-select: none;
+  max-width: 100%;
+  width: 100%;
   position: relative;
-  padding: 2rem 0;
+  padding: clamp(0.5rem, 2vw, 2rem) 0;
+  box-sizing: border-box;
 }
 
 .carousel_container::before {
@@ -622,8 +631,10 @@
   backdrop-filter: blur(10px);
   border: 3px solid rgba(218, 165, 32, 0.3);
   border-radius: 50%;
-  width: 70px;
-  height: 70px;
+  width: clamp(50px, 10vw, 70px);
+  height: clamp(50px, 10vw, 70px);
+  min-width: 44px;
+  min-height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -691,10 +702,11 @@
   animation: castleAppear 1s ease-in-out;
 }
 
-/* Castle Size Variants */
+/* Castle Size Variants - Fluid Responsive */
 .castle_marker {
   --y: 0;
-  width: 400px;
+  width: clamp(100px, 20vw, 400px);
+  max-width: 60vw;
   cursor: pointer;
   position: relative;
   flex-shrink: 0;
@@ -707,7 +719,8 @@
 }
 
 .current_castle {
-  width: 400px;
+  width: clamp(140px, 25vw, 400px);
+  max-width: 55vw;
   z-index: 20;
   opacity: 1;
   transform: translate3d(0, var(--y, 0), 0) scale(1);
@@ -720,7 +733,8 @@
 }
 
 .prev_castle {
-  width: 300px;
+  width: clamp(80px, 15vw, 300px);
+  max-width: 45vw;
   opacity: 0.5;
   z-index: 10;
   transform: translate3d(0, var(--y, 0), 0) scale(0.8);
@@ -728,7 +742,8 @@
 }
 
 .next_castle {
-  width: 300px;
+  width: clamp(80px, 15vw, 300px);
+  max-width: 45vw;
   opacity: 0.5;
   z-index: 10;
   transform: translate3d(0, var(--y, 0), 0) scale(0.8);
@@ -855,19 +870,19 @@
 .castle_name_plate {
   background: linear-gradient(145deg, rgba(20, 20, 20, 0.95), rgba(40, 30, 20, 0.95));
   backdrop-filter: blur(15px);
-  padding: 0.75rem 2rem;
-  border-radius: 40px;
+  padding: clamp(0.4rem, 1.2vw, 0.75rem) clamp(0.85rem, 3vw, 2rem);
+  border-radius: clamp(20px, 5vw, 40px);
   border: 2px solid rgba(218, 165, 32, 0.4);
-  font-size: 1.2rem;
+  font-size: clamp(0.75rem, 2.2vw, 1.2rem);
   font-weight: 700;
   font-family: 'Cinzel', serif;
   color: #daa520;
   text-shadow: 
     0 2px 8px rgba(0, 0, 0, 0.9),
     0 0 20px rgba(218, 165, 32, 0.3);
-  letter-spacing: 1.5px;
+  letter-spacing: clamp(0.5px, 0.3vw, 1.5px);
   text-transform: uppercase;
-  min-width: 180px;
+  min-width: clamp(100px, 28vw, 180px);
   text-align: center;
   box-shadow: 
     0 4px 20px rgba(0, 0, 0, 0.6),
@@ -992,6 +1007,8 @@
     flex-direction: column;
     gap: 0.75rem;
     padding: 1rem 1.5rem;
+    max-width: 90%;
+    margin: 0 auto;
   }
 
   .stat_item {
@@ -1000,9 +1017,31 @@
     width: 100%;
   }
 
+  .castle_marker {
+    position: relative;
+  }
+
+  .castle_name_plate {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 10;
+    background: rgba(20, 20, 20, 0.85);
+    backdrop-filter: blur(12px);
+    font-size: 0.8rem;
+    padding: 0.35rem 0.75rem;
+    min-width: auto;
+    width: auto;
+    max-width: 80%;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.8);
+  }
+
   .carousel_arrow {
-    width: 50px;
-    height: 50px;
+    width: clamp(45px, 8vw, 50px);
+    height: clamp(45px, 8vw, 50px);
+    min-width: 44px;
+    min-height: 44px;
   }
 
   .modal_content {
@@ -1011,13 +1050,39 @@
   }
 
   .modal_content h2 {
-    font-size: 1.75rem;
+    font-size: clamp(1.25rem, 4vw, 1.75rem);
   }
-}
 
-@media (max-width: 600px) {
+  .carousel_container {
+    gap: 0.25rem;
+    padding: 0.5rem 0.25rem;
+    max-width: 100vw;
+    box-sizing: border-box;
+  }
+
+  .carousel_section {
+    gap: 0.5rem;
+    padding: 0;
+    max-width: 100vw;
+    box-sizing: border-box;
+    overflow: hidden;
+  }
+
+  .stats_panel {
+    position: relative;
+    z-index: 50;
+  }
+
   .current_castle {
-    width: 200px;
+    max-width: 50vw;
+  }
+
+  .prev_castle, .next_castle {
+    max-width: 35vw;
+  }
+
+  .carousel_arrow {
+    flex-shrink: 0;
   }
 }
 
@@ -1074,6 +1139,118 @@
     padding: 0.85rem 1.5rem;
     font-size: 1rem;
   }
+
+  .castle_name_plate {
+    font-size: 0.85rem;
+    padding: 0.35rem 0.85rem;
+    min-width: 120px;
+  }
+
+  .lock_overlay {
+    font-size: 2rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .carousel_container {
+    gap: 0.2rem;
+    padding: 0.5rem 0.2rem;
+    max-width: 100vw;
+  }
+
+  .carousel_arrow {
+    width: 38px;
+    height: 38px;
+    min-width: 38px;
+    min-height: 38px;
+    flex-shrink: 0;
+  }
+
+  .carousel_arrow svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .current_castle {
+    max-width: 48vw;
+  }
+
+  .prev_castle, .next_castle {
+    max-width: 28vw;
+  }
+
+  .stats_panel {
+    padding: 0.5rem 0.75rem;
+    max-width: 96%;
+    position: relative;
+    z-index: 100;
+    font-size: 0.85rem;
+  }
+
+  .carousel_section {
+    gap: 0.5rem;
+  }
+
+  .castle_name_plate {
+    font-size: 0.65rem;
+    padding: 0.25rem 0.6rem;
+    letter-spacing: 0.5px;
+    border-width: 1.5px;
+  }
+
+  .stat_item {
+    font-size: 0.85rem;
+  }
+
+  .stat_label {
+    font-size: 0.7rem;
+  }
+
+  .stat_value {
+    font-size: 0.9rem;
+  }
+
+  .carousel_indicators {
+    padding: 0.5rem 1rem;
+  }
+
+  .indicator_dot {
+    width: 8px;
+    height: 8px;
+  }
+
+  .indicator_dot.active {
+    width: 10px;
+    height: 10px;
+  }
+
+  .completion_crown {
+    font-size: 1.25rem;
+    top: -4px;
+  }
+
+  .lock_overlay {
+    font-size: 1.5rem;
+  }
+
+  .modal_content {
+    padding: 1.25rem;
+    max-width: 95vw;
+  }
+
+  .modal_content h2 {
+    font-size: 1.25rem;
+  }
+
+  .castle_description {
+    font-size: 0.85rem;
+  }
+
+  .enter_button {
+    padding: 0.75rem 1.25rem;
+    font-size: 0.9rem;
+    min-width: 150px;
+  }
 }
 
 /* ========================================
@@ -1082,17 +1259,20 @@
 
 .stats_panel {
   display: flex;
-  gap: 1.5rem;
-  padding: 0.75rem 1.5rem;
+  gap: clamp(0.5rem, 1.5vw, 1.5rem);
+  padding: clamp(0.6rem, 1.2vw, 0.75rem) clamp(0.75rem, 2vw, 1.5rem);
   background: rgba(20, 20, 25, 0.85);
   backdrop-filter: blur(15px);
-  border-radius: 20px;
+  border-radius: clamp(12px, 3vw, 20px);
   border: 2px solid rgba(80, 80, 90, 0.5);
   box-shadow: 
     0 4px 20px rgba(0, 0, 0, 0.6),
     inset 0 1px 2px rgba(255, 255, 255, 0.05);
-  margin-bottom: 1.5rem;
+  margin-bottom: clamp(0.5rem, 1.5vw, 1.5rem);
   transition: all 0.3s ease;
+  max-width: 95%;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .stat_item {
@@ -1103,7 +1283,7 @@
 }
 
 .stat_label {
-  font-size: 0.75rem;
+  font-size: clamp(0.65rem, 1.5vw, 0.75rem);
   font-family: 'Cinzel', serif;
   color: rgba(180, 180, 190, 0.85);
   text-transform: uppercase;
@@ -1113,7 +1293,7 @@
 }
 
 .stat_value {
-  font-size: 1.25rem;
+  font-size: clamp(0.9rem, 2vw, 1.25rem);
   font-weight: 700;
   font-family: 'Cinzel', serif;
   color: #ffffff;

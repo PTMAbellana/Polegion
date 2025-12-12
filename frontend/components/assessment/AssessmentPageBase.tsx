@@ -176,13 +176,14 @@ export default function AssessmentPageBase({ config }: { config: AssessmentConfi
             
             try {
                 console.log(`[${config.type}] Checking if assessment is already completed...`);
-                const existingResults = await getAssessmentResults(userId, config.type);
+                const response: any = await getAssessmentResults(userId, config.type);
+                const existingResults = response?.results || response;
                 
                 if (existingResults && existingResults.percentage !== undefined) {
                     console.log(`[${config.type}] Assessment already completed, loading results...`);
                     
                     // Keep results in the format returned by backend
-                    const formattedResults = {
+                    const formattedResults: any = {
                         totalScore: existingResults.totalScore || Math.round((existingResults.percentage / 100) * (existingResults.totalQuestions || config.totalQuestions)),
                         totalQuestions: existingResults.totalQuestions || config.totalQuestions,
                         percentage: existingResults.percentage,
@@ -370,11 +371,12 @@ export default function AssessmentPageBase({ config }: { config: AssessmentConfi
                     const userId = authData.user?.id;
                     
                     if (userId) {
-                        const existingResults = await getAssessmentResults(userId, config.type);
+                        const response: any = await getAssessmentResults(userId, config.type);
+                        const existingResults = response?.results || response;
                         
                         if (existingResults) {
                             // Keep results in the format returned by backend
-                            const formattedResults = {
+                            const formattedResults: any = {
                                 totalScore: existingResults.totalScore || Math.round((existingResults.percentage / 100) * (existingResults.totalQuestions || 60)),
                                 totalQuestions: existingResults.totalQuestions || 60,
                                 percentage: existingResults.percentage,
