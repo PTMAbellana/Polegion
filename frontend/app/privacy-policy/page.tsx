@@ -1,31 +1,17 @@
 export default function PrivacyPolicyPage() {
-  const lastUpdated = new Date().toLocaleDateString('en-US', { 
-    month: 'long', 
-    day: 'numeric', 
-    year: 'numeric' 
-  });
-
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white py-16 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-5xl mx-auto">
-        {/* Header Section */}
-        <div className="bg-white shadow-xl rounded-2xl overflow-hidden mb-8">
-          <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-8 py-12 text-white">
-            <h1 className="text-5xl font-bold mb-3">Privacy Policy</h1>
-            <p className="text-blue-100 text-lg">
-              Your privacy and data security are our top priorities
-            </p>
-            <div className="mt-6 flex items-center gap-2 text-sm text-blue-100">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-              </svg>
-              <span>Last updated: {lastUpdated}</span>
-            </div>
-          </div>
+    <div style={{ minHeight: '100vh', backgroundColor: '#f7fafc', padding: '40px 20px' }}>
+      <div style={{ maxWidth: '1200px', margin: '0 auto', backgroundColor: 'white', padding: '40px', borderRadius: '8px', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }}>
+        
+        <div style={{ backgroundColor: '#2563eb', color: 'white', padding: '40px', borderRadius: '8px', marginBottom: '30px' }}>
+          <h1 style={{ fontSize: '48px', fontWeight: 'bold', marginBottom: '10px' }}>Privacy Policy</h1>
+          <p style={{ fontSize: '18px', opacity: 0.9 }}>Your privacy and data security are our top priorities</p>
+          <p style={{ fontSize: '14px', marginTop: '20px', opacity: 0.8 }}>
+            Last updated: {new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+          </p>
         </div>
 
-        {/* Main Content */}
-        <div className="bg-white shadow-xl rounded-2xl p-8 md:p-12 space-y-10 text-gray-700">
+        <div style={{ color: '#374151', lineHeight: '1.8' }}>
           {/* Introduction */}
           <section className="border-l-4 border-blue-600 pl-6">
             <h2 className="text-3xl font-bold text-gray-900 mb-4">Introduction</h2>
