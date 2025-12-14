@@ -16,6 +16,9 @@ import SetVisibility from "@/components/teacher/create-problem/SetVisibility";
 import ShapeLimitPopup from "@/components/teacher/create-problem/ShapeLimitPopup";
 import ProblemsList from "@/components/teacher/create-problem/ProblemsList";
 import PropertiesPanel from "@/components/teacher/create-problem/PropertiesPanel";
+import ProblemTypeSelector from "@/components/teacher/create-problem/ProblemTypeSelector";
+import ShapeConstraintSelector from "@/components/teacher/create-problem/ShapeConstraintSelector";
+import GradingRulesBuilder from "@/components/teacher/create-problem/GradingRulesBuilder";
 
 // Hooks
 import { useShapeManagement } from "@/hooks/teacher/useShapeManagement";
@@ -27,7 +30,7 @@ import { useTeacherRoomStore } from "@/store/teacherRoomStore";
 import { Problem, ProblemPayload, TProblemType } from "@/types";
 
 const XP_MAP = { Easy: 10, Intermediate: 20, Hard: 30 };
-const MAX_SHAPES = 5;
+const MAX_SHAPES = 1;
 
 export default function CreateProblemPage({ params }: { params: Promise<{ roomCode: string }> }) {
   const router = useRouter();
@@ -110,6 +113,12 @@ console.log("Current Room in CreateProblemPage:", currentRoom);
     resetForm,
   } = useProblemFormState();
 
+  // New grading state
+  const [problemType, setProblemType] = React.useState('general');
+  const [shapeConstraint, setShapeConstraint] = React.useState('');
+  const [gradingRules, setGradingRules] = React.useState({});
+  const [showGradingSettings, setShowGradingSettings] = React.useState(false);
+
   // Focus prompt input when editing
   useEffect(() => {
     if (editingPrompt && promptInputRef.current) {
@@ -158,11 +167,15 @@ console.log("Current Room in CreateProblemPage:", currentRoom);
         description: prompt,
         expected_solution: shapesWithProps,
         difficulty,
-        visibility: visible ? "show" : "hide",
+        visibility: visible ? "public" : "private",
         max_attempts: limitAttempts,
         expected_xp: XP_MAP[difficulty as keyof typeof XP_MAP],
         timer: timerOpen ? timerValue : null,
         hint: hintOpen ? hint : null,
+        problem_type: problemType,
+        shape_constraint: shapeConstraint || null,
+        grading_rules: Object.keys(gradingRules).length > 0 ? gradingRules : null,
+        accepts_submissions: true,
     };
 
     try {
@@ -202,6 +215,10 @@ console.log("Current Room in CreateProblemPage:", currentRoom);
                     confirmButtonText: "OK",
                 });
             }
+            
+            // Force refresh room details to ensure we have latest data
+            await fetchRoomDetails(roomCode, true);
+            
             await Swal.fire({
                 title: "Problem Edited",
                 text: "Your problem has been successfully edited!",
@@ -265,6 +282,8 @@ console.log("Current Room in CreateProblemPage:", currentRoom);
     const problem = problems.find(p => p.id === problemId);
     if (!problem) return;
 
+    console.log('Editing problem:', problem.title, 'Visibility:', problem.visibility);
+
     setCurrentProblem(problem);
     setTitle(problem.title || "");
     setPrompt(problem.description || "");
@@ -275,7 +294,12 @@ console.log("Current Room in CreateProblemPage:", currentRoom);
     setTimerValue(typeof problem.timer === 'number' ? problem.timer : 5);
     setHintOpen(problem.hint !== null && problem.hint !== undefined);
     setHint(problem.hint ?? "");
-    setVisible(problem.visibility === "show");
+    const isVisible = problem.visibility === "public" || problem.visibility === "show";
+    console.log('Setting visible to:', isVisible, 'based on visibility:', problem.visibility);
+    setVisible(isVisible);
+    setProblemType((problem as any).problem_type || 'general');
+    setShapeConstraint((problem as any).shape_constraint || '');
+    setGradingRules((problem as any).grading_rules || {});
   }, [problems, setCurrentProblem, setTitle, setPrompt, setShapes, setDifficulty, setLimitAttempts, setTimerOpen, setTimerValue, setHintOpen, setHint, setVisible]);
 
   return (
@@ -360,12 +384,51 @@ console.log("Current Room in CreateProblemPage:", currentRoom);
             promptInputRef={promptInputRef}
           />
 
+          {/* Grading Settings Toggle */}
+          <button 
+            className={styles.gradingToggleBtn}
+            onClick={() => setShowGradingSettings(!showGradingSettings)}
+            type="button"
+          >
+            <span className={styles.gradingToggleIcon}>
+              {showGradingSettings ? '▼' : '▶'}
+            </span>
+            <span className={styles.gradingToggleText}>
+              Grading Settings
+            </span>
+            <span className={styles.gradingToggleBadge}>
+              {problemType !== 'general' ? 'Configured' : 'Default'}
+            </span>
+          </button>
+
+          {/* Collapsible Grading Settings */}
+          {showGradingSettings && (
+            <div className={styles.gradingSection}>
+              <div className={styles.gradingSettingsGrid}>
+                <ProblemTypeSelector 
+                  value={problemType}
+                  onChange={setProblemType}
+                />
+                <ShapeConstraintSelector 
+                  value={shapeConstraint}
+                  onChange={setShapeConstraint}
+                />
+              </div>
+              <GradingRulesBuilder 
+                value={gradingRules}
+                onChange={setGradingRules}
+                problemType={problemType}
+              />
+            </div>
+          )}
+
           {/* Main Drawing Area */}
           <MainArea
             shapes={shapes}
             setShapes={setShapes}
             selectedId={selectedId}
             setSelectedId={setSelectedId}
+            selectedTool={selectedTool}
             setSelectedTool={setSelectedTool}
             saveButton={
               <button className={`${styles.saveBtn} ${styles.rowBtn}`} onClick={handleSave}>
@@ -388,7 +451,10 @@ console.log("Current Room in CreateProblemPage:", currentRoom);
             showMeasurement={showMeasurement}
             showArcRadius={showArcRadius}
           />
+        </div>
 
+        {/* Right Sidebar - Properties Panel */}
+        <div className={styles.propertiesPanelContainer}>
           {/* Controls */}
           <div className={styles.controlsRow}>
             <LimitAttempts limit={limitAttempts} setLimit={setLimitAttempts} />
@@ -420,10 +486,7 @@ console.log("Current Room in CreateProblemPage:", currentRoom);
             )}
             <SetVisibility visible={visible} setVisible={setVisible} />
           </div>
-        </div>
-
-        {/* Right Sidebar - Properties Panel */}
-        <div className={styles.propertiesPanelContainer}>
+          
           <PropertiesPanel
             selectedShape={shapes.find(shape => shape.id === selectedId) || null}
             pxToUnits={pxToUnits}

@@ -414,6 +414,74 @@ class ProblemRoutes {
      *       404:
      *         $ref: '#/components/responses/NotFoundError'
      */
+
+    /**
+     * @swagger
+     * /problems/{problem_id}/attempt:
+     *   post:
+     *     tags: [Problems]
+     *     summary: Submit a solution for a public problem
+     *     description: Submit and grade a solution attempt for a public problem
+     *     security:
+     *       - bearerAuth: []
+     *     parameters:
+     *       - in: path
+     *         name: problem_id
+     *         required: true
+     *         schema:
+     *           type: string
+     *         description: Problem ID
+     *         example: problem-uuid-123
+     *     requestBody:
+     *       required: true
+     *       content:
+     *         application/json:
+     *           schema:
+     *             type: object
+     *             required: [solution]
+     *             properties:
+     *               solution:
+     *                 type: object
+     *                 description: Student's submitted solution containing shapes array and time spent
+     *                 properties:
+     *                   shapes:
+     *                     type: array
+     *                     items:
+     *                       type: object
+     *                       properties:
+     *                         type: { type: string, example: "square" }
+     *                         area: { type: number, example: 25.5 }
+     *                         sideLengths: { type: array, items: { type: number } }
+     *                   time_spent: { type: integer, example: 120 }
+     *                 example: { "shapes": [{ "type": "square", "area": 25.5, "sideLengths": [5, 5, 5, 5] }], "time_spent": 120 }
+     *     responses:
+     *       200:
+     *         description: Submission graded successfully
+     *         content:
+     *           application/json:
+     *             schema:
+     *               type: object
+     *               properties:
+     *                 message: { type: string, example: "Submission graded successfully" }
+     *                 data:
+     *                   type: object
+     *                   properties:
+     *                     is_correct: { type: boolean }
+     *                     score: { type: number }
+     *                     feedback: { type: string }
+     *                     validation_details: { type: object }
+     *                     attempt_number: { type: integer }
+     *                     xp_gained: { type: integer }
+     *       401:
+     *         $ref: '#/components/responses/UnauthorizedError'
+     *       403:
+     *         description: Not a participant in this room
+     *       404:
+     *         description: Problem not found or not public
+     */
+    this.router.route('/:problem_id/attempt')
+      .post(this.problemController.submitPublicProblemAttempt)
+
     this.router.route('/:problem_id/:competition_id')
       .post(this.problemController.addCompeProblem)
       .delete(this.problemController.removeCompeProblem)
@@ -452,6 +520,166 @@ class ProblemRoutes {
      */
     this.router.route('/compe-problem/:compe_prob_id')
       .get(this.problemController.getCurrCompeProblem)
+
+    /**
+     * @swagger
+     * /problems/public/{room_id}:
+     *   get:
+     *     tags: [Problems]
+     *     summary: Get all public problems in a room
+     *     description: Retrieve all public problems available for practice with user stats
+     *     security:
+     *       - bearerAuth: []
+     *     parameters:
+     *       - in: path
+     *         name: room_id
+     *         required: true
+     *         schema:
+     *           type: string
+     *         description: Room ID
+     *         example: 123
+     *     responses:
+     *       200:
+     *         description: Public problems retrieved successfully
+     *         content:
+     *           application/json:
+     *             schema:
+     *               type: object
+     *               properties:
+     *                 message: { type: string, example: "Successfully fetched public problems" }
+     *                 data: { type: array, items: { type: object } }
+     *       401:
+     *         $ref: '#/components/responses/UnauthorizedError'
+     *       404:
+     *         $ref: '#/components/responses/NotFoundError'
+     */
+    this.router.route('/public/:room_id')
+      .get(this.problemController.getPublicProblems)
+
+    /**
+     * @swagger
+     * /problems/public-problem/{problem_id}:
+     *   get:
+     *     tags: [Problems]
+     *     summary: Get a single public problem
+     *     description: Retrieve details for a specific public problem that students can access
+     *     security:
+     *       - bearerAuth: []
+     *     parameters:
+     *       - in: path
+     *         name: problem_id
+     *         required: true
+     *         schema:
+     *           type: string
+     *         description: Problem ID
+     *         example: problem-uuid-123
+     *     responses:
+     *       200:
+     *         description: Problem retrieved successfully
+     *         content:
+     *           application/json:
+     *             schema:
+     *               type: object
+     *               properties:
+     *                 message: { type: string, example: "Successfully fetched problem" }
+     *                 data: { type: object }
+     *       401:
+     *         $ref: '#/components/responses/UnauthorizedError'
+     *       404:
+     *         $ref: '#/components/responses/NotFoundError'
+     */
+    this.router.route('/public-problem/:problem_id')
+      .get(this.problemController.getPublicProblem)
+
+    /**
+     * @swagger
+     * /problems/{problem_id}/leaderboard:
+     *   get:
+     *     tags: [Problems]
+     *     summary: Get leaderboard for a problem
+     *     description: Retrieve rankings and scores for a specific problem
+     *     security:
+     *       - bearerAuth: []
+     *     parameters:
+     *       - in: path
+     *         name: problem_id
+     *         required: true
+     *         schema:
+     *           type: string
+     *         description: Problem ID
+     *         example: problem-uuid-123
+     *       - in: query
+     *         name: limit
+     *         schema:
+     *           type: integer
+     *           default: 50
+     *         description: Maximum number of leaderboard entries
+     *     responses:
+     *       200:
+     *         description: Leaderboard retrieved successfully
+     *         content:
+     *           application/json:
+     *             schema:
+     *               type: object
+     *               properties:
+     *                 message: { type: string, example: "Successfully fetched leaderboard" }
+     *                 data:
+     *                   type: array
+     *                   items:
+     *                     type: object
+     *                     properties:
+     *                       rank: { type: integer, example: 1 }
+     *                       user_id: { type: string, example: "user-uuid-123" }
+     *                       username: { type: string, example: "John Doe" }
+     *                       best_score: { type: number, example: 100.0 }
+     *                       time_taken: { type: integer, example: 120, description: "Time in seconds" }
+     *                       attempt_count: { type: integer, example: 3 }
+     *                       last_attempt_at: { type: string, format: date-time }
+     *       401:
+     *         $ref: '#/components/responses/UnauthorizedError'
+     *       404:
+     *         $ref: '#/components/responses/NotFoundError'
+     */
+    this.router.route('/:problem_id/leaderboard')
+      .get(this.problemController.getProblemLeaderboard)
+
+    /**
+     * @swagger
+     * /problems/{problem_id}/stats:
+     *   get:
+     *     tags: [Problems]
+     *     summary: Get user's statistics for a problem
+     *     description: Retrieve user's attempt history and best score for a specific problem
+     *     security:
+     *       - bearerAuth: []
+     *     parameters:
+     *       - in: path
+     *         name: problem_id
+     *         required: true
+     *         schema:
+     *           type: string
+     *         description: Problem ID
+     *         example: problem-uuid-123
+     *     responses:
+     *       200:
+     *         description: User stats retrieved successfully
+     *         content:
+     *           application/json:
+     *             schema:
+     *               type: object
+     *               properties:
+     *                 message: { type: string, example: "Successfully fetched user stats" }
+     *                 data:
+     *                   type: object
+     *                   properties:
+     *                     attempts: { type: integer }
+     *                     best_score: { type: number }
+     *                     last_attempt: { type: string, format: date-time }
+     *       401:
+     *         $ref: '#/components/responses/UnauthorizedError'
+     */
+    this.router.route('/:problem_id/stats')
+      .get(this.problemController.getUserProblemStats)
   }
 
   getRouter() {

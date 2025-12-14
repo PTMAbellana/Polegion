@@ -11,6 +11,7 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
   selectedShape,
   pxToUnits,
 }) => {
+  
   // Helper to safely convert and format values
   const safeToFixed = (value: number | string, decimals: number = 2): string => {
     const num = Number(value);
@@ -232,6 +233,8 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
     const sideBottom = Math.sqrt(Math.pow(bottomRight.x - bottomLeft.x, 2) + Math.pow(bottomRight.y - bottomLeft.y, 2));
     const sideLeft = Math.sqrt(Math.pow(bottomLeft.x - topLeft.x, 2) + Math.pow(bottomLeft.y - topLeft.y, 2));
 
+    const widthUnits = safePxToUnits(sideTop);
+    const heightUnits = safePxToUnits(sideRight);
     const perimeter = sideTop + sideRight + sideBottom + sideLeft;
 
     // Calculate area using shoelace formula
@@ -275,7 +278,7 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
 
         <div className={styles.propertyGroup}>
           <div className={styles.propertyLabel}>Area</div>
-          <div className={styles.propertyValue}>{safeToFixed(safePxToUnits(area), 2)} units²</div>
+          <div className={styles.propertyValue}>{safeToFixed(area / (10 * 10), 2)} units²</div>
         </div>
       </>
     );

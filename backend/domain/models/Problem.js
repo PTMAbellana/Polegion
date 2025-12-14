@@ -1,5 +1,5 @@
 class Problem {
-    constructor(id, title, description, room_id, creator_id, expected_solution, difficulty = 'easy', visibility = 'show', created_at=new Date(), updated_at, max_attempts = 1, expected_xp=10, hint, timer=null){
+    constructor(id, title, description, room_id, creator_id, expected_solution, difficulty = 'easy', visibility = 'show', created_at=new Date(), updated_at, max_attempts = 1, expected_xp=10, hint, timer=null, problem_type='general', shape_constraint=null, grading_rules=null, accepts_submissions=true){
         this.id                 = id
         this.title              = title
         this.description        = description
@@ -14,6 +14,10 @@ class Problem {
         this.expected_xp        = expected_xp
         this.hint               = hint
         this.timer              = timer
+        this.problem_type       = problem_type
+        this.shape_constraint   = shape_constraint
+        this.grading_rules      = grading_rules
+        this.accepts_submissions = accepts_submissions
     }
 
     static fromDbRoom (problemData){
@@ -30,7 +34,12 @@ class Problem {
             problemData.updated_at,
             problemData.max_attempts,
             problemData.expected_xp,
-            problemData.hint
+            problemData.hint,
+            null,
+            problemData.problem_type,
+            problemData.shape_constraint,
+            problemData.grading_rules,
+            problemData.accepts_submissions
         );
     }
 
@@ -49,7 +58,11 @@ class Problem {
             problemData.max_attempts,
             problemData.expected_xp,
             problemData.hint,
-            timer
+            timer,
+            problemData.problem_type,
+            problemData.shape_constraint,
+            problemData.grading_rules,
+            problemData.accepts_submissions
         );
     }
 
@@ -64,7 +77,11 @@ class Problem {
             timer: this.timer,
             expected_xp: this.expected_xp,
             hint: this.hint,
-            expected_solution: this.expected_solution
+            expected_solution: this.expected_solution,
+            problem_type: this.problem_type,
+            shape_constraint: this.shape_constraint,
+            grading_rules: this.grading_rules,
+            accepts_submissions: this.accepts_submissions
         }
     }
 
@@ -92,7 +109,11 @@ class Problem {
             updated_at: this.updated_at,
             max_attempts: this.max_attempts,
             expected_xp: this.expected_xp,
-            hint: this.hint
+            hint: this.hint,
+            problem_type: this.problem_type,
+            shape_constraint: this.shape_constraint,
+            grading_rules: this.grading_rules,
+            accepts_submissions: this.accepts_submissions
         }
     }
 }

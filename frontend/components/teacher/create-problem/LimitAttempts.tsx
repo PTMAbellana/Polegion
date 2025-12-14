@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import styles from "@/styles/create-problem-teacher.module.css";
 import { LimitAttemptsProps } from "@/types/props/problem";
 
@@ -9,12 +9,25 @@ const LimitAttempts: React.FC<LimitAttemptsProps> = ({
   const [editing, setEditing] = useState(false);
   const [input, setInput] = useState(limit ?? 1);
 
+  // Sync input state with limit prop when it changes
+  useEffect(() => {
+    setInput(limit ?? 1);
+  }, [limit]);
+
+  const handleSave = () => {
+    setLimit(input);
+    setEditing(false);
+  };
+
   return !editing ? (
     <button
       className={`${styles.limitedAttemptsBtn} ${styles.rowBtn}`}
-      onClick={() => setEditing(true)}
+      onClick={() => {
+        setInput(limit ?? 1);
+        setEditing(true);
+      }}
     >
-      Limit Attempts
+      Limit Attempts ({limit ?? 1})
     </button>
   ) : (
     <div className={styles.timerContainer}>
@@ -26,19 +39,19 @@ const LimitAttempts: React.FC<LimitAttemptsProps> = ({
           className={styles.timerInput}
           value={input}
           onChange={e => setInput(Number(e.target.value))}
+          onBlur={handleSave}
           autoFocus
           onKeyDown={e => {
             if (e.key === "Enter") {
-              setLimit(input);
-              setEditing(false);
+              handleSave();
             }
           }}
         />
         <button
           type="button"
           className={styles.closeButton}
-          aria-label="Cancel"
-          onClick={() => setEditing(false)}
+          aria-label="Save and Close"
+          onClick={handleSave}
           tabIndex={0}
         >
           ✕

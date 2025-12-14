@@ -260,6 +260,17 @@ export const useAuthStore = create<AuthState>()(
                 await apiLogout();
                 authUtils.clearAuthData();
                 
+                // Clear axios cache
+                try {
+                    const { cacheControl } = await import('@/api/axios');
+                    if (cacheControl && cacheControl.clear) {
+                        cacheControl.clear();
+                        logger.log('[AuthStore] Cleared axios cache');
+                    }
+                } catch (error) {
+                    logger.warn('[AuthStore] Could not clear axios cache:', error);
+                }
+                
                 // Clear auth storage
                 localStorage.removeItem('auth-storage');
                 
@@ -267,6 +278,26 @@ export const useAuthStore = create<AuthState>()(
                 if (currentUserId) {
                     localStorage.removeItem(`castle-storage-${currentUserId}`);
                     logger.log(`[AuthStore] Cleared castle storage for user: ${currentUserId}`);
+                }
+                
+                // Clear all cached data related to the user
+                if (typeof window !== 'undefined') {
+                    // Clear all timer data
+                    Object.keys(localStorage).forEach(key => {
+                        if (key.startsWith('timer_')) {
+                            localStorage.removeItem(key);
+                        }
+                    });
+                    
+                    // Clear sessionStorage completely
+                    sessionStorage.clear();
+                    
+                    // Clear any other user-specific data
+                    localStorage.removeItem('user-data');
+                    localStorage.removeItem('problem-cache');
+                    localStorage.removeItem('room-cache');
+                    
+                    logger.log('[AuthStore] Cleared all user cache data');
                 }
                 
                 // Clear all chapter progress when logging out

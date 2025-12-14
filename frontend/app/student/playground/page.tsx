@@ -113,6 +113,7 @@ export default function PlaygroundPage() {
             setShapes={setShapes}
             selectedId={selectedId}
             setSelectedId={setSelectedId}
+            selectedTool={selectedTool}
             setSelectedTool={setSelectedTool}
             shapeLimit={MAX_SHAPES}
             shapeCount={shapes.length}

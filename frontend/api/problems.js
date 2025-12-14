@@ -1,4 +1,5 @@
 import api from './axios';
+import { cacheControl } from './axios';
 
 export const createProblem = async (problemData, room_code) => {
   try {
@@ -88,7 +89,11 @@ export const deleteProblem = async(problem_id) => {
 
 export const updateProblem = async(problem_id, problemData) => {
   try {
-    const res = await api.put(`/problems/${problem_id}`, problemData);
+    // Clear cache to ensure fresh data
+    cacheControl.clear();
+    
+    // Add cache busting timestamp to ensure fresh data
+    const res = await api.put(`/problems/${problem_id}?t=${Date.now()}`, problemData);
     
     return {
       success: true,
@@ -148,4 +153,70 @@ export const removeCompeProblem = async(problem_id, competition_id) => {
   } catch (error) {
     throw error;
   }
-}   
+}
+
+// ===== NEW: Public Problems & Grading =====
+
+export const getPublicProblems = async(room_id) => {
+  try {
+    const res = await api.get(`/problems/public/${room_id}`);
+    return {
+      success: true,
+      data: res.data.data
+    };
+  } catch (error) {
+    return {
+      success: false,
+      message: error.response?.data?.message || 'Failed to fetch public problems',
+      error: error.response?.data?.error || error.message
+    };
+  }
+};
+
+export const getProblemLeaderboard = async(problem_id, limit = 50) => {
+  try {
+    const res = await api.get(`/problems/${problem_id}/leaderboard`, { params: { limit } });
+    return {
+      success: true,
+      data: res.data.data
+    };
+  } catch (error) {
+    return {
+      success: false,
+      message: error.response?.data?.message || 'Failed to fetch leaderboard',
+      error: error.response?.data?.error || error.message
+    };
+  }
+};
+
+export const submitProblemAttempt = async(problem_id, solution) => {
+  try {
+    const res = await api.post(`/problems/${problem_id}/attempt`, { solution });
+    return {
+      success: true,
+      data: res.data.data
+    };
+  } catch (error) {
+    return {
+      success: false,
+      message: error.response?.data?.message || 'Failed to submit attempt',
+      error: error.response?.data?.error || error.message
+    };
+  }
+};
+
+export const getUserProblemStats = async(problem_id) => {
+  try {
+    const res = await api.get(`/problems/${problem_id}/stats`);
+    return {
+      success: true,
+      data: res.data.data
+    };
+  } catch (error) {
+    return {
+      success: false,
+      message: error.response?.data?.message || 'Failed to fetch stats',
+      error: error.response?.data?.error || error.message
+    };
+  }
+};   

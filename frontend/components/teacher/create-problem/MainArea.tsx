@@ -14,6 +14,7 @@ const MainArea: React.FC<MainAreaProps> = ({
   setShapes,
   selectedId,
   setSelectedId,
+  selectedTool = null,
   setSelectedTool,
   saveButton,
   shapeLimit,
@@ -31,10 +32,14 @@ const MainArea: React.FC<MainAreaProps> = ({
   showMeasurement,
   showArcRadius,
   disabled = false, // New prop to prevent modifications after submission
+  customStyles, // New prop for custom CSS styles
 }) => {
   const stageRef = useRef<any>(null);
   const mainAreaRef = useRef<HTMLDivElement>(null);
   const [stageSize, setStageSize] = useState({ width: 800, height: 400 });
+
+  // Use custom styles if provided, otherwise use default teacher styles
+  const currentStyles = customStyles || styles;
 
   // Handle keyboard delete
   React.useEffect(() => {
@@ -166,6 +171,7 @@ const MainArea: React.FC<MainAreaProps> = ({
   };
 
   const handleStageClick = (e: any) => {
+    // Only deselect if we actually clicked on the stage background, not on shapes
     if (e.target === e.target.getStage()) {
       setSelectedId(null);
       setSelectedTool(null);
@@ -238,14 +244,16 @@ const MainArea: React.FC<MainAreaProps> = ({
   return (
     <div
       ref={mainAreaRef}
-      className={styles.mainArea}
+      className={currentStyles.mainArea}
       onDragOver={(e) => e.preventDefault()}
       onDrop={handleDrop}
       style={{ opacity: disabled ? 0.7 : 1 }} // Visual feedback when disabled
     >
-      <div className={styles.mainAreaHeader}>Main Area {disabled && '(Submitted)'}</div>
+      <div className={currentStyles.mainAreaHeader}>
+        Main Area {disabled && '(Submitted)'}
+      </div>
       
-      <div className={styles.stageContainer}>
+      <div className={currentStyles.stageContainer}>
         <Stage
           ref={stageRef}
           width={stageSize.width}
@@ -260,10 +268,10 @@ const MainArea: React.FC<MainAreaProps> = ({
                 return (
                   <CircleShape
                     key={shape.id}
-                    shape={shape}
+                    shape={shape as any}
                     isSelected={isSelected}
                     onSelect={() => handleShapeSelect(shape.id)}
-                    onChange={handleShapeDragEnd}
+                    onChange={(updatedShape) => handleShapeDragEnd(updatedShape as Shape)}
                     onResize={handleCircleResize}
                     pxToUnits={pxToUnits}
                     showDiameter={showDiameter}
@@ -277,14 +285,15 @@ const MainArea: React.FC<MainAreaProps> = ({
                 return (
                   <SquareShape
                     key={shape.id}
-                    shape={shape}
+                    shape={shape as any}
                     isSelected={isSelected}
                     onSelect={() => handleShapeSelect(shape.id)}
-                    onChange={handleShapeDragEnd}
+                    onChange={(updatedShape) => handleShapeDragEnd(updatedShape as Shape)}
                     onResize={handleSquareResize}
                     pxToUnits={pxToUnits}
                     showSides={showSides}
                     showAngles={showAngles}
+                    showArea={false}
                     showAreaByShape={showAreaByShape}
                   />
                 );
@@ -294,10 +303,10 @@ const MainArea: React.FC<MainAreaProps> = ({
                 return (
                   <TriangleShape
                     key={shape.id}
-                    shape={shape}
+                    shape={shape as any}
                     isSelected={isSelected}
                     onSelect={() => handleShapeSelect(shape.id)}
-                    onChange={handleShapeDragEnd}
+                    onChange={(updatedShape) => handleShapeDragEnd(updatedShape as Shape)}
                     onResize={handleTriangleResize}
                     pxToUnits={pxToUnits}
                     showSides={showSides}
@@ -312,10 +321,10 @@ const MainArea: React.FC<MainAreaProps> = ({
                 return (
                   <LineShape
                     key={shape.id}
-                    shape={shape}
+                    shape={shape as any}
                     isSelected={isSelected}
                     onSelect={() => handleShapeSelect(shape.id)}
-                    onChange={handleShapeDragEnd}
+                    onChange={(updatedShape) => handleShapeDragEnd(updatedShape as Shape)}
                     onResize={handleLineResize}
                     pxToUnits={pxToUnits}
                     showLength={showLength ?? false}
@@ -328,10 +337,10 @@ const MainArea: React.FC<MainAreaProps> = ({
                 return (
                   <AngleShape
                     key={shape.id}
-                    shape={shape}
+                    shape={shape as any}
                     isSelected={isSelected}
                     onSelect={() => handleShapeSelect(shape.id)}
-                    onChange={handleShapeDragEnd}
+                    onChange={(updatedShape) => handleShapeDragEnd(updatedShape as Shape)}
                     onResize={handleAngleResize}
                     showMeasurement={showMeasurement ?? false}
                     showArcRadius={showArcRadius ?? false}

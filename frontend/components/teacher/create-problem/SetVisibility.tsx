@@ -14,8 +14,9 @@ const SetVisibility: React.FC<SetVisibilityProps> = ({
         color: "#fff",
       }}
       onClick={() => setVisible(!visible)}
+      title={visible ? "Problem is public - students can practice" : "Problem is private - competition only"}
     >
-      {visible ? "Visible" : "Hide"}
+      {visible ? "Public" : "Private"}
     </button>
   );
 };

@@ -14,12 +14,15 @@ export const profileSchema = yup.object().shape({
         .max(50, 'Last name must be less than 50 characters'),
     gender: yup
         .string()
+        .optional()
         .oneOf([...GENDERS, ''], 'Please select a valid gender'),
     phone: yup
         .string()
-        .matches(/^[\d\s\-\+\(\)]+$/, 'Please enter a valid phone number')
-        .min(10, 'Phone number must be at least 10 digits')
-        .max(20, 'Phone number must be less than 20 characters')
+        .optional()
+        .test('is-valid-phone', 'Please enter a valid phone number', function(value) {
+            if (!value) return true; // Allow empty
+            return /^[\d\s\-\+\(\)]+$/.test(value) && value.length >= 10 && value.length <= 20;
+        })
 })
 
 export const emailChangeSchema = yup.object().shape({

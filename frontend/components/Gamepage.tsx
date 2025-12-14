@@ -55,7 +55,7 @@ const DIFFICULTY_COLORS = {
 };
 
 const XP_MAP = { Easy: 10, Intermediate: 20, Hard: 30 };
-const MAX_SHAPES = 5; // Allow up to 5 shapes like teacher mode
+const MAX_SHAPES = 1; // Students should only place one shape to answer
 
 export default function Gamepage({
   roomCode,

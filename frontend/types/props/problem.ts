@@ -48,6 +48,7 @@ export interface MainAreaProps {
   setShapes: React.Dispatch<React.SetStateAction<Shape[]>>;
   selectedId: number | null;
   setSelectedId: (id: number | null) => void;
+  selectedTool?: string | null;
   setSelectedTool: (tool: string | null) => void;
   saveButton?: React.ReactNode;
   shapeLimit: number;
@@ -70,6 +71,7 @@ export interface MainAreaProps {
   showMeasurement?: boolean;
   showArcRadius?: boolean;
   disabled?: boolean; // Prevent shape addition/modification when true (e.g., after submission)
+  customStyles?: any; // Custom CSS module styles
 }
 
 export interface ExistingProblemsListProps {

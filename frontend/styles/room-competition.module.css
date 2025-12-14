@@ -52,7 +52,7 @@
 .room-title {
   font-family: 'Poppins', sans-serif;
   font-weight: 700;
-  font-size: clamp(1.5rem, 3vw, 2rem);
+  font-size: 0.95rem;
   color: var(--text-primary);
   margin: 0 0 0.625rem 0;
   line-height: 1.2;
@@ -891,20 +891,21 @@
 }
 
 .roomBanner {
-  height: 6rem; /* Reduced height for better scrollable layout */
+  height: 3rem; /* Reduced height for better scrollable layout */
   background: linear-gradient(135deg, #34d399 0%, #3b82f6 30%, #f59e0b 70%, #ef4444 100%);
   position: relative;
   overflow: hidden;
 }
 
 .roomTitle {
-  font-size: 1.1rem; /* Slightly smaller for better fit */
+  font-size: 0.95rem;
   font-weight: 700;
   margin-bottom: 0.5rem;
   color: #1f2937;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  max-width: 100%;
 }
 
 .roomDescription {
@@ -916,10 +917,11 @@
   line-height: 1.4;
   color: #6b7280;
   display: -webkit-box;
-  -webkit-line-clamp: 2; /* Limit to 2 lines */
+  -webkit-line-clamp: 2; /* Strictly limit to 2 lines */
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
+  max-height: 2.4em; /* 1.4 line-height * 2 lines */
 }
 
 .roomMantra {
@@ -931,10 +933,11 @@
   font-style: italic;
   color: #9ca3af;
   display: -webkit-box;
-  -webkit-line-clamp: 2; /* Limit to 2 lines */
+  -webkit-line-clamp: 2; /* Strictly limit to 2 lines */
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
+  max-height: 2.4em; /* 1.5 line-height * 2 lines */
 }
 
 /* Update My Room Section container */
@@ -983,7 +986,7 @@
   }
   
   .roomBanner {
-    height: 5rem;
+    height: 2.5rem;
   }
 }
 

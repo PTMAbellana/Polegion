@@ -16,11 +16,11 @@ export const registerSchema = yup.object().shape({
     .string()
     .email("Invalid Email Value")
     .required("Email value is required"),
-  phone: yup.string().required("Phone number is required"),
+  phone: yup.string().optional(),
   gender: yup
     .string()
-    .required("Gender is required")
-    .oneOf([...GENDERS], "Gender is not allowed"),
+    .optional()
+    .oneOf([...GENDERS, ''], "Gender is not allowed"),
   password: yup
     .string()
     .required("Password is required")
