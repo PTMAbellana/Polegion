@@ -11,20 +11,20 @@
 .certificateBorder {
   padding: 2rem;
   background: linear-gradient(135deg, #000080 0%, #00044A 100%);
-  border-radius: 20px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+  border-radius: 1.25rem;
+  box-shadow: 0 0.625rem 2.5rem rgba(0, 0, 0, 0.3);
   position: relative;
 }
 
 .certificateBorder::before {
   content: '';
   position: absolute;
-  top: 10px;
-  left: 10px;
-  right: 10px;
-  bottom: 10px;
-  border: 3px solid #FFD60A;
-  border-radius: 15px;
+  top: 0.625rem;
+  left: 0.625rem;
+  right: 0.625rem;
+  bottom: 0.625rem;
+  border: 0.1875rem solid #FFD60A;
+  border-radius: 0.9375rem;
   pointer-events: none;
 }
 
@@ -32,9 +32,9 @@
 .certificateInner {
   background: linear-gradient(to bottom, #ffffff 0%, #f8f9fa 100%);
   padding: 3rem 2.5rem;
-  border-radius: 10px;
+  border-radius: 0.625rem;
   position: relative;
-  box-shadow: inset 0 0 30px rgba(0, 4, 74, 0.1);
+  box-shadow: inset 0 0 1.875rem rgba(0, 4, 74, 0.1);
 }
 
 /* Header */
@@ -44,10 +44,10 @@
 }
 
 .logo {
-  width: 120px;
+  width: 7.5rem;
   height: auto;
   margin-bottom: 1rem;
-  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
+  filter: drop-shadow(0 0.25rem 0.375rem rgba(0, 0, 0, 0.1));
 }
 
 .mainTitle {
@@ -56,13 +56,13 @@
   font-weight: 700;
   color: #000080;
   margin: 0;
-  letter-spacing: 2px;
+  letter-spacing: 0.125rem;
   text-transform: uppercase;
 }
 
 /* Decorative Line */
 .decorativeLine {
-  height: 3px;
+  height: 0.1875rem;
   background: linear-gradient(90deg, 
     transparent 0%, 
     #FFD60A 20%, 
@@ -94,9 +94,9 @@
   color: #00044A;
   margin: 1rem 0;
   padding: 0.5rem 0;
-  border-bottom: 3px solid #FFD60A;
+  border-bottom: 0.1875rem solid #FFD60A;
   display: inline-block;
-  min-width: 300px;
+  min-width: 18.75rem;
 }
 
 .description {
@@ -112,7 +112,7 @@
   font-weight: 600;
   color: #000080;
   margin: 0.5rem 0 2rem 0;
-  letter-spacing: 1px;
+  letter-spacing: 0.0625rem;
 }
 
 .achievement {
@@ -128,7 +128,7 @@
 .dateSection {
   margin-top: 3rem;
   padding-top: 2rem;
-  border-top: 2px dashed #FFBF1C;
+  border-top: 0.125rem dashed #FFBF1C;
 }
 
 .dateLabel {
@@ -156,25 +156,25 @@
 }
 
 .seal {
-  width: 100px;
-  height: 100px;
+  width: 6.25rem;
+  height: 6.25rem;
   border-radius: 50%;
   background: linear-gradient(135deg, #000080 0%, #00044A 100%);
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 15px rgba(0, 0, 128, 0.3);
-  border: 4px solid #FFD60A;
+  box-shadow: 0 0.25rem 0.9375rem rgba(0, 0, 128, 0.3);
+  border: 0.25rem solid #FFD60A;
   position: relative;
 }
 
 .seal::before {
   content: '';
   position: absolute;
-  width: 110px;
-  height: 110px;
+  width: 6.875rem;
+  height: 6.875rem;
   border-radius: 50%;
-  border: 2px dashed #FFBF1C;
+  border: 0.125rem dashed #FFBF1C;
   animation: rotate 20s linear infinite;
 }
 
@@ -200,7 +200,7 @@
   font-size: 0.75rem;
   font-weight: 700;
   color: #FFD60A;
-  letter-spacing: 1px;
+  letter-spacing: 0.0625rem;
   line-height: 1.2;
 }
 
@@ -224,7 +224,7 @@
 
   .userName {
     font-size: 2rem;
-    min-width: 250px;
+    min-width: 15.625rem;
   }
 
   .programName {
@@ -236,29 +236,29 @@
   }
 
   .logo {
-    width: 80px;
+    width: 5rem;
   }
 
   .seal {
-    width: 80px;
-    height: 80px;
+    width: 5rem;
+    height: 5rem;
   }
 
   .seal::before {
-    width: 90px;
-    height: 90px;
+    width: 5.625rem;
+    height: 5.625rem;
   }
 }
 
 @media (max-width: 480px) {
   .mainTitle {
     font-size: 1.5rem;
-    letter-spacing: 1px;
+    letter-spacing: 0.0625rem;
   }
 
   .userName {
     font-size: 1.5rem;
-    min-width: 200px;
+    min-width: 12.5rem;
   }
 
   .programName {

@@ -192,155 +192,174 @@ const Toolbox: React.FC<ToolboxProps> = ({
           </div>
 
           <div className={styles.shapeCountIndicator}>
-            Shapes: {shapes.length} / 5
+            Shapes: {shapes.length} / 1
           </div>
         </div>
 
-        {/* Property Toggles */}
-        {(setShowSides || setShowAngles || setShowHeight || setShowDiameter || 
-          setShowCircumference || setShowLength || setShowMidpoint || 
-          setShowMeasurement || setShowArcRadius || setShowAreaByShape) && (
-          <div className={styles.toolboxSection}>
-            <div className={styles.sectionHeader}>Show Properties</div>
-            
-            <div className={styles.propertyToggles}>
-              {/* Line Properties */}
-              {setShowLength && (
-                <label className={styles.toggleLabel}>
-                  <input
-                    type="checkbox"
-                    checked={showLength}
-                    onChange={(e) => setShowLength(e.target.checked)}
-                    className={styles.toggleCheckbox}
-                  />
-                  <span>Line Length</span>
-                </label>
-              )}
-              
-              {setShowMidpoint && (
-                <label className={styles.toggleLabel}>
-                  <input
-                    type="checkbox"
-                    checked={showMidpoint}
-                    onChange={(e) => setShowMidpoint(e.target.checked)}
-                    className={styles.toggleCheckbox}
-                  />
-                  <span>Line Midpoint</span>
-                </label>
-              )}
+        {/* Property Toggles - Only show when shapes are placed */}
+        {shapes.length > 0 && (() => {
+          const currentShape = shapes[0];
+          const shapeType = currentShape?.type;
 
-              {/* Angle Properties */}
-              {setShowMeasurement && (
-                <label className={styles.toggleLabel}>
-                  <input
-                    type="checkbox"
-                    checked={showMeasurement}
-                    onChange={(e) => setShowMeasurement(e.target.checked)}
-                    className={styles.toggleCheckbox}
-                  />
-                  <span>Angle Measurement</span>
-                </label>
-              )}
-
-              {/* Polygon Properties */}
-              {setShowSides && (
-                <label className={styles.toggleLabel}>
-                  <input
-                    type="checkbox"
-                    checked={showSides}
-                    onChange={(e) => setShowSides(e.target.checked)}
-                    className={styles.toggleCheckbox}
-                  />
-                  <span>Side Lengths (Triangle & Quadrilateral)</span>
-                </label>
-              )}
+          return (
+            <div className={styles.toolboxSection}>
+              <div className={styles.sectionHeader}>Show Properties</div>
               
-              {setShowAngles && (
-                <label className={styles.toggleLabel}>
-                  <input
-                    type="checkbox"
-                    checked={showAngles}
-                    onChange={(e) => setShowAngles(e.target.checked)}
-                    className={styles.toggleCheckbox}
-                  />
-                  <span>Corner Angles (Triangle & Quadrilateral)</span>
-                </label>
-              )}
-              
-              {setShowHeight && (
-                <label className={styles.toggleLabel}>
-                  <input
-                    type="checkbox"
-                    checked={showHeight}
-                    onChange={(e) => setShowHeight(e.target.checked)}
-                    className={styles.toggleCheckbox}
-                  />
-                  <span>Triangle Height</span>
-                </label>
-              )}
+              <div className={styles.propertyToggles}>
+                {/* Line Properties */}
+                {shapeType === 'line' && (
+                  <>
+                    {setShowLength && (
+                      <label className={styles.toggleLabel}>
+                        <span>Line Length</span>
+                        <input
+                          type="checkbox"
+                          checked={showLength}
+                          onChange={(e) => setShowLength(e.target.checked)}
+                          className={styles.toggleCheckbox}
+                        />
+                        <span className={styles.toggleSwitch}></span>
+                      </label>
+                    )}
+                    
+                    {setShowMidpoint && (
+                      <label className={styles.toggleLabel}>
+                        <span>Line Midpoint</span>
+                        <input
+                          type="checkbox"
+                          checked={showMidpoint}
+                          onChange={(e) => setShowMidpoint(e.target.checked)}
+                          className={styles.toggleCheckbox}
+                        />
+                        <span className={styles.toggleSwitch}></span>
+                      </label>
+                    )}
+                  </>
+                )}
 
-              {/* Circle Properties */}
-              {setShowDiameter && (
-                <label className={styles.toggleLabel}>
-                  <input
-                    type="checkbox"
-                    checked={showDiameter}
-                    onChange={(e) => setShowDiameter(e.target.checked)}
-                    className={styles.toggleCheckbox}
-                  />
-                  <span>Circle Diameter</span>
-                </label>
-              )}
-              
-              {setShowCircumference && (
-                <label className={styles.toggleLabel}>
-                  <input
-                    type="checkbox"
-                    checked={showCircumference}
-                    onChange={(e) => setShowCircumference(e.target.checked)}
-                    className={styles.toggleCheckbox}
-                  />
-                  <span>Circle Circumference</span>
-                </label>
-              )}
-
-              {/* General Area */}
-              {setShowAreaByShape && showAreaByShape && (
-                <>
+                {/* Angle Properties */}
+                {shapeType === 'angle' && setShowMeasurement && (
                   <label className={styles.toggleLabel}>
+                    <span>Angle Measurement</span>
                     <input
                       type="checkbox"
-                      checked={showAreaByShape.circle}
-                      onChange={(e) => setShowAreaByShape({ ...showAreaByShape, circle: e.target.checked })}
+                      checked={showMeasurement}
+                      onChange={(e) => setShowMeasurement(e.target.checked)}
                       className={styles.toggleCheckbox}
                     />
-                    <span>Circle Area</span>
+                    <span className={styles.toggleSwitch}></span>
                   </label>
-                  
-                  <label className={styles.toggleLabel}>
-                    <input
-                      type="checkbox"
-                      checked={showAreaByShape.triangle}
-                      onChange={(e) => setShowAreaByShape({ ...showAreaByShape, triangle: e.target.checked })}
-                      className={styles.toggleCheckbox}
-                    />
-                    <span>Triangle Area</span>
-                  </label>
-                  
-                  <label className={styles.toggleLabel}>
-                    <input
-                      type="checkbox"
-                      checked={showAreaByShape.square}
-                      onChange={(e) => setShowAreaByShape({ ...showAreaByShape, square: e.target.checked })}
-                      className={styles.toggleCheckbox}
-                    />
-                    <span>Square Area</span>
-                  </label>
-                </>
-              )}
+                )}
+
+                {/* Triangle Properties */}
+                {shapeType === 'triangle' && (
+                  <>
+                    {setShowSides && (
+                      <label className={styles.toggleLabel}>
+                        <span>Side Lengths</span>
+                        <input
+                          type="checkbox"
+                          checked={showSides}
+                          onChange={(e) => setShowSides(e.target.checked)}
+                          className={styles.toggleCheckbox}
+                        />
+                        <span className={styles.toggleSwitch}></span>
+                      </label>
+                    )}
+                    
+                    {setShowAngles && (
+                      <label className={styles.toggleLabel}>
+                        <span>Corner Angles</span>
+                        <input
+                          type="checkbox"
+                          checked={showAngles}
+                          onChange={(e) => setShowAngles(e.target.checked)}
+                          className={styles.toggleCheckbox}
+                        />
+                        <span className={styles.toggleSwitch}></span>
+                      </label>
+                    )}
+                    
+                    {setShowHeight && (
+                      <label className={styles.toggleLabel}>
+                        <span>Triangle Height</span>
+                        <input
+                          type="checkbox"
+                          checked={showHeight}
+                          onChange={(e) => setShowHeight(e.target.checked)}
+                          className={styles.toggleCheckbox}
+                        />
+                        <span className={styles.toggleSwitch}></span>
+                      </label>
+                    )}
+                  </>
+                )}
+
+                {/* Square/Quadrilateral Properties */}
+                {shapeType === 'square' && (
+                  <>
+                    {setShowSides && (
+                      <label className={styles.toggleLabel}>
+                        <span>Side Lengths</span>
+                        <input
+                          type="checkbox"
+                          checked={showSides}
+                          onChange={(e) => setShowSides(e.target.checked)}
+                          className={styles.toggleCheckbox}
+                        />
+                        <span className={styles.toggleSwitch}></span>
+                      </label>
+                    )}
+                    
+                    {setShowAngles && (
+                      <label className={styles.toggleLabel}>
+                        <span>Corner Angles</span>
+                        <input
+                          type="checkbox"
+                          checked={showAngles}
+                          onChange={(e) => setShowAngles(e.target.checked)}
+                          className={styles.toggleCheckbox}
+                        />
+                        <span className={styles.toggleSwitch}></span>
+                      </label>
+                    )}
+                  </>
+                )}
+
+                {/* Circle Properties */}
+                {shapeType === 'circle' && (
+                  <>
+                    {setShowDiameter && (
+                      <label className={styles.toggleLabel}>
+                        <span>Circle Diameter</span>
+                        <input
+                          type="checkbox"
+                          checked={showDiameter}
+                          onChange={(e) => setShowDiameter(e.target.checked)}
+                          className={styles.toggleCheckbox}
+                        />
+                        <span className={styles.toggleSwitch}></span>
+                      </label>
+                    )}
+                    
+                    {setShowCircumference && (
+                      <label className={styles.toggleLabel}>
+                        <span>Circle Circumference</span>
+                        <input
+                          type="checkbox"
+                          checked={showCircumference}
+                          onChange={(e) => setShowCircumference(e.target.checked)}
+                          className={styles.toggleCheckbox}
+                        />
+                        <span className={styles.toggleSwitch}></span>
+                      </label>
+                    )}
+                  </>
+                )}
+              </div>
             </div>
-          </div>
-        )}
+          );
+        })()}
       </div>
     </div>
   );

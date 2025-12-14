@@ -26,7 +26,7 @@
     rgba(62, 88, 121, 0.5) 50%,
     rgba(33, 53, 85, 0.4) 100%
   );
-  backdrop-filter: blur(1px);
+  backdrop-filter: blur(0.0625rem);
 }
 
 /* Introduction Overlay */
@@ -55,30 +55,30 @@
 }
 
 .introTitle {
-  font-size: 2.5rem;
+  font-size: clamp(2rem, 4vw, 2.5rem);
   font-weight: bold;
   margin-bottom: 0.75rem;
-  text-shadow: 0 0 20px rgba(216, 196, 182, 0.8);
+  text-shadow: 0 0 1.25rem rgba(216, 196, 182, 0.8);
   animation: glow 2s ease-in-out infinite alternate;
 }
 
 @keyframes glow {
-  from { text-shadow: 0 0 20px rgba(216, 196, 182, 0.5); }
-  to { text-shadow: 0 0 30px rgba(216, 196, 182, 1); }
+  from { text-shadow: 0 0 1.25rem rgba(216, 196, 182, 0.5); }
+  to { text-shadow: 0 0 1.875rem rgba(216, 196, 182, 1); }
 }
 
 .introText {
-  font-size: 1rem;
+  font-size: clamp(0.875rem, 1.5vw, 1rem);
   margin-bottom: 1.5rem;
   opacity: 0.9;
   color: #D8C4B6;
 }
 
 .introSpinner {
-  width: 35px;
-  height: 35px;
-  border: 3px solid rgba(216, 196, 182, 0.3);
-  border-top: 3px solid #D8C4B6;
+  width: 2.1875rem;
+  height: 2.1875rem;
+  border: 0.1875rem solid rgba(216, 196, 182, 0.3);
+  border-top: 0.1875rem solid #D8C4B6;
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin: 0 auto;
@@ -110,36 +110,36 @@
 }
 
 .backButtonImage {
-  width: 55px;
-  height: 55px;
+  width: 3.4375rem;
+  height: 3.4375rem;
   object-fit: contain;
   transition: transform 0.3s ease, filter 0.3s ease;
-  filter: drop-shadow(0 2px 8px rgba(216, 196, 182, 0.5));
+  filter: drop-shadow(0 0.125rem 0.5rem rgba(216, 196, 182, 0.5));
 }
 
 .backButtonText {
   color: #F5EFE7;
   font-weight: 700;
-  font-size: 0.75rem;
+  font-size: clamp(0.7rem, 1.2vw, 0.75rem);
   text-align: center;
   white-space: nowrap;
   text-shadow: 
-    0 2px 4px rgba(0, 0, 0, 0.8),
-    0 0 8px rgba(216, 196, 182, 0.5);
+    0 0.125rem 0.25rem rgba(0, 0, 0, 0.8),
+    0 0 0.5rem rgba(216, 196, 182, 0.5);
   transition: all 0.3s ease;
 }
 
 .backButton:hover .backButtonImage {
   transform: scale(1.15) rotate(-5deg);
-  filter: drop-shadow(0 4px 15px rgba(216, 196, 182, 0.8));
+  filter: drop-shadow(0 0.25rem 0.9375rem rgba(216, 196, 182, 0.8));
 }
 
 .backButton:hover .backButtonText {
   color: #D8C4B6;
   text-shadow: 
-    0 2px 4px rgba(0, 0, 0, 0.8),
-    0 0 15px rgba(216, 196, 182, 0.8);
-  transform: translateY(-2px);
+    0 0.125rem 0.25rem rgba(0, 0, 0, 0.8),
+    0 0 0.9375rem rgba(216, 196, 182, 0.8);
+  transform: translateY(-0.125rem);
 }
 
 .backButton:active .backButtonImage {
@@ -153,30 +153,30 @@
 /* Title Panel */
 .titlePanel {
   background: rgba(33, 53, 85, 0.8);
-  border: 2px solid #D8C4B6;
-  border-radius: 10px;
+  border: 0.125rem solid #D8C4B6;
+  border-radius: 0.625rem;
   padding: 0.75rem 1.15rem;
   text-align: center;
-  backdrop-filter: blur(10px);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(0.625rem);
+  box-shadow: 0 0.375rem 1.25rem rgba(0, 0, 0, 0.3);
   margin: 0.75rem auto 0.4rem auto;
   width: fit-content;
-  min-width: 250px;
+  min-width: clamp(15rem, 50vw, 20rem);
   position: relative;
   z-index: 10;
 }
 
 .castleTitle h1 {
   font-family: 'UnifrakturMaguntia', serif;
-  font-size: 1.4rem;
+  font-size: clamp(1.2rem, 2.5vw, 1.4rem);
   color: #F5EFE7;
   margin-bottom: 0.12rem;
-  text-shadow: 0 0 8px rgba(245, 239, 231, 0.5);
+  text-shadow: 0 0 0.5rem rgba(245, 239, 231, 0.5);
 }
 
 .castleSubtitle {
   color: #D8C4B6;
-  font-size: 0.8rem;
+  font-size: clamp(0.75rem, 1.3vw, 0.8rem);
   margin-bottom: 0;
   margin-top: 0;
   opacity: 0.9;
@@ -184,7 +184,7 @@
 
 .castleTheme {
   color: #F5EFE7;
-  font-size: 0.75rem;
+  font-size: clamp(0.7rem, 1.2vw, 0.75rem);
   margin-top: 0.4rem;
   font-style: italic;
   opacity: 0.9;
@@ -206,29 +206,29 @@
 .progressLabel {
   color: #F5EFE7;
   font-weight: 600;
-  font-size: 0.7rem;
+  font-size: clamp(0.65rem, 1vw, 0.7rem);
 }
 
 .progressValue {
   color: #D8C4B6;
   font-weight: bold;
-  font-size: 0.7rem;
+  font-size: clamp(0.65rem, 1vw, 0.7rem);
 }
 
 .progressBar {
   width: 100%;
-  height: 4px;
+  height: 0.25rem;
   background: rgba(216, 196, 182, 0.2);
-  border-radius: 2px;
+  border-radius: 0.125rem;
   overflow: hidden;
 }
 
 .progressFill {
   height: 100%;
   background: linear-gradient(90deg, #D8C4B6, #F5EFE7);
-  border-radius: 2px;
+  border-radius: 0.125rem;
   transition: width 0.5s ease;
-  box-shadow: 0 0 6px rgba(216, 196, 182, 0.5);
+  box-shadow: 0 0 0.375rem rgba(216, 196, 182, 0.5);
 }
 
 /* Main Content */
@@ -238,25 +238,25 @@
   display: flex;
   align-items: flex-start;
   justify-content: center;
-  gap: 1.5rem;
-  max-width: 1200px;
+  gap: clamp(1rem, 2vw, 1.5rem);
+  max-width: 75rem;
   margin: 0 auto;
   width: 100%;
-  padding: 1.15rem 1.5rem;
+  padding: clamp(0.75rem, 2vw, 1.15rem) clamp(1rem, 2.5vw, 1.5rem);
 }
 
 /* Chapter Panel */
 .chapterPanel {
   background: rgba(33, 53, 85, 0.8);
-  border: 2px solid #D8C4B6;
-  border-radius: 10px;
-  padding: 1rem;
-  backdrop-filter: blur(10px);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+  border: 0.125rem solid #D8C4B6;
+  border-radius: 0.625rem;
+  padding: clamp(0.75rem, 1.5vw, 1rem);
+  backdrop-filter: blur(0.625rem);
+  box-shadow: 0 0.375rem 1.25rem rgba(0, 0, 0, 0.3);
   width: 100%;
-  max-width: 500px;
-  height: 400px;
-  max-height: 400px;
+  max-width: clamp(28rem, 60%, 31.25rem);
+  height: clamp(22rem, 50vh, 25rem);
+  max-height: 25rem;
   overflow: hidden;
 }
 
@@ -265,16 +265,16 @@
   align-items: center;
   gap: 0.3rem;
   color: #F5EFE7;
-  font-size: 0.9rem;
+  font-size: clamp(0.85rem, 1.4vw, 0.9rem);
   font-weight: bold;
   margin-bottom: 0.6rem;
-  text-shadow: 0 0 4px rgba(245, 239, 231, 0.5);
+  text-shadow: 0 0 0.25rem rgba(245, 239, 231, 0.5);
 }
 
 .chapterIcon {
   color: #D8C4B6;
-  width: 15px;
-  height: 15px;
+  width: 0.9375rem;
+  height: 0.9375rem;
 }
 
 .chapterList {
@@ -282,24 +282,24 @@
   flex-direction: column;
   gap: 0.3rem;
   margin-bottom: 0.75rem;
-  max-height: 295px; /* Limit to exactly 4 chapters visible (70px each + gaps) */
+  max-height: 18.4375rem; /* Limit to exactly 4 chapters visible (4.375rem each + gaps) */
   overflow-y: auto;
   overflow-x: visible;
   padding-right: 0.4rem;
 }
 
 .chapterList::-webkit-scrollbar {
-  width: 8px;
+  width: 0.5rem;
 }
 
 .chapterList::-webkit-scrollbar-track {
   background: rgba(33, 53, 85, 0.3);
-  border-radius: 4px;
+  border-radius: 0.25rem;
 }
 
 .chapterList::-webkit-scrollbar-thumb {
   background: rgba(216, 196, 182, 0.5);
-  border-radius: 4px;
+  border-radius: 0.25rem;
 }
 
 .chapterList::-webkit-scrollbar-thumb:hover {
@@ -309,23 +309,23 @@
 /* Chapter Item */
 .chapterItem {  
   background: rgba(33, 53, 85, 0.4);
-  border: 2px solid rgba(216, 196, 182, 0.25);
-  border-radius: 10px;
-  padding: 0.75rem;
+  border: 0.125rem solid rgba(216, 196, 182, 0.25);
+  border-radius: 0.625rem;
+  padding: clamp(0.625rem, 1.2vw, 0.75rem);
   cursor: pointer;
   transition: all 0.3s ease;
   display: flex;
   gap: 0.75rem;
   position: relative;
-  min-height: 70px;
-  max-height: 80px;
+  min-height: 4.375rem;
+  max-height: 5rem;
 }
 
 /* Hover state - for tooltip/description */
 .chapterItem:hover:not(.locked) {
   background: rgba(62, 88, 121, 0.6);
   border-color: rgba(216, 196, 182, 0.5);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.3);
 }
 
 /* LOCKED STATE - Gray and disabled */
@@ -346,14 +346,14 @@
 /* COMPLETED STATE - Lighter beige accent (when not selected) */
 .chapterItem.completed:not(.selected) {
   background: rgba(33, 53, 85, 0.4);
-  border-left: 4px solid #F5EFE7;
-  padding-left: calc(1rem - 2px);
+  border-left: 0.25rem solid #F5EFE7;
+  padding-left: calc(clamp(0.625rem, 1.2vw, 0.75rem) - 0.125rem);
 }
 
 .chapterItem.completed:not(.selected):hover {
   background: rgba(62, 88, 121, 0.6);
   border-left-color: #F5EFE7;
-  box-shadow: 0 4px 12px rgba(245, 239, 231, 0.08);
+  box-shadow: 0 0.25rem 0.75rem rgba(245, 239, 231, 0.08);
 }
 
 /* SELECTED STATE - Castle blue highlight */
@@ -363,18 +363,18 @@
     rgba(62, 88, 121, 0.6) 0%, 
     rgba(33, 53, 85, 0.5) 100%
   );
-  border: 2px solid #D8C4B6;
-  border-left: 4px solid #F5EFE7;
-  padding-left: calc(1rem - 2px);
+  border: 0.125rem solid #D8C4B6;
+  border-left: 0.25rem solid #F5EFE7;
+  padding-left: calc(clamp(0.625rem, 1.2vw, 0.75rem) - 0.125rem);
   box-shadow: 
-    0 0 20px rgba(216, 196, 182, 0.3),
-    0 4px 16px rgba(0, 0, 0, 0.5);
+    0 0 1.25rem rgba(216, 196, 182, 0.3),
+    0 0.25rem 1rem rgba(0, 0, 0, 0.5);
 }
 
 .chapterItem.selected:hover {
   box-shadow: 
-    0 0 20px rgba(216, 196, 182, 0.35),
-    0 4px 16px rgba(0, 0, 0, 0.55);
+    0 0 1.25rem rgba(216, 196, 182, 0.35),
+    0 0.25rem 1rem rgba(0, 0, 0, 0.55);
 }
 
 /* Chapter Number Container */
@@ -382,8 +382,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
+  width: 2.25rem;
+  height: 2.25rem;
   flex-shrink: 0;
   transition: all 0.3s ease;
   border: none;
@@ -395,9 +395,9 @@
 /* Default/Unlocked chapter number styling */
 .chapterNumber {
   color: #F5EFE7;
-  font-size: 1.2rem;
+  font-size: clamp(1.1rem, 1.8vw, 1.2rem);
   font-weight: 700;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  text-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.3);
   border: none;
   outline: none;
   background: transparent;
@@ -421,14 +421,14 @@
 
 .lockIcon {
   color: #999;
-  width: 16px;
-  height: 16px;
+  width: 1rem;
+  height: 1rem;
 }
 
 /* COMPLETED - Bright beige number (when not selected) */
 .chapterItem.completed:not(.selected) .chapterNumber {
   color: #F5EFE7;
-  text-shadow: 0 0 8px rgba(245, 239, 231, 0.6);
+  text-shadow: 0 0 0.5rem rgba(245, 239, 231, 0.6);
   font-weight: 800;
 }
 
@@ -440,22 +440,22 @@
 .chapterItem.selected .chapterNumber {
   color: #F5EFE7;
   font-weight: 800;
-  text-shadow: 0 0 12px rgba(245, 239, 231, 0.8);
+  text-shadow: 0 0 0.75rem rgba(245, 239, 231, 0.8);
 }
 
 .completedIcon {
   color: #FFD700;
-  width: 15px;
-  height: 15px;
+  width: 0.9375rem;
+  height: 0.9375rem;
 }
 
 .chapterItem.selected .completedIcon {
   color: #FFF;
-  filter: drop-shadow(0 0 5px rgba(255, 215, 0, 0.6));
+  filter: drop-shadow(0 0 0.3125rem rgba(255, 215, 0, 0.6));
 }
 
 .chapterEmoji {
-  font-size: 0.95rem;
+  font-size: clamp(0.875rem, 1.4vw, 0.95rem);
 }
 
 /* Chapter Content - Text */
@@ -473,7 +473,7 @@
   font-size: clamp(0.8rem, 1vw, 0.9rem);
   margin: 0;
   font-weight: 600;
-  letter-spacing: 0.25px;
+  letter-spacing: 0.015625rem;
   line-height: 1.25;
   transition: all 0.3s ease;
 }
@@ -512,7 +512,7 @@
 .chapterItem.selected .chapterTitle {
   color: #F5EFE7;
   font-weight: 700;
-  text-shadow: 0 0 10px rgba(245, 239, 231, 0.5);
+  text-shadow: 0 0 0.625rem rgba(245, 239, 231, 0.5);
 }
 
 .chapterItem.selected .chapterObjective {
@@ -534,8 +534,8 @@
   gap: 0.3rem;
   background: rgba(76, 175, 80, 0.2);
   padding: 0.3rem 0.6rem;
-  border-radius: 15px;
-  border: 1px solid #4CAF50;
+  border-radius: 0.9375rem;
+  border: 0.0625rem solid #4CAF50;
 }
 
 .rewardBadge span {
@@ -547,8 +547,8 @@
 
 .rewardBadge svg {
   color: #FFD700;
-  width: 16px;
-  height: 16px;
+  width: 1rem;
+  height: 1rem;
 }
 
 /* Chapter Status - Right side arrow/badge */
@@ -565,8 +565,8 @@
   gap: 0.25rem;
   background: rgba(216, 196, 182, 0.2);
   padding: 0.3rem 0.6rem;
-  border-radius: 16px;
-  border: 1px solid #D8C4B6;
+  border-radius: 1rem;
+  border: 0.0625rem solid #D8C4B6;
 }
 
 .rewardBadge span {
@@ -578,36 +578,36 @@
 
 .rewardBadge svg {
   color: #F5EFE7;
-  width: 13px;
-  height: 13px;
+  width: 0.8125rem;
+  height: 0.8125rem;
 }
 
 .chapterItem.selected .rewardBadge {
   background: rgba(245, 239, 231, 0.25);
   border-color: #F5EFE7;
-  box-shadow: 0 0 6px rgba(245, 239, 231, 0.3);
+  box-shadow: 0 0 0.375rem rgba(245, 239, 231, 0.3);
 }
 
 .chapterItem.selected .rewardBadge span {
   color: #F5EFE7;
-  text-shadow: 0 0 5px rgba(245, 239, 231, 0.4);
+  text-shadow: 0 0 0.3125rem rgba(245, 239, 231, 0.4);
 }
 
 .chapterItem.selected .rewardBadge svg {
   color: #F5EFE7;
-  filter: drop-shadow(0 0 3px rgba(245, 239, 231, 0.5));
+  filter: drop-shadow(0 0 0.1875rem rgba(245, 239, 231, 0.5));
 }
 
 .chapterArrow {
   color: #D8C4B6;
-  width: 17px;
-  height: 17px;
+  width: 1.0625rem;
+  height: 1.0625rem;
   transition: all 0.3s ease;
   opacity: 0.6;
 }
 
 .chapterItem:hover:not(.locked) .chapterArrow {
-  transform: translateX(4px);
+  transform: translateX(0.25rem);
   opacity: 1;
   color: #F5EFE7;
 }
@@ -625,8 +625,8 @@
 .chapterItem.selected .chapterArrow {
   color: #F5EFE7;
   opacity: 1;
-  transform: translateX(5px);
-  filter: drop-shadow(0 0 4px rgba(245, 239, 231, 0.5));
+  transform: translateX(0.3125rem);
+  filter: drop-shadow(0 0 0.25rem rgba(245, 239, 231, 0.5));
 }
 
 /* Action Section */
@@ -635,8 +635,8 @@
   z-index: 10;
   display: flex;
   justify-content: center;
-  padding: 1.15rem 1.5rem 1.5rem 1.5rem;
-  max-width: 1200px;
+  padding: clamp(0.75rem, 2vw, 1.15rem) clamp(1rem, 2.5vw, 1.5rem) clamp(1rem, 2.5vw, 1.5rem) clamp(1rem, 2.5vw, 1.5rem);
+  max-width: 75rem;
   margin: 0 auto;
   width: 100%;
 }
@@ -648,23 +648,23 @@
   background: linear-gradient(135deg, #3E5879 0%, #213555 50%, #3E5879 100%);
   color: #F5EFE7;
   border: none;
-  padding: 0.75rem 2rem;
-  border-radius: 25px;
-  font-size: 1rem;
+  padding: clamp(0.625rem, 1.2vw, 0.75rem) clamp(1.5rem, 3vw, 2rem);
+  border-radius: 1.5625rem;
+  font-size: clamp(0.875rem, 1.5vw, 1rem);
   font-weight: 800;
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: 
-    0 3px 12px rgba(216, 196, 182, 0.4),
-    0 0 16px rgba(216, 196, 182, 0.2),
-    inset 0 1px 0 rgba(245, 239, 231, 0.2);
-  min-width: 230px;
+    0 0.1875rem 0.75rem rgba(216, 196, 182, 0.4),
+    0 0 1rem rgba(216, 196, 182, 0.2),
+    inset 0 0.0625rem 0 rgba(245, 239, 231, 0.2);
+  min-width: clamp(12rem, 30vw, 14.375rem);
   justify-content: center;
   position: relative;
   overflow: hidden;
   text-transform: uppercase;
-  letter-spacing: 0.8px;
-  border: 2px solid rgba(216, 196, 182, 0.4);
+  letter-spacing: 0.05rem;
+  border: 0.125rem solid rgba(216, 196, 182, 0.4);
 }
 
 /* Animated gradient effect */
@@ -691,19 +691,19 @@
 .startButton:hover:not(.disabled) {
   background: linear-gradient(135deg, #3E5879 0%, #213555 50%, #3E5879 100%);
   box-shadow: 
-    0 6px 25px rgba(216, 196, 182, 0.6),
-    0 0 30px rgba(216, 196, 182, 0.4),
-    inset 0 1px 0 rgba(245, 239, 231, 0.3);
-  transform: translateY(-3px) scale(1.02);
+    0 0.375rem 1.5625rem rgba(216, 196, 182, 0.6),
+    0 0 1.875rem rgba(216, 196, 182, 0.4),
+    inset 0 0.0625rem 0 rgba(245, 239, 231, 0.3);
+  transform: translateY(-0.1875rem) scale(1.02);
   border-color: #D8C4B6;
   color: #F5EFE7;
 }
 
 .startButton:active:not(.disabled) {
-  transform: translateY(-1px) scale(0.98);
+  transform: translateY(-0.0625rem) scale(0.98);
   box-shadow: 
-    0 3px 15px rgba(216, 196, 182, 0.5),
-    0 0 20px rgba(216, 196, 182, 0.3);
+    0 0.1875rem 0.9375rem rgba(216, 196, 182, 0.5),
+    0 0 1.25rem rgba(216, 196, 182, 0.3);
 }
 
 .startButton.disabled {
@@ -711,8 +711,8 @@
   cursor: not-allowed;
   opacity: 0.6;
   box-shadow: 
-    0 2px 8px rgba(0, 0, 0, 0.3),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    0 0.125rem 0.5rem rgba(0, 0, 0, 0.3),
+    inset 0 0.0625rem 0 rgba(255, 255, 255, 0.1);
   transform: none;
   border-color: rgba(255, 255, 255, 0.1);
 }
@@ -742,16 +742,16 @@
 }
 
 .startButton:hover:not(.disabled) .arrowIcon {
-  transform: translateX(5px);
+  transform: translateX(0.3125rem);
   animation: pulse 1s ease-in-out infinite;
 }
 
 @keyframes pulse {
   0%, 100% {
-    transform: translateX(5px);
+    transform: translateX(0.3125rem);
   }
   50% {
-    transform: translateX(8px);
+    transform: translateX(0.5rem);
   }
 }
 
@@ -763,15 +763,15 @@
 @keyframes buttonGlow {
   0%, 100% {
     box-shadow: 
-      0 6px 25px rgba(102, 187, 255, 0.6),
-      0 0 30px rgba(102, 187, 255, 0.4),
-      inset 0 1px 0 rgba(255, 255, 255, 0.4);
+      0 0.375rem 1.5625rem rgba(102, 187, 255, 0.6),
+      0 0 1.875rem rgba(102, 187, 255, 0.4),
+      inset 0 0.0625rem 0 rgba(255, 255, 255, 0.4);
   }
   50% {
     box-shadow: 
-      0 8px 30px rgba(102, 187, 255, 0.8),
-      0 0 40px rgba(102, 187, 255, 0.6),
-      inset 0 1px 0 rgba(255, 255, 255, 0.5);
+      0 0.5rem 1.875rem rgba(102, 187, 255, 0.8),
+      0 0 2.5rem rgba(102, 187, 255, 0.6),
+      inset 0 0.0625rem 0 rgba(255, 255, 255, 0.5);
   }
 }
 
@@ -786,16 +786,16 @@
 
 .castleInfoCard {
   background: rgba(33, 53, 85, 0.8);
-  border: 2px solid #D8C4B6;
-  border-radius: 12px;
-  padding: 1.15rem;
-  backdrop-filter: blur(10px);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+  border: 0.125rem solid #D8C4B6;
+  border-radius: 0.75rem;
+  padding: clamp(0.875rem, 1.8vw, 1.15rem);
+  backdrop-filter: blur(0.625rem);
+  box-shadow: 0 0.375rem 1.25rem rgba(0, 0, 0, 0.3);
   text-align: center;
   width: 100%;
-  max-width: 270px;
-  height: 400px;
-  max-height: 400px;
+  max-width: clamp(15rem, 35%, 16.875rem);
+  height: clamp(22rem, 50vh, 25rem);
+  max-height: 25rem;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -803,8 +803,8 @@
 
 .castleInfoAvatar {
   position: relative;
-  width: 170px;
-  height: 170px;
+  width: clamp(9rem, 20vw, 10.625rem);
+  height: clamp(9rem, 20vw, 10.625rem);
   margin: 0 auto 1.15rem;
   display: flex;
   align-items: center;
@@ -815,22 +815,22 @@
   width: 100%;
   height: 100%;
   object-fit: contain;
-  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.3));
+  filter: drop-shadow(0 0.25rem 0.75rem rgba(0, 0, 0, 0.3));
   transition: transform 0.3s ease, filter 0.3s ease;
 }
 
 .castleInfoAvatar:hover .castleImage {
   transform: scale(1.05);
-  filter: drop-shadow(0 6px 16px rgba(216, 196, 182, 0.5));
+  filter: drop-shadow(0 0.375rem 1rem rgba(216, 196, 182, 0.5));
 }
 
 .castleInfoName {
   color: #F5EFE7;
-  font-size: 1.15rem;
+  font-size: clamp(1rem, 1.8vw, 1.15rem);
   margin: 0 0 1rem 0;
   font-weight: 700;
-  text-shadow: 0 0 10px rgba(245, 239, 231, 0.4);
-  letter-spacing: 0.3px;
+  text-shadow: 0 0 0.625rem rgba(245, 239, 231, 0.4);
+  letter-spacing: 0.01875rem;
 }
 
 /* Castle Info Stats Grid */
@@ -846,23 +846,23 @@
   gap: 0.6rem;
   padding: 0.5rem 0.7rem;
   background: rgba(33, 53, 85, 0.3);
-  border-radius: 8px;
-  border: 1px solid rgba(216, 196, 182, 0.2);
+  border-radius: 0.5rem;
+  border: 0.0625rem solid rgba(216, 196, 182, 0.2);
   transition: all 0.3s ease;
 }
 
 .castleInfoStat:hover {
   background: rgba(62, 88, 121, 0.4);
   border-color: rgba(216, 196, 182, 0.3);
-  transform: translateX(3px);
+  transform: translateX(0.1875rem);
 }
 
 .statIcon {
   color: #F5EFE7;
-  width: 18px;
-  height: 18px;
+  width: 1.125rem;
+  height: 1.125rem;
   flex-shrink: 0;
-  filter: drop-shadow(0 0 4px rgba(245, 239, 231, 0.4));
+  filter: drop-shadow(0 0 0.25rem rgba(245, 239, 231, 0.4));
 }
 
 .statText {
@@ -874,31 +874,31 @@
 
 .statValue {
   color: #F5EFE7;
-  font-size: 0.85rem;
+  font-size: clamp(0.8rem, 1.3vw, 0.85rem);
   font-weight: 700;
   line-height: 1;
 }
 
 .statLabel {
   color: #D8C4B6;
-  font-size: 0.65rem;
+  font-size: clamp(0.6rem, 1vw, 0.65rem);
   font-weight: 500;
   opacity: 0.9;
   line-height: 1;
 }
 
 .chapterTooltip {
-  min-width: 250px;
-  max-width: 350px;
+  min-width: 15.625rem;
+  max-width: 21.875rem;
   width: max-content;
   background: linear-gradient(135deg, rgba(33, 53, 85, 0.98) 0%, rgba(62, 88, 121, 0.98) 100%);
-  backdrop-filter: blur(10px);
-  border: 2px solid rgba(216, 196, 182, 0.4);
-  border-radius: 10px;
+  backdrop-filter: blur(0.625rem);
+  border: 0.125rem solid rgba(216, 196, 182, 0.4);
+  border-radius: 0.625rem;
   padding: 1rem;
   box-shadow: 
-    0 6px 20px rgba(0, 0, 0, 0.5),
-    0 0 12px rgba(216, 196, 182, 0.2);
+    0 0.375rem 1.25rem rgba(0, 0, 0, 0.5),
+    0 0 0.75rem rgba(216, 196, 182, 0.2);
   pointer-events: none;
   animation: tooltipSlideIn 0.2s ease;
 }
@@ -909,7 +909,7 @@
   line-height: 1.5;
   word-wrap: break-word;
   white-space: normal;
-  font-size: 0.8rem;
+  font-size: clamp(0.75rem, 1.2vw, 0.8rem);
 }
 
 .tooltipTopics {
@@ -923,9 +923,9 @@
   display: inline-block;
   padding: 0.3rem 0.6rem;
   background: rgba(216, 196, 182, 0.2);
-  border: 1px solid rgba(216, 196, 182, 0.4);
-  border-radius: 6px;
-  font-size: 0.75rem;
+  border: 0.0625rem solid rgba(216, 196, 182, 0.4);
+  border-radius: 0.375rem;
+  font-size: clamp(0.7rem, 1.1vw, 0.75rem);
   color: #D8C4B6;
   white-space: nowrap;
   font-weight: 500;
@@ -934,7 +934,7 @@
 @keyframes tooltipSlideIn {
   from {
     opacity: 0;
-    transform: translateX(-10px);
+    transform: translateX(-0.625rem);
   }
   to {
     opacity: 1;
@@ -955,8 +955,8 @@
 
 .particle {
   position: absolute;
-  width: 2px;
-  height: 2px;
+  width: 0.125rem;
+  height: 0.125rem;
   background: rgba(102, 187, 255, 0.5);
   border-radius: 50%;
   animation: float linear infinite;
@@ -997,13 +997,13 @@
 .error_container h2 {
   color: #66BBFF;
   margin-bottom: 1rem;
-  font-size: 1.8rem;
+  font-size: clamp(1.5rem, 3vw, 1.8rem);
 }
 
 .error_container p {
   color: #B8D4F0;
   margin-bottom: 1.5rem;
-  font-size: 1rem;
+  font-size: clamp(0.875rem, 1.5vw, 1rem);
 }
 
 .errorButton {
@@ -1011,37 +1011,37 @@
   color: white;
   border: none;
   padding: 0.75rem 1.5rem;
-  border-radius: 20px;
-  font-size: 1rem;
+  border-radius: 1.25rem;
+  font-size: clamp(0.875rem, 1.5vw, 1rem);
   font-weight: bold;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 3px 10px rgba(102, 187, 255, 0.3);
+  box-shadow: 0 0.1875rem 0.625rem rgba(102, 187, 255, 0.3);
 }
 
 .errorButton:hover {
   background: linear-gradient(135deg, #4FC3F7, #29B6F6);
-  box-shadow: 0 5px 18px rgba(102, 187, 255, 0.4);
-  transform: translateY(-2px);
+  box-shadow: 0 0.3125rem 1.125rem rgba(102, 187, 255, 0.4);
+  transform: translateY(-0.125rem);
 }
 
 /* Responsive Design */
-@media (max-width: 1400px) {
+@media (max-width: 87.5rem) {
   .mainContent {
-    padding: 0 1.5rem 1rem 1.5rem;
-    gap: 1.5rem;
+    padding: 0 clamp(1rem, 2.5vw, 1.5rem) clamp(0.75rem, 1.5vw, 1rem) clamp(1rem, 2.5vw, 1.5rem);
+    gap: clamp(1rem, 2vw, 1.5rem);
   }
   
   .chapterPanel {
-    width: 580px;
+    width: clamp(32rem, 70%, 36.25rem);
   }
 }
 
-@media (max-width: 1200px) {
+@media (max-width: 75rem) {
   .mainContent {
     flex-direction: column;
     align-items: center;
-    padding: 0 1.5rem;
+    padding: 0 clamp(1rem, 2.5vw, 1.5rem);
   }
 
   .chapterPanel {
@@ -1055,7 +1055,7 @@
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 48rem) {
   .chapterSelectionContainer {
     height: auto;
     min-height: 100vh;
@@ -1077,39 +1077,39 @@
   
   .chapterPanel {
     width: 100%;
-    max-width: 400px;
+    max-width: 25rem;
     max-height: none;
   }
   
   .castleInfoCard {
-    max-width: 250px;
+    max-width: 15.625rem;
   }
   
   .chapterItem {
     flex-direction: row;
     text-align: left;
     gap: 0.6rem;
-    padding: 0.75rem;
+    padding: clamp(0.625rem, 1.2vw, 0.75rem);
   }
   
   .backButton {
     top: 0.75rem;
     right: 0.75rem;
     padding: 0.4rem 0.8rem;
-    font-size: 0.9rem;
-    min-width: 44px;
-    min-height: 44px;
+    font-size: clamp(0.85rem, 1.4vw, 0.9rem);
+    min-width: 2.75rem;
+    min-height: 2.75rem;
   }
 
   .startButton {
-    min-width: 200px;
-    font-size: 1rem;
-    padding: 0.75rem 1.5rem;
-    min-height: 44px;
+    min-width: 12.5rem;
+    font-size: clamp(0.875rem, 1.5vw, 1rem);
+    padding: clamp(0.625rem, 1.2vw, 0.75rem) clamp(1.25rem, 2.5vw, 1.5rem);
+    min-height: 2.75rem;
   }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 30rem) {
   .chapterSelectionContainer {
     padding: 0;
   }
@@ -1125,11 +1125,11 @@
   }
 
   .castleTitle {
-    font-size: 1.5rem;
+    font-size: clamp(1.3rem, 2.5vw, 1.5rem);
   }
 
   .castleSubtitle {
-    font-size: 0.85rem;
+    font-size: clamp(0.8rem, 1.3vw, 0.85rem);
   }
 
   .chapterPanel {
@@ -1147,10 +1147,10 @@
   }
 
   .chapterNumber {
-    width: 35px;
-    height: 35px;
-    font-size: 0.85rem;
-    min-width: 35px;
+    width: 2.1875rem;
+    height: 2.1875rem;
+    font-size: clamp(0.8rem, 1.3vw, 0.85rem);
+    min-width: 2.1875rem;
   }
 
   .chapterInfo {
@@ -1158,28 +1158,28 @@
   }
 
   .chapterTitle {
-    font-size: 0.9rem;
+    font-size: clamp(0.85rem, 1.4vw, 0.9rem);
   }
 
   .chapterObjective {
-    font-size: 0.75rem;
+    font-size: clamp(0.7rem, 1.1vw, 0.75rem);
   }
 
   .backButton {
     top: 0.5rem;
     right: 0.5rem;
     padding: 0.35rem 0.7rem;
-    font-size: 0.85rem;
+    font-size: clamp(0.8rem, 1.3vw, 0.85rem);
   }
 
   .startButton {
-    min-width: 180px;
-    font-size: 0.95rem;
+    min-width: 11.25rem;
+    font-size: clamp(0.85rem, 1.4vw, 0.95rem);
     padding: 0.7rem 1.25rem;
   }
 
   .castleInfoCard {
-    max-width: 220px;
+    max-width: 13.75rem;
   }
 
   .rewardBadge {
@@ -1187,12 +1187,12 @@
   }
 
   .rewardBadge span {
-    font-size: 0.65rem;
+    font-size: clamp(0.6rem, 1vw, 0.65rem);
   }
 
   .rewardBadge svg {
-    width: 12px;
-    height: 12px;
+    width: 0.75rem;
+    height: 0.75rem;
   }
 }
 

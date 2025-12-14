@@ -12,7 +12,7 @@
 .pageHeader {
   position: relative;
   width: 100%;
-  height: 80px;
+  height: 5rem;
   display: flex;
   align-items: center;
   z-index: 100;
@@ -54,8 +54,8 @@
 }
 
 .brandIcon {
-  width: 50px;
-  height: 50px;
+  width: 3.125rem;
+  height: 3.125rem;
   object-fit: contain;
 }
 
@@ -64,17 +64,17 @@
   background: linear-gradient(135deg, #3A9679 0%, #2F3E75 100%);
   color: white;
   border: none;
-  border-radius: 50px;
+  border-radius: 3.125rem;
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(47, 62, 117, 0.3);
+  box-shadow: 0 0.25rem 0.9375rem rgba(47, 62, 117, 0.3);
 }
 
 .signInBtn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(47, 62, 117, 0.4);
+  transform: translateY(-0.125rem);
+  box-shadow: 0 0.375rem 1.25rem rgba(47, 62, 117, 0.4);
 }
 
 /* ========== HERO SECTION ========== */
@@ -107,8 +107,8 @@
 
 .logoContainer {
   position: relative;
-  width: 400px;
-  height: 120px;
+  width: 25rem;
+  height: 7.5rem;
 }
 
 .polegionLogo {
@@ -135,17 +135,17 @@
   background: linear-gradient(135deg, #E16262 0%, #FABC60 100%);
   color: white;
   border: none;
-  border-radius: 50px;
+  border-radius: 3.125rem;
   font-size: 1.25rem;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 10px 30px rgba(225, 98, 98, 0.35);
+  box-shadow: 0 0.625rem 1.875rem rgba(225, 98, 98, 0.35);
 }
 
 .getStartedBtn:hover {
-  transform: translateY(-3px) scale(1.05);
-  box-shadow: 0 15px 40px rgba(225, 98, 98, 0.45);
+  transform: translateY(-0.1875rem) scale(1.05);
+  box-shadow: 0 0.9375rem 2.5rem rgba(225, 98, 98, 0.45);
 }
 
 .getStartedBtn:disabled {
@@ -160,7 +160,7 @@
 }
 
 .getStartedBtn:hover .arrow {
-  transform: translateX(5px);
+  transform: translateX(0.3125rem);
 }
 
 .spinner {
@@ -215,10 +215,10 @@
 
 .discoveryCard {
   background: white;
-  border-radius: 18px;
+  border-radius: 1.125rem;
   padding: 1.75rem;
-  border: 1px solid rgba(58, 150, 121, 0.15);
-  box-shadow: 0 10px 30px rgba(31, 41, 55, 0.09);
+  border: 0.0625rem solid rgba(58, 150, 121, 0.15);
+  box-shadow: 0 0.625rem 1.875rem rgba(31, 41, 55, 0.09);
   transition: transform 0.25s ease, box-shadow 0.25s ease;
   display: flex;
   flex-direction: column;
@@ -226,8 +226,8 @@
 }
 
 .discoveryCard:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 18px 35px rgba(31, 41, 55, 0.12);
+  transform: translateY(-0.375rem);
+  box-shadow: 0 1.125rem 2.1875rem rgba(31, 41, 55, 0.12);
 }
 
 .discoveryCard h3 {
@@ -243,9 +243,9 @@
 }
 
 .discoveryIcon {
-  width: 56px;
-  height: 56px;
-  border-radius: 14px;
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 0.875rem;
   background: rgba(58, 150, 121, 0.12);
   display: flex;
   align-items: center;
@@ -286,10 +286,10 @@
 }
 
 .carouselDot {
-  width: 14px;
-  height: 14px;
+  width: 0.875rem;
+  height: 0.875rem;
   border-radius: 50%;
-  border: 2px solid rgba(47, 62, 117, 0.4);
+  border: 0.125rem solid rgba(47, 62, 117, 0.4);
   background: transparent;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -302,14 +302,14 @@
 }
 
 .carouselStage {
-  flex: 1 1 560px;
+  flex: 1 1 35rem;
   background: white;
-  border-radius: 24px;
+  border-radius: 1.5rem;
   padding: 2rem;
   position: relative;
-  box-shadow: 0 25px 60px rgba(31, 41, 55, 0.15);
+  box-shadow: 0 1.5625rem 3.75rem rgba(31, 41, 55, 0.15);
   display: grid;
-  grid-template-columns: minmax(260px, 1fr) minmax(220px, 1fr);
+  grid-template-columns: minmax(16.25rem, 1fr) minmax(13.75rem, 1fr);
   gap: 1.5rem;
 }
 
@@ -321,16 +321,16 @@
   color: #146c43;
   font-weight: 600;
   padding: 0.35rem 1rem;
-  border-radius: 999px;
+  border-radius: 62.4375rem;
   font-size: 0.85rem;
 }
 
 .carouselImageWrap {
   position: relative;
-  border-radius: 18px;
+  border-radius: 1.125rem;
   overflow: hidden;
-  min-height: 280px;
-  border: 1px solid rgba(47, 62, 117, 0.08);
+  min-height: 17.5rem;
+  border: 0.0625rem solid rgba(47, 62, 117, 0.08);
 }
 
 .carouselImage {
@@ -363,7 +363,7 @@
 
 .carouselStats div {
   background: rgba(47, 62, 117, 0.06);
-  border-radius: 12px;
+  border-radius: 0.75rem;
   padding: 0.75rem 1rem;
   flex: 1;
   text-align: center;
@@ -396,14 +396,14 @@
 }
 
 .moduleCard {
-  border: 1px solid rgba(31, 41, 55, 0.1);
-  border-radius: 18px;
+  border: 0.0625rem solid rgba(31, 41, 55, 0.1);
+  border-radius: 1.125rem;
   padding: 1.5rem;
   background: #fdfdfc;
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
-  min-height: 240px;
+  min-height: 15rem;
   position: relative;
 }
 
@@ -429,8 +429,8 @@
 
 .modulePlaceholder {
   margin-top: auto;
-  border: 1px dashed rgba(47, 62, 117, 0.35);
-  border-radius: 10px;
+  border: 0.0625rem dashed rgba(47, 62, 117, 0.35);
+  border-radius: 0.625rem;
   padding: 0.75rem;
   text-align: center;
   font-size: 0.85rem;
@@ -486,16 +486,16 @@
 
 .featureBox {
   background: white;
-  border-radius: 20px;
+  border-radius: 1.25rem;
   padding: 2.5rem 2rem;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 0.625rem 2.5rem rgba(0, 0, 0, 0.08);
   transition: all 0.4s ease;
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
-  border: 3px solid transparent;
-  min-height: 350px;
+  border: 0.1875rem solid transparent;
+  min-height: 21.875rem;
 }
 
 .featureBox:nth-child(1) {
@@ -511,19 +511,19 @@
 }
 
 .featureBox:hover {
-  transform: translateY(-10px);
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.12);
+  transform: translateY(-0.625rem);
+  box-shadow: 0 1.25rem 3.75rem rgba(0, 0, 0, 0.12);
 }
 
 .featureImageWrap {
-  width: 120px;
-  height: 120px;
+  width: 7.5rem;
+  height: 7.5rem;
   display: flex;
   align-items: center;
   justify-content: center;
   margin-bottom: 1.5rem;
   background: linear-gradient(135deg, rgba(58, 150, 121, 0.1) 0%, rgba(47, 62, 117, 0.1) 100%);
-  border-radius: 20px;
+  border-radius: 1.25rem;
 }
 
 .featureIcon {
@@ -569,16 +569,16 @@
 
 .benefitCard {
   background: white;
-  border-radius: 16px;
+  border-radius: 1rem;
   padding: 2rem;
-  box-shadow: 0 6px 25px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 0.375rem 1.5625rem rgba(0, 0, 0, 0.06);
   transition: all 0.3s ease;
   text-align: center;
 }
 
 .benefitCard:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.1);
+  transform: translateY(-0.3125rem);
+  box-shadow: 0 0.75rem 2.1875rem rgba(0, 0, 0, 0.1);
 }
 
 .benefitIcon {
@@ -613,16 +613,16 @@
 
 .previewCard {
   position: relative;
-  border-radius: 20px;
+  border-radius: 1.25rem;
   overflow: hidden;
-  height: 250px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+  height: 15.625rem;
+  box-shadow: 0 0.625rem 2.5rem rgba(0, 0, 0, 0.1);
   transition: all 0.3s ease;
 }
 
 .previewCard:hover {
   transform: scale(1.03);
-  box-shadow: 0 15px 50px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 0.9375rem 3.125rem rgba(0, 0, 0, 0.15);
 }
 
 .previewImage {
@@ -657,10 +657,10 @@
 
 .testimonial {
   background: white;
-  border-radius: 16px;
+  border-radius: 1rem;
   padding: 2rem;
-  box-shadow: 0 6px 25px rgba(0, 0, 0, 0.06);
-  border-left: 5px solid #3A9679;
+  box-shadow: 0 0.375rem 1.5625rem rgba(0, 0, 0, 0.06);
+  border-left: 0.3125rem solid #3A9679;
 }
 
 .testimonialText {
@@ -711,17 +711,17 @@
   background: white;
   color: #2F3E75;
   border: none;
-  border-radius: 50px;
+  border-radius: 3.125rem;
   font-size: 1.25rem;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 0.625rem 1.875rem rgba(0, 0, 0, 0.2);
 }
 
 .ctaButton:hover {
-  transform: translateY(-3px) scale(1.05);
-  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+  transform: translateY(-0.1875rem) scale(1.05);
+  box-shadow: 0 0.9375rem 2.5rem rgba(0, 0, 0, 0.3);
 }
 
 .ctaButton:disabled {
@@ -731,14 +731,14 @@
 }
 
 .ctaButton:hover .arrow {
-  transform: translateX(5px);
+  transform: translateX(0.3125rem);
 }
 
 /* ========== FOOTER ========== */
 .footer {
   padding: 2.5rem 2rem;
   background: rgba(255, 255, 255, 0.8);
-  border-top: 2px solid rgba(58, 150, 121, 0.2);
+  border-top: 0.125rem solid rgba(58, 150, 121, 0.2);
   text-align: center;
 }
 
@@ -808,8 +808,8 @@
   }
 
   .brandIcon {
-    width: 40px;
-    height: 40px;
+    width: 2.5rem;
+    height: 2.5rem;
   }
 
   .signInBtn {
@@ -826,8 +826,8 @@
   }
 
   .logoContainer {
-    width: 300px;
-    height: 90px;
+    width: 18.75rem;
+    height: 5.625rem;
   }
 
   .heroSubtitle {
@@ -899,7 +899,7 @@
 
 @media (max-width: 480px) {
   .pageHeader {
-    height: 70px;
+    height: 4.375rem;
   }
 
   .headerContent {
@@ -907,8 +907,8 @@
   }
 
   .brandIcon {
-    width: 35px;
-    height: 35px;
+    width: 2.1875rem;
+    height: 2.1875rem;
   }
 
   .signInBtn {
@@ -925,8 +925,8 @@
   }
 
   .logoContainer {
-    width: 250px;
-    height: 75px;
+    width: 15.625rem;
+    height: 4.6875rem;
   }
 
   .heroSubtitle {
@@ -943,8 +943,8 @@
   }
 
   .featureImageWrap {
-    width: 100px;
-    height: 100px;
+    width: 6.25rem;
+    height: 6.25rem;
   }
 
   .featureIcon {
@@ -972,7 +972,7 @@
   }
 
   .previewCard {
-    height: 200px;
+    height: 12.5rem;
   }
 
   .previewLabel {
@@ -1025,7 +1025,7 @@
 /* ========== LANDSCAPE MOBILE ========== */
 @media (max-width: 768px) and (orientation: landscape) {
   .pageHeader {
-    height: 60px;
+    height: 3.75rem;
   }
 
   .heroSection {
@@ -1037,8 +1037,8 @@
   }
 
   .logoContainer {
-    width: 280px;
-    height: 80px;
+    width: 17.5rem;
+    height: 5rem;
   }
 
   .heroSubtitle {
@@ -1066,8 +1066,8 @@
 /* ========== EXTRA SMALL DEVICES ========== */
 @media (max-width: 360px) {
   .logoContainer {
-    width: 220px;
-    height: 66px;
+    width: 13.75rem;
+    height: 4.125rem;
   }
 
   .welcomeText {

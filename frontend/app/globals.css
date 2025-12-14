@@ -15,23 +15,54 @@
   --text-primary: #000000;
   --text-secondary: #555555;
   --text-light: #FFFFFF;
-  --border-radius: 20px;
-  --box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  --border-radius: 1.25rem;
+  --box-shadow: 0 0.25rem 0.625rem rgba(0, 0, 0, 0.1);
   --transition: all 0.3s ease;
 }
 
 /* ========================================
    CASTLE THEMES - Color Palettes
    ======================================== */
-/* Castle 0 - Trial Grounds */
+/* Castle 0 - Trial Grounds with Enhanced Atmosphere */
 .castle-theme-0 {
-  --castle-primary: #37353E;
-  --castle-secondary: #44444E;
-  --castle-tertiary: #715A5A;
-  --castle-accent: #D3DAD9;
-  --scrollbar-track: #37353E;
-  --scrollbar-thumb: #715A5A;
-  --scrollbar-thumb-hover: #8B6B6B;
+  --castle-primary: #2D2A3D;
+  --castle-secondary: #4A4458;
+  --castle-tertiary: #7D6B7D;
+  --castle-accent: #B8A8C8;
+  --scrollbar-track: #2D2A3D;
+  --scrollbar-thumb: #7D6B7D;
+  --scrollbar-thumb-hover: #9D8B9D;
+  position: relative;
+}
+
+/* Animated particles background for Castle 0 */
+.castle-theme-0::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+  background-image: 
+    radial-gradient(2px 2px at 20% 30%, rgba(184, 168, 200, 0.2), transparent),
+    radial-gradient(2px 2px at 60% 70%, rgba(184, 168, 200, 0.15), transparent),
+    radial-gradient(1px 1px at 50% 50%, rgba(255, 255, 255, 0.18), transparent),
+    radial-gradient(1px 1px at 80% 10%, rgba(184, 168, 200, 0.12), transparent),
+    radial-gradient(2px 2px at 90% 60%, rgba(255, 255, 255, 0.15), transparent),
+    radial-gradient(1px 1px at 33% 80%, rgba(184, 168, 200, 0.13), transparent);
+  background-size: 200% 200%;
+  animation: particlesFloat 20s ease-in-out infinite;
+}
+
+@keyframes particlesFloat {
+  0%, 100% {
+    background-position: 0% 0%, 100% 100%, 50% 50%, 80% 10%, 90% 60%, 33% 80%;
+  }
+  50% {
+    background-position: 100% 100%, 0% 0%, 70% 70%, 20% 80%, 10% 40%, 67% 20%;
+  }
 }
 
 /* Castle 1 */
@@ -89,34 +120,67 @@
   --scrollbar-thumb-hover: #826CBD;
 }
 
-/* Castle 6 - Grand Championship */
+/* Castle 6 - Grand Championship with Enhanced Royal Theme */
 .castle-theme-6 {
-  --castle-primary: #000080;
-  --castle-secondary: #00044A;
-  --castle-tertiary: #FFBF1C;
+  --castle-primary: #1A1A4E;
+  --castle-secondary: #2E2E6E;
+  --castle-tertiary: #FFB732;
   --castle-accent: #FFD60A;
-  --scrollbar-track: #000080;
-  --scrollbar-thumb: #FFBF1C;
-  --scrollbar-thumb-hover: #D1A309;
+  --scrollbar-track: #1A1A4E;
+  --scrollbar-thumb: #FFB732;
+  --scrollbar-thumb-hover: #FFC84D;
+  position: relative;
+}
+
+/* Animated golden particles for Castle 6 */
+.castle-theme-6::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+  background-image: 
+    radial-gradient(2px 2px at 25% 35%, rgba(255, 214, 10, 0.25), transparent),
+    radial-gradient(2px 2px at 65% 75%, rgba(255, 183, 50, 0.2), transparent),
+    radial-gradient(1px 1px at 45% 55%, rgba(255, 214, 10, 0.22), transparent),
+    radial-gradient(1px 1px at 85% 15%, rgba(255, 183, 50, 0.18), transparent),
+    radial-gradient(2px 2px at 15% 65%, rgba(255, 214, 10, 0.15), transparent),
+    radial-gradient(1px 1px at 75% 25%, rgba(255, 183, 50, 0.2), transparent);
+  background-size: 200% 200%;
+  animation: goldenParticlesFloat 18s ease-in-out infinite;
+}
+
+@keyframes goldenParticlesFloat {
+  0%, 100% {
+    background-position: 0% 0%, 100% 100%, 50% 50%, 85% 15%, 15% 65%, 75% 25%;
+    opacity: 1;
+  }
+  50% {
+    background-position: 100% 100%, 0% 0%, 65% 65%, 15% 85%, 85% 35%, 25% 75%;
+    opacity: 0.8;
+  }
 }
 
 /* ========================================
    CASTLE 0 SCROLLBAR STYLING
    ======================================== */
 .castle-theme-0 *::-webkit-scrollbar {
-  width: 12px;
-  height: 12px;
+  width: 0.75rem;
+  height: 0.75rem;
 }
 
 .castle-theme-0 *::-webkit-scrollbar-track {
   background: var(--scrollbar-track);
-  border-radius: 6px;
+  border-radius: 0.375rem;
 }
 
 .castle-theme-0 *::-webkit-scrollbar-thumb {
   background: var(--scrollbar-thumb);
-  border-radius: 6px;
-  border: 2px solid var(--scrollbar-track);
+  border-radius: 0.375rem;
+  border: 0.125rem solid var(--scrollbar-track);
 }
 
 .castle-theme-0 *::-webkit-scrollbar-thumb:hover {
@@ -193,23 +257,23 @@ body > div:first-child /* For other React setups */ {
 }
 
 .sidebar-open {
-  margin-left: 250px; /* or whatever your sidebar width is */
+  margin-left: 15.625rem; /* or whatever your sidebar width is */
 }
 
 .navbar {
-  height: 60px;
+  height: 3.75rem;
   background-color: #fff;
-  border-bottom: 1px solid #ccc;
+  border-bottom: 0.0625rem solid #ccc;
   display: flex;
   align-items: center;
   padding: 0 1rem;
 }
 
 .card {
-  border: 1px solid #ddd;
-  border-radius: 8px;
+  border: 0.0625rem solid #ddd;
+  border-radius: 0.5rem;
   padding: 1.5rem;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,0.05);
 }
 
 /* ========================================
@@ -232,7 +296,7 @@ body {
 
 /* Prevent zoom on input focus (mobile) */
 input, select, textarea {
-  font-size: 16px !important;
+  font-size: 1rem !important; /* 16px equivalent - prevents mobile zoom */
 }
 
 /* Smooth scrolling for touch devices */
@@ -243,7 +307,7 @@ input, select, textarea {
 }
 
 /* Landscape-only content optimization */
-@media (max-width: 900px) and (orientation: landscape) {
+@media (max-width: 56.25rem) and (orientation: landscape) {
   body {
     overflow-x: hidden;
     overflow-y: auto;

@@ -40,9 +40,9 @@
   position: relative;
   overflow: hidden;
   flex-shrink: 0;
-  border-radius: 20px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-  border: 1px solid rgba(44, 81, 76, 0.1);
+  border-radius: clamp(1rem, 3vw, 1.25rem);
+  box-shadow: 0 0.25rem 1rem rgba(0, 0, 0, 0.08);
+  border: 0.0625rem solid rgba(44, 81, 76, 0.1);
 }
 
 .headerContent {
@@ -59,14 +59,14 @@
 
 /* New Competition Header Styles */
 .competitionHeader {
-  padding: 1.5rem 2.75rem;
+  padding: clamp(1.25rem, 3vw, 1.5rem) clamp(2rem, 4vw, 2.75rem);
   margin: 1rem;
   background: linear-gradient(135deg, #2C514C 0%, #1a3a3a 100%);
   position: relative;
   overflow: hidden;
   flex-shrink: 0;
-  border-radius: 20px;
-  box-shadow: 0 8px 24px rgba(44, 81, 76, 0.2);
+  border-radius: clamp(1rem, 3vw, 1.25rem);
+  box-shadow: 0 0.5rem 1.5rem rgba(44, 81, 76, 0.2);
 }
 
 .competitionHeader::before {
@@ -95,38 +95,38 @@
 }
 
 .competitionTitle {
-  font-size: 2rem;
+  font-size: clamp(1.5rem, 4vw, 2rem);
   font-weight: 800;
   color: white;
   margin: 0 0 1rem 0;
-  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  text-shadow: 0 0.125rem 0.625rem rgba(0, 0, 0, 0.2);
 }
 
 .statusBadgeLarge {
   padding: 0.5rem 1.25rem;
-  border-radius: 8px;
+  border-radius: 0.5rem;
   font-weight: 700;
   font-size: 0.85rem;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.03125rem;
 }
 
 .statusNew {
   background: linear-gradient(135deg, #06b6d4, #0891b2);
   color: white;
-  box-shadow: 0 4px 12px rgba(6, 182, 212, 0.3);
+  box-shadow: 0 0.25rem 0.75rem rgba(6, 182, 212, 0.3);
 }
 
 .statusOngoing {
   background: linear-gradient(135deg, #10b981, #059669);
   color: white;
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+  box-shadow: 0 0.25rem 0.75rem rgba(16, 185, 129, 0.3);
 }
 
 .statusDone {
   background: linear-gradient(135deg, #6b7280, #4b5563);
   color: white;
-  box-shadow: 0 4px 12px rgba(107, 114, 128, 0.3);
+  box-shadow: 0 0.25rem 0.75rem rgba(107, 114, 128, 0.3);
 }
 
 .headerStatsRow {
@@ -143,9 +143,9 @@
   padding: 0.75rem 1.25rem;
   background: rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(10px);
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  min-width: 100px;
+  border-radius: 0.75rem;
+  border: 0.0625rem solid rgba(255, 255, 255, 0.15);
+  min-width: 6.25rem;
 }
 
 .headerStatLabel {
@@ -153,11 +153,11 @@
   font-weight: 600;
   color: rgba(255, 255, 255, 0.7);
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.03125rem;
 }
 
 .headerStatValue {
-  font-size: 1.25rem;
+  font-size: clamp(1rem, 2.5vw, 1.25rem);
   font-weight: 700;
   color: white;
   font-family: 'Courier New', monospace;
@@ -174,16 +174,16 @@
     rgba(255, 255, 255, 0.2) 100%
   );
   backdrop-filter: blur(20px);
-  border: 2px solid rgba(255, 255, 255, 0.3);
+  border: 0.125rem solid rgba(255, 255, 255, 0.3);
   color: white;
-  padding: 1rem;
-  border-radius: 16px;
+  padding: 1rem 1.5rem;
+  border-radius: 1rem;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 0.5rem 2rem rgba(0, 0, 0, 0.2);
   min-width: 3.5rem;
   height: 3.5rem;
   position: relative;
@@ -191,7 +191,6 @@
   flex-shrink: 0;
   font-weight: 600;
   font-size: 0.95rem;
-  padding: 1rem 1.5rem;
 }
 
 .backButton::before {
@@ -211,8 +210,8 @@
 
 .backButton:hover {
   background: rgba(255, 255, 255, 0.3);
-  transform: translateY(-2px);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+  transform: translateY(-0.125rem);
+  box-shadow: 0 0.75rem 2.5rem rgba(0, 0, 0, 0.3);
   border-color: rgba(255, 255, 255, 0.4);
 }
 
@@ -223,15 +222,15 @@
 .printButton {
   background: linear-gradient(135deg, #10b981, #059669);
   color: white;
-  border: 2px solid rgba(255, 255, 255, 0.2);
-  border-radius: 12px;
+  border: 0.125rem solid rgba(255, 255, 255, 0.2);
+  border-radius: 0.75rem;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   align-items: center;
   gap: 0.5rem;
   justify-content: center;
-  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.3);
+  box-shadow: 0 0.25rem 1rem rgba(16, 185, 129, 0.3);
   padding: 0.75rem 1.25rem;
   font-weight: 600;
   font-size: 0.9rem;
@@ -239,8 +238,8 @@
 
 .printButton:hover {
   background: linear-gradient(135deg, #059669, #047857);
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(16, 185, 129, 0.4);
+  transform: translateY(-0.125rem);
+  box-shadow: 0 0.5rem 1.5rem rgba(16, 185, 129, 0.4);
 }
 
 .printButton:active {
@@ -303,16 +302,16 @@
 }
 
 .title {
-  font-size: 2.5rem;
+  font-size: clamp(1.75rem, 5vw, 2.5rem);
   font-weight: 900;
   color: white;
   margin: 0;
-  text-shadow: 0 0 20px rgba(250, 188, 96, 0.3);
+  text-shadow: 0 0 1.25rem rgba(250, 188, 96, 0.3);
   flex: 1;
 }
 
 .description {
-  font-size: 1.1rem;
+  font-size: clamp(0.95rem, 2.2vw, 1.1rem);
   color: rgba(255, 255, 255, 0.9);
   margin: 0.5rem 0 0 0;
   text-align: center;
@@ -336,8 +335,8 @@
   gap: 0.75rem;
   padding: 1.5rem 2rem;
   background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(5, 150, 105, 0.15));
-  border: 2px solid #10b981;
-  border-radius: 16px;
+  border: 0.125rem solid #10b981;
+  border-radius: 1rem;
   animation: pulse 1s ease-in-out infinite;
 }
 
@@ -351,7 +350,7 @@
 }
 
 .countdownNumber {
-  font-size: 3rem;
+  font-size: clamp(2rem, 6vw, 3rem);
   font-weight: 800;
   color: #059669;
   line-height: 1;
@@ -381,14 +380,14 @@
 }
 
 .cancelButton:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+  transform: translateY(-0.0625rem);
+  box-shadow: 0 0.25rem 0.75rem rgba(239, 68, 68, 0.4);
 }
 
 .controlButton {
   padding: 0.75rem 1.5rem;
   border: none;
-  border-radius: 12px;
+  border-radius: 0.75rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -403,8 +402,8 @@
 }
 
 .startButton:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
+  transform: translateY(-0.125rem);
+  box-shadow: 0 0.5rem 1.25rem rgba(16, 185, 129, 0.4);
 }
 
 .pauseButton {
@@ -435,12 +434,12 @@
 .buttonLoading::after {
   content: '';
   position: absolute;
-  width: 16px;
-  height: 16px;
+  width: 1rem;
+  height: 1rem;
   top: 50%;
-  right: 12px;
+  right: 0.75rem;
   transform: translateY(-50%);
-  border: 2px solid transparent;
+  border: 0.125rem solid transparent;
   border-top-color: currentColor;
   border-radius: 50%;
   animation: buttonSpin 0.6s linear infinite;
@@ -456,17 +455,17 @@
   padding: 0.75rem 1rem;
   background: rgba(44, 81, 76, 0.9);
   backdrop-filter: blur(10px);
-  border-radius: 12px;
+  border-radius: 0.75rem;
   color: #ffffff;
   font-weight: 600;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 0.0625rem solid rgba(255, 255, 255, 0.2);
 }
 
 .competitionStatus {
   padding: 0.75rem 1.5rem;
   background: rgba(16, 185, 129, 0.2);
   backdrop-filter: blur(10px);
-  border-radius: 12px;
+  border-radius: 0.75rem;
   color: #10b981;
   font-weight: 700;
 }
@@ -475,12 +474,12 @@
 .completedBanner {
   width: 100%;
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(240, 253, 244, 0.95));
-  border: 2px solid #10b981;
-  border-radius: 16px;
+  border: 0.125rem solid #10b981;
+  border-radius: 1rem;
   padding: 1.5rem 2rem;
   position: relative;
   overflow: hidden;
-  box-shadow: 0 4px 20px rgba(16, 185, 129, 0.15);
+  box-shadow: 0 0.25rem 1.25rem rgba(16, 185, 129, 0.15);
 }
 
 .completedBanner::before {

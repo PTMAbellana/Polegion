@@ -1,54 +1,54 @@
 .container {
   min-height: 100vh;
   background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-  padding: 2rem;
+  padding: clamp(1rem, 3vw, 2rem);
 }
 
 .header {
   background: white;
-  border-radius: 16px;
-  padding: 2rem;
+  border-radius: 1rem;
+  padding: clamp(1rem, 3vw, 2rem);
   margin-bottom: 2rem;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 0.25rem 1.25rem rgba(0, 0, 0, 0.1);
 }
 
 .headerContent {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 2rem;
+  gap: clamp(1rem, 3vw, 2rem);
 }
 
 .studentInfo {
   display: flex;
   align-items: center;
-  gap: 1.5rem;
+  gap: clamp(1rem, 2vw, 1.5rem);
 }
 
 .avatar {
-  width: 80px;
-  height: 80px;
+  width: clamp(4rem, 8vw, 5rem);
+  height: clamp(4rem, 8vw, 5rem);
   border-radius: 50%;
   object-fit: cover;
-  border: 3px solid #2C514C;
+  border: 0.1875rem solid #2C514C;
 }
 
 .title {
-  font-size: 2rem;
+  font-size: clamp(1.5rem, 3vw, 2rem);
   font-weight: 700;
   color: #1a202c;
   margin: 0 0 0.5rem 0;
 }
 
 .studentName {
-  font-size: 1.25rem;
+  font-size: clamp(1.1rem, 2vw, 1.25rem);
   font-weight: 600;
   color: #2C514C;
   margin: 0;
 }
 
 .studentEmail {
-  font-size: 0.9rem;
+  font-size: clamp(0.8rem, 1.5vw, 0.9rem);
   color: #6b7280;
   margin: 0.25rem 0 0 0;
 }
@@ -57,32 +57,32 @@
   background: linear-gradient(135deg, #10b981, #059669);
   color: white;
   border: none;
-  border-radius: 12px;
-  padding: 0.875rem 1.5rem;
-  font-size: 1rem;
+  border-radius: 0.75rem;
+  padding: clamp(0.75rem, 1.5vw, 0.875rem) clamp(1.25rem, 2vw, 1.5rem);
+  font-size: clamp(0.9rem, 1.5vw, 1rem);
   font-weight: 600;
   cursor: pointer;
   display: flex;
   align-items: center;
   gap: 0.5rem;
   transition: all 0.3s;
-  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.3);
+  box-shadow: 0 0.25rem 1rem rgba(16, 185, 129, 0.3);
 }
 
 .printButton:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(16, 185, 129, 0.4);
+  transform: translateY(-0.125rem);
+  box-shadow: 0 0.5rem 1.5rem rgba(16, 185, 129, 0.4);
 }
 
 .content {
   background: white;
-  border-radius: 16px;
-  padding: 2rem;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  border-radius: 1rem;
+  padding: clamp(1rem, 3vw, 2rem);
+  box-shadow: 0 0.25rem 1.25rem rgba(0, 0, 0, 0.1);
 }
 
 .section {
-  margin-bottom: 3rem;
+  margin-bottom: clamp(2rem, 4vw, 3rem);
 }
 
 .section:last-child {
@@ -90,31 +90,31 @@
 }
 
 .sectionTitle {
-  font-size: 1.5rem;
+  font-size: clamp(1.25rem, 2.5vw, 1.5rem);
   font-weight: 700;
   color: #1a202c;
   margin: 0 0 1.5rem 0;
   padding-bottom: 0.75rem;
-  border-bottom: 2px solid #e5e7eb;
+  border-bottom: 0.125rem solid #e5e7eb;
 }
 
 .castlesGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(18.75rem, 1fr));
   gap: 1.5rem;
 }
 
 .castleCard {
   background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
-  border: 2px solid #e5e7eb;
-  border-radius: 12px;
-  padding: 1.5rem;
+  border: 0.125rem solid #e5e7eb;
+  border-radius: 0.75rem;
+  padding: clamp(1rem, 2vw, 1.5rem);
   transition: all 0.3s;
 }
 
 .castleCard:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  transform: translateY(-0.25rem);
+  box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.1);
 }
 
 .castleHeader {
@@ -125,14 +125,14 @@
 }
 
 .castleName {
-  font-size: 1.125rem;
+  font-size: clamp(1rem, 1.8vw, 1.125rem);
   font-weight: 600;
   color: #1a202c;
   margin: 0;
 }
 
 .castleProgress {
-  font-size: 1.25rem;
+  font-size: clamp(1.1rem, 2vw, 1.25rem);
   font-weight: 700;
   color: #2C514C;
 }
@@ -163,9 +163,9 @@
 
 .progressBar {
   width: 100%;
-  height: 8px;
+  height: 0.5rem;
   background: #e5e7eb;
-  border-radius: 4px;
+  border-radius: 0.25rem;
   overflow: hidden;
 }
 
@@ -193,12 +193,12 @@
   padding: 1rem;
   font-weight: 600;
   color: #1a202c;
-  border-bottom: 2px solid #e5e7eb;
+  border-bottom: 0.125rem solid #e5e7eb;
 }
 
 .table td {
   padding: 1rem;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 0.0625rem solid #e5e7eb;
   color: #374151;
 }
 
@@ -218,7 +218,7 @@
 
 .statusBadge {
   padding: 0.25rem 0.75rem;
-  border-radius: 6px;
+  border-radius: 0.375rem;
   font-size: 0.75rem;
   font-weight: 600;
   text-transform: uppercase;
@@ -241,21 +241,21 @@
 
 .emptyState {
   text-align: center;
-  padding: 3rem;
+  padding: clamp(2rem, 4vw, 3rem);
   color: #6b7280;
 }
 
 .summaryGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(12.5rem, 1fr));
   gap: 1.5rem;
 }
 
 .summaryCard {
   background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
-  border: 2px solid #e5e7eb;
-  border-radius: 12px;
-  padding: 1.5rem;
+  border: 0.125rem solid #e5e7eb;
+  border-radius: 0.75rem;
+  padding: clamp(1rem, 2vw, 1.5rem);
   text-align: center;
 }
 
@@ -266,18 +266,18 @@
 }
 
 .summaryValue {
-  font-size: 2rem;
+  font-size: clamp(1.5rem, 3vw, 2rem);
   font-weight: 700;
   color: #2C514C;
 }
 
 .footer {
   background: white;
-  border-radius: 16px;
-  padding: 1rem 2rem;
+  border-radius: 1rem;
+  padding: 1rem clamp(1rem, 3vw, 2rem);
   margin-top: 2rem;
   text-align: center;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 0.25rem 1.25rem rgba(0, 0, 0, 0.1);
 }
 
 .footer p {
@@ -298,9 +298,9 @@
 }
 
 .spinner {
-  width: 50px;
-  height: 50px;
-  border: 4px solid rgba(255, 255, 255, 0.3);
+  width: 3.125rem;
+  height: 3.125rem;
+  border: 0.25rem solid rgba(255, 255, 255, 0.3);
   border-top-color: #10b981;
   border-radius: 50%;
   animation: spin 1s linear infinite;

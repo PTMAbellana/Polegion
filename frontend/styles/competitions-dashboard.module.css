@@ -4,14 +4,14 @@
 
 .competitions_grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 21.875rem), 1fr));
   gap: 1.5rem;
   margin-top: 1.5rem;
 }
 
 .competition_card {
   backdrop-filter: blur(10px);
-  border-radius: 1.5rem;
+  border-radius: clamp(1rem, 3vw, 1.5rem);
   padding: 1.5rem;
   cursor: pointer;
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
@@ -27,8 +27,8 @@
   right: 0;
   bottom: 0;
   z-index: -1;
-  padding: 2px;
-  border-radius: 1.5rem;
+  padding: 0.125rem;
+  border-radius: clamp(1rem, 3vw, 1.5rem);
   mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   mask-composite: exclude;
   opacity: 0;
@@ -36,7 +36,7 @@
 }
 
 .competition_card:hover {
-  transform: translateY(-6px) scale(1.02);
+  transform: translateY(-0.375rem) scale(1.02);
 }
 
 .competition_card:hover::before {
@@ -53,7 +53,7 @@
 
 .competition_title {
   font-family: 'Poppins', sans-serif;
-  font-size: 1.25rem;
+  font-size: clamp(1.1rem, 2.5vw, 1.25rem);
   font-weight: 700;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -69,7 +69,7 @@
   font-weight: 600;
   white-space: nowrap;
   font-family: 'Poppins', sans-serif;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.15);
 }
 
 .competition_meta {
@@ -103,7 +103,7 @@
 
 .student_card {
   background: linear-gradient(135deg, rgba(34, 197, 94, 0.1) 0%, rgba(132, 204, 22, 0.05) 100%);
-  border: 2px solid rgba(34, 197, 94, 0.3);
+  border: 0.125rem solid rgba(34, 197, 94, 0.3);
 }
 
 .student_card::before {
@@ -111,7 +111,7 @@
 }
 
 .student_card:hover {
-  box-shadow: 0 20px 40px rgba(34, 197, 94, 0.3);
+  box-shadow: 0 1.25rem 2.5rem rgba(34, 197, 94, 0.3);
   border-color: rgba(34, 197, 94, 0.5);
 }
 
@@ -121,7 +121,7 @@
 
 .student_meta {
   background: linear-gradient(135deg, rgba(34, 197, 94, 0.08) 0%, rgba(132, 204, 22, 0.08) 100%);
-  border: 1px solid rgba(34, 197, 94, 0.2);
+  border: 0.0625rem solid rgba(34, 197, 94, 0.2);
 }
 
 .status_badge.ongoing {
@@ -150,12 +150,12 @@
 .view_button {
   font-family: 'Poppins', sans-serif;
   padding: 0.75rem 1.5rem;
-  border-radius: 50px;
+  border-radius: 3.125rem;
   border: none;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.15);
   position: relative;
   overflow: hidden;
 }
@@ -186,8 +186,8 @@
 }
 
 .join_button:hover {
-  transform: translateY(-2px) scale(1.05);
-  box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
+  transform: translateY(-0.125rem) scale(1.05);
+  box-shadow: 0 0.375rem 1.25rem rgba(255, 107, 107, 0.4);
 }
 
 .view_button {
@@ -196,8 +196,8 @@
 }
 
 .view_button:hover {
-  transform: translateY(-2px) scale(1.05);
-  box-shadow: 0 6px 20px rgba(34, 197, 94, 0.4);
+  transform: translateY(-0.125rem) scale(1.05);
+  box-shadow: 0 0.375rem 1.25rem rgba(34, 197, 94, 0.4);
 }
 
 /* ========================================
@@ -206,7 +206,7 @@
 
 .teacher_card {
   background: linear-gradient(135deg, rgba(234, 179, 8, 0.1) 0%, rgba(245, 158, 11, 0.05) 100%);
-  border: 2px solid rgba(234, 179, 8, 0.3);
+  border: 0.125rem solid rgba(234, 179, 8, 0.3);
 }
 
 .teacher_card::before {
@@ -214,7 +214,7 @@
 }
 
 .teacher_card:hover {
-  box-shadow: 0 20px 40px rgba(234, 179, 8, 0.3);
+  box-shadow: 0 1.25rem 2.5rem rgba(234, 179, 8, 0.3);
   border-color: rgba(234, 179, 8, 0.5);
 }
 
@@ -224,7 +224,7 @@
 
 .teacher_meta {
   background: linear-gradient(135deg, rgba(234, 179, 8, 0.08) 0%, rgba(245, 158, 11, 0.08) 100%);
-  border: 1px solid rgba(234, 179, 8, 0.2);
+  border: 0.0625rem solid rgba(234, 179, 8, 0.2);
 }
 
 .competition_stats {
@@ -234,7 +234,7 @@
   padding: 1rem;
   background: linear-gradient(135deg, rgba(234, 179, 8, 0.12) 0%, rgba(245, 158, 11, 0.12) 100%);
   border-radius: 0.75rem;
-  border: 1px solid rgba(234, 179, 8, 0.25);
+  border: 0.0625rem solid rgba(234, 179, 8, 0.25);
 }
 
 .stat {
@@ -249,13 +249,13 @@
   font-size: 0.8rem;
   color: #6b7280;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.03125rem;
   font-weight: 600;
 }
 
 .stat_value {
   font-family: 'Poppins', sans-serif;
-  font-size: 1.2rem;
+  font-size: clamp(1rem, 2.4vw, 1.2rem);
   font-weight: 700;
   background: linear-gradient(135deg, #eab308 0%, #f59e0b 100%);
   -webkit-background-clip: text;
@@ -266,14 +266,14 @@
 .manage_button {
   font-family: 'Poppins', sans-serif;
   padding: 0.75rem 1.5rem;
-  border-radius: 50px;
+  border-radius: 3.125rem;
   border: none;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
   background: linear-gradient(135deg, #eab308 0%, #f59e0b 100%);
   color: white;
-  box-shadow: 0 4px 12px rgba(234, 179, 8, 0.3);
+  box-shadow: 0 0.25rem 0.75rem rgba(234, 179, 8, 0.3);
   position: relative;
   overflow: hidden;
 }
@@ -292,8 +292,8 @@
 }
 
 .manage_button:hover {
-  transform: translateY(-2px) scale(1.05);
-  box-shadow: 0 6px 20px rgba(234, 179, 8, 0.4);
+  transform: translateY(-0.125rem) scale(1.05);
+  box-shadow: 0 0.375rem 1.25rem rgba(234, 179, 8, 0.4);
 }
 
 .manage_button:hover::before {
@@ -314,7 +314,7 @@
 
 .section_title {
   font-family: 'Poppins', sans-serif;
-  font-size: 1.8rem;
+  font-size: clamp(1.4rem, 3.6vw, 1.8rem);
   font-weight: 800;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -342,7 +342,7 @@
 }
 
 .icon {
-  font-size: 1.5rem;
+  font-size: clamp(1.25rem, 3vw, 1.5rem);
 }
 
 /* ========================================
@@ -366,10 +366,10 @@
   }
   
   .competition_title {
-    font-size: 1.1rem;
+    font-size: clamp(1rem, 2.2vw, 1.1rem);
   }
   
   .section_title {
-    font-size: 1.5rem;
+    font-size: clamp(1.3rem, 3vw, 1.5rem);
   }
 }

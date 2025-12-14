@@ -27,10 +27,10 @@
   --text-secondary: #555555;
   --text-light: #FFFFFF;
   --text-warning: #f59e0b;
-  --border-radius: 20px;
-  --box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  --border-radius: 1.25rem;
+  --box-shadow: 0 0.25rem 0.625rem rgba(0, 0, 0, 0.1);
   --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  --sidebar-width: 50px;
+  --sidebar-width: 3.125rem;
   
   /* Enhanced gradient variables */
   --background-gradient: linear-gradient(135deg, #f0fdf4 0%, #fefce8 50%, #fffbeb 100%);
@@ -78,11 +78,11 @@
   gap: 1rem;
   position: relative;
   z-index: 10;
-  max-width: 1450px;
+  max-width: 90.625rem;
   margin: 0 auto;
   padding: 1.5rem;
   padding-bottom: 0;
-  margin-top: -125px; /* Overlay on banner - adjusted to create small space */
+  margin-top: -7.8125rem; /* Overlay on banner - adjusted to create small space */
   pointer-events: auto;
 }
 
@@ -97,8 +97,8 @@
 
 .sidebarSection {
   flex: 1;
-  min-width: 350px;
-  max-width: 450px;
+  min-width: 21.875rem;
+  max-width: 28.125rem;
   position: relative;
   display: flex;
   flex-direction: column;
@@ -110,13 +110,13 @@
 /* Problems List Styling */
 .problemsContainer {
   background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(20px);
-  border-radius: 24px;
+  backdrop-filter: blur(1.25rem);
+  border-radius: 1.5rem;
   box-shadow: 
-    0 20px 25px -5px rgba(0, 0, 0, 0.1),
-    0 10px 10px -5px rgba(0, 0, 0, 0.04),
-    0 0 0 1px rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+    0 1.25rem 1.5625rem -0.3125rem rgba(0, 0, 0, 0.1),
+    0 0.625rem 0.625rem -0.3125rem rgba(0, 0, 0, 0.04),
+    0 0 0 0.0625rem rgba(255, 255, 255, 0.05);
+  border: 0.0625rem solid rgba(255, 255, 255, 0.2);
   overflow: hidden;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   height: 100%;
@@ -128,10 +128,10 @@
 }
 
 .problemsContainer:hover {
-  transform: translateY(-2px);
+  transform: translateY(-0.125rem);
   box-shadow: 
-    0 25px 50px -12px rgba(0, 0, 0, 0.15),
-    0 0 0 1px rgba(255, 255, 255, 0.1);
+    0 1.5625rem 3.125rem -0.75rem rgba(0, 0, 0, 0.15),
+    0 0 0 0.0625rem rgba(255, 255, 255, 0.1);
 }
 
 /* Modifier for problems container inside tabs */
@@ -198,7 +198,7 @@
   color: white;
   border: none;
   padding: 0.75rem 1.5rem;
-  border-radius: 12px;
+  border-radius: 0.75rem;
   font-weight: 700;
   font-size: 0.9rem;
   cursor: pointer;
@@ -206,7 +206,7 @@
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  box-shadow: 0 8px 25px -8px rgba(245, 158, 11, 0.5);
+  box-shadow: 0 0.5rem 1.5625rem -0.5rem rgba(245, 158, 11, 0.5);
   position: relative;
   overflow: hidden;
   z-index: 100;
@@ -229,8 +229,8 @@
 }
 
 .createButton:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 12px 35px -8px rgba(245, 158, 11, 0.6);
+  transform: translateY(-0.125rem);
+  box-shadow: 0 0.75rem 2.1875rem -0.5rem rgba(245, 158, 11, 0.6);
 }
 
 .createButton:active {
@@ -246,17 +246,17 @@
 }
 
 .problemsContent::-webkit-scrollbar {
-  width: 6px;
+  width: 0.375rem;
 }
 
 .problemsContent::-webkit-scrollbar-track {
   background: rgba(0, 0, 0, 0.05);
-  border-radius: 3px;
+  border-radius: 0.1875rem;
 }
 
 .problemsContent::-webkit-scrollbar-thumb {
   background: rgba(0, 0, 0, 0.2);
-  border-radius: 3px;
+  border-radius: 0.1875rem;
 }
 
 .emptyState {
@@ -306,12 +306,12 @@
 
 .problemCard {
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.9) 100%);
-  backdrop-filter: blur(12px);
-  border-radius: 20px;
+  backdrop-filter: blur(0.75rem);
+  border-radius: 1.25rem;
   padding: 1.25rem 1.75rem;
   margin-bottom: 1rem;
-  border: 2px solid rgba(16, 185, 129, 0.1);
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
+  border: 0.125rem solid rgba(16, 185, 129, 0.1);
+  box-shadow: 0 0.25rem 0.375rem -0.0625rem rgba(0, 0, 0, 0.08), 0 0.125rem 0.25rem -0.0625rem rgba(0, 0, 0, 0.04);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   overflow: hidden;
@@ -322,14 +322,14 @@
   position: absolute;
   top: 0;
   left: 0;
-  width: 4px;
+  width: 0.25rem;
   height: 100%;
   background: linear-gradient(135deg, var(--primary-green) 0%, var(--secondary-yellow) 100%);
 }
 
 .problemCard:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 12px 24px -8px rgba(16, 185, 129, 0.25), 0 8px 16px -4px rgba(0, 0, 0, 0.1);
+  transform: translateY(-0.375rem);
+  box-shadow: 0 0.75rem 1.5rem -0.5rem rgba(16, 185, 129, 0.25), 0 0.5rem 1rem -0.25rem rgba(0, 0, 0, 0.1);
   background: linear-gradient(135deg, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 0.98) 100%);
   border-color: rgba(16, 185, 129, 0.2);
 }
@@ -365,8 +365,8 @@
 
 .actionButton {
   background: rgba(255, 255, 255, 0.9);
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  border-radius: 12px;
+  border: 0.0625rem solid rgba(0, 0, 0, 0.1);
+  border-radius: 0.75rem;
   padding: 0.5rem;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -377,8 +377,8 @@
 
 .actionButton:hover {
   background: white;
-  box-shadow: 0 4px 12px -4px rgba(0, 0, 0, 0.2);
-  transform: translateY(-1px);
+  box-shadow: 0 0.25rem 0.75rem -0.25rem rgba(0, 0, 0, 0.2);
+  transform: translateY(-0.0625rem);
 }
 
 .editButton {
@@ -403,15 +403,15 @@
   border-radius: 0.75rem;
   font-size: 0.9375rem;
   font-weight: 600;
-  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.25);
+  box-shadow: 0 0.125rem 0.5rem rgba(16, 185, 129, 0.25);
   transition: all 0.3s ease;
   border: none;
 }
 
 .openButton:hover {
   background: linear-gradient(135deg, #059669 0%, #047857 100%);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+  transform: translateY(-0.125rem);
+  box-shadow: 0 0.25rem 0.75rem rgba(16, 185, 129, 0.3);
 }
 
 .problemMeta {
@@ -424,12 +424,12 @@
 
 .difficultyBadge {
   padding: 0.5rem 1.125rem;
-  border-radius: 50px;
+  border-radius: 3.125rem;
   font-size: 0.8125rem;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.75px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  letter-spacing: 0.046875rem;
+  box-shadow: 0 0.125rem 0.375rem rgba(0, 0, 0, 0.15);
 }
 
 .difficultyEasy {
@@ -449,11 +449,11 @@
 
 .statusBadge {
   padding: 0.375rem 1rem;
-  border-radius: 50px;
+  border-radius: 3.125rem;
   font-size: 0.75rem;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.03125rem;
 }
 
 .statusActive {
@@ -499,13 +499,13 @@
 /* Participants Sidebar Styling */
 .participantsContainer {
   background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(20px);
-  border-radius: 24px;
+  backdrop-filter: blur(1.25rem);
+  border-radius: 1.5rem;
   box-shadow: 
-    0 20px 25px -5px rgba(0, 0, 0, 0.1),
-    0 10px 10px -5px rgba(0, 0, 0, 0.04),
-    0 0 0 1px rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+    0 1.25rem 1.5625rem -0.3125rem rgba(0, 0, 0, 0.1),
+    0 0.625rem 0.625rem -0.3125rem rgba(0, 0, 0, 0.04),
+    0 0 0 0.0625rem rgba(255, 255, 255, 0.05);
+  border: 0.0625rem solid rgba(255, 255, 255, 0.2);
   overflow: hidden;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   height: 100%;
@@ -516,10 +516,10 @@
 }
 
 .participantsContainer:hover {
-  transform: translateY(-2px);
+  transform: translateY(-0.125rem);
   box-shadow: 
-    0 25px 50px -12px rgba(0, 0, 0, 0.15),
-    0 0 0 1px rgba(255, 255, 255, 0.1);
+    0 1.5625rem 3.125rem -0.75rem rgba(0, 0, 0, 0.15),
+    0 0 0 0.0625rem rgba(255, 255, 255, 0.1);
 }
 
 .participantsHeader {
@@ -593,7 +593,7 @@
   color: white;
   border: none;
   padding: 0.75rem 1.25rem;
-  border-radius: 12px;
+  border-radius: 0.75rem;
   font-weight: 700;
   font-size: 0.9rem;
   cursor: pointer;
@@ -602,7 +602,7 @@
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  box-shadow: 0 8px 25px -8px rgba(16, 185, 129, 0.4);
+  box-shadow: 0 0.5rem 1.5625rem -0.5rem rgba(16, 185, 129, 0.4);
   margin-bottom: 1.5rem;
   position: relative;
   overflow: hidden;
@@ -624,8 +624,8 @@
 }
 
 .inviteButton:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 12px 35px -8px rgba(16, 185, 129, 0.5);
+  transform: translateY(-0.125rem);
+  box-shadow: 0 0.75rem 2.1875rem -0.5rem rgba(16, 185, 129, 0.5);
 }
 
 .participantsList {
@@ -637,17 +637,17 @@
 }
 
 .participantsList::-webkit-scrollbar {
-  width: 6px;
+  width: 0.375rem;
 }
 
 .participantsList::-webkit-scrollbar-track {
   background: rgba(0, 0, 0, 0.05);
-  border-radius: 3px;
+  border-radius: 0.1875rem;
 }
 
 .participantsList::-webkit-scrollbar-thumb {
   background: rgba(0, 0, 0, 0.2);
-  border-radius: 3px;
+  border-radius: 0.1875rem;
 }
 
 .participantItem {
@@ -656,10 +656,10 @@
   gap: 1rem;
   padding: 1rem;
   background: rgba(255, 255, 255, 0.6);
-  backdrop-filter: blur(10px);
-  border-radius: 16px;
+  backdrop-filter: blur(0.625rem);
+  border-radius: 1rem;
   margin-bottom: 0.75rem;
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  border: 0.0625rem solid rgba(255, 255, 255, 0.3);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   overflow: hidden;
@@ -667,8 +667,8 @@
 
 .participantItem:hover {
   background: rgba(255, 255, 255, 0.9);
-  transform: translateX(4px);
-  box-shadow: 0 8px 25px -8px rgba(0, 0, 0, 0.1);
+  transform: translateX(0.25rem);
+  box-shadow: 0 0.5rem 1.5625rem -0.5rem rgba(0, 0, 0, 0.1);
 }
 
 .kickButton {
@@ -718,7 +718,7 @@
   color: white;
   font-weight: 800;
   font-size: 1.25rem;
-  box-shadow: 0 4px 15px -4px rgba(59, 130, 246, 0.4);
+  box-shadow: 0 0.25rem 0.9375rem -0.25rem rgba(59, 130, 246, 0.4);
   position: relative;
 }
 
@@ -996,8 +996,8 @@
     rgba(255, 255, 255, 0.15) 50%,
     rgba(255, 255, 255, 0.2) 100%
   );
-  backdrop-filter: blur(20px);
-  border: 2px solid rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(1.25rem);
+  border: 0.125rem solid rgba(255, 255, 255, 0.3);
   color: white;
   padding: 1rem;
   border-radius: 16px;

@@ -6,7 +6,7 @@
 
 /* Sidebar Styles */
 .sidebar {
-  width: 280px;
+  width: 17.5rem;
   background-color: #2C514C;
   color: #FFFFFF;
   min-height: 100vh;
@@ -16,18 +16,18 @@
   display: flex;
   flex-direction: column;
   font-family: 'Poppins', sans-serif;
-  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 0.25rem 0.625rem rgba(0, 0, 0, 0.1);
   overflow: hidden;
   will-change: width;
   flex-shrink: 0; /* Prevent sidebar from shrinking */
 }
 
 .sidebar.collapsed {
-  width: 70px;
+  width: 4.375rem;
 }
 
 .sidebar.expanded {
-  width: 280px;
+  width: 17.5rem;
 }
 
 /* Main content area - Add this class */
@@ -42,15 +42,15 @@
 /* Content wrapper - Add this for proper spacing */
 .content-wrapper {
   flex: 1;
-  padding: 20px;
+  padding: 1.25rem;
   overflow-x: auto;
 }
 
 .logo-container {
-  padding: 20px;
+  padding: 1.25rem;
   text-align: center;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  height: 80px;
+  border-bottom: 0.0625rem solid rgba(255, 255, 255, 0.1);
+  height: 5rem;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -58,19 +58,19 @@
 }
 
 .logo-icon {
-  min-width: 30px;
-  height: 40px;
+  min-width: 1.875rem;
+  height: 2.5rem;
   color: var(--primary-color);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 20px;
+  font-size: 1.25rem;
   font-weight: bold;
   transition: var(--transition-smooth);
 }
 
 .logo-text {
-  font-size: 10px;
+  font-size: 0.625rem;
   font-weight: 600;
   white-space: nowrap;
   width: 60%;
@@ -79,12 +79,12 @@
 
 .collapsed .logo-text {
   opacity: 0;
-  transform: translateX(-20px);
+  transform: translateX(-1.25rem);
 }
 
 .sidebar-nav {
   flex: 1;
-  padding: 20px 0;
+  padding: 1.25rem 0;
   overflow-y: auto;
   overflow-x: hidden;
 }
@@ -96,19 +96,19 @@
 }
 
 .sidebar-nav li {
-  margin-bottom: 10px;
+  margin-bottom: 0.625rem;
   position: relative;
 }
 
 .sidebar-nav li a {
   display: flex;
   align-items: center;
-  padding: 12px 20px;
+  padding: 0.75rem 1.25rem;
   color: var(--text-light);
   text-decoration: none;
   transition: background-color 0.2s ease;
-  border-radius: 10px;
-  margin: 0 10px;
+  border-radius: 0.625rem;
+  margin: 0 0.625rem;
   white-space: nowrap;
   overflow: hidden;
 }
@@ -124,9 +124,9 @@
 }
 
 .nav-icon {
-  font-size: 18px;
-  margin-right: 15px;
-  min-width: 20px;
+  font-size: 1.125rem;
+  margin-right: 0.9375rem;
+  min-width: 1.25rem;
   display: flex;
   justify-content: center;
   transition: margin 0.3s ease;
@@ -141,27 +141,27 @@
 
 .collapsed .nav-text {
   opacity: 0;
-  transform: translateX(-10px);
+  transform: translateX(-0.625rem);
   pointer-events: none;
 }
 
 .logout-container {
-  padding: 20px;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 1.25rem;
+  border-top: 0.0625rem solid rgba(255, 255, 255, 0.1);
 }
 
 .logout-btn {
   display: flex;
   align-items: center;
   width: 100%;
-  padding: 12px 20px;
+  padding: 0.75rem 1.25rem;
   border: none;
   background: transparent;
   color: var(--text-light);
   cursor: pointer;
-  font-size: 16px;
+  font-size: 1rem;
   transition: background-color 0.2s ease;
-  border-radius: 10px;
+  border-radius: 0.625rem;
   white-space: nowrap;
   font-family: 'Poppins', sans-serif;
   overflow: hidden;
@@ -176,8 +176,8 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0 20px;
-  height: 80px;
+  padding: 0 1.25rem;
+  height: 5rem;
   background-color: var(--primary-color);
   color: var(--text-light);
   box-shadow: var(--box-shadow);
@@ -198,15 +198,15 @@
 }
 
 .public-nav li {
-  margin-left: 20px;
+  margin-left: 1.25rem;
 }
 
 .public-nav li a {
   color: var(--text-light);
   text-decoration: none;
   font-weight: 500;
-  padding: 8px 15px;
-  border-radius: 5px;
+  padding: 0.5rem 0.9375rem;
+  border-radius: 0.3125rem;
   transition: background-color 0.2s ease;
 }
 
@@ -217,26 +217,26 @@
 /* Mobile Toggle Button */
 .mobile-toggle-btn {
   position: fixed;
-  top: 20px;
-  left: 20px;
-  width: 40px;
-  height: 40px;
+  top: 1.25rem;
+  left: 1.25rem;
+  width: 2.5rem;
+  height: 2.5rem;
   border-radius: 50%;
   background-color: #1a3a36;
   color: #ffffff;
-  border: 2px solid #ffffff;
+  border: 0.125rem solid #ffffff;
   display: none;
   justify-content: center;
   align-items: center;
   cursor: pointer;
   z-index: 1000;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 0.125rem 0.5rem rgba(0, 0, 0, 0.3);
   transition: left 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-  font-size: 18px;
+  font-size: 1.125rem;
 }
 
 .mobile-toggle-btn.sidebar-open {
-  left: 200px;
+  left: 12.5rem;
 }
 
 .mobile-toggle-btn:hover {
@@ -284,7 +284,7 @@
     position: fixed;
     top: 0;
     left: 0;
-    width: 250px;
+    width: 15.625rem;
     min-height: 100vh;
     background-color: #2C514C;
     transform: translateX(-100%);
@@ -303,31 +303,31 @@
 
   .logo-container {
     display: flex;
-    padding: 20px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    height: 80px;
+    padding: 1.25rem;
+    border-bottom: 0.0625rem solid rgba(255, 255, 255, 0.1);
+    height: 5rem;
   }
 
   .sidebar-nav {
     flex: 1;
-    padding: 20px 0;
+    padding: 1.25rem 0;
     overflow-y: auto;
     overflow-x: hidden;
   }
 
   /* Custom scrollbar for mobile sidebar */
   .sidebar-nav::-webkit-scrollbar {
-    width: 6px;
+    width: 0.375rem;
   }
 
   .sidebar-nav::-webkit-scrollbar-track {
     background: rgba(255, 255, 255, 0.1);
-    border-radius: 3px;
+    border-radius: 0.1875rem;
   }
 
   .sidebar-nav::-webkit-scrollbar-thumb {
     background: rgba(255, 255, 255, 0.3);
-    border-radius: 3px;
+    border-radius: 0.1875rem;
   }
 
   .sidebar-nav::-webkit-scrollbar-thumb:hover {
@@ -339,30 +339,30 @@
   }
 
   .sidebar-nav li {
-    margin-bottom: 10px;
+    margin-bottom: 0.625rem;
   }
 
   .sidebar-nav li a {
     display: flex;
     flex-direction: row;
     align-items: center;
-    padding: 12px 20px;
-    margin: 0 10px;
+    padding: 0.75rem 1.25rem;
+    margin: 0 0.625rem;
   }
 
   .nav-icon {
-    margin-right: 15px;
-    font-size: 18px;
+    margin-right: 0.9375rem;
+    font-size: 1.125rem;
   }
 
   .nav-text {
-    font-size: 16px;
+    font-size: 1rem;
     white-space: nowrap;
   }
 
   .logout-container {
-    padding: 20px;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 1.25rem;
+    border-top: 0.0625rem solid rgba(255, 255, 255, 0.1);
     border-left: none;
   }
 
@@ -370,8 +370,8 @@
     display: flex;
     flex-direction: row;
     align-items: center;
-    padding: 12px 20px;
-    font-size: 16px;
+    padding: 0.75rem 1.25rem;
+    font-size: 1rem;
   }
 
   /* Mobile content adjustments */
@@ -387,27 +387,27 @@
   .public-nav {
     flex-direction: column;
     height: auto;
-    padding: 15px;
+    padding: 0.9375rem;
   }
   
   .public-nav ul {
-    margin-top: 15px;
+    margin-top: 0.9375rem;
   }
   
   .public-nav li {
-    margin-left: 10px;
-    margin-right: 10px;
+    margin-left: 0.625rem;
+    margin-right: 0.625rem;
   }
 }
 
 @media (max-width: 576px) {
   .public-nav li a {
-    padding: 6px 10px;
-    font-size: 14px;
+    padding: 0.375rem 0.625rem;
+    font-size: 0.875rem;
   }
   
   .content-wrapper {
-    padding: 70px 15px 15px 15px;
+    padding: 4.375rem 0.9375rem 0.9375rem 0.9375rem;
   }
 }
 
@@ -415,18 +415,18 @@
 @media (max-width: 900px) and (max-height: 500px) and (orientation: landscape) {
   .mobile-toggle-btn {
     display: flex;
-    top: 15px;
-    left: 15px;
-    width: 36px;
-    height: 36px;
-    font-size: 16px;
+    top: 0.9375rem;
+    left: 0.9375rem;
+    width: 2.25rem;
+    height: 2.25rem;
+    font-size: 1rem;
   }
 
   .sidebar {
     position: fixed;
     top: 0;
     left: 0;
-    width: 240px;
+    width: 15rem;
     height: 100vh;
     max-height: 100vh;
     background-color: #2C514C;
@@ -479,7 +479,7 @@
   }
 
   .content-wrapper {
-    padding: 70px 20px 20px 20px;
+    padding: 4.375rem 1.25rem 1.25rem 1.25rem;
   }
 }
 
@@ -514,5 +514,5 @@
 
 .page-layout .content-area {
   flex: 1;
-  padding: 20px;
+  padding: 1.25rem;
 }

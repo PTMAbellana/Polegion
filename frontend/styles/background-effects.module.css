@@ -43,9 +43,9 @@
   position: absolute;
   top: -10vh;
   color: white;
-  font-size: 20px;
+  font-size: 1.25rem;
   animation: fall linear infinite;
-  text-shadow: 0 0 5px rgba(255, 255, 255, 0.8);
+  text-shadow: 0 0 0.3125rem rgba(255, 255, 255, 0.8);
   pointer-events: none;
   will-change: transform;
 }
@@ -56,7 +56,7 @@
     transform: translateY(-10vh) rotate(0deg) translateX(0);
   }
   50% {
-    transform: translateY(50vh) rotate(180deg) translateX(30px);
+    transform: translateY(50vh) rotate(180deg) translateX(1.875rem);
   }
   100% {
     transform: translateY(110vh) rotate(360deg) translateX(0);
@@ -67,9 +67,9 @@
   position: absolute;
   top: -10vh;
   color: #2d5016;
-  font-size: 18px;
+  font-size: 1.125rem;
   animation: float linear infinite;
-  text-shadow: 0 0 3px rgba(45, 80, 22, 0.5);
+  text-shadow: 0 0 0.1875rem rgba(45, 80, 22, 0.5);
   pointer-events: none;
   will-change: transform;
 }
@@ -96,9 +96,9 @@
   position: absolute;
   bottom: -10vh;
   color: rgba(173, 216, 230, 0.6);
-  font-size: 15px;
+  font-size: 0.9375rem;
   animation: rise linear infinite;
-  text-shadow: 0 0 5px rgba(173, 216, 230, 0.8);
+  text-shadow: 0 0 0.3125rem rgba(173, 216, 230, 0.8);
   pointer-events: none;
   will-change: transform, opacity;
 }
@@ -106,14 +106,14 @@
 /* --- Mist Effect (Highland) --- */
 @keyframes drift {
   0% {
-    transform: translateX(-100px);
+    transform: translateX(-6.25rem);
     opacity: 0;
   }
   50% {
     opacity: 0.4;
   }
   100% {
-    transform: translateX(calc(100vw + 100px));
+    transform: translateX(calc(100vw + 6.25rem));
     opacity: 0;
   }
 }
@@ -127,7 +127,7 @@
   );
   border-radius: 50%;
   animation: drift linear infinite;
-  filter: blur(15px);
+  filter: blur(0.9375rem);
   pointer-events: none;
   will-change: transform, opacity;
 }
@@ -147,7 +147,7 @@
 .star {
   position: absolute;
   color: #ffd700;
-  font-size: 16px;
+  font-size: 1rem;
   animation: twinkle ease-in-out infinite;
   pointer-events: none;
   will-change: transform, opacity;

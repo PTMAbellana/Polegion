@@ -23,26 +23,26 @@
 
 /* Custom Scrollbar Styles */
 .leaderboard_scrollable::-webkit-scrollbar {
-  width: 12px;
+  width: 0.75rem;
 }
 
 .leaderboard_scrollable::-webkit-scrollbar-track {
   background: linear-gradient(180deg, rgba(250, 188, 96, 0.15) 0%, rgba(44, 81, 76, 0.1) 100%);
-  border-radius: 10px;
-  border: 2px solid rgba(250, 188, 96, 0.1);
+  border-radius: 0.625rem;
+  border: 0.125rem solid rgba(250, 188, 96, 0.1);
 }
 
 .leaderboard_scrollable::-webkit-scrollbar-thumb {
   background: linear-gradient(180deg, #FABC60 0%, #E8A83B 50%, #D97706 100%);
-  border-radius: 10px;
-  border: 2px solid transparent;
+  border-radius: 0.625rem;
+  border: 0.125rem solid transparent;
   background-clip: content-box;
 }
 
 .leaderboard_scrollable::-webkit-scrollbar-thumb:hover {
   background: linear-gradient(180deg, #F0B84C 0%, #C97E2E 50%, #B45309 100%);
   background-clip: content-box;
-  box-shadow: 0 0 10px rgba(250, 188, 96, 0.6);
+  box-shadow: 0 0 0.625rem rgba(250, 188, 96, 0.6);
 }
 
 .leaderboard_scrollable::-webkit-scrollbar-corner {
@@ -82,7 +82,7 @@
 /* Hero Section */
 .hero_section {
   position: relative;
-  padding: 4rem 2rem;
+  padding: clamp(2rem, 5vw, 4rem) clamp(1rem, 3vw, 2rem);
   text-align: center;
   overflow: hidden;
 }
@@ -105,20 +105,20 @@
 .hero_content {
   position: relative;
   z-index: 1;
-  max-width: 800px;
+  max-width: 50rem;
   margin: 0 auto;
 }
 
 .hero_icon {
-  margin-bottom: 1.5rem;
+  margin-bottom: clamp(1rem, 2vw, 1.5rem);
   animation: trophyFloat 3s ease-in-out infinite;
 }
 
 .trophy_icon {
-  width: 4rem;
-  height: 4rem;
+  width: clamp(3rem, 5vw, 4rem);
+  height: clamp(3rem, 5vw, 4rem);
   color: #FABC60;
-  filter: drop-shadow(0 0 20px rgba(250, 188, 96, 0.5));
+  filter: drop-shadow(0 0 1.25rem rgba(250, 188, 96, 0.5));
 }
 
 @keyframes trophyFloat {
@@ -127,20 +127,20 @@
 }
 
 .hero_title {
-  font-size: 4rem;
+  font-size: clamp(2rem, 5vw, 4rem);
   font-weight: 900;
   color: white;
   margin-bottom: 1rem;
   text-shadow: 
-    0 0 30px rgba(250, 188, 96, 0.5),
-    2px 2px 4px rgba(0, 0, 0, 0.3);
+    0 0 1.875rem rgba(250, 188, 96, 0.5),
+    0.125rem 0.125rem 0.25rem rgba(0, 0, 0, 0.3);
   font-family: 'Poppins', sans-serif;
 }
 
 .hero_subtitle {
-  font-size: 1.3rem;
+  font-size: clamp(1rem, 2vw, 1.3rem);
   color: rgba(255, 255, 255, 0.9);
-  margin-bottom: 2rem;
+  margin-bottom: clamp(1rem, 3vw, 2rem);
   font-weight: 500;
 }
 
@@ -155,8 +155,8 @@
 .stats_row {
   display: flex;
   justify-content: center;
-  gap: 3rem;
-  margin-top: 2rem;
+  gap: clamp(1.5rem, 3vw, 3rem);
+  margin-top: clamp(1rem, 2vw, 2rem);
 }
 
 .stat_item {
@@ -164,40 +164,40 @@
   flex-direction: column;
   align-items: center;
   gap: 0.5rem;
-  padding: 1.5rem;
+  padding: clamp(1rem, 2vw, 1.5rem);
   background: rgba(255, 255, 255, 0.15);
-  border-radius: 20px;
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(250, 188, 96, 0.2);
-  min-width: 120px;
+  border-radius: 1.25rem;
+  backdrop-filter: blur(0.625rem);
+  border: 0.0625rem solid rgba(250, 188, 96, 0.2);
+  min-width: 7.5rem;
 }
 
 .stat_icon {
-  width: 2rem;
-  height: 2rem;
+  width: clamp(1.5rem, 2.5vw, 2rem);
+  height: clamp(1.5rem, 2.5vw, 2rem);
   color: #FABC60;
 }
 
 .stat_value {
-  font-size: 2rem;
+  font-size: clamp(1.5rem, 2.5vw, 2rem);
   font-weight: 800;
   color: white;
 }
 
 .stat_label {
-  font-size: 0.9rem;
+  font-size: clamp(0.75rem, 1.5vw, 0.9rem);
   color: rgba(255, 255, 255, 0.8);
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.03125rem;
 }
 
 /* Main Content */
 .main_content {
   background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(20px);
-  margin: 0 2rem;
-  border-radius: 30px 30px 0 0;
+  backdrop-filter: blur(1.25rem);
+  margin: 0 clamp(1rem, 3vw, 2rem);
+  border-radius: 1.875rem 1.875rem 0 0;
   min-height: calc(100vh - 300px);
   box-shadow: 
     0 -20px 40px rgba(0, 0, 0, 0.1),
@@ -207,8 +207,8 @@
 
 /* Navigation */
 .nav_container {
-  padding: 2rem 2rem 0 2rem;
-  border-bottom: 1px solid rgba(44, 81, 76, 0.1);
+  padding: clamp(1rem, 3vw, 2rem) clamp(1rem, 3vw, 2rem) 0 clamp(1rem, 3vw, 2rem);
+  border-bottom: 0.0625rem solid rgba(44, 81, 76, 0.1);
 }
 
 .nav_bar {
@@ -216,8 +216,8 @@
   gap: 1rem;
   background: rgba(44, 81, 76, 0.05);
   padding: 0.5rem;
-  border-radius: 15px;
-  border: 2px solid rgba(44, 81, 76, 0.1);
+  border-radius: 0.9375rem;
+  border: 0.125rem solid rgba(44, 81, 76, 0.1);
 }
 
 .nav_btn {
@@ -226,9 +226,9 @@
   align-items: center;
   justify-content: center;
   gap: 0.75rem;
-  padding: 1rem 1.5rem;
+  padding: clamp(0.75rem, 1.5vw, 1rem) clamp(1rem, 2vw, 1.5rem);
   border: none;
-  border-radius: 12px;
+  border-radius: 0.75rem;
   background: transparent;
   color: #6b7280;
   font-weight: 600;
@@ -256,8 +256,8 @@
 .nav_btn.active {
   background: linear-gradient(135deg, #2C514C, #122932);
   color: white;
-  box-shadow: 0 4px 20px rgba(44, 81, 76, 0.3);
-  transform: translateY(-2px);
+  box-shadow: 0 0.25rem 1.25rem rgba(44, 81, 76, 0.3);
+  transform: translateY(-0.125rem);
 }
 
 .nav_icon {
@@ -268,7 +268,7 @@
 .nav_count {
   background: rgba(250, 188, 96, 0.2);
   padding: 0.25rem 0.6rem;
-  border-radius: 12px;
+  border-radius: 0.75rem;
   font-size: 0.8rem;
   font-weight: 700;
   color: #2C514C;
@@ -281,12 +281,12 @@
 
 /* Content Sections */
 .content_section {
-  padding: 2rem;
+  padding: clamp(1rem, 3vw, 2rem);
 }
 
 .section_header {
   text-align: center;
-  margin-bottom: 3rem;
+  margin-bottom: clamp(2rem, 4vw, 3rem);
 }
 
 .section_title {
@@ -294,7 +294,7 @@
   align-items: center;
   justify-content: center;
   gap: 0.75rem;
-  font-size: 2.5rem;
+  font-size: clamp(1.75rem, 3.5vw, 2.5rem);
   font-weight: 800;
   background: linear-gradient(45deg, #2C514C, #122932);
   -webkit-background-clip: text;
@@ -304,13 +304,13 @@
 }
 
 .section_icon {
-  width: 2.5rem;
-  height: 2.5rem;
+  width: clamp(2rem, 3vw, 2.5rem);
+  height: clamp(2rem, 3vw, 2.5rem);
   color: #2C514C;
 }
 
 .section_description {
-  font-size: 1.1rem;
+  font-size: clamp(0.95rem, 1.8vw, 1.1rem);
   color: #6b7280;
   font-weight: 500;
 }
@@ -322,17 +322,17 @@
   gap: 1rem;
   width: 90%;
   margin: 0 auto;
-  max-width: 800px;
+  max-width: 50rem;
 }
 
 .leaderboard_item {
   display: flex;
   align-items: center;
-  gap: 1.5rem;
-  padding: 1.5rem;
+  gap: clamp(1rem, 2vw, 1.5rem);
+  padding: clamp(1rem, 2vw, 1.5rem);
   background: rgba(255, 255, 255, 0.8);
-  border: 2px solid rgba(44, 81, 76, 0.1);
-  border-radius: 20px;
+  border: 0.125rem solid rgba(44, 81, 76, 0.1);
+  border-radius: 1.25rem;
   transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
@@ -343,7 +343,7 @@
   position: absolute;
   top: 0;
   left: 0;
-  width: 4px;
+  width: 0.25rem;
   height: 100%;
   background: linear-gradient(135deg, #2C514C, #122932);
   transform: scaleY(0);
@@ -351,8 +351,8 @@
 }
 
 .leaderboard_item:hover {
-  transform: translateX(8px);
-  box-shadow: 0 10px 30px rgba(44, 81, 76, 0.2);
+  transform: translateX(0.5rem);
+  box-shadow: 0 0.625rem 1.875rem rgba(44, 81, 76, 0.2);
   border-color: rgba(44, 81, 76, 0.3);
 }
 
@@ -364,7 +364,7 @@
 .champion {
   background: linear-gradient(135deg, rgba(250, 188, 96, 0.15), rgba(240, 181, 85, 0.1));
   border-color: #FABC60;
-  box-shadow: 0 0 30px rgba(250, 188, 96, 0.3);
+  box-shadow: 0 0 1.875rem rgba(250, 188, 96, 0.3);
 }
 
 .champion::before {
@@ -396,8 +396,8 @@
 }
 
 .rank_badge {
-  width: 3.5rem;
-  height: 3.5rem;
+  width: clamp(3rem, 4vw, 3.5rem);
+  height: clamp(3rem, 4vw, 3.5rem);
   border-radius: 50%;
   background: linear-gradient(135deg, #2C514C, #122932);
   color: white;
@@ -405,8 +405,8 @@
   align-items: center;
   justify-content: center;
   font-weight: 800;
-  font-size: 1.2rem;
-  box-shadow: 0 4px 15px rgba(44, 81, 76, 0.3);
+  font-size: clamp(1rem, 1.5vw, 1.2rem);
+  box-shadow: 0 0.25rem 0.9375rem rgba(44, 81, 76, 0.3);
   position: relative;
   z-index: 2;
 }
@@ -414,13 +414,13 @@
 .champion .rank_badge {
   background: linear-gradient(135deg, #FABC60, #f0b555);
   color: #2C514C;
-  box-shadow: 0 0 25px rgba(250, 188, 96, 0.6);
+  box-shadow: 0 0 1.5625rem rgba(250, 188, 96, 0.6);
   animation: championGlow 2s ease-in-out infinite;
 }
 
 @keyframes championGlow {
-  0%, 100% { box-shadow: 0 0 25px rgba(250, 188, 96, 0.6); }
-  50% { box-shadow: 0 0 35px rgba(250, 188, 96, 0.9); }
+  0%, 100% { box-shadow: 0 0 1.5625rem rgba(250, 188, 96, 0.6); }
+  50% { box-shadow: 0 0 2.1875rem rgba(250, 188, 96, 0.9); }
 }
 
 .runner_up .rank_badge {
@@ -465,11 +465,11 @@
 
 .avatar_image,
 .avatar_placeholder {
-  width: 3rem;
-  height: 3rem;
+  width: clamp(2.5rem, 3.5vw, 3rem);
+  height: clamp(2.5rem, 3.5vw, 3rem);
   border-radius: 50%;
-  border: 3px solid white;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border: 0.1875rem solid white;
+  box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.1);
 }
 
 .avatar_placeholder {
@@ -479,23 +479,23 @@
   align-items: center;
   justify-content: center;
   font-weight: 700;
-  font-size: 1.2rem;
+  font-size: clamp(1rem, 1.5vw, 1.2rem);
 }
 
 .crown_icon {
   position: absolute;
-  top: -8px;
-  right: -8px;
+  top: -0.5rem;
+  right: -0.5rem;
   width: 1.5rem;
   height: 1.5rem;
   color: #FABC60;
-  filter: drop-shadow(0 0 8px rgba(250, 188, 96, 0.5));
+  filter: drop-shadow(0 0 0.5rem rgba(250, 188, 96, 0.5));
   animation: crownFloat 2s ease-in-out infinite;
 }
 
 @keyframes crownFloat {
-  0%, 100% { transform: translateY(0px) rotate(-5deg); }
-  50% { transform: translateY(-3px) rotate(5deg); }
+  0%, 100% { transform: translateY(0) rotate(-5deg); }
+  50% { transform: translateY(-0.1875rem) rotate(5deg); }
 }
 
 .player_info {
@@ -503,7 +503,7 @@
 }
 
 .player_name {
-  font-size: 1.1rem;
+  font-size: clamp(0.95rem, 1.8vw, 1.1rem);
   font-weight: 700;
   color: #2d3748;
   margin: 0 0 0.25rem 0;
@@ -520,12 +520,12 @@
 }
 
 .player_rank {
-  font-size: 0.85rem;
+  font-size: clamp(0.75rem, 1.3vw, 0.85rem);
   color: #9ca3af;
   font-weight: 600;
   margin: 0;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.03125rem;
 }
 
 /* Score Section */

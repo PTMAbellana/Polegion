@@ -31,7 +31,7 @@
 
 /* Header */
 .header {
-  padding: 2rem;
+  padding: clamp(1.5rem, 4vw, 2rem);
   text-align: center;
   position: relative;
   z-index: 1;
@@ -40,7 +40,7 @@
 /* Go Back Button */
 .backButton {
   position: absolute;
-  left: 2rem;
+  left: clamp(1.5rem, 4vw, 2rem);
   top: 50%;
   transform: translateY(-50%);
   background: linear-gradient(135deg, 
@@ -49,16 +49,16 @@
     rgba(255, 255, 255, 0.2) 100%
   );
   backdrop-filter: blur(20px);
-  border: 2px solid rgba(255, 255, 255, 0.3);
+  border: 0.125rem solid rgba(255, 255, 255, 0.3);
   color: white;
   padding: 1rem 1.5rem;
-  border-radius: 16px;
+  border-radius: 1rem;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 0.5rem 2rem rgba(0, 0, 0, 0.2);
   min-width: 3.5rem;
   height: 3.5rem;
   position: relative;
@@ -85,8 +85,8 @@
 
 .backButton:hover {
   background: rgba(255, 255, 255, 0.3);
-  transform: translateY(-50%) translateY(-2px);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+  transform: translateY(-50%) translateY(-0.125rem);
+  box-shadow: 0 0.75rem 2.5rem rgba(0, 0, 0, 0.3);
   border-color: rgba(255, 255, 255, 0.4);
 }
 
@@ -100,11 +100,11 @@
 }
 
 .title {
-  font-size: 2.5rem;
+  font-size: clamp(1.75rem, 5vw, 2.5rem);
   font-weight: 900;
   color: white;
   margin-bottom: 0.5rem;
-  text-shadow: 0 0 20px rgba(250, 188, 96, 0.3);
+  text-shadow: 0 0 1.25rem rgba(250, 188, 96, 0.3);
 }
 
 .status {
@@ -128,17 +128,17 @@
 }
 
 .scrollableContent::-webkit-scrollbar {
-  width: 8px;
+  width: 0.5rem;
 }
 
 .scrollableContent::-webkit-scrollbar-track {
   background: rgba(255, 255, 255, 0.05);
-  border-radius: 10px;
+  border-radius: 0.625rem;
 }
 
 .scrollableContent::-webkit-scrollbar-thumb {
   background: linear-gradient(135deg, #06b6d4, #0891b2);
-  border-radius: 10px;
+  border-radius: 0.625rem;
 }
 
 .scrollableContent::-webkit-scrollbar-thumb:hover {
@@ -147,7 +147,7 @@
 
 /* Timer Section */
 .timerSection {
-  padding: 2rem;
+  padding: clamp(1.5rem, 4vw, 2rem);
   display: flex;
   justify-content: center;
   position: relative;
@@ -157,19 +157,19 @@
 .timerContent {
   background: rgba(255, 255, 255, 0.15);
   backdrop-filter: blur(10px);
-  border: 2px solid rgba(250, 188, 96, 0.3);
-  border-radius: 20px;
-  padding: 2rem 3rem;
+  border: 0.125rem solid rgba(250, 188, 96, 0.3);
+  border-radius: clamp(1rem, 3vw, 1.25rem);
+  padding: clamp(1.5rem, 4vw, 2rem) clamp(2rem, 5vw, 3rem);
   text-align: center;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 0.625rem 2.5rem rgba(0, 0, 0, 0.2);
 }
 
 .timer {
-  font-size: 4rem;
+  font-size: clamp(2.5rem, 8vw, 4rem);
   font-weight: 900;
   color: white;
   font-family: 'Courier New', monospace;
-  text-shadow: 0 0 20px rgba(250, 188, 96, 0.5);
+  text-shadow: 0 0 1.25rem rgba(250, 188, 96, 0.5);
   margin-bottom: 0.5rem;
 }
 
@@ -212,16 +212,16 @@
 
 .waitingContent {
   background: rgba(255, 255, 255, 0.95);
-  border-radius: 30px;
-  padding: 3rem;
+  border-radius: clamp(1.5rem, 4vw, 1.875rem);
+  padding: clamp(2rem, 5vw, 3rem);
   max-width: 600px;
   width: 100%;
   text-align: center;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 1.25rem 3.75rem rgba(0, 0, 0, 0.2);
 }
 
 .waitingIcon {
-  font-size: 4rem;
+  font-size: clamp(3rem, 8vw, 4rem);
   margin-bottom: 1.5rem;
   animation: spin 3s linear infinite;
 }
@@ -232,27 +232,27 @@
 }
 
 .waitingTitle {
-  font-size: 2rem;
+  font-size: clamp(1.5rem, 4vw, 2rem);
   font-weight: 700;
   color: #2C514C;
   margin-bottom: 1rem;
 }
 
 .waitingDescription {
-  font-size: 1.1rem;
+  font-size: clamp(0.95rem, 2.2vw, 1.1rem);
   color: #6b7280;
   margin-bottom: 2rem;
 }
 
 .competitionInfo {
   background: rgba(44, 81, 76, 0.05);
-  border-radius: 16px;
+  border-radius: 1rem;
   padding: 1.5rem;
   margin-bottom: 2rem;
 }
 
 .competitionTitle {
-  font-size: 1.3rem;
+  font-size: clamp(1.1rem, 2.6vw, 1.3rem);
   font-weight: 700;
   color: #2C514C;
   margin-bottom: 1rem;
@@ -278,7 +278,7 @@
 }
 
 .infoValue {
-  font-size: 1.2rem;
+  font-size: clamp(1rem, 2.4vw, 1.2rem);
   font-weight: 700;
   color: #2C514C;
 }
@@ -307,8 +307,8 @@
   height: 3rem;
   border-radius: 50%;
   overflow: hidden;
-  border: 2px solid white;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: 0.125rem solid white;
+  box-shadow: 0 0.125rem 0.5rem rgba(0, 0, 0, 0.1);
   position: relative;
 }
 
@@ -325,7 +325,7 @@
   width: 0.75rem;
   height: 0.75rem;
   background: #10b981;
-  border: 2px solid white;
+  border: 0.125rem solid white;
   border-radius: 50%;
   animation: pulse 2s infinite;
 }
@@ -348,7 +348,7 @@
   align-items: center;
   justify-content: center;
   font-weight: 700;
-  font-size: 1.2rem;
+  font-size: clamp(1rem, 2.4vw, 1.2rem);
 }
 
 .moreParticipants {
@@ -356,7 +356,7 @@
   height: 3rem;
   border-radius: 50%;
   background: rgba(44, 81, 76, 0.1);
-  border: 2px solid rgba(44, 81, 76, 0.3);
+  border: 0.125rem solid rgba(44, 81, 76, 0.3);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -388,21 +388,21 @@
 
 .pausedContent {
   background: white;
-  border-radius: 30px;
-  padding: 3rem;
+  border-radius: clamp(1.5rem, 4vw, 1.875rem);
+  padding: clamp(2rem, 5vw, 3rem);
   max-width: 500px;
   width: 100%;
   text-align: center;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 1.25rem 3.75rem rgba(0, 0, 0, 0.3);
 }
 
 .pausedIcon {
-  font-size: 4rem;
+  font-size: clamp(3rem, 8vw, 4rem);
   margin-bottom: 1.5rem;
 }
 
 .pausedTitle {
-  font-size: 2rem;
+  font-size: clamp(1.5rem, 4vw, 2rem);
   font-weight: 700;
   color: #2C514C;
   margin-bottom: 1rem;
@@ -416,7 +416,7 @@
 
 .pausedInfo {
   background: rgba(44, 81, 76, 0.05);
-  border-radius: 16px;
+  border-radius: 1rem;
   padding: 1.5rem;
   margin-bottom: 2rem;
 }

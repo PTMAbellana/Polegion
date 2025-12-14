@@ -8,7 +8,7 @@ import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuthStore } from '@/store/authStore'
 import Loader from '@/components/Loader'
-import styles from '@/styles/castle6-adventure.module.css'
+import styles from '@/styles/castle6-loading.module.css'
 
 export default function Castle6Page() {
   const router = useRouter()

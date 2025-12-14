@@ -146,23 +146,23 @@
     justify-content: center;
     align-items: center;
     background-color: #F3F9E3;
-    padding: 20px;
+    padding: 1.25rem;
   }
   
   .loginCard {
     position: relative;
     width: 100%;
-    max-width: 520px;
+    max-width: 32.5rem;
     background: #FFFFFF;
-    border: 0.5px solid #000000;
-    border-radius: 10px;
-    padding: 30px 20px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border: 0.03125rem solid #000000;
+    border-radius: 0.625rem;
+    padding: 1.875rem 1.25rem;
+    box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.1);
   }
   
   .cardContent {
     width: 100%;
-    max-width: 440px;
+    max-width: 27.5rem;
     margin: 0 auto;
     position: relative
   }
@@ -170,40 +170,40 @@
   .welcomeTitle {
     font-family: 'Poppins', sans-serif;
     font-weight: 700;
-    font-size: 36px;
+    font-size: clamp(1.75rem, 5vw, 2.25rem);
     line-height: 1.3;
     text-align: center;
     color: #000000;
-    margin-bottom: 8px;
+    margin-bottom: 0.5rem;
   }
   
   .welcomeSubtitle {
     font-family: 'Poppins', sans-serif;
     font-weight: 400;
-    font-size: 18px;
+    font-size: clamp(1rem, 3vw, 1.125rem);
     line-height: 1.4;
     text-align: center;
     color: #000000;
-    margin-bottom: 24px;
+    margin-bottom: 1.5rem;
   }
   
   .formGroup {
     position: relative;
-    margin-bottom: 18px;
+    margin-bottom: 1.125rem;
   }
   
   .inputField {
     box-sizing: border-box;
     width: 100%;
-    height: 50px;
+    height: 3.125rem;
     background: #FFFFFF;
-    border: 0.6px solid #282828;
-    border-radius: 6px;
-    padding: 0 15px;
+    border: 0.0375rem solid #282828;
+    border-radius: 0.375rem;
+    padding: 0 0.9375rem;
     font-family: 'Poppins', sans-serif;
     font-weight: 300;
-    font-size: 15px;
-    line-height: 22px;
+    font-size: 0.9375rem;
+    line-height: 1.375rem;
     color: #282828;
   }
   
@@ -223,7 +223,7 @@
   
   .passwordToggle {
     position: absolute;
-    right: 15px;
+    right: 0.9375rem;
     top: 50%;
     transform: translateY(-50%);
     background: transparent;
@@ -239,21 +239,21 @@
     display: flex;
     justify-content: flex-end;
     align-items: center;
-    margin-bottom: 18px;
+    margin-bottom: 1.125rem;
     font-family: 'Poppins', sans-serif;
-    font-size: 14px;
+    font-size: 0.875rem;
   }
   
   .rememberMe {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 0.625rem;
   }
   
   .checkbox {
-    width: 17px;
-    height: 15px;
-    border: 1px solid #000000;
+    width: 1.0625rem;
+    height: 0.9375rem;
+    border: 0.0625rem solid #000000;
     background: #FFFFFF;
     cursor: pointer;
   }
@@ -268,10 +268,10 @@
     color: #2F3E75;
     text-decoration: none;
     cursor: pointer;
-    font-size: 14px;
+    font-size: 0.875rem;
     transition: all 0.3s ease;
-    padding: 4px 8px;
-    border-radius: 4px;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
     position: relative;
   }
   
@@ -288,17 +288,17 @@
   
   .loginButton {
     width: 100%;
-    height: 48px;
+    height: 3rem;
     background: #2F3E75;
-    border-radius: 60px;
+    border-radius: 3.75rem;
     border: none;
     font-family: 'Poppins', sans-serif;
     font-weight: 400;
-    font-size: 18px;
-    line-height: 27px;
+    font-size: 1.125rem;
+    line-height: 1.6875rem;
     color: #FFFFFF;
     cursor: pointer;
-    margin-bottom: 18px;
+    margin-bottom: 1.125rem;
     transition: background-color 0.3s;
   }
   
@@ -314,7 +314,7 @@
   .socialDivider {
     display: flex;
     align-items: center;
-    margin: 18px 0;
+    margin: 1.125rem 0;
     color: #7D7D7D;
     font-family: 'Poppins', sans-serif;
     font-weight: 300;
@@ -322,34 +322,34 @@
   
   .dividerLine {
     flex-grow: 1;
-    height: 1px;
+    height: 0.0625rem;
     background-color: #e0e0e0;
   }
   
   .dividerText {
-    padding: 0 10px;
-    font-size: 14px;
+    padding: 0 0.625rem;
+    font-size: 0.875rem;
   }
   
   .socialButtons {
     display: flex;
-    gap: 16px;
-    margin-bottom: 18px;
+    gap: 1rem;
+    margin-bottom: 1.125rem;
   }
   
   .socialButton {
     flex: 1;
-    height: 45px;
+    height: 2.8125rem;
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 6px;
-    border: 1px solid #e0e0e0;
+    border-radius: 0.375rem;
+    border: 0.0625rem solid #e0e0e0;
     background-color: #fff;
     cursor: pointer;
     transition: background-color 0.3s;
     font-family: 'Poppins', sans-serif;
-    font-size: 15px;
+    font-size: 0.9375rem;
     color: #333;
   }
   
@@ -358,15 +358,15 @@
   }
   
   .socialIcon {
-    margin-right: 12px;
-    font-size: 20px;
+    margin-right: 0.75rem;
+    font-size: 1.25rem;
   }
   
   .registerPrompt {
     font-family: 'Poppins', sans-serif;
     font-weight: 300;
-    font-size: 15px;
-    line-height: 22px;
+    font-size: 0.9375rem;
+    line-height: 1.375rem;
     text-align: center;
     color: #7D7D7D;
   }
@@ -383,34 +383,34 @@
   
   .error {
     color: #e74c3c;
-    font-size: 14px;
-    margin-top: 5px;
+    font-size: 0.875rem;
+    margin-top: 0.3125rem;
     font-family: 'Poppins', sans-serif;
   }
   
   /* Logo */
   .logo {
     width: 100%;
-    max-width: 240px;
+    max-width: 15rem;
     height: auto;
-    margin: 0 auto 20px;
+    margin: 0 auto 1.25rem;
     display: block;
   }
   
   /* Responsive adjustments */
   @media (max-width: 768px) {
     .welcomeTitle {
-      font-size: 36px;
-      line-height: 52px;
+      font-size: 2.25rem;
+      line-height: 3.25rem;
     }
     
     .welcomeSubtitle {
-      font-size: 20px;
-      line-height: 30px;
+      font-size: 1.25rem;
+      line-height: 1.875rem;
     }
     
     .loginCard {
-      padding: 30px 15px;
+      padding: 1.875rem 0.9375rem;
     }
     
     .socialButtons {
@@ -420,100 +420,100 @@
   
   @media (max-width: 480px) {
     .welcomeTitle {
-      font-size: 28px;
-      line-height: 40px;
+      font-size: 1.75rem;
+      line-height: 2.5rem;
     }
     
     .welcomeSubtitle {
-      font-size: 16px;
-      line-height: 24px;
+      font-size: 1rem;
+      line-height: 1.5rem;
     }
     
     .rememberForgot {
       flex-direction: column;
       align-items: flex-start;
-      gap: 10px;
+      gap: 0.625rem;
     }
   }
 
   /* Mobile Landscape - Optimize layout */
   @media (max-width: 900px) and (orientation: landscape) {
     .loginPage {
-      padding: 3px;
+      padding: 0.1875rem;
       min-height: 100vh;
     }
     
     .loginCard {
-      padding: 10px 10px;
-      max-width: 550px;
+      padding: 0.625rem 0.625rem;
+      max-width: 34.375rem;
     }
     
     .logo {
-      max-width: 90px;
-      margin-bottom: 5px;
+      max-width: 5.625rem;
+      margin-bottom: 0.3125rem;
     }
     
     .welcomeTitle {
-      font-size: 16px;
-      line-height: 22px;
-      margin-bottom: 3px;
+      font-size: 1rem;
+      line-height: 1.375rem;
+      margin-bottom: 0.1875rem;
     }
     
     .welcomeSubtitle {
-      font-size: 11px;
-      line-height: 16px;
-      margin-bottom: 8px;
+      font-size: 0.6875rem;
+      line-height: 1rem;
+      margin-bottom: 0.5rem;
     }
     
     .formGroup {
-      margin-bottom: 8px;
+      margin-bottom: 0.5rem;
     }
     
     .inputField {
-      height: 34px;
-      font-size: 12px;
-      padding: 0 10px;
+      height: 2.125rem;
+      font-size: 0.75rem;
+      padding: 0 0.625rem;
     }
     
     .loginButton {
-      height: 34px;
-      font-size: 13px;
-      margin-bottom: 8px;
+      height: 2.125rem;
+      font-size: 0.8125rem;
+      margin-bottom: 0.5rem;
     }
     
     .rememberForgot {
-      margin-bottom: 8px;
-      font-size: 11px;
+      margin-bottom: 0.5rem;
+      font-size: 0.6875rem;
     }
     
     .forgotPassword {
-      font-size: 11px;
-      padding: 2px 4px;
+      font-size: 0.6875rem;
+      padding: 0.125rem 0.25rem;
     }
     
     .socialDivider {
-      margin: 8px 0;
-      font-size: 11px;
+      margin: 0.5rem 0;
+      font-size: 0.6875rem;
     }
     
     .socialButtons {
-      gap: 10px;
-      margin-bottom: 8px;
+      gap: 0.625rem;
+      margin-bottom: 0.5rem;
     }
     
     .socialButton {
-      height: 32px;
-      font-size: 12px;
+      height: 2rem;
+      font-size: 0.75rem;
     }
     
     .socialIcon {
-      font-size: 14px;
-      margin-right: 6px;
+      font-size: 0.875rem;
+      margin-right: 0.375rem;
     }
     
     .registerPrompt {
-      font-size: 12px;
-      margin-top: 3px;
+      font-size: 0.75rem;
+      margin-top: 0.1875rem;
     }
     
     .cardContent {
@@ -538,11 +538,11 @@
 
 .modalContent {
   background-color: #fff;
-  border-radius: 12px;
+  border-radius: 0.75rem;
   width: 90%;
-  max-width: 450px;
+  max-width: 28.125rem;
   padding: 2rem;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 0.625rem 1.5625rem rgba(0, 0, 0, 0.2);
   animation: fadeIn 0.3s ease-out;
   position: relative;
 }
@@ -551,7 +551,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 1.25rem;
 }
 
 .modalTitle {
@@ -567,7 +567,7 @@
   cursor: pointer;
   color: #777;
   transition: color 0.2s;
-  padding: 4px;
+  padding: 0.25rem;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -579,7 +579,7 @@
 
 .modalDescription {
   color: #666;
-  margin-bottom: 20px;
+  margin-bottom: 1.25rem;
   font-size: 0.95rem;
   line-height: 1.5;
 }
@@ -589,8 +589,8 @@
   background-color: #4f46e5;
   color: white;
   border: none;
-  padding: 12px;
-  border-radius: 8px;
+  padding: 0.75rem;
+  border-radius: 0.5rem;
   font-size: 1rem;
   font-weight: 500;
   cursor: pointer;
@@ -598,7 +598,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
+  gap: 0.625rem;
 }
 
 .forgotPasswordButton:hover {
@@ -642,7 +642,7 @@
   align-items: center;
   justify-content: center;
   padding: 2rem;
-  min-height: 200px;
+  min-height: 12.5rem;
 }
 
 .loaderContainer p {
@@ -675,7 +675,7 @@
 
 .passwordToggle {
   position: absolute;
-  right: 10px;
+  right: 0.625rem;
   top: 50%;
   transform: translateY(-50%);
   background: none;
@@ -683,25 +683,25 @@
   cursor: pointer;
   color: #777;
   display: flex;
-  padding: 4px;
+  padding: 0.25rem;
 }
 
 .backButton {
   position: absolute;
-  top: 20px;
-  left: 20px;
+  top: 1.25rem;
+  left: 1.25rem;
   background: none;
   border: none;
   color: #666;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 0.875rem;
   font-weight: 500;
-  padding: 8px 12px;
-  border-radius: 6px;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.375rem;
   transition: all 0.2s ease;
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 0.375rem;
 }
 
 .backButton:hover {

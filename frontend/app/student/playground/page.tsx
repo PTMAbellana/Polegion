@@ -14,7 +14,7 @@ import { useShapeManagement } from "@/hooks/teacher/useShapeManagement";
 import { usePropertiesManagement } from "@/hooks/teacher/usePropertiesManagement";
 import { useAuthStore } from "@/store/authStore";
 
-const MAX_SHAPES = 5; // Allow up to 5 shapes in playground
+const MAX_SHAPES = 1; // Allow only one shape at a time
 
 export default function PlaygroundPage() {
   const { userProfile } = useAuthStore();

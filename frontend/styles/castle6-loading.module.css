@@ -1,0 +1,70 @@
+/* ============================================================================
+   CASTLE 6 - POSTTEST LOADING SCREEN (OPTIMIZED)
+   Lightweight CSS for assessment redirect page
+   ============================================================================ */
+
+.loading_container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  width: 100%;
+  background: linear-gradient(135deg, #000080 0%, #00044A 100%);
+  padding: 2rem;
+  gap: 1.5rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.loading_container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    radial-gradient(circle at 20% 50%, rgba(255, 191, 28, 0.08) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(255, 214, 10, 0.05) 0%, transparent 50%),
+    radial-gradient(circle at 40% 80%, rgba(0, 4, 74, 0.3) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.loading_container > * {
+  position: relative;
+  z-index: 2;
+}
+
+.loading_container p {
+  color: #FFD60A;
+  font-size: clamp(1rem, 1vw + 0.75rem, 1.25rem);
+  font-weight: 500;
+  text-align: center;
+  margin: 0;
+  letter-spacing: 0.03125rem;
+  text-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.3);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .loading_container {
+    padding: 1.5rem;
+    gap: 1rem;
+  }
+  
+  .loading_container p {
+    font-size: clamp(0.875rem, 2vw + 0.5rem, 1rem);
+  }
+}

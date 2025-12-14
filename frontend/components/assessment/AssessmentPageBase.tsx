@@ -131,10 +131,10 @@ export default function AssessmentPageBase({ config }: { config: AssessmentConfi
     const castleNumber = config.type === 'pretest' ? 0 : config.type === 'posttest' ? 6 : null;
     const castleBackgroundColors = (() => {
         if (castleNumber === 0) {
-            return { primary: '#37353E', accent: '#44444E' };
+            return { primary: '#2D2A3D', accent: '#4A4458' };
         }
         if (castleNumber === 6) {
-            return { primary: '#000080', accent: '#00044A' };
+            return { primary: '#1A1A4E', accent: '#2E2E6E' };
         }
         return { primary: config.theme.primaryColor, accent: config.theme.accentColor };
     })();
