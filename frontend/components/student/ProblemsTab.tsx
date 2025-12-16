@@ -57,10 +57,17 @@ export default function ProblemsTab({ problems, roomCode }: ProblemsTabProps) {
         }
     };
 
+    // Filter out hidden/private problems for students
+    // Only show problems that are explicitly public or visible (show)
+    // Hide problems with visibility: 'private', 'hidden', or 'hide'
+    const visibleProblems = problems.filter(problem => 
+        problem.visibility === 'public' || problem.visibility === 'show'
+    );
+
     return (
         <div className={styles.problemsContainer}>
             <div className={styles.problemsContent}>
-                {problems.length === 0 ? (
+                {visibleProblems.length === 0 ? (
                     <div className={styles.emptyState}>
                         <FaBook className={styles.emptyStateIcon} />
                         <h3 className={styles.emptyStateTitle}>No Problems Yet</h3>
@@ -68,7 +75,7 @@ export default function ProblemsTab({ problems, roomCode }: ProblemsTabProps) {
                     </div>
                 ) : (
                     <div>
-                        {problems.map((problem, index) => (
+                        {visibleProblems.map((problem, index) => (
                             <div key={problem.id || index} className={styles.problemCard}>
                                 <div className={styles.problemHeader}>
                                     <h3 className={styles.problemTitle}>{problem.title}</h3>

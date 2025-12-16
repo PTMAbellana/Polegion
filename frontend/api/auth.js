@@ -4,6 +4,8 @@ export const refreshToken = async () => {
   try {
     const response = await api.post(`auth/refresh-token`, {
       refresh_token: localStorage.getItem("refresh_token"),
+    }, {
+      cache: false  // Disable cache for auth requests
     });
     return {
       success: true,
@@ -22,24 +24,39 @@ export const refreshToken = async () => {
 
 export const login = async (email, password) => {
   try {
+    console.log('🔐 Attempting login for:', email);
     const response = await api.post("/auth/login", {
       email,
       password,
+    }, {
+      cache: false  // Disable cache for auth requests
     });
-    console.log('Login response data:', response.data);
+    console.log('✅ Login response received:', response.data);
+    
+    // Validate response structure
+    if (!response.data) {
+      console.error('❌ No data in response');
+      return {
+        success: false,
+        error: 'Invalid server response',
+        message: 'No data received from server'
+      };
+    }
+    
     // Don't save auth data here, let the auth store handle it
-    // authUtils.saveAuthData(response.data);
     return {
       success: true,
       message: response.data.message,
       data: response.data.data || response.data  // Handle both nested and direct data
     };
   } catch (error) {
-    console.log('Login error:', error)
+    console.error('❌ Login error:', error);
+    console.error('Error response:', error.response);
+    
     return {
       success: false,
-      error: error.response?.data?.error || 'Login failed',
-      message: error.response?.data?.message || 'An error occurred',
+      error: error.response?.data?.error || error.message || 'Login failed',
+      message: error.response?.data?.message || error.message || 'An error occurred',
       status: error.response?.status
     }
   }
@@ -50,6 +67,8 @@ export const register = async (userData, userType) => {
     const response = await api.post("/auth/register", {
       ...userData,
       userType,
+    }, {
+      cache: false  // Disable cache for auth requests
     });
     return {
       success: true,
@@ -76,7 +95,9 @@ export const resetPassword = async (email) => {
 
 export const logout = async () => {
   try {
-    const response = await api.post("/auth/logout");
+    const response = await api.post("/auth/logout", {}, {
+      cache: false  // Disable cache for auth requests
+    });
     authUtils.clearAuthData();
     return response.data;
   } catch (error) {

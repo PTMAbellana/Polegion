@@ -193,6 +193,36 @@
   scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
 }
 
+/* ========================================
+   CUSTOM SCROLLBAR STYLING FOR PROBLEM DISPLAY
+   ======================================== */
+/* Webkit browsers (Chrome, Safari, Edge) */
+*::-webkit-scrollbar {
+  width: 0.5rem;
+  height: 0.5rem;
+}
+
+*::-webkit-scrollbar-track {
+  background: #f9fafb;
+  border-radius: 0.25rem;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 0.25rem;
+  border: 0.0625rem solid #f9fafb;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 #f9fafb;
+}
+
 
 @media (prefers-color-scheme: dark) {
   :root {

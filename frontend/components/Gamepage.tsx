@@ -793,6 +793,22 @@ export default function Gamepage({
   // Track previous problem ID to detect problem changes
   const previousProblemIdRef = useRef<number | null>(null);
 
+  // Save current shapes to localStorage when paused or user is working
+  useEffect(() => {
+    if (competitionId && activeCompetition?.current_problem_id && shapes.length > 0) {
+      const currentProblemId = activeCompetition.current_problem_id;
+      const shapesKey = `working_shapes_${competitionId}_${currentProblemId}`;
+      
+      // Save shapes to localStorage (preserve work during pause)
+      try {
+        localStorage.setItem(shapesKey, JSON.stringify(shapes));
+        console.log('💾 [Gamepage] Saved working shapes to localStorage');
+      } catch (e) {
+        console.error('Failed to save working shapes:', e);
+      }
+    }
+  }, [shapes, competitionId, activeCompetition?.current_problem_id]);
+
   // NEW: Check submission status from localStorage and handle problem changes
   useEffect(() => {
     if (competitionId && activeCompetition?.current_problem_id) {
@@ -812,6 +828,28 @@ export default function Gamepage({
         // Clear shapes for the new problem
         setShapes([]);
         setSelectedId(null);
+        
+        // Clear working shapes from localStorage for the new problem
+        const workingShapesKey = `working_shapes_${competitionId}_${currentProblemId}`;
+        localStorage.removeItem(workingShapesKey);
+      } else if (!wasSubmitted) {
+        // NOT a new problem and not submitted - restore working shapes (handles pause/resume)
+        const workingShapesKey = `working_shapes_${competitionId}_${currentProblemId}`;
+        const savedWorkingShapes = localStorage.getItem(workingShapesKey);
+        
+        if (savedWorkingShapes && shapes.length === 0) {
+          try {
+            const parsedShapes = JSON.parse(savedWorkingShapes);
+            const shapesWithIds = parsedShapes.map((shape: any, index: number) => ({
+              ...shape,
+              id: shape.id || Date.now() + index,
+            }));
+            setShapes(shapesWithIds);
+            console.log('📦 [Gamepage] Restored working shapes after pause:', shapesWithIds);
+          } catch (e) {
+            console.error('Failed to parse saved working shapes:', e);
+          }
+        }
       }
       
       // Update the ref AFTER checking for new problem
@@ -943,19 +981,42 @@ export default function Gamepage({
                 </div>
               )}
               
-              {/* Title + Prompt Combined */}
+              {/* Title + Prompt Combined - Expanded with Scrollbar */}
               <div style={{
                 flex: 1,
                 background: '#f9fafb',
                 border: '2px solid #e5e7eb',
                 borderRadius: '8px',
                 padding: '8px 12px',
+                maxHeight: '120px',
+                display: 'flex',
+                flexDirection: 'column',
                 overflow: 'hidden'
               }}>
-                <div style={{ fontSize: '14px', fontWeight: 600, color: '#1f2937', marginBottom: '2px' }}>
+                <div style={{ 
+                  fontSize: '14px', 
+                  fontWeight: 600, 
+                  color: '#1f2937', 
+                  marginBottom: '4px',
+                  overflow: 'auto',
+                  maxHeight: '40px',
+                  paddingRight: '4px',
+                  scrollbarWidth: 'thin',
+                  scrollbarColor: '#cbd5e1 #f9fafb'
+                }}>
                   {title || "Untitled Problem"}
                 </div>
-                <div style={{ fontSize: '12px', color: '#6b7280', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                <div style={{ 
+                  fontSize: '12px', 
+                  color: '#6b7280',
+                  overflow: 'auto',
+                  flex: 1,
+                  paddingRight: '4px',
+                  scrollbarWidth: 'thin',
+                  scrollbarColor: '#cbd5e1 #f9fafb',
+                  whiteSpace: 'pre-wrap',
+                  wordBreak: 'break-word'
+                }}>
                   {prompt || "No description"}
                 </div>
               </div>

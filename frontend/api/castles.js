@@ -31,14 +31,8 @@ export const getAllCastles = async (userId) => {
         
         console.log('[CastleAPI] Fetching from endpoint:', endpoint, 'validUserId:', !!validUserId)
         
-        // Simple config without cache interceptor options that may cause issues in Edge
-        // The axios-cache-interceptor may not handle all browsers consistently
+        // Disable cache for this request to avoid CORS issues
         const res = await api.get(endpoint, {
-            headers: {
-                'Cache-Control': 'no-cache',
-                'Pragma': 'no-cache'
-            },
-            // Disable axios-cache-interceptor for this request
             cache: false
         })
         
@@ -60,7 +54,6 @@ export const getAllCastles = async (userId) => {
                 console.warn('[CastleAPI] Got 400 error, attempting fallback fetch without userId...')
                 try {
                     const fallbackRes = await api.get(`castles?_t=${Date.now()}`, {
-                        headers: { 'Cache-Control': 'no-cache' },
                         cache: false
                     })
                     console.log('[CastleAPI] Fallback fetch successful')

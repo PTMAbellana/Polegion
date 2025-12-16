@@ -8,7 +8,9 @@ import { TabType } from '@/constants/ui'
 
 export default function TabContainer({ problems, competitions, roomCode }: TabContainerProps) {
     const [activeTab, setActiveTab] = useState<TabType>('problems')
-
+    const newProb = problems.filter(problem => 
+        problem.visibility === 'public' || problem.visibility === 'show'
+    )
     return (
         <div className={styles.tabsContainer}>
             {/* Tab Buttons */}
@@ -19,7 +21,7 @@ export default function TabContainer({ problems, competitions, roomCode }: TabCo
                 >
                     <FaBook />
                     Problems
-                    <span className={styles.tabCount}>{problems.length}</span>
+                    <span className={styles.tabCount}>{newProb.length}</span>
                 </button>
                 <button
                     className={`${styles.tabButton} ${activeTab === 'competitions' ? styles.tabButtonActive : ''}`}
@@ -34,7 +36,7 @@ export default function TabContainer({ problems, competitions, roomCode }: TabCo
             {/* Tab Content */}
             <div className={styles.tabContent}>
                 {activeTab === 'problems' ? (
-                    <ProblemsTab problems={problems} roomCode={roomCode} />
+                    <ProblemsTab problems={newProb} roomCode={roomCode} />
                 ) : (
                     <CompetitionsTab competitions={competitions} roomCode={roomCode} />
                 )}

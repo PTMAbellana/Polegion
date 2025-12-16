@@ -10,7 +10,7 @@ const refreshAxios = axios.create({
 	headers: {
 		"Content-Type": "application/json",
 	},
-	timeout: 10000,
+	timeout: 30000, // 30 seconds for token refresh
 });
 
 // Create base axios instance
@@ -19,7 +19,7 @@ const baseAxios = axios.create({
 	headers: {
 		"Content-Type": "application/json",
 	},
-	timeout: 10000,
+	timeout: 60000, // 60 seconds for production (cold starts, heavy operations)
 });
 
 // Setup cache interceptor
@@ -33,6 +33,24 @@ const api = setupCache(baseAxios, {
 	interpretHeader: false,
 	etag: false,
 	modifiedSince: false,
+	// Don't send cache headers to avoid CORS issues
+	headerInterpreter: () => ({}),
+	// Don't add cache-control headers to requests
+	requestInterceptor: (config) => {
+		// Remove cache headers that can cause CORS issues
+		// Check both lowercase and capitalized versions
+		if (config.headers) {
+			delete config.headers['cache-control'];
+			delete config.headers['Cache-Control'];
+			delete config.headers['if-none-match'];
+			delete config.headers['If-None-Match'];
+			delete config.headers['if-modified-since'];
+			delete config.headers['If-Modified-Since'];
+			delete config.headers['pragma'];
+			delete config.headers['Pragma'];
+		}
+		return config;
+	},
 	// Debug mode
 	// debug: process.env.NODE_ENV === 'development' ? console.log : undefined,
 });
@@ -128,20 +146,35 @@ let isRefreshing = false;
 let refreshPromise = null;
 
 // Request interceptor - Check token validity BEFORE making request
-// Request interceptor - Check token validity BEFORE making request
 api.interceptors.request.use(
 	async (config) => {
+		// Log all requests in development
+		if (process.env.NODE_ENV === 'development') {
+			console.log(`📤 Request: ${config.method?.toUpperCase()} ${config.url}`);
+		}
+		
 		// 🚨 CRITICAL: Skip ALL processing for refresh-token endpoint to prevent circular dependency
-		if (config.url?.includes('/auth/refresh-token')) {
+		if (config.url?.includes('refresh-token')) {
+			console.log('⚠️ Skipping interceptor for refresh-token');
 			// Return config as-is, no auth headers, no token checks
 			return config;
 		}
 
-		// Skip token check for other auth endpoints and public endpoints
-		if (config.url?.includes('/auth/login') || 
-		    config.url?.includes('/auth/register') ||
-		    (config.url?.startsWith('castles') && config.method?.toLowerCase() === 'get') ||
-		    (config.url?.startsWith('chapters') && config.method?.toLowerCase() === 'get')) {
+		// Skip token check for auth endpoints and public endpoints
+		// Check both with and without leading slash, and with full URL
+		const isAuthEndpoint = 
+			config.url?.includes('auth/login') || 
+			config.url?.includes('auth/register') ||
+			config.url?.includes('auth/logout');
+		
+		const isPublicEndpoint = 
+			(config.url?.includes('castles') && config.method?.toLowerCase() === 'get') ||
+			(config.url?.includes('chapters') && config.method?.toLowerCase() === 'get');
+		
+		if (isAuthEndpoint || isPublicEndpoint) {
+			if (process.env.NODE_ENV === 'development') {
+				console.log('✅ Auth/public endpoint detected, skipping token check');
+			}
 			// Still add token if available for public endpoints (to get user-specific data)
 			const accessToken = localStorage.getItem("access_token");
 			if (accessToken && !authUtils.isTokenExpired()) {
@@ -214,6 +247,7 @@ async function refreshAccessToken() {
 
 	try {
 		console.log("🔄 Refreshing access token...");
+		console.log("🔑 Refresh token (first 20 chars):", refreshToken.substring(0, 20) + "...");
 		
 		// 🚨 CRITICAL: Use the completely isolated axios instance (NO INTERCEPTORS)
 		const response = await refreshAxios.post("/auth/refresh-token", {
@@ -270,10 +304,21 @@ async function refreshAccessToken() {
 		}
 	} catch (error) {
 		console.error("❌ Token refresh failed:", error);
+		console.error("❌ Error response:", error.response?.data);
+		console.error("❌ Error status:", error.response?.status);
 		
 		// Only clear and redirect if it's a 401/403 (invalid refresh token)
 		if (error.response?.status === 401 || error.response?.status === 403) {
 			console.log("❌ Refresh token is invalid, logging out");
+			authUtils.clearAuthData();
+			localStorage.removeItem('auth-storage');
+			
+			if (typeof window !== 'undefined') {
+				window.location.href = ROUTES.HOME;
+			}
+		} else if (error.response?.status === 400) {
+			// 400 means bad request - likely refresh token is malformed or missing
+			console.error("❌ Bad refresh token request - clearing auth and redirecting");
 			authUtils.clearAuthData();
 			localStorage.removeItem('auth-storage');
 			
