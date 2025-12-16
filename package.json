@@ -53,6 +53,7 @@
     "recharts": "^3.5.0",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1",
+    "swr": "^2.3.8",
     "zustand": "^5.0.8"
   }
 }
