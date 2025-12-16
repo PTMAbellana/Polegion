@@ -41,17 +41,16 @@ const LimitAttempts: React.FC<LimitAttemptsProps> = ({
           onChange={e => setInput(Number(e.target.value))}
           onBlur={handleSave}
           autoFocus
-          onKeyDown={e => {
-            if (e.key === "Enter") {
-              handleSave();
-            }
-          }}
         />
         <button
           type="button"
-          className={styles.closeButton}
-          aria-label="Save and Close"
-          onClick={handleSave}
+          className={styles.clearButton}
+          aria-label="Clear and Close"
+          onClick={() => {
+            setInput(1);
+            setLimit(1);
+            setEditing(false);
+          }}
           tabIndex={0}
         >
           ✕

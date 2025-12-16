@@ -17,6 +17,7 @@ import {
 import { CreateRoomData, UpdateRoomData } from '@/types';
 import { createProblem, deleteProblem, getRoomProblems, updateProblem } from '@/api/problems'
 import { createCompe, getAllCompe } from '@/api/competitions'
+import { mutate } from 'swr'
 
 export const useTeacherRoomStore = create<ExtendTeacherRoomState>()(
     persist(
@@ -413,34 +414,44 @@ export const useTeacherRoomStore = create<ExtendTeacherRoomState>()(
 
             // Remove problem from currentRoom.problems array
             removeProblemFromRoom: async (problemId) => {
+                const currentRoom = get().currentRoom;
+                if (!currentRoom) {
+                    logger.error('Attempted to remove problem without a current room.');
+                    return { success: false, error: 'No current room selected' };
+                }
+                const roomCode = currentRoom.code;
+
                 try {
+                    // Call the API to delete the problem from the database
                     const response = await deleteProblem(problemId);
                     if (!response.success) {
-                        logger.log('Failed to delete problem from room');
-                        logger.log(response.error);
-                        return {
-                            success: false,
-                            error: response.error
-                        };
+                        logger.log('Failed to delete problem from room via API:', response.error);
+                        return { success: false, error: response.error };
                     }
-                    set(state => ({
-                        currentRoom: state.currentRoom ? {
-                            ...state.currentRoom,
-                            problems: (state.currentRoom.problems || []).filter(p => p.id !== problemId)
-                        } : null
-                    }));
-                    return {
-                        success: true,
-                        message: response.message
+
+                    // Optimistically update the local state to immediately reflect the change in the UI
+                    const updatedProblems = (currentRoom.problems || []).filter(p => p.id !== problemId);
+                    const updatedRoom = {
+                        ...currentRoom,
+                        problems: updatedProblems,
                     };
+                    
+                    // Update the Zustand store
+                    set({ currentRoom: updatedRoom });
+
+                    // Manually update the SWR cache to prevent it from re-fetching stale data.
+                    // This tells other components listening to this SWR key that the data has changed.
+                    // 'revalidate: false' is crucial to prevent a network request.
+                    mutate(`/rooms/${roomCode}`, updatedRoom, { revalidate: false });
+
+                    logger.log(`Problem ${problemId} removed from room ${roomCode}`);
+                    return { success: true, message: response.message };
+
                 } catch (error) {
                     logger.error('Error removing problem from room:', error);
-                    return {
-                        success: false,
-                        error: 'Error removing problem from room'
-                    }
+                    return { success: false, error: 'Error removing problem from room' };
                 }
-         },
+            },
 
          removeParticipant: async (partId) => {
             const currentRoom = get().currentRoom;

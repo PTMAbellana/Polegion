@@ -30,8 +30,11 @@ const Timer: React.FC<TimerProps> = ({
             />
             <span className={styles.timerUnit}>seconds</span>
             <button
-              className={styles.closeButton}
-              onClick={() => setTimerOpen(false)}
+              className={styles.clearButton}
+              onClick={() => {
+                setTimerValue(5);
+                setTimerOpen(false);
+              }}
               title="Close"
             >
               ✕

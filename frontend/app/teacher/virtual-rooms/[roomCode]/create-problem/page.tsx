@@ -266,6 +266,13 @@ console.log("Current Room in CreateProblemPage:", currentRoom);
             const res = await removeProblemFromRoom(problemId);
 
             if (res.success) {
+                if (currentProblem && currentProblem.id === problemId) {
+                    resetForm();
+                    setShapes([]);
+                    setSelectedId(null);
+                    handleAllShapesDeleted();
+                    clearCurrentProblem();
+                }
                 await Swal.fire("Deleted!", "Your problem has been deleted.", "success");
             } else {
                 console.log(res.error);
@@ -486,6 +493,9 @@ console.log("Current Room in CreateProblemPage:", currentRoom);
             )}
             <SetVisibility visible={visible} setVisible={setVisible} />
           </div>
+          <p className={styles.clarificationText}>
+            The attempt limit is for individual practice problems and does not apply to competitions.
+          </p>
           
           <PropertiesPanel
             selectedShape={shapes.find(shape => shape.id === selectedId) || null}
