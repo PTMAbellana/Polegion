@@ -48,7 +48,7 @@ export default function ProblemsList({ problems, roomCode }: ProblemsListProps) 
                     className={styles.createButton}
                 >
                     <FaPlus />
-                    Create Problem
+                    Create / Edit Problem
                 </button>
             </div>
             
@@ -73,12 +73,12 @@ export default function ProblemsList({ problems, roomCode }: ProblemsListProps) 
                                 <div className={styles.problemHeader}>
                                     <h3 className={styles.problemTitle}>{problem.title}</h3>
                                     <div className={styles.problemActions}>
-                                        <button 
+                                        {/* <button 
                                         className={`${styles.actionButton} ${styles.deleteButton}`}
                                         onClick={handleDeleteProblem(problem.id)}
                                         >
                                             <FaTrash />
-                                        </button>
+                                        </button> */}
                                     </div>
                                 </div>
                                 
