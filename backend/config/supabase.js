@@ -15,12 +15,15 @@ if (!supabaseUrl || !supabaseKey) {
 // console.log('Supabase URL:', supabaseUrl)
 // console.log('Service Key present:', !!supabaseKey)
 
-const supabase = createClient(supabaseUrl, supabaseKey)
-//     auth: {
-//         autoRefreshToken: true,
-//         persistSession: true
-//     }
-// })
+const supabase = createClient(supabaseUrl, supabaseKey, {
+    auth: {
+        autoRefreshToken: false,
+        persistSession: false
+    },
+    db: {
+        schema: 'public'
+    }
+})
 
 // async function testToken(token) {
 //     const {

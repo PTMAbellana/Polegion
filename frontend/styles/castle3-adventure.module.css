@@ -2,7 +2,7 @@
 /* Theme Colors: #DDEB9D (light green), #A0C878 (medium green), #27667B (teal), #143D60 (dark blue) */
 .chapterSelectionContainer {
   height: 100vh;
-  background-image: url('/images/castles/castle3-background.png');
+  background-image: url('/images/castles/castle3-background.webp');
   background-size: cover;
   background-position: center;
   background-attachment: fixed;

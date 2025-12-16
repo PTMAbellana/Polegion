@@ -2,7 +2,7 @@
 /* Theme Colors: #FFE1AF (sand), #E2B59A (beige), #B77466 (terracotta), #957C62 (brown) */
 .chapterSelectionContainer {
   height: 100vh;
-  background-image: url('/images/castles/castle4-background.png');
+  background-image: url('/images/castles/castle4-background.webp');
   background-size: cover;
   background-position: center;
   background-attachment: fixed;

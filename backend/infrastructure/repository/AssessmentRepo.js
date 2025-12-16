@@ -14,6 +14,8 @@ class AssessmentRepo extends BaseRepo {
      */
     async getQuestionsByCategory(category, testType, limit = 10) {
         try {
+            console.log(`[AssessmentRepo] Fetching questions - category: "${category}", testType: "${testType}", limit: ${limit}`);
+            
             const { data, error } = await this.supabase
                 .from('assessment_questions')
                 .select('*')
@@ -22,14 +24,29 @@ class AssessmentRepo extends BaseRepo {
                 .limit(limit * 3); // Get more than needed for random selection
 
             if (error) {
-                console.error('Error fetching questions:', error);
+                console.error('[AssessmentRepo] Database error:', error);
+                console.error('[AssessmentRepo] Error details:', {
+                    message: error.message,
+                    code: error.code,
+                    details: error.details,
+                    hint: error.hint
+                });
                 throw error;
             }
 
+            console.log(`[AssessmentRepo] Found ${data?.length || 0} questions for category "${category}"`);
+            
+            if (!data || data.length === 0) {
+                console.warn(`[AssessmentRepo] No questions found. Check:
+                    1. Questions exist in database: SELECT COUNT(*) FROM assessment_questions WHERE category='${category}' AND test_type='${testType}';
+                    2. RLS policies allow reading: Check if assessment_questions table has proper SELECT policy
+                    3. Category name spelling matches exactly (case-sensitive)`);
+            }
+
             // Shuffle and return only the requested limit
-            return this.shuffleArray(data).slice(0, limit);
+            return this.shuffleArray(data || []).slice(0, limit);
         } catch (error) {
-            console.error('getQuestionsByCategory error:', error);
+            console.error('[AssessmentRepo] getQuestionsByCategory error:', error);
             throw error;
         }
     }

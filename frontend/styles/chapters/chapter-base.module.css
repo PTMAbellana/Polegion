@@ -99,7 +99,7 @@
 
 /* Castle 2 - Forest Theme */
 .chapterContainer.castle2Theme {
-  background-image: url('/images/castles/castle2-background.png');
+  background-image: url('/images/castles/castle2-background.webp');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -193,7 +193,7 @@
 
 /* Castle 3 Theme */
 .chapterContainer.castle3Theme {
-  background-image: url('/images/castles/castle3-background.png');
+  background-image: url('/images/castles/castle3-background.webp');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -276,7 +276,7 @@
 
 /* Castle 4 Theme */
 .chapterContainer.castle4Theme {
-  background-image: url('/images/castles/castle4-background.png');
+  background-image: url('/images/castles/castle4-background.webp');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -359,7 +359,7 @@
 
 /* Castle 5 Theme */
 .chapterContainer.castle5Theme {
-  background-image: url('/images/castles/castle5-background.png');
+  background-image: url('/images/castles/castle5-background.webp');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;

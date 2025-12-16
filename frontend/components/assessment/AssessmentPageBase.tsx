@@ -335,29 +335,49 @@ export default function AssessmentPageBase({ config }: { config: AssessmentConfi
             // Call backend API to get random questions
             const response = await generateAssessment(userId, config.type) as GenerateAssessmentResponse;
             
-            if (response.questions && response.questions.length > 0) {
-                const startedAt = startTime || new Date().toISOString();
-                if (!startTime) {
-                    setStartTime(startedAt);
-                    setElapsedSeconds(0);
-                }
-                setAssessmentQuestions(response.questions);
-                setCurrentQuestion(0);
-                setUserAnswers({});
-                console.log(`[${config.type}] Loaded ${response.questions.length} questions`);
-                setStage('assessment');
-                localStorage.setItem(STORAGE_KEY, JSON.stringify({
-                    stage: 'assessment',
-                    questions: response.questions,
-                    currentQ: 0,
-                    answers: {},
-                    startTime: startedAt
-                }));
-                setRestoredProgress(true);
-            } else {
-                toast.error('Failed to load assessment questions');
-                console.error('Invalid response:', response);
+            console.log(`[${config.type}] API Response:`, response);
+            
+            // Check if response has questions
+            if (!response || typeof response !== 'object') {
+                console.error('Invalid response structure:', response);
+                toast.error('No assessment questions available. Please contact your administrator to seed the database.');
+                setIsLoading(false);
+                return;
             }
+            
+            if (!response.questions || !Array.isArray(response.questions)) {
+                console.error('No questions array in response:', response);
+                toast.error('Assessment questions are not properly configured. Please run the INSERT_ASSESSMENT_QUESTIONS.sql script.');
+                setIsLoading(false);
+                return;
+            }
+            
+            if (response.questions.length === 0) {
+                console.error('Empty questions array');
+                toast.error('No assessment questions found. Please ensure the database has been seeded with questions.');
+                setIsLoading(false);
+                return;
+            }
+            
+            // Valid response with questions
+            const startedAt = startTime || new Date().toISOString();
+            if (!startTime) {
+                setStartTime(startedAt);
+                setElapsedSeconds(0);
+            }
+            setAssessmentQuestions(response.questions);
+            setCurrentQuestion(0);
+            setUserAnswers({});
+            console.log(`[${config.type}] Loaded ${response.questions.length} questions`);
+            setStage('assessment');
+            localStorage.setItem(STORAGE_KEY, JSON.stringify({
+                stage: 'assessment',
+                questions: response.questions,
+                currentQ: 0,
+                answers: {},
+                startTime: startedAt
+            }));
+            setRestoredProgress(true);
             
         } catch (error: any) {
             console.error(`[${config.type}] Error loading assessment:`, error);

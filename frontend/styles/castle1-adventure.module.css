@@ -1,7 +1,7 @@
 /* Chapter Selection Page Styles */
 .chapterSelectionContainer {
   height: 100vh;
-  background-image: url('/images/castles/castle1-background.png');
+  background-image: url('/images/castles/castle1-background.webp');
   background-size: cover;
   background-position: center;
   background-attachment: fixed;

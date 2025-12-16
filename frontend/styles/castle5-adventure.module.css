@@ -2,7 +2,7 @@
 /* Theme Colors: #D4BEE4 (light purple), #9B7EBD (purple), #6A4C93 (dark purple), #2D1B4E (deep purple) */
 .chapterSelectionContainer {
   height: 100vh;
-  background-image: url('/images/castles/castle5-background.png');
+  background-image: url('/images/castles/castle5-background.webp');
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
