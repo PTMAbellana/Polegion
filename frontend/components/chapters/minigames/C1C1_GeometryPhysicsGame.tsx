@@ -355,21 +355,37 @@ export default function GeometryPhysicsGame({
           if (isNearBox) {
             let collided = false;
             
-            // LEFT WALL - Ball trying to enter from the left
+            // LEFT WALL - Ball colliding with left side (from inside or outside)
+            // Check if ball is hitting the left wall from either direction
             if (ballRight > innerLeft && ballRight < innerLeft + BOX_WALL_THICKNESS * 2 && 
-                newPosition.x < innerLeft && ballBottom > boxOpeningBottom) {
-              // Push ball out to the left
-              newPosition.x = innerLeft - BALL_RADIUS;
-              newVelocity.x = Math.abs(newVelocity.x) * 0.5; // Bounce away from wall
+                ballBottom > boxOpeningBottom) {
+              // If ball is coming from the left (outside), push it out
+              if (newPosition.x < innerLeft) {
+                newPosition.x = innerLeft - BALL_RADIUS;
+                newVelocity.x = Math.abs(newVelocity.x) * 0.5; // Bounce away from wall
+              }
+              // If ball is inside trying to escape through the left, contain it
+              else if (newPosition.x - BALL_RADIUS < innerLeft) {
+                newPosition.x = innerLeft + BALL_RADIUS;
+                newVelocity.x = Math.abs(newVelocity.x) * 0.5; // Bounce back right
+              }
               collided = true;
             }
             
-            // RIGHT WALL - Ball trying to enter from the right
+            // RIGHT WALL - Ball colliding with right side (from inside or outside)
+            // Check if ball is hitting the right wall from either direction
             if (ballLeft < innerRight && ballLeft > innerRight - BOX_WALL_THICKNESS * 2 && 
-                newPosition.x > innerRight && ballBottom > boxOpeningBottom) {
-              // Push ball out to the right
-              newPosition.x = innerRight + BALL_RADIUS;
-              newVelocity.x = -Math.abs(newVelocity.x) * 0.5; // Bounce away from wall
+                ballBottom > boxOpeningBottom) {
+              // If ball is coming from the right (outside), push it out
+              if (newPosition.x > innerRight) {
+                newPosition.x = innerRight + BALL_RADIUS;
+                newVelocity.x = -Math.abs(newVelocity.x) * 0.5; // Bounce away from wall
+              } 
+              // If ball is inside trying to escape through the right, contain it
+              else if (newPosition.x + BALL_RADIUS > innerRight) {
+                newPosition.x = innerRight - BALL_RADIUS;
+                newVelocity.x = -Math.abs(newVelocity.x) * 0.5; // Bounce back left
+              }
               collided = true;
             }
             
