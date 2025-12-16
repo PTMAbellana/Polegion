@@ -129,7 +129,7 @@ export default function WorldMapPage() {
         backgroundNum = ((castle.image_number - 1) % 5) + 1;
       }
       const img = new Image();
-      img.src = `/images/castles/castle${backgroundNum}-background.png`;
+      img.src = `/images/castles/castle${backgroundNum}-background.webp`;
       
       img.onload = () => {
         loadedSet.add(castle.image_number);
@@ -290,7 +290,7 @@ export default function WorldMapPage() {
     } else {
       backgroundNum = ((currentCastle.image_number - 1) % 5) + 1;
     }
-    const currentBackgroundImage = `/images/castles/castle${backgroundNum}-background.png`;
+    const currentBackgroundImage = `/images/castles/castle${backgroundNum}-background.webp`;
 
     // Only show the image if it's preloaded, otherwise show gradient
     const isImageLoaded = preloadedImages.has(currentCastle.image_number);
