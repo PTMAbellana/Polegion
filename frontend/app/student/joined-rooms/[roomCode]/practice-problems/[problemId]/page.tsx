@@ -72,6 +72,34 @@ export default function SolveProblemPage({ params }: { params: Promise<{ roomCod
       const savedTime = parseInt(saved);
       setTimer(savedTime);
     }
+
+    // Load saved shapes from localStorage
+    const submittedKey = `practice_submitted_${problemId}`;
+    const workingKey = `practice_working_${problemId}`;
+    
+    // Check for submitted answer first
+    const submittedShapes = localStorage.getItem(submittedKey);
+    if (submittedShapes) {
+      try {
+        const parsed = JSON.parse(submittedShapes);
+        setShapes(parsed);
+        console.log('✅ Loaded submitted shapes from localStorage:', parsed.length, 'shapes');
+      } catch (error) {
+        console.error('Error parsing submitted shapes:', error);
+      }
+    } else {
+      // Load working shapes if no submitted answer
+      const workingShapes = localStorage.getItem(workingKey);
+      if (workingShapes) {
+        try {
+          const parsed = JSON.parse(workingShapes);
+          setShapes(parsed);
+          console.log('✅ Loaded working shapes from localStorage:', parsed.length, 'shapes');
+        } catch (error) {
+          console.error('Error parsing working shapes:', error);
+        }
+      }
+    }
   }, [problemId]);
 
   // Timer effect with persistence
@@ -105,6 +133,25 @@ export default function SolveProblemPage({ params }: { params: Promise<{ roomCod
       setTimerRunning(false);
     };
   }, []);
+
+  // Save working shapes to localStorage as user draws
+  useEffect(() => {
+    if (shapes.length > 0 && !submitting) {
+      const workingKey = `practice_working_${problemId}`;
+      const submittedKey = `practice_submitted_${problemId}`;
+      
+      // Only save working shapes if not already submitted
+      const hasSubmitted = localStorage.getItem(submittedKey);
+      if (!hasSubmitted) {
+        try {
+          localStorage.setItem(workingKey, JSON.stringify(shapes));
+          console.log('💾 Saved working shapes to localStorage');
+        } catch (error) {
+          console.error('Error saving working shapes:', error);
+        }
+      }
+    }
+  }, [shapes, problemId, submitting]);
 
   const fetchProblemDetails = async () => {
     try {
@@ -158,6 +205,18 @@ export default function SolveProblemPage({ params }: { params: Promise<{ roomCod
         if (typeof window !== 'undefined') {
           localStorage.removeItem(`timer_${problemId}`);
         }
+
+        // Save submitted shapes and clear working shapes
+        const submittedKey = `practice_submitted_${problemId}`;
+        const workingKey = `practice_working_${problemId}`;
+        
+        try {
+          localStorage.setItem(submittedKey, JSON.stringify(shapesWithProps));
+          localStorage.removeItem(workingKey);
+          console.log('✅ Saved submitted shapes to localStorage');
+        } catch (error) {
+          console.error('Error saving submitted shapes:', error);
+        }
         
         // Show grading result
         await Swal.fire({
@@ -203,9 +262,12 @@ export default function SolveProblemPage({ params }: { params: Promise<{ roomCod
             // Reset for another attempt
             setShapes([]);
             setTimer(0);
-            // Clear timer from localStorage
+            // Clear both timer and shapes from localStorage
             if (typeof window !== 'undefined') {
               localStorage.removeItem(`timer_${problemId}`);
+              localStorage.removeItem(`practice_submitted_${problemId}`);
+              localStorage.removeItem(`practice_working_${problemId}`);
+              console.log('🔄 Cleared all saved data for new attempt');
             }
             setTimerRunning(true);
             fetchUserStats();
