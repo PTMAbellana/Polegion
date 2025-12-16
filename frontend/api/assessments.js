@@ -8,7 +8,10 @@ import api from "./axios";
  */
 export const generateAssessment = async (userId, testType) => {
   try {
-    const response = await api.post(`/assessments/generate/${testType}`, { userId });
+    const response = await api.post(`/assessments/generate/${testType}`, { userId }, {
+      timeout: 30000, // 30 seconds for generating assessment
+      cache: false // Don't cache assessment generation
+    });
     return response.data?.data ?? response.data;
   } catch (error) {
     console.error("Error generating assessment:", error);
@@ -35,6 +38,9 @@ export const submitAssessment = async (userId, testType, answers, startTime = nu
       startTime,
       endTime,
       duration,
+    }, {
+      timeout: 30000, // 30 seconds for submitting and grading assessment
+      cache: false // Never cache assessment submissions
     });
     return response.data?.data ?? response.data;
   } catch (error) {
@@ -51,7 +57,10 @@ export const submitAssessment = async (userId, testType, answers, startTime = nu
  */
 export const getAssessmentResults = async (userId, testType) => {
   try {
-    const response = await api.get(`/assessments/results/${userId}/${testType}`);
+    const response = await api.get(`/assessments/results/${userId}/${testType}`, {
+      timeout: 15000, // 15 seconds for fetching results
+      cache: false // Don't cache results to always get fresh data
+    });
     return response.data?.data ?? response.data;
   } catch (error) {
     // Return null for 404 (not found) instead of throwing

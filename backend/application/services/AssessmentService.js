@@ -99,8 +99,14 @@ class AssessmentService {
             console.log('  endTime:', endTime);
             console.log('  duration:', duration);
 
+            if (!answers || answers.length === 0) {
+                throw new Error('No answers provided for submission');
+            }
+
             // Fetch the correct answers for all submitted questions
             const questionIds = answers.map(a => a.questionId);
+            console.log('🔍 Fetching questions for IDs:', questionIds);
+            
             const { data: questions, error } = await this.assessmentRepo.supabase
                 .from('assessment_questions')
                 .select('*')
@@ -108,7 +114,12 @@ class AssessmentService {
 
             if (error) {
                 console.error('❌ Error fetching questions:', error);
-                throw error;
+                throw new Error(`Database error fetching questions: ${error.message}`);
+            }
+
+            if (!questions || questions.length === 0) {
+                console.error('❌ No questions found for provided IDs');
+                throw new Error('No matching questions found in database');
             }
 
             console.log('✅ Fetched', questions.length, 'questions from database');
@@ -139,7 +150,7 @@ class AssessmentService {
             answers.forEach(answer => {
                 const question = questionsMap[answer.questionId];
                 if (!question) {
-                    console.warn(`Question ${answer.questionId} not found`);
+                    console.warn(`Question ${answer.questionId} not found in database`);
                     return;
                 }
 
@@ -184,28 +195,43 @@ class AssessmentService {
 
             // Save all attempts in bulk
             console.log('💾 Saving', gradedAnswers.length, 'attempts...');
-            await this.assessmentRepo.saveBulkAttempts(gradedAnswers);
-            console.log('✅ Attempts saved');
+            try {
+                await this.assessmentRepo.saveBulkAttempts(gradedAnswers);
+                console.log('✅ Attempts saved successfully');
+            } catch (error) {
+                console.error('❌ Error saving attempts:', error);
+                throw new Error(`Failed to save assessment attempts: ${error.message}`);
+            }
 
             // Save overall results
             const percentage = maxScore > 0 ? (totalScore / maxScore) * 100 : 0;
 
             console.log('💾 Saving overall results...');
-            const results = await this.assessmentRepo.saveResults({
-                userId,
-                testType,
-                totalScore,
-                maxScore,
-                percentage: parseFloat(percentage.toFixed(2)),
-                categoryScores,
-                startTime,
-                endTime,
-                duration
-            });
-            console.log('✅ Overall results saved');
+            try {
+                const results = await this.assessmentRepo.saveResults({
+                    userId,
+                    testType,
+                    totalScore,
+                    maxScore,
+                    percentage: parseFloat(percentage.toFixed(2)),
+                    categoryScores,
+                    startTime,
+                    endTime,
+                    duration
+                });
+                console.log('✅ Overall results saved successfully');
+            } catch (error) {
+                console.error('❌ Error saving results:', error);
+                throw new Error(`Failed to save assessment results: ${error.message}`);
+            }
 
             // UNLOCK PROGRESSION: Handle castle unlocking after assessment
-            await this.handleCastleUnlockAfterAssessment(userId, testType);
+            try {
+                await this.handleCastleUnlockAfterAssessment(userId, testType);
+            } catch (error) {
+                console.warn('⚠️ Castle unlock failed (non-critical):', error.message);
+                // Don't throw - assessment was successful even if unlock fails
+            }
 
             return {
                 success: true,
@@ -215,11 +241,11 @@ class AssessmentService {
                 correctAnswers: gradedAnswers.filter(a => a.is_correct).length,
                 totalQuestions: answers.length,
                 categoryScores,
-                results
+                completedAt: new Date().toISOString()
             };
 
         } catch (error) {
-            console.error('submitAssessment error:', error);
+            console.error('❌ submitAssessment service error:', error);
             throw error;
         }
     }

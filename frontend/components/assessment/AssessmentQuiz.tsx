@@ -27,6 +27,7 @@ interface AssessmentQuizProps {
     currentCategory?: string;
     categoryIcon?: string;
     elapsedSeconds?: number;
+    isSubmitting?: boolean;
 }
 
 export default function AssessmentQuiz({ 
@@ -38,7 +39,8 @@ export default function AssessmentQuiz({
     onSubmitAssessment,
     currentCategory = '',
     categoryIcon = '',
-    elapsedSeconds = 0
+    elapsedSeconds = 0,
+    isSubmitting = false
 }: AssessmentQuizProps) {
     const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
 
@@ -198,8 +200,9 @@ export default function AssessmentQuiz({
                         <button 
                             onClick={onSubmitAssessment}
                             className={styles['submit-assessment-button']}
+                            disabled={isSubmitting}
                         >
-                            Submit Assessment
+                            {isSubmitting ? 'Submitting...' : 'Submit Assessment'}
                         </button>
                     ) : (
                         <span className={styles['submit-hint']}>

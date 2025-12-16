@@ -61,6 +61,11 @@ class AssessmentController {
             console.log('🔵 ==========================================');
             console.log('🔵 SUBMIT ASSESSMENT REQUEST RECEIVED');
             console.log('🔵 Request body:', JSON.stringify(req.body, null, 2));
+            console.log('🔵 Request headers:', {
+                'content-type': req.headers['content-type'],
+                'content-length': req.headers['content-length'],
+                'authorization': req.headers['authorization'] ? 'Present' : 'Missing'
+            });
             console.log('🔵 ==========================================');
             
             const { userId, testType, answers, startTime, endTime, duration } = req.body;
@@ -68,6 +73,9 @@ class AssessmentController {
             // Validation
             if (!userId || !testType || !answers) {
                 console.log('❌ Validation failed: Missing required fields');
+                console.log('   userId:', userId ? 'Present' : 'Missing');
+                console.log('   testType:', testType ? 'Present' : 'Missing');
+                console.log('   answers:', answers ? 'Present' : 'Missing');
                 return res.status(400).json({
                     success: false,
                     message: 'userId, testType, and answers are required'
@@ -102,6 +110,7 @@ class AssessmentController {
             );
 
             console.log('✅ Service completed successfully');
+            console.log('🔵 Returning results:', JSON.stringify(results, null, 2));
             console.log('🔵 ==========================================');
 
             return res.status(200).json({
@@ -115,10 +124,13 @@ class AssessmentController {
             console.error('❌ Error message:', error.message);
             console.error('❌ Error stack:', error.stack);
             console.log('🔵 ==========================================');
+            
+            // Send detailed error response
             return res.status(500).json({
                 success: false,
                 message: 'Failed to submit assessment',
-                error: error.message
+                error: error.message,
+                details: process.env.NODE_ENV === 'development' ? error.stack : undefined
             });
         }
     };

@@ -318,6 +318,11 @@ export default function AssessmentPageBase({ config }: { config: AssessmentConfi
     // LOAD ASSESSMENT QUESTIONS
     // ============================================================================
     const loadAssessment = async () => {
+        if (isLoading) {
+            console.log(`[${config.type}] Already loading assessment, skipping...`);
+            return;
+        }
+        
         setIsLoading(true);
         try {
             console.log(`[${config.type}] Loading assessment questions...`);
@@ -381,6 +386,14 @@ export default function AssessmentPageBase({ config }: { config: AssessmentConfi
             
         } catch (error: any) {
             console.error(`[${config.type}] Error loading assessment:`, error);
+            
+            // Provide specific error messages
+            if (error?.code === 'ECONNABORTED' || error?.message?.includes('timeout')) {
+                toast.error('Request timed out. Please check your connection and try again.');
+                setIsLoading(false);
+                setStage('intro');
+                return;
+            }
             
             // Check if error is 400 (assessment already completed)
             if (error?.response?.status === 400) {
@@ -467,6 +480,11 @@ export default function AssessmentPageBase({ config }: { config: AssessmentConfi
 
     // Submit assessment when all questions answered
     const handleSubmitAssessment = () => {
+        if (isLoading) {
+            console.log(`[${config.type}] Already submitting, skipping duplicate submission...`);
+            return;
+        }
+        
         if (!allQuestionsAnswered()) {
             toast.error(`Please answer all ${assessmentQuestions.length} questions before submitting`);
             return;
@@ -560,30 +578,40 @@ export default function AssessmentPageBase({ config }: { config: AssessmentConfi
                 
                 console.log(`[${config.type}] About to update state - results and stage`);
                 
-                // Update results first
-                setResults(transformedResults);
-                
-                // Use setTimeout to ensure state is updated before changing stage
-                setTimeout(() => {
-                    setStage('results');
-                    console.log(`[${config.type}] State updated to results - rendering now`);
-                }, 100);
-                
-                localStorage.removeItem(STORAGE_KEY); // Clear progress after completion
+                // Clear progress and reset state BEFORE setting results
+                localStorage.removeItem(STORAGE_KEY);
                 setRestoredProgress(false);
                 setStartTime(null);
                 setElapsedSeconds(0);
                 setAssessmentQuestions([]);
                 setCurrentQuestion(0);
                 setUserAnswers({});
+                
+                // Update results and stage together to avoid race conditions
+                setResults(transformedResults);
+                setStage('results');
+                console.log(`[${config.type}] State updated to results - rendering now`);
+                
                 toast.success('Assessment completed!');
             } else {
-                toast.error('Failed to save results');
+                console.error(`[${config.type}] Invalid results structure:`, response);
+                toast.error('Failed to save results. Please try again.');
             }
             
-        } catch (error) {
+        } catch (error: any) {
             console.error(`[${config.type}] Error calculating results:`, error);
-            toast.error('Failed to submit assessment. Please try again.');
+            
+            // Provide more specific error messages
+            if (error?.code === 'ECONNABORTED' || error?.message?.includes('timeout')) {
+                toast.error('Request timed out. Please check your connection and try again.');
+            } else if (error?.response?.status === 500) {
+                toast.error('Server error while processing results. Please try again.');
+            } else if (error?.response?.status === 401) {
+                toast.error('Session expired. Please log in again.');
+                router.push('/auth/login');
+            } else {
+                toast.error('Failed to submit assessment. Please try again.');
+            }
         } finally {
             setIsLoading(false);
         }
@@ -756,6 +784,7 @@ export default function AssessmentPageBase({ config }: { config: AssessmentConfi
                 currentCategory={currentCategoryName}
                 categoryIcon={currentCategoryIcon}
                 elapsedSeconds={elapsedSeconds}
+                isSubmitting={isLoading}
             />
         );
     }
