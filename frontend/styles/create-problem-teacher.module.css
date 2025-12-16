@@ -2094,6 +2094,7 @@
   transition: all 0.2s ease;
   width: 100%;
   box-sizing: border-box;
+  color: black;
 }
 
 .select:hover {
