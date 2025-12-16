@@ -587,6 +587,71 @@
   background: rgba(139, 115, 85, 0.7);
 }
 
+/* Castle 1 Scrollbar */
+.chapterContainer.castle1Theme .taskList::-webkit-scrollbar-track {
+  background: rgba(216, 196, 182, 0.2);
+}
+
+.chapterContainer.castle1Theme .taskList::-webkit-scrollbar-thumb {
+  background: rgba(216, 196, 182, 0.5);
+}
+
+.chapterContainer.castle1Theme .taskList::-webkit-scrollbar-thumb:hover {
+  background: rgba(216, 196, 182, 0.7);
+}
+
+/* Castle 2 Scrollbar */
+.chapterContainer.castle2Theme .taskList::-webkit-scrollbar-track {
+  background: rgba(176, 206, 136, 0.2);
+}
+
+.chapterContainer.castle2Theme .taskList::-webkit-scrollbar-thumb {
+  background: rgba(176, 206, 136, 0.5);
+}
+
+.chapterContainer.castle2Theme .taskList::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 253, 143, 0.7);
+}
+
+/* Castle 3 Scrollbar */
+.chapterContainer.castle3Theme .taskList::-webkit-scrollbar-track {
+  background: rgba(160, 200, 120, 0.2);
+}
+
+.chapterContainer.castle3Theme .taskList::-webkit-scrollbar-thumb {
+  background: rgba(160, 200, 120, 0.5);
+}
+
+.chapterContainer.castle3Theme .taskList::-webkit-scrollbar-thumb:hover {
+  background: rgba(221, 235, 157, 0.7);
+}
+
+/* Castle 4 Scrollbar */
+.chapterContainer.castle4Theme .taskList::-webkit-scrollbar-track {
+  background: rgba(226, 181, 154, 0.2);
+}
+
+.chapterContainer.castle4Theme .taskList::-webkit-scrollbar-thumb {
+  background: rgba(226, 181, 154, 0.5);
+}
+
+.chapterContainer.castle4Theme .taskList::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 225, 175, 0.7);
+}
+
+/* Castle 5 Scrollbar */
+.chapterContainer.castle5Theme .taskList::-webkit-scrollbar-track {
+  background: rgba(140, 205, 235, 0.2);
+}
+
+.chapterContainer.castle5Theme .taskList::-webkit-scrollbar-thumb {
+  background: rgba(140, 205, 235, 0.5);
+}
+
+.chapterContainer.castle5Theme .taskList::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 227, 169, 0.7);
+}
+
 .taskItem {
   display: flex;
   align-items: center;

@@ -9,8 +9,8 @@ const proceduralSkillsQuestions = [
     id: 'ps_pre_01',
     category: 'procedural_skills',
     question: 'Which of the following correctly represents line segment AB?',
-    options: ['→AB', 'AB↔', 'AB̅', 'Ray AB'],
-    correctAnswer: 'AB̅',
+    options: ['AB→', 'AB↔', 'A̅B̅', 'Ray AB'],
+    correctAnswer: 'A̅B̅',
     difficulty: 'easy',
     testType: 'pretest',
     points: 1
@@ -54,8 +54,8 @@ const proceduralSkillsQuestions = [
     id: 'ps_pre_05',
     category: 'procedural_skills',
     question: 'A ray starting at point A toward point B is represented by which symbol?',
-    options: ['AB̅', '→AB', 'AB↔', 'Point A'],
-    correctAnswer: '→AB',
+    options: ['A̅B̅', 'AB→', 'AB↔', 'Point A'],
+    correctAnswer: 'AB→',
     difficulty: 'easy',
     testType: 'pretest',
     points: 1
@@ -276,8 +276,8 @@ const proceduralSkillsQuestions = [
     id: 'ps_post_01',
     category: 'procedural_skills',
     question: 'Which of the following is the correct symbol for line MN?',
-    options: ['MN̅', '→MN', '↔MN', 'Ray MN'],
-    correctAnswer: '↔MN',
+    options: ['M̅N̅', 'MN→', 'MN↔', 'Ray MN'],
+    correctAnswer: 'MN↔',
     difficulty: 'easy',
     testType: 'posttest',
     points: 1
@@ -321,8 +321,8 @@ const proceduralSkillsQuestions = [
     id: 'ps_post_05',
     category: 'procedural_skills',
     question: 'Which of the following correctly represents ray CD?',
-    options: ['CD̅', '↔CD', '→CD', 'DC̅'],
-    correctAnswer: '→CD',
+    options: ['C̅D̅', 'CD↔', 'CD→', 'D̅C̅'],
+    correctAnswer: 'CD→',
     difficulty: 'easy',
     testType: 'posttest',
     points: 1

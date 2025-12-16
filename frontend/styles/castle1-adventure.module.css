@@ -293,17 +293,17 @@
 }
 
 .chapterList::-webkit-scrollbar-track {
-  background: rgba(33, 53, 85, 0.3);
+  background: #213555;
   border-radius: 0.25rem;
 }
 
 .chapterList::-webkit-scrollbar-thumb {
-  background: rgba(216, 196, 182, 0.5);
+  background: #D8C4B6;
   border-radius: 0.25rem;
 }
 
 .chapterList::-webkit-scrollbar-thumb:hover {
-  background: rgba(216, 196, 182, 0.7);
+  background: #C4B0A0;
 }
 
 /* Chapter Item */

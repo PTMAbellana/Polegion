@@ -309,7 +309,7 @@ export default function AssessmentResults({
                     </div>
                     
                     {/* Improvement Banner (Posttest only) */}
-                    {assessmentType === 'posttest' && results.comparison && (
+                    {assessmentType === 'posttest' && results.comparison && results.comparison.improvements && (
                         <div className={styles['improvement-banner']}>
                             <h2>Your Growth Journey</h2>
                             <p className={styles['improvement-text']}>

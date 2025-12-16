@@ -497,15 +497,16 @@ class AssessmentService {
                     return;
                 }
 
-                // Mark Castle 6 as completed
+                // Mark Castle 6 as completed AND ensure it stays unlocked
                 const castle6Progress = await this.userCastleProgressRepo.getUserCastleProgressByUserAndCastle(userId, castle6.id);
                 if (castle6Progress) {
                     await this.userCastleProgressRepo.updateUserCastleProgress(castle6Progress.id, {
+                        unlocked: true, // Keep castle unlocked after completion
                         completed: true,
                         completion_percentage: 100,
                         completed_at: new Date().toISOString()
                     });
-                    console.log('[AssessmentService] Castle 6 marked as completed - Journey complete!');
+                    console.log('[AssessmentService] Castle 6 marked as completed and unlocked - Journey complete!');
                 }
 
                 // Clear castle cache for this user to ensure frontend gets fresh data

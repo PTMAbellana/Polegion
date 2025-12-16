@@ -1117,6 +1117,28 @@
   padding: 1.5rem;
   box-shadow: 0 1.25rem 3.75rem rgba(0, 0, 0, 0.3);
     margin: 0 auto;
+    overflow-y: auto; /* Allow vertical scrolling */
+    max-height: 100%; /* Ensure it doesn't overflow the viewport */
+}
+
+/* Custom Scrollbar for Castle 6 (Posttest) */
+.assessment-results::-webkit-scrollbar {
+    width: 12px;
+}
+
+.assessment-results::-webkit-scrollbar-track {
+    background: #1A1A4E; /* Dark blue track */
+    border-radius: 10px;
+}
+
+.assessment-results::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #FFBF1C, #D1A309);
+    border-radius: 10px;
+    border: 2px solid #1A1A4E;
+}
+
+.assessment-results::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #D1A309, #B8900A);
 }
 
 .results-header {
@@ -1525,9 +1547,12 @@
     margin-top: 2rem;
     padding: 2rem;
     background: rgba(255, 255, 255, 0.05);
-  border-radius: 1.25rem;
-  backdrop-filter: blur(10px);
-  border: 0.125rem solid rgba(255, 215, 10, 0.3);
+    border-radius: 1.25rem;
+    backdrop-filter: blur(10px);
+    border: 0.125rem solid rgba(255, 215, 10, 0.3);
+    max-height: 80vh;
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 
 .certificate-header {

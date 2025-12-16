@@ -123,9 +123,10 @@ export default function WorldMapPage() {
     castles.forEach((castle) => {
       // Use specific backgrounds for castle 0 and 6, modulo cycling for 7+
       let backgroundNum: number;
-      if (castle.image_number === 0 || castle.image_number === 6) {
+      if (castle.image_number >= 0 && castle.image_number <= 6) {
         backgroundNum = castle.image_number;
       } else {
+        // Fallback for any other numbers, e.g., cycle through 1-5
         backgroundNum = ((castle.image_number - 1) % 5) + 1;
       }
       const img = new Image();
@@ -285,9 +286,10 @@ export default function WorldMapPage() {
     const currentCastle = castles[currentCastleIndex];
     // Use specific backgrounds for castle 0 and 6, modulo cycling for 7+
     let backgroundNum: number;
-    if (currentCastle.image_number === 0 || currentCastle.image_number === 6) {
+    if (currentCastle.image_number >= 0 && currentCastle.image_number <= 6) {
       backgroundNum = currentCastle.image_number;
     } else {
+      // Fallback for any other numbers, e.g., cycle through 1-5
       backgroundNum = ((currentCastle.image_number - 1) % 5) + 1;
     }
     const currentBackgroundImage = `/images/castles/castle${backgroundNum}-background.webp`;
