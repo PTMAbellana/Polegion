@@ -229,6 +229,13 @@ function ChapterPageBase({ config }: { config: ChapterConfig }) {
 
   const { playNarration, stopAudio } = useChapterAudio({ isMuted });
 
+  // Cleanup: Stop audio when component unmounts
+  useEffect(() => {
+    return () => {
+      stopAudio();
+    };
+  }, [stopAudio]);
+
   // Sync state changes to store
   useEffect(() => {
     chapterStore.setScene(config.chapterKey, currentScene);
