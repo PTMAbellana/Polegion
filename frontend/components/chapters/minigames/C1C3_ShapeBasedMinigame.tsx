@@ -47,7 +47,7 @@ const ShapeBasedMinigame: React.FC<ShapeBasedMinigameProps> = ({
 
   // Get image path for shape
   const getShapeImagePath = (shape: any) => {
-    return `/images/castle1/${shape.type.toLowerCase()}.png`;
+    return `/images/castle1/${shape.type.toLowerCase()}.webp`;
   };
 
   return (
