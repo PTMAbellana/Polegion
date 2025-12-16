@@ -6,8 +6,6 @@ import Footer from "@/components/Footer";
 import AppProvider from "@/context/AppProvider";
 import GlobalLandscapePrompt from "@/components/GlobalLandscapePrompt";
 
-import { ThemeProvider } from "@/components/theme-provider";
-
 export const metadata: Metadata = {
   title: "Polegion",
   description: "Your geometry visualizer!",
@@ -34,16 +32,9 @@ export default function RootLayout({
       <body>
         <GlobalLandscapePrompt />
         <Toaster />
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <AppProvider>
-            {children}
-          </AppProvider>
-        </ThemeProvider>
+        <AppProvider>
+          {children}
+        </AppProvider>
         {/* <Footer /> */}
       </body>
     </html>

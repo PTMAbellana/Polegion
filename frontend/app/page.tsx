@@ -6,8 +6,6 @@ import { useRouter } from "next/navigation";
 import { ROUTES } from "@/constants/routes";
 import styles from "./page.module.css";
 
-import { ModeToggle } from "@/components/theme-toggle";
-
 export default function Home() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
@@ -104,7 +102,6 @@ export default function Home() {
               <span></span>
             </button>
             <div className={styles.headerActions}>
-              <ModeToggle />
               <button className={styles.signInBtn} onClick={handleSignIn}>
                 Sign In
               </button>
