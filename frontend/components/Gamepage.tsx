@@ -1021,8 +1021,8 @@ export default function Gamepage({
                 </div>
               </div>
 
-              {/* XP Display Badge */}
-              <div style={{
+              {/* XP Display Badge - COMMENTED OUT */}
+              {/* <div style={{
                 background: 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)',
                 border: '2px solid #fcd34d',
                 borderRadius: '8px',
@@ -1034,7 +1034,7 @@ export default function Gamepage({
                 justifyContent: 'center'
               }}>
                 <span style={{ fontSize: '14px', fontWeight: 700, color: '#78350f' }}>⭐ {userAccumulatedXP}</span>
-              </div>
+              </div> */}
             </div>
           )}
 
@@ -1172,8 +1172,8 @@ export default function Gamepage({
 
         {/* Right Sidebar - Properties Panel */}
         <div className={styles.propertiesPanelContainer}>
-          {/* Competition Info Panel */}
-          {competitionId && (
+          {/* Competition Info Panel - COMMENTED OUT */}
+          {/* {competitionId && (
             <div style={{
               background: 'linear-gradient(135deg, #ffffff 0%, #f7fee7 100%)',
               borderRadius: '1.5rem',
@@ -1195,7 +1195,6 @@ export default function Gamepage({
                 Problem Info
               </h3>
               
-              {/* Difficulty */}
               <div style={{ marginBottom: '0.75rem' }}>
                 <div style={{ fontSize: '0.75rem', fontWeight: 600, color: '#6b7280', marginBottom: '0.25rem' }}>
                   Difficulty
@@ -1213,7 +1212,6 @@ export default function Gamepage({
                 </div>
               </div>
 
-              {/* Max Attempts */}
               <div style={{ marginBottom: '0.75rem' }}>
                 <div style={{ fontSize: '0.75rem', fontWeight: 600, color: '#6b7280', marginBottom: '0.25rem' }}>
                   Max Attempts
@@ -1231,7 +1229,6 @@ export default function Gamepage({
                 </div>
               </div>
 
-              {/* Timer Value */}
               {currentProblem?.timer && (
                 <div style={{ marginBottom: '0.75rem' }}>
                   <div style={{ fontSize: '0.75rem', fontWeight: 600, color: '#6b7280', marginBottom: '0.25rem' }}>
@@ -1251,7 +1248,6 @@ export default function Gamepage({
                 </div>
               )}
 
-              {/* Hint */}
               {hint && (
                 <div style={{ marginTop: '0.75rem' }}>
                   <div style={{ fontSize: '0.75rem', fontWeight: 600, color: '#6b7280', marginBottom: '0.25rem' }}>
@@ -1271,7 +1267,6 @@ export default function Gamepage({
                 </div>
               )}
 
-              {/* Submission Status */}
               {hasSubmitted && (
                 <div style={{
                   marginTop: '1rem',
@@ -1287,7 +1282,7 @@ export default function Gamepage({
                 </div>
               )}
             </div>
-          )}
+          )} */}
 
           {/* Properties Panel */}
           <PropertiesPanel

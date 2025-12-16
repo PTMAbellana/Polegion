@@ -178,6 +178,11 @@ export default function SolveProblemPage({ params }: { params: Promise<{ roomCod
   };
 
   const handleSubmit = async () => {
+    if (isSubmissionsDisabled) {
+      Swal.fire('Limit Reached', 'You have reached the maximum number of attempts.', 'warning');
+      return;
+    }
+
     if (shapes.length === 0) {
       Swal.fire('No Solution', 'Please draw at least one shape before submitting.', 'warning');
       return;
@@ -305,6 +310,9 @@ export default function SolveProblemPage({ params }: { params: Promise<{ roomCod
     );
   }
 
+  const isSubmissionsDisabled = problem && userStats && problem.max_attempts && userStats.attempts >= problem.max_attempts;
+
+
   return (
     <div className={styles.problemContainer}>
       <div className={styles.scrollableContent}>
@@ -350,7 +358,7 @@ export default function SolveProblemPage({ params }: { params: Promise<{ roomCod
             <div className={styles.statItem}>
               <span className={styles.statIcon}>📝</span>
               <span className={styles.statLabel}>Attempts:</span>
-              <span className={styles.statValue}>{userStats.attempts || 0}</span>
+              <span className={styles.statValue}>{userStats.attempts || 0} / {problem.max_attempts || 'unlimited'}</span>
             </div>
           </>
         )}
@@ -462,21 +470,21 @@ export default function SolveProblemPage({ params }: { params: Promise<{ roomCod
           }}>
             <button
               style={{
-                background: submitting || shapes.length === 0 ? '#ccc' : 'linear-gradient(135deg, #2c514c 0%, #3d6b64 100%)',
+                background: submitting || shapes.length === 0 || isSubmissionsDisabled ? '#ccc' : 'linear-gradient(135deg, #2c514c 0%, #3d6b64 100%)',
                 color: 'white',
                 border: 'none',
                 padding: '1rem 2rem',
                 borderRadius: '0.75rem',
                 fontSize: '1rem',
                 fontWeight: '600',
-                cursor: submitting || shapes.length === 0 ? 'not-allowed' : 'pointer',
+                cursor: submitting || shapes.length === 0 || isSubmissionsDisabled ? 'not-allowed' : 'pointer',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '0.5rem',
                 margin: '0 auto'
               }}
               onClick={handleSubmit}
-              disabled={submitting || shapes.length === 0}
+              disabled={submitting || shapes.length === 0 || isSubmissionsDisabled}
             >
               {submitting ? (
                 <>
