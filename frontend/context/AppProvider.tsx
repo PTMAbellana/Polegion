@@ -7,6 +7,7 @@ import { useStudentRoomStore } from '@/store/studentRoomStore';
 import { useCastleStore } from '@/store/castleStore';
 import Loader from '@/components/Loader';
 import { ROUTES, PUBLIC_ROUTES, STUDENT_ROUTES, TEACHER_ROUTES } from '@/constants/routes';
+import { supabase } from '@/lib/supabaseClient';
 
 export default function AppProvider({ children }: { children: React.ReactNode }) {
   const { 
@@ -31,6 +32,41 @@ export default function AppProvider({ children }: { children: React.ReactNode })
   useEffect(() => {
     initialize();
   }, [initialize]);
+
+  // ✅ NEW: Monitor Supabase auth state changes and auto-refresh
+  useEffect(() => {
+    const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log('🔐 Supabase auth event:', event);
+      
+      if (event === 'TOKEN_REFRESHED') {
+        console.log('✅ Token auto-refreshed by Supabase');
+        // Update localStorage with new tokens
+        if (session) {
+          localStorage.setItem('access_token', session.access_token);
+          localStorage.setItem('refresh_token', session.refresh_token);
+          localStorage.setItem('expires_at', session.expires_at?.toString() || '');
+          
+          // Trigger token refresh event for other parts of the app
+          window.dispatchEvent(new Event('token-refreshed'));
+        }
+      }
+      
+      if (event === 'SIGNED_OUT') {
+        console.log('🚪 User signed out');
+        localStorage.clear();
+        router.push(ROUTES.HOME);
+      }
+      
+      if (event === 'USER_UPDATED') {
+        console.log('👤 User data updated');
+        syncAuthToken();
+      }
+    });
+
+    return () => {
+      authListener?.subscription.unsubscribe();
+    };
+  }, [router, syncAuthToken]);
 
   // ✅ FIX #2: Listen for token refresh events
   useEffect(() => {
