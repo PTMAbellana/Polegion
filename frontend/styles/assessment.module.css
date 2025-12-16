@@ -3,6 +3,7 @@
     position: relative;
     width: 100%;
     height: 100vh;
+    max-height: 100vh;
     overflow: hidden;
     background: 
         radial-gradient(ellipse at 10% 10%, var(--primary-color, #0f172a) 0%, transparent 50%),
@@ -50,6 +51,8 @@
     overflow: hidden;
     position: relative;
     z-index: 1;
+    min-height: 0;
+    max-height: 100%;
 }
 
 @media (max-width: 1024px) {
@@ -298,6 +301,13 @@
     text-align: center;
     color: white;
     padding: 3rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 0;
+    max-width: 100%;
+    overflow: hidden;
 }
 
 .placeholder h2 {
