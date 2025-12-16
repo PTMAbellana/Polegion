@@ -9,7 +9,7 @@ class CastleService {
         this.userChapterProgressRepo = userChapterProgressRepo;
         this.chapterSeeder = chapterSeeder;
         this.quizAndMinigameSeeder = quizAndMinigameSeeder;
-        this.CACHE_TTL = 10 * 60 * 1000; // 10 minutes
+        this.CACHE_TTL = 2 * 60 * 1000; // 2 minutes - shorter for progress updates
     }
 
     _invalidateCastleCache(castleId = null) {
@@ -70,69 +70,12 @@ class CastleService {
 
         const castles = await this.castleRepo.getAllCastlesWithUserProgress(userId);
         
-        // Auto-initialize first castle if user has no progress at all
+        // Log if user has no progress (frontend should handle initialization)
         if (this.userCastleProgressRepo && castles.length > 0) {
             const hasAnyProgress = castles.some(c => c.progress);
             
             if (!hasAnyProgress) {
-                console.log(`[CastleService] User ${userId} has no castle progress, auto-creating for Castle 0 (Pretest)`);
-                
-                // Find Castle 0 (The Trial Grounds - Pretest, unlock_order = 0)
-                const firstCastle = castles.find(c => c.unlockOrder === 0) || castles[0];
-                
-                if (firstCastle) {
-                    console.log(`[CastleService] Creating progress for castle: ${firstCastle.name}`);
-                    
-                    try {
-                        // Create progress for Castle 0 (Pretest)
-                        const newProgress = await this.userCastleProgressRepo.createUserCastleProgress({
-                            user_id: userId,
-                            castle_id: firstCastle.id,
-                            unlocked: true, // Castle 0 (Pretest) is always unlocked for new users
-                            completed: false,
-                            total_xp_earned: 0,
-                            completion_percentage: 0,
-                            started_at: new Date().toISOString()
-                        });
-                        
-                        // Update the castle object with the new progress
-                        firstCastle.progress = {
-                            id: newProgress.id,
-                            user_id: newProgress.userId,
-                            castle_id: newProgress.castleId,
-                            unlocked: newProgress.unlocked,
-                            completed: newProgress.completed,
-                            total_xp_earned: newProgress.totalXpEarned,
-                            completion_percentage: newProgress.completionPercentage,
-                            started_at: newProgress.startedAt,
-                            completed_at: newProgress.completedAt
-                        };
-                        
-                        console.log(`[CastleService] First castle progress created:`, newProgress);
-                    } catch (error) {
-                        // If duplicate key error, just fetch the existing progress
-                        if (error.message && error.message.includes('duplicate key')) {
-                            console.log(`[CastleService] Progress already exists (race condition), fetching existing progress`);
-                            const existingProgress = await this.userCastleProgressRepo.getUserCastleProgressByUserAndCastle(userId, firstCastle.id);
-                            if (existingProgress) {
-                                firstCastle.progress = {
-                                    id: existingProgress.id,
-                                    user_id: existingProgress.userId,
-                                    castle_id: existingProgress.castleId,
-                                    unlocked: existingProgress.unlocked,
-                                    completed: existingProgress.completed,
-                                    total_xp_earned: existingProgress.totalXpEarned,
-                                    completion_percentage: existingProgress.completionPercentage,
-                                    started_at: existingProgress.startedAt,
-                                    completed_at: existingProgress.completedAt
-                                };
-                            }
-                        } else {
-                            // Re-throw if it's not a duplicate key error
-                            throw error;
-                        }
-                    }
-                }
+                console.log(`[CastleService] User ${userId} has no castle progress. Frontend should call /initialize endpoint.`);
             }
         }
         

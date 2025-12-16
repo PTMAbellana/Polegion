@@ -15,6 +15,8 @@ if (!supabaseUrl || !supabaseKey) {
 // console.log('Supabase URL:', supabaseUrl)
 // console.log('Service Key present:', !!supabaseKey)
 
+// Create Supabase client with connection pooling configuration
+// Service role key bypasses RLS policies automatically
 const supabase = createClient(supabaseUrl, supabaseKey, {
     auth: {
         autoRefreshToken: false,
@@ -22,8 +24,27 @@ const supabase = createClient(supabaseUrl, supabaseKey, {
     },
     db: {
         schema: 'public'
+    },
+    global: {
+        headers: {
+            'X-Client-Info': 'supabase-js-node',
+            'apikey': supabaseKey  // Ensure service key is used for all requests
+        }
+    },
+    // Enable connection pooling and retry logic
+    realtime: {
+        params: {
+            eventsPerSecond: 10
+        }
     }
 })
+
+// Verify service key is being used (should show 'service_role')
+if (supabaseKey.includes('service_role')) {
+    console.log('[Supabase] Using service_role key - RLS will be bypassed')
+} else {
+    console.warn('[Supabase] WARNING: Not using service_role key - RLS policies will apply')
+}
 
 // async function testToken(token) {
 //     const {

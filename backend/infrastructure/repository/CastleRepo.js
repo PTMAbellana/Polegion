@@ -35,14 +35,21 @@ class CastleRepo extends BaseRepo {
 
     async getCastleById(id) {
         try {
-            const { data, error } = await this.supabase
-                .from(this.tableName)
-                .select('*')
-                .eq('id', id)
-                .single();
+            return await this.withRetry(async () => {
+                const { data, error } = await this.supabase
+                    .from(this.tableName)
+                    .select('*')
+                    .eq('id', id)
+                    .single();
 
-            if (error) throw error;
-            return data ? Castle.fromDatabase(data) : null;
+                if (error) {
+                    console.error('[CastleRepo] Database error in getCastleById:', error);
+                    throw error;
+                }
+                
+                console.log(`[CastleRepo] Successfully fetched castle with id: ${id}`);
+                return data ? Castle.fromDatabase(data) : null;
+            });
         } catch (error) {
             console.error('[CastleRepo] Error in getCastleById:', error);
             throw error;
@@ -51,13 +58,20 @@ class CastleRepo extends BaseRepo {
 
     async getAllCastles() {
         try {
-            const { data, error } = await this.supabase
-                .from(this.tableName)
-                .select('*')
-                .order('unlock_order', { ascending: true });
+            return await this.withRetry(async () => {
+                const { data, error } = await this.supabase
+                    .from(this.tableName)
+                    .select('*')
+                    .order('unlock_order', { ascending: true });
 
-            if (error) throw error;
-            return data.map(Castle.fromDatabase);
+                if (error) {
+                    console.error('[CastleRepo] Database error in getAllCastles:', error);
+                    throw error;
+                }
+                
+                console.log(`[CastleRepo] Successfully fetched ${data?.length || 0} castles`);
+                return data.map(Castle.fromDatabase);
+            });
         } catch (error) {
             console.error('[CastleRepo] Error in getAllCastles:', error);
             throw error;
@@ -118,42 +132,64 @@ class CastleRepo extends BaseRepo {
                 throw new Error('userId is required for getAllCastlesWithUserProgress');
             }
             
-            // Get all castles
-            const { data: castles, error: castlesError } = await this.supabase
-                .from(this.tableName)
-                .select('*')
-                .order('unlock_order', { ascending: true });
+            // Use retry logic for all database queries
+            const [castles, progress, chapterCounts] = await Promise.all([
+                // Get all castles with retry
+                this.withRetry(async () => {
+                    console.log('[CastleRepo] Fetching castles...');
+                    const { data, error } = await this.supabase
+                        .from(this.tableName)
+                        .select('*')
+                        .order('unlock_order', { ascending: true });
+                    
+                    if (error) {
+                        console.error('[CastleRepo] Error fetching castles:', error);
+                        throw error;
+                    }
+                    console.log('[CastleRepo] Fetched castles count:', data?.length);
+                    return data || [];
+                }),
+                
+                // Get user progress with retry
+                this.withRetry(async () => {
+                    console.log('[CastleRepo] Fetching progress for user_id:', userId);
+                    const { data, error } = await this.supabase
+                        .from('user_castle_progress')
+                        .select('*')
+                        .eq('user_id', userId);
+                    
+                    if (error) {
+                        console.error('[CastleRepo] Error fetching progress:', error);
+                        console.error('[CastleRepo] Progress error code:', error.code);
+                        console.error('[CastleRepo] Progress error details:', error.details);
+                        throw error;
+                    }
+                    console.log('[CastleRepo] Fetched progress count:', data?.length);
+                    return data || [];
+                }),
+                
+                // Get chapter counts with retry (non-critical, so catch errors)
+                this.withRetry(async () => {
+                    console.log('[CastleRepo] Fetching chapter counts...');
+                    const { data, error } = await this.supabase
+                        .from('chapters')
+                        .select('castle_id');
+                    
+                    if (error) {
+                        console.error('[CastleRepo] Error fetching chapters:', error);
+                        return [];
+                    }
+                    console.log('[CastleRepo] Fetched chapter counts');
+                    return data || [];
+                }).catch(err => {
+                    console.warn('[CastleRepo] Failed to fetch chapter counts (non-critical):', err.message);
+                    return [];
+                })
+            ]);
 
-            if (castlesError) {
-                console.error('[CastleRepo] Error fetching castles:', castlesError);
-                throw castlesError;
-            }
-
-            console.log('[CastleRepo] Fetched castles count:', castles?.length);
-
-            // Get user progress for all castles
-            console.log('[CastleRepo] Fetching progress for user_id:', userId);
-            const { data: progress, error: progressError } = await this.supabase
-                .from('user_castle_progress')
-                .select('*')
-                .eq('user_id', userId);
-
-            if (progressError) {
-                console.error('[CastleRepo] Error fetching progress:', progressError);
-                console.error('[CastleRepo] Progress error code:', progressError.code);
-                console.error('[CastleRepo] Progress error details:', progressError.details);
-                throw progressError;
-            }
-
-            console.log('[CastleRepo] Fetched progress count:', progress?.length);
-
-            // Get chapter counts for all castles
-            const { data: chapterCounts, error: chaptersError } = await this.supabase
-                .from('chapters')
-                .select('castle_id');
-
-            if (chaptersError) {
-                console.error('[CastleRepo] Error fetching chapters:', chaptersError);
+            if (!castles || castles.length === 0) {
+                console.warn('[CastleRepo] No castles found in database');
+                return [];
             }
 
             // Count chapters per castle
@@ -199,27 +235,40 @@ class CastleRepo extends BaseRepo {
         try {
             console.log('[CastleRepo] getCastleByIdWithUserProgress for castle:', castleId, 'user:', userId);
             
-            // Get castle
-            const { data: castle, error: castleError } = await this.supabase
-                .from(this.tableName)
-                .select('*')
-                .eq('id', castleId)
-                .single();
+            // Use retry logic and fetch castle and progress in parallel
+            const [castle, progress] = await Promise.all([
+                // Get castle with retry
+                this.withRetry(async () => {
+                    const { data, error } = await this.supabase
+                        .from(this.tableName)
+                        .select('*')
+                        .eq('id', castleId)
+                        .single();
+                    
+                    if (error) throw error;
+                    return data;
+                }),
+                
+                // Get user progress with retry (may not exist)
+                this.withRetry(async () => {
+                    const { data, error } = await this.supabase
+                        .from('user_castle_progress')
+                        .select('*')
+                        .eq('user_id', userId)
+                        .eq('castle_id', castleId)
+                        .maybeSingle();
+                    
+                    // PGRST116 means no rows found, which is ok
+                    if (error && error.code !== 'PGRST116') throw error;
+                    return data;
+                })
+            ]);
 
-            if (castleError) throw castleError;
             if (!castle) return null;
 
             const castleData = Castle.fromDatabase(castle).toJSON();
 
-            // Get user progress
-            const { data: progress, error: progressError } = await this.supabase
-                .from('user_castle_progress')
-                .select('*')
-                .eq('user_id', userId)
-                .eq('castle_id', castleId)
-                .single();
-
-            if (!progressError && progress) {
+            if (progress) {
                 castleData.progress = {
                     id: progress.id,
                     user_id: progress.user_id,

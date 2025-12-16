@@ -3,23 +3,34 @@ const UserCastleProgress = require('../../domain/models/UserCastleProgress');
 
 class UserCastleProgressRepo extends BaseRepo {
     async createUserCastleProgress(data) {
-        const { data: result, error } = await this.supabase
-            .from('user_castle_progress')
-            .insert({
-                user_id: data.user_id,
-                castle_id: data.castle_id,
-                unlocked: data.unlocked,
-                completed: data.completed,
-                total_xp_earned: data.total_xp_earned,
-                completion_percentage: data.completion_percentage,
-                started_at: data.started_at,
-                completed_at: data.completed_at
-            })
-            .select()
-            .single();
-        
-        if (error) throw error;
-        return UserCastleProgress.fromDatabase(result);
+        return await this.withRetry(async () => {
+            console.log('[UserCastleProgressRepo] Creating progress for user:', data.user_id, 'castle:', data.castle_id);
+            
+            const { data: result, error } = await this.supabase
+                .from('user_castle_progress')
+                .insert({
+                    user_id: data.user_id,
+                    castle_id: data.castle_id,
+                    unlocked: data.unlocked,
+                    completed: data.completed,
+                    total_xp_earned: data.total_xp_earned,
+                    completion_percentage: data.completion_percentage,
+                    started_at: data.started_at,
+                    completed_at: data.completed_at
+                })
+                .select()
+                .single();
+            
+            if (error) {
+                console.error('[UserCastleProgressRepo] Insert error:', error);
+                console.error('[UserCastleProgressRepo] Error code:', error.code);
+                console.error('[UserCastleProgressRepo] Error details:', error.details);
+                throw error;
+            }
+            
+            console.log('[UserCastleProgressRepo] Successfully created progress');
+            return UserCastleProgress.fromDatabase(result);
+        });
     }
 
     async getUserCastleProgressById(id) {
@@ -34,24 +45,34 @@ class UserCastleProgressRepo extends BaseRepo {
     }
 
     async getUserCastleProgressByUserAndCastle(userId, castleId) {
-        const { data, error } = await this.supabase
-            .from('user_castle_progress')
-            .select('*')
-            .eq('user_id', userId)
-            .eq('castle_id', castleId)
-            .maybeSingle();
-        
-        if (error) throw error;
-        return data ? UserCastleProgress.fromDatabase(data) : null;
+        return await this.withRetry(async () => {
+            const { data, error } = await this.supabase
+                .from('user_castle_progress')
+                .select('*')
+                .eq('user_id', userId)
+                .eq('castle_id', castleId)
+                .maybeSingle();
+            
+            if (error) {
+                console.error('[UserCastleProgressRepo] Error fetching progress:', error);
+                throw error;
+            }
+            return data ? UserCastleProgress.fromDatabase(data) : null;
+        });
     }
 
     async getAllUserCastleProgress() {
-        const { data, error } = await this.supabase
-            .from('user_castle_progress')
-            .select('*');
-        
-        if (error) throw error;
-        return data.map(UserCastleProgress.fromDatabase);
+        return await this.withRetry(async () => {
+            const { data, error } = await this.supabase
+                .from('user_castle_progress')
+                .select('*');
+            
+            if (error) {
+                console.error('[UserCastleProgressRepo] Error fetching all progress:', error);
+                throw error;
+            }
+            return (data || []).map(UserCastleProgress.fromDatabase);
+        });
     }
 
     async updateUserCastleProgress(id, updateData) {
