@@ -69,6 +69,12 @@ export default function ProblemsManagement({
                         <span className={styles.problemXp}>
                           {compeProblem.problem.expected_xp} XP
                         </span>
+                        <span 
+                          className={styles.visibilityBadge}
+                          data-visibility={compeProblem.problem.visibility}
+                        >
+                          {compeProblem.problem.visibility === 'public' ? '🌐 Public' : '🔒 Private'}
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -105,7 +111,7 @@ export default function ProblemsManagement({
             <h2 className={styles.sectionTitle}>Available Problems</h2>
             <span className={styles.badge}>
               {availableProblems.filter(p => 
-                !addedProblems.some(ap => ap.problem.id === p.id) && p.visibility === 'show'
+                !addedProblems.some(ap => ap.problem.id === p.id)
               ).length}
             </span>
           </div>
@@ -113,8 +119,7 @@ export default function ProblemsManagement({
           <div className={styles.problemsList}>
             {availableProblems
               .filter(problem => 
-                !addedProblems.some(ap => ap.problem.id === problem.id) && 
-                problem.visibility === 'show'
+                !addedProblems.some(ap => ap.problem.id === problem.id)
               )
               .map((problem, index) => {
                 const canAdd = problem.timer && problem.timer > 0
@@ -136,6 +141,12 @@ export default function ProblemsManagement({
                             </span>
                             <span className={styles.problemXp}>
                               {problem.expected_xp} XP
+                            </span>
+                            <span 
+                              className={styles.visibilityBadge}
+                              data-visibility={problem.visibility}
+                            >
+                              {problem.visibility === 'public' ? '🌐 Public' : '🔒 Private'}
                             </span>
                           </div>
                         </div>

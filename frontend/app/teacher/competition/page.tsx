@@ -19,6 +19,7 @@ export default function TeacherCompetitionPage() {
   const { currentRoom, fetchRoomDetails, addCompetitionToRoom, createdRooms, fetchCreatedRooms, roomLoading } = useTeacherRoomStore()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [initialDataLoaded, setInitialDataLoaded] = useState(false)
   
   // Get roomCode from URL params
   const searchParams = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '')
@@ -29,11 +30,16 @@ export default function TeacherCompetitionPage() {
 
   // Get competitions, problems and participants from currentRoom (already fetched by teacherRoomStore)
   const competitions = currentRoom?.competitions || []
-  const visibleProblems = currentRoom?.problems?.filter(p => p.visibility === 'show') || []
+  // Show all problems (both public and private) for competition use
+  const visibleProblems = currentRoom?.problems || []
   const participants = currentRoom?.participants || []
 
-  // Check if data is still loading
-  const isDataLoading = roomLoading || (roomCode && createdRooms.length === 0) || (roomCode && !currentRoom)
+  // Improved loading state logic
+  const isDataLoading = roomLoading || 
+    (roomCode && !initialDataLoaded) || 
+    (roomCode && createdRooms.length === 0) || 
+    (roomCode && !currentRoom) ||
+    (roomCode && currentRoom && !Array.isArray(currentRoom.competitions))
 
   console.log('📊 Available data - Competitions:', competitions.length, 'Problems:', visibleProblems.length, 'Participants:', participants.length, 'isDataLoading:', isDataLoading)
 
@@ -48,17 +54,26 @@ export default function TeacherCompetitionPage() {
   // Then fetch room details once we have createdRooms
   useEffect(() => {
     if (isLoggedIn && !appLoading && roomCode && createdRooms.length > 0) {
-      // Check if we need to fetch - either no currentRoom, different room, or participants not loaded
+      // Check if we need to fetch - either no currentRoom, different room, or data not complete
       const needsFetch = !currentRoom || 
                         currentRoom.code !== roomCode || 
-                        !Array.isArray(currentRoom.participants)
+                        !Array.isArray(currentRoom.participants) ||
+                        !Array.isArray(currentRoom.competitions) ||
+                        !Array.isArray(currentRoom.problems)
       
       if (needsFetch) {
         console.log('🔄 Fetching room details for roomCode:', roomCode)
-        fetchRoomDetails(roomCode, true) // Force refresh to get fresh data
+        setInitialDataLoaded(false)
+        fetchRoomDetails(roomCode, true).then(() => {
+          console.log('✅ Room details loaded, setting initialDataLoaded to true')
+          setInitialDataLoaded(true)
+        })
+      } else {
+        console.log('✅ Room data already complete, setting initialDataLoaded to true')
+        setInitialDataLoaded(true)
       }
     }
-  }, [isLoggedIn, appLoading, roomCode, createdRooms.length])
+  }, [isLoggedIn, appLoading, roomCode, createdRooms.length, currentRoom?.code])
 
   // Handle create competition
   const handleCreateCompetition = async (title: string) => {

@@ -807,6 +807,23 @@
   color: #6b7280;
 }
 
+.visibilityBadge {
+  padding: 0.2rem 0.5rem;
+  border-radius: 6px;
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+.visibilityBadge[data-visibility="public"] {
+  background: rgba(59, 130, 246, 0.15);
+  color: #2563eb;
+}
+
+.visibilityBadge[data-visibility="private"] {
+  background: rgba(107, 114, 128, 0.15);
+  color: #4b5563;
+}
+
 .problemRight {
   display: flex;
   align-items: center;

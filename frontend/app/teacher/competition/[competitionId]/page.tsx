@@ -268,10 +268,46 @@ function TeacherCompetitionContent({ competitionId }: { competitionId: number })
     return (
       <div className={styles.container}>
         <div className={styles.mainContainer}>
-          <div style={{ textAlign: 'center', padding: '3rem', color: 'white' }}>
-            <h2>Error</h2>
-            <p>{error}</p>
-            <button onClick={() => router.back()} className={styles.backButton}>
+          <div style={{ 
+            textAlign: 'center', 
+            padding: '3rem',
+            maxWidth: '500px',
+            margin: '2rem auto',
+            background: 'rgba(255, 255, 255, 0.95)',
+            borderRadius: '12px',
+            boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
+          }}>
+            <div style={{ 
+              fontSize: '3rem', 
+              marginBottom: '1rem',
+              color: '#ef4444'
+            }}>⚠️</div>
+            <h2 style={{ 
+              color: '#1a202c', 
+              marginBottom: '1rem',
+              fontSize: '1.5rem'
+            }}>Error</h2>
+            <p style={{ 
+              color: '#4a5568',
+              marginBottom: '2rem',
+              lineHeight: '1.6'
+            }}>{error}</p>
+            <button 
+              onClick={() => router.back()} 
+              style={{
+                padding: '0.75rem 2rem',
+                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                color: 'white',
+                border: 'none',
+                borderRadius: '8px',
+                fontSize: '1rem',
+                fontWeight: '600',
+                cursor: 'pointer',
+                transition: 'transform 0.2s',
+              }}
+              onMouseOver={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
+              onMouseOut={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+            >
               Go Back
             </button>
           </div>

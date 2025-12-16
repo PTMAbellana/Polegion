@@ -256,6 +256,11 @@ body > div:first-child /* For other React setups */ {
   margin-top: auto; /* Push the footer to the bottom */
 }
 
+/* Ensure footer only has white text when on dark background */
+.footer:not([style*="background-color: #343a40"]):not([class*="dark"]) {
+  color: #374151; /* Use dark gray instead of white for light backgrounds */
+}
+
 .sidebar-open {
   margin-left: 15.625rem; /* or whatever your sidebar width is */
 }
