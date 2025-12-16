@@ -58,7 +58,7 @@ const ComplementarySupplementaryMinigame: React.FC<ComplementarySupplementaryMin
   };
 
   const renderDiagram = () => {
-    const imagePath = `/images/castle2/chapter3/${relationship}.png`;
+    const imagePath = `/images/castle2/chapter3/${relationship}.webp`;
     
     return (
       <div style={{ textAlign: 'center' }}>

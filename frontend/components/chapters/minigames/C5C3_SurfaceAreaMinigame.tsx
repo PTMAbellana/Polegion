@@ -38,7 +38,7 @@ const slugifyShape = (value?: string) => {
 const buildImagePath = (shape?: string) => {
   const slug = slugifyShape(shape)
   if (!slug) return null
-  return `${IMAGE_BASE_PATH}/${slug}.png`
+  return `${IMAGE_BASE_PATH}/${slug}.webp`
 }
 
 const toFriendlyShape = (shape?: string) => {

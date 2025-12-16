@@ -66,7 +66,7 @@ const C2C4_WordProblemSolverMinigame: React.FC<C2C4_WordProblemSolverMinigamePro
   };
 
   const renderProblemDiagram = () => {
-    const imagePath = `/images/castle2/chapter4/problem-${question.id}.png`;
+    const imagePath = `/images/castle2/chapter4/problem-${question.id}.webp`;
     
     return (
       <div style={{ textAlign: 'center' }}>

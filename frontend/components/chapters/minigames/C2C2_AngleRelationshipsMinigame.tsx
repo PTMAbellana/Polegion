@@ -43,7 +43,7 @@ const AngleRelationshipsMinigame: React.FC<AngleRelationshipsMinigameProps> = ({
   };
 
   const renderDiagram = () => {
-    const imagePath = `/images/castle2/chapter2/${question.type}.png`;
+    const imagePath = `/images/castle2/chapter2/${question.type}.webp`;
     
     return (
       <div style={{ textAlign: 'center' }}>
