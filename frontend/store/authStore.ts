@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import { authUtils } from '@/api/axios';
+import api, { authUtils, refreshAccessToken } from '@/api/axios';
 import logger from '@/utils/logger';
 import { 
     login as apiLogin, 
@@ -11,7 +11,6 @@ import {
 } from '@/api/auth';
 import { AuthState, UserProfileDTO, AuthActionResult } from '@/types';
 import { RegisterFormData } from '@/types/forms/auth'; 
-import api from '@/api/axios';
 import { 
     updateEmail as apiUpdateEmail, 
     updatePassword as apiUpdatePassword, 
@@ -222,21 +221,22 @@ export const useAuthStore = create<AuthState>()(
                 if (authUtils.isTokenExpired()) {
                     try {
                         logger.log('🔄 Token expired on init, refreshing...');
-                        const refreshResult = await api.post('/auth/refresh-token', {
-                            refresh_token: authData.refreshToken
-                        });
+                        // Use the centralized refresh function that handles race conditions
+                        await refreshAccessToken();
                         
-                        if (refreshResult.data.success) {
-                            const newData = refreshResult.data.data;
-                            authUtils.saveAuthData(newData);
+                        // refreshAccessToken updates localStorage, so we just reload from there
+                        const updatedAuthData = authUtils.getAuthData();
+                        
+                        if (updatedAuthData.accessToken) {
                             set({
-                                authToken: newData.session.access_token,
+                                authToken: updatedAuthData.accessToken,
                                 isLoggedIn: true,
-                                userProfile: newData.user
+                                userProfile: updatedAuthData.user
                             });
                             logger.log('✅ Token refreshed successfully on init');
                             return true;
                         }
+                        return false;
                     } catch (error) {
                         logger.error('❌ Failed to refresh token on init:', error);
                         set({ isLoggedIn: false, authToken: null });

@@ -237,7 +237,16 @@ api.interceptors.request.use(
 );
 
 // Refresh token function
-async function refreshAccessToken() {
+export async function refreshAccessToken() {
+	// 1. First check if another tab has already refreshed the token
+	if (!authUtils.isTokenExpired()) {
+		const currentAccessToken = localStorage.getItem("access_token");
+		if (currentAccessToken) {
+			console.log("✅ Token was already refreshed by another tab/window");
+			return currentAccessToken;
+		}
+	}
+
 	const refreshToken = localStorage.getItem("refresh_token");
 	
 	if (!refreshToken) {
@@ -309,6 +318,17 @@ async function refreshAccessToken() {
 		
 		// Only clear and redirect if it's a 401/403 (invalid refresh token)
 		if (error.response?.status === 401 || error.response?.status === 403) {
+			// CRITICAL: Check if another tab updated the token while we were failing
+			const currentRefreshToken = localStorage.getItem("refresh_token");
+			if (currentRefreshToken && currentRefreshToken !== refreshToken) {
+				console.log("⚠️ Refresh token mismatch - another tab likely refreshed it. Recovering...");
+				const currentAccessToken = localStorage.getItem("access_token");
+				if (currentAccessToken && !authUtils.isTokenExpired()) {
+					console.log("✅ Recovered with new token from other tab");
+					return currentAccessToken;
+				}
+			}
+
 			console.log("❌ Refresh token is invalid, logging out");
 			authUtils.clearAuthData();
 			localStorage.removeItem('auth-storage');
