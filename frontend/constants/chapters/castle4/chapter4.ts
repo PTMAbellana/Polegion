@@ -25,13 +25,13 @@ export const CHAPTER4_LESSON_DIALOGUE = CHAPTER4_DIALOGUE.filter(d => d.scene ==
 export const CHAPTER4_MINIGAME_DIALOGUE = CHAPTER4_DIALOGUE.filter(d => d.scene === 'minigame').map(d => d.text);
 
 export const CHAPTER4_MINIGAME_LEVELS = [
-  { id: 1, shape: 'rectangle', length: 8, width: 5, type: 'perimeter', correctAnswer: 26, instruction: 'Find perimeter of rectangle (l=8, w=5)', hint: 'P = 2(l + w)', image: '/images/castle4/chapter4/perimeter-problem.png' },
-  { id: 2, shape: 'square', side: 6, type: 'perimeter', correctAnswer: 24, instruction: 'Find perimeter of square (side=6)', hint: 'P = 4 × side', image: '/images/castle4/chapter4/perimeter-problem1.png'  },
-  { id: 3, shape: 'rectangle', length: 7, width: 4, type: 'area', correctAnswer: 28, instruction: 'Find area of rectangle (l=7, w=4)', hint: 'A = l × w' , image: '/images/castle4/chapter4/perimeter-problem2.png'},
-  { id: 4, shape: 'square', side: 5, type: 'area', correctAnswer: 25, instruction: 'Find area of square (side=5)', hint: 'A = side²' , image: '/images/castle4/chapter4/perimeter-problem3.png'},
-  { id: 5, shape: 'triangle', base: 10, height: 6, type: 'area', correctAnswer: 30, instruction: 'Find area of triangle (b=10, h=6)', hint: 'A = (b × h) ÷ 2' , image: '/images/castle4/chapter4/perimeter-problem4.png'},
-  { id: 6, shape: 'parallelogram', base: 9, height: 5, type: 'area', correctAnswer: 45, instruction: 'Find area of parallelogram (b=9, h=5)', hint: 'A = b × h' , image: '/images/castle4/chapter4/perimeter-problem5.png'},
-  { id: 7, shape: 'trapezoid', base1: 8, base2: 6, height: 4, type: 'area', correctAnswer: 28, instruction: 'Find area of trapezoid (b₁=8, b₂=6, h=4)', hint: 'A = [(b₁ + b₂) × h] ÷ 2', image: '/images/castle4/chapter4/perimeter-problem6.png'},
+  { id: 1, shape: 'rectangle', length: 8, width: 5, type: 'perimeter', correctAnswer: 26, instruction: 'Find perimeter of rectangle (l=8, w=5)', hint: 'P = 2(l + w)', image: '/images/castle4/chapter4/perimeter-problem.webp' },
+  { id: 2, shape: 'square', side: 6, type: 'perimeter', correctAnswer: 24, instruction: 'Find perimeter of square (side=6)', hint: 'P = 4 × side', image: '/images/castle4/chapter4/perimeter-problem1.webp'  },
+  { id: 3, shape: 'rectangle', length: 7, width: 4, type: 'area', correctAnswer: 28, instruction: 'Find area of rectangle (l=7, w=4)', hint: 'A = l × w' , image: '/images/castle4/chapter4/perimeter-problem2.webp'},
+  { id: 4, shape: 'square', side: 5, type: 'area', correctAnswer: 25, instruction: 'Find area of square (side=5)', hint: 'A = side²' , image: '/images/castle4/chapter4/perimeter-problem3.webp'},
+  { id: 5, shape: 'triangle', base: 10, height: 6, type: 'area', correctAnswer: 30, instruction: 'Find area of triangle (b=10, h=6)', hint: 'A = (b × h) ÷ 2' , image: '/images/castle4/chapter4/perimeter-problem4.webp'},
+  { id: 6, shape: 'parallelogram', base: 9, height: 5, type: 'area', correctAnswer: 45, instruction: 'Find area of parallelogram (b=9, h=5)', hint: 'A = b × h' , image: '/images/castle4/chapter4/perimeter-problem5.webp'},
+  { id: 7, shape: 'trapezoid', base1: 8, base2: 6, height: 4, type: 'area', correctAnswer: 28, instruction: 'Find area of trapezoid (b₁=8, b₂=6, h=4)', hint: 'A = [(b₁ + b₂) × h] ÷ 2', image: '/images/castle4/chapter4/perimeter-problem6.webp'},
 ];
 
 export const CHAPTER4_CONCEPTS = [
@@ -40,7 +40,7 @@ export const CHAPTER4_CONCEPTS = [
     title: 'Perimeter',
     summary: 'The distance around a polygon',
     description: 'Total length around a polygon.',
-    image: '/images/castle4/chapter4/perimeter.png',
+    image: '/images/castle4/chapter4/perimeter.webp',
     taskId: 'task-0'
   },
   {
@@ -48,7 +48,7 @@ export const CHAPTER4_CONCEPTS = [
     title: 'Rectangle Perimeter',
     summary: 'P = 2(l + w)',
     description: 'Add length and width, then double.',
-    image: '/images/castle4/chapter4/rectangle-perimeter.png',
+    image: '/images/castle4/chapter4/rectangle-perimeter.webp',
     taskId: 'task-1'
   },
   {
@@ -56,7 +56,7 @@ export const CHAPTER4_CONCEPTS = [
     title: 'Square Perimeter',
     summary: 'P = 4 × side',
     description: 'Four equal sides; multiply side by 4.',
-    image: '/images/castle4/chapter4/square-perimeter.png',
+    image: '/images/castle4/chapter4/square-perimeter.webp',
     taskId: 'task-2'
   },
   {
@@ -64,7 +64,7 @@ export const CHAPTER4_CONCEPTS = [
     title: 'Area',
     summary: 'The space inside a polygon (square units)',
     description: 'Space inside a shape measured in square units.',
-    image: '/images/castle4/chapter4/area.png',
+    image: '/images/castle4/chapter4/area.webp',
     taskId: 'task-3'
   },
   {
@@ -72,7 +72,7 @@ export const CHAPTER4_CONCEPTS = [
     title: 'Rectangle Area',
     summary: 'A = length × width',
     description: 'Multiply length by width.',
-    image: '/images/castle4/chapter4/rectangle-area.png',
+    image: '/images/castle4/chapter4/rectangle-area.webp',
     taskId: 'task-4'
   },
   {
@@ -80,7 +80,7 @@ export const CHAPTER4_CONCEPTS = [
     title: 'Square Area',
     summary: 'A = side²',
     description: 'Multiply the side by itself.',
-    image: '/images/castle4/chapter4/square-area.png',
+    image: '/images/castle4/chapter4/square-area.webp',
     taskId: 'task-5'
   },
   {
@@ -88,7 +88,7 @@ export const CHAPTER4_CONCEPTS = [
     title: 'Triangle Area',
     summary: 'A = (base × height) ÷ 2',
     description: 'Half the product of base and height.',
-    image: '/images/castle4/chapter4/triangle-area.png',
+    image: '/images/castle4/chapter4/triangle-area.webp',
     taskId: 'task-6'
   },
   {
@@ -96,7 +96,7 @@ export const CHAPTER4_CONCEPTS = [
     title: 'Parallelogram Area',
     summary: 'A = base × height',
     description: 'Base times height.',
-    image: '/images/castle4/chapter4/parallelogram-area.png',
+    image: '/images/castle4/chapter4/parallelogram-area.webp',
     taskId: 'task-7'
   },
   {
@@ -104,7 +104,7 @@ export const CHAPTER4_CONCEPTS = [
     title: 'Trapezoid Area',
     summary: 'A = [(b₁ + b₂) × h] ÷ 2',
     description: 'Average of bases times height.',
-    image: '/images/castle4/chapter4/trapezoid-area.png',
+    image: '/images/castle4/chapter4/trapezoid-area.webp',
     taskId: 'task-8'
   },
   {
@@ -112,7 +112,7 @@ export const CHAPTER4_CONCEPTS = [
     title: 'Word Problems',
     summary: 'Apply formulas to real-world situations',
     description: 'Apply formulas to practical scenarios.',
-    image: '/images/castle4/chapter4/word-problems.png',
+    image: '/images/castle4/chapter4/word-problems.webp',
     taskId: 'task-9'
   }
 ];
@@ -179,13 +179,13 @@ export const CHAPTER4_NARRATION = {
 
 export const CHAPTER4_RELIC = {
   name: "Ruler of Realms",
-  image: "/images/relics/ruler-realms.png",
+  image: "/images/relics/ruler-realms.webp",
   description: "You have mastered polygon measurements! The Ruler of Realms allows you to measure any shape in any dimension."
 };
 
 export const CHAPTER4_WIZARD = {
   name: "Polymus, Master of Many Sides",
-  image: "/images/wizards/polymus-wizard.png"
+  image: "/images/wizards/polymus-wizard.webp"
 };
 
 export const CHAPTER4_METADATA = {

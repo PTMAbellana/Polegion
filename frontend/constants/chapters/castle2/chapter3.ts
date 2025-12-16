@@ -49,21 +49,21 @@ export const CHAPTER3_CONCEPTS = [
     title: 'Complementary Angles',
     summary: 'Two angles that add up to 90°',
     description: 'Complementary angles work together to form a perfect right angle. If you know one, subtract from 90° to find its partner!',
-    image: '/images/castle2/complementary-angles.png'
+    image: '/images/castle2/complementary-angles.webp'
   },
   {
     key: 'supplementary',
     title: 'Supplementary Angles',
     summary: 'Two angles that add up to 180°',
     description: 'Supplementary angles join forces to create a straight line. Subtract from 180° to discover the missing angle!',
-    image: '/images/castle2/supplementary-angles.png'
+    image: '/images/castle2/supplementary-angles.webp'
   },
   {
     key: 'finding-missing',
     title: 'Finding Missing Angles',
     summary: 'Subtract from 90° or 180° to find the pair',
     description: 'Use simple subtraction to find missing angles: 90° minus angle for complements, 180° minus angle for supplements!',
-    image: '/images/castle2/finding-missing-angles.png'
+    image: '/images/castle2/finding-missing-angles.webp'
   }
 ];
 
@@ -176,14 +176,14 @@ export const CHAPTER3_NARRATION = {
 // Relic information for reward screen
 export const CHAPTER3_RELIC = {
   name: "Medallion of Harmony",
-  image: "/images/relics/medallion-of-harmony.png",
+  image: "/images/relics/medallion-of-harmony.webp",
   description: "You have mastered the Angle Forge! The Medallion of Harmony reveals the perfect pairs, complementary and supplementary angles working in unity."
 };
 
 // Wizard information
 export const CHAPTER3_WIZARD = {
   name: "Complementa, Master of Angle Relationships",
-  image: "/images/wizards/complementa-wizard.png"
+  image: "/images/wizards/complementa-wizard.webp"
 };
 
 // Chapter metadata

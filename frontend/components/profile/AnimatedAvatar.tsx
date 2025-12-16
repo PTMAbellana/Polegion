@@ -13,7 +13,7 @@ export default function AnimatedAvatar({
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img 
                 className={styles['profile-avatar']} 
-                src={src || "/images/defaultImageProfile.png"}
+                src={src || "/images/defaultImageProfile.webp"}
                 alt={alt}
             />
             <div className={styles['avatar-glow']}></div>

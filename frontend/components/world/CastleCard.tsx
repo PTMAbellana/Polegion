@@ -28,7 +28,7 @@ export default function CastleCard({
         {/* Castle Image */}
         <div className={styleModule.castleInfoAvatar}>
           <img 
-            src={`/images/castles/castle${imageNumber}.png`}
+            src={`/images/castles/castle${imageNumber}.webp`}
             alt={castleName}
             className={styleModule.castleImage}
           />

@@ -50,7 +50,7 @@ export const CHAPTER2_CONCEPTS = [
     title: 'Drawing Polygons',
     summary: 'Plan sides and angles carefully to construct polygons',
     description: 'Sketch polygons by planning sides and angle measures.',
-    image: '/images/castle4/chapter2/drawing.png',
+    image: '/images/castle4/chapter2/drawing.webp',
     taskId: 'task-0'
   },
   {
@@ -58,7 +58,7 @@ export const CHAPTER2_CONCEPTS = [
     title: 'Drawing Triangles',
     summary: 'Use protractor to measure angles between three sides',
     description: 'Draw three sides with angles measured accurately.',
-    image: '/images/castle4/chapter2/triangle.png',
+    image: '/images/castle4/chapter2/triangle.webp',
     taskId: 'task-1'
   },
   {
@@ -66,7 +66,7 @@ export const CHAPTER2_CONCEPTS = [
     title: 'Drawing Quadrilaterals',
     summary: 'Four sides, interior angles sum to 360°',
     description: 'Four connected sides; interior angles add to 360°.',
-    image: '/images/castle4/chapter2/quadrilateral.png',
+    image: '/images/castle4/chapter2/quadrilateral.webp',
     taskId: 'task-2'
   },
   {
@@ -74,7 +74,7 @@ export const CHAPTER2_CONCEPTS = [
     title: 'Drawing Pentagons',
     summary: 'Five sides, regular pentagon has 108° angles',
     description: 'Five sides; each angle is 108° in a regular pentagon.',
-    image: '/images/castle4/chapter2/pentagon.png',
+    image: '/images/castle4/chapter2/pentagon.webp',
     taskId: 'task-3'
   },
   {
@@ -82,7 +82,7 @@ export const CHAPTER2_CONCEPTS = [
     title: 'Drawing Hexagons',
     summary: 'Six sides, regular hexagon has 120° angles',
     description: 'Six sides; each angle is 120° in a regular hexagon.',
-    image: '/images/castle4/chapter2/hexagon.png',
+    image: '/images/castle4/chapter2/hexagon.webp',
     taskId: 'task-4'
   },
   {
@@ -90,7 +90,7 @@ export const CHAPTER2_CONCEPTS = [
     title: 'Drawing Tools',
     summary: 'Ruler for sides, protractor for angles',
     description: 'Use a ruler for straight lines and a protractor for angles.',
-    image: '/images/castle4/chapter2/tools.png',
+    image: '/images/castle4/chapter2/tools.webp',
     taskId: 'task-5'
   }
 ];
@@ -150,13 +150,13 @@ export const CHAPTER2_NARRATION = {
 
 export const CHAPTER2_RELIC = {
   name: "Pencil of Precision",
-  image: "/images/relics/pencil-precision.png",
+  image: "/images/relics/pencil-precision.webp",
   description: "You have mastered polygon drawing! The Pencil of Precision allows you to construct any shape with perfect accuracy."
 };
 
 export const CHAPTER2_WIZARD = {
   name: "Polymus, Master of Many Sides",
-  image: "/images/wizards/polymus-wizard.png"
+  image: "/images/wizards/polymus-wizard.webp"
 };
 
 export const CHAPTER2_METADATA = {

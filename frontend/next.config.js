@@ -25,8 +25,6 @@ const nextConfig = {
     },
     // Compress output
     compress: true,
-    // Production optimizations
-    swcMinify: true,
     async headers() {
         return [
             {

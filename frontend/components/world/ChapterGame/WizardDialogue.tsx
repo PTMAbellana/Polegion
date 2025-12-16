@@ -8,7 +8,7 @@ interface WizardDialogueProps {
 
 const WizardDialogue: React.FC<WizardDialogueProps> = ({
   message,
-  wizardImage = '/images/wizards/wizard.png',
+  wizardImage = '/images/wizards/wizard.webp',
   styles
 }) => {
   return (

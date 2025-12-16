@@ -58,42 +58,42 @@ export const CHAPTER2_CONCEPTS = [
     title: 'Circumference',
     summary: 'The distance around a circle',
     description: 'The full length around a circle\'s edge.',
-    image: '/images/castle3/circumference.png'
+    image: '/images/castle3/circumference.webp'
   },
   {
     key: 'pi',
     title: 'Pi (π)',
     summary: 'A special constant approximately equal to 3.14159',
     description: 'A constant ratio of circumference to diameter, about 3.14159.',
-    image: '/images/castle3/pi.png'
+    image: '/images/castle3/pi.webp'
   },
   {
     key: 'formula-radius',
     title: 'Formula with Radius',
     summary: 'C = 2πr (when radius is known)',
     description: 'Use radius to compute circumference: two times π times r.',
-    image: '/images/castle3/formula-radius.png'
+    image: '/images/castle3/formula-radius.webp'
   },
   {
     key: 'formula-diameter',
     title: 'Formula with Diameter',
     summary: 'C = πd (when diameter is known)',
     description: 'Use diameter to compute circumference: π times d.',
-    image: '/images/castle3/formula-diameter.png'
+    image: '/images/castle3/formula-diameter.webp'
   },
   {
     key: 'example1',
     title: 'Example: Using Radius',
     summary: 'If r = 5, then C = 2π(5) = 10π ≈ 31.4',
     description: 'With r = 5 cm, C ≈ 31.4 cm using 2πr.',
-    image: '/images/castle3/example1.png'
+    image: '/images/castle3/example1.webp'
   },
   {
     key: 'example2',
     title: 'Example: Using Diameter',
     summary: 'If d = 12, then C = π(12) = 12π ≈ 37.7',
     description: 'With d = 12 cm, C ≈ 37.7 cm using πd.',
-    image: '/images/castle3/example2.png'
+    image: '/images/castle3/example2.webp'
   }
 ];
 
@@ -152,13 +152,13 @@ export const CHAPTER2_NARRATION = {
 
 export const CHAPTER2_RELIC = {
   name: "Ring of Measurement",
-  image: "/images/relics/ring-measurement.png",
+  image: "/images/relics/ring-measurement.webp",
   description: "You have mastered circumference! The Ring of Measurement allows you to calculate the perimeter of any circular path."
 };
 
 export const CHAPTER2_WIZARD = {
   name: "Arcana, Keeper of the Curved Path",
-  image: "/images/wizards/arcana-wizard.png"
+  image: "/images/wizards/arcana-wizard.webp"
 };
 
 export const CHAPTER2_METADATA = {

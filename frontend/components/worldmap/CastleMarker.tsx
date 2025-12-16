@@ -32,12 +32,12 @@ export default function CastleMarker({
     if (imgError) {
       return 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200"><rect width="200" height="200" fill="%234a5568"/><text y="50%" x="50%" text-anchor="middle" dominant-baseline="middle" font-size="60" fill="white">Castle</text></svg>'
     }
-    return `/images/castles/castle${castle.image_number}.png`
+    return `/images/castles/castle${castle.image_number}.webp`
   }
 
   const handleImageError = () => {
     if (!imgError) {
-      console.warn(`Image not found: /images/castles/castle${castle.image_number}.png`)
+      console.warn(`Image not found: /images/castles/castle${castle.image_number}.webp`)
       setImgError(true)
     }
   }

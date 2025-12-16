@@ -106,12 +106,12 @@ export const CHAPTER1_MINIGAME_LEVELS: Array<{
 
 // Concept cards with semantic keys matching dialogue
 export const CHAPTER1_CONCEPTS = [
-  { key: 'acute', title: 'Acute Angle', description: "An angle that measures less than 90°. Sharp and precise, like a slice of pizza!", image: '/images/castle2/acute-angle.png', taskId: 'task-0' },
-  { key: 'right', title: 'Right Angle', description: "An angle that measures exactly 90°. Forms a perfect corner, like the letter L.", image: '/images/castle2/right-angle.png', taskId: 'task-1' },
-  { key: 'obtuse', title: 'Obtuse Angle', description: "An angle that measures between 90° and 180°. Wider and more open than a right angle.", image: '/images/castle2/obtuse-angle.png', taskId: 'task-2' },
-  { key: 'straight', title: 'Straight Angle', description: "An angle that measures exactly 180°. Forms a perfectly straight line.", image: '/images/castle2/straight-angle.png', taskId: 'task-3' },
-  { key: 'reflex', title: 'Reflex Angle', description: "An angle that measures between 180° and 360°. More than a straight angle!", image: '/images/castle2/reflex-angle.png', taskId: 'task-4' },
-  { key: 'protractor', title: 'Protractor', description: "A tool used to measure angles in degrees. Essential for any angle explorer!", image: '/images/castle2/protractor.png', taskId: 'task-5' }
+  { key: 'acute', title: 'Acute Angle', description: "An angle that measures less than 90°. Sharp and precise, like a slice of pizza!", image: '/images/castle2/acute-angle.webp', taskId: 'task-0' },
+  { key: 'right', title: 'Right Angle', description: "An angle that measures exactly 90°. Forms a perfect corner, like the letter L.", image: '/images/castle2/right-angle.webp', taskId: 'task-1' },
+  { key: 'obtuse', title: 'Obtuse Angle', description: "An angle that measures between 90° and 180°. Wider and more open than a right angle.", image: '/images/castle2/obtuse-angle.webp', taskId: 'task-2' },
+  { key: 'straight', title: 'Straight Angle', description: "An angle that measures exactly 180°. Forms a perfectly straight line.", image: '/images/castle2/straight-angle.webp', taskId: 'task-3' },
+  { key: 'reflex', title: 'Reflex Angle', description: "An angle that measures between 180° and 360°. More than a straight angle!", image: '/images/castle2/reflex-angle.webp', taskId: 'task-4' },
+  { key: 'protractor', title: 'Protractor', description: "A tool used to measure angles in degrees. Essential for any angle explorer!", image: '/images/castle2/protractor.webp', taskId: 'task-5' }
 ];
 
 export const CHAPTER1_LEARNING_OBJECTIVES = [
@@ -171,14 +171,14 @@ export const CHAPTER1_NARRATION = {
 // Relic information for reward screen
 export const CHAPTER1_RELIC = {
   name: "Protractor of Precision",
-  image: "/images/relics/protractor-of-precision.png",
+  image: "/images/relics/protractor-of-precision.webp",
   description: "You have mastered the art of angle measurement! The Protractor of Precision shines with your geometric understanding, revealing the degrees hidden in every corner."
 };
 
 // Wizard information
 export const CHAPTER1_WIZARD = {
   name: "Sylvan, Guardian of the Polygon Citadel",
-  image: "/images/wizards/sylvan-wizard.png"
+  image: "/images/wizards/sylvan-wizard.webp"
 };
 
 // Chapter metadata

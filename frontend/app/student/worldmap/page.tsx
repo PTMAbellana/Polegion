@@ -370,7 +370,7 @@ export default function WorldMapPage() {
 
       {/* Logo - Top Right */}
       <div className={styles.world_map_logo}>
-        <img src="/images/world-map-logo.png" alt="World Map" />
+        <img src="/images/world-map-logo.webp" alt="World Map" />
       </div>
 
       {/* Main Content */}

@@ -59,49 +59,49 @@ export const CHAPTER3_CONCEPTS = [
     title: 'Area of Circle',
     summary: 'The amount of space inside the circle',
     description: 'Space enclosed by the circle\'s boundary.',
-    image: '/images/castle3/chapter3/area.png'
+    image: '/images/castle3/chapter3/area.webp'
   },
   {
     key: 'formula',
     title: 'Area Formula',
     summary: 'A = πr² (pi times radius squared)',
     description: 'Multiply π by the square of the radius.',
-    image: '/images/castle3/chapter3/formula.png'
+    image: '/images/castle3/chapter3/formula.webp'
   },
   {
     key: 'squared',
     title: 'Squaring the Radius',
     summary: 'r² means r × r (multiply radius by itself)',
     description: 'r² means radius multiplied by itself.',
-    image: '/images/castle3/chapter3/squared.png'
+    image: '/images/castle3/chapter3/squared.webp'
   },
   {
     key: 'example1',
     title: 'Example: Full Circle',
     summary: 'If r = 4, then A = π(16) ≈ 50.3 cm²',
     description: 'With r = 4 cm, A ≈ 50.3 cm² using πr².',
-    image: '/images/castle3/chapter3/example1.png'
+    image: '/images/castle3/chapter3/example1.webp'
   },
   {
     key: 'semicircle',
     title: 'Semi-Circle',
     summary: 'Half of a circle, area = πr²/2',
     description: 'Half a circle has area equal to πr² ÷ 2.',
-    image: '/images/castle3/chapter3/semicircle.png'
+    image: '/images/castle3/chapter3/semicircle.webp'
   },
   {
     key: 'example2',
     title: 'Example: Semi-Circle',
     summary: 'If r = 6, then A = 18π ≈ 56.5 cm²',
     description: 'With r = 6 cm, A ≈ 56.5 cm² for a semicircle.',
-    image: '/images/castle3/chapter3/example2.png'
+    image: '/images/castle3/chapter3/example2.webp'
   },
   {
     key: 'sector',
     title: 'Sector',
     summary: 'A pie-shaped portion of the circle',
     description: 'A slice of the circle defined by a central angle.',
-    image: '/images/castle3/chapter3/sector.png'
+    image: '/images/castle3/chapter3/sector.webp'
   }
 ];
 
@@ -162,13 +162,13 @@ export const CHAPTER3_NARRATION = {
 
 export const CHAPTER3_RELIC = {
   name: "Orb of Space",
-  image: "/images/relics/orb-space.png",
+  image: "/images/relics/orb-space.webp",
   description: "You have mastered circle area! The Orb of Space reveals the inner dimensions of any circular realm."
 };
 
 export const CHAPTER3_WIZARD = {
   name: "Arcana, Keeper of the Curved Path",
-  image: "/images/wizards/arcana-wizard.png"
+  image: "/images/wizards/arcana-wizard.webp"
 };
 
 export const CHAPTER3_METADATA = {

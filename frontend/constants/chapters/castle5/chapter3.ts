@@ -44,7 +44,7 @@ export const CHAPTER3_CONCEPTS = [
     title: 'Surface Area',
     summary: 'Total area of all faces of a 3D solid',
     description: 'Total covering area of a solid’s outer surfaces.',
-    image: '/images/castle5/surface-area.png',
+    image: '/images/castle5/surface-area.webp',
     taskId: 'task-0'
   },
   {
@@ -52,7 +52,7 @@ export const CHAPTER3_CONCEPTS = [
     title: 'Cube Surface Area',
     summary: 'SA = 6s² (6 equal square faces)',
     description: 'Six identical squares; multiply 6 by side squared.',
-    image: '/images/castle5/cube.png',
+    image: '/images/castle5/cube.webp',
     taskId: 'task-1'
   },
   {
@@ -60,7 +60,7 @@ export const CHAPTER3_CONCEPTS = [
     title: 'Rectangular Prism',
     summary: 'SA = 2(lw + lh + wh)',
     description: 'Sum areas of all rectangular faces.',
-    image: '/images/castle5/rectangular-prism.png',
+    image: '/images/castle5/rectangular-prism.webp',
     taskId: 'task-2'
   },
   {
@@ -68,7 +68,7 @@ export const CHAPTER3_CONCEPTS = [
     title: 'Cylinder Surface Area',
     summary: 'SA = 2πr² + 2πrh',
     description: 'Two circular ends plus curved side area.',
-    image: '/images/castle5/cylinder.png',
+    image: '/images/castle5/cylinder.webp',
     taskId: 'task-3'
   },
   {
@@ -76,7 +76,7 @@ export const CHAPTER3_CONCEPTS = [
     title: 'Sphere Surface Area',
     summary: 'SA = 4πr²',
     description: 'Area depends only on radius: 4 × π × r².',
-    image: '/images/castle5/sphere.png',
+    image: '/images/castle5/sphere.webp',
     taskId: 'task-4'
   },
   {
@@ -84,7 +84,7 @@ export const CHAPTER3_CONCEPTS = [
     title: 'Cone Surface Area',
     summary: 'SA = πr² + πrl (l = slant height)',
     description: 'Base circle plus lateral surface using slant height.',
-    image: '/images/castle5/cone-surface-area.png',
+    image: '/images/castle5/cone-surface-area.webp',
     taskId: 'task-5'
   },
   {
@@ -92,7 +92,7 @@ export const CHAPTER3_CONCEPTS = [
     title: 'Square Pyramid',
     summary: 'SA = b² + 2bl (l = slant height)',
     description: 'Square base plus four triangular faces.',
-    image: '/images/castle5/square-pyramid-surface-area.png',
+    image: '/images/castle5/square-pyramid-surface-area.webp',
     taskId: 'task-6'
   },
   {
@@ -100,7 +100,7 @@ export const CHAPTER3_CONCEPTS = [
     title: 'Triangular Prism',
     summary: 'SA = 2(½bh) + perimeter × H',
     description: 'Two triangular bases plus three rectangles; sum all face areas.',
-    image: '/images/castle5/triangular-prism.png',
+    image: '/images/castle5/triangular-prism.webp',
     taskId: 'task-7'
   }
 ];
@@ -165,13 +165,13 @@ export const CHAPTER3_NARRATION = {
 
 export const CHAPTER3_RELIC = {
   name: "Wrapping Crystal",
-  image: "/images/relics/wrapping-crystal.png",
+  image: "/images/relics/wrapping-crystal.webp",
   description: "You have mastered surface area! The Wrapping Crystal reveals how much material covers any 3D object."
 };
 
 export const CHAPTER3_WIZARD = {
   name: "Dimensius, Guardian of Space",
-  image: "/images/wizards/dimensius-wizard.png"
+  image: "/images/wizards/dimensius-wizard.webp"
 };
 
 export const CHAPTER3_METADATA = {

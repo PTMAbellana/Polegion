@@ -47,7 +47,7 @@ export const CHAPTER4_CONCEPTS = [
     title: 'Volume',
     summary: 'Space inside a 3D solid (cubic units)',
     description: 'Amount of 3D space a solid contains; measured in cubes.',
-    image: '/images/castle5/volume.png',
+    image: '/images/castle5/volume.webp',
     taskId: 'task-0'
   },
   {
@@ -55,7 +55,7 @@ export const CHAPTER4_CONCEPTS = [
     title: 'Cube Volume',
     summary: 'V = s³',
     description: 'Multiply side by itself three times (side cubed).',
-    image: '/images/castle5/cube.png',
+    image: '/images/castle5/cube.webp',
     taskId: 'task-1'
   },
   {
@@ -63,7 +63,7 @@ export const CHAPTER4_CONCEPTS = [
     title: 'Rectangular Prism',
     summary: 'V = l × w × h',
     description: 'Length times width times height gives the volume.',
-    image: '/images/castle5/rectangular-prism.png',
+    image: '/images/castle5/rectangular-prism.webp',
     taskId: 'task-2'
   },
   {
@@ -71,7 +71,7 @@ export const CHAPTER4_CONCEPTS = [
     title: 'Cylinder Volume',
     summary: 'V = πr²h',
     description: 'Area of circular base (πr²) times height.',
-    image: '/images/castle5/cylinder.png',
+    image: '/images/castle5/cylinder.webp',
     taskId: 'task-3'
   },
   {
@@ -79,7 +79,7 @@ export const CHAPTER4_CONCEPTS = [
     title: 'Sphere Volume',
     summary: 'V = (4/3)πr³',
     description: 'Four-thirds times π times radius cubed.',
-    image: '/images/castle5/sphere.png',
+    image: '/images/castle5/sphere.webp',
     taskId: 'task-4'
   },
   {
@@ -87,7 +87,7 @@ export const CHAPTER4_CONCEPTS = [
     title: 'Cone Volume',
     summary: 'V = (1/3)πr²h',
     description: 'One-third of a cylinder with same base and height.',
-    image: '/images/castle5/cone-volume.png',
+    image: '/images/castle5/cone-volume.webp',
     taskId: 'task-5'
   },
   {
@@ -95,7 +95,7 @@ export const CHAPTER4_CONCEPTS = [
     title: 'Square Pyramid',
     summary: 'V = (1/3)b²h',
     description: 'One-third of a prism with square base b and height h.',
-    image: '/images/castle5/square-pyramid-volume.png',
+    image: '/images/castle5/square-pyramid-volume.webp',
     taskId: 'task-6'
   },
   {
@@ -103,7 +103,7 @@ export const CHAPTER4_CONCEPTS = [
     title: 'Triangular Prism',
     summary: 'V = (½bh) × H',
     description: 'Base triangle area (½bh) multiplied by prism height H.',
-    image: '/images/castle5/triangular-prism.png',
+    image: '/images/castle5/triangular-prism.webp',
     taskId: 'task-7'
   },
   {
@@ -111,7 +111,7 @@ export const CHAPTER4_CONCEPTS = [
     title: 'Volume Pattern',
     summary: 'Pyramids/cones = 1/3 of prisms/cylinders',
     description: 'Cones and pyramids have one-third the volume counterparts.',
-    image: '/images/castle5/volume-patterns.png',
+    image: '/images/castle5/volume-patterns.webp',
     taskId: 'task-8'
   },
   {
@@ -119,7 +119,7 @@ export const CHAPTER4_CONCEPTS = [
     title: 'Volume Word Problems',
     summary: 'Calculate capacity of containers',
     description: 'Use volume formulas to find how much a container holds.',
-    image: '/images/castle5/volume-word-problems.png',
+    image: '/images/castle5/volume-word-problems.webp',
     taskId: 'task-9'
   }
 ];
@@ -188,13 +188,13 @@ export const CHAPTER4_NARRATION = {
 
 export const CHAPTER4_RELIC = {
   name: "Orb of Capacity",
-  image: "/images/relics/orb-capacity.png",
+  image: "/images/relics/orb-capacity.webp",
   description: "You have conquered the Arcane Observatory! The Orb of Capacity reveals the volume within any 3D shape, making you a true master of space."
 };
 
 export const CHAPTER4_WIZARD = {
   name: "Dimensius, Guardian of Space",
-  image: "/images/wizards/dimensius-wizard.png"
+  image: "/images/wizards/dimensius-wizard.webp"
 };
 
 export const CHAPTER4_METADATA = {

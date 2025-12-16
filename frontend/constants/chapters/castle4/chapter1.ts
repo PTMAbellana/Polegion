@@ -58,7 +58,7 @@ export const CHAPTER1_CONCEPTS = [
     title: 'Polygon',
     summary: 'A closed figure made of straight line segments',
     description: 'A closed shape formed by straight line segments called sides.',
-    image: '/images/castle4/chapter1/polygon.png',
+    image: '/images/castle4/chapter1/polygon.webp',
     taskId: 'task-0'
   },
   {
@@ -66,7 +66,7 @@ export const CHAPTER1_CONCEPTS = [
     title: 'Naming Polygons',
     summary: 'Named by number of sides: Pentagon (5), Hexagon (6), Octagon (8), etc.',
     description: 'Named by side count (e.g., triangle=3, quadrilateral=4, pentagon=5, hexagon=6, octagon=8).',
-    image: '/images/castle4/chapter1/naming.png',
+    image: '/images/castle4/chapter1/naming.webp',
     taskId: 'task-1'
   },
   {
@@ -74,7 +74,7 @@ export const CHAPTER1_CONCEPTS = [
     title: 'Congruent Polygons',
     summary: 'Same shape AND same size',
     description: 'Polygons that match in shape and size (equal corresponding sides and angles).',
-    image: '/images/castle4/chapter1/congruent.png',
+    image: '/images/castle4/chapter1/congruent.webp',
     taskId: 'task-2'
   },
   {
@@ -82,7 +82,7 @@ export const CHAPTER1_CONCEPTS = [
     title: 'Congruent Example',
     summary: 'Two identical squares are congruent',
     description: 'Squares with equal side lengths (e.g., both 5 cm) are congruent.',
-    image: '/images/castle4/chapter1/congruent-example.png',
+    image: '/images/castle4/chapter1/congruent-example.webp',
     taskId: 'task-3'
   },
   {
@@ -90,7 +90,7 @@ export const CHAPTER1_CONCEPTS = [
     title: 'Similar Polygons',
     summary: 'Same shape but different sizes',
     description: 'Same shape with proportional sides and equal angles; sizes differ.',
-    image: '/images/castle4/chapter1/similar.png',
+    image: '/images/castle4/chapter1/similar.webp',
     taskId: 'task-4'
   },
   {
@@ -98,7 +98,7 @@ export const CHAPTER1_CONCEPTS = [
     title: 'Similar Example',
     summary: 'A small and large square are similar',
     description: 'Squares with side lengths in proportion (e.g., 3 cm and 6 cm) are similar.',
-    image: '/images/castle4/chapter1/similar-example.png',
+    image: '/images/castle4/chapter1/similar-example.webp',
     taskId: 'task-5'
   }
 ];
@@ -158,13 +158,13 @@ export const CHAPTER1_NARRATION = {
 
 export const CHAPTER1_RELIC = {
   name: "Prism of Polygons",
-  image: "/images/relics/prism-polygons.png",
+  image: "/images/relics/prism-polygons.webp",
   description: "You have mastered polygon identification! The Prism of Polygons reveals the nature of any multi-sided shape."
 };
 
 export const CHAPTER1_WIZARD = {
   name: "Polymus, Master of Many Sides",
-  image: "/images/wizards/polymus-wizard.png"
+  image: "/images/wizards/polymus-wizard.webp"
 };
 
 export const CHAPTER1_METADATA = {

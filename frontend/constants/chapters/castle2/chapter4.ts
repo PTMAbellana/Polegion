@@ -49,21 +49,21 @@ export const CHAPTER4_CONCEPTS = [
     title: 'Reading Word Problems',
     summary: 'Identify given angles and relationships',
     description: 'Carefully read to find what angles are given and what relationships connect them. Look for keywords like "complementary" or "supplementary"!',
-    image: '/images/castle2/reading-word-problems.png'
+    image: '/images/castle2/reading-word-problems.webp'
   },
   {
     key: 'equations',
     title: 'Setting Up Equations',
     summary: 'Translate words into mathematical equations',
     description: 'Turn word problems into math! Use variables for unknown angles and write equations based on the angle relationships described.',
-    image: '/images/castle2/setting-up-equations.png'
+    image: '/images/castle2/setting-up-equations.webp'
   },
   {
     key: 'solving',
     title: 'Solving Angle Equations',
     summary: 'Use algebra to find unknown angle measures',
     description: 'Apply your algebra skills to solve for unknown angles. Isolate the variable to discover the missing angle measure!',
-    image: '/images/castle2/solving-equations.png'
+    image: '/images/castle2/solving-equations.webp'
   }
 ];
 
@@ -214,14 +214,14 @@ export const CHAPTER4_NARRATION = {
 // Relic information for reward screen
 export const CHAPTER4_RELIC = {
   name: "Scroll of Solutions",
-  image: "/images/relics/scroll-of-solutions.png",
+  image: "/images/relics/scroll-of-solutions.webp",
   description: "You have conquered the Temple of Solutions! The Scroll of Solutions grants you the power to solve any angle problem, translating words into geometric wisdom."
 };
 
 // Wizard information
 export const CHAPTER4_WIZARD = {
   name: "Solvera, Keeper of Geometric Wisdom",
-  image: "/images/wizards/solvera-wizard.png"
+  image: "/images/wizards/solvera-wizard.webp"
 };
 
 // Chapter metadata

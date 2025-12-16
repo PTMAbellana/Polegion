@@ -181,13 +181,13 @@ const Sidebar = (
                         <div className={styles["logo-container"]}>
                             {isCollapsed && !isHovering ? (
                                 <img
-                                src="/images/polegionIcon.png"
+                                src="/images/polegionIcon.webp"
                                 alt="Polegion Icon"
                                 className={styles["logo-icon"]}
                                 />
                             ) : (
                                 <img
-                                src="/images/polegionLogoWhite.png"
+                                src="/images/polegionLogoWhite.webp"
                                 alt="Polegion Logo"
                                 className={styles["logo-text"]}
                                 />

@@ -50,12 +50,12 @@ const config: ChapterConfig = {
   
   wizard: {
     name: 'Archim, Keeper of the Euclidean Spire',
-    image: '/images/wizards/archim-wizard.png',
+    image: '/images/wizards/archim-wizard.webp',
   },
   
   relic: {
     name: 'Line Compass',
-    image: '/images/relics/line-compass.png',
+    image: '/images/relics/line-compass.webp',
     description: 'You have mastered lines and angles! The Line Compass allows you to measure and draw perfect lines.',
   },
   

@@ -31,7 +31,7 @@ export default function CastleHeader({
         <button className={styleModule.backButton} onClick={onBack}>
           <div className={styleModule.backButtonContent}>
             <img 
-              src="/images/world-map-button.png" 
+              src="/images/world-map-button.webp" 
               alt="World Map"
               className={styleModule.backButtonImage}
               onError={(e) => {

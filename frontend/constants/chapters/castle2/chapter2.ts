@@ -50,35 +50,35 @@ export const CHAPTER2_CONCEPTS = [
     title: 'Adjacent Angles',
     summary: 'Angles that share a vertex and a common side',
     description: 'Two angles are adjacent when they share a common vertex and side, like neighbors next to each other. They don\'t overlap!',
-    image: '/images/castle2/adjacent-angles.png'
+    image: '/images/castle2/adjacent-angles.webp'
   },
   {
     key: 'vertical',
     title: 'Vertical Angles',
     summary: 'Opposite angles formed by intersecting lines - always equal!',
     description: 'When two lines cross, they form vertical angles across from each other. These special angles are always equal in measure!',
-    image: '/images/castle2/vertical-angles.png'
+    image: '/images/castle2/vertical-angles.webp'
   },
   {
     key: 'around-point',
     title: 'Angles Around a Point',
     summary: 'All angles meeting at one point add up to 360°',
     description: 'When multiple angles meet at a single point, their measures always add up to 360° - a complete rotation!',
-    image: '/images/castle2/angles-around-point.png'
+    image: '/images/castle2/angles-around-point.webp'
   },
   {
     key: 'linear-pair',
     title: 'Linear Pair',
     summary: 'Adjacent angles on a straight line that sum to 180°',
     description: 'A linear pair consists of two adjacent angles on a straight line. Together, they always sum to 180°!',
-    image: '/images/castle2/linear-pair.png'
+    image: '/images/castle2/linear-pair.webp'
   },
   {
     key: 'finding-angles',
     title: 'Finding Missing Angles',
     summary: 'Use angle relationships to solve for unknowns',
     description: 'Apply what you know about angle relationships to find missing angle measures. Math detective work!',
-    image: '/images/castle2/finding-angles.png'
+    image: '/images/castle2/finding-angles.webp'
   }
 ];
 
@@ -200,14 +200,14 @@ export const CHAPTER2_NARRATION = {
 // Relic information for reward screen
 export const CHAPTER2_RELIC = {
   name: "Lens of Convergence",
-  image: "/images/relics/lens-of-convergence.png",
+  image: "/images/relics/lens-of-convergence.webp",
   description: "You have mastered angle relationships! The Lens of Convergence reveals how angles connect, showing you vertical angles, linear pairs, and the harmony of angles around a point."
 };
 
 // Wizard information
 export const CHAPTER2_WIZARD = {
   name: "Vertex, Master of Angle Positions",
-  image: "/images/wizards/vertex-wizard.png"
+  image: "/images/wizards/vertex-wizard.webp"
 };
 
 // Chapter metadata

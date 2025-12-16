@@ -17,7 +17,7 @@ const Certificate = forwardRef<HTMLDivElement, CertificateProps>(
             {/* Header with logo */}
             <div className={styles.header}>
               <img 
-                src="/images/polegionLogo.png" 
+                src="/images/polegionLogo.webp" 
                 alt="Polegion Logo" 
                 className={styles.logo}
               />

@@ -7,7 +7,7 @@ interface WizardCharacterProps {
 }
 
 const WizardCharacter: React.FC<WizardCharacterProps> = ({
-  imagePath = '/images/wizards/wizard.png',
+  imagePath = '/images/wizards/wizard.webp',
   alt = 'Wizard Archimedes',
   styles
 }) => {

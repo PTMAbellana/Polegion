@@ -60,12 +60,12 @@ const config: ChapterConfig = {
   
   wizard: {
     name: 'Archim, Keeper of the Euclidean Spire',
-    image: '/images/wizards/archim-wizard.png',
+    image: '/images/wizards/archim-wizard.webp',
   },
   
   relic: {
     name: 'Pointlight Crystal',
-    image: '/images/relics/pointlight-crystal.png',
+    image: '/images/relics/pointlight-crystal.webp',
     description: 'You have mastered the fundamental building blocks of geometry! The Pointlight Crystal allows you to illuminate dark areas and reveal hidden paths.',
   },
   

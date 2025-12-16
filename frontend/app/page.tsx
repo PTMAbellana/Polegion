@@ -17,21 +17,21 @@ export default function Home() {
       id: 1,
       title: "7 Interactive Worlds",
       description: "Navigate through 2 assessment levels and 5 castle realms, each with unique geometry challenges and lessons!",
-      image: "/images/worldmap-page.png",
+      image: "/images/worldmap-page.webp",
       color: "#2F3E75",
     },
     {
       id: 2,
       title: "Collaborative Learning",
       description: "Join virtual rooms, compete with classmates, and participate in real-time geometry challenges!",
-      image: "/images/dashboard-page.png",
+      image: "/images/dashboard-page.webp",
       color: "#3A9679",
     },
     {
       id: 3,
       title: "Collect Relics & Track Progress",
       description: "Earn relics as you master concepts, complete assessments, and unlock achievements!",
-      image: "/images/chapter-complete-page.png",
+      image: "/images/chapter-complete-page.webp",
       color: "#FABC60",
     },
   ];
@@ -67,7 +67,7 @@ export default function Home() {
           name="description"
           content="Join the adventure! Learn geometry through magical castles, fun games, and exciting quests."
         />
-        <link rel="icon" type="image/png" href="/images/polegionIcon.png" />
+        <link rel="icon" type="image/png" href="/images/polegionIcon.webp" />
       </Head>
 
       <div className={styles.landingContainer}>
@@ -304,7 +304,7 @@ export default function Home() {
             </div>
             <div className={styles.previewCard}>
               <Image 
-                src="/images/paths-of-power.png" 
+                src="/images/paths-of-power.webp" 
                 alt="Fun Puzzles" 
                 fill 
                 className={styles.previewImage}
@@ -313,7 +313,7 @@ export default function Home() {
             </div>
             <div className={styles.previewCard}>
               <Image 
-                src="/images/wizard-check.png" 
+                src="/images/wizard-check.webp" 
                 alt="Awesome Rewards" 
                 fill 
                 className={styles.previewImage}
@@ -355,7 +355,7 @@ export default function Home() {
           <div className={styles.footerContent}>
             <div className={styles.footerBrand}>
               <Image 
-                src="/images/polegionIcon.png" 
+                src="/images/polegionIcon.webp" 
                 alt="Polegion" 
                 width={30} 
                 height={30}

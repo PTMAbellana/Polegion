@@ -189,7 +189,7 @@ export default function ResetPassword() {
                             <>
                                 <div className={styles.logoContainer}>
                                     <img
-                                        src="/images/polegionLogo.png"
+                                        src="/images/polegionLogo.webp"
                                         alt="Logo"
                                         className={styles.logo}
                                     />

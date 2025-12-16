@@ -59,42 +59,42 @@ export const CHAPTER1_CONCEPTS = [
     title: 'Center',
     summary: 'The point equidistant from all points on the circle, usually labeled O',
     description: 'The fixed point at the middle of a circle, often labeled O.',
-    image: '/images/castle3/circle-center.png'
+    image: '/images/castle3/circle-center.webp'
   },
   {
     key: 'radius',
     title: 'Radius',
     summary: 'A line segment from the center to any point on the circle',
     description: 'A segment from the center to a point on the circle.',
-    image: '/images/castle3/radius.png'
+    image: '/images/castle3/radius.webp'
   },
   {
     key: 'diameter',
     title: 'Diameter',
     summary: 'A line segment through the center connecting two opposite points. Diameter = 2 × Radius',
     description: 'A segment through the center connecting two points; equals 2 × radius.',
-    image: '/images/castle3/diameter.png'
+    image: '/images/castle3/diameter.webp'
   },
   {
     key: 'chord',
     title: 'Chord',
     summary: 'A line segment connecting two points on the circle (not through center)',
     description: 'A segment between two points on the circle that does not pass through the center.',
-    image: '/images/castle3/chord.png'
+    image: '/images/castle3/chord.webp'
   },
   {
     key: 'arc',
     title: 'Arc',
     summary: 'A curved portion of the circle between two points',
     description: 'A curved portion of the circle between two points.',
-    image: '/images/castle3/arc.png'
+    image: '/images/castle3/arc.webp'
   },
   {
     key: 'sector',
     title: 'Sector',
     summary: 'A pie-shaped region between two radii and an arc',
     description: 'A pie-shaped region bounded by two radii and the arc.',
-    image: '/images/castle3/sector.png'
+    image: '/images/castle3/sector.webp'
   }
 ];
 
@@ -154,13 +154,13 @@ export const CHAPTER1_NARRATION = {
 
 export const CHAPTER1_RELIC = {
   name: "Compass of the Circle",
-  image: "/images/relics/compass-circle.png",
+  image: "/images/relics/compass-circle.webp",
   description: "You have mastered the parts of a circle! The Compass of the Circle reveals the hidden structure within every curve."
 };
 
 export const CHAPTER1_WIZARD = {
   name: "Arcana, Keeper of the Curved Path",
-  image: "/images/wizards/arcana-wizard.png"
+  image: "/images/wizards/arcana-wizard.webp"
 };
 
 export const CHAPTER1_METADATA = {

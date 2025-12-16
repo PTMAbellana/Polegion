@@ -45,7 +45,7 @@ export const CHAPTER1_CONCEPTS = [
     title: 'Plane Figures (2D)',
     summary: 'Flat shapes with only length and width',
     description: 'Flat 2D shapes with length and width only (no depth).',
-    image: '/images/castle5/plane-figures.png',
+    image: '/images/castle5/plane-figures.webp',
     taskId: 'task-0'
   },
   {
@@ -53,7 +53,7 @@ export const CHAPTER1_CONCEPTS = [
     title: 'Plane Examples',
     summary: 'Circle, square, triangle, rectangle, pentagon, hexagon',
     description: 'Common plane figures include circle, square, triangle, rectangle, pentagon, and hexagon.',
-    image: '/images/castle5/plane-examples.png',
+    image: '/images/castle5/plane-examples.webp',
     taskId: 'task-1'
   },
   {
@@ -61,7 +61,7 @@ export const CHAPTER1_CONCEPTS = [
     title: 'Solid Figures (3D)',
     summary: 'Shapes with length, width, AND height',
     description: '3D shapes with length, width, and height (depth).',
-    image: '/images/castle5/solid-figures.png',
+    image: '/images/castle5/solid-figures.webp',
     taskId: 'task-2'
   },
   {
@@ -69,7 +69,7 @@ export const CHAPTER1_CONCEPTS = [
     title: 'Solid Examples',
     summary: 'Cube, sphere, cylinder, cone, pyramid, prism',
     description: 'Common solid figures include cube, sphere, cylinder, cone, pyramid, and prism.',
-    image: '/images/castle5/solid-examples.png',
+    image: '/images/castle5/solid-examples.webp',
     taskId: 'task-3'
   },
   {
@@ -77,7 +77,7 @@ export const CHAPTER1_CONCEPTS = [
     title: 'Key Difference',
     summary: 'Plane = flat, Solid = has volume',
     description: 'Plane figures are flat; solid figures occupy space and have volume.',
-    image: '/images/castle5/difference.png',
+    image: '/images/castle5/difference.webp',
     taskId: 'task-4'
   },
   {
@@ -85,7 +85,7 @@ export const CHAPTER1_CONCEPTS = [
     title: 'Prism',
     summary: 'Two parallel bases connected by rectangular faces',
     description: 'A solid with two parallel congruent bases and rectangular lateral faces.',
-    image: '/images/castle5/prism.png',
+    image: '/images/castle5/prism.webp',
     taskId: 'task-5'
   },
   {
@@ -93,7 +93,7 @@ export const CHAPTER1_CONCEPTS = [
     title: 'Pyramid',
     summary: 'Polygon base with triangular faces meeting at apex',
     description: 'A solid with a polygon base and triangular faces meeting at a single apex.',
-    image: '/images/castle5/pyramid.png',
+    image: '/images/castle5/pyramid.webp',
     taskId: 'task-6'
   }
 ];
@@ -156,13 +156,13 @@ export const CHAPTER1_NARRATION = {
 
 export const CHAPTER1_RELIC = {
   name: "Lens of Dimensions",
-  image: "/images/relics/lens-dimensions.png",
+  image: "/images/relics/lens-dimensions.webp",
   description: "You can now see beyond the surface! The Lens of Dimensions reveals whether a shape exists in 2D or 3D space."
 };
 
 export const CHAPTER1_WIZARD = {
   name: "Dimensius, Guardian of Space",
-  image: "/images/wizards/dimensius-wizard.png"
+  image: "/images/wizards/dimensius-wizard.webp"
 };
 
 export const CHAPTER1_METADATA = {

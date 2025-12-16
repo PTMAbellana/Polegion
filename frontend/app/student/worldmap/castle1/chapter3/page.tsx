@@ -50,12 +50,12 @@ const config: ChapterConfig = {
   
   wizard: {
     name: 'Archim, Keeper of the Euclidean Spire',
-    image: '/images/wizards/archim-wizard.png',
+    image: '/images/wizards/archim-wizard.webp',
   },
   
   relic: {
     name: 'Polygon Prism',
-    image: '/images/relics/polygon-prism.png',
+    image: '/images/relics/polygon-prism.webp',
     description: 'You have mastered shapes and polygons! The Polygon Prism reveals the hidden properties of all geometric forms.',
   },
   

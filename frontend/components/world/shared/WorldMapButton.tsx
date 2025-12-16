@@ -9,7 +9,7 @@ interface WorldMapButtonProps {
 
 const WorldMapButton: React.FC<WorldMapButtonProps> = ({
   onClick,
-  imagePath = '/images/world-map-button.png',
+  imagePath = '/images/world-map-button.webp',
   text = 'World Map',
   styles
 }) => {
