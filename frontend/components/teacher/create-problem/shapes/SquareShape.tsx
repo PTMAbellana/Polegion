@@ -554,6 +554,7 @@ const SquareShape: React.FC<SquareShapeProps> = ({
           fill={shape.fill || "#e3dcc2"}
           stroke="#000"
           strokeWidth={4}
+          hitStrokeWidth={20}
           closed={true}
         />
 

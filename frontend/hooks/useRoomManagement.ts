@@ -5,6 +5,7 @@ import { TEACHER_ROUTES } from '@/constants/routes'
 import toast from 'react-hot-toast'
 import Swal from 'sweetalert2'
 import { UserType } from '@/types/common/user'
+import { sanitizeErrorMessage } from '@/utils/errorMessages'
 
 export const useRoomManagement = (roomCode: string) => {
     const router = useRouter()
@@ -37,13 +38,13 @@ export const useRoomManagement = (roomCode: string) => {
             // If confirmed, proceed with kicking the participant
             const res = await removeParticipant(participant.participant_id);
             if (res.success) {
-                toast.success(res.message || 'Participant kicked successfully')
+                toast.success(res.message || 'Participant removed successfully')
             } else {
-                toast.error(res.error || 'Failed to kick participant') 
+                toast.error(sanitizeErrorMessage(res.error || res)) 
             }
         } catch (error) {
             console.error('❌ Failed to kick participant:', error)
-            toast.error('Failed to kick participant')
+            toast.error(sanitizeErrorMessage(error))
         }     
     }
 
@@ -79,7 +80,7 @@ export const useRoomManagement = (roomCode: string) => {
             setTimeout(() => setCopySuccess(false), 2000)
         } catch (error) {
             console.error('❌ Failed to copy room code:', error)
-            toast.error('Failed to copy room code')
+            toast.error('Unable to copy room code. Please try again')
             
             // Final fallback - show the room code in an alert
             alert(`Room code: ${roomCode}\n\nPlease copy this manually.`)
@@ -105,10 +106,10 @@ export const useRoomManagement = (roomCode: string) => {
                 setShowEditModal(false)
                 // No need to call fetchRoomDetails since the store already updates currentRoom
             } else {
-                toast.error(response.error || 'Failed to update room')
+                toast.error(sanitizeErrorMessage(response.error || response))
             }
-        } catch {
-            toast.error('An error occurred while updating the room')
+        } catch (error) {
+            toast.error(sanitizeErrorMessage(error))
         } finally {
             setEditLoading(false)
         }
@@ -132,7 +133,7 @@ export const useRoomManagement = (roomCode: string) => {
                 toast.success('Room deleted successfully!')
                 router.replace(TEACHER_ROUTES.VIRTUAL_ROOMS)
             } else {
-                toast.error(deleteResult.error || 'Failed to delete room')
+                toast.error(sanitizeErrorMessage(deleteResult.error || deleteResult))
             }
         }
     }
@@ -145,7 +146,7 @@ export const useRoomManagement = (roomCode: string) => {
         try {
             const result = await inviteParticipant( roomCode, email )
             if (!result.success) {
-                toast.error(result.error || 'Failed to send invitation')
+                toast.error(sanitizeErrorMessage(result.error || result))
                 return
             }
             console.log('Inviting participant with email:', email)

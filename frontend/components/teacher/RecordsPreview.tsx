@@ -4,6 +4,7 @@ import React, { useState, useMemo } from 'react'
 import { RecordStudent } from '@/types'
 import styles from '@/styles/records.module.css'
 import { ChevronUp, ChevronDown, Eye } from 'lucide-react'
+import { safeNumber, safePercentage } from '@/utils/numberFormat'
 
 interface RecordsPreviewProps {
   records: RecordStudent[]
@@ -184,18 +185,18 @@ export default function RecordsPreview({
                 {isWorldmapView && (
                   <>
                     <div className={styles.records_table_cell}>
-                      <strong>{record.castles_completed || 0}/{record.total_castles || 7}</strong>
+                      <strong>{safeNumber(record.castles_completed, 0)}/{safeNumber(record.total_castles, 7)}</strong>
                     </div>
                     <div className={styles.records_table_cell}>
-                      {record.pretest_score !== null && record.pretest_score !== undefined ? `${record.pretest_score}%` : 'N/A'}
+                      {safePercentage(record.pretest_score)}
                     </div>
                     <div className={styles.records_table_cell}>
-                      {record.posttest_score !== null && record.posttest_score !== undefined ? `${record.posttest_score}%` : 'N/A'}
+                      {safePercentage(record.posttest_score)}
                     </div>
                   </>
                 )}
                 <div className={styles.records_table_cell}>
-                    <strong>{record.xp || 0}</strong>
+                    <strong>{safeNumber(record.xp, 0)}</strong>
                 </div>
                 {showProgressButton && (
                   <div className={styles.records_table_cell}>

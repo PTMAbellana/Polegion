@@ -6,6 +6,7 @@ import Loader from "@/components/Loader"
 import LoadingOverlay from "@/components/LoadingOverlay"
 import { useAuthStore } from "@/store/authStore"
 import { useLeaderboardManagement } from "@/hooks/useLeaderboardManagement"
+import { useLeaderboardRealtime } from "@/hooks/useLeaderboardRealtime"
 import { Trophy, Medal } from "lucide-react"
 import LeaderboardHeader from "@/components/student/LeaderboardHeader"
 import LeaderboardTabs from "@/components/student/LeaderboardTabs"
@@ -27,6 +28,9 @@ export default function LeaderboardPage({ params }: { params: Promise<{ roomId: 
     fetchLeaderboards,
     clearLeaderboards
   } = useLeaderboardManagement(roomId)
+
+  // Real-time updates for leaderboard
+  const { isConnected } = useLeaderboardRealtime(roomId, fetchLeaderboards)
 
   useEffect(() => {
     if (isLoggedIn && !appLoading && roomId) {

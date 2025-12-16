@@ -6,6 +6,8 @@ import { useRouter } from "next/navigation";
 import { ROUTES } from "@/constants/routes";
 import styles from "./page.module.css";
 
+import { ModeToggle } from "@/components/theme-toggle";
+
 export default function Home() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
@@ -15,24 +17,31 @@ export default function Home() {
   const carouselSlides = [
     {
       id: 1,
-      title: "7 Interactive Worlds",
-      description: "Navigate through 2 assessment levels and 5 castle realms, each with unique geometry challenges and lessons!",
+      title: "Interactive World Map",
+      description: "Navigate through 7 distinct worlds, each offering unique geometry challenges and progressive learning paths!",
       image: "/images/worldmap-page.webp",
-      color: "#2F3E75",
+      color: "#2E7D32",
     },
     {
       id: 2,
-      title: "Collaborative Learning",
-      description: "Join virtual rooms, compete with classmates, and participate in real-time geometry challenges!",
+      title: "Curriculum-Based Modules",
+      description: "Follow structured lessons aligned with educational standards, covering polygons, angles, circles, and spatial reasoning!",
       image: "/images/dashboard-page.webp",
-      color: "#3A9679",
+      color: "#2E7D32",
     },
     {
       id: 3,
-      title: "Collect Relics & Track Progress",
-      description: "Earn relics as you master concepts, complete assessments, and unlock achievements!",
+      title: "Pre & Post Assessments",
+      description: "Track your learning journey with comprehensive assessments that measure your geometry mastery!",
       image: "/images/chapter-complete-page.webp",
-      color: "#FABC60",
+      color: "#2E7D32",
+    },
+    {
+      id: 4,
+      title: "Collaborative Rooms",
+      description: "Join virtual classrooms, compete with peers, and participate in teacher-led geometry competitions!",
+      image: "/images/room-page.webp",
+      color: "#2E7D32",
     },
   ];
 
@@ -94,9 +103,12 @@ export default function Home() {
               <span></span>
               <span></span>
             </button>
-            <button className={styles.signInBtn} onClick={handleSignIn}>
-              Sign In
-            </button>
+            <div className={styles.headerActions}>
+              <ModeToggle />
+              <button className={styles.signInBtn} onClick={handleSignIn}>
+                Sign In
+              </button>
+            </div>
           </div>
           {isMobileMenuOpen && (
             <div className={styles.mobileMenu}>
@@ -113,13 +125,12 @@ export default function Home() {
         {/* Hero Section - Big and Exciting */}
         <section className={styles.heroSection}>
           <div className={styles.heroContent}>
-            <div className={styles.heroBadge}>Welcome! Currently in Development</div>
             <h1 className={styles.heroTitle}>
               Master Geometry Through<br/>
               Interactive Adventures
             </h1>
             <p className={styles.heroSubtitle}>
-              An interactive geometry learning platform featuring 7 progressive worlds—2 comprehensive assessment levels and 5 curriculum-based castle realms. Navigate through engaging challenges, collect relics as you master concepts, and track your improvement through structured pre-test and post-test evaluations.
+              An interactive geometry learning platform featuring comprehensive assessment levels. Navigate through engaging challenges, collect relics as you master concepts, and track your improvement through structured pre-test and post-test evaluations.
             </p>
             <button 
               className={styles.ctaButton} 
@@ -139,18 +150,18 @@ export default function Home() {
               )}
             </button>
             <p className={styles.trustText}>
-              Safe & Focused • Built for Students • Developed with AI Assistance
+              Safe and Focused • Built for Students • Developed with AI Assistance
             </p>
           </div>
-        </section>
-
-        {/* Credit Section */}
-        <section className={styles.creditSection}>
-          <div className={styles.creditContent}>
-            <p className={styles.creditText}>
-              Curriculum inspired by the Grade 6 Mathematics program at Cebu Institute of Technology University
-            </p>
-          </div>
+          
+          {/* Credit Section */}
+          <section className={styles.creditSection}>
+            <div className={styles.creditContent}>
+              <p className={styles.creditText}>
+                Curriculum inspired by the Grade 6 Mathematics program at Cebu Institute of Technology University
+              </p>
+            </div>
+          </section>
         </section>
 
         {/* Interactive Carousel Section */}
@@ -223,32 +234,7 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Why Kids Love It */}
-        <section className={styles.featuresSection}>
-          <div className={styles.sectionHeader}>
-            <span className={styles.sectionBadge}>Key Features</span>
-            <h2 className={styles.sectionTitle}>Why Students Love It</h2>
-          </div>
 
-          <div className={styles.featuresGrid}>
-            <div className={styles.featureCard}>
-              <h3>Interactive World Map</h3>
-              <p>Navigate through 7 distinct worlds, each offering unique geometry challenges and progressive learning paths!</p>
-            </div>
-            <div className={styles.featureCard}>
-              <h3>Curriculum-Based Modules</h3>
-              <p>Follow structured lessons aligned with educational standards, covering polygons, angles, circles, and spatial reasoning!</p>
-            </div>
-            <div className={styles.featureCard}>
-              <h3>Pre & Post Assessments</h3>
-              <p>Track your learning journey with comprehensive assessments that measure your geometry mastery!</p>
-            </div>
-            <div className={styles.featureCard}>
-              <h3>Collaborative Rooms</h3>
-              <p>Join virtual classrooms, compete with peers, and participate in teacher-led geometry competitions!</p>
-            </div>
-          </div>
-        </section>
 
         {/* Why Parents Trust It */}
         <section className={styles.parentsSection}>
@@ -272,56 +258,20 @@ export default function Home() {
                   <div className={styles.parentCardIcon}>AI BUILT</div>
                   <h3>AI-Assisted Development</h3>
                 </div>
-                <p>Platform developed with AI assistance to optimize user experience, generate educational content, and streamline development processes.</p>
+                <p>Our platform is developed with AI assistance to create an optimized, user-friendly, and effective learning experience.</p>
               </div>
               <div className={styles.parentCard}>
                 <div className={styles.parentCardHeader}>
                   <div className={styles.parentCardIcon}>TRACKING</div>
-                  <h3>Progress Tracking</h3>
+                  <h3>Track Your Child's Progress</h3>
                 </div>
-                <p>Comprehensive pre-test and post-test assessments measure geometry mastery and track improvement over time.</p>
+                <p>Measure your child's geometry mastery and track their improvement over time with our comprehensive assessment tools.</p>
               </div>
             </div>
           </div>
         </section>
 
-        {/* Social Proof - Preview Images */}
-        {/* <section className={styles.previewSection}>
-          <div className={styles.sectionHeader}>
-            <span className={styles.sectionBadge}>Sneak Peek</span>
-            <h2 className={styles.sectionTitle}>Take A Look Inside</h2>
-          </div>
 
-          <div className={styles.previewGrid}>
-            <div className={styles.previewCard}>
-              <Image 
-                src="/images/world-map-bg.svg" 
-                alt="World Map" 
-                fill 
-                className={styles.previewImage}
-              />
-              <div className={styles.previewLabel}>Interactive World Map</div>
-            </div>
-            <div className={styles.previewCard}>
-              <Image 
-                src="/images/paths-of-power.webp" 
-                alt="Fun Puzzles" 
-                fill 
-                className={styles.previewImage}
-              />
-              <div className={styles.previewLabel}>Engaging Puzzles</div>
-            </div>
-            <div className={styles.previewCard}>
-              <Image 
-                src="/images/wizard-check.webp" 
-                alt="Awesome Rewards" 
-                fill 
-                className={styles.previewImage}
-              />
-              <div className={styles.previewLabel}>Achievement Rewards</div>
-            </div>
-          </div>
-        </section> */}
 
         {/* Final CTA */}
         <section className={styles.finalCtaSection}>
@@ -363,14 +313,11 @@ export default function Home() {
               <span>Polegion</span>
             </div>
             <nav className={styles.footerLinks}>
-              <a href="#">About</a>
-              <a href="#">Contact</a>
-              <a href="#">Privacy</a>
-              <a href="#">Help</a>
+              <a href="/privacy-policy">Privacy Policy</a>
             </nav>
           </div>
           <div className={styles.footerBottom}>
-            <p>Making geometry accessible through interactive learning • Built with AI assistance</p>
+            <p>© {new Date().getFullYear()} Polegion. All rights reserved.</p>
           </div>
         </footer>
       </div>

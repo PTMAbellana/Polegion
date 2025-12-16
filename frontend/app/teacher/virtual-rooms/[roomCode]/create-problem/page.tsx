@@ -301,7 +301,7 @@ console.log("Current Room in CreateProblemPage:", currentRoom);
     setTimerValue(typeof problem.timer === 'number' ? problem.timer : 5);
     setHintOpen(problem.hint !== null && problem.hint !== undefined);
     setHint(problem.hint ?? "");
-    const isVisible = problem.visibility === "public" || problem.visibility === "show";
+    const isVisible = problem.visibility === "public";
     console.log('Setting visible to:', isVisible, 'based on visibility:', problem.visibility);
     setVisible(isVisible);
     setProblemType((problem as any).problem_type || 'general');

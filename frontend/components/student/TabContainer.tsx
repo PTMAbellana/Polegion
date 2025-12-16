@@ -9,7 +9,7 @@ import { TabType } from '@/constants/ui'
 export default function TabContainer({ problems, competitions, roomCode }: TabContainerProps) {
     const [activeTab, setActiveTab] = useState<TabType>('problems')
     const newProb = problems.filter(problem => 
-        problem.visibility === 'public' || problem.visibility === 'show'
+        problem.visibility === 'public'
     )
     return (
         <div className={styles.tabsContainer}>

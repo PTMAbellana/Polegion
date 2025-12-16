@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import { useAuthStore } from "@/store/authStore"
 import { useTeacherRoomStore } from "@/store/teacherRoomStore"
 import { getRoomLeaderboards } from "@/api/records"
+import { useTeacherDashboardRealtime } from "@/hooks/useTeacherDashboardRealtime"
 import Loader from "@/components/Loader"
 import LoadingOverlay from "@/components/LoadingOverlay"
 import PageHeader from "@/components/PageHeader"
@@ -17,6 +18,7 @@ import { Competition } from "@/types/common/competition"
 import { LeaderboardData } from "@/types/common/leaderboard"
 import AnimatedAvatar from "@/components/profile/AnimatedAvatar"
 import { FaChalkboardTeacher, FaPlus, FaRegFileAlt } from 'react-icons/fa'
+import { safeAverage, safeMax, safeNumber } from "@/utils/numberFormat"
 
 // Extended type for competitions with room context and additional fields
 interface CompetitionWithRoom extends Competition {
@@ -35,61 +37,29 @@ export default function TeacherDashboard() {
     fetchCreatedRooms 
   } = useTeacherRoomStore()
 
-  const [recentCompetitions, setRecentCompetitions] = useState<CompetitionWithRoom[]>([])
-  const [leaderboards, setLeaderboards] = useState<LeaderboardData[]>([])
-
+  // Initial fetch on mount
   useEffect(() => {
     if (isLoggedIn && !appLoading) {
       void fetchCreatedRooms()
     }
   }, [isLoggedIn, appLoading, fetchCreatedRooms])
 
-  // Fetch leaderboards for created rooms
+  // Real-time hook for competitions and leaderboards
+  const { recentCompetitions, leaderboards, lastUpdate } = useTeacherDashboardRealtime(
+    userProfile?.id,
+    createdRooms
+  )
+
+  // Auto-refresh rooms when real-time updates occur
   useEffect(() => {
-    const fetchLeaderboards = async () => {
-      if (createdRooms.length > 0) {
-        const leaderboardPromises = createdRooms.slice(0, 3).map(async (room) => {
-          const result = await getRoomLeaderboards(room.id)
-          if (result.success && result.data) {
-            return {
-              id: room.id,
-              title: room.title,
-              data: result.data.slice(0, 5) // Top 5
-            }
-          }
-          return null
-        })
-        const results = await Promise.all(leaderboardPromises)
-        setLeaderboards(results.filter(Boolean) as LeaderboardData[])
+    if (lastUpdate > 0 && createdRooms.length > 0) {
+      // Debounce: only refresh if last update was recent
+      const timeSinceUpdate = Date.now() - lastUpdate
+      if (timeSinceUpdate < 1000) {
+        void fetchCreatedRooms()
       }
     }
-    fetchLeaderboards()
-  }, [createdRooms])
-
-  // Extract recent competitions from created rooms
-  useEffect(() => {
-    if (createdRooms.length > 0) {
-      const competitions: CompetitionWithRoom[] = []
-      createdRooms.forEach(room => {
-        // Type guard: check if room has competitions property
-        const roomWithCompetitions = room as typeof room & { competitions?: Competition[] }
-        if (roomWithCompetitions.competitions && Array.isArray(roomWithCompetitions.competitions)) {
-          competitions.push(...roomWithCompetitions.competitions.map((comp: Competition) => ({
-            ...comp,
-            roomTitle: room.title,
-            roomCode: room.code
-          })))
-        }
-      })
-      // Sort by most recent (ONGOING first, then by ID desc)
-      competitions.sort((a, b) => {
-        if (a.status === 'ONGOING' && b.status !== 'ONGOING') return -1
-        if (a.status !== 'ONGOING' && b.status === 'ONGOING') return 1
-        return (b.id || 0) - (a.id || 0)
-      })
-      setRecentCompetitions(competitions.slice(0, 6)) // Show max 6
-    }
-  }, [createdRooms])
+  }, [lastUpdate, fetchCreatedRooms, createdRooms.length])
 
   const handleCreateRoom = () => {
     router.push(TEACHER_ROUTES.VIRTUAL_ROOMS)
@@ -281,16 +251,15 @@ export default function TeacherDashboard() {
                           <div className={competitionStyles.stat}>
                             <span className={competitionStyles.stat_label}>Avg Score:</span>
                             <span className={competitionStyles.stat_value}>
-                              {Math.round(
-                                competition.participants.reduce((sum, p) => sum + (p.accumulated_xp || 0), 0) / 
-                                competition.participants.length
+                              {safeAverage(
+                                competition.participants.map(p => p.accumulated_xp || 0)
                               )} XP
                             </span>
                           </div>
                           <div className={competitionStyles.stat}>
                             <span className={competitionStyles.stat_label}>Top Score:</span>
                             <span className={competitionStyles.stat_value}>
-                              {Math.max(...competition.participants.map(p => p.accumulated_xp || 0))} XP
+                              {safeMax(competition.participants.map(p => p.accumulated_xp || 0))} XP
                             </span>
                           </div>
                         </>
@@ -347,7 +316,7 @@ export default function TeacherDashboard() {
                             </span>
                           </div>
                           <div className={teacherStyles.leaderboardScore}>
-                            {item.accumulated_xp} XP
+                            {safeNumber(item.accumulated_xp, 0)} XP
                           </div>
                         </div>
                       )

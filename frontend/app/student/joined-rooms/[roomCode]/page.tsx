@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useAuthStore } from '@/store/authStore'
 import { useStudentRoomStore } from '@/store/studentRoomStore'
 import { useStudentRoomManagement } from '@/hooks/useStudentRoomManagement'
+import { useRoomRealtime } from '@/hooks/useRoomRealtime'
 import StudentRoomBanner from '@/components/student/StudentRoomBanner'
 import TabContainer from '@/components/student/TabContainer'
 import StudentParticipantsList from '@/components/student/StudentParticipantsList'
@@ -35,30 +36,12 @@ export default function StudentRoomDetailsPage({ params }: { params: Promise<{ r
         handleCopyRoomCode
     } = useStudentRoomManagement(roomCode, currentRoom?.id)
 
-    const handleRefresh = async () => {
-        console.log('🔘 Refresh button clicked!', { roomCode, hasCurrentRoom: !!currentRoom });
-        
-        if (!roomCode) {
-            console.log('❌ No roomCode, aborting refresh');
-            return;
-        }
-        
-        // Clear axios cache to force fresh data
-        cacheControl.clear();
-        console.log('🔄 Refreshing room data for:', roomCode);
-        
-        try {
-            // Force refetch of joined rooms first
-            const roomsResult = await fetchJoinedRooms();
-            console.log('✅ Joined rooms refreshed:', roomsResult);
-            
-            // Then fetch detailed room data
-            await fetchRoomDetails(roomCode);
-            console.log('✅ Room details refreshed');
-        } catch (error) {
-            console.error('❌ Error refreshing:', error);
-        }
-    }
+    // Real-time updates for room data (replaces manual refresh)
+    const { isConnected } = useRoomRealtime(
+        currentRoom?.id,
+        roomCode,
+        fetchRoomDetails
+    )
 
     useEffect(() => {
         if (roomCode && isLoggedIn) {
@@ -148,15 +131,13 @@ export default function StudentRoomDetailsPage({ params }: { params: Promise<{ r
                                 <FaCopy className={styles.roomCodeIcon} />
                             )}
                         </div>
-                        <button 
-                            onClick={handleRefresh}
-                            className={styles.refreshButton}
-                            title="Refresh room data"
-                            disabled={roomLoading}
-                        >
-                            <FaSyncAlt className={roomLoading ? styles.spinning : ''} />
-                            <span>Refresh</span>
-                        </button>
+                        {/* Real-time connection indicator */}
+                        {isConnected && (
+                            <div className={styles.realtimeIndicator} title="Live updates enabled">
+                                <span className={styles.realtimeDot}></span>
+                                <span className={styles.realtimeText}>Live</span>
+                            </div>
+                        )}
                     </div>
 
                     <StudentParticipantsList participants={participants} />

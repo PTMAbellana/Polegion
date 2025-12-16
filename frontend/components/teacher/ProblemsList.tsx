@@ -87,7 +87,7 @@ export default function ProblemsList({ problems, roomCode }: ProblemsListProps) 
                                         {problem.difficulty}
                                     </span>
                                     <div className={styles.visibilityIndicator}>
-                                        {problem.visibility === 'public' || problem.visibility === 'show' ? (
+                                        {problem.visibility === 'public' ? (
                                             <><FaEye /> Visible</>
                                         ) : (
                                             <><FaEyeSlash /> Hidden</>

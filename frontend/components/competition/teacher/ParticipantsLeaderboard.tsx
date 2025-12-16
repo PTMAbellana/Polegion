@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import { ChevronDown, ChevronUp } from 'lucide-react'
 import { CompetitionParticipant } from '@/types/common/competition'
 import styles from '@/styles/competition-teacher.module.css'
+import { safeNumber } from '@/utils/numberFormat'
 
 interface ParticipantsLeaderboardProps {
   participants: CompetitionParticipant[]
@@ -131,7 +132,7 @@ export default function ParticipantsLeaderboard({ participants, activeParticipan
                     </div>
                     <div className={styles.participantRight}>
                       <div className={styles.participantXp}>
-                        {participant.accumulated_xp} XP
+                        {safeNumber(participant.accumulated_xp, 0)} XP
                       </div>
                     </div>
                   </div>

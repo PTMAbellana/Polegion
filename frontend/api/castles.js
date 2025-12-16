@@ -3,6 +3,26 @@ import api from './axios'
 // UUID validation regex
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
+// Get all castles without user progress (for teachers)
+export const getCastles = async () => {
+    try {
+        const timestamp = Date.now()
+        const res = await api.get(`castles?_t=${timestamp}`, { cache: false })
+        
+        return {
+            success: true,
+            data: res.data.data || res.data || []
+        }
+    } catch (error) {
+        console.error('[CastleAPI] Error fetching castles:', error)
+        return {
+            success: false,
+            message: error.response?.data?.message || 'Failed to fetch castles',
+            error: error.response?.data?.error || error.message
+        }
+    }
+}
+
 // Get all castles with optional user progress
 export const getAllCastles = async (userId) => {
     try {

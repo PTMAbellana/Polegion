@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { useAuthStore } from "@/store/authStore"
 import { useStudentRoomStore } from "@/store/studentRoomStore"
+import { useStudentDashboardRealtime } from "@/hooks/useStudentDashboardRealtime"
 import Loader from "@/components/Loader"
 import LoadingOverlay from "@/components/LoadingOverlay"
 import PageHeader from "@/components/PageHeader"
@@ -38,8 +39,7 @@ export default function StudentDashboard() {
     fetchJoinedRooms 
   } = useStudentRoomStore()
 
-  const [activeCompetitions, setActiveCompetitions] = useState<CompetitionWithRoom[]>([])
-  const [leaderboards, setLeaderboards] = useState<LeaderboardData[]>([])
+  // Assessment and castle state (not affected by real-time)
   const [pretestScores, setPretestScores] = useState<any>(null)
   const [posttestScores, setPosttestScores] = useState<any>(null)
   const [assessmentLoading, setAssessmentLoading] = useState(true)
@@ -47,11 +47,29 @@ export default function StudentDashboard() {
   const [castlesLoading, setCastlesLoading] = useState(true)
   const [activeTab, setActiveTab] = useState<'assessment' | 'castle'>('castle')
 
+  // Initial fetch on mount
   useEffect(() => {
     if (isLoggedIn && !appLoading) {
       void fetchJoinedRooms()
     }
   }, [isLoggedIn, appLoading, fetchJoinedRooms])
+
+  // Real-time hook for competitions and leaderboards
+  const { activeCompetitions, leaderboards, lastUpdate } = useStudentDashboardRealtime(
+    userProfile?.id,
+    joinedRooms
+  )
+
+  // Auto-refresh rooms when real-time updates occur
+  useEffect(() => {
+    if (lastUpdate > 0 && joinedRooms.length > 0) {
+      // Debounce: only refresh if last update was recent
+      const timeSinceUpdate = Date.now() - lastUpdate
+      if (timeSinceUpdate < 1000) {
+        void fetchJoinedRooms()
+      }
+    }
+  }, [lastUpdate, fetchJoinedRooms, joinedRooms.length])
 
   // Fetch assessment results
   useEffect(() => {
@@ -116,58 +134,6 @@ export default function StudentDashboard() {
 
     fetchCastles()
   }, [userProfile?.id])
-
-  // Fetch leaderboards for joined rooms
-  useEffect(() => {
-    const fetchLeaderboards = async () => {
-      if (joinedRooms.length > 0) {
-        const leaderboardPromises = joinedRooms.slice(0, 3).map(async (room) => {
-          const result = await getRoomLeaderboards(room.id)
-          if (result.success && result.data) {
-            return {
-              id: room.id,
-              title: room.title,
-              data: result.data.slice(0, 5) // Top 5
-            }
-          }
-          return null
-        })
-        const results = await Promise.all(leaderboardPromises)
-        setLeaderboards(results.filter(Boolean) as LeaderboardData[])
-      }
-    }
-    fetchLeaderboards()
-  }, [joinedRooms])
-
-  // Extract active competitions from joined rooms
-  useEffect(() => {
-    if (joinedRooms.length > 0) {
-      const competitions: CompetitionWithRoom[] = []
-      joinedRooms.forEach(room => {
-          // Type guard: check if room has competitions property
-        const roomWithCompetitions = room as typeof room & { competitions?: Competition[] }
-        if (roomWithCompetitions.competitions && Array.isArray(roomWithCompetitions.competitions)) {
-          // Filter for NEW or ONGOING competitions
-          const activeOnes = roomWithCompetitions.competitions.filter(
-            (comp: Competition) => comp.status === 'NEW' || comp.status === 'ONGOING'
-          )
-          competitions.push(...activeOnes.map((comp: Competition) => ({
-            ...comp,
-            roomTitle: room.title,
-            roomCode: room.code,
-            room_id: comp.room_id ?? room.id // Use nullish coalescing to ensure room_id is set
-          })))
-        }
-      })
-      // Sort by status (ONGOING first, then NEW)
-      competitions.sort((a, b) => {
-        if (a.status === 'ONGOING' && b.status !== 'ONGOING') return -1
-        if (a.status !== 'ONGOING' && b.status === 'ONGOING') return 1
-        return 0
-      })
-      setActiveCompetitions(competitions)
-    }
-  }, [joinedRooms])
 
   const handleJoinRoom = () => {
     router.push(STUDENT_ROUTES.JOINED_ROOMS)

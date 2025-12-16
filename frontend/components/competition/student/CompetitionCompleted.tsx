@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { CompetitionParticipant } from '@/types/common/competition'
 import styles from '@/styles/competition-student.module.css'
+import { safeNumber } from '@/utils/numberFormat'
 
 interface CompetitionCompletedProps {
   competitionTitle: string
@@ -84,7 +85,7 @@ export default function CompetitionCompleted({
             </div>
             <h3 className={styles.winnerName}>{winner.fullName || 'Unknown'}</h3>
             <div className={styles.winnerXP}>
-              {winner.accumulated_xp} XP
+              {safeNumber(winner.accumulated_xp, 0)} XP
             </div>
           </div>
         )}
@@ -133,7 +134,7 @@ export default function CompetitionCompleted({
                 </div>
                 
                 <div className={styles.xpBadge}>
-                  <span className={styles.xpValue}>{participant.accumulated_xp}</span>
+                  <span className={styles.xpValue}>{safeNumber(participant.accumulated_xp, 0)}</span>
                   <span className={styles.xpLabel}>XP</span>
                 </div>
               </div>

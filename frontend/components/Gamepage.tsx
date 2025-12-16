@@ -675,7 +675,7 @@ export default function Gamepage({
         description: prompt,
         expected_solution: shapesWithProps,
         difficulty,
-        visibility: visible ? "show" : "hide",
+        visibility: visible ? "public" : "private",
         max_attempts: limitAttempts,
         expected_xp: XP_MAP[difficulty as keyof typeof XP_MAP],
         timer: timerOpen ? timerValue : null,
@@ -751,7 +751,7 @@ export default function Gamepage({
     setTimerValue(typeof problem.timer === 'number' ? problem.timer : 5);
     setHintOpen(problem.hint !== null && problem.hint !== undefined);
     setHint(problem.hint ?? "");
-    setVisible(problem.visibility === "show");
+    setVisible(problem.visibility === "public");
     setShowProperties(true);  
   };
 
@@ -802,7 +802,7 @@ export default function Gamepage({
       // Save shapes to localStorage (preserve work during pause)
       try {
         localStorage.setItem(shapesKey, JSON.stringify(shapes));
-        console.log('💾 [Gamepage] Saved working shapes to localStorage');
+        console.log('💾 [Gamepage] Saved working shapes to localStorage:', shapes.length, 'shapes');
       } catch (e) {
         console.error('Failed to save working shapes:', e);
       }
@@ -832,20 +832,24 @@ export default function Gamepage({
         // Clear working shapes from localStorage for the new problem
         const workingShapesKey = `working_shapes_${competitionId}_${currentProblemId}`;
         localStorage.removeItem(workingShapesKey);
-      } else if (!wasSubmitted) {
+      } else if (!wasSubmitted && shapes.length === 0) {
         // NOT a new problem and not submitted - restore working shapes (handles pause/resume)
         const workingShapesKey = `working_shapes_${competitionId}_${currentProblemId}`;
         const savedWorkingShapes = localStorage.getItem(workingShapesKey);
         
-        if (savedWorkingShapes && shapes.length === 0) {
+        console.log('🔍 [Gamepage] Checking for saved shapes - Key:', workingShapesKey, 'Found:', !!savedWorkingShapes);
+        
+        if (savedWorkingShapes) {
           try {
             const parsedShapes = JSON.parse(savedWorkingShapes);
-            const shapesWithIds = parsedShapes.map((shape: any, index: number) => ({
-              ...shape,
-              id: shape.id || Date.now() + index,
-            }));
-            setShapes(shapesWithIds);
-            console.log('📦 [Gamepage] Restored working shapes after pause:', shapesWithIds);
+            if (parsedShapes && parsedShapes.length > 0) {
+              const shapesWithIds = parsedShapes.map((shape: any, index: number) => ({
+                ...shape,
+                id: shape.id || Date.now() + index,
+              }));
+              setShapes(shapesWithIds);
+              console.log('📦 [Gamepage] Restored working shapes after pause/resume:', shapesWithIds.length, 'shapes');
+            }
           } catch (e) {
             console.error('Failed to parse saved working shapes:', e);
           }
@@ -872,22 +876,23 @@ export default function Gamepage({
               id: shape.id || Date.now() + index,
             }));
             setShapes(shapesWithIds);
-            console.log('📦 Loaded submitted shapes from localStorage:', shapesWithIds);
+            console.log('📦 [Gamepage] Loaded submitted shapes from localStorage:', shapesWithIds.length, 'shapes');
           } catch (e) {
             console.error('Failed to parse saved shapes:', e);
           }
         }
       }
       
-      console.log('🔍 Checking submission status:', {
+      console.log('🔍 [Gamepage] Submission check:', {
         submissionKey,
         wasSubmitted,
         competitionId,
         problemId: currentProblemId,
-        isNewProblem
+        isNewProblem,
+        currentShapesCount: shapes.length
       });
     }
-  }, [competitionId, activeCompetition?.current_problem_id]);
+  }, [competitionId, activeCompetition?.current_problem_id]); // Removed shapes from dependencies to prevent loops
 
   // Get selected shape for PropertiesPanel
   const selectedShape = shapes.find(shape => shape.id === selectedId) || null;
@@ -1106,22 +1111,35 @@ export default function Gamepage({
                       right: '24px',
                       zIndex: 20,
                       background: hasSubmitted ? '#10b981' : isExpired ? '#6b7280' : '#fabc60',
-                      borderRadius: '12px',
-                      fontFamily: 'Poppins',
-                      fontSize: '16px',
-                      fontWeight: 600,
+                      borderRadius: '16px',
+                      fontFamily: 'Poppins, sans-serif',
+                      fontSize: '20px',
+                      fontWeight: 700,
                       color: hasSubmitted || isExpired ? '#ffffff' : '#000',
                       border: 'none',
                       cursor: hasSubmitted || isSubmitting || isExpired ? 'not-allowed' : 'pointer',
-                      padding: '12px 32px',
-                      minWidth: '160px',
-                      minHeight: '48px',
-                      transition: 'all 0.2s',
+                      padding: '16px 40px',
+                      minWidth: '200px',
+                      minHeight: '60px',
+                      transition: 'all 0.3s',
                       opacity: hasSubmitted || isSubmitting || isExpired ? 0.7 : 1,
-                      boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
+                      boxShadow: '0 6px 16px rgba(0,0,0,0.2)',
+                      transform: hasSubmitted || isSubmitting || isExpired ? 'none' : 'scale(1)',
+                    }}
+                    onMouseEnter={(e) => {
+                      if (!hasSubmitted && !isSubmitting && !isExpired) {
+                        e.currentTarget.style.transform = 'scale(1.05)';
+                        e.currentTarget.style.boxShadow = '0 8px 20px rgba(0,0,0,0.3)';
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (!hasSubmitted && !isSubmitting && !isExpired) {
+                        e.currentTarget.style.transform = 'scale(1)';
+                        e.currentTarget.style.boxShadow = '0 6px 16px rgba(0,0,0,0.2)';
+                      }
                     }}
                   >
-                    {isSubmitting ? "Submitting..." : hasSubmitted ? "✓ Submitted" : isExpired ? "⏰ Time Expired" : "Submit Solution"}
+                    {isSubmitting ? "✨ Submitting..." : hasSubmitted ? "✓ Great Job!" : isExpired ? "⏰ Time's Up" : "🚀 Submit!"}
                   </button>
                 ) : (
                   <button 
@@ -1132,21 +1150,29 @@ export default function Gamepage({
                       right: '24px',
                       zIndex: 20,
                       background: '#fabc60',
-                      borderRadius: '12px',
-                      fontFamily: 'Poppins',
-                      fontSize: '16px',
-                      fontWeight: 600,
+                      borderRadius: '16px',
+                      fontFamily: 'Poppins, sans-serif',
+                      fontSize: '20px',
+                      fontWeight: 700,
                       color: '#000',
                       border: 'none',
                       cursor: 'pointer',
-                      padding: '12px 32px',
-                      minWidth: '160px',
-                      minHeight: '48px',
-                      transition: 'all 0.2s',
-                      boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
+                      padding: '16px 40px',
+                      minWidth: '200px',
+                      minHeight: '60px',
+                      transition: 'all 0.3s',
+                      boxShadow: '0 6px 16px rgba(0,0,0,0.2)'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.transform = 'scale(1.05)';
+                      e.currentTarget.style.boxShadow = '0 8px 20px rgba(0,0,0,0.3)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.transform = 'scale(1)';
+                      e.currentTarget.style.boxShadow = '0 6px 16px rgba(0,0,0,0.2)';
                     }}
                   >
-                    Save Problem
+                    💾 Save Problem
                   </button>
                 )
               }

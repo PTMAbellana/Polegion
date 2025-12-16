@@ -34,16 +34,48 @@
 .main-content {
   flex: 1;
   min-height: 100vh;
+  max-height: 100vh;
+  overflow-y: auto;
+  overflow-x: hidden;
   transition: margin-left 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
   display: flex;
   flex-direction: column;
+}
+
+/* Custom scrollbar for main content */
+.main-content::-webkit-scrollbar {
+  width: 0.75rem;
+}
+
+.main-content::-webkit-scrollbar-track {
+  background: linear-gradient(180deg, #f0fdf4 0%, #fefce8 100%);
+  border-radius: 0.625rem;
+  border: 0.125rem solid rgba(34, 197, 94, 0.1);
+}
+
+.main-content::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #22c55e 0%, #84cc16 50%, #eab308 100%);
+  border-radius: 0.625rem;
+  border: 0.125rem solid transparent;
+  background-clip: content-box;
+}
+
+.main-content::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #16a34a 0%, #65a30d 50%, #d97706 100%);
+  background-clip: content-box;
+  box-shadow: 0 0 10px rgba(34, 197, 94, 0.5);
+}
+
+/* Firefox scrollbar styling */
+.main-content {
+  scrollbar-width: thin;
+  scrollbar-color: #22c55e #f0fdf4;
 }
 
 /* Content wrapper - Add this for proper spacing */
 .content-wrapper {
   flex: 1;
   padding: 1.25rem;
-  overflow-x: auto;
 }
 
 .logo-container {
@@ -487,6 +519,8 @@
 .page-layout {
   display: flex;
   min-height: 100vh;
+  max-height: 100vh;
+  overflow: hidden;
 }
 
 .page-layout .main-content {
@@ -495,6 +529,9 @@
   flex-direction: column;
   background: linear-gradient(135deg, #f0fdf4 0%, #fefce8 50%, #fffbeb 100%);
   position: relative;
+  overflow-y: auto;
+  overflow-x: hidden;
+  max-height: 100vh;
 }
 
 .page-layout .main-content::before {
@@ -515,4 +552,6 @@
 .page-layout .content-area {
   flex: 1;
   padding: 1.25rem;
+  position: relative;
+  z-index: 1;
 }

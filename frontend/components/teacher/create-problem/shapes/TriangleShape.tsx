@@ -192,6 +192,7 @@ const TriangleShape: React.FC<TriangleShapeProps> = ({
           fill={shape.fill || "#e3dcc2"}
           stroke="#000"
           strokeWidth={6}
+          hitStrokeWidth={20}
           closed={true}
         />
 

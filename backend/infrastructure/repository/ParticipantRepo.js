@@ -116,6 +116,8 @@ class ParticipantRepo extends BaseRepo {
 
     async getParticipantCount(room_id){
         try {
+            // Only count actual participants (students), not teachers/admins
+            // Teachers are not in participants table - they're room creators
             const {
                 data,
                 error

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useAuthStore } from '@/store/authStore'
 import { useTeacherRoomStore } from '@/store/teacherRoomStore'
 import { useRoomManagement } from '@/hooks/useRoomManagement'
+import { useRoomRealtime } from '@/hooks/useRoomRealtime'
 import RoomBanner from '@/components/teacher/RoomBanner'
 import ProblemsList from '@/components/teacher/ProblemsList'
 import ParticipantsSidebar from '@/components/teacher/ParticipantsSidebar'
@@ -43,6 +44,14 @@ export default function RoomDetailsPage({ params }: { params: Promise<{ roomCode
         handleInviteSubmit,
         handleKickParticipant
     } = useRoomManagement(roomCode)
+
+    // Real-time updates for room data
+    const { isConnected } = useRoomRealtime(
+        currentRoom?.id,
+        roomCode,
+        fetchRoomDetails
+    )
+
 console.log("RoomDetailsPage - currentRoom:", currentRoom)
     useEffect(() => {
         if (roomCode && isLoggedIn) {

@@ -155,21 +155,21 @@ export default function PracticeQuiz({ questions, onComplete, onRestart }: Pract
             onClick={handleSubmit}
             disabled={!selectedAnswer}
           >
-            Submit Answer
+            🚀 Submit Answer
           </button>
         ) : (
           <div className={styles.feedbackSection}>
             <div className={`${styles.feedbackMessage} ${styles[feedback]}`}>
-              {feedback === 'correct' ? '✓ Correct!' : '✗ Incorrect'}
+              {feedback === 'correct' ? '🎉 Awesome! You got it right!' : '💪 Keep trying! You can do it!'}
             </div>
             {currentQuestion.explanation && (
               <div className={styles.explanationBox}>
-                <div className={styles.explanationLabel}>Explanation:</div>
+                <div className={styles.explanationLabel}>💡 Explanation:</div>
                 <p className={styles.explanationText}>{currentQuestion.explanation}</p>
               </div>
             )}
             <button className={styles.nextButton} onClick={handleNext}>
-              {currentQuestionIndex < questions.length - 1 ? 'Next Question' : 'Finish'}
+              {currentQuestionIndex < questions.length - 1 ? '➡️ Next Question' : '🏆 Finish Quiz'}
             </button>
           </div>
         )}

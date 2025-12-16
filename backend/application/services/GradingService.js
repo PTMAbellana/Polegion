@@ -18,7 +18,14 @@ class GradingService {
             // Grade the solution
             const gradingResult = this.gradeShape(solution, expected_shape, timeSpent, timeLimit, difficulty);
             
+            // CRITICAL: Ensure XP is always a positive integer
+            if (!gradingResult.xp_gained || gradingResult.xp_gained < 10) {
+                console.warn('⚠️ XP too low or missing, setting minimum XP to 10');
+                gradingResult.xp_gained = 10;
+            }
+            
             console.log('🏆 FINAL GRADING RESULT:', JSON.stringify(gradingResult, null, 2));
+            console.log('💎 XP TO BE AWARDED:', gradingResult.xp_gained);
             return gradingResult;
             
         } catch (error) {
@@ -222,7 +229,7 @@ class GradingService {
         return geometryScore;
     }
     
-    // ✅ UPDATED: Precision-based triangle analysis
+    // ✅ UPDATED: Precision-based triangle analysis with rotation invariance
     analyzeTriangleProperties(userTriangle, expectedTriangle) {
         console.log('📐 === ANALYZING TRIANGLE PROPERTIES ===');
         console.log('👤 User triangle:', { 
@@ -239,16 +246,17 @@ class GradingService {
         let totalScore = 0;
         let propertyCount = 0;
         
-        // Check side lengths
+        // Check side lengths with rotation invariance
         if (userTriangle.sideLengths && expectedTriangle.sideLengths && 
             userTriangle.sideLengths.length === 3 && expectedTriangle.sideLengths.length === 3) {
             propertyCount++;
             
-            // Sort both arrays to compare similar triangles
+            // IMPORTANT: Sort to handle rotated/flipped triangles
+            // This makes [3,4,5] equivalent to [4,5,3] (rotated triangle)
             const userSides = [...userTriangle.sideLengths].sort((a, b) => a - b);
             const expectedSides = [...expectedTriangle.sideLengths].sort((a, b) => a - b);
             
-            console.log('📏 === TRIANGLE SIDE ANALYSIS ===');
+            console.log('📏 === TRIANGLE SIDE ANALYSIS (ROTATION-INVARIANT) ===');
             console.log('👤 User sides (sorted):', userSides);
             console.log('🎯 Expected sides (sorted):', expectedSides);
             
@@ -274,10 +282,11 @@ class GradingService {
         const geometryScore = propertyCount > 0 ? totalScore / propertyCount : 0.5;
         console.log('📊 === TRIANGLE FINAL SCORE ===');
         console.log(`📊 Triangle geometry score: ${geometryScore.toFixed(3)} (average of ${propertyCount} properties)`);
+        console.log('✅ Rotation/flip invariance applied - sorted side lengths used');
         return geometryScore;
     }
     
-    // ✅ UPDATED: Precision-based quadrilateral analysis
+    // ✅ UPDATED: Precision-based quadrilateral analysis with rotation invariance
     analyzeQuadrilateralProperties(userQuad, expectedQuad) {
         console.log('🔲 === ANALYZING QUADRILATERAL PROPERTIES ===');
         console.log('👤 User quad:', { 
@@ -294,16 +303,17 @@ class GradingService {
         let totalScore = 0;
         let propertyCount = 0;
         
-        // Check side lengths
+        // Check side lengths with rotation invariance
         if (userQuad.sideLengths && expectedQuad.sideLengths && 
             userQuad.sideLengths.length === 4 && expectedQuad.sideLengths.length === 4) {
             propertyCount++;
             
-            // Sort both arrays to compare
+            // IMPORTANT: Sort both arrays to handle rotated/flipped shapes
+            // This makes [10,5,10,5] equivalent to [5,10,5,10] (rotated rectangle)
             const userSides = [...userQuad.sideLengths].sort((a, b) => a - b);
             const expectedSides = [...expectedQuad.sideLengths].sort((a, b) => a - b);
             
-            console.log('📏 === QUADRILATERAL SIDE ANALYSIS ===');
+            console.log('📏 === QUADRILATERAL SIDE ANALYSIS (ROTATION-INVARIANT) ===');
             console.log('👤 User sides (sorted):', userSides);
             console.log('🎯 Expected sides (sorted):', expectedSides);
             
@@ -329,6 +339,7 @@ class GradingService {
         const geometryScore = propertyCount > 0 ? totalScore / propertyCount : 0.5;
         console.log('📊 === QUADRILATERAL FINAL SCORE ===');
         console.log(`📊 Quadrilateral geometry score: ${geometryScore.toFixed(3)} (average of ${propertyCount} properties)`);
+        console.log('✅ Rotation/flip invariance applied - sorted side lengths used');
         return geometryScore;
     }
     

@@ -83,8 +83,18 @@ export default function AppProvider({ children }: { children: React.ReactNode })
 
         // Fetch user data when authenticated and on protected routes
         if (isLoggedIn && userProfile && !PUBLIC_ROUTES.includes(pathname)) {
-          if (userProfile.role === 'teacher') {
-            fetchCreatedRooms();
+          if (userProfile.role === 'teacher' || userProfile.role === 'admin') {
+            // Teachers and admins can access teacher routes
+            if (pathname.startsWith('/teacher')) {
+              fetchCreatedRooms();
+            }
+            // Admins can also access student routes
+            if (userProfile.role === 'admin' && pathname.startsWith('/student')) {
+              fetchJoinedRooms();
+              if (userProfile.id) {
+                fetchCastles(userProfile.id);
+              }
+            }
           } else if (userProfile.role === 'student') {
             fetchJoinedRooms();
             // Fetch castles for students

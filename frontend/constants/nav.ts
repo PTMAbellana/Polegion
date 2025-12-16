@@ -1,11 +1,13 @@
 import { STUDENT_ROUTES, TEACHER_ROUTES } from "./routes";
-import { FaHome, FaUser, FaChalkboardTeacher, FaDungeon, FaMedal, FaUserAstronaut, FaFortAwesome, FaShapes, FaRegFileAlt, FaBrain } from 'react-icons/fa';
+import { FaHome, FaUser, FaChalkboardTeacher, FaDungeon, FaMedal, FaUserAstronaut, FaFortAwesome, FaShapes, FaRegFileAlt, FaBrain, FaBook } from 'react-icons/fa';
 
 // temporary paths
 // Navigation items for teachers
 export const teacherNavItems = [
     { path: TEACHER_ROUTES.DASHBOARD, icon: FaHome, label: 'Dashboard', title: 'Home' },
     { path: TEACHER_ROUTES.VIRTUAL_ROOMS, icon: FaChalkboardTeacher, label: 'Virtual Rooms', title: 'Virtual Rooms' },
+    { path: TEACHER_ROUTES.CASTLE_CONTENT, icon: FaFortAwesome, label: 'Castle Content', title: 'Castle Content' },
+    { path: TEACHER_ROUTES.PRACTICE_PROBLEMS, icon: FaBrain, label: 'Practice Problems', title: 'Practice Problems' },
     { path: TEACHER_ROUTES.RECORDS, icon: FaRegFileAlt, label: 'Records', title: 'Records' },
     { path: TEACHER_ROUTES.PROFILE, icon: FaUser, label: 'Profile', title: 'Profile' },
 ];

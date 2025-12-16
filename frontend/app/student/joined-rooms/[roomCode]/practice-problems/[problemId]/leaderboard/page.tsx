@@ -3,6 +3,7 @@
 import React, { useEffect, useState, use } from 'react';
 import { useRouter } from 'next/navigation';
 import { getProblemLeaderboard } from '@/api/problems';
+import { useLeaderboardRealtime } from '@/hooks/useLeaderboardRealtime';
 import ProblemLeaderboard from '@/components/student/ProblemLeaderboard';
 import { useAuthStore } from '@/store/authStore';
 import styles from './leaderboard.module.css';
@@ -15,10 +16,7 @@ export default function ProblemLeaderboardPage({ params }: { params: Promise<{ p
   const [leaderboard, setLeaderboard] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [problemInfo, setProblemInfo] = useState<any>(null);
-
-  useEffect(() => {
-    fetchLeaderboard();
-  }, [problemId]);
+  const [roomId, setRoomId] = useState<number | null>(null);
 
   const fetchLeaderboard = async () => {
     try {
@@ -30,6 +28,10 @@ export default function ProblemLeaderboardPage({ params }: { params: Promise<{ p
       if (response.success) {
         console.log('Leaderboard data:', response.data);
         setLeaderboard(response.data || []);
+        // Extract room_id from first leaderboard entry if available
+        if (response.data && response.data.length > 0 && response.data[0].room_id) {
+          setRoomId(response.data[0].room_id);
+        }
       } else {
         console.error('Leaderboard fetch failed:', response.message);
       }
@@ -39,6 +41,13 @@ export default function ProblemLeaderboardPage({ params }: { params: Promise<{ p
       setLoading(false);
     }
   };
+
+  // Real-time updates for problem leaderboard
+  useLeaderboardRealtime(roomId, fetchLeaderboard)
+
+  useEffect(() => {
+    fetchLeaderboard();
+  }, [problemId]);
 
   return (
     <div className={styles.container}>

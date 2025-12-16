@@ -58,7 +58,7 @@ export default function LeaderboardRow({ row, rank }: LeaderboardRowProps) {
       <div className={styles.score_section}>
         <div className={styles.xp_container}>
           <Star className={styles.xp_icon} />
-          <span className={styles.xp_value}>{row.accumulated_xp.toLocaleString()}</span>
+          <span className={styles.xp_value}>{safeNumber(row.accumulated_xp, 0).toLocaleString()}</span>
           <span className={styles.xp_label}>XP</span>
         </div>
       </div>

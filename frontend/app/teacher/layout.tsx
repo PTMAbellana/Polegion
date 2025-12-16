@@ -19,20 +19,24 @@ export default function TeacherLayout({
   const { fetchCreatedRooms } = useTeacherRoomStore();
 
   useEffect(() => {
-    // Redirect students trying to access teacher routes
+    console.log('[TeacherLayout] Checking auth:', { isLoggedIn, role: userProfile?.role, pathname })
+    
+    // ABSOLUTE BLOCK: Redirect students trying to access teacher routes
     if (isLoggedIn && userProfile?.role === 'student') {
+      console.log('[TeacherLayout] Student detected, redirecting to student dashboard')
       router.replace(STUDENT_ROUTES.DASHBOARD);
       return;
     }
 
-    // Auto-fetch created rooms when user is logged in as teacher
+    // Auto-fetch created rooms when user is logged in as teacher/admin
     if (
       isLoggedIn 
       && (userProfile?.role === 'teacher' || userProfile?.role === 'admin')
     ) {
+      console.log('[TeacherLayout] Teacher/Admin detected, fetching created rooms')
       fetchCreatedRooms();
     }
-  }, [isLoggedIn, userProfile?.role, fetchCreatedRooms, router]);
+  }, [isLoggedIn, userProfile?.role, pathname, fetchCreatedRooms, router]);
 
   // Block rendering if student is trying to access teacher routes
   if (isLoggedIn && userProfile?.role === 'student') {

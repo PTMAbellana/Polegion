@@ -104,11 +104,17 @@ export const authUtils = {
 		if (!expiresAt) return true;
 		
 		const now = Math.floor(Date.now() / 1000);
-		// Add 30 second buffer to refresh before actual expiry
-		const isExpired = expiresAt <= (now + 30);
+		// Add 5 minute buffer instead of 30 seconds to prevent frequent refreshes during active use
+		const bufferSeconds = 5 * 60; // 5 minutes
+		const isExpired = expiresAt <= (now + bufferSeconds);
 		
 		if (isExpired && expiresAt > 0) {
-			console.log("⏰ Token expired or expiring soon at:", new Date(expiresAt * 1000).toLocaleString());
+			const timeUntilExpiry = expiresAt - now;
+			console.log("⏰ Token expiring soon:", {
+				expiresAt: new Date(expiresAt * 1000).toLocaleString(),
+				timeUntilExpiry: `${Math.floor(timeUntilExpiry / 60)}m ${timeUntilExpiry % 60}s`,
+				willRefresh: isExpired
+			});
 		}
 		
 		return isExpired;

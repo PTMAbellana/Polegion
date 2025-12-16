@@ -70,6 +70,12 @@ export const TEACHER_ROUTES = {
     // records
     RECORDS: `/teacher${ROUTES.RECORDS}`,
     
+    // castle content viewer
+    CASTLE_CONTENT: `/teacher/castle-content`,
+    
+    // practice problems viewer
+    PRACTICE_PROBLEMS: `/teacher/practice-problems`,
+    
     // profile
     PROFILE: `/teacher${ROUTES.PROFILE}`,
     EDIT_PROFILE: `/teacher${ROUTES.EDIT_PROFILE}`,

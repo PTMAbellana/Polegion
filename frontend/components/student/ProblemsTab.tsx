@@ -58,10 +58,9 @@ export default function ProblemsTab({ problems, roomCode }: ProblemsTabProps) {
     };
 
     // Filter out hidden/private problems for students
-    // Only show problems that are explicitly public or visible (show)
-    // Hide problems with visibility: 'private', 'hidden', or 'hide'
+    // Only show problems that are explicitly public
     const visibleProblems = problems.filter(problem => 
-        problem.visibility === 'public' || problem.visibility === 'show'
+        problem.visibility === 'public'
     );
 
     return (
@@ -80,7 +79,7 @@ export default function ProblemsTab({ problems, roomCode }: ProblemsTabProps) {
                                 <div className={styles.problemHeader}>
                                     <h3 className={styles.problemTitle}>{problem.title}</h3>
                                     <div className={styles.problemActions}>
-                                        {(problem.visibility === 'public' || problem.visibility === 'show') && (
+                                        {problem.visibility === 'public' && (
                                             <button 
                                                 className={`${styles.actionButton} ${styles.openButton}`}
                                                 onClick={() => handleOpenProblem(problem.id, problem.title, problem.max_attempts, problem.timer)}
@@ -99,7 +98,7 @@ export default function ProblemsTab({ problems, roomCode }: ProblemsTabProps) {
                                     </span>
                                     {'visibility' in problem && (
                                         <div className={styles.visibilityIndicator}>
-                                            {problem.visibility === 'public' || problem.visibility === 'show' ? (
+                                            {problem.visibility === 'public' ? (
                                                 <><FaEye /> Visible</>
                                             ) : (
                                                 <><FaEyeSlash /> Hidden</>

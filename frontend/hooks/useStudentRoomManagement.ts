@@ -12,7 +12,7 @@ export function useStudentRoomManagement(roomCode: string, roomId?: number) {
 
     const handleLeaveRoom = async () => {
         if (!roomId) {
-            toast.error('Room ID not found')
+            toast.error('Unable to process request. Room information not found')
             return
         }
 

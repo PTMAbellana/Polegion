@@ -1240,12 +1240,12 @@
 }
 
 .optionButton {
-  padding: 0.875rem 1rem;
+  padding: 1rem 1.15rem;
   border: 0.125rem solid #e0e0e0;
   border-radius: 0.75rem;
   background: white;
   color: #2c3e50;
-  font-size: clamp(0.9rem, 0.85rem + 0.25vw, 1rem);
+  font-size: clamp(1rem, 0.85rem + 0.25vw, 1.1rem);
   font-weight: 500;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -1255,8 +1255,8 @@
 
 @media (min-width: 768px) {
   .optionButton {
-    font-size: 1rem;
-    padding: 1rem 1.15rem;
+    font-size: 1.1rem;
+    padding: 1.15rem 1.25rem;
     border: 0.1875rem solid #e0e0e0;
   }
 }
@@ -1308,10 +1308,10 @@
 .submitButton,
 .nextButton {
   width: 100%;
-  padding: 1.25rem;
+  padding: 1.5rem;
   border: none;
-  border-radius: 0.9375rem;
-  font-size: 1.1rem;
+  border-radius: 1rem;
+  font-size: 1.25rem;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -1324,7 +1324,7 @@
 }
 
 .submitButton:hover:not(:disabled) {
-  transform: translateY(-0.125rem);
+  transform: translateY(-0.125rem) scale(1.02);
   box-shadow: 0 0.75rem 1.75rem rgba(34, 197, 94, 0.4);
 }
 
@@ -1334,13 +1334,14 @@
 }
 
 .nextButton {
-  background: #4CAF50;
+  background: linear-gradient(135deg, #4CAF50, #45a049);
   color: white;
+  box-shadow: 0 0.5rem 1.25rem rgba(76, 175, 80, 0.3);
 }
 
 .nextButton:hover {
-  background: #45a049;
-  transform: scale(1.02);
+  transform: translateY(-0.125rem) scale(1.02);
+  box-shadow: 0 0.75rem 1.75rem rgba(76, 175, 80, 0.4);
 }
 
 /* Feedback Section */

@@ -219,4 +219,22 @@ export const getUserProblemStats = async(problem_id) => {
       error: error.response?.data?.error || error.message
     };
   }
-};   
+};
+
+// Get all problems (for teachers to view practice problems library)
+export const getAllProblems = async() => {
+  try {
+    const res = await api.get('/problems/all/library');
+    return {
+      success: true,
+      data: res.data.data || res.data || []
+    };
+  } catch (error) {
+    console.error('[ProblemsAPI] Error fetching all problems:', error);
+    return {
+      success: false,
+      message: error.response?.data?.message || 'Failed to fetch problems',
+      error: error.response?.data?.error || error.message
+    };
+  }
+};

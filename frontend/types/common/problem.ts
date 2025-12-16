@@ -21,7 +21,8 @@ export interface SProblemType {
     max_attempts?: number;
     expected_xp: number;
     hint?: string | null;
-    timer? : number | null; // in seconds, null means no timer    
+    timer? : number | null; // in seconds, null means no timer
+    visibility?: 'public' | 'private';
 }
 
 // for teacher view under room details

@@ -113,6 +113,14 @@ class AttemptsService {
 
             // 6. Update leaderboards (internal, no API)  
             const part_data = await this.participantService.getPartInfo(part.id);
+            
+            console.log('💎 Updating leaderboards with XP:', {
+                participant_id: part.id,
+                competition_id: competitionId,
+                room_id: part_data.room_id,
+                xp_gained: gradingResult.xp_gained
+            });
+            
             await this.leaderboardService.updateBothLeaderboards(
                 part.id, 
                 competitionId, 

@@ -19,7 +19,7 @@ export const useJoinedRoomsManagement = () => {
         const room = joinedRooms.find(r => r.id === roomId)
         
         if (!room) {
-            toast.error('Room not found')
+            toast.error('Room not found. Please try again')
             return
         }
 

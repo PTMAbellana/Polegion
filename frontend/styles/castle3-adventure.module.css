@@ -294,6 +294,7 @@
   width: 0.5rem;
 }
 
+```
 .chapterList::-webkit-scrollbar-track {
   background: #143D60;
   border-radius: 0.25rem;
@@ -305,7 +306,9 @@
 }
 
 .chapterList::-webkit-scrollbar-thumb:hover {
-  background: #8AB862;
+  background: #DDEB9D;
+}
+```
 }
 
 /* Chapter Item */

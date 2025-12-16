@@ -1,0 +1,261 @@
+/* Teacher Castle Content Viewer Styles */
+
+.castleGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.castleCard {
+  background: linear-gradient(135deg, #ffffff 0%, #f7fee7 100%);
+  border-radius: 1rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.castleCard:hover {
+  box-shadow: 0 10px 20px rgba(34, 197, 94, 0.2);
+  transform: translateY(-2px);
+}
+
+.castleHeader {
+  padding: 1.5rem;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  border-bottom: 2px solid transparent;
+  transition: all 0.3s ease;
+  background: linear-gradient(135deg, #f0fdf4 0%, #fefce8 100%);
+}
+
+.castleHeader:hover {
+  border-bottom-color: #22c55e;
+  background: linear-gradient(135deg, #f0fdf4 0%, #ecfccb 100%);
+}
+
+.castleInfo {
+  flex: 1;
+}
+
+.castleNumber {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  background: linear-gradient(135deg, #22c55e 0%, #84cc16 100%);
+  color: white;
+  border-radius: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 0.75rem;
+}
+
+.castleName {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #2C514C;
+  margin: 0.5rem 0;
+  background: linear-gradient(135deg, #2C514C 0%, #6D8A72 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.castleDescription {
+  font-size: 0.9rem;
+  color: #4b5563;
+  line-height: 1.5;
+  margin: 0.5rem 0 0 0;
+}
+
+.expandIcon {
+  color: #22c55e;
+  transition: transform 0.3s ease;
+  flex-shrink: 0;
+}
+
+.chaptersSection {
+  border-top: 2px solid #22c55e;
+  background: white;
+}
+
+.chapterList {
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.chapterItem {
+  padding: 1rem;
+  background: linear-gradient(135deg, #f9fafb 0%, #f0fdf4 100%);
+  border-radius: 0.75rem;
+  border: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  transition: all 0.3s ease;
+}
+
+.chapterItem:hover {
+  border-color: #22c55e;
+  box-shadow: 0 4px 8px rgba(34, 197, 94, 0.15);
+  transform: translateX(4px);
+}
+
+.chapterInfo {
+  flex: 1;
+}
+
+.chapterNumber {
+  display: inline-block;
+  padding: 0.2rem 0.6rem;
+  background: linear-gradient(135deg, #84cc16 0%, #eab308 100%);
+  color: white;
+  border-radius: 0.4rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 0.5rem;
+}
+
+.chapterTitle {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #2C514C;
+  margin: 0.5rem 0;
+}
+
+.chapterDescription {
+  font-size: 0.85rem;
+  color: #6b7280;
+  line-height: 1.4;
+  margin: 0.5rem 0;
+}
+
+.chapterXp {
+  display: inline-block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #eab308;
+  margin-top: 0.5rem;
+}
+
+.viewChapterBtn {
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(135deg, #22c55e 0%, #84cc16 100%);
+  color: white;
+  border: none;
+  border-radius: 0.75rem;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+  box-shadow: 0 2px 4px rgba(34, 197, 94, 0.3);
+}
+
+.viewChapterBtn:hover {
+  background: linear-gradient(135deg, #16a34a 0%, #65a30d 100%);
+  box-shadow: 0 4px 8px rgba(34, 197, 94, 0.4);
+  transform: translateY(-2px);
+}
+
+.viewChapterBtn:active {
+  transform: translateY(0);
+}
+
+.loadingChapters,
+.noChapters {
+  padding: 2rem;
+  text-align: center;
+  color: #6b7280;
+}
+
+.infoBox {
+  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+  border-left: 4px solid #3b82f6;
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  margin-top: 2rem;
+}
+
+.infoBox h4 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #1e40af;
+  margin: 0 0 0.75rem 0;
+}
+
+.infoBox p {
+  font-size: 0.95rem;
+  color: #1e3a8a;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.errorMessage {
+  background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+  border-left: 4px solid #ef4444;
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.errorMessage p {
+  color: #991b1b;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  text-align: center;
+}
+
+.emptyState h3 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #2C514C;
+  margin: 1rem 0 0.5rem 0;
+}
+
+.emptyState p {
+  color: #6b7280;
+  font-size: 1rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .castleGrid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .chapterItem {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .viewChapterBtn {
+    width: 100%;
+  }
+
+  .castleName {
+    font-size: 1.3rem;
+  }
+
+  .infoBox {
+    padding: 1rem;
+  }
+}

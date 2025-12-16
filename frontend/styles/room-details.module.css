@@ -2008,3 +2008,40 @@
 .errorButton:hover {
   background-color: #1d4ed8;
 }
+/* Real-time connection indicator */
+.realtimeIndicator {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  background: linear-gradient(135deg, #22c55e15 0%, #16a34a15 100%);
+  border: 1px solid #22c55e40;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  color: #16a34a;
+  font-weight: 500;
+}
+
+.realtimeDot {
+  width: 8px;
+  height: 8px;
+  background: #22c55e;
+  border-radius: 50%;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.2);
+  }
+}
+
+.realtimeText {
+  font-weight: 600;
+  letter-spacing: 0.025em;
+}
