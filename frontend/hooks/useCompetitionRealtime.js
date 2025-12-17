@@ -471,3 +471,4 @@ export const useCompetitionRealtime = (competitionId, isLoading, roomId = '', us
     connectionStatus,
     presenceReady,
     setParticipants: (newParticipants) => setParticipants(newParticipants),
+  }}
