@@ -15,7 +15,7 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     params: {
       eventsPerSecond: 10
     },
-    timeout: 30000, // 30 seconds timeout
-    heartbeatIntervalMs: 30000, // Send heartbeat every 30 seconds
+    timeout: 60000, // 60 seconds timeout (increased from 30s for production)
+    heartbeatIntervalMs: 15000, // Send heartbeat every 15 seconds (more frequent)
   }
 });

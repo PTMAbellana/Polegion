@@ -31,6 +31,7 @@ export const useCompetitionRealtime = (competitionId, isLoading, roomId = '', us
   const currentCompIdRef = useRef(null);
   const retryCountRef = useRef(0);
   const retryTimeoutRef = useRef(null);
+  const pollingIntervals = useRef({ competition: null, leaderboard: null });
   const maxRetries = 3;
   const isCleaningUpRef = useRef(false);
   
@@ -145,12 +146,70 @@ export const useCompetitionRealtime = (competitionId, isLoading, roomId = '', us
     // Fetch initial data
     fetchInitialData();
 
+    // Polling fallback setup function
+    const setupPollingFallback = (type) => {
+      console.log(`📡 [Polling Fallback] Starting for ${type}...`);
+      
+      if (type === 'competition' && !pollingIntervals.current.competition) {
+        pollingIntervals.current.competition = setInterval(async () => {
+          if (!mountedRef.current) return;
+          try {
+            const timestamp = Date.now();
+            const response = await api.get(
+              `/competitions/${stableRoomId}/${compIdStr}?type=${userType}&_t=${timestamp}`,
+              { headers: { 'Cache-Control': 'no-cache' }, cache: false }
+            );
+            if (response.data && mountedRef.current) {
+              setCompetition(response.data);
+              console.log('✅ [Polling] Competition data updated');
+            }
+          } catch (error) {
+            console.error('⚠️ [Polling] Competition fetch error:', error.message);
+          }
+        }, 5000); // Poll every 5 seconds
+      }
+      
+      if (type === 'leaderboard' && !pollingIntervals.current.leaderboard) {
+        pollingIntervals.current.leaderboard = setInterval(async () => {
+          if (!mountedRef.current) return;
+          try {
+            const timestamp = Date.now();
+            const response = await api.get(
+              `/leaderboards/competition/${stableRoomId}?competition_id=${compIdStr}&_t=${timestamp}`,
+              { headers: { 'Cache-Control': 'no-cache' }, cache: false }
+            );
+            const leaderboardData = response.data?.data || [];
+            const participantsArray = leaderboardData.length > 0 && leaderboardData[0]?.data 
+              ? leaderboardData[0].data
+                  .filter(item => item.participants && item.participants.id)
+                  .map((item, idx) => ({
+                    id: item.participants?.id || `participant-${idx}`,
+                    user_id: item.participants?.id,
+                    fullName: `${item.participants?.first_name || ''} ${item.participants?.last_name || ''}`.trim(),
+                    profile_pic: item.participants?.profile_pic,
+                    accumulated_xp: item.accumulated_xp,
+                    role: 'student'
+                  }))
+              : [];
+            if (mountedRef.current) {
+              setParticipants(participantsArray);
+              console.log('✅ [Polling] Leaderboard updated');
+            }
+          } catch (error) {
+            console.error('⚠️ [Polling] Leaderboard fetch error:', error.message);
+          }
+        }, 5000); // Poll every 5 seconds
+      }
+    };
+
     // ============================================
-    // REAL-TIME SUBSCRIPTION: Competition Table
+    // REAL-TIME SUBSCRIPTION: Competitions Table
     // ============================================
     console.log('🔔 [Subscription] Setting up competition table subscription...');
     competitionSubscriptionRef.current = supabase
-      .channel(`competition-updates-${compIdStr}`)
+      .channel(`competition-updates-${compIdStr}`, {
+        config: { broadcast: { self: false } }
+      })
       .on(
         'postgres_changes',
         {
@@ -189,8 +248,14 @@ export const useCompetitionRealtime = (competitionId, isLoading, roomId = '', us
           }
         }
       )
-      .subscribe((status) => {
+      .subscribe((status, err) => {
         console.log('📡 [Competition Subscription] Status:', status);
+        if (err) console.error('❌ [Competition Subscription] Error:', err);
+        
+        if (status === 'TIMED_OUT' || status === 'CHANNEL_ERROR') {
+          console.error(`⚠️ [Competition Subscription] ${status} - using polling fallback`);
+          setupPollingFallback('competition');
+        }
       });
 
     // ============================================
@@ -198,7 +263,11 @@ export const useCompetitionRealtime = (competitionId, isLoading, roomId = '', us
     // ============================================
     console.log('🔔 [Subscription] Setting up leaderboard subscription...');
     leaderboardSubscriptionRef.current = supabase
-      .channel(`leaderboard-updates-${compIdStr}`)
+      .channel(`leaderboard-updates-${compIdStr}`, {
+        config: {
+          broadcast: { self: false },
+        }
+      })
       .on(
         'postgres_changes',
         {
@@ -248,8 +317,14 @@ export const useCompetitionRealtime = (competitionId, isLoading, roomId = '', us
           }
         }
       )
-      .subscribe((status) => {
+      .subscribe((status, err) => {
         console.log('📡 [Leaderboard Subscription] Status:', status);
+        if (err) console.error('❌ [Leaderboard Subscription] Error:', err);
+        
+        if (status === 'TIMED_OUT' || status === 'CHANNEL_ERROR') {
+          console.error(`⚠️ [Leaderboard Subscription] ${status} - using polling fallback`);
+          setupPollingFallback('leaderboard');
+        }
       });
 
     // ============================================
@@ -427,6 +502,18 @@ export const useCompetitionRealtime = (competitionId, isLoading, roomId = '', us
         retryTimeoutRef.current = null;
       }
       
+      // Clear polling intervals
+      if (pollingIntervals.current.competition) {
+        clearInterval(pollingIntervals.current.competition);
+        pollingIntervals.current.competition = null;
+        console.log('✅ [Cleanup] Competition polling stopped');
+      }
+      if (pollingIntervals.current.leaderboard) {
+        clearInterval(pollingIntervals.current.leaderboard);
+        pollingIntervals.current.leaderboard = null;
+        console.log('✅ [Cleanup] Leaderboard polling stopped');
+      }
+      
       // Unsubscribe from competition updates
       if (competitionSubscriptionRef.current) {
         supabase.removeChannel(competitionSubscriptionRef.current);
@@ -471,4 +558,5 @@ export const useCompetitionRealtime = (competitionId, isLoading, roomId = '', us
     connectionStatus,
     presenceReady,
     setParticipants: (newParticipants) => setParticipants(newParticipants),
-  }}
+  };
+};

@@ -9,15 +9,15 @@
   "theme_color": "#2C514C",
   "icons": [
     {
-      "src": "/images/polegionIcon.png",
+      "src": "/images/polegionIcon.webp",
       "sizes": "192x192",
-      "type": "image/png",
+      "type": "image/webp",
       "purpose": "any maskable"
     },
     {
-      "src": "/images/polegionIcon.png",
+      "src": "/images/polegionIcon.webp",
       "sizes": "512x512",
-      "type": "image/png",
+      "type": "image/webp",
       "purpose": "any maskable"
     }
   ],
