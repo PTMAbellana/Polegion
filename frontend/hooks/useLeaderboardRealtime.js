@@ -12,6 +12,9 @@ import logger from '@/utils/logger'
 export const useLeaderboardRealtime = (roomId, fetchLeaderboards) => {
   const [lastUpdate, setLastUpdate] = useState(0)
   const [isConnected, setIsConnected] = useState(false)
+  const [retryCount, setRetryCount] = useState(0)
+  const maxRetries = 3
+  const retryDelay = 5000 // 5 seconds
 
   useEffect(() => {
     if (!roomId || !fetchLeaderboards) {
@@ -19,10 +22,16 @@ export const useLeaderboardRealtime = (roomId, fetchLeaderboards) => {
       return
     }
 
-    logger.log(`[Leaderboard Realtime] Setting up subscriptions for room ${roomId}`)
+    logger.log(`[Leaderboard Realtime] Setting up subscriptions for room ${roomId} (attempt ${retryCount + 1})`)
 
-    // Create unique channel for this leaderboard
-    const channel = supabase.channel(`leaderboard-${roomId}`)
+    // Create unique channel for this leaderboard with retry timestamp
+    const channelName = `leaderboard-${roomId}-${Date.now()}`
+    const channel = supabase.channel(channelName, {
+      config: {
+        broadcast: { self: true },
+        presence: { key: 'leaderboard' }
+      }
+    })
 
     // Subscribe to problem_leaderboards table (individual problem XP)
     channel.on(
@@ -77,16 +86,48 @@ export const useLeaderboardRealtime = (roomId, fetchLeaderboards) => {
       }
     )
 
+    // Retry logic - must be defined before subscribe callback
+    const handleRetry = () => {
+      if (retryCount < maxRetries) {
+        logger.log(`[Leaderboard Realtime] 🔄 Retrying connection in ${retryDelay/1000}s...`)
+        setTimeout(() => {
+          setRetryCount(prev => prev + 1)
+        }, retryDelay)
+      } else {
+        logger.error(`[Leaderboard Realtime] ❌ Max retries (${maxRetries}) reached. Using polling fallback.`)
+        // Fallback to polling every 30 seconds
+        const pollInterval = setInterval(() => {
+          logger.log('[Leaderboard Realtime] 📡 Polling leaderboard data (fallback mode)')
+          fetchLeaderboards()
+        }, 30000)
+        
+        // Store interval for cleanup
+        return pollInterval
+      }
+    }
+
+    // Track polling interval for cleanup
+    let pollInterval = null
+
     channel.subscribe((status) => {
       if (status === 'SUBSCRIBED') {
         logger.log(`[Leaderboard Realtime] ✅ Connected to leaderboard for room ${roomId}`)
         setIsConnected(true)
+        setRetryCount(0) // Reset retry count on success
+        // Clear any polling fallback
+        if (pollInterval) {
+          clearInterval(pollInterval)
+          pollInterval = null
+        }
       } else if (status === 'CHANNEL_ERROR') {
         logger.error('[Leaderboard Realtime] ❌ Channel error')
         setIsConnected(false)
+        handleRetry()
       } else if (status === 'TIMED_OUT') {
-        logger.error('[Leaderboard Realtime] ⏱️ Connection timed out')
+        logger.error(`[Leaderboard Realtime] ⏱️ Connection timed out (attempt ${retryCount + 1}/${maxRetries})`)
         setIsConnected(false)
+        const interval = handleRetry()
+        if (interval) pollInterval = interval
       } else if (status === 'CLOSED') {
         logger.log('[Leaderboard Realtime] 🔌 Channel closed')
         setIsConnected(false)
@@ -97,9 +138,10 @@ export const useLeaderboardRealtime = (roomId, fetchLeaderboards) => {
     return () => {
       logger.log(`[Leaderboard Realtime] 🔌 Unsubscribing from leaderboard ${roomId}`)
       supabase.removeChannel(channel)
+      if (pollInterval) clearInterval(pollInterval)
       setIsConnected(false)
     }
-  }, [roomId, fetchLeaderboards])
+  }, [roomId, fetchLeaderboards, retryCount])
 
   // Auto-refresh when changes detected (with debounce)
   useEffect(() => {

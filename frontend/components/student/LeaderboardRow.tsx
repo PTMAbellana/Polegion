@@ -4,6 +4,7 @@ import React from 'react'
 import { Crown, Star } from 'lucide-react'
 import { LeaderboardRowProps } from '@/types'
 import styles from '@/styles/leaderboard.module.css'
+import { safeNumber } from '@/utils/numberFormat'
 
 export default function LeaderboardRow({ row, rank }: LeaderboardRowProps) {
   const participant = Array.isArray(row.participants) ? row.participants[0] : row.participants
