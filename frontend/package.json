@@ -12,7 +12,7 @@
     "@hookform/resolvers": "^5.0.1",
     "@supabase/supabase-js": "^2.50.0",
     "autoprefixer": "^10.4.21",
-    "axios": "^1.9.0",
+    "axios": "^1.13.2",
     "axios-cache-interceptor": "^1.8.3",
     "bootstrap": "^5.3.6",
     "canvas": "^3.1.2",
