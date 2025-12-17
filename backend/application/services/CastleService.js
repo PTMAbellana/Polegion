@@ -68,14 +68,40 @@ class CastleService {
             return cached;
         }
 
-        const castles = await this.castleRepo.getAllCastlesWithUserProgress(userId);
+        let castles = await this.castleRepo.getAllCastlesWithUserProgress(userId);
         
-        // Log if user has no progress (frontend should handle initialization)
+        // Auto-initialize Castle 0 for new users
         if (this.userCastleProgressRepo && castles.length > 0) {
             const hasAnyProgress = castles.some(c => c.progress);
             
             if (!hasAnyProgress) {
-                console.log(`[CastleService] User ${userId} has no castle progress. Frontend should call /initialize endpoint.`);
+                console.log(`[CastleService] New user detected - auto-initializing Castle 0 (Pretest)`);
+                
+                // Find Castle 0
+                const castle0 = castles.find(c => c.unlock_order === 0);
+                
+                if (castle0) {
+                    try {
+                        // Create progress for Castle 0 - unlocked by default
+                        const castle0Progress = await this.userCastleProgressRepo.createUserCastleProgress({
+                            user_id: userId,
+                            castle_id: castle0.id,
+                            unlocked: true, // Auto-unlock Castle 0 for new users
+                            completed: false,
+                            total_xp_earned: 0,
+                            completion_percentage: 0,
+                            started_at: new Date().toISOString()
+                        });
+                        
+                        console.log(`[CastleService] Castle 0 auto-unlocked for new user ${userId}`);
+                        
+                        // Refetch castles to include the new progress
+                        castles = await this.castleRepo.getAllCastlesWithUserProgress(userId);
+                    } catch (error) {
+                        console.error(`[CastleService] Error auto-initializing Castle 0:`, error);
+                        // Continue even if initialization fails
+                    }
+                }
             }
         }
         
