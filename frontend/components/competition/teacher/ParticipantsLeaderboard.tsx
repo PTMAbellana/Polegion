@@ -8,9 +8,11 @@ interface ParticipantsLeaderboardProps {
   participants: CompetitionParticipant[]
   activeParticipants?: any[]
   currentProblemIndex?: number
+  competitionStatus?: string
+  currentUserId?: string
 }
 
-export default function ParticipantsLeaderboard({ participants, activeParticipants = [], currentProblemIndex = 0 }: ParticipantsLeaderboardProps) {
+export default function ParticipantsLeaderboard({ participants, activeParticipants = [], currentProblemIndex = 0, competitionStatus = 'NEW', currentUserId }: ParticipantsLeaderboardProps) {
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
   const lastProblemIndexRef = useRef(currentProblemIndex)
   const lastXpValuesRef = useRef<Map<string, number>>(new Map())
@@ -18,6 +20,7 @@ export default function ParticipantsLeaderboard({ participants, activeParticipan
   console.log('🔍 [Leaderboard] Participants:', participants);
   console.log('🔍 [Leaderboard] Active participants:', activeParticipants);
   console.log('🔍 [Leaderboard] Current problem index:', currentProblemIndex);
+  console.log('🔍 [Leaderboard] Current user ID:', currentUserId);
 
   // Track when problem changes
   useEffect(() => {
@@ -67,8 +70,13 @@ export default function ParticipantsLeaderboard({ participants, activeParticipan
     return activeParticipants.some(ap => ap.id === participant.user_id)
   }
   
-  // Use participants length as active count since all joined participants are considered active
-  const activeStudentCount = participants.length
+  // Count only students who are actually online (exclude teachers and current user/host)
+  // Deduplicate by user_id to count unique users instead of sessions
+  const activeStudentCount = [...new Set(
+    activeParticipants
+      .filter(ap => ap.role !== 'teacher' && ap.id !== currentUserId)
+      .map(ap => ap.id)
+  )].length
 
   return (
     <div className={styles.rightColumn}>
@@ -119,15 +127,16 @@ export default function ParticipantsLeaderboard({ participants, activeParticipan
                       <div className={styles.participantInfo}>
                         <h3 className={styles.participantName}>
                           {participant.fullName || 'Unknown Participant'}
-                          {active && <span className={styles.onlineBadge}>● Online</span>}
                         </h3>
-                        <div className={styles.participantStatus}>
-                          {hasSubmittedCurrentProblem(participant) ? (
-                            <span className={styles.statusSubmitted}>✓ Submitted</span>
-                          ) : (
-                            <span className={styles.statusAnswering}>⏳ Answering</span>
-                          )}
-                        </div>
+                        {competitionStatus === 'ONGOING' && (
+                          <div className={styles.participantStatus}>
+                            {hasSubmittedCurrentProblem(participant) ? (
+                              <span className={styles.statusSubmitted}>✓ Submitted</span>
+                            ) : (
+                              <span className={styles.statusAnswering}>⏳ Answering</span>
+                            )}
+                          </div>
+                        )}
                       </div>
                     </div>
                     <div className={styles.participantRight}>

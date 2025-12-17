@@ -20,8 +20,6 @@ export default function CompetitionWaitingRoom({ competition, participants, acti
   return (
     <div className={styles.waitingRoom}>
       <div className={styles.waitingContent}>
-        <div className={styles.waitingIcon}>⏳</div>
-        
         <h2 className={styles.waitingTitle}>Competition Not Started</h2>
         
         <p className={styles.waitingDescription}>

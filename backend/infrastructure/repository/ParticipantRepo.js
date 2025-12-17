@@ -180,6 +180,59 @@ class ParticipantRepo extends BaseRepo {
             throw error
         }
     }
+
+    // =====================================================
+    // ACTIVE TRACKING METHODS
+    // =====================================================
+
+    async updateHeartbeat(participantId, data) {
+        try {
+            const { error } = await this.supabase
+                .from(this.tableName)
+                .update({
+                    last_active: new Date().toISOString(),
+                    is_in_competition: data.is_in_competition || false,
+                    current_competition_id: data.competition_id || null,
+                    session_id: data.session_id || null
+                })
+                .eq('id', participantId);
+
+            if (error) throw error;
+            return { success: true };
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    async getActiveParticipants(roomId) {
+        try {
+            const { data, error } = await this.supabase
+                .from('active_room_participants')
+                .select('*')
+                .eq('room_id', roomId)
+                .neq('role', 'teacher'); // Exclude teachers
+
+            if (error) throw error;
+            return data || [];
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    async getActiveCompetitionParticipants(competitionId) {
+        try {
+            const { data, error } = await this.supabase
+                .from('active_competition_participants')
+                .select('*')
+                .eq('current_competition_id', competitionId)
+                .neq('role', 'teacher'); // Exclude teachers
+
+            if (error) throw error;
+            return data || [];
+        } catch (error) {
+            throw error;
+        }
+    }
 }
 
 module.exports = ParticipantRepo

@@ -365,5 +365,63 @@ class ParticipantService {
             throw error
         }
     }
+
+    // =====================================================
+    // ACTIVE TRACKING METHODS
+    // =====================================================
+
+    async updateParticipantHeartbeat(userId, roomId, data) {
+        try {
+            // Get participant record
+            const participant = await this.participantRepo.getParticipantByUserId(userId, roomId);
+            
+            if (!participant) {
+                throw new Error('Participant not found');
+            }
+
+            // Update heartbeat with session data
+            return await this.participantRepo.updateHeartbeat(participant.id, {
+                is_in_competition: data.is_in_competition || false,
+                competition_id: data.competition_id || null,
+                session_id: data.session_id || this._generateSessionId()
+            });
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    async getActiveParticipants(roomId, excludeCreatorId = null) {
+        try {
+            let active = await this.participantRepo.getActiveParticipants(roomId);
+            
+            // Filter out room creator if provided
+            if (excludeCreatorId) {
+                active = active.filter(p => p.user_id !== excludeCreatorId);
+            }
+            
+            return active;
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    async getActiveCompetitionParticipants(competitionId, excludeCreatorId = null) {
+        try {
+            let active = await this.participantRepo.getActiveCompetitionParticipants(competitionId);
+            
+            // Filter out room creator if provided
+            if (excludeCreatorId) {
+                active = active.filter(p => p.user_id !== excludeCreatorId);
+            }
+            
+            return active;
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    _generateSessionId() {
+        return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    }
 }
 module.exports = ParticipantService

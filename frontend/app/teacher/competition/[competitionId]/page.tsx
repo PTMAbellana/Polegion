@@ -257,7 +257,49 @@ function TeacherCompetitionContent({ competitionId }: { competitionId: number })
   }
 
   const handlePrintResults = () => {
-    window.print()
+    // Generate CSV data
+    const problems = localAddedProblems.map(cp => cp.problem);
+    const participants = displayParticipants;
+    
+    // CSV Headers: Student Name, Problem 1, Problem 2, ..., Total XP
+    const headers = ['Student Name', ...problems.map((p, idx) => `Problem ${idx + 1}: ${p.title}`), 'Total XP'];
+    
+    // CSV Rows: Each row is a student with their scores per problem
+    const rows = participants.map(participant => {
+      const row = [participant.fullName || 'Unknown'];
+      
+      // Add scores for each problem (if available from submissions)
+      problems.forEach((problem, idx) => {
+        // For now, show problem XP or empty if not submitted
+        // You can enhance this with actual submission data if available
+        const submitted = idx < (displayCompetition.current_problem_index || 0);
+        row.push(submitted ? problem.expected_xp.toString() : '');
+      });
+      
+      // Add total XP
+      row.push((participant.accumulated_xp || 0).toString());
+      
+      return row;
+    });
+    
+    // Combine headers and rows
+    const csvContent = [
+      headers.join(','),
+      ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
+    ].join('\n');
+    
+    // Create and download CSV file
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    
+    link.setAttribute('href', url);
+    link.setAttribute('download', `competition_${displayCompetition.title.replace(/[^a-z0-9]/gi, '_')}_results.csv`);
+    link.style.visibility = 'hidden';
+    
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   }
 
   // Only show full loading overlay for initial load, not for action loading (pause/resume/etc)
@@ -370,7 +412,7 @@ function TeacherCompetitionContent({ competitionId }: { competitionId: number })
                   border: '1px solid rgba(16, 185, 129, 0.2)'
                 }}>
                   <span style={{ fontSize: '0.75rem', fontWeight: '600', color: '#6b7280', textTransform: 'uppercase' }}>Active</span>
-                  <span style={{ fontSize: '1.125rem', fontWeight: '700', color: '#10b981', fontFamily: 'monospace' }}>{displayParticipants.length}</span>
+                  <span style={{ fontSize: '1.125rem', fontWeight: '700', color: '#10b981', fontFamily: 'monospace' }}>{[...new Set(displayActiveParticipants.filter((ap: any) => ap.role !== 'teacher' && ap.id !== userProfile?.id).map((ap: any) => ap.id))].length}</span>
                 </div>
                 <div style={{
                   padding: '0.5rem 1rem',
@@ -394,14 +436,25 @@ function TeacherCompetitionContent({ competitionId }: { competitionId: number })
             }
             showAvatar={false}
             actionButton={
-              <div style={{ display: 'flex', gap: '0.75rem' }}>
+              <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap' }}>
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                  <CompetitionControls
+                    competition={displayCompetition}
+                    addedProblems={addedProblems}
+                    onStart={handleStart}
+                    onPause={handlePause}
+                    onResume={handleResume}
+                    onNext={handleNext}
+                    loading={loading}
+                  />
+                </div>
                 <button 
                   onClick={handlePrintResults}
                   style={{
                     background: 'rgba(34, 197, 94, 0.1)',
                     color: '#16a34a',
                     border: '2px solid rgba(34, 197, 94, 0.3)',
-                    padding: '10px 20px',
+                    padding: '12px 24px',
                     borderRadius: '12px',
                     fontWeight: '600',
                     cursor: 'pointer',
@@ -409,7 +462,8 @@ function TeacherCompetitionContent({ competitionId }: { competitionId: number })
                     fontSize: '14px',
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '0.5rem'
+                    gap: '0.5rem',
+                    height: '44px'
                   }}
                 >
                   📊 Print Results
@@ -425,7 +479,8 @@ function TeacherCompetitionContent({ competitionId }: { competitionId: number })
                     fontWeight: '600',
                     cursor: 'pointer',
                     transition: 'all 0.3s ease',
-                    fontSize: '14px'
+                    fontSize: '14px',
+                    height: '44px'
                   }}
                 >
                   Back
@@ -436,39 +491,166 @@ function TeacherCompetitionContent({ competitionId }: { competitionId: number })
 
         {/* Scrollable Content */}
         <div className={styles.scrollableContent}>
-          {/* Competition Controls */}
-          <div className={styles.header}>
-            <div className={styles.headerContent}>
-              <CompetitionControls
-                competition={displayCompetition}
-                addedProblems={addedProblems}
-                onStart={handleStart}
-                onPause={handlePause}
-                onResume={handleResume}
-                onNext={handleNext}
-                loading={loading}
-              />
-            </div>
-          </div>
-
           {/* Main Content */}
           <div className={styles.roomContent}>
-            {/* Problems Management */}
-            <ProblemsManagement
-              availableProblems={availableProblems}
-              addedProblems={localAddedProblems}
-              competitionStatus={displayCompetition.status}
-              onAddProblem={handleAddProblem}
-              onRemoveProblem={handleRemoveProblem}
-              onUpdateTimer={handleUpdateTimer}
-            />
+            {/* Added Problems - First Column */}
+            <div className={styles.leftColumn}>
+              <div className={styles.section}>
+                <div className={styles.sectionHeader}>
+                  <h2 className={styles.sectionTitle}>Added Problems</h2>
+                  <span className={styles.badge}>{localAddedProblems.length}</span>
+                </div>
+                
+                {localAddedProblems.length > 0 ? (
+                  <div className={styles.problemsList}>
+                    {localAddedProblems.map((compeProblem, index) => (
+                      <div key={`added-${compeProblem.problem.id}-${index}`} className={styles.problemCard}>
+                        <div className={styles.problemContent}>
+                          <div className={styles.problemLeft}>
+                            <div className={styles.problemRank}>{index + 1}</div>
+                            <div className={styles.problemInfo}>
+                              <h3 className={styles.problemTitle}>
+                                {compeProblem.problem.title || 'Untitled Problem'}
+                              </h3>
+                              <div className={styles.problemMeta}>
+                                <span 
+                                  className={styles.problemDifficulty}
+                                  data-difficulty={compeProblem.problem.difficulty}
+                                >
+                                  {compeProblem.problem.difficulty}
+                                </span>
+                                <span className={styles.problemXp}>
+                                  {compeProblem.problem.expected_xp} XP
+                                </span>
+                                <span 
+                                  className={styles.visibilityBadge}
+                                  data-visibility={compeProblem.problem.visibility}
+                                >
+                                  {compeProblem.problem.visibility === 'public' ? '🌐 Public' : '🔒 Private'}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                          
+                          <div className={styles.problemRight}>
+                            <div className={styles.problemTimer}>
+                              {compeProblem.timer != null && compeProblem.timer > 0 
+                                ? `${compeProblem.timer}s` 
+                                : <span className={styles.noTimer}>No timer</span>
+                              }
+                            </div>
 
-            {/* Participants Leaderboard */}
-            <ParticipantsLeaderboard 
-              participants={displayParticipants} 
-              activeParticipants={displayActiveParticipants}
-              currentProblemIndex={displayCompetition.current_problem_index}
-            />
+                            {displayCompetition.status === 'NEW' && (
+                              <button
+                                className={styles.removeButton}
+                                onClick={() => handleRemoveProblem(compeProblem.problem)}
+                                title="Remove from competition"
+                              >
+                                ✕
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div style={{
+                    padding: '2rem',
+                    textAlign: 'center',
+                    color: '#9ca3af',
+                    fontSize: '0.875rem'
+                  }}>
+                    No problems added yet. Add problems from the available list.
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Available Problems - Second Column */}
+            <div className={styles.middleColumn}>
+              {displayCompetition.status === 'NEW' && (
+                <div className={styles.section}>
+                  <div className={styles.sectionHeader}>
+                    <h2 className={styles.sectionTitle}>Available Problems</h2>
+                    <span className={styles.badge}>
+                      {availableProblems.filter(p => 
+                        !localAddedProblems.some(ap => ap.problem.id === p.id)
+                      ).length}
+                    </span>
+                  </div>
+                  
+                  <div className={styles.problemsList}>
+                    {availableProblems
+                      .filter(problem => 
+                        !localAddedProblems.some(ap => ap.problem.id === problem.id)
+                      )
+                      .map((problem, index) => {
+                        const canAdd = problem.timer && problem.timer > 0
+                        return (
+                          <div key={`available-${problem.id}-${index}`} className={styles.problemCard}>
+                            <div className={styles.problemContent}>
+                              <div className={styles.problemLeft}>
+                                <div className={styles.problemRank}>{index + 1}</div>
+                                <div className={styles.problemInfo}>
+                                  <h3 className={styles.problemTitle}>
+                                    {problem.title || 'Untitled Problem'}
+                                  </h3>
+                                  <div className={styles.problemMeta}>
+                                    <span 
+                                      className={styles.problemDifficulty}
+                                      data-difficulty={problem.difficulty}
+                                    >
+                                      {problem.difficulty}
+                                    </span>
+                                    <span className={styles.problemXp}>
+                                      {problem.expected_xp} XP
+                                    </span>
+                                    <span 
+                                      className={styles.visibilityBadge}
+                                      data-visibility={problem.visibility}
+                                    >
+                                      {problem.visibility === 'public' ? '🌐 Public' : '🔒 Private'}
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+                              
+                              <div className={styles.problemRight}>
+                                <div className={styles.problemTimer}>
+                                  {problem.timer != null && problem.timer > 0 
+                                    ? `${problem.timer}s` 
+                                    : <span className={styles.noTimer}>No timer</span>
+                                  }
+                                </div>
+                                <button
+                                  className={styles.addButton}
+                                  disabled={!canAdd}
+                                  onClick={() => handleAddProblem(problem)}
+                                  title={!canAdd ? 'Set timer first' : 'Add to competition'}
+                                >
+                                  +
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        )
+                      })}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Participants - Third Column */}
+            <div className={styles.rightColumn}>
+              <ParticipantsLeaderboard 
+                participants={displayParticipants} 
+                activeParticipants={displayActiveParticipants}
+                currentProblemIndex={displayCompetition.current_problem_index}
+                competitionStatus={displayCompetition.status}
+                currentUserId={userProfile?.id}
+              />
+            </div>
           </div>
         </div>
       </div>

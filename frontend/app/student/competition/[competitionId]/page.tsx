@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { use } from "react";
 import { useCompetitionRealtime } from "@/hooks/useCompetitionRealtime";
 import { useCompetitionTimer } from "@/hooks/useCompetitionTimer";
+import PageHeader from "@/components/PageHeader";
 import {
   CompetitionWaitingRoom,
   CompetitionPaused,
@@ -13,6 +14,7 @@ import {
 } from "@/components/competition";
 import type { Competition, CompetitionParticipant } from "@/types/common/competition";
 import styles from "@/styles/competition-student.module.css";
+import dashboardStyles from "@/styles/dashboard-wow.module.css";
 import { useStudentRoomStore } from "@/store/studentRoomStore";
 
 interface CompetitionPageProps {
@@ -24,32 +26,32 @@ function CompetitionPageContent({ competitionId }: { competitionId: number }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { currentRoom } = useStudentRoomStore();
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
   
   // Get roomId from URL or fallback to store
   const roomId = searchParams.get('room') || currentRoom?.id?.toString() || '';
   const roomCode = searchParams.get('roomCode') || currentRoom?.code || '';
-  
-  // Track if we're ready to connect (have roomId)
-  const [isReady, setIsReady] = useState(false);
-  
-  useEffect(() => {
-    if (roomId) {
-      setIsReady(true);
-    }
-  }, [roomId]);
 
-  // Real-time hooks - only connect when ready
+  // Real-time hooks - connect immediately if we have roomId
   const {
     competition,
     participants,
     activeParticipants,
-  } = useCompetitionRealtime(competitionId.toString(), !isReady, roomId);
+  } = useCompetitionRealtime(competitionId.toString(), !roomId, roomId);
 
   const liveCompetition = competition as Competition | null;
   const liveParticipants = participants as CompetitionParticipant[];
   const liveActiveParticipants = activeParticipants || [];
 
-  // Filter out teachers from active participants count
+  // Mark initial load as complete after competition and participants load
+  // Removed the delay - activeParticipants should update immediately when presence syncs
+  useEffect(() => {
+    if (liveCompetition && isInitialLoad) {
+      setIsInitialLoad(false);
+    }
+  }, [liveCompetition, isInitialLoad]);
+
+  // Filter out teachers/host from active participants count and deduplicate by user_id
   // Only show students (role === 'student' or role is undefined but they're in participants list)
   const filteredActiveParticipants = useMemo(() => {
     console.log('🔍 [Filter] Active participants before filter:', liveActiveParticipants);
@@ -58,7 +60,15 @@ function CompetitionPageContent({ competitionId }: { competitionId: number }) {
     // Get participant IDs (students who joined the competition)
     const participantIds = new Set(liveParticipants.map(p => p.user_id || p.id));
     
+    // Get competition creator/host ID
+    const hostId = liveCompetition?.created_by;
+    
     const filtered = liveActiveParticipants.filter((ap: { id: string; role?: string }) => {
+      // Exclude host/creator of the competition
+      if (hostId && ap.id === hostId) {
+        console.log('🚫 [Filter] Excluding host:', ap);
+        return false;
+      }
       // If role is explicitly 'teacher', exclude them
       if (ap.role === 'teacher') {
         console.log('🚫 [Filter] Excluding teacher:', ap);
@@ -78,9 +88,13 @@ function CompetitionPageContent({ competitionId }: { competitionId: number }) {
       return true;
     });
     
-    console.log('✅ [Filter] Filtered active participants:', filtered);
-    return filtered;
-  }, [liveActiveParticipants, liveParticipants]);
+    // Deduplicate by user_id to count unique users instead of multiple sessions
+    const uniqueIds = [...new Set(filtered.map((ap: any) => ap.id))];
+    const deduplicated = uniqueIds.map(id => filtered.find((ap: any) => ap.id === id));
+    
+    console.log('✅ [Filter] Filtered and deduplicated active participants:', deduplicated);
+    return deduplicated;
+  }, [liveActiveParticipants, liveParticipants, liveCompetition?.created_by]);
 
   const {
     formattedTime,
@@ -177,23 +191,96 @@ function CompetitionPageContent({ competitionId }: { competitionId: number }) {
   };
 
   return (
-    <div className={styles.mainContainer}>
-      {/* Header */}
-      <div className={styles.header}>
-        <button 
-          onClick={handleGoBack}
-          className={styles.backButton}
-          title="Go back"
-        >
-          Back
-        </button>
-        <div className={styles.headerContent}>
-          <h1 className={styles.title}>{liveCompetition.title}</h1>
-          <p className={styles.status}>
-            Status: <span className={styles.statusValue}>{liveCompetition.status}</span>
-          </p>
-        </div>
-      </div>
+    <div className={dashboardStyles["dashboard-container"]}>
+      <div className={styles.mainContainer}>
+        {/* Header */}
+        <PageHeader
+          title={liveCompetition.title}
+          subtitle={
+            <div style={{ 
+              display: 'flex', 
+              gap: '2rem', 
+              alignItems: 'center',
+              flexWrap: 'wrap',
+              marginTop: '0.5rem'
+            }}>
+              <div style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '0.25rem',
+                padding: '0.5rem 1rem',
+                background: 'rgba(34, 197, 94, 0.1)',
+                borderRadius: '0.5rem',
+                border: '1px solid rgba(34, 197, 94, 0.2)'
+              }}>
+                <span style={{ fontSize: '0.75rem', fontWeight: '600', color: '#6b7280', textTransform: 'uppercase' }}>Timer</span>
+                <span style={{ fontSize: '1.125rem', fontWeight: '700', color: '#2C514C', fontFamily: 'monospace' }}>{formattedTime}</span>
+              </div>
+              <div style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '0.25rem',
+                padding: '0.5rem 1rem',
+                background: 'rgba(59, 130, 246, 0.1)',
+                borderRadius: '0.5rem',
+                border: '1px solid rgba(59, 130, 246, 0.2)'
+              }}>
+                <span style={{ fontSize: '0.75rem', fontWeight: '600', color: '#6b7280', textTransform: 'uppercase' }}>Participants</span>
+                <span style={{ fontSize: '1.125rem', fontWeight: '700', color: '#2C514C', fontFamily: 'monospace' }}>{liveParticipants.length}</span>
+              </div>
+              <div style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '0.25rem',
+                padding: '0.5rem 1rem',
+                background: 'rgba(16, 185, 129, 0.1)',
+                borderRadius: '0.5rem',
+                border: '1px solid rgba(16, 185, 129, 0.2)'
+              }}>
+                <span style={{ fontSize: '0.75rem', fontWeight: '600', color: '#6b7280', textTransform: 'uppercase' }}>Active</span>
+                <span style={{ fontSize: '1.125rem', fontWeight: '700', color: '#10b981', fontFamily: 'monospace' }}>{filteredActiveParticipants.length}</span>
+              </div>
+              <div style={{
+                padding: '0.5rem 1rem',
+                background: liveCompetition.status === 'NEW' ? 'rgba(6, 182, 212, 0.1)' : 
+                           liveCompetition.status === 'ONGOING' ? 'rgba(16, 185, 129, 0.1)' : 
+                           'rgba(107, 114, 128, 0.1)',
+                borderRadius: '0.5rem',
+                border: `1px solid ${liveCompetition.status === 'NEW' ? 'rgba(6, 182, 212, 0.3)' : 
+                           liveCompetition.status === 'ONGOING' ? 'rgba(16, 185, 129, 0.3)' : 
+                           'rgba(107, 114, 128, 0.3)'}`,
+                fontWeight: '700',
+                fontSize: '0.875rem',
+                color: liveCompetition.status === 'NEW' ? '#06b6d4' : 
+                       liveCompetition.status === 'ONGOING' ? '#10b981' : 
+                       '#6b7280',
+                textTransform: 'uppercase'
+              }}>
+                {liveCompetition.status}
+              </div>
+            </div>
+          }
+          showAvatar={false}
+          actionButton={
+            <button 
+              onClick={handleGoBack}
+              style={{
+                background: 'linear-gradient(135deg, #22c55e 0%, #84cc16 100%)',
+                color: 'white',
+                border: 'none',
+                padding: '12px 24px',
+                borderRadius: '12px',
+                fontWeight: '600',
+                cursor: 'pointer',
+                transition: 'all 0.3s ease',
+                fontSize: '14px',
+                height: '44px'
+              }}
+            >
+              Back
+            </button>
+          }
+        />
 
       {/* Scrollable Content */}
       <div className={styles.scrollableContent}>
@@ -215,6 +302,7 @@ function CompetitionPageContent({ competitionId }: { competitionId: number }) {
         {/* Content */}
         {renderContent()}
       </div>
+    </div>
     </div>
   );
 }

@@ -329,6 +329,86 @@ class ParticipantRoutes {
          *         $ref: '#/components/responses/UnauthorizedError'
          */
         this.router.get('/joined', this.participantController.joinedRooms)
+
+        // =====================================================
+        // ACTIVE TRACKING ROUTES
+        // =====================================================
+
+        /**
+         * @swagger
+         * /participants/heartbeat/{roomId}:
+         *   put:
+         *     tags: [Participants]
+         *     summary: Update participant heartbeat
+         *     description: Update participant activity status
+         *     security:
+         *       - bearerAuth: []
+         *     parameters:
+         *       - name: roomId
+         *         in: path
+         *         required: true
+         *         schema:
+         *           type: integer
+         *     requestBody:
+         *       required: true
+         *       content:
+         *         application/json:
+         *           schema:
+         *             type: object
+         *             properties:
+         *               is_in_competition:
+         *                 type: boolean
+         *               competition_id:
+         *                 type: integer
+         *               session_id:
+         *                 type: string
+         *     responses:
+         *       200:
+         *         description: Heartbeat updated successfully
+         */
+        this.router.put('/heartbeat/:roomId', this.participantController.updateHeartbeat)
+
+        /**
+         * @swagger
+         * /participants/active/{roomId}:
+         *   get:
+         *     tags: [Participants]
+         *     summary: Get active participants
+         *     description: Get list of currently active participants in a room
+         *     security:
+         *       - bearerAuth: []
+         *     parameters:
+         *       - name: roomId
+         *         in: path
+         *         required: true
+         *         schema:
+         *           type: integer
+         *     responses:
+         *       200:
+         *         description: Active participants retrieved successfully
+         */
+        this.router.get('/active/room/:roomId', this.participantController.getActiveParticipants)
+
+        /**
+         * @swagger
+         * /participants/active/competition/{competitionId}:
+         *   get:
+         *     tags: [Participants]
+         *     summary: Get active competition participants
+         *     description: Get list of currently active participants in a competition
+         *     security:
+         *       - bearerAuth: []
+         *     parameters:
+         *       - name: competitionId
+         *         in: path
+         *         required: true
+         *         schema:
+         *           type: integer
+         *     responses:
+         *       200:
+         *         description: Active competition participants retrieved successfully
+         */
+        this.router.get('/active/competition/:competitionId', this.participantController.getActiveCompetitionParticipants)
     }
     
     getRouter(){

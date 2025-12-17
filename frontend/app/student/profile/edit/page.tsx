@@ -60,7 +60,7 @@ export default function StudentEditProfilePage() {
                     actionButton={backButton}
                 />
 
-            <div className={styles['edit-profile-container']}>
+                <div className={styles['edit-profile-container']}>
                 {/* Tab Navigation */}
                 <div className={styles['tab-navigation']}>
                     <button
@@ -105,7 +105,7 @@ export default function StudentEditProfilePage() {
                     )}
                 </div>
             </div>
+            </div>
         </div>
-    )
     )
 }

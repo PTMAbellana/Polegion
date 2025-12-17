@@ -231,7 +231,7 @@ export const useCompetitionRealtime = (competitionId, isLoading, roomId = '', us
       .subscribe(async (status, err) => {
         console.log(`📡 [Presence] Status: ${status} for competition-${compIdStr}`);
         if (err) {
-          console.error(`❌ [Presence] Subscription error:`, err);
+          console.warn(`⚠️ [Presence] Subscription error:`, err);
         }
         console.log(`📡 [Presence] Channel details:`, {
           channelName: `competition-${compIdStr}`,
@@ -244,14 +244,14 @@ export const useCompetitionRealtime = (competitionId, isLoading, roomId = '', us
           setIsConnected(true);
           setConnectionStatus('CONNECTED');
           retryCountRef.current = 0; // Reset retry count on success
+          console.log('✅ [Presence] Successfully subscribed to channel');
           
-          // Mark presence as ready after a short delay to allow sync
-          setTimeout(() => {
-            if (mountedRef.current) {
-              setPresenceReady(true);
-              console.log('✅ [Presence] Marked as ready');
-            }
-          }, 1000);
+          // Mark presence as ready immediately
+          setPresenceReady(true);
+          console.log('✅ [Presence] Marked as ready immediately');
+          
+          // DON'T read presenceState here - it's empty on initial subscription
+          // The 'sync' event will fire shortly and populate activeParticipants
           
           // Track this user's presence
           let userProfile = null;
@@ -269,7 +269,7 @@ export const useCompetitionRealtime = (competitionId, isLoading, roomId = '', us
               userProfile = userStr ? JSON.parse(userStr) : null;
             }
           } catch (e) {
-            console.error('❌ [Presence] Failed to parse user from localStorage:', e);
+            console.warn('⚠️ [Presence] Failed to parse user from localStorage:', e);
           }
           
           if (userProfile?.id) {
@@ -290,18 +290,18 @@ export const useCompetitionRealtime = (competitionId, isLoading, roomId = '', us
               setupCompleteRef.current = true;
               console.log(`✅ [Presence] User tracked successfully`);
               
-              // Force an immediate sync after tracking
+              // Force a manual sync check after a brief moment to ensure presence propagates
               setTimeout(() => {
                 if (!mountedRef.current) return;
                 const presenceState = channel.presenceState();
-                console.log(`👥 [Presence] Forced sync after track - state:`, presenceState);
-                
                 const active = Object.values(presenceState).flatMap(presences => 
                   presences.map(p => p.user).filter(Boolean)
                 );
-                console.log(`👥 [Presence] Forced sync - active count: ${active.length}`);
-                setActiveParticipants(active);
-              }, 500); // 500ms delay to allow presence propagation
+                console.log(`👥 [Presence] Manual check after track - active count: ${active.length}`);
+                if (active.length > 0) {
+                  setActiveParticipants(active);
+                }
+              }, 300); // Short delay to allow presence to propagate
             } catch (trackError) {
               console.error('❌ [Presence] Failed to track user:', trackError);
             }
@@ -350,16 +350,16 @@ export const useCompetitionRealtime = (competitionId, isLoading, roomId = '', us
       setupCompleteRef.current = true;
     }, 100);
     
-    // Add timeout to detect if subscription hangs
+    // Add timeout to detect if subscription hangs (increased to 15 seconds)
     const subscriptionTimeout = setTimeout(() => {
       if (channelRef.current && channelRef.current.state !== 'joined') {
-        console.error(`⏱️ [Presence] Subscription timeout! Channel state: ${channelRef.current.state}`);
-        console.error(`⏱️ [Presence] The subscription callback was never called. Possible issues:`);
-        console.error(`  1. Supabase Realtime not enabled in dashboard`);
-        console.error(`  2. Network/firewall blocking WebSocket connections`);
-        console.error(`  3. Invalid Supabase credentials`);
+        console.warn(`⏱️ [Presence] Subscription taking longer than expected. Channel state: ${channelRef.current.state}`);
+        console.warn(`⏱️ [Presence] The channel may still connect. If issues persist, check:`);
+        console.warn(`  1. Supabase Realtime is enabled in dashboard`);
+        console.warn(`  2. Network/firewall is not blocking WebSocket connections`);
+        console.warn(`  3. Supabase credentials are valid`);
       }
-    }, 5000); // 5 second timeout
+    }, 15000); // 15 second timeout (increased from 5)
     
     // Cleanup function - only runs on unmount or when competition actually changes
     return () => {
@@ -390,7 +390,7 @@ export const useCompetitionRealtime = (competitionId, isLoading, roomId = '', us
         channelRef.current.untrack().then(() => {
           console.log('✅ [Realtime] Untracked presence successfully');
         }).catch((error) => {
-          console.error('⚠️ [Realtime] Error untracking presence:', error);
+          console.warn('⚠️ [Realtime] Error untracking presence:', error);
         });
         
         supabase.removeChannel(channelRef.current);
