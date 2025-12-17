@@ -29,7 +29,7 @@ export default function Home() {
     },
     {
       id: 3,
-      title: "Pre & Post Assessments",
+      title: "Pre / Post Assessments",
       description: "Track your learning journey with comprehensive assessments that measure your geometry mastery!",
       image: "/images/chapter-complete-page.webp",
       color: "#2E7D32",
@@ -147,7 +147,7 @@ export default function Home() {
               )}
             </button>
             <p className={styles.trustText}>
-              Safe and Focused • Built for Students • Developed with AI Assistance
+              Safe and Focused / Built for Students / Developed with AI Assistance
             </p>
           </div>
           
@@ -270,34 +270,7 @@ export default function Home() {
 
 
 
-        {/* Final CTA */}
-        <section className={styles.finalCtaSection}>
-          <div className={styles.ctaBox}>
-            <h2 className={styles.ctaTitle}>Join Our Learning Adventure</h2>
-            <p className={styles.ctaSubtitle}>
-              Experience interactive geometry education through 7 unique worlds, collaborative rooms, and comprehensive assessments
-            </p>
-            <button 
-              className={styles.ctaButtonLarge} 
-              onClick={handleGetStarted}
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <>
-                  <div className={styles.spinner} />
-                  Loading...
-                </>
-              ) : (
-                <>
-                  Get Started - Free Access!
-                </>
-              )}
-            </button>
-            <p className={styles.noCardText}>Platform in development • New features added regularly</p>
-          </div>
-        </section>
-
-        {/* Footer */}
+        {/* Footer */}}
         <footer className={styles.footer}>
           <div className={styles.footerContent}>
             <div className={styles.footerBrand}>

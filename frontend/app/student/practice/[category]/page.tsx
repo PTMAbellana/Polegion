@@ -42,7 +42,7 @@ export default function CategoryPracticePage() {
       detail: 'Covers Grade 5–6 geometry concepts and competencies.',
     },
     {
-      title: 'Quick & Repeatable',
+      title: 'Quick / Repeatable',
       detail: 'Finish a set in under five minutes, then try again.',
     },
   ];

@@ -7,7 +7,11 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: #F3F9E3;
+  background-image: url('/images/auth-page-background.webp');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
   padding: 1.25rem;
 }
 
@@ -16,10 +20,13 @@
   width: 100%;
   max-width: 48.75rem;
   background: #FFFFFF;
-  border: 0.03125rem solid #000000;
-  border-radius: 0.625rem;
-  padding: 1.875rem 1.25rem;
-  box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.1);
+  border: none;
+  border-radius: 1.5rem;
+  padding: 2.5rem 2rem;
+  box-shadow: 0 1rem 3rem rgba(59, 130, 246, 0.15),
+              0 0.5rem 1.5rem rgba(59, 130, 246, 0.1),
+              0 2rem 4rem rgba(0, 0, 0, 0.08);
+  backdrop-filter: blur(10px);
 }
 
 .cardContent {
@@ -47,7 +54,7 @@
   font-size: clamp(1.75rem, 5vw, 2.25rem);
   line-height: 1.3;
   text-align: center;
-  color: #000000;
+  color: #1E3A8A;
   margin-bottom: 0.5rem;
 }
 
@@ -57,7 +64,7 @@
   font-size: clamp(1rem, 3vw, 1.125rem);
   line-height: 1.4;
   text-align: center;
-  color: #000000;
+  color: #4B5563;
   margin-bottom: 1.875rem;
 }
 
@@ -70,9 +77,9 @@
 
 .roleCard {
   background: #FFFFFF;
-  border: 0.09375rem solid #2F3E75;
-  border-radius: 0.75rem;
-  padding: 1.875rem 1.5rem;
+  border: 0.125rem solid #DBEAFE;
+  border-radius: 1.25rem;
+  padding: 2rem 1.5rem;
   text-align: center;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -80,25 +87,27 @@
   flex-direction: column;
   align-items: center;
   min-height: 21.25rem;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.08);
 }
 
 .roleCard:hover {
-  transform: translateY(-0.3125rem);
-  box-shadow: 0 0.5rem 1.25rem rgba(47, 62, 117, 0.2);
-  border-color: #2F3E75;
-  background: rgba(47, 62, 117, 0.02);
+  transform: translateY(-0.5rem);
+  box-shadow: 0 0.75rem 2rem rgba(59, 130, 246, 0.15);
+  border-color: #3B82F6;
+  background: rgba(59, 130, 246, 0.02);
 }
 
 .roleIcon {
   width: 5.625rem;
   height: 5.625rem;
-  background: linear-gradient(135deg, #F3F9E3 0%, #E8F4D9 100%);
+  background: linear-gradient(135deg, #DBEAFE 0%, #D1FAE5 100%);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   margin-bottom: 1.25rem;
-  border: 0.125rem solid #2F3E75;
+  border: 0.1875rem solid #3B82F6;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
 }
 
 .iconImage {
@@ -110,7 +119,7 @@
 .iconSvg {
   width: 3.4375rem;
   height: 3.4375rem;
-  color: #2F3E75;
+  color: #2563EB;
 }
 
 .roleTitle {
@@ -118,42 +127,44 @@
   font-weight: 600;
   font-size: clamp(1.5rem, 3.5vw, 1.625rem);
   line-height: 1.3;
-  color: #2F3E75;
+  color: #1E3A8A;
   margin-bottom: 0.75rem;
 }
 
 .roleDescription {
   font-family: 'Poppins', sans-serif;
-  font-weight: 300;
+  font-weight: 400;
   font-size: 0.9375rem;
   line-height: 1.5;
-  color: #282828;
+  color: #4B5563;
   margin-bottom: 1.25rem;
   flex-grow: 1;
 }
 
 .roleButton {
   width: 100%;
-  height: 2.8125rem;
-  background: #2F3E75;
-  border-radius: 3.75rem;
+  height: 3rem;
+  background: #22C55E;
+  border-radius: 0.75rem;
   border: none;
   font-family: 'Poppins', sans-serif;
-  font-weight: 500;
+  font-weight: 600;
   font-size: 1rem;
   line-height: 1.5rem;
   color: #FFFFFF;
   cursor: pointer;
   transition: all 0.3s ease;
+  box-shadow: 0 4px 14px rgba(34, 197, 94, 0.25);
 }
 
 .roleButton:hover {
-  background: #263259;
-  transform: scale(1.02);
+  background: #16A34A;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(34, 197, 94, 0.35);
 }
 
 .roleButton:active {
-  transform: scale(0.98);
+  transform: translateY(0);
 }
 
 .loginPrompt {
@@ -167,12 +178,13 @@
 }
 
 .loginLink {
-  color: #2F3E75;
+  color: #2563EB;
   cursor: pointer;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .loginLink:hover {
+  color: #1D4ED8;
   text-decoration: underline;
 }
 

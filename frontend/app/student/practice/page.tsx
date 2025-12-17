@@ -39,11 +39,11 @@ export default function PracticePage() {
       detail: 'Choose the category that matches your current lesson or goal.',
     },
     {
-      title: 'Answer & Reflect',
+      title: 'Answer / Reflect',
       detail: 'Read the feedback after each response to reinforce concepts.',
     },
     {
-      title: 'Retake & Master',
+      title: 'Retake / Master',
       detail: 'Retry categories anytime with brand-new question variations.',
     },
   ];

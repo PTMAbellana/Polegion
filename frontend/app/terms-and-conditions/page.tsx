@@ -1,38 +1,22 @@
 "use client";
-import { useEffect } from 'react';
-import { IoClose } from 'react-icons/io5';
-import styles from '@/styles/terms-modal.module.css';
+import { IoChevronBack } from 'react-icons/io5';
+import { useRouter } from 'next/navigation';
+import styles from './terms.module.css';
 
-interface TermsAndConditionsModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-}
-
-export default function TermsAndConditionsModal({ isOpen, onClose }: TermsAndConditionsModalProps) {
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'unset';
-    }
-    return () => {
-      document.body.style.overflow = 'unset';
-    };
-  }, [isOpen]);
-
-  if (!isOpen) return null;
+export default function TermsAndConditionsPage() {
+  const router = useRouter();
 
   return (
-    <div className={styles.modalOverlay} onClick={onClose}>
-      <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
-        <div className={styles.modalHeader}>
-          <h2>Terms and Conditions / Privacy Notice</h2>
-          <button onClick={onClose} className={styles.closeButton}>
-            <IoClose />
+    <div className={styles.termsPage}>
+      <div className={styles.termsContainer}>
+        <div className={styles.termsHeader}>
+          <button onClick={() => router.back()} className={styles.backButton}>
+            <IoChevronBack />
           </button>
+          <h1>Terms and Conditions / Privacy Notice</h1>
         </div>
         
-        <div className={styles.modalBody}>
+        <div className={styles.termsBody}>
           <section className={styles.section}>
             <h3>1. Research and Development Notice</h3>
             <p>
@@ -177,9 +161,9 @@ export default function TermsAndConditionsModal({ isOpen, onClose }: TermsAndCon
           </p>
         </div>
         
-        <div className={styles.modalFooter}>
-          <button onClick={onClose} className={styles.closeBtn}>
-            Close
+        <div className={styles.termsFooter}>
+          <button onClick={() => router.back()} className={styles.backBtn}>
+            <IoChevronBack /> Back
           </button>
         </div>
       </div>

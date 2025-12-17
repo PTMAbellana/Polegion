@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import toast from 'react-hot-toast';
 import { useAuthStore } from '@/store/authStore';
 import { RegisterFormData } from '@/types/forms/auth';
@@ -10,7 +11,6 @@ import { registerSchema } from '@/schemas/authSchemas';
 import { ROUTES, STUDENT_ROUTES, TEACHER_ROUTES } from '@/constants/routes';
 import PasswordInput from '@/components/auth/inputs/PasswordInput';
 import EmailInput from '@/components/auth/inputs/EmailInput';
-import TermsAndConditionsModal from '@/components/auth/TermsAndConditionsModal';
 import styles from '@/styles/register.module.css';
 
 export default function RegisterForm(
@@ -27,7 +27,6 @@ export default function RegisterForm(
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
-  const [showTermsModal, setShowTermsModal] = useState(false);
 
   const {
     register,
@@ -175,13 +174,12 @@ export default function RegisterForm(
           />
           <span>
             I agree to the{' '}
-            <button
-              type="button"
-              onClick={() => setShowTermsModal(true)}
+            <Link
+              href="/terms-and-conditions"
               className={styles.termsLink}
             >
               Terms and Conditions
-            </button>
+            </Link>
             {' '}and confirm that:
           </span>
         </label>
@@ -199,12 +197,6 @@ export default function RegisterForm(
       >
         {loginLoading ? "Registering..." : "Register"}
       </button>
-
-      {/* Terms Modal */}
-      <TermsAndConditionsModal
-        isOpen={showTermsModal}
-        onClose={() => setShowTermsModal(false)}
-      />
     </form>
   );
 }
