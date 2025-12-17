@@ -10,6 +10,7 @@ interface RecordsDownloadSectionWithPreviewProps extends RecordsDownloadSectionP
   roomRecords: RecordStudent[]
   competitionRecords: Map<number, RecordStudent[]>
   competitions: Array<{ id: number; title: string }>
+  roomId?: number
 }
 
 export default function RecordsDownloadSection({
@@ -18,7 +19,8 @@ export default function RecordsDownloadSection({
   isLoading = false,
   roomRecords = [],
   competitionRecords = new Map(),
-  competitions = []
+  competitions = [],
+  roomId
 }: RecordsDownloadSectionWithPreviewProps) {
   const [recordType, setRecordType] = useState<'room' | 'competition' | 'worldmap'>('room')
   const [selectedCompetitionId, setSelectedCompetitionId] = useState<number | ''>('')
@@ -56,7 +58,12 @@ export default function RecordsDownloadSection({
   }
 
   const handleViewProgress = (userId: string) => {
-    window.open(`/teacher/student-progress/${userId}`, '_blank')
+    if (!roomId) {
+      console.error('No roomId provided for viewing student progress')
+      return
+    }
+    const url = `/teacher/records/${roomId}/student/${userId}`
+    window.open(url, '_blank')
   }
 
   return (

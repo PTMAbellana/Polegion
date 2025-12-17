@@ -129,7 +129,7 @@ export default function TeacherCastleContentPage() {
   }
 
   return (
-    <>
+    <div className={styles["dashboard-container"]}>
       <PageHeader
         title="Castle Content Viewer"
         subtitle="Browse all castle chapters and content that students learn"
@@ -242,6 +242,6 @@ export default function TeacherCastleContentPage() {
           </p>
         </div>
       </div>
-    </>
+    </div>
   )
 }

@@ -28,7 +28,7 @@
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* .miniProfileAvatar {
+.miniProfileAvatar {
   width: 100px;
   height: 100px;
   border-radius: 50%;
@@ -36,7 +36,7 @@
   border: 4px solid rgba(34, 197, 94, 0.3);
   box-shadow: 0 8px 24px rgba(34, 197, 94, 0.3);
   transition: all 0.3s ease;
-} */
+}
 
 .miniProfileCard:hover .miniProfileAvatar {
   transform: scale(1.1);
@@ -422,6 +422,29 @@
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(18.75rem, 1fr));
   gap: 1.5rem;
+  max-height: 42rem;
+  overflow-y: auto;
+  padding-right: 0.5rem;
+}
+
+/* Custom Scrollbar for Castle Grid */
+.castleGrid::-webkit-scrollbar {
+  width: 0.5rem;
+}
+
+.castleGrid::-webkit-scrollbar-track {
+  background: rgba(34, 197, 94, 0.1);
+  border-radius: 0.25rem;
+}
+
+.castleGrid::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+  border-radius: 0.25rem;
+  transition: background 0.3s ease;
+}
+
+.castleGrid::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
 }
 
 .castleCard {
@@ -554,13 +577,7 @@
   margin-bottom: 2.5rem;
 }
 
-.leaderboardsGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(21.875rem, 1fr));
-  gap: 1.5rem;
-}
-
-.leaderboardCard {
+.leaderboardContainer {
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(254, 252, 232, 0.95) 100%);
   backdrop-filter: blur(10px);
   border: 0.125rem solid rgba(234, 179, 8, 0.3);
@@ -569,32 +586,71 @@
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   overflow: hidden;
+  height: 500px;
+  display: flex;
+  flex-direction: column;
 }
 
-.leaderboardCard::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(45deg, #eab308, #f59e0b, #84cc16, #22c55e);
-  z-index: -1;
-  padding: 0.125rem;
-  border-radius: 1.5rem;
-  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  mask-composite: exclude;
-  opacity: 0;
-  transition: opacity 0.3s ease;
+.leaderboardTabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  border-bottom: 2px solid rgba(234, 179, 8, 0.2);
+  padding-bottom: 0.5rem;
+  overflow-x: auto;
+  flex-shrink: 0;
 }
 
-.leaderboardCard:hover::before {
-  opacity: 1;
+.leaderboardTab {
+  font-family: 'Poppins', sans-serif;
+  padding: 0.75rem 1.5rem;
+  background: transparent;
+  border: none;
+  border-bottom: 3px solid transparent;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: #6b7280;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
 }
 
-.leaderboardCard:hover {
-  transform: translateY(-0.25rem);
-  box-shadow: 0 0.75rem 2.5rem rgba(234, 179, 8, 0.3);
+.leaderboardTab:hover {
+  color: #eab308;
+}
+
+.activeTab {
+  color: #eab308 !important;
+  border-bottom-color: #eab308 !important;
+}
+
+.leaderboardsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(21.875rem, 1fr));
+  gap: 1.5rem;
+  max-height: 42rem;
+  overflow-y: auto;
+  padding-right: 0.5rem;
+}
+
+/* Custom Scrollbar for Leaderboards Grid */
+.leaderboardsGrid::-webkit-scrollbar {
+  width: 0.5rem;
+}
+
+.leaderboardsGrid::-webkit-scrollbar-track {
+  background: rgba(234, 179, 8, 0.1);
+  border-radius: 0.25rem;
+}
+
+.leaderboardsGrid::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #eab308 0%, #f59e0b 100%);
+  border-radius: 0.25rem;
+  transition: background 0.3s ease;
+}
+
+.leaderboardsGrid::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
 }
 
 .leaderboardTitle {
@@ -606,12 +662,36 @@
   -webkit-text-fill-color: transparent;
   background-clip: text;
   margin: 0 0 1rem 0;
+  flex-shrink: 0;
 }
 
 .leaderboardList {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
+  flex: 1;
+  overflow-y: auto;
+  padding-right: 0.5rem;
+}
+
+/* Custom Scrollbar for Leaderboard List */
+.leaderboardList::-webkit-scrollbar {
+  width: 0.4rem;
+}
+
+.leaderboardList::-webkit-scrollbar-track {
+  background: rgba(234, 179, 8, 0.1);
+  border-radius: 0.25rem;
+}
+
+.leaderboardList::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #eab308 0%, #f59e0b 100%);
+  border-radius: 0.25rem;
+  transition: background 0.3s ease;
+}
+
+.leaderboardList::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
 }
 
 .leaderboardItem {

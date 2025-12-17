@@ -9,6 +9,7 @@ import { useTeacherDashboardRealtime } from "@/hooks/useTeacherDashboardRealtime
 import Loader from "@/components/Loader"
 import LoadingOverlay from "@/components/LoadingOverlay"
 import PageHeader from "@/components/PageHeader"
+import MiniProfileCard from "@/components/MiniProfileCard"
 import RoomCardsList from "@/components/RoomCardsList"
 import { TEACHER_ROUTES } from "@/constants/routes"
 import dashboardStyles from "@/styles/dashboard-wow.module.css"
@@ -17,7 +18,7 @@ import competitionStyles from "@/styles/competitions-dashboard.module.css"
 import { Competition } from "@/types/common/competition"
 import { LeaderboardData } from "@/types/common/leaderboard"
 import AnimatedAvatar from "@/components/profile/AnimatedAvatar"
-import { FaChalkboardTeacher, FaPlus, FaRegFileAlt } from 'react-icons/fa'
+import { FaChalkboardTeacher, FaPlus, FaRegFileAlt, FaFortAwesome, FaBrain, FaBook } from 'react-icons/fa'
 import { safeAverage, safeMax, safeNumber } from "@/utils/numberFormat"
 
 // Extended type for competitions with room context and additional fields
@@ -36,6 +37,8 @@ export default function TeacherDashboard() {
     loading: roomsLoading, 
     fetchCreatedRooms 
   } = useTeacherRoomStore()
+
+  const [selectedLeaderboardIndex, setSelectedLeaderboardIndex] = useState(0)
 
   // Initial fetch on mount
   useEffect(() => {
@@ -124,35 +127,13 @@ export default function TeacherDashboard() {
         {/* Top Section: Mini Profile + Quick Actions */}
         <div className={teacherStyles.topSection}>
           {/* Mini Profile Card */}
-          <section className={teacherStyles.miniProfileCard}>
-            <div className={teacherStyles.miniProfileAvatar}>
-              {userProfile?.profile_pic ? (
-                <AnimatedAvatar
-                  className={teacherStyles.miniProfileImg}
-                  src={userProfile.profile_pic}
-                  alt="Profile"
-                />
-              ) : (
-                <div className={teacherStyles.miniProfileLetter}>
-                  {userProfile?.first_name?.charAt(0).toUpperCase() || 'T'}
-                </div>
-              )}
-            </div>
-            <div className={teacherStyles.miniProfileInfo}>
-              <h3 className={teacherStyles.miniProfileName}>
-                {userProfile?.first_name} {userProfile?.last_name}
-              </h3>
-              <p className={teacherStyles.miniProfileRole}>
-                Teacher
-              </p>
-            </div>
-            <button 
-              className={teacherStyles.viewProfileButton}
-              onClick={() => router.push(TEACHER_ROUTES.PROFILE)}
-            >
-              View Full Profile
-            </button>
-          </section>
+          <MiniProfileCard
+            firstName={userProfile?.first_name}
+            lastName={userProfile?.last_name}
+            profilePic={userProfile?.profile_pic}
+            role="Teacher"
+            profileRoute={TEACHER_ROUTES.PROFILE}
+          />
 
           {/* Quick Actions Cards */}
           <div className={teacherStyles.quickActionsGrid}>
@@ -184,6 +165,32 @@ export default function TeacherDashboard() {
 
             <button 
               className={teacherStyles.quickActionCard}
+              onClick={() => router.push(TEACHER_ROUTES.WORLD_MAP_HANDBOOK)}
+            >
+              <div className={teacherStyles.quickActionIcon}>
+                <FaFortAwesome />
+              </div>
+              <div className={teacherStyles.quickActionContent}>
+                <h4>World Map</h4>
+                <p>Student adventure view</p>
+              </div>
+            </button>
+
+            <button 
+              className={teacherStyles.quickActionCard}
+              onClick={() => router.push(TEACHER_ROUTES.PRACTICE_HANDBOOK)}
+            >
+              <div className={teacherStyles.quickActionIcon}>
+                <FaBrain />
+              </div>
+              <div className={teacherStyles.quickActionContent}>
+                <h4>Practice</h4>
+                <p>Student practice view</p>
+              </div>
+            </button>
+
+            <button 
+              className={teacherStyles.quickActionCard}
               onClick={() => router.push(TEACHER_ROUTES.RECORDS)}
             >
               <div className={teacherStyles.quickActionIcon}>
@@ -192,6 +199,19 @@ export default function TeacherDashboard() {
               <div className={teacherStyles.quickActionContent}>
                 <h4>View Records</h4>
                 <p>Student performance</p>
+              </div>
+            </button>
+
+            <button 
+              className={teacherStyles.quickActionCard}
+              onClick={() => router.push(TEACHER_ROUTES.CASTLE_CONTENT)}
+            >
+              <div className={teacherStyles.quickActionIcon}>
+                <FaBook />
+              </div>
+              <div className={teacherStyles.quickActionContent}>
+                <h4>Castle Viewer</h4>
+                <p>Content reference</p>
               </div>
             </button>
           </div>
@@ -291,39 +311,57 @@ export default function TeacherDashboard() {
               </button>
             </div>
             
-            <div className={teacherStyles.leaderboardsGrid}>
-              {leaderboards.map((leaderboard) => (
-                <div key={leaderboard.id} className={teacherStyles.leaderboardCard}>
-                  <h3 className={teacherStyles.leaderboardTitle}>
-                    {leaderboard.title}
-                  </h3>
-                  <div className={teacherStyles.leaderboardList}>
-                    {leaderboard.data.map((item, index) => {
-                      const participant = Array.isArray(item.participants) 
-                        ? item.participants[0] 
-                        : item.participants
-                      return (
-                        <div key={index} className={teacherStyles.leaderboardItem}>
-                          <div className={teacherStyles.leaderboardRank}>
-                            {index === 0 ? '#1' : index === 1 ? '#2' : index === 2 ? '#3' : `#${index + 1}`}
-                          </div>
-                          <div className={teacherStyles.leaderboardUser}>
-                            <div className={teacherStyles.leaderboardUserAvatar}>
-                              {participant?.first_name?.charAt(0).toUpperCase() || '?'}
-                            </div>
-                            <span className={teacherStyles.leaderboardUserName}>
-                              {participant?.first_name} {participant?.last_name}
-                            </span>
-                          </div>
-                          <div className={teacherStyles.leaderboardScore}>
-                            {safeNumber(item.accumulated_xp, 0)} XP
-                          </div>
-                        </div>
-                      )
-                    })}
-                  </div>
+            <div className={teacherStyles.leaderboardContainer}>
+              {/* Tabs for multiple leaderboards */}
+              {leaderboards.length > 1 && (
+                <div className={teacherStyles.leaderboardTabs}>
+                  {leaderboards.map((leaderboard, index) => (
+                    <button
+                      key={leaderboard.id}
+                      className={`${teacherStyles.leaderboardTab} ${
+                        selectedLeaderboardIndex === index ? teacherStyles.activeTab : ''
+                      }`}
+                      onClick={() => setSelectedLeaderboardIndex(index)}
+                    >
+                      {leaderboard.title}
+                    </button>
+                  ))}
                 </div>
-              ))}
+              )}
+              
+              {/* Leaderboard title (only shown when single leaderboard) */}
+              {leaderboards.length === 1 && (
+                <h3 className={teacherStyles.leaderboardTitle}>
+                  {leaderboards[0].title}
+                </h3>
+              )}
+              
+              {/* Leaderboard list */}
+              <div className={teacherStyles.leaderboardList}>
+                {leaderboards[selectedLeaderboardIndex]?.data.map((item, index) => {
+                  const participant = Array.isArray(item.participants) 
+                    ? item.participants[0] 
+                    : item.participants
+                  return (
+                    <div key={index} className={teacherStyles.leaderboardItem}>
+                      <div className={teacherStyles.leaderboardRank}>
+                        {index === 0 ? '#1' : index === 1 ? '#2' : index === 2 ? '#3' : `#${index + 1}`}
+                      </div>
+                      <div className={teacherStyles.leaderboardUser}>
+                        <div className={teacherStyles.leaderboardUserAvatar}>
+                          {participant?.first_name?.charAt(0).toUpperCase() || '?'}
+                        </div>
+                        <span className={teacherStyles.leaderboardUserName}>
+                          {participant?.first_name} {participant?.last_name}
+                        </span>
+                      </div>
+                      <div className={teacherStyles.leaderboardScore}>
+                        {safeNumber(item.accumulated_xp, 0)} XP
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
             </div>
           </section>
         )}

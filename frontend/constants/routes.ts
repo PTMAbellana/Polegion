@@ -70,11 +70,18 @@ export const TEACHER_ROUTES = {
     // records
     RECORDS: `/teacher${ROUTES.RECORDS}`,
     
-    // castle content viewer
+    // student progress reports (now under records)
+    // STUDENT_PROGRESS: `/teacher/records/[roomId]/student/[userId]`, // Dynamic route
+    
+    // castle content viewer (read-only reference)
     CASTLE_CONTENT: `/teacher/castle-content`,
     
-    // practice problems viewer
+    // practice problems viewer (read-only reference)
     PRACTICE_PROBLEMS: `/teacher/practice-problems`,
+    
+    // handbook - actual student interfaces for teacher reference
+    WORLD_MAP_HANDBOOK: `/teacher/handbook/worldmap`,
+    PRACTICE_HANDBOOK: `/teacher/handbook/practice`,
     
     // profile
     PROFILE: `/teacher${ROUTES.PROFILE}`,
@@ -92,5 +99,6 @@ export const PUBLIC_ROUTES = [
     STUDENT_ROUTES.REGISTER,
     TEACHER_ROUTES.LOGIN,
     TEACHER_ROUTES.REGISTER,
-    '/terms-and-conditions'
+    '/terms-and-conditions',
+    '/privacy-policy'
 ]

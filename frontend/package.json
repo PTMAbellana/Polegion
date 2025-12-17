@@ -14,9 +14,9 @@
     "autoprefixer": "^10.4.21",
     "axios": "^1.13.2",
     "axios-cache-interceptor": "^1.8.3",
-    "bootstrap": "^5.3.6",
     "canvas": "^3.1.2",
     "html2canvas": "^1.4.1",
+    "lottie-react": "^2.4.1",
     "lucide-react": "^0.508.0",
     "next": "^15.3.8",
     "react": "^19.1.0",
@@ -33,14 +33,12 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
-    "@tailwindcss/postcss": "^4",
     "@types/node": "20.17.47",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "15.3.2",
     "sharp": "^0.34.5",
-    "tailwindcss": "^4",
     "typescript": "5.8.3"
   }
 }

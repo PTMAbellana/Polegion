@@ -1,0 +1,67 @@
+/* Teacher Handbook Wrapper Styles */
+.handbookContainer {
+  width: 100%;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #E3F2FD 0%, #E8F5E9 100%);
+}
+
+.teacherBanner {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 2rem;
+  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.2);
+  border-bottom: 3px solid #15803d;
+}
+
+.bannerIcon {
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+
+.bannerContent {
+  flex: 1;
+}
+
+.bannerContent strong {
+  display: block;
+  font-size: 1.125rem;
+  margin-bottom: 0.25rem;
+  font-weight: 600;
+}
+
+.bannerContent p {
+  margin: 0;
+  font-size: 0.875rem;
+  opacity: 0.95;
+}
+
+.studentInterfaceWrapper {
+  /* No additional styling needed - student interface renders naturally */
+  width: 100%;
+  min-height: calc(100vh - 80px);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .teacherBanner {
+    padding: 0.75rem 1rem;
+  }
+
+  .bannerIcon {
+    font-size: 1.25rem;
+  }
+
+  .bannerContent strong {
+    font-size: 1rem;
+  }
+
+  .bannerContent p {
+    font-size: 0.8rem;
+  }
+}

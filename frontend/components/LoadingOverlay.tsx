@@ -14,7 +14,7 @@ const LoadingOverlay: React.FC<LoadingOverlayProps> = ({
   className = ""
 }) => {
   return (
-    <div className={`${styles["dashboard-container"]} ${className}`}>
+    <div className={className}>
       {isLoading && (
         <div className={styles["loading-overlay"]}>
           <Loader />

@@ -8,6 +8,7 @@ import { useStudentDashboardRealtime } from "@/hooks/useStudentDashboardRealtime
 import Loader from "@/components/Loader"
 import LoadingOverlay from "@/components/LoadingOverlay"
 import PageHeader from "@/components/PageHeader"
+import MiniProfileCard from "@/components/MiniProfileCard"
 import RoomCardsList from "@/components/RoomCardsList"
 import { STUDENT_ROUTES } from "@/constants/routes"
 import { getRoomLeaderboards } from "@/api/records"
@@ -172,33 +173,13 @@ export default function StudentDashboard() {
         {/* Top Section: Mini Profile + Quick Actions */}
         <div className={studentStyles.topSection}>
           {/* Mini Profile Card */}
-          <section className={studentStyles.miniProfileCard}>
-            {userProfile?.profile_pic ? (
-              <AnimatedAvatar
-                className={studentStyles.miniProfileImg}
-                src={userProfile.profile_pic}
-                alt="Profile"
-              />
-            ) : (
-              <div className={studentStyles.miniProfileLetter}>
-                {userProfile?.first_name?.charAt(0).toUpperCase() || 'S'}
-              </div>
-            )}
-            <div className={studentStyles.miniProfileInfo}>
-              <h3 className={studentStyles.miniProfileName}>
-                {userProfile?.first_name} {userProfile?.last_name}
-              </h3>
-              <p className={studentStyles.miniProfileRole}>
-                Student
-              </p>
-            </div>
-            <button 
-              className={studentStyles.viewProfileButton}
-              onClick={() => router.push(STUDENT_ROUTES.PROFILE)}
-            >
-              View Full Profile
-            </button>
-          </section>
+          <MiniProfileCard
+            firstName={userProfile?.first_name}
+            lastName={userProfile?.last_name}
+            profilePic={userProfile?.profile_pic}
+            role="Student"
+            profileRoute={STUDENT_ROUTES.PROFILE}
+          />
 
           {/* Quick Actions Cards */}
           <div className={studentStyles.quickActionsGrid}>
@@ -374,7 +355,7 @@ export default function StudentDashboard() {
             </div>
             
             <div className={competitionStyles.competitions_grid}>
-              {activeCompetitions.map(competition => (
+              {activeCompetitions.map((competition: CompetitionWithRoom) => (
                 <div 
                   key={competition.id} 
                   className={`${competitionStyles.competition_card} ${competitionStyles.student_card}`}
@@ -432,13 +413,13 @@ export default function StudentDashboard() {
             </div>
             
             <div className={studentStyles.leaderboardsGrid}>
-              {leaderboards.map((leaderboard) => (
+              {leaderboards.map((leaderboard: any) => (
                 <div key={leaderboard.id} className={studentStyles.leaderboardCard}>
                   <h3 className={studentStyles.leaderboardTitle}>
                     📚 {leaderboard.title}
                   </h3>
                   <div className={studentStyles.leaderboardList}>
-                    {leaderboard.data.map((item, index) => {
+                    {leaderboard.data.map((item: any, index: number) => {
                       const participant = Array.isArray(item.participants) 
                         ? item.participants[0] 
                         : item.participants

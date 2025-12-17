@@ -323,6 +323,29 @@
   width: 90%;
   margin: 0 auto;
   max-width: 50rem;
+  max-height: 42rem;
+  overflow-y: auto;
+  padding-right: 0.5rem;
+}
+
+/* Custom Scrollbar for Leaderboard Grid */
+.leaderboard_grid::-webkit-scrollbar {
+  width: 0.5rem;
+}
+
+.leaderboard_grid::-webkit-scrollbar-track {
+  background: rgba(44, 81, 76, 0.1);
+  border-radius: 0.25rem;
+}
+
+.leaderboard_grid::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #2C514C 0%, #122932 100%);
+  border-radius: 0.25rem;
+  transition: background 0.3s ease;
+}
+
+.leaderboard_grid::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #122932 0%, #0a1419 100%);
 }
 
 .leaderboard_item {

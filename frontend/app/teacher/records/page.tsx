@@ -22,13 +22,14 @@ export default function TeacherRecordPage() {
 
     return (
         <LoadingOverlay isLoading={loading}>
-            <PageHeader
-                title="Records"
-                userName={userProfile?.first_name}
-                subtitle="View records for your created rooms"
-            />
+            <div className={styles["dashboard-container"]}>
+                <PageHeader
+                    title="Records"
+                    userName={userProfile?.first_name}
+                    subtitle="View records for your created rooms"
+                />
 
-            <div className={styles["scrollable-content"]}>
+                <div className={styles["scrollable-content"]}>
                 <RoomCardsList
                     rooms={createdRooms}
                     onViewRoom={handleViewRecords}
@@ -40,6 +41,7 @@ export default function TeacherRecordPage() {
                     isLoading={loading}
                     viewButtonText="View Records"
                 />
+                </div>
             </div>
         </LoadingOverlay>
     )

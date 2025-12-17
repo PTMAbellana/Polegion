@@ -13,7 +13,8 @@ export default function ParticipantsSidebar({
     const handlePrintProgress = (participant: any) => {
         // Open student progress in new window for printing
         const userId = participant.user_id || participant.id;
-        window.open(`/teacher/student-progress/${userId}`, '_blank');
+        // Note: This should be updated to pass roomId when available
+        // window.open(`/teacher/records/${roomId}/student/${userId}`, '_blank');
     };
     
     return (

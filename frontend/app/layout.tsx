@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import "bootstrap/dist/css/bootstrap.min.css";
 import { Toaster } from "react-hot-toast";
 import Footer from "@/components/Footer";
 import AppProvider from "@/context/AppProvider";

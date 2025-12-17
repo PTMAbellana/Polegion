@@ -58,14 +58,15 @@ export default function VirtualRoomsPage() {
 
     return (
         <LoadingOverlay isLoading={loading}>
-            <PageHeader
-                title="Virtual Rooms"
-                userName={userProfile?.first_name}
-                subtitle="Manage your created rooms"
-                actionButton={createRoomButton}
-            />
+            <div className={styles["dashboard-container"]}>
+                <PageHeader
+                    title="Virtual Rooms"
+                    userName={userProfile?.first_name}
+                    subtitle="Manage your created rooms"
+                    actionButton={createRoomButton}
+                />
 
-            <div className={styles["scrollable-content"]}>
+                <div className={styles["scrollable-content"]}>
                 <RoomCardsList
                     rooms={createdRooms}
                     onViewRoom={handleViewRoom}
@@ -93,6 +94,7 @@ export default function VirtualRoomsPage() {
                 onSubmit={handleEditSubmit}
                 isLoading={editLoading}
             />
+            </div>
         </LoadingOverlay>
     )
 };

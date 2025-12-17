@@ -8,6 +8,7 @@ import PageHeader from '@/components/PageHeader'
 import ProfileEditForm from '@/components/profile/ProfileEditForm'
 import ProfileImageUpload from '@/components/profile/ProfileImageUpload'
 import SecuritySettings from '@/components/profile/SecuritySettings'
+import dashboardStyles from '@/styles/dashboard-wow.module.css'
 import styles from '@/styles/profile.module.css'
 import { TEACHER_ROUTES } from '@/constants/routes'
 
@@ -51,14 +52,15 @@ export default function TeacherEditProfilePage() {
     )
 
     return (
-        <div className={styles['edit-profile-page']}>
-            <PageHeader 
-                title="Edit Profile"
-                subtitle="Update your personal information and settings"
-                actionButton={backButton}
-            />
+        <div className={dashboardStyles['dashboard-container']}>
+            <div className={styles['edit-profile-page']}>
+                <PageHeader 
+                    title="Edit Profile"
+                    subtitle="Update your personal information and settings"
+                    actionButton={backButton}
+                />
 
-            <div className={styles['edit-profile-container']}>
+                <div className={styles['edit-profile-container']}>
                 {/* Tab Navigation */}
                 <div className={styles['tab-navigation']}>
                     <button
@@ -103,6 +105,7 @@ export default function TeacherEditProfilePage() {
                     )}
                 </div>
 
+            </div>
             </div>
         </div>
     )

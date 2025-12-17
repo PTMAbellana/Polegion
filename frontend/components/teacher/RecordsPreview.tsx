@@ -15,7 +15,7 @@ interface RecordsPreviewProps {
   isWorldmapView?: boolean
 }
 
-type SortField = 'firstName' | 'lastName' | 'xp'
+type SortField = 'rank' | 'firstName' | 'lastName' | 'xp'
 type SortDirection = 'asc' | 'desc'
 
 export default function RecordsPreview({
@@ -26,8 +26,18 @@ export default function RecordsPreview({
   onViewProgress,
   isWorldmapView = false
 }: RecordsPreviewProps) {
-  const [sortField, setSortField] = useState<SortField>('xp')
-  const [sortDirection, setSortDirection] = useState<SortDirection>('desc')
+  const [sortField, setSortField] = useState<SortField>('rank')
+  const [sortDirection, setSortDirection] = useState<SortDirection>('asc')
+
+  // Create a rank map based on XP (rank never changes, always based on XP order)
+  const rankMap = useMemo(() => {
+    const xpSorted = [...records].sort((a, b) => (b.xp || 0) - (a.xp || 0))
+    const map = new Map<RecordStudent, number>()
+    xpSorted.forEach((record, index) => {
+      map.set(record, index + 1)
+    })
+    return map
+  }, [records])
 
   // Sort and filter records
   const sortedRecords = useMemo(() => {
@@ -43,6 +53,10 @@ export default function RecordsPreview({
       let compareB: string | number = 0
 
       switch (sortField) {
+        case 'rank':
+          compareA = rankMap.get(a) || 999
+          compareB = rankMap.get(b) || 999
+          break
         case 'firstName':
           compareA = a.first_name?.toLowerCase() || ''
           compareB = b.first_name?.toLowerCase() || ''
@@ -65,17 +79,7 @@ export default function RecordsPreview({
       }
       return 0
     })
-  }, [records, sortField, sortDirection, searchTerm])
-
-  // Create a rank map based on XP (rank never changes, always based on XP order)
-  const rankMap = useMemo(() => {
-    const xpSorted = [...records].sort((a, b) => (b.xp || 0) - (a.xp || 0))
-    const map = new Map<RecordStudent, number>()
-    xpSorted.forEach((record, index) => {
-      map.set(record, index + 1)
-    })
-    return map
-  }, [records])
+  }, [records, sortField, sortDirection, searchTerm, rankMap])
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
@@ -84,7 +88,8 @@ export default function RecordsPreview({
     } else {
       // If clicking different field, set appropriate default direction
       setSortField(field)
-      // XP should default to descending (highest first), names to ascending
+      // Rank and XP should default to ascending (lowest first for rank, highest first for XP)
+      // Names should default to ascending
       setSortDirection(field === 'xp' ? 'desc' : 'asc')
     }
   }
@@ -124,9 +129,13 @@ export default function RecordsPreview({
           className={styles.records_table_header}
           style={{ gridTemplateColumns: gridColumns }}
         >
-          <div className={styles.records_table_header_cell}>
+          <button
+            onClick={() => handleSort('rank')}
+            className={styles.records_table_header_cell}
+          >
             <span>Rank</span>
-          </div>
+            <SortIcon field="rank" />
+          </button>
           <button
             onClick={() => handleSort('firstName')}
             className={styles.records_table_header_cell}

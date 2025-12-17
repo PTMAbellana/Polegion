@@ -32,14 +32,12 @@ export default function CompetitionList({ competitions, onManage }: CompetitionL
                   </span>
                 </div>
                 
-                {comp.status !== 'DONE' && (
-                  <button 
-                    className={styles.manageButton} 
-                    onClick={() => onManage(comp.id)}
-                  >
-                    Manage
-                  </button>
-                )}
+                <button 
+                  className={styles.manageButton} 
+                  onClick={() => onManage(comp.id)}
+                >
+                  {comp.status === 'DONE' ? 'View' : 'Manage'}
+                </button>
               </div>
             </div>
           </div>

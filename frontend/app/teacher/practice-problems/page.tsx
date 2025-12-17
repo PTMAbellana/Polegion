@@ -124,7 +124,7 @@ export default function TeacherPracticeProblemsPage() {
   }
 
   return (
-    <>
+    <div className={styles["dashboard-container"]}>
       <PageHeader
         title="Practice Problems Library"
         subtitle="View all practice problems available to students"
@@ -269,6 +269,6 @@ export default function TeacherPracticeProblemsPage() {
           </p>
         </div>
       </div>
-    </>
+    </div>
   )
 }

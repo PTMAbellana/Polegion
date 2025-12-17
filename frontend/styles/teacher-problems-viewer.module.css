@@ -108,6 +108,29 @@
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   gap: 1.5rem;
   margin-bottom: 2rem;
+  max-height: 50rem;
+  overflow-y: auto;
+  padding-right: 0.5rem;
+}
+
+/* Custom Scrollbar for Problems Grid */
+.problemsGrid::-webkit-scrollbar {
+  width: 0.5rem;
+}
+
+.problemsGrid::-webkit-scrollbar-track {
+  background: rgba(147, 51, 234, 0.1);
+  border-radius: 0.25rem;
+}
+
+.problemsGrid::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #9333ea 0%, #7c3aed 100%);
+  border-radius: 0.25rem;
+  transition: background 0.3s ease;
+}
+
+.problemsGrid::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
 }
 
 .problemCard {

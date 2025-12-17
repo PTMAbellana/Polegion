@@ -18,28 +18,32 @@ export default function Home() {
       title: "Interactive World Map",
       description: "Navigate through 7 distinct worlds, each offering unique geometry challenges and progressive learning paths!",
       image: "/images/worldmap-page.webp",
-      color: "#2E7D32",
+      color: "#64B5F6",
+      bgGradient: "linear-gradient(135deg, #E3F2FD 0%, #BBDEFB 100%)",
     },
     {
       id: 2,
       title: "Curriculum-Based Modules",
       description: "Follow structured lessons aligned with educational standards, covering polygons, angles, circles, and spatial reasoning!",
       image: "/images/dashboard-page.webp",
-      color: "#2E7D32",
+      color: "#81C784",
+      bgGradient: "linear-gradient(135deg, #E8F5E9 0%, #C8E6C9 100%)",
     },
     {
       id: 3,
       title: "Pre / Post Assessments",
       description: "Track your learning journey with comprehensive assessments that measure your geometry mastery!",
-      image: "/images/chapter-complete-page.webp",
-      color: "#2E7D32",
+      image: "/images/assessment-page.webp",
+      color: "#F48FB1",
+      bgGradient: "linear-gradient(135deg, #FCE4EC 0%, #F8BBD0 100%)",
     },
     {
       id: 4,
       title: "Collaborative Rooms",
       description: "Join virtual classrooms, compete with peers, and participate in teacher-led geometry competitions!",
-      image: "/images/room-page.webp",
-      color: "#2E7D32",
+      image: "/images/dashboard-page.webp",
+      color: "#BA68C8",
+      bgGradient: "linear-gradient(135deg, #F3E5F5 0%, #E1BEE7 100%)",
     },
   ];
 
@@ -180,10 +184,16 @@ export default function Home() {
                 <div 
                   key={slide.id} 
                   className={styles.carouselSlide}
-                  style={{ borderColor: slide.color }}
+                  style={{ 
+                    borderColor: slide.color,
+                    background: slide.bgGradient,
+                    borderWidth: '3px'
+                  }}
                 >
                   <div className={styles.slideContent}>
-                    <h3 className={styles.slideTitle}>{slide.title}</h3>
+                    <h3 className={styles.slideTitle} style={{ color: slide.color }}>
+                      {slide.title}
+                    </h3>
                     <p className={styles.slideDescription}>{slide.description}</p>
                   </div>
                   <div className={styles.slideImage}>

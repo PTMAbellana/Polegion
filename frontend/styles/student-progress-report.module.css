@@ -2,6 +2,19 @@
   min-height: 100vh;
   background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
   padding: clamp(1rem, 3vw, 2rem);
+  position: relative;
+}
+
+/* Ensure background fills entire viewport even when content is short */
+.container::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  z-index: -1;
 }
 
 .header {
@@ -104,6 +117,34 @@
   gap: 1.5rem;
 }
 
+/* Table Container with Scrollbar */
+.tableContainer {
+  max-height: 42rem;
+  overflow-y: auto;
+  overflow-x: hidden;
+  border-radius: 0.75rem;
+  border: 0.125rem solid #e5e7eb;
+}
+
+/* Custom Scrollbar for Table Container */
+.tableContainer::-webkit-scrollbar {
+  width: 0.5rem;
+}
+
+.tableContainer::-webkit-scrollbar-track {
+  background: rgba(147, 51, 234, 0.1);
+  border-radius: 0.25rem;
+}
+
+.tableContainer::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #9333ea 0%, #7c3aed 100%);
+  border-radius: 0.25rem;
+}
+
+.tableContainer::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #7c3aed 0%, #6d28d9 100%);
+}
+
 .castleCard {
   background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
   border: 0.125rem solid #e5e7eb;
@@ -182,38 +223,83 @@
 .table {
   width: 100%;
   border-collapse: collapse;
+  background: white;
 }
 
 .table thead {
-  background: #f9fafb;
+  background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
 
 .table th {
   text-align: left;
-  padding: 1rem;
+  padding: 1rem 1.25rem;
   font-weight: 600;
+  font-size: 0.9rem;
   color: #1a202c;
   border-bottom: 0.125rem solid #e5e7eb;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .table td {
-  padding: 1rem;
+  padding: 1rem 1.25rem;
   border-bottom: 0.0625rem solid #e5e7eb;
   color: #374151;
+  font-size: 0.95rem;
+}
+
+.table tbody tr {
+  transition: all 0.2s ease;
 }
 
 .table tbody tr:hover {
-  background: #f9fafb;
+  background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 50%);
+  transform: scale(1.005);
 }
 
 .xpCell {
-  font-weight: 600;
+  font-weight: 700;
   color: #2C514C;
+  font-size: 1rem;
 }
 
 .rankCell {
-  font-weight: 600;
+  font-weight: 700;
   color: #10b981;
+  font-size: 1rem;
+}
+
+.castleNameCell {
+  font-weight: 600;
+  color: #1a202c;
+  font-size: 1rem;
+}
+
+.chaptersCell {
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.progressCell {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.progressText {
+  font-weight: 600;
+  color: #2C514C;
+  min-width: 3rem;
+}
+
+.filterNote {
+  font-size: 0.85rem;
+  font-weight: 400;
+  color: #6b7280;
+  font-style: italic;
 }
 
 .statusBadge {

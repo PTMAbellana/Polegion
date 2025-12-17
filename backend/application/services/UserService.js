@@ -166,22 +166,41 @@ class UserService {
 
             console.log('Fetching student progress for user:', userId);
 
-            // Get user info
-            const user = await this.userRepo.getUserByUid(userId);
-            if (!user) {
-                console.error('User not found:', userId);
-                throw new Error('User not found');
+            // Get user info with error handling
+            let user;
+            try {
+                user = await this.userRepo.getUserByUid(userId);
+                if (!user) {
+                    console.error('User not found:', userId);
+                    throw new Error('User not found');
+                }
+                console.log('User found:', user.first_name, user.last_name);
+            } catch (userError) {
+                console.error('Error fetching user:', userError);
+                throw new Error('Failed to fetch user information');
             }
 
-            console.log('User found:', user.first_name, user.last_name);
-
-            // Get castle progress
-            const castleProgress = await this.userRepo.getUserCastleProgress(userId);
-            console.log('Castle progress fetched:', castleProgress?.length || 0, 'castles');
+            // Get castle progress with error handling
+            let castleProgress = [];
+            try {
+                castleProgress = await this.userRepo.getUserCastleProgress(userId);
+                console.log('Castle progress fetched:', castleProgress?.length || 0, 'castles');
+            } catch (castleError) {
+                console.error('Error fetching castle progress:', castleError);
+                // Continue with empty array if castle fetch fails
+                castleProgress = [];
+            }
             
-            // Get competition history
-            const competitionHistory = await this.userRepo.getUserCompetitionHistory(userId);
-            console.log('Competition history fetched:', competitionHistory?.length || 0, 'competitions');
+            // Get competition history with error handling
+            let competitionHistory = [];
+            try {
+                competitionHistory = await this.userRepo.getUserCompetitionHistory(userId);
+                console.log('Competition history fetched:', competitionHistory?.length || 0, 'competitions');
+            } catch (compError) {
+                console.error('Error fetching competition history:', compError);
+                // Continue with empty array if competition fetch fails
+                competitionHistory = [];
+            }
 
             const result = {
                 user: {
@@ -194,8 +213,8 @@ class UserService {
                 competitions: competitionHistory || []
             };
 
-            // Cache the result
-            cache.set(cacheKey, result, this.CACHE_TTL);
+            // Cache the result with shorter TTL to ensure fresh data
+            cache.set(cacheKey, result, this.CACHE_TTL / 2); // Cache for 5 minutes
             console.log('Cached: getStudentProgress', userId);
 
             return result;

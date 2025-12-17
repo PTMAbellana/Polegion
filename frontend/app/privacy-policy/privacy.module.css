@@ -1,0 +1,271 @@
+/* Privacy Policy Page Styles - Matching Terms & Conditions */
+.privacyPage {
+  min-height: 100vh;
+  background-image: url('/images/auth-page-background.webp');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  padding: 2rem 1.25rem;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.privacyContainer {
+  background: #FFFFFF;
+  border-radius: 1.25rem;
+  max-width: 56rem;
+  width: 100%;
+  box-shadow: 0 1rem 3rem rgba(59, 130, 246, 0.15),
+              0 0.5rem 1.5rem rgba(59, 130, 246, 0.1),
+              0 2rem 4rem rgba(0, 0, 0, 0.08);
+  backdrop-filter: blur(10px);
+  overflow: hidden;
+  margin: 2rem auto;
+}
+
+.privacyHeader {
+  padding: 2rem;
+  background: linear-gradient(135deg, #2563EB 0%, #1E3A8A 100%);
+  color: white;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.backButton {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  border-radius: 0.5rem;
+  width: 2.5rem;
+  height: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 1.5rem;
+  color: white;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+}
+
+.backButton:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.privacyHeader h1 {
+  margin: 0;
+  font-family: 'Poppins', sans-serif;
+  font-size: clamp(1.25rem, 3vw, 1.75rem);
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.privacyBody {
+  padding: 2rem;
+  font-family: 'Poppins', sans-serif;
+  line-height: 1.6;
+  color: #1f2937;
+}
+
+/* Hide scrollbar but keep functionality */
+.privacyBody::-webkit-scrollbar {
+  display: none;
+}
+
+.privacyBody {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.section {
+  margin-bottom: 2rem;
+}
+
+.section h3 {
+  font-size: clamp(1.125rem, 2vw, 1.375rem);
+  font-weight: 700;
+  color: #1E3A8A;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 0.125rem solid #3B82F6;
+}
+
+.section p {
+  margin-bottom: 1rem;
+  color: #4b5563;
+  font-size: clamp(0.875rem, 1.5vw, 1rem);
+}
+
+.section ul {
+  margin-left: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.section li {
+  margin-bottom: 0.75rem;
+  color: #4b5563;
+  font-size: clamp(0.875rem, 1.5vw, 1rem);
+}
+
+.highlight {
+  background-color: #EFF6FF;
+  padding: 1rem 1.25rem;
+  border-left: 0.25rem solid #3B82F6;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  color: #1E3A8A;
+}
+
+.contactInfo {
+  background-color: #F0FDF4;
+  padding: 1.25rem;
+  border-left: 0.25rem solid #22C55E;
+  border-radius: 0.5rem;
+  font-size: clamp(0.875rem, 1.5vw, 1rem);
+  line-height: 1.8;
+}
+
+.footer {
+  background-color: #F5F7FA;
+  padding: 1.25rem;
+  border-radius: 0.75rem;
+  font-size: 0.875rem;
+  color: #4B5563;
+  margin-top: 2rem;
+  border: 0.0625rem solid #DBEAFE;
+}
+
+.privacyFooter {
+  padding: 1.5rem 2rem;
+  background-color: #F5F7FA;
+  display: flex;
+  justify-content: center;
+}
+
+.backBtn {
+  padding: 0.875rem 3rem;
+  background: #22C55E;
+  color: white;
+  border: none;
+  border-radius: 0.75rem;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 1rem;
+  box-shadow: 0 4px 14px rgba(34, 197, 94, 0.25);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.backBtn:hover {
+  background: #16A34A;
+  box-shadow: 0 6px 20px rgba(34, 197, 94, 0.35);
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .privacyPage {
+    padding: 1rem;
+  }
+
+  .privacyContainer {
+    margin: 1rem auto;
+  }
+
+  .privacyHeader {
+    padding: 1.25rem;
+  }
+
+  .privacyHeader h1 {
+    font-size: 1.25rem;
+  }
+
+  .backButton {
+    width: 2.25rem;
+    height: 2.25rem;
+    font-size: 1.25rem;
+  }
+
+  .privacyBody {
+    padding: 1.25rem;
+  }
+
+  .section h3 {
+    font-size: 1.125rem;
+  }
+
+  .section p,
+  .section li {
+    font-size: 0.875rem;
+  }
+
+  .privacyFooter {
+    padding: 1.25rem 1.5rem;
+  }
+
+  .backBtn {
+    padding: 0.75rem 2rem;
+    font-size: 0.875rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .privacyPage {
+    padding: 0.5rem;
+  }
+
+  .privacyHeader {
+    padding: 1rem;
+  }
+
+  .privacyHeader h1 {
+    font-size: 1.125rem;
+  }
+
+  .backButton {
+    width: 2rem;
+    height: 2rem;
+    font-size: 1.125rem;
+  }
+
+  .privacyBody {
+    padding: 1rem;
+  }
+
+  .section {
+    margin-bottom: 1.5rem;
+  }
+
+  .section h3 {
+    font-size: 1rem;
+  }
+
+  .section p,
+  .section li {
+    font-size: 0.8125rem;
+  }
+
+  .highlight,
+  .contactInfo {
+    padding: 0.875rem 1rem;
+    font-size: 0.8125rem;
+  }
+
+  .footer {
+    padding: 1rem;
+    font-size: 0.75rem;
+  }
+
+  .privacyFooter {
+    padding: 1rem;
+  }
+
+  .backBtn {
+    padding: 0.625rem 1.5rem;
+    font-size: 0.8125rem;
+  }
+}

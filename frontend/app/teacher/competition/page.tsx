@@ -4,13 +4,14 @@ import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuthStore } from '@/store/authStore'
 import { useTeacherRoomStore } from '@/store/teacherRoomStore'
+import PageHeader from '@/components/PageHeader'
 import {
-  CompetitionHeader,
   CreateCompetitionForm,
   CompetitionList
 } from '@/components/competition'
 import { FaUsers } from 'react-icons/fa'
 import LoadingOverlay from '@/components/LoadingOverlay'
+import dashboardStyles from '@/styles/dashboard-wow.module.css'
 import styles from '@/styles/competition-teacher.module.css'
 
 export default function TeacherCompetitionPage() {
@@ -206,72 +207,88 @@ export default function TeacherCompetitionPage() {
   }
 
   return (
-    <div className={styles.container}>
-      <div className={styles.mainContainer}>
+    <div className={dashboardStyles["dashboard-container"]}>
+      <div className={styles.container}>
+        <div className={styles.mainContainer}>
         {/* Header */}
-        <CompetitionHeader
+        <PageHeader
           title="Competition Dashboard"
-          participantCount={participants.length}
-          activeCount={participants.length} // On dashboard, show total participants as active since we don't have real-time presence here
-          onBack={handleBack}
+          subtitle={`${participants.length} participants in room`}
+          showAvatar={false}
+          actionButton={
+            <button 
+              onClick={handleBack}
+              style={{
+                background: 'linear-gradient(135deg, #22c55e 0%, #84cc16 100%)',
+                color: 'white',
+                border: 'none',
+                padding: '12px 24px',
+                borderRadius: '12px',
+                fontWeight: '600',
+                cursor: 'pointer',
+                transition: 'all 0.3s ease',
+                fontSize: '14px'
+              }}
+            >
+              Back
+            </button>
+          }
         />
 
         {/* Scrollable Content */}
         <div className={styles.scrollableContent}>
-          {/* Main Content */}
+          {/* Main Content - 3 Column Layout */}
           <div className={styles.roomContent}>
-            {/* Left Column - Competitions */}
+            {/* Left Column - Create Competition + Room Competitions */}
             <div className={styles.leftColumn}>
-            {/* Create Competition Form */}
-            <CreateCompetitionForm
-              onSubmit={handleCreateCompetition}
-              loading={loading}
-            />
+              {/* Create Competition Form */}
+              <CreateCompetitionForm
+                onSubmit={handleCreateCompetition}
+                loading={loading}
+              />
 
-            {/* Competitions List */}
-            <div className={styles.section}>
-              <div className={styles.sectionHeader}>
-                <h2 className={styles.sectionTitle}>Room Competitions</h2>
-                <span className={styles.badge}>{competitions.length}</span>
-              </div>
-              
-              {competitions.length === 0 ? (
-                <div className={styles.emptyState}>
-                  <p className={styles.emptyText}>
-                    No competitions yet. Create your first competition above!
-                  </p>
+              {/* Competitions List */}
+              <div className={styles.section}>
+                <div className={styles.sectionHeader}>
+                  <h2 className={styles.sectionTitle}>Room Competitions</h2>
+                  <span className={styles.badge}>{competitions.length}</span>
                 </div>
-              ) : (
-                <CompetitionList
-                  competitions={competitions as any}
-                  onManage={handleManageCompetition}
-                />
-              )}
-            </div>
-            </div>
-            {/* End Left Column */}
-
-            {/* Right Column - Sidebar */}
-            <div className={styles.rightColumn}>
-            {/* Problems Preview */}
-            <div className={styles.section}>
-              <div className={styles.sectionHeader}>
-                <h2 className={styles.sectionTitle}>Available Problems</h2>
-                <span className={styles.badge}>
-                  {visibleProblems.length}
-                </span>
-              </div>
-              
-              <div className={styles.problemsList}>
-                {visibleProblems.length === 0 ? (
+                
+                {competitions.length === 0 ? (
                   <div className={styles.emptyState}>
                     <p className={styles.emptyText}>
-                      No visible problems found. Create problems in your room first!
+                      No competitions yet. Create your first competition above!
                     </p>
                   </div>
                 ) : (
-                  <>
-                    {visibleProblems.slice(0, 5).map((problem, index) => (
+                  <CompetitionList
+                    competitions={competitions as any}
+                    onManage={handleManageCompetition}
+                  />
+                )}
+              </div>
+            </div>
+            {/* End Left Column */}
+
+            {/* Middle Column - Available Problems */}
+            <div className={styles.middleColumn}>
+              <div className={styles.section}>
+                <div className={styles.sectionHeader}>
+                  <h2 className={styles.sectionTitle}>Available Problems</h2>
+                  <span className={styles.badge}>
+                    {visibleProblems.length}
+                  </span>
+                </div>
+                
+                <div className={styles.problemsList}>
+                  {visibleProblems.length === 0 ? (
+                    <div className={styles.emptyState}>
+                      <p className={styles.emptyText}>
+                        No visible problems found. Create problems in your room first!
+                      </p>
+                    </div>
+                  ) : (
+                    visibleProblems.map((problem, index) => (
                       <div key={problem.id} className={styles.problemCard}>
                         <div className={styles.problemContent}>
                           <div className={styles.problemLeft}>
@@ -303,31 +320,25 @@ export default function TeacherCompetitionPage() {
                           </div>
                         </div>
                       </div>
-                    ))}
-                    
-                    {visibleProblems.length > 5 && (
-                      <div className={styles.emptyState}>
-                        <p className={styles.emptyText}>
-                          +{visibleProblems.length - 5} more problems
-                        </p>
-                      </div>
-                    )}
-                  </>
-                )}
+                    ))
+                  )}
+                </div>
               </div>
             </div>
+            {/* End Middle Column */}
 
-            {/* Participants Section */}
-            <div className={styles.section}>
-              <div className={styles.sectionHeader}>
-                <h2 className={styles.sectionTitle}>
-                  <FaUsers style={{ marginRight: '0.5rem' }} />
-                  Participants
-                </h2>
-                <span className={styles.badge}>{participants.length}</span>
-              </div>
-              
-              <div className={styles.participantsList}>
+            {/* Right Column - Participants */}
+            <div className={styles.rightColumn}>
+              <div className={styles.section}>
+                <div className={styles.sectionHeader}>
+                  <h2 className={styles.sectionTitle}>
+                    <FaUsers style={{ marginRight: '0.5rem' }} />
+                    Students
+                  </h2>
+                  <span className={styles.badge}>{participants.length}</span>
+                </div>
+                
+                <div className={styles.participantsList}>
                 {participants.length === 0 ? (
                   <div className={styles.emptyState}>
                     <p className={styles.emptyText}>
@@ -335,47 +346,38 @@ export default function TeacherCompetitionPage() {
                     </p>
                   </div>
                 ) : (
-                  <>
-                    {participants.slice(0, 10).map((participant, index) => (
-                      <div key={participant.participant_id || index} className={styles.participantCard}>
-                        <div className={styles.participantAvatar}>
-                          {participant.profile_pic ? (
-                            <img
-                              src={participant.profile_pic}
-                              alt={`${participant.first_name} ${participant.last_name}`}
-                              className={styles.avatarImage}
-                            />
-                          ) : (
-                            participant.first_name?.charAt(0)?.toUpperCase() || 'U'
-                          )}
-                        </div>
-                        <div className={styles.participantInfo}>
-                          <h3 className={styles.participantName}>
-                            {participant.first_name} {participant.last_name}
-                          </h3>
-                          {participant.role && (
-                            <span className={styles.participantRole}>
-                              {participant.role === 'student' ? 'Student' : 'Teacher'}
-                            </span>
-                          )}
-                        </div>
+                  participants.map((participant, index) => (
+                    <div key={participant.participant_id || index} className={styles.participantCard}>
+                      <div className={styles.participantAvatar}>
+                        {participant.profile_pic ? (
+                          <img
+                            src={participant.profile_pic}
+                            alt={`${participant.first_name} ${participant.last_name}`}
+                            className={styles.avatarImage}
+                          />
+                        ) : (
+                          participant.first_name?.charAt(0)?.toUpperCase() || 'U'
+                        )}
                       </div>
-                    ))}
-                    
-                    {participants.length > 10 && (
-                      <div className={styles.emptyState}>
-                        <p className={styles.emptyText}>
-                          +{participants.length - 10} more participants
-                        </p>
+                      <div className={styles.participantInfo}>
+                        <h3 className={styles.participantName}>
+                          {participant.first_name} {participant.last_name}
+                        </h3>
+                        {participant.role && (
+                          <span className={styles.participantRole}>
+                            {participant.role === 'student' ? 'Student' : 'Teacher'}
+                          </span>
+                        )}
                       </div>
-                    )}
-                  </>
+                    </div>
+                  ))
                 )}
               </div>
             </div>
           </div>
         </div>
         </div>
+      </div>
       </div>
     </div>
   )

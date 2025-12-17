@@ -59,7 +59,6 @@
 
 .signInBtn:hover {
   background: #1D4ED8;
-  transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(37, 99, 235, 0.3);
 }
 
@@ -118,7 +117,6 @@
 
 .mobileSignInBtn:hover {
   background: #1D4ED8;
-  transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(46, 125, 50, 0.3);
 }
 
@@ -128,6 +126,13 @@
   max-width: 1200px;
   margin: 0 auto;
   text-align: center;
+  background-image: url('/images/landing-page-herosection.webp');
+  background-size: 100% 100%;
+  background-position: center;
+  background-repeat: no-repeat;
+  border-radius: 24px;
+  position: relative;
+  min-height: 600px;
 }
 
 .heroBadge {
@@ -178,7 +183,6 @@
 
 .ctaButton:hover:not(:disabled) {
   background: #16A34A;
-  transform: translateY(-3px);
   box-shadow: 0 8px 25px rgba(34, 197, 94, 0.4);
 }
 
@@ -269,8 +273,24 @@
 /* ========== CAROUSEL SECTION ========== */
 .carouselSection {
   padding: 5rem 2rem;
-  background-color: #EFF6FF;
+  background: linear-gradient(135deg, #EFF6FF 0%, #F3E5F5 50%, #FFF9C4 100%);
   overflow: hidden;
+  position: relative;
+}
+
+.carouselSection::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: url('/images/landing-page-background-1.svg');
+  background-size: cover;
+  background-position: center;
+  opacity: 0.1;
+  z-index: 0;
+  pointer-events: none;
 }
 
 .carouselWrapper {
@@ -287,14 +307,21 @@
 .carouselSlide {
   min-width: 100%;
   background: #FFFFFF;
-  border-radius: 16px;
-  padding: 2.5rem;
+  border-radius: 24px;
+  padding: 3rem;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 2.5rem;
+  gap: 3rem;
   align-items: center;
-  border: 1px solid #E5E7EB;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  border: 3px solid #E5E7EB;
+  box-shadow: 0 12px 32px rgba(100, 181, 246, 0.25), 0 8px 16px rgba(129, 199, 132, 0.15);
+  position: relative;
+  z-index: 1;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.carouselSlide:hover {
+  box-shadow: 0 16px 40px rgba(100, 181, 246, 0.35), 0 12px 24px rgba(129, 199, 132, 0.25);
 }
 
 .slideContent {
@@ -302,25 +329,29 @@
 }
 
 .slideTitle {
-  font-size: 1.8rem;
-  font-weight: 700;
+  font-size: 2.25rem;
+  font-weight: 800;
   color: #1E3A8A;
-  margin-bottom: 1rem;
+  margin-bottom: 1.25rem;
+  line-height: 1.2;
 }
 
 .slideDescription {
-  font-size: 1rem;
+  font-size: 1.1rem;
   color: #4B5563;
-  line-height: 1.6;
+  line-height: 1.7;
+  font-weight: 500;
 }
 
 .slideImage {
   position: relative;
   width: 100%;
-  height: 250px;
-  border-radius: 12px;
+  height: 300px;
+  border-radius: 16px;
   overflow: hidden;
-  background: #FFFFFF;
+  background: rgba(255, 255, 255, 0.7);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border: 2px solid rgba(255, 255, 255, 0.9);
 }
 
 .slideImg {
@@ -337,23 +368,22 @@
 }
 
 .carouselArrow {
-  width: 50px;
-  height: 50px;
+  width: 56px;
+  height: 56px;
   border-radius: 50%;
-  background: #FFFFFF;
-  color: #1f2937;
-  border: 1px solid #E5E7EB;
+  background: linear-gradient(135deg, #64B5F6 0%, #81C784 100%);
+  color: white;
+  border: 3px solid white;
   font-size: 1.5rem;
   font-weight: bold;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 16px rgba(100, 181, 246, 0.4);
 }
 
 .carouselArrow:hover {
-  background: #2563EB;
-  color: white;
-  border-color: #2563EB;
+  background: linear-gradient(135deg, #42A5F5 0%, #66BB6A 100%);
+  box-shadow: 0 6px 20px rgba(100, 181, 246, 0.5);
 }
 
 .carouselDots {
@@ -362,18 +392,20 @@
 }
 
 .carouselDot {
-  width: 12px;
-  height: 12px;
+  width: 14px;
+  height: 14px;
   border-radius: 50%;
   background: #D1D5DB;
-  border: none;
+  border: 2px solid white;
   cursor: pointer;
   transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .carouselDot.active {
-  background: #22C55E;
-  transform: scale(1.1);
+  background: linear-gradient(135deg, #64B5F6 0%, #81C784 100%);
+  transform: scale(1.3);
+  box-shadow: 0 3px 12px rgba(100, 181, 246, 0.4);
 }
 
 /* ========== FEATURES SECTION ========== */
@@ -530,7 +562,6 @@
 
 .ctaButtonLarge:hover:not(:disabled) {
   background: #16A34A;
-  transform: translateY(-3px);
   box-shadow: 0 8px 25px rgba(34, 197, 94, 0.4);
 }
 
@@ -636,12 +667,25 @@
   }
   .carouselSlide {
     grid-template-columns: 1fr;
-    padding: 2rem;
+    padding: 2rem 1.5rem;
     gap: 2rem;
+    border-width: 3px;
+    border-radius: 20px;
+  }
+  .slideTitle {
+    font-size: 1.75rem;
+  }
+  .slideDescription {
+    font-size: 0.95rem;
   }
   .slideImage {
     order: -1;
-    height: 200px;
+    height: 220px;
+  }
+  .carouselArrow {
+    width: 48px;
+    height: 48px;
+    font-size: 1.25rem;
   }
   .featuresGrid, .parentGrid {
     grid-template-columns: 1fr;
@@ -675,6 +719,28 @@
   }
   .sectionTitle {
     font-size: 1.8rem;
+  }
+  .carouselSlide {
+    padding: 1.5rem 1rem;
+    border-radius: 16px;
+  }
+  .slideTitle {
+    font-size: 1.5rem;
+  }
+  .slideDescription {
+    font-size: 0.875rem;
+  }
+  .slideImage {
+    height: 180px;
+  }
+  .carouselArrow {
+    width: 44px;
+    height: 44px;
+    font-size: 1.1rem;
+  }
+  .carouselDot {
+    width: 12px;
+    height: 12px;
   }
   .ctaBox {
     padding: 2.5rem 1.5rem;

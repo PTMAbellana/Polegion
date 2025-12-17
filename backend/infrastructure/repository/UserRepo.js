@@ -352,7 +352,21 @@ class UserRepo extends BaseRepo{
     // Get user castle progress with details
     async getUserCastleProgress(userId) {
         try {
-            const { data, error } = await this.supabase
+            // First, get all castles
+            const { data: allCastles, error: castlesError } = await this.supabase
+                .from('castles')
+                .select('id, name, route, unlock_order')
+                .order('unlock_order');
+
+            if (castlesError) throw castlesError;
+
+            if (!allCastles || allCastles.length === 0) {
+                console.log('No castles found in database');
+                return [];
+            }
+
+            // Get user's castle progress
+            const { data: userProgress, error } = await this.supabase
                 .from('user_castle_progress')
                 .select(`
                     *,
@@ -367,44 +381,41 @@ class UserRepo extends BaseRepo{
 
             if (error) throw error;
 
-            // Return empty array if no data
-            if (!data || data.length === 0) {
-                console.log(`No castle progress found for user ${userId}`);
-                return [];
+            // Create a map of user progress by castle_id
+            const progressMap = new Map();
+            if (userProgress && userProgress.length > 0) {
+                userProgress.forEach(progress => {
+                    progressMap.set(progress.castle_id, progress);
+                });
             }
 
-            // Sort by castle unlock_order
-            const sortedData = data.sort((a, b) => {
-                const orderA = a.castles?.unlock_order || 0;
-                const orderB = b.castles?.unlock_order || 0;
-                return orderA - orderB;
-            });
+            // Build complete castle progress for all castles
+            const castleProgress = await Promise.all(allCastles.map(async (castle) => {
+                const progress = progressMap.get(castle.id);
 
-            // Get total chapters for each castle
-            const castleProgress = await Promise.all(sortedData.map(async (progress) => {
                 // Count chapters for this castle
                 const { count: totalChapters } = await this.supabase
                     .from('chapters')
                     .select('*', { count: 'exact', head: true })
-                    .eq('castle_id', progress.castle_id);
+                    .eq('castle_id', castle.id);
 
-                const chaptersCompleted = progress.completion_percentage 
+                const chaptersCompleted = progress?.completion_percentage 
                     ? Math.round((progress.completion_percentage / 100) * (totalChapters || 0))
                     : 0;
 
                 return {
-                    castle_id: progress.castle_id,
-                    castle_name: progress.castles?.name || 'Unknown Castle',
+                    castle_id: castle.id,
+                    castle_name: castle.name || 'Unknown Castle',
                     chapters_completed: chaptersCompleted,
                     total_chapters: totalChapters || 0,
-                    total_xp: progress.total_xp_earned || 0,
-                    progress_percentage: progress.completion_percentage || 0,
-                    unlocked: progress.unlocked || false,
-                    completed: progress.completed || false
+                    total_xp: progress?.total_xp_earned || 0,
+                    progress_percentage: progress?.completion_percentage || 0,
+                    unlocked: progress?.unlocked || false,
+                    completed: progress?.completed || false
                 };
             }));
 
-            console.log(`Found ${castleProgress.length} castles for user ${userId}`);
+            console.log(`Returning ${castleProgress.length} castles for user ${userId} (${userProgress?.length || 0} with progress)`);
             return castleProgress;
         } catch (error) {
             console.error('Error in getUserCastleProgress:', error);
@@ -415,18 +426,27 @@ class UserRepo extends BaseRepo{
     // Get user competition history
     async getUserCompetitionHistory(userId) {
         try {
-            // First get the room_participant_id for this user
+            // First get the room_participant_id for this user with room information
             const { data: participantData, error: participantError } = await this.supabase
                 .from('room_participants')
-                .select('id')
+                .select('id, room_id')
                 .eq('user_id', userId);
 
-            if (participantError) throw participantError;
+            if (participantError) {
+                console.error('Error fetching room participants:', participantError);
+                throw participantError;
+            }
 
             if (!participantData || participantData.length === 0) {
                 console.log(`No room participants found for user ${userId}`);
                 return [];
             }
+
+            // Create a map of participant_id to room_id
+            const participantToRoomMap = {};
+            participantData.forEach(p => {
+                participantToRoomMap[p.id] = p.room_id;
+            });
 
             const participantIds = participantData.map(p => p.id);
 
@@ -445,16 +465,20 @@ class UserRepo extends BaseRepo{
                 .in('room_participant_id', participantIds)
                 .order('id', { ascending: false });
 
-            if (error) throw error;
+            if (error) {
+                console.error('Error fetching competition leaderboards:', error);
+                throw error;
+            }
 
             if (!data || data.length === 0) {
                 console.log(`No competition history found for user ${userId}`);
                 return [];
             }
 
-            // Transform data
+            // Transform data and include room_id
             const competitionHistory = data.map(entry => ({
                 competition_id: entry.competition_id,
+                room_id: participantToRoomMap[entry.room_participant_id] || null,
                 title: entry.competition?.title || 'Unknown Competition',
                 accumulated_xp: entry.accumulated_xp || 0,
                 rank: 0, // Rank would need to be calculated separately
