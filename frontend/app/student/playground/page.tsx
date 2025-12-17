@@ -69,12 +69,14 @@ export default function PlaygroundPage() {
       {/* Landscape Prompt for Mobile Portrait */}
       <LandscapePrompt />
       
-      <PageHeader
-        title="Geometry Playground"
-        userName={userProfile?.first_name}
-        subtitle="Explore shapes and their properties"
-        showAvatar={true}
-      />
+      <div className={styles['dashboard-container']}>
+        <PageHeader
+          title="Geometry Playground"
+          userName={userProfile?.first_name}
+          subtitle="Explore shapes and their properties"
+          showAvatar={true}
+        />
+      </div>
 
       <div className={styles.playgroundWorkspaceWithPanel}>
         {/* Left Sidebar - Toolbox */}

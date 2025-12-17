@@ -21,12 +21,13 @@ export default function StudentLeaderboardPage() {
     }
 
     return (
-        <LoadingOverlay isLoading={loading}>
-            <PageHeader
-                title="Wall of Fame"
-                userName={userProfile?.first_name}
-                subtitle="View leaderboards for your joined rooms"
-            />
+        <div className={styles['dashboard-container']}>
+            <LoadingOverlay isLoading={loading}>
+                <PageHeader
+                    title="Wall of Fame"
+                    userName={userProfile?.first_name}
+                    subtitle="View leaderboards for your joined rooms"
+                />
 
             <div className={styles["scrollable-content"]}>
                 <RoomCardsList
@@ -42,5 +43,6 @@ export default function StudentLeaderboardPage() {
                 />
             </div>
         </LoadingOverlay>
+        </div>
     )
 }

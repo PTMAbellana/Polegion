@@ -8,13 +8,14 @@ import { useCompetitionRealtime } from '@/hooks/useCompetitionRealtime'
 import { useCompetitionTimer } from '@/hooks/useCompetitionTimer'
 import { getRoomProblems } from '@/api/problems'
 import { Problem } from '@/types/common/competition'
+import PageHeader from '@/components/PageHeader'
 import {
-  CompetitionHeader,
   CompetitionControls,
   ProblemsManagement,
   ParticipantsLeaderboard
 } from '@/components/competition'
 import LoadingOverlay from '@/components/LoadingOverlay'
+import dashboardStyles from '@/styles/dashboard-wow.module.css'
 import styles from '@/styles/competition-teacher.module.css'
 
 // Inner component that uses useSearchParams
@@ -321,18 +322,117 @@ function TeacherCompetitionContent({ competitionId }: { competitionId: number })
   }
 
   return (
-    <div className={styles.container}>
-      <div className={styles.mainContainer}>
-        {/* Header */}
-        <CompetitionHeader
-          title={displayCompetition.title}
-          status={displayCompetition.status}
-          timer={formattedTime}
-          participantCount={displayParticipants.length}
-          activeCount={displayParticipants.length}
-          onBack={handleBack}
-          onPrint={handlePrintResults}
-        />
+    <div className={dashboardStyles["dashboard-container"]}>
+      <div className={styles.container}>
+        <div className={styles.mainContainer}>
+          {/* Header */}
+          <PageHeader
+            title={displayCompetition.title}
+            subtitle={
+              <div style={{ 
+                display: 'flex', 
+                gap: '2rem', 
+                alignItems: 'center',
+                flexWrap: 'wrap',
+                marginTop: '0.5rem'
+              }}>
+                <div style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '0.25rem',
+                  padding: '0.5rem 1rem',
+                  background: 'rgba(34, 197, 94, 0.1)',
+                  borderRadius: '0.5rem',
+                  border: '1px solid rgba(34, 197, 94, 0.2)'
+                }}>
+                  <span style={{ fontSize: '0.75rem', fontWeight: '600', color: '#6b7280', textTransform: 'uppercase' }}>Timer</span>
+                  <span style={{ fontSize: '1.125rem', fontWeight: '700', color: '#2C514C', fontFamily: 'monospace' }}>{formattedTime}</span>
+                </div>
+                <div style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '0.25rem',
+                  padding: '0.5rem 1rem',
+                  background: 'rgba(59, 130, 246, 0.1)',
+                  borderRadius: '0.5rem',
+                  border: '1px solid rgba(59, 130, 246, 0.2)'
+                }}>
+                  <span style={{ fontSize: '0.75rem', fontWeight: '600', color: '#6b7280', textTransform: 'uppercase' }}>Participants</span>
+                  <span style={{ fontSize: '1.125rem', fontWeight: '700', color: '#2C514C', fontFamily: 'monospace' }}>{displayParticipants.length}</span>
+                </div>
+                <div style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '0.25rem',
+                  padding: '0.5rem 1rem',
+                  background: 'rgba(16, 185, 129, 0.1)',
+                  borderRadius: '0.5rem',
+                  border: '1px solid rgba(16, 185, 129, 0.2)'
+                }}>
+                  <span style={{ fontSize: '0.75rem', fontWeight: '600', color: '#6b7280', textTransform: 'uppercase' }}>Active</span>
+                  <span style={{ fontSize: '1.125rem', fontWeight: '700', color: '#10b981', fontFamily: 'monospace' }}>{displayParticipants.length}</span>
+                </div>
+                <div style={{
+                  padding: '0.5rem 1rem',
+                  background: displayCompetition.status === 'NEW' ? 'rgba(6, 182, 212, 0.1)' : 
+                             displayCompetition.status === 'ONGOING' ? 'rgba(16, 185, 129, 0.1)' : 
+                             'rgba(107, 114, 128, 0.1)',
+                  borderRadius: '0.5rem',
+                  border: `1px solid ${displayCompetition.status === 'NEW' ? 'rgba(6, 182, 212, 0.3)' : 
+                             displayCompetition.status === 'ONGOING' ? 'rgba(16, 185, 129, 0.3)' : 
+                             'rgba(107, 114, 128, 0.3)'}`,
+                  fontWeight: '700',
+                  fontSize: '0.875rem',
+                  color: displayCompetition.status === 'NEW' ? '#06b6d4' : 
+                         displayCompetition.status === 'ONGOING' ? '#10b981' : 
+                         '#6b7280',
+                  textTransform: 'uppercase'
+                }}>
+                  {displayCompetition.status}
+                </div>
+              </div>
+            }
+            showAvatar={false}
+            actionButton={
+              <div style={{ display: 'flex', gap: '0.75rem' }}>
+                <button 
+                  onClick={handlePrintResults}
+                  style={{
+                    background: 'rgba(34, 197, 94, 0.1)',
+                    color: '#16a34a',
+                    border: '2px solid rgba(34, 197, 94, 0.3)',
+                    padding: '10px 20px',
+                    borderRadius: '12px',
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                    transition: 'all 0.3s ease',
+                    fontSize: '14px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem'
+                  }}
+                >
+                  📊 Print Results
+                </button>
+                <button 
+                  onClick={handleBack}
+                  style={{
+                    background: 'linear-gradient(135deg, #22c55e 0%, #84cc16 100%)',
+                    color: 'white',
+                    border: 'none',
+                    padding: '12px 24px',
+                    borderRadius: '12px',
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                    transition: 'all 0.3s ease',
+                    fontSize: '14px'
+                  }}
+                >
+                  Back
+                </button>
+              </div>
+            }
+          />
 
         {/* Scrollable Content */}
         <div className={styles.scrollableContent}>
@@ -371,6 +471,7 @@ function TeacherCompetitionContent({ competitionId }: { competitionId: number })
             />
           </div>
         </div>
+      </div>
       </div>
     </div>
   )

@@ -15,6 +15,7 @@ import PracticeProgress, { savePracticeStats } from '@/components/practice/Pract
 import { getQuestionsByCategory } from '@/utils/questions/generateQuestions';
 import { PRACTICE_CATEGORIES } from '@/components/practice/CategorySelector';
 import styles from '@/styles/practice.module.css';
+import dashboardStyles from '@/styles/dashboard-wow.module.css';
 
 export default function CategoryPracticePage() {
   const router = useRouter();
@@ -96,18 +97,19 @@ export default function CategoryPracticePage() {
 
   if (!isStarted) {
     return (
-      <div className={styles.categoryPageContainer}>
-        {/* Page Header */}
-        <PageHeader 
-          title={categoryInfo.name}
-          subtitle="Practice Mode - Build mastery through repetition"
-          showAvatar={false}
-          actionButton={
-            <button onClick={handleBackToPractice} className={styles.backButtonHeader}>
-              Practice Hub
-            </button>
-          }
-        />
+      <div className={dashboardStyles['dashboard-container']}>
+        <div className={styles.categoryPageContainer}>
+          {/* Page Header */}
+          <PageHeader 
+            title={categoryInfo.name}
+            subtitle="Practice Mode - Build mastery through repetition"
+            showAvatar={false}
+            actionButton={
+              <button onClick={handleBackToPractice} className={styles.backButtonHeader}>
+                Practice Hub
+              </button>
+            }
+          />
 
         {/* Scrollable Content */}
         <div className={styles.scrollableContent}>
@@ -171,22 +173,24 @@ export default function CategoryPracticePage() {
         </div>
         </div>
       </div>
+      </div>
     );
   }
 
   return (
-    <div className={styles.categoryPageContainer}>
-      {/* Page Header */}
-      <PageHeader 
-        title={categoryInfo.name}
-        subtitle="Practice Mode - Active Session"
-        showAvatar={false}
-        actionButton={
-          <button onClick={handleBackToPractice} className={styles.backButtonHeader}>
-            Practice Hub
-          </button>
-        }
-      />
+    <div className={dashboardStyles['dashboard-container']}>
+      <div className={styles.categoryPageContainer}>
+        {/* Page Header */}
+        <PageHeader 
+          title={categoryInfo.name}
+          subtitle="Practice Mode - Active Session"
+          showAvatar={false}
+          actionButton={
+            <button onClick={handleBackToPractice} className={styles.backButtonHeader}>
+              Practice Hub
+            </button>
+          }
+        />
 
       {/* Scrollable Content */}
       <div className={styles.scrollableContent}>
@@ -197,6 +201,7 @@ export default function CategoryPracticePage() {
           onRestart={handleRestart}
         />
       </div>
+    </div>
     </div>
   );
 }

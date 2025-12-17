@@ -4,7 +4,7 @@ import styles from '@/styles/dashboard-wow.module.css';
 interface PageHeaderProps {
   title: string;
   userName?: string;
-  subtitle?: string;
+  subtitle?: string | React.ReactNode;
   showAvatar?: boolean;
   avatarText?: string;
   className?: string;
@@ -40,7 +40,7 @@ const PageHeader: React.FC<PageHeaderProps> = ({
         {userName && (
           <p>Welcome, {userName}</p>
         )}
-        {subtitle && <p>{subtitle}</p>}
+        {subtitle && <div>{subtitle}</div>}
       </div>
       {actionButton && (
         <div className={styles["header-actions"]}>

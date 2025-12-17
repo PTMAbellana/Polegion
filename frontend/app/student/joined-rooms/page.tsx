@@ -55,13 +55,14 @@ export default function JoinedRoomsPage() {
     }
 
     return (
-        <LoadingOverlay isLoading={loading}>
-            <PageHeader
-                title="Joined Rooms"
-                userName={userProfile?.first_name}
-                subtitle="Rooms you have joined"
-                actionButton={joinRoomButton}
-            />
+        <div className={styles['dashboard-container']}>
+            <LoadingOverlay isLoading={loading}>
+                <PageHeader
+                    title="Joined Rooms"
+                    userName={userProfile?.first_name}
+                    subtitle="Rooms you have joined"
+                    actionButton={joinRoomButton}
+                />
 
             <div className={styles["scrollable-content"]}> {/* Changed from inline style to className */}
                 <RoomCardsList
@@ -85,5 +86,6 @@ export default function JoinedRoomsPage() {
                 onSuccess={handleJoinSuccess}
             />
         </LoadingOverlay>
+        </div>
     )
 }
