@@ -77,10 +77,31 @@ export const useCompetitionRealtime = (competitionId, isLoading, roomId = '', us
       return;
     }
 
-    // Skip if already set up for this competition
-    if (currentCompIdRef.current === compIdStr && presenceChannelRef.current && !isCleaningUpRef.current) {
+    // Skip if already set up for this competition - check all subscriptions
+    if (currentCompIdRef.current === compIdStr && 
+        presenceChannelRef.current && 
+        competitionSubscriptionRef.current &&
+        leaderboardSubscriptionRef.current &&
+        !isCleaningUpRef.current) {
       console.log('🔄 [Realtime] Already set up for:', compIdStr, 'skipping setup');
       return;
+    }
+
+    // Clean up any existing subscriptions before setting up new ones
+    if (competitionSubscriptionRef.current) {
+      console.log('🧹 [Realtime] Cleaning up existing competition subscription');
+      supabase.removeChannel(competitionSubscriptionRef.current);
+      competitionSubscriptionRef.current = null;
+    }
+    if (leaderboardSubscriptionRef.current) {
+      console.log('🧹 [Realtime] Cleaning up existing leaderboard subscription');
+      supabase.removeChannel(leaderboardSubscriptionRef.current);
+      leaderboardSubscriptionRef.current = null;
+    }
+    if (presenceChannelRef.current) {
+      console.log('🧹 [Realtime] Cleaning up existing presence channel');
+      supabase.removeChannel(presenceChannelRef.current);
+      presenceChannelRef.current = null;
     }
 
     console.log('🚀 [Realtime] Setting up REAL-TIME subscriptions for competition:', compIdStr, 'userType:', userType, 'roomId:', stableRoomId);
@@ -148,9 +169,17 @@ export const useCompetitionRealtime = (competitionId, isLoading, roomId = '', us
 
     // Polling fallback setup function
     const setupPollingFallback = (type) => {
-      console.log(`📡 [Polling Fallback] Starting for ${type}...`);
+      console.log(`📡 [Polling Fallback] Requested for ${type}...`);
       
-      if (type === 'competition' && !pollingIntervals.current.competition) {
+      if (type === 'competition') {
+        // Clear existing interval if any
+        if (pollingIntervals.current.competition) {
+          console.log('🧹 [Polling] Clearing existing competition polling');
+          clearInterval(pollingIntervals.current.competition);
+          pollingIntervals.current.competition = null;
+        }
+        
+        console.log('📡 [Polling Fallback] Starting competition polling...');
         pollingIntervals.current.competition = setInterval(async () => {
           if (!mountedRef.current) return;
           try {
@@ -169,7 +198,15 @@ export const useCompetitionRealtime = (competitionId, isLoading, roomId = '', us
         }, 5000); // Poll every 5 seconds
       }
       
-      if (type === 'leaderboard' && !pollingIntervals.current.leaderboard) {
+      if (type === 'leaderboard') {
+        // Clear existing interval if any
+        if (pollingIntervals.current.leaderboard) {
+          console.log('🧹 [Polling] Clearing existing leaderboard polling');
+          clearInterval(pollingIntervals.current.leaderboard);
+          pollingIntervals.current.leaderboard = null;
+        }
+        
+        console.log('📡 [Polling Fallback] Starting leaderboard polling...');
         pollingIntervals.current.leaderboard = setInterval(async () => {
           if (!mountedRef.current) return;
           try {
