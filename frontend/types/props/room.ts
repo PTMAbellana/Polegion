@@ -53,6 +53,8 @@ export interface ProblemsListProps {
 
 export interface ParticipantsSidebarProps {
     participants: UserType[]
+    activeCount?: number
+    activeParticipantIds?: Set<string>
     onInviteParticipants: () => void
     onKickParticipant: (participant: UserType) => void
 }
@@ -68,4 +70,5 @@ export interface StudentRoomBannerProps {
 
 export interface StudentParticipantsListProps {
     participants: UserType[]
+    activeCount?: number
 }

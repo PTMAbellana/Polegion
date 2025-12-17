@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuthStore } from '@/store/authStore'
 import { useTeacherRoomStore } from '@/store/teacherRoomStore'
@@ -16,6 +16,7 @@ import { FaCopy, FaCheck } from 'react-icons/fa'
 import styles from '@/styles/room-details.module.css'
 import { use } from 'react'
 import InviteParticipantModal from '@/components/teacher/InviteParticipantModal'
+import { getActiveParticipants } from '@/api/participants'
 
 export default function RoomDetailsPage({ params }: { params: Promise<{ roomCode: string }> }) {
     const { roomCode } = use(params)
@@ -46,11 +47,46 @@ export default function RoomDetailsPage({ params }: { params: Promise<{ roomCode
     } = useRoomManagement(roomCode)
 
     // Real-time updates for room data
-    const { isConnected } = useRoomRealtime(
+    const { isConnected, lastUpdate } = useRoomRealtime(
         currentRoom?.id,
         roomCode,
         fetchRoomDetails
     )
+
+    // Track active participants count and list
+    const [activeCount, setActiveCount] = useState(0);
+    const [activeParticipantIds, setActiveParticipantIds] = useState<Set<string>>(new Set());
+
+    // Fetch active participants
+    const fetchActive = async () => {
+        if (!currentRoom?.id) return;
+        const result = await getActiveParticipants(currentRoom.id.toString());
+        if (result.success && result.data) {
+            setActiveCount(result.data.length);
+            const ids = new Set(result.data.map((p: any) => p.user_id || p.id));
+            setActiveParticipantIds(ids);
+        }
+    };
+
+    // Fetch on initial load
+    useEffect(() => {
+        if (currentRoom?.id) {
+            fetchActive();
+        }
+    }, [currentRoom?.id]);
+
+    // Fetch when realtime detects changes
+    useEffect(() => {
+        if (lastUpdate === 0) return;
+        fetchActive();
+    }, [lastUpdate]);
+
+    // Poll every 5 seconds as backup
+    useEffect(() => {
+        if (!currentRoom?.id) return;
+        const interval = setInterval(fetchActive, 5000);
+        return () => clearInterval(interval);
+    }, [currentRoom?.id]);
 
 console.log("RoomDetailsPage - currentRoom:", currentRoom)
     useEffect(() => {
@@ -158,6 +194,8 @@ console.log("RoomDetailsPage - currentRoom:", currentRoom)
 
                     <ParticipantsSidebar
                         participants={participants}
+                        activeCount={activeCount}
+                        activeParticipantIds={activeParticipantIds}
                         onInviteParticipants={handleInviteParticipants}
                         onKickParticipant={handleKickParticipant}
                     />

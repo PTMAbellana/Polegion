@@ -1,12 +1,13 @@
 const supabase = require('../../config/supabase')
 
 class AttemptsService {
-    constructor(attemptRepo, xpService, leaderboardService, gradingService, participantService) {
+    constructor(attemptRepo, xpService, leaderboardService, gradingService, participantService, userService) {
         this.attemptRepo = attemptRepo;
         this.xpService = xpService;
         this.leaderboardService = leaderboardService;
         this.gradingService = gradingService;
         this.participantService = participantService;
+        this.userService = userService;
     }
 
     async submitSolution(competitionId, competitionProblemId, user_id, solution, timeTaken, room_id) {
@@ -140,6 +141,114 @@ class AttemptsService {
 
         } catch (error) {
             console.error('❌ Submit solution error:', error);
+            throw error;
+        }
+    }
+
+    async getSubmissionsByProblem(competitionProblemId) {
+        try {
+            console.log('🔍 [getSubmissionsByProblem] Fetching submissions for competition_problem_id:', competitionProblemId);
+            
+            if (!competitionProblemId) {
+                throw new Error('Competition problem ID is required');
+            }
+
+            const { data, error } = await supabase
+                .from('competition_problem_attempts')
+                .select('*')
+                .eq('competition_problem_id', competitionProblemId)
+                .order('submitted_at', { ascending: false });
+
+            console.log('📊 [getSubmissionsByProblem] Query result:', {
+                error: error ? error.message : null,
+                foundCount: data?.length || 0,
+                competitionProblemId
+            });
+
+            if (error) {
+                console.error('❌ [getSubmissionsByProblem] Query error:', error);
+                throw error;
+            }
+
+            if (!data || data.length === 0) {
+                console.log('⚠️ [getSubmissionsByProblem] No submissions found for competition_problem_id:', competitionProblemId);
+                return [];
+            }
+
+            console.log('✅ [getSubmissionsByProblem] Found submissions:', data.map(d => ({
+                id: d.id,
+                room_participant_id: d.room_participant_id,
+                competition_problem_id: d.competition_problem_id,
+                submitted_at: d.submitted_at
+            })));
+
+            const submissions = await Promise.all(
+                data.map(async (attempt) => {
+                    let participantInfo = null;
+                    let userProfile = null;
+
+                    if (attempt.room_participant_id) {
+                        try {
+                            participantInfo = await this.participantService.getPartInfo(attempt.room_participant_id);
+                            console.log('👤 [getSubmissionsByProblem] Participant info:', {
+                                participant_id: attempt.room_participant_id,
+                                user_id: participantInfo?.user_id
+                            });
+                        } catch (partError) {
+                            console.error('⚠️ [getSubmissionsByProblem] Failed to fetch participant info:', partError);
+                        }
+                    }
+
+                    if (participantInfo?.user_id && this.userService) {
+                        try {
+                            userProfile = await this.userService.getUserById(participantInfo.user_id);
+                            console.log('📋 [getSubmissionsByProblem] User profile:', {
+                                user_id: participantInfo.user_id,
+                                name: `${userProfile?.first_name || ''} ${userProfile?.last_name || ''}`.trim()
+                            });
+                        } catch (userError) {
+                            console.error('⚠️ [getSubmissionsByProblem] Failed to fetch user profile:', userError);
+                        }
+                    }
+
+                    let parsedSolution = [];
+                    if (Array.isArray(attempt.solution)) {
+                        parsedSolution = attempt.solution;
+                    } else if (attempt.solution) {
+                        try {
+                            parsedSolution = JSON.parse(attempt.solution);
+                        } catch (parseError) {
+                            console.error('⚠️ Failed to parse submission solution:', parseError);
+                            parsedSolution = [];
+                        }
+                    }
+
+                    const xpEarned = attempt.xp_gained || 0;
+                    const fallbackName = userProfile
+                        ? `${userProfile.first_name || ''} ${userProfile.last_name || ''}`.trim()
+                        : null;
+
+                    return {
+                        id: attempt.id,
+                        competition_problem_id: attempt.competition_problem_id,
+                        room_participant_id: attempt.room_participant_id,
+                        user_id: participantInfo?.user_id || null,
+                        full_name: fallbackName && fallbackName.length > 0 ? fallbackName : 'Unknown Participant',
+                        profile_pic: userProfile?.profile_pic || null,
+                        xp_gained: xpEarned,
+                        feedback: attempt.feedback || '',
+                        time_taken: attempt.time_taken || 0,
+                        participant_solution: parsedSolution,
+                        submitted_at: attempt.submitted_at,
+                        attempted_at: attempt.attempted_at,
+                        is_correct: xpEarned > 0
+                    };
+                })
+            );
+
+            return submissions;
+        } catch (error) {
+            console.error('❌ Error fetching submissions by problem:', error);
             throw error;
         }
     }

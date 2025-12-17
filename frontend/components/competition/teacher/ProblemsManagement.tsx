@@ -73,7 +73,7 @@ export default function ProblemsManagement({
                           className={styles.visibilityBadge}
                           data-visibility={compeProblem.problem.visibility}
                         >
-                          {compeProblem.problem.visibility === 'public' ? '🌐 Public' : '🔒 Private'}
+                          {compeProblem.problem.visibility === 'public' ? 'Public' : 'Private'}
                         </span>
                       </div>
                     </div>
@@ -146,7 +146,7 @@ export default function ProblemsManagement({
                               className={styles.visibilityBadge}
                               data-visibility={problem.visibility}
                             >
-                              {problem.visibility === 'public' ? '🌐 Public' : '🔒 Private'}
+                              {problem.visibility === 'public' ? 'Public' : 'Private'}
                             </span>
                           </div>
                         </div>

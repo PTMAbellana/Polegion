@@ -1,11 +1,12 @@
 "use client"
 
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuthStore } from '@/store/authStore'
 import { useStudentRoomStore } from '@/store/studentRoomStore'
 import { useStudentRoomManagement } from '@/hooks/useStudentRoomManagement'
 import { useRoomRealtime } from '@/hooks/useRoomRealtime'
+import { useParticipantHeartbeat } from '@/hooks/useParticipantHeartbeat'
 import StudentRoomBanner from '@/components/student/StudentRoomBanner'
 import TabContainer from '@/components/student/TabContainer'
 import StudentParticipantsList from '@/components/student/StudentParticipantsList'
@@ -16,6 +17,7 @@ import styles from '@/styles/room-details.module.css'
 import { use } from 'react'
 import Loader from '@/components/Loader'
 import { cacheControl } from '@/api/axios'
+import { getActiveParticipants } from '@/api/participants'
 
 export default function StudentRoomDetailsPage({ params }: { params: Promise<{ roomCode: string }> }) {
     const { roomCode } = use(params)
@@ -37,11 +39,50 @@ export default function StudentRoomDetailsPage({ params }: { params: Promise<{ r
     } = useStudentRoomManagement(roomCode, currentRoom?.id)
 
     // Real-time updates for room data (replaces manual refresh)
-    const { isConnected } = useRoomRealtime(
+    const { isConnected, lastUpdate } = useRoomRealtime(
         currentRoom?.id,
         roomCode,
         fetchRoomDetails
     )
+
+    // Send heartbeat to track active status (not in competition)
+    useParticipantHeartbeat(currentRoom?.id?.toString(), {
+        isInCompetition: false,
+        competitionId: null,
+        enabled: !!currentRoom?.id
+    });
+
+    // Track active participants count
+    const [activeCount, setActiveCount] = useState(0);
+
+    // Fetch active participants
+    const fetchActive = async () => {
+        if (!currentRoom?.id) return;
+        const result = await getActiveParticipants(currentRoom.id.toString());
+        if (result.success && result.data) {
+            setActiveCount(result.data.length);
+        }
+    };
+
+    // Fetch on initial load
+    useEffect(() => {
+        if (currentRoom?.id) {
+            fetchActive();
+        }
+    }, [currentRoom?.id]);
+
+    // Fetch when realtime detects changes
+    useEffect(() => {
+        if (lastUpdate === 0) return;
+        fetchActive();
+    }, [lastUpdate]);
+
+    // Poll every 5 seconds as backup
+    useEffect(() => {
+        if (!currentRoom?.id) return;
+        const interval = setInterval(fetchActive, 5000);
+        return () => clearInterval(interval);
+    }, [currentRoom?.id]);
 
     useEffect(() => {
         if (roomCode && isLoggedIn) {
@@ -140,7 +181,7 @@ export default function StudentRoomDetailsPage({ params }: { params: Promise<{ r
                         )}
                     </div>
 
-                    <StudentParticipantsList participants={participants} />
+                    <StudentParticipantsList participants={participants} activeCount={activeCount} />
                 </div>
             </div>
         </div>

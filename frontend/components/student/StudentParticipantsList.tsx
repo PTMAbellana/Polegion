@@ -4,7 +4,8 @@ import styles from '@/styles/room-details.module.css'
 import { StudentParticipantsListProps } from '@/types'
 
 export default function StudentParticipantsList({ 
-    participants
+    participants,
+    activeCount = 0
 }: StudentParticipantsListProps) {
     return (
         <div className={styles.participantsContainer}>
@@ -13,7 +14,7 @@ export default function StudentParticipantsList({
                     <FaUsers />
                     Participants
                     <span className={styles.participantsCount}>
-                        {participants.length}
+                        {activeCount > 0 ? `${activeCount} active / ${participants.length}` : participants.length}
                     </span>
                 </h2>
             </div>

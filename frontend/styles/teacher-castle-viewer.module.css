@@ -1,243 +1,537 @@
-/* Teacher Castle Content Viewer Styles */
+/* Teacher Castle Content Handbook - Unified Tab Layout */
 
-.castleGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-  gap: 1.5rem;
-  margin-bottom: 2rem;
-  max-height: 50rem;
-  overflow-y: auto;
-  padding-right: 0.5rem;
-}
+/* ========================================
+   MAIN CONTAINER
+======================================== */
 
-/* Custom Scrollbar for Castle Grid */
-.castleGrid::-webkit-scrollbar {
-  width: 0.5rem;
-}
-
-.castleGrid::-webkit-scrollbar-track {
-  background: rgba(147, 51, 234, 0.1);
-  border-radius: 0.25rem;
-}
-
-.castleGrid::-webkit-scrollbar-thumb {
-  background: linear-gradient(135deg, #9333ea 0%, #7c3aed 100%);
-  border-radius: 0.25rem;
-  transition: background 0.3s ease;
-}
-
-.castleGrid::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
-}
-
-.castleCard {
-  background: linear-gradient(135deg, #ffffff 0%, #f7fee7 100%);
+.mainContainer {
+  background: white;
   border-radius: 1rem;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   overflow: hidden;
-  transition: all 0.3s ease;
+  border: 1px solid #e5e7eb;
 }
 
-.castleCard:hover {
-  box-shadow: 0 10px 20px rgba(34, 197, 94, 0.2);
-  transform: translateY(-2px);
-}
+/* ========================================
+   MAIN TABS (Handbook + All Castles)
+======================================== */
 
-.castleHeader {
-  padding: 1.5rem;
-  cursor: pointer;
+.mainTabsContainer {
   display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 1rem;
-  border-bottom: 2px solid transparent;
-  transition: all 0.3s ease;
-  background: linear-gradient(135deg, #f0fdf4 0%, #fefce8 100%);
+  gap: 0;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border-bottom: 2px solid #e2e8f0;
+  overflow-x: auto;
+  overflow-y: hidden;
 }
 
-.castleHeader:hover {
-  border-bottom-color: #22c55e;
-  background: linear-gradient(135deg, #f0fdf4 0%, #ecfccb 100%);
+.mainTabsContainer::-webkit-scrollbar {
+  height: 4px;
 }
 
-.castleInfo {
-  flex: 1;
+.mainTabsContainer::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 2px;
 }
 
-.castleNumber {
-  display: inline-block;
-  padding: 0.25rem 0.75rem;
-  background: linear-gradient(135deg, #22c55e 0%, #84cc16 100%);
-  color: white;
-  border-radius: 0.5rem;
-  font-size: 0.75rem;
+.mainTab {
+  flex-shrink: 0;
+  padding: 1rem 1.5rem;
+  background: transparent;
+  border: none;
+  border-bottom: 3px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  min-width: 140px;
+}
+
+.mainTab:hover {
+  background: rgba(59, 130, 246, 0.05);
+  border-bottom-color: #93c5fd;
+}
+
+.mainTabActive {
+  background: white;
+  border-bottom-color: #3b82f6;
+}
+
+.mainTabIcon {
+  font-size: 1.5rem;
+}
+
+.mainTabNumber {
+  font-size: 0.7rem;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin-bottom: 0.75rem;
+  letter-spacing: 0.05em;
+  color: #64748b;
 }
 
-.castleName {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: #2C514C;
-  margin: 0.5rem 0;
-  background: linear-gradient(135deg, #2C514C 0%, #6D8A72 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+.mainTabActive .mainTabNumber {
+  color: #3b82f6;
 }
 
-.castleDescription {
+.mainTabLabel {
   font-size: 0.9rem;
-  color: #4b5563;
-  line-height: 1.5;
-  margin: 0.5rem 0 0 0;
+  font-weight: 600;
+  color: #1e293b;
+  text-align: center;
+  line-height: 1.2;
 }
 
-.expandIcon {
-  color: #22c55e;
-  transition: transform 0.3s ease;
+.mainTabActive .mainTabLabel {
+  color: #1e40af;
+}
+
+/* ========================================
+   CHAPTER TABS ROW
+======================================== */
+
+.chapterTabsRow {
+  display: flex;
+  gap: 0;
+  background: #f9fafb;
+  border-bottom: 2px solid #e5e7eb;
+  overflow-x: auto;
+  padding: 0.5rem 0;
+}
+
+.chapterTabsRow::-webkit-scrollbar {
+  height: 4px;
+}
+
+.chapterTabsRow::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 2px;
+}
+
+.chapterTab {
   flex-shrink: 0;
+  padding: 0.75rem 1.25rem;
+  background: transparent;
+  border: none;
+  border-bottom: 3px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  min-width: 160px;
 }
 
-.chaptersSection {
-  border-top: 2px solid #22c55e;
+.chapterTab:hover {
+  background: rgba(34, 197, 94, 0.05);
+  border-bottom-color: #86efac;
+}
+
+.chapterTabActive {
+  background: white;
+  border-bottom-color: #22c55e;
+}
+
+.chapterTabNum {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #64748b;
+}
+
+.chapterTabActive .chapterTabNum {
+  color: #16a34a;
+}
+
+.chapterTabName {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #1e293b;
+  line-height: 1.2;
+}
+
+.chapterTabActive .chapterTabName {
+  color: #15803d;
+}
+
+.chapterTabXp {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #f59e0b;
+}
+
+/* ========================================
+   CONTENT AREA
+======================================== */
+
+.contentArea {
+  padding: 2.5rem;
+  min-height: 500px;
   background: white;
 }
 
-.chapterList {
-  padding: 1rem;
+/* ========================================
+   HANDBOOK CONTENT
+======================================== */
+
+.handbookContent {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.handbookHeader {
   display: flex;
-  flex-direction: column;
-  gap: 1rem;
+  gap: 2rem;
+  align-items: flex-start;
+  margin-bottom: 3rem;
+  padding-bottom: 2rem;
+  border-bottom: 3px solid #e2e8f0;
 }
 
-.chapterItem {
-  padding: 1rem;
-  background: linear-gradient(135deg, #f9fafb 0%, #f0fdf4 100%);
-  border-radius: 0.75rem;
-  border: 1px solid #e5e7eb;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 1rem;
-  transition: all 0.3s ease;
+.handbookIcon {
+  color: #3b82f6;
+  flex-shrink: 0;
 }
 
-.chapterItem:hover {
-  border-color: #22c55e;
-  box-shadow: 0 4px 8px rgba(34, 197, 94, 0.15);
-  transform: translateX(4px);
-}
-
-.chapterInfo {
-  flex: 1;
-}
-
-.chapterNumber {
-  display: inline-block;
-  padding: 0.2rem 0.6rem;
-  background: linear-gradient(135deg, #84cc16 0%, #eab308 100%);
-  color: white;
-  border-radius: 0.4rem;
-  font-size: 0.7rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin-bottom: 0.5rem;
-}
-
-.chapterTitle {
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: #2C514C;
-  margin: 0.5rem 0;
-}
-
-.chapterDescription {
-  font-size: 0.85rem;
-  color: #6b7280;
-  line-height: 1.4;
-  margin: 0.5rem 0;
-}
-
-.chapterXp {
-  display: inline-block;
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: #eab308;
-  margin-top: 0.5rem;
-}
-
-.viewChapterBtn {
-  padding: 0.75rem 1.5rem;
-  background: linear-gradient(135deg, #22c55e 0%, #84cc16 100%);
-  color: white;
-  border: none;
-  border-radius: 0.75rem;
-  font-weight: 600;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  white-space: nowrap;
-  box-shadow: 0 2px 4px rgba(34, 197, 94, 0.3);
-}
-
-.viewChapterBtn:hover {
-  background: linear-gradient(135deg, #16a34a 0%, #65a30d 100%);
-  box-shadow: 0 4px 8px rgba(34, 197, 94, 0.4);
-  transform: translateY(-2px);
-}
-
-.viewChapterBtn:active {
-  transform: translateY(0);
-}
-
-.loadingChapters,
-.noChapters {
-  padding: 2rem;
-  text-align: center;
-  color: #6b7280;
-}
-
-.infoBox {
-  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
-  border-left: 4px solid #3b82f6;
-  border-radius: 0.75rem;
-  padding: 1.5rem;
-  margin-top: 2rem;
-}
-
-.infoBox h4 {
-  font-size: 1.1rem;
-  font-weight: 700;
+.handbookHeader h1 {
+  font-size: 2.25rem;
   color: #1e40af;
   margin: 0 0 0.75rem 0;
+  font-weight: 800;
 }
 
-.infoBox p {
+.handbookSubtitle {
+  font-size: 1.1rem;
+  line-height: 1.7;
+  color: #475569;
+  margin: 0;
+}
+
+.handbookGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 3rem;
+}
+
+.handbookCard {
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  padding: 2rem;
+  border-radius: 1rem;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.1);
+  border: 1px solid #bfdbfe;
+}
+
+.handbookCard svg {
+  color: #3b82f6;
+  margin-bottom: 1rem;
+}
+
+.handbookCard h3 {
+  font-size: 1.25rem;
+  color: #1e40af;
+  margin: 0 0 0.75rem 0;
+  font-weight: 700;
+}
+
+.handbookCard p {
   font-size: 0.95rem;
   color: #1e3a8a;
   line-height: 1.6;
   margin: 0;
 }
 
-.errorMessage {
-  background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
-  border-left: 4px solid #ef4444;
-  border-radius: 0.75rem;
-  padding: 1.5rem;
-  text-align: center;
+.handbookInstructions {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  padding: 2rem;
+  border-radius: 1rem;
+  border-left: 5px solid #f59e0b;
 }
 
-.errorMessage p {
-  color: #991b1b;
+.handbookInstructions h2 {
+  font-size: 1.5rem;
+  color: #92400e;
+  margin: 0 0 1.25rem 0;
+}
+
+.handbookInstructions ol {
+  margin: 0;
+  padding-left: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.handbookInstructions li {
+  font-size: 1rem;
+  color: #78350f;
+  line-height: 1.6;
+}
+
+.handbookInstructions strong {
+  color: #451a03;
   font-weight: 600;
-  margin-bottom: 1rem;
 }
 
-.emptyState {
+/* ========================================
+   CHAPTER CONTENT
+======================================== */
+
+.chapterContent {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.chapterTitleSection {
+  margin-bottom: 2.5rem;
+  padding-bottom: 2rem;
+  border-bottom: 3px solid #e2e8f0;
+}
+
+.chapterMeta {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.castleBadge {
+  display: inline-block;
+  padding: 0.4rem 0.9rem;
+  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+  color: white;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+.chapterBadge {
+  display: inline-block;
+  padding: 0.4rem 0.9rem;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+.chapterTitleSection h1 {
+  font-size: 2.25rem;
+  color: #1e293b;
+  margin: 0.5rem 0;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.chapterDesc {
+  font-size: 1.1rem;
+  color: #475569;
+  line-height: 1.7;
+  margin: 1rem 0;
+}
+
+.xpBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 1rem;
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  border: 2px solid #fbbf24;
+  border-radius: 999px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #92400e;
+}
+
+/* ========================================
+   CONCEPTS SECTION
+======================================== */
+
+.conceptsSection {
+  margin-bottom: 2.5rem;
+}
+
+.conceptsSection h2 {
+  font-size: 1.75rem;
+  color: #15803d;
+  margin: 0 0 1.5rem 0;
+  font-weight: 700;
+}
+
+.conceptsList {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.conceptItem {
+  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+  padding: 1.5rem;
+  border-radius: 0.875rem;
+  border-left: 4px solid #22c55e;
+  box-shadow: 0 2px 8px rgba(34, 197, 94, 0.1);
+}
+
+.conceptHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.conceptNumber {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  background: #22c55e;
+  color: white;
+  border-radius: 50%;
+  font-weight: 700;
+  font-size: 0.95rem;
+  flex-shrink: 0;
+}
+
+.conceptHeader h3 {
+  font-size: 1.3rem;
+  color: #15803d;
+  margin: 0;
+  font-weight: 700;
+}
+
+.conceptDescription {
+  font-size: 1rem;
+  color: #166534;
+  line-height: 1.6;
+  margin: 0 0 0.5rem 0;
+}
+
+.conceptSummary {
+  font-size: 0.95rem;
+  color: #14532d;
+  line-height: 1.5;
+  margin: 0;
+  font-style: italic;
+  padding-left: 0.75rem;
+  border-left: 3px solid #86efac;
+}
+
+.conceptSummary strong {
+  color: #052e16;
+}
+
+/* ========================================
+   INTRODUCTION SECTION
+======================================== */
+
+.introSection {
+  background: linear-gradient(135deg, #fff7ed 0%, #fed7aa 100%);
+  padding: 1.75rem;
+  border-radius: 1rem;
+  border-left: 5px solid #f97316;
+  margin-bottom: 2.5rem;
+}
+
+.introSection h2 {
+  font-size: 1.5rem;
+  color: #9a3412;
+  margin: 0 0 1rem 0;
+}
+
+.narrativeBox p {
+  font-size: 1rem;
+  color: #7c2d12;
+  line-height: 1.7;
+  margin: 0 0 0.75rem 0;
+  font-style: italic;
+}
+
+.narrativeBox p:last-child {
+  margin-bottom: 0;
+}
+
+/* ========================================
+   LEARNING OBJECTIVES
+======================================== */
+
+.objectivesSection {
+  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+  padding: 1.75rem;
+  border-radius: 1rem;
+  border-left: 5px solid #3b82f6;
+  margin-bottom: 2.5rem;
+}
+
+.objectivesSection h2 {
+  font-size: 1.5rem;
+  color: #1e40af;
+  margin: 0 0 1rem 0;
+}
+
+.objectivesSection ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.objectivesSection li {
+  font-size: 1rem;
+  color: #1e3a8a;
+  line-height: 1.6;
+  padding-left: 1.75rem;
+  position: relative;
+}
+
+.objectivesSection li::before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  color: #3b82f6;
+  font-weight: bold;
+  font-size: 1.1rem;
+}
+
+.objectivesSection strong {
+  color: #1e40af;
+  font-weight: 600;
+}
+
+/* ========================================
+   PREREQUISITES
+======================================== */
+
+.prerequisitesSection {
+  background: linear-gradient(135deg, #fef2f2 0%, #fecaca 100%);
+  padding: 1.75rem;
+  border-radius: 1rem;
+  border-left: 5px solid #ef4444;
+}
+
+.prerequisitesSection h2 {
+  font-size: 1.5rem;
+  color: #991b1b;
+  margin: 0 0 0.75rem 0;
+}
+
+.prerequisitesSection p {
+  font-size: 1rem;
+  color: #7f1d1d;
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* ========================================
+   SELECT PROMPT (Empty State)
+======================================== */
+
+.selectPrompt {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -246,39 +540,53 @@
   text-align: center;
 }
 
-.emptyState h3 {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: #2C514C;
-  margin: 1rem 0 0.5rem 0;
+.selectPrompt svg {
+  color: #94a3b8;
 }
 
-.emptyState p {
-  color: #6b7280;
-  font-size: 1rem;
+.selectPrompt h2 {
+  font-size: 1.75rem;
+  color: #64748b;
+  margin: 1.5rem 0 0.5rem 0;
 }
 
-/* Responsive Design */
+.selectPrompt p {
+  font-size: 1.1rem;
+  color: #94a3b8;
+}
+
+/* ========================================
+   RESPONSIVE DESIGN
+======================================== */
+
 @media (max-width: 768px) {
-  .castleGrid {
-    grid-template-columns: 1fr;
+  .mainTab {
+    min-width: 120px;
+    padding: 0.875rem 1rem;
+  }
+
+  .mainTabLabel {
+    font-size: 0.85rem;
+  }
+
+  .chapterTab {
+    min-width: 140px;
+  }
+
+  .contentArea {
+    padding: 1.5rem;
+  }
+
+  .handbookHeader {
+    flex-direction: column;
     gap: 1rem;
   }
 
-  .chapterItem {
-    flex-direction: column;
-    align-items: flex-start;
+  .handbookHeader h1 {
+    font-size: 1.75rem;
   }
 
-  .viewChapterBtn {
-    width: 100%;
-  }
-
-  .castleName {
-    font-size: 1.3rem;
-  }
-
-  .infoBox {
-    padding: 1rem;
+  .chapterTitleSection h1 {
+    font-size: 1.75rem;
   }
 }

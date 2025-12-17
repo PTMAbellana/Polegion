@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { use } from "react";
 import { useCompetitionRealtime } from "@/hooks/useCompetitionRealtime";
 import { useCompetitionTimer } from "@/hooks/useCompetitionTimer";
+import { useParticipantHeartbeat } from "@/hooks/useParticipantHeartbeat";
 import PageHeader from "@/components/PageHeader";
 import {
   CompetitionWaitingRoom,
@@ -37,7 +38,14 @@ function CompetitionPageContent({ competitionId }: { competitionId: number }) {
     competition,
     participants,
     activeParticipants,
-  } = useCompetitionRealtime(competitionId.toString(), !roomId, roomId);
+  } = useCompetitionRealtime(competitionId.toString(), !roomId, roomId, 'participant');
+
+  // Send heartbeat to track active status
+  useParticipantHeartbeat(roomId, {
+    isInCompetition: true,
+    competitionId: competitionId.toString(),
+    enabled: !!roomId // Start immediately when we have roomId
+  });
 
   const liveCompetition = competition as Competition | null;
   const liveParticipants = participants as CompetitionParticipant[];

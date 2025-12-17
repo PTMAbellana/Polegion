@@ -75,8 +75,35 @@ export default function CompetitionControls({
         <>
           {isCountingDown ? (
             <div className={styles.countdownContainer}>
-              <div className={styles.countdownNumber}>{countdown}</div>
-              <div className={styles.countdownText}>Competition starting in...</div>
+              <div className={styles.countdownCircle}>
+                <svg className={styles.countdownSvg} viewBox="0 0 100 100">
+                  <circle 
+                    className={styles.countdownTrack}
+                    cx="50" 
+                    cy="50" 
+                    r="45"
+                  />
+                  <circle 
+                    className={styles.countdownProgress}
+                    cx="50" 
+                    cy="50" 
+                    r="45"
+                    style={{
+                      strokeDasharray: `${(countdown / 5) * 283} 283`,
+                      animation: 'countdown-spin 1s linear'
+                    }}
+                  />
+                  <text 
+                    className={styles.countdownNumber}
+                    x="50" 
+                    y="58" 
+                    textAnchor="middle"
+                  >
+                    {countdown}
+                  </text>
+                </svg>
+              </div>
+              <span className={styles.countdownLabel}>Starting...</span>
               <button
                 onClick={handleCancelCountdown}
                 className={`${styles.controlButton} ${styles.cancelButton}`}
@@ -120,18 +147,6 @@ export default function CompetitionControls({
             Problem {currentIndex + 1} of {addedProblems.length}
           </div>
         </>
-      )}
-      
-      {competition.status === 'DONE' && (
-        <div className={styles.completedBanner}>
-          <div className={styles.completedBannerContent}>
-            <div className={styles.completedBadge}>COMPLETED</div>
-            <h3 className={styles.completedBannerTitle}>Competition has ended</h3>
-            <p className={styles.completedBannerText}>
-              All participants have finished. View the final rankings below.
-            </p>
-          </div>
-        </div>
       )}
     </div>
   )

@@ -107,33 +107,20 @@ export default function Gamepage({
   const [hasSubmitted, setHasSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // MEMOIZE COMPETITION ID TO PREVENT UNNECESSARY HOOK CALLS
-  const memoizedCompetitionId = useMemo(() => competitionId || 0, [competitionId]);
-  
-  // CONDITIONALLY USE HOOKS TO PREVENT UNNECESSARY API CALLS
-  const shouldUseHooks = !!competitionId && competitionId > 0;
-  
-  const { 
-    competition: realtimeCompetition, 
-  } = useCompetitionRealtime(
-    memoizedCompetitionId, 
-    !shouldUseHooks, // isLoading: true when NOT using hooks (to prevent connection)
-    roomId || '', // Pass roomId for proper API calls
-    'participant' // userType
-  );
-
+  // DISABLE internal realtime hook - parent page handles this now
+  // This prevents duplicate subscriptions and race conditions
   const {
     timeRemaining = 0,
     formattedTime = '00:00',
     isExpired = false,
     isPaused = false
   } = useCompetitionTimer(
-    memoizedCompetitionId, 
-    shouldUseHooks ? (realtimeCompetition || currentCompetition) : null
+    competitionId || 0, 
+    currentCompetition // Use competition data from props
   );
 
-  // Use realtime competition data if available, fallback to props
-  const activeCompetition = realtimeCompetition || currentCompetition;
+  // Use competition data from props (passed from parent page)
+  const activeCompetition = currentCompetition;
 
   // SAFER FETCH PROBLEMS WITH BETTER ERROR HANDLING AND DEBOUNCING
   const fetchProblems = useCallback(async () => {
@@ -903,11 +890,11 @@ export default function Gamepage({
       <LandscapePrompt />
       
       {/* Header */}
-      {competitionId && currentCompetition ? (
+      {competitionId && activeCompetition ? (
         <PageHeader
-          title={currentCompetition.title || "Competition"}
+          title={activeCompetition.title || "Competition"}
           userName={userProfile?.first_name}
-          subtitle={`Problem ${(currentCompetition.current_problem_index || 0) + 1} of ${currentCompetition.total_problems || currentCompetition.problem_count || 0}`}
+          subtitle={`Problem ${(activeCompetition.current_problem_index || 0) + 1} of ${activeCompetition.total_problems || activeCompetition.problem_count || 0}`}
           showAvatar={true}
         />
       ) : (

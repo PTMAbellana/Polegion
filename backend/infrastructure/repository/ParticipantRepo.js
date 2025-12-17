@@ -192,7 +192,7 @@ class ParticipantRepo extends BaseRepo {
                 .update({
                     last_active: new Date().toISOString(),
                     is_in_competition: data.is_in_competition || false,
-                    current_competition_id: data.competition_id || null,
+                    current_competition_id: data.current_competition_id || null,
                     session_id: data.session_id || null
                 })
                 .eq('id', participantId);

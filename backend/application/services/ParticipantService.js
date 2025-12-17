@@ -382,7 +382,7 @@ class ParticipantService {
             // Update heartbeat with session data
             return await this.participantRepo.updateHeartbeat(participant.id, {
                 is_in_competition: data.is_in_competition || false,
-                competition_id: data.competition_id || null,
+                current_competition_id: data.current_competition_id || null,
                 session_id: data.session_id || this._generateSessionId()
             });
         } catch (error) {

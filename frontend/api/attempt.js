@@ -34,3 +34,19 @@ export const submitSolution = async (competitionId, problemId, solutionData) => 
         }
     }
 };
+
+export const getSubmissionsByProblem = async (competitionProblemId) => {
+    try {
+        const response = await api.get(`/attempts/problem/${competitionProblemId}`);
+        return {
+            success: true,
+            data: response.data
+        };
+    } catch (error) {
+        console.error('❌ Get submissions error:', error);
+        return {
+            success: false,
+            error: error.response?.data?.message || 'Failed to fetch submissions'
+        };
+    }
+};

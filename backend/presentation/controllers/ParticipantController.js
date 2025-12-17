@@ -298,7 +298,7 @@ class ParticipantController {
 
     updateHeartbeat = async (req, res) => {
         const { roomId } = req.params;
-        const { is_in_competition, competition_id, session_id } = req.body;
+        const { is_in_competition, current_competition_id, session_id } = req.body;
 
         try {
             await this.participantService.updateParticipantHeartbeat(
@@ -306,7 +306,7 @@ class ParticipantController {
                 roomId,
                 {
                     is_in_competition,
-                    competition_id,
+                    current_competition_id,
                     session_id
                 }
             );
@@ -335,13 +335,10 @@ class ParticipantController {
         const { roomId } = req.params;
 
         try {
-            // Get room to find creator
-            const room = await this.participantService.roomService.getRoomById(roomId);
-            
-            // Get active participants excluding creator
+            // Get active participants (service layer handles filtering)
             const active = await this.participantService.getActiveParticipants(
                 roomId,
-                room.user_id
+                null // Don't exclude creator for now since we filter in view
             );
 
             res.status(200).json({
@@ -361,14 +358,10 @@ class ParticipantController {
         const { competitionId } = req.params;
 
         try {
-            // Get competition to find room and creator
-            const competition = await this.participantService.roomService.getCompetitionById(competitionId);
-            const room = await this.participantService.roomService.getRoomById(competition.room_id);
-            
-            // Get active competition participants excluding creator
+            // Get active competition participants (service layer handles filtering)
             const active = await this.participantService.getActiveCompetitionParticipants(
                 competitionId,
-                room.user_id
+                null // Don't exclude creator for now since we filter in view
             );
 
             res.status(200).json({

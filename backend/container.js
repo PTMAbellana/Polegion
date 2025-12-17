@@ -126,7 +126,14 @@ const gradingService = new GradingService();
 const xpService = new XPService(xpRepository);
 const leaderboardService = new LeaderboardService(leaderboardRepository, userService, xpService);
 const participantService = new ParticipantService(participantRepository, roomService, userService, leaderboardService);
-const attemptsService = new AttemptsService(attemptsRepository, xpService, leaderboardService, gradingService, participantService);
+const attemptsService = new AttemptsService(
+  attemptsRepository,
+  xpService,
+  leaderboardService,
+  gradingService,
+  participantService,
+  userService
+);
 const competitionService = new CompetitionService(competitionRepository, participantService, leaderboardService, roomService, problemService);
 
 // Added Newly Added Services

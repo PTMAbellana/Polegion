@@ -4,9 +4,10 @@ import { useEffect, useState, Suspense, useMemo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { use } from "react";
 import Gamepage from "@/components/Gamepage";
-import { CompetitionPaused } from "@/components/competition";
+import { CompetitionPaused, CompetitionCompleted } from "@/components/competition";
 import { useCompetitionRealtime } from "@/hooks/useCompetitionRealtime";
 import { useCompetitionTimer } from "@/hooks/useCompetitionTimer";
+import { useParticipantHeartbeat } from "@/hooks/useParticipantHeartbeat";
 import { useAuthStore } from "@/store/authStore";
 import type { Competition } from "@/types/common/competition";
 import { useStudentRoomStore } from "@/store/studentRoomStore";
@@ -23,73 +24,34 @@ function PlayPageContent({ competitionId }: { competitionId: number }) {
   const { currentRoom } = useStudentRoomStore();
   const { userProfile } = useAuthStore();
   const roomId = searchParams.get('room') || currentRoom?.id?.toString() || '';
-  const roomCode = searchParams.get('roomCode') || '';
+  const roomCode = searchParams.get('roomCode') || currentRoom?.code || '';
 
-  // Debug logging
-  console.log('🎮 [PlayPage] competitionId:', competitionId, 'roomId:', roomId, 'currentRoom:', currentRoom);
+  const [showPauseOverlay, setShowPauseOverlay] = useState(false);
 
-  // Real-time hooks - pass false to not block connection
+  // Real-time hooks - fetch competition data
   const {
     competition,
-    isConnected,
     participants,
-    activeParticipants,
+    error: realtimeError,
   } = useCompetitionRealtime(competitionId.toString(), false, roomId, 'participant');
 
-  console.log('🎮 [PlayPage] Real-time hook returned:', {
-    competition: !!competition,
-    isConnected,
-    participantsCount: participants.length,
-    activeParticipantsCount: activeParticipants?.length || 0,
-    activeParticipantsRaw: activeParticipants
+  // Send heartbeat to track active status while playing
+  useParticipantHeartbeat(roomId, {
+    isInCompetition: true,
+    competitionId: competitionId.toString(),
+    enabled: !!roomId
   });
-
-  // Debug logging for competition data
-  console.log('🎮 [PlayPage] competition:', competition, 'isConnected:', isConnected);
 
   const liveCompetition = competition as Competition | null;
   const { formattedTime } = useCompetitionTimer(competitionId, liveCompetition);
 
-  // Track if we should show pause overlay
-  const [showPauseOverlay, setShowPauseOverlay] = useState(false);
-  const [loadTimeout, setLoadTimeout] = useState(false);
-
-  // Get user's XP from participants data (updated in real-time via polling)
+  // Get user's XP from participants data
   const userAccumulatedXP = useMemo(() => {
-    console.log('📊 [PlayPage] === XP CALCULATION DEBUG ===');
-    console.log('📊 [PlayPage] User Profile ID:', userProfile?.id, 'Type:', typeof userProfile?.id);
-    console.log('📊 [PlayPage] Participants Count:', participants.length);
-    console.log('📊 [PlayPage] All Participants:', participants);
-    console.log('📊 [PlayPage] Participant Details:', participants.map((p: any) => ({ 
-      id: p.id, 
-      user_id: p.user_id, 
-      xp: p.accumulated_xp,
-      fullName: p.fullName,
-      idType: typeof p.id,
-      userIdType: typeof p.user_id
-    })));
-    
     const found = participants.find(
       (p: any) => String(p.user_id) === String(userProfile?.id) || String(p.id) === String(userProfile?.id)
     );
-    
-    console.log('📊 [PlayPage] Found participant:', found);
-    console.log('📊 [PlayPage] Returning XP:', found?.accumulated_xp || 0);
-    console.log('📊 [PlayPage] === END XP CALCULATION ===');
-    
     return found?.accumulated_xp || 0;
   }, [participants, userProfile?.id]);
-
-  // Set a timeout to show error message if loading takes too long
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (!liveCompetition) {
-        setLoadTimeout(true);
-      }
-    }, 10000); // 10 seconds timeout
-
-    return () => clearTimeout(timer);
-  }, [liveCompetition]);
 
   // Redirect logic based on competition status
   useEffect(() => {
@@ -103,11 +65,8 @@ function PlayPageContent({ competitionId }: { competitionId: number }) {
       return;
     }
 
-    // Competition finished - go to results
-    if (liveCompetition.status === "DONE") {
-      router.push(`/student/competition/${competitionId}${roomParam}`);
-      return;
-    }
+    // Don't redirect on DONE - let the game page show completion
+    // (Prevents redirect errors and shows results in-place)
 
     // Competition paused - show overlay
     if (liveCompetition.gameplay_indicator === "PAUSE") {
@@ -117,7 +76,7 @@ function PlayPageContent({ competitionId }: { competitionId: number }) {
     }
   }, [liveCompetition, competitionId, router, roomId, roomCode]);
 
-  // Show error if no roomId provided
+  // Show error if no roomId
   if (!roomId) {
     return (
       <div className={styles.mainContainer}>
@@ -127,11 +86,37 @@ function PlayPageContent({ competitionId }: { competitionId: number }) {
             <p className={styles.status}>
               Please access this page with a valid room parameter.
             </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error if API failed
+  if (realtimeError) {
+    return (
+      <div className={styles.mainContainer}>
+        <div className={styles.header}>
+          <div className={styles.headerContent}>
+            <h1 className={styles.title}>Connection Error</h1>
+            <p className={styles.status} style={{ color: '#dc2626', marginTop: '1rem' }}>
+              {realtimeError.message || 'Failed to connect to competition'}
+            </p>
             <button 
-              onClick={() => router.back()}
-              style={{ marginTop: '1rem', padding: '0.5rem 1rem', cursor: 'pointer' }}
+              onClick={() => window.location.reload()}
+              style={{ 
+                marginTop: '1rem', 
+                padding: '0.75rem 1.5rem', 
+                cursor: 'pointer',
+                background: '#22c55e',
+                color: 'white',
+                border: 'none',
+                borderRadius: '0.5rem',
+                fontSize: '1rem',
+                fontWeight: '600'
+              }}
             >
-              Go Back
+              Retry
             </button>
           </div>
         </div>
@@ -139,35 +124,48 @@ function PlayPageContent({ competitionId }: { competitionId: number }) {
     );
   }
 
+  // Show loading while waiting for competition data
   if (!liveCompetition) {
     return (
-      <div className={styles.mainContainer}>
-        <div className={styles.header}>
-          <div className={styles.headerContent}>
-            <h1 className={styles.title}>
-              {loadTimeout ? 'Failed to Load Competition' : 'Loading Competition...'}
-            </h1>
-            {loadTimeout && (
-              <>
-                <p className={styles.status}>
-                  Could not connect to the competition. Please check your connection.
+      <>
+        <style jsx>{`
+          @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+          }
+        `}</style>
+        <div className={styles.mainContainer}>
+          <div className={styles.header}>
+            <div className={styles.headerContent}>
+              <h1 className={styles.title}>Loading Game...</h1>
+              <div style={{
+                marginTop: '2rem',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: '1.5rem'
+              }}>
+                <div style={{
+                  width: '50px',
+                  height: '50px',
+                  border: '5px solid rgba(34, 197, 94, 0.2)',
+                  borderTop: '5px solid #22c55e',
+                  borderRadius: '50%',
+                  animation: 'spin 1s linear infinite'
+                }} />
+                <p style={{ color: '#6b7280', fontSize: '0.875rem' }}>
+                  Connecting to competition...
                 </p>
-                <button 
-                  onClick={() => window.location.reload()}
-                  style={{ marginTop: '1rem', padding: '0.5rem 1rem', cursor: 'pointer' }}
-                >
-                  Retry
-                </button>
-              </>
-            )}
+              </div>
+            </div>
           </div>
         </div>
-      </div>
+      </>
     );
   }
 
   // Competition not in proper state
-  if (liveCompetition.status !== "ONGOING") {
+  if (liveCompetition.status !== "ONGOING" && liveCompetition.status !== "DONE") {
     return (
       <div className={styles.mainContainer}>
         <div className={styles.header}>
@@ -182,6 +180,19 @@ function PlayPageContent({ competitionId }: { competitionId: number }) {
     );
   }
 
+  // Show completion screen if competition is done
+  if (liveCompetition.status === "DONE") {
+    return (
+      <CompetitionCompleted
+        competitionTitle={liveCompetition.title}
+        formattedTime={formattedTime}
+        participants={participants}
+        onRefresh={() => window.location.reload()}
+      />
+    );
+  }
+
+  // Render the game
   return (
     <>
       {/* Pause Overlay - Shown when competition is paused */}
@@ -192,12 +203,12 @@ function PlayPageContent({ competitionId }: { competitionId: number }) {
         />
       )}
 
-      {/* Game Component - Note: currentRoom is preserved from studentRoomStore */}
+      {/* Game Component */}
       <Gamepage
-        roomCode={currentRoom?.code || ""}
+        roomCode={roomCode}
         competitionId={competitionId}
         currentCompetition={liveCompetition}
-        roomId={roomId || currentRoom?.id?.toString() || ""}
+        roomId={roomId}
         isFullScreenMode={true}
         userAccumulatedXP={userAccumulatedXP}
       />

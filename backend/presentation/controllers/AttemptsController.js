@@ -73,6 +73,32 @@ class AttemptsController {
             });
         }
     };
+
+    getSubmissionsByProblem = async (req, res) => {
+        try {
+            const { competitionProblemId } = req.params;
+
+            if (!competitionProblemId) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Competition problem ID is required'
+                });
+            }
+
+            const submissions = await this.attemptService.getSubmissionsByProblem(competitionProblemId);
+
+            res.status(200).json({
+                success: true,
+                data: submissions
+            });
+        } catch (error) {
+            console.error('❌ Get submissions error:', error);
+            res.status(500).json({
+                success: false,
+                message: error.message || 'Failed to fetch submissions'
+            });
+        }
+    }
 }
 
 module.exports = AttemptsController;

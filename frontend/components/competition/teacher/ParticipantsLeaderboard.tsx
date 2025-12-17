@@ -123,6 +123,7 @@ export default function ParticipantsLeaderboard({ participants, activeParticipan
                     <div className={styles.participantLeft}>
                       <div className={styles.participantRank}>
                         {index === 0 ? '#1' : index === 1 ? '#2' : index === 2 ? '#3' : `#${index + 1}`}
+                        {active && <span className={styles.activeIndicatorSmall} title="Active now" />}
                       </div>
                       <div className={styles.participantInfo}>
                         <h3 className={styles.participantName}>

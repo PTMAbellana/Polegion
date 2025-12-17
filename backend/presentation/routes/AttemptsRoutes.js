@@ -67,6 +67,7 @@ class AttemptsRoutes {
          *         $ref: '#/components/responses/NotFoundError'
          */
         this.router.post('/submit', this.attemptsController.submitSolution);
+        this.router.get('/problem/:competitionProblemId', this.attemptsController.getSubmissionsByProblem);
      }
 
     getRouter() {

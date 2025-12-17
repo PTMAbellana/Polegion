@@ -120,12 +120,15 @@ export const getActiveParticipants = async (roomId) => {
 
 export const getActiveCompetitionParticipants = async (competitionId) => {
   try {
+    console.log('[API] Fetching active participants for competition:', competitionId);
     const res = await api.get(`/participants/active/competition/${competitionId}`);
+    console.log('[API] Active participants response:', res.data);
     return {
       success: true,
       data: res.data.data || []
     };
   } catch (error) {
+    console.error('[API] Failed to fetch active participants:', error);
     return {
       success: false,
       data: [],

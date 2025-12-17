@@ -39,6 +39,21 @@ export const useRoomRealtime = (roomId, roomCode, fetchRoomDetails) => {
       }
     )
 
+    // Subscribe to room_participants table (active tracking / heartbeats)
+    channel.on(
+      'postgres_changes',
+      {
+        event: '*',
+        schema: 'public',
+        table: 'room_participants',
+        filter: `room_id=eq.${roomId}`
+      },
+      (payload) => {
+        logger.log('[Room Realtime] Active status changed:', payload.eventType, payload.new || payload.old)
+        setLastUpdate(Date.now())
+      }
+    )
+
     // Subscribe to problems table (problems added/updated/deleted)
     channel.on(
       'postgres_changes',

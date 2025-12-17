@@ -6,6 +6,8 @@ import { ParticipantsSidebarProps } from '@/types'
 
 export default function ParticipantsSidebar({ 
     participants, 
+    activeCount = 0,
+    activeParticipantIds = new Set(),
     onInviteParticipants,
     onKickParticipant 
 }: ParticipantsSidebarProps) {
@@ -24,7 +26,7 @@ export default function ParticipantsSidebar({
                     <FaUsers />
                     Participants
                     <span className={styles.participantsCount}>
-                        {participants.length}
+                        {activeCount > 0 ? `${activeCount} active / ${participants.length}` : participants.length}
                     </span>
                 </h2>
             </div>
@@ -46,40 +48,46 @@ export default function ParticipantsSidebar({
                     </div>
                 ) : (
                     <div className={styles.participantsList}>
-                        {participants.map((participant, index) => (
-                            <div key={index} className={styles.participantItem}>
-                                <div className={styles.participantAvatar}>
-                                    {participant.profile_pic ? (
-                                        <img
-                                            src={participant.profile_pic}
-                                            alt={`${participant.first_name} ${participant.last_name}`}
-                                            className={styles.avatarImage}
-                                        />
-                                    ) : (
-                                        participant.first_name?.charAt(0)?.toUpperCase() || 'U'
-                                    )}
+                        {participants.map((participant, index) => {
+                            const participantId = participant.user_id || participant.id;
+                            const isActive = activeParticipantIds.has(participantId);
+                            
+                            return (
+                                <div key={index} className={styles.participantItem}>
+                                    <div className={styles.participantAvatar}>
+                                        {participant.profile_pic ? (
+                                            <img
+                                                src={participant.profile_pic}
+                                                alt={`${participant.first_name} ${participant.last_name}`}
+                                                className={styles.avatarImage}
+                                            />
+                                        ) : (
+                                            participant.first_name?.charAt(0)?.toUpperCase() || 'U'
+                                        )}
+                                        {isActive && <span className={styles.activeIndicator} title="Active now" />}
+                                    </div>
+                                    <div className={styles.participantInfo}>
+                                        <p className={styles.participantName}>
+                                            {participant.first_name} {participant.last_name}
+                                        </p>
+                                    </div>
+                                    <button
+                                        className={styles.printProgressButton}
+                                        title="Print student progress"
+                                        onClick={() => handlePrintProgress(participant)}
+                                    >
+                                        <FaPrint />
+                                    </button>
+                                    <button
+                                        className={styles.kickButton}
+                                        title="Kick participant"
+                                        onClick={() => onKickParticipant(participant)}
+                                    >
+                                        <FaUserSlash />
+                                    </button>
                                 </div>
-                                <div className={styles.participantInfo}>
-                                    <p className={styles.participantName}>
-                                        {participant.first_name} {participant.last_name}
-                                    </p>
-                                </div>
-                                <button
-                                    className={styles.printProgressButton}
-                                    title="Print student progress"
-                                    onClick={() => handlePrintProgress(participant)}
-                                >
-                                    <FaPrint />
-                                </button>
-                                <button
-                                    className={styles.kickButton}
-                                    title="Kick participant"
-                                    onClick={() => onKickParticipant(participant)}
-                                >
-                                    <FaUserSlash />
-                                </button>
-                            </div>
-                        ))}
+                            );
+                        })}
                     </div>
                 )}
             </div>
