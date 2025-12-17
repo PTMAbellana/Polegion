@@ -15,15 +15,20 @@
 }
 
 .modalContent {
-  background: white;
-  border-radius: 0.75rem;
+  background: #FFFFFF;
+  border-radius: 1.25rem;
   max-width: 50rem;
   width: 100%;
-  max-height: 90vh;
+  max-height: 85vh;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 0.625rem 2.5rem rgba(0, 0, 0, 0.3);
+  box-shadow: 0 1rem 3rem rgba(59, 130, 246, 0.15),
+              0 0.5rem 1.5rem rgba(59, 130, 246, 0.1),
+              0 2rem 4rem rgba(0, 0, 0, 0.08);
+  backdrop-filter: blur(10px);
   animation: slideIn 0.3s ease-out;
+  overflow: hidden;
+  margin: auto;
 }
 
 @keyframes slideIn {
@@ -39,13 +44,12 @@
 
 .modalHeader {
   padding: 1.5rem;
-  border-bottom: 0.125rem solid #e5e7eb;
+  border-bottom: none;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: linear-gradient(135deg, #2F3E75 0%, #3A9679 100%);
+  background: linear-gradient(135deg, #2563EB 0%, #1E3A8A 100%);
   color: white;
-  border-radius: 0.75rem 0.75rem 0 0;
 }
 
 .modalHeader h2 {
@@ -77,25 +81,17 @@
   flex: 1;
   font-family: 'Poppins', sans-serif;
   line-height: 1.6;
-  color: #333;
+  color: #1f2937;
 }
 
+/* Hide scrollbar but keep functionality */
 .modalBody::-webkit-scrollbar {
-  width: 0.5rem;
+  display: none;
 }
 
-.modalBody::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border-radius: 0.25rem;
-}
-
-.modalBody::-webkit-scrollbar-thumb {
-  background: #3A9679;
-  border-radius: 0.25rem;
-}
-
-.modalBody::-webkit-scrollbar-thumb:hover {
-  background: #2F3E75;
+.modalBody {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
 .section {
@@ -105,10 +101,10 @@
 .section h3 {
   font-size: clamp(1.125rem, 1.125rem + 0.2vw, 1.25rem);
   font-weight: 700;
-  color: #2F3E75;
+  color: #1E3A8A;
   margin-bottom: 0.75rem;
   padding-bottom: 0.5rem;
-  border-bottom: 0.125rem solid #3A9679;
+  border-bottom: 0.125rem solid #3B82F6;
 }
 
 .section p {
@@ -129,58 +125,58 @@
 }
 
 .highlight {
-  background-color: #fef3c7;
+  background-color: #EFF6FF;
   padding: 0.75rem 1rem;
-  border-left: 0.25rem solid #f59e0b;
-  border-radius: 0.25rem;
+  border-left: 0.25rem solid #3B82F6;
+  border-radius: 0.5rem;
   font-weight: 600;
-  color: #92400e;
+  color: #1E3A8A;
 }
 
 .contactInfo {
-  background-color: #f0fdf4;
+  background-color: #F0FDF4;
   padding: 1rem;
-  border-left: 0.25rem solid #3A9679;
-  border-radius: 0.25rem;
+  border-left: 0.25rem solid #22C55E;
+  border-radius: 0.5rem;
   font-size: clamp(0.875rem, 0.875rem + 0.1vw, 0.95rem);
   line-height: 1.8;
 }
 
 .footer {
-  background-color: #f9fafb;
+  background-color: #F5F7FA;
   padding: 1rem;
-  border-radius: 0.5rem;
+  border-radius: 0.75rem;
   font-size: 0.875rem;
-  color: #6b7280;
+  color: #4B5563;
   margin-top: 1.25rem;
-  border: 0.0625rem solid #e5e7eb;
+  border: 0.0625rem solid #DBEAFE;
 }
 
 .modalFooter {
   padding: 1rem 1.5rem;
-  border-top: 0.125rem solid #e5e7eb;
+  border-top: none;
   display: flex;
   justify-content: flex-end;
-  background-color: #f9fafb;
-  border-radius: 0 0 0.75rem 0.75rem;
+  background-color: #F5F7FA;
 }
 
 .closeBtn {
   padding: 0.75rem 2rem;
-  background: linear-gradient(135deg, #3A9679 0%, #2F3E75 100%);
+  background: #22C55E;
   color: white;
   border: none;
-  border-radius: 0.5rem;
+  border-radius: 0.75rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
   font-size: 1rem;
-  box-shadow: 0 0.25rem 0.75rem rgba(58, 150, 121, 0.3);
+  box-shadow: 0 4px 14px rgba(34, 197, 94, 0.25);
 }
 
 .closeBtn:hover {
+  background: #16A34A;
   transform: translateY(-0.125rem);
-  box-shadow: 0 0.375rem 1rem rgba(58, 150, 121, 0.4);
+  box-shadow: 0 6px 20px rgba(34, 197, 94, 0.35);
 }
 
 /* Mobile Responsive */
