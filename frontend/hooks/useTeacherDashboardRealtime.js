@@ -141,9 +141,9 @@ export const useTeacherDashboardRealtime = (userId, createdRooms) => {
       if (status === 'SUBSCRIBED') {
         logger.log('[Teacher Dashboard Realtime] Subscribed successfully')
       } else if (status === 'CHANNEL_ERROR') {
-        logger.error('[Teacher Dashboard Realtime] Channel error')
+        logger.warn('[Teacher Dashboard Realtime] Channel error - real-time updates may be delayed')
       } else if (status === 'TIMED_OUT') {
-        logger.error('[Teacher Dashboard Realtime] Connection timed out')
+        logger.warn('[Teacher Dashboard Realtime] Connection timed out - will retry automatically')
       }
     })
 

@@ -196,6 +196,7 @@ console.log("RoomDetailsPage - currentRoom:", currentRoom)
                         participants={participants}
                         activeCount={activeCount}
                         activeParticipantIds={activeParticipantIds}
+                        roomId={currentRoom?.id}
                         onInviteParticipants={handleInviteParticipants}
                         onKickParticipant={handleKickParticipant}
                     />

@@ -55,6 +55,7 @@ export interface ParticipantsSidebarProps {
     participants: UserType[]
     activeCount?: number
     activeParticipantIds?: Set<string>
+    roomId?: number | string
     onInviteParticipants: () => void
     onKickParticipant: (participant: UserType) => void
 }

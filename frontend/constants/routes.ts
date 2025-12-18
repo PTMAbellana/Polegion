@@ -79,10 +79,6 @@ export const TEACHER_ROUTES = {
     // practice problems viewer (read-only reference)
     PRACTICE_PROBLEMS: `/teacher/practice-problems`,
     
-    // handbook - actual student interfaces for teacher reference
-    WORLD_MAP_HANDBOOK: `/teacher/handbook/worldmap`,
-    PRACTICE_HANDBOOK: `/teacher/handbook/practice`,
-    
     // profile
     PROFILE: `/teacher${ROUTES.PROFILE}`,
     EDIT_PROFILE: `/teacher${ROUTES.EDIT_PROFILE}`,

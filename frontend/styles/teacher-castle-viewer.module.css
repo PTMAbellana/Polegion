@@ -556,6 +556,414 @@
 }
 
 /* ========================================
+   LESSON GUIDE STYLES
+======================================== */
+
+.lessonGuide {
+  max-width: 1000px;
+  margin: 2rem auto;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  padding: 2.5rem;
+  border: 1px solid #e5e7eb;
+}
+
+.lessonGuide h2 {
+  font-size: 2rem;
+  color: #1e293b;
+  margin: 0 0 2rem 0;
+  padding-bottom: 1rem;
+  border-bottom: 3px solid #FABC60;
+}
+
+.lessonSection {
+  margin-bottom: 2.5rem;
+}
+
+.lessonSection h3 {
+  font-size: 1.5rem;
+  color: #475569;
+  margin: 0 0 1rem 0;
+}
+
+.lessonSection p {
+  font-size: 1.05rem;
+  line-height: 1.8;
+  color: #334155;
+}
+
+.storyBox {
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.05), rgba(99, 102, 241, 0.08));
+  border-left: 4px solid #8b5cf6;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-top: 1rem;
+}
+
+.dialogueLine {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+  font-size: 1.05rem;
+  line-height: 1.7;
+  color: #1e293b;
+}
+
+.dialogueMarker {
+  flex-shrink: 0;
+  font-size: 1.2rem;
+}
+
+.flowList {
+  margin-top: 1rem;
+}
+
+.flowItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  padding: 1rem;
+  background: #f8fafc;
+  border-radius: 8px;
+  border-left: 3px solid #FABC60;
+}
+
+.flowNumber {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  background: #FABC60;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 1rem;
+}
+
+.flowItem p {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+/* Concept Cards */
+.conceptCard {
+  margin-bottom: 2.5rem;
+  background: white;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.conceptCardHeader {
+  background: linear-gradient(135deg, #FABC60, #E8A83B);
+  padding: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.conceptBadge {
+  width: 48px;
+  height: 48px;
+  background: white;
+  color: #FABC60;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+
+.conceptCardHeader h3 {
+  margin: 0;
+  color: white;
+  font-size: 1.75rem;
+  font-weight: 700;
+}
+
+.conceptCardBody {
+  padding: 2rem;
+}
+
+.conceptDefinition,
+.conceptSummary,
+.conceptTeaching,
+.conceptVisual,
+.teachingSuggestions {
+  margin-bottom: 1.5rem;
+  padding: 1.25rem;
+  border-radius: 8px;
+}
+
+.conceptDefinition {
+  background: rgba(59, 130, 246, 0.05);
+  border-left: 4px solid #3b82f6;
+}
+
+.conceptSummary {
+  background: rgba(250, 188, 96, 0.08);
+  border-left: 4px solid #FABC60;
+}
+
+.conceptTeaching {
+  background: rgba(139, 92, 246, 0.05);
+  border-left: 4px solid #8b5cf6;
+}
+
+.conceptVisual {
+  background: #f8fafc;
+  border: 2px solid #e5e7eb;
+  text-align: center;
+}
+
+.teachingSuggestions {
+  background: rgba(16, 185, 129, 0.05);
+  border-left: 4px solid #10b981;
+}
+
+.conceptCardBody h4 {
+  margin: 0 0 0.75rem 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.conceptCardBody p {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.7;
+  color: #334155;
+}
+
+.conceptVisual img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  margin: 1rem 0;
+}
+
+.imageNote {
+  font-size: 0.9rem !important;
+  font-style: italic;
+  color: #64748b !important;
+  margin-top: 0.5rem !important;
+}
+
+.teachingSuggestions ul {
+  margin: 0;
+  padding-left: 1.5rem;
+}
+
+.teachingSuggestions li {
+  margin-bottom: 0.5rem;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: #334155;
+}
+
+.practiceBox {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.05), rgba(5, 150, 105, 0.08));
+  border-left: 4px solid #10b981;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-top: 1rem;
+}
+
+.teachingNote {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background: rgba(250, 188, 96, 0.08);
+  border-radius: 6px;
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+.summaryList {
+  list-style: none;
+  padding: 0;
+}
+
+.summaryList li {
+  padding: 0.75rem 0;
+  border-bottom: 1px solid #e5e7eb;
+  font-size: 1.05rem;
+  line-height: 1.7;
+}
+
+.summaryList li:last-child {
+  border-bottom: none;
+}
+
+.teachingList {
+  list-style: none;
+  padding: 0;
+}
+
+.teachingList li {
+  padding: 0.75rem 0 0.75rem 1.5rem;
+  position: relative;
+  font-size: 1.05rem;
+  line-height: 1.7;
+}
+
+.teachingList li::before {
+  content: "✓";
+  position: absolute;
+  left: 0;
+  color: #10b981;
+  font-weight: bold;
+}
+
+/* ========================================
+   ASSESSMENT INFO STYLES
+======================================== */
+
+.assessmentInfo {
+  max-width: 900px;
+  margin: 2rem auto;
+  padding: 0;
+}
+
+.assessmentBanner {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.05));
+  border: 2px solid rgba(99, 102, 241, 0.3);
+  border-radius: 12px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+}
+
+.assessmentBanner h2 {
+  color: #6366f1;
+  margin: 0 0 1rem 0;
+  font-size: 1.75rem;
+}
+
+.assessmentDialogue {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.assessmentDialogue h3 {
+  color: #1e293b;
+  margin: 0 0 1.5rem 0;
+  font-size: 1.4rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 2px solid rgba(99, 102, 241, 0.2);
+}
+
+.assessmentNote {
+  background: rgba(250, 188, 96, 0.08);
+  border-left: 4px solid #FABC60;
+  border-radius: 6px;
+  padding: 1.25rem;
+  font-size: 1rem;
+  line-height: 1.7;
+}
+
+.reviewerContent {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 2rem 0;
+}
+
+.reviewerIntro {
+  margin-bottom: 3rem;
+  padding: 1.5rem;
+  background: linear-gradient(135deg, rgba(250, 188, 96, 0.08), rgba(250, 188, 96, 0.03));
+  border-left: 4px solid #FABC60;
+  border-radius: 8px;
+}
+
+.reviewerSection {
+  margin-bottom: 3.5rem;
+  padding: 2rem;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  border: 1px solid #e5e7eb;
+}
+
+.reviewerHeader {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid rgba(250, 188, 96, 0.2);
+}
+
+.reviewerNumber {
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(135deg, #FABC60, #E8A83B);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+.reviewerHeader h2 {
+  font-size: 1.75rem;
+  color: #1e293b;
+  margin: 0;
+  font-weight: 700;
+}
+
+.reviewerBody {
+  margin-top: 1.5rem;
+}
+
+.reviewerDescription {
+  margin-bottom: 1.5rem;
+}
+
+.definitionBox {
+  background: rgba(250, 188, 96, 0.08);
+  border: 2px solid rgba(250, 188, 96, 0.3);
+  border-radius: 8px;
+  padding: 1.25rem;
+  margin: 1.5rem 0;
+}
+
+.definitionBox h4 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1rem;
+}
+
+.conceptImage {
+  margin: 1.5rem 0;
+  text-align: center;
+}
+
+.keyTakeaway {
+  margin-top: 1.5rem;
+  padding: 1rem 1.25rem;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.08), rgba(96, 165, 250, 0.05));
+  border-left: 4px solid #3b82f6;
+  border-radius: 6px;
+  font-size: 1rem;
+  line-height: 1.7;
+  color: #1e293b;
+}
+
+/* ========================================
    RESPONSIVE DESIGN
 ======================================== */
 
@@ -589,4 +997,96 @@
   .chapterTitleSection h1 {
     font-size: 1.75rem;
   }
+
+  .reviewerContent {
+    padding: 1rem 0;
+  }
+
+  .reviewerSection {
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .reviewerHeader h2 {
+    font-size: 1.4rem;
+  }
+}
+
+/* ========================================
+   LESSON CONTENT STYLES
+======================================== */
+
+.lessonContent {
+  padding: 2rem;
+  background: white;
+  line-height: 1.8;
+  color: #1e293b;
+}
+
+.lessonContent h2 {
+  font-size: 2rem;
+  color: #1e40af;
+  margin-top: 2.5rem;
+  margin-bottom: 1rem;
+  border-bottom: 3px solid #FABC60;
+  padding-bottom: 0.5rem;
+}
+
+.lessonContent h2:first-child {
+  margin-top: 0;
+}
+
+.lessonContent h3 {
+  font-size: 1.5rem;
+  color: #1e40af;
+  margin-top: 2rem;
+  margin-bottom: 0.75rem;
+}
+
+.lessonContent h4 {
+  font-size: 1.25rem;
+  color: #2563eb;
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.lessonContent p {
+  margin-bottom: 1rem;
+  font-size: 1.05rem;
+}
+
+.lessonContent strong {
+  color: #1e40af;
+  font-weight: 600;
+}
+
+.lessonContent em {
+  color: #64748b;
+  font-style: italic;
+}
+
+.lessonContent ul, .lessonContent ol {
+  margin-left: 2rem;
+  margin-bottom: 1.5rem;
+}
+
+.lessonContent li {
+  margin-bottom: 0.75rem;
+  font-size: 1.05rem;
+}
+
+.lessonContent ul li {
+  list-style-type: disc;
+}
+
+.lessonContent ol li {
+  list-style-type: decimal;
+}
+
+.lessonContent ul ul,
+.lessonContent ol ul,
+.lessonContent ul ol,
+.lessonContent ol ol {
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
 }

@@ -352,16 +352,26 @@ class UserRepo extends BaseRepo{
     // Get user castle progress with details
     async getUserCastleProgress(userId) {
         try {
+            console.log('🏰 getUserCastleProgress called for userId:', userId);
+            
             // First, get all castles
             const { data: allCastles, error: castlesError } = await this.supabase
                 .from('castles')
                 .select('id, name, route, unlock_order')
                 .order('unlock_order');
 
-            if (castlesError) throw castlesError;
+            if (castlesError) {
+                console.error('❌ Error fetching castles:', castlesError);
+                throw castlesError;
+            }
+
+            console.log('✅ Found castles in database:', allCastles?.length || 0);
+            if (allCastles && allCastles.length > 0) {
+                console.log('Castle names:', allCastles.map(c => c.name).join(', '));
+            }
 
             if (!allCastles || allCastles.length === 0) {
-                console.log('No castles found in database');
+                console.log('⚠️ No castles found in database');
                 return [];
             }
 
@@ -379,7 +389,15 @@ class UserRepo extends BaseRepo{
                 `)
                 .eq('user_id', userId);
 
-            if (error) throw error;
+            if (error) {
+                console.error('❌ Error fetching user progress:', error);
+                throw error;
+            }
+            
+            console.log('✅ User has progress for', userProgress?.length || 0, 'castles');
+            if (userProgress && userProgress.length > 0) {
+                console.log('Progress castle IDs:', userProgress.map(p => p.castle_id).join(', '));
+            }
 
             // Create a map of user progress by castle_id
             const progressMap = new Map();

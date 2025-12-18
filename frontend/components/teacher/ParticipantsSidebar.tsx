@@ -8,6 +8,7 @@ export default function ParticipantsSidebar({
     participants, 
     activeCount = 0,
     activeParticipantIds = new Set(),
+    roomId,
     onInviteParticipants,
     onKickParticipant 
 }: ParticipantsSidebarProps) {
@@ -15,8 +16,9 @@ export default function ParticipantsSidebar({
     const handlePrintProgress = (participant: any) => {
         // Open student progress in new window for printing
         const userId = participant.user_id || participant.id;
-        // Note: This should be updated to pass roomId when available
-        // window.open(`/teacher/records/${roomId}/student/${userId}`, '_blank');
+        if (roomId && userId) {
+            window.open(`/teacher/records/${roomId}/student/${userId}`, '_blank');
+        }
     };
     
     return (

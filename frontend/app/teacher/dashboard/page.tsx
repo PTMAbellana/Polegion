@@ -165,32 +165,6 @@ export default function TeacherDashboard() {
 
             <button 
               className={teacherStyles.quickActionCard}
-              onClick={() => router.push(TEACHER_ROUTES.WORLD_MAP_HANDBOOK)}
-            >
-              <div className={teacherStyles.quickActionIcon}>
-                <FaFortAwesome />
-              </div>
-              <div className={teacherStyles.quickActionContent}>
-                <h4>World Map</h4>
-                <p>Student adventure view</p>
-              </div>
-            </button>
-
-            <button 
-              className={teacherStyles.quickActionCard}
-              onClick={() => router.push(TEACHER_ROUTES.PRACTICE_HANDBOOK)}
-            >
-              <div className={teacherStyles.quickActionIcon}>
-                <FaBrain />
-              </div>
-              <div className={teacherStyles.quickActionContent}>
-                <h4>Practice</h4>
-                <p>Student practice view</p>
-              </div>
-            </button>
-
-            <button 
-              className={teacherStyles.quickActionCard}
               onClick={() => router.push(TEACHER_ROUTES.RECORDS)}
             >
               <div className={teacherStyles.quickActionIcon}>
@@ -210,7 +184,7 @@ export default function TeacherDashboard() {
                 <FaBook />
               </div>
               <div className={teacherStyles.quickActionContent}>
-                <h4>Castle Viewer</h4>
+                <h4>Castle Handbook</h4>
                 <p>Content reference</p>
               </div>
             </button>

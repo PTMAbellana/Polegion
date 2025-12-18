@@ -50,6 +50,26 @@ export default function AssessmentQuiz({
         setSelectedAnswer(savedAnswer || null);
     }, [currentQuestionIndex, userAnswers]);
 
+    // Keyboard navigation: Arrow keys to move between questions
+    React.useEffect(() => {
+        const handleKeyDown = (event: KeyboardEvent) => {
+            if (event.key === 'ArrowLeft') {
+                event.preventDefault();
+                if (currentQuestionIndex > 0) {
+                    onNavigate(currentQuestionIndex - 1);
+                }
+            } else if (event.key === 'ArrowRight') {
+                event.preventDefault();
+                if (currentQuestionIndex < questions.length - 1) {
+                    onNavigate(currentQuestionIndex + 1);
+                }
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [currentQuestionIndex, questions.length, onNavigate]);
+
     if (!questions || questions.length === 0 || currentQuestionIndex >= questions.length) {
         return (
             <div className={styles['quiz-error']}>

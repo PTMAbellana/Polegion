@@ -57,6 +57,9 @@ export default function StudentProgressReport({ params }: { params: Promise<{ us
         setError(null)
         
         const response = await getStudentProgress(userId)
+        console.log('📊 Student Progress API Response:', response);
+        console.log('🏰 Castles data:', response.data?.castles);
+        console.log('🏰 Castles length:', response.data?.castles?.length);
         
         if (response.success && response.data) {
           setProgress(response.data)
@@ -88,6 +91,10 @@ export default function StudentProgressReport({ params }: { params: Promise<{ us
   const filteredCompetitions = progress && roomId 
     ? progress.competitions.filter(comp => comp.room_id === parseInt(roomId))
     : progress?.competitions || []
+
+  console.log('🎨 Render state - progress:', progress);
+  console.log('🎨 Render state - progress.castles:', progress?.castles);
+  console.log('🎨 Render state - castles length:', progress?.castles?.length);
 
   return (
     <LoadingOverlay isLoading={loading}>
@@ -201,6 +208,7 @@ export default function StudentProgressReport({ params }: { params: Promise<{ us
                   }}>
                     Castle Progress
                   </h2>
+                  {progress.castles && progress.castles.length > 0 ? (
                   <div style={{
                     background: 'rgba(250, 188, 96, 0.05)',
                     borderRadius: '1rem',
@@ -259,6 +267,18 @@ export default function StudentProgressReport({ params }: { params: Promise<{ us
                       </tbody>
                     </table>
                   </div>
+                  ) : (
+                    <div style={{
+                      background: 'rgba(250, 188, 96, 0.05)',
+                      borderRadius: '1rem',
+                      padding: '2rem',
+                      border: '1px solid rgba(250, 188, 96, 0.2)',
+                      textAlign: 'center',
+                      color: 'rgba(255, 255, 255, 0.6)'
+                    }}>
+                      <p>This student hasn't started the worldmap journey yet.</p>
+                    </div>
+                  )}
                 </section>
 
                 {/* Competition History Section */}
