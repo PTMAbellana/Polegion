@@ -83,15 +83,19 @@ export function useSubmissionViewer(competitionProblems: CompetitionProblem[], p
         const response = await getSubmissionsByProblem(competitionProblemId);
         console.log('📊 [useSubmissionViewer] API response:', {
           success: response.success,
-          submissionCount: response.data?.length || 0,
-          submissions: response.data?.map((s: any) => ({
+          data: response.data,
+          dataType: typeof response.data,
+          isArray: Array.isArray(response.data),
+          submissionCount: Array.isArray(response.data) ? response.data.length : 0
+        });
+        
+        if (response.success && response.data && Array.isArray(response.data)) {
+          console.log('📊 [useSubmissionViewer] Submissions:', response.data.map((s: any) => ({
             id: s.id,
             user_id: s.user_id,
             full_name: s.full_name
-          }))
-        });
-        
-        if (response.success && response.data) {
+          })));
+          
           // Find submission for the selected participant
           const userSubmission = response.data.find(
             (sub: any) => {
@@ -109,7 +113,7 @@ export function useSubmissionViewer(competitionProblems: CompetitionProblem[], p
           console.log(userSubmission ? '✅ [useSubmissionViewer] Found submission!' : '⚠️ [useSubmissionViewer] No matching submission found');
           setSubmission(userSubmission || null);
         } else {
-          console.log('⚠️ [useSubmissionViewer] API request failed or no data');
+          console.log('⚠️ [useSubmissionViewer] API request failed, no data, or data is not an array');
           setSubmission(null);
         }
       } catch (error) {

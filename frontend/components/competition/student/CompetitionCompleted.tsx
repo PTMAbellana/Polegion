@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { CompetitionParticipant } from '@/types/common/competition'
 import styles from '@/styles/competition-student.module.css'
 import { safeNumber } from '@/utils/numberFormat'
@@ -8,6 +9,8 @@ interface CompetitionCompletedProps {
   formattedTime: string
   participants: CompetitionParticipant[]
   onRefresh?: () => void
+  roomId?: string
+  roomCode?: string
 }
 
 // Confetti component for celebration effect
@@ -44,8 +47,11 @@ export default function CompetitionCompleted({
   competitionTitle,
   formattedTime,
   participants,
-  onRefresh
+  onRefresh,
+  roomId,
+  roomCode
 }: CompetitionCompletedProps) {
+  const router = useRouter()
   const [showConfetti, setShowConfetti] = useState(true)
   
   const sortedParticipants = [...participants].sort((a, b) => b.accumulated_xp - a.accumulated_xp)
@@ -60,6 +66,43 @@ export default function CompetitionCompleted({
   return (
     <div className={styles.completedSection}>
       {showConfetti && <Confetti />}
+      
+      {/* Back to Room Button - Top Left */}
+      {roomCode && (
+        <button 
+          onClick={() => router.push(`/student/joined-rooms/${roomCode}`)}
+          style={{
+            position: 'absolute',
+            top: '1.5rem',
+            left: '1.5rem',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            padding: '0.75rem 1.25rem',
+            background: 'linear-gradient(135deg, #22c55e, #16a34a)',
+            color: 'white',
+            border: 'none',
+            borderRadius: '12px',
+            fontSize: '0.95rem',
+            fontWeight: '600',
+            cursor: 'pointer',
+            transition: 'all 0.3s ease',
+            boxShadow: '0 4px 12px rgba(34, 197, 94, 0.3)',
+            zIndex: 10
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = 'translateY(-2px)';
+            e.currentTarget.style.boxShadow = '0 6px 20px rgba(34, 197, 94, 0.4)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = 'translateY(0)';
+            e.currentTarget.style.boxShadow = '0 4px 12px rgba(34, 197, 94, 0.3)';
+          }}
+        >
+          <span>←</span>
+          <span>Back to Room</span>
+        </button>
+      )}
       
       <div className={styles.completedContent}>
         {/* Trophy Animation */}

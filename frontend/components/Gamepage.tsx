@@ -64,6 +64,7 @@ export default function Gamepage({
   roomId,
   userAccumulatedXP = 0
 }: GamepageProps) {
+  const router = useRouter();
   const { userProfile } = useAuthStore();  // Basic state management (removed old drag/resize states)
   const [problems, setProblems] = useState<Problem[]>([]);
   const [problemId, setProblemId] = useState<string | null>(null);
@@ -896,6 +897,38 @@ export default function Gamepage({
           userName={userProfile?.first_name}
           subtitle={`Problem ${(activeCompetition.current_problem_index || 0) + 1} of ${activeCompetition.total_problems || activeCompetition.problem_count || 0}`}
           showAvatar={true}
+          actionButton={
+            roomCode && (
+              <button
+                onClick={() => router.push(`/student/joined-rooms/${roomCode}`)}
+                style={{
+                  padding: '0.625rem 1.25rem',
+                  backgroundColor: '#22c55e',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '0.5rem',
+                  fontSize: '0.875rem',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = '#16a34a';
+                  e.currentTarget.style.transform = 'translateY(-2px)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = '#22c55e';
+                  e.currentTarget.style.transform = 'translateY(0)';
+                }}
+              >
+                <span>←</span>
+                <span>Back to Room</span>
+              </button>
+            )
+          }
         />
       ) : (
         <PageHeader

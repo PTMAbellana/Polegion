@@ -189,6 +189,44 @@ class UserRepo extends BaseRepo{
             if (error) {
                 throw new Error('Failed to create user profile: ' + error.message)
             }
+            
+            // Initialize Castle 0 progress for new users
+            try {
+                console.log('🏰 Initializing Castle 0 for new user:', userId);
+                
+                // Get Castle 0 (unlock_order = 0)
+                const { data: castle0, error: castleError } = await this.supabase
+                    .from('castles')
+                    .select('id')
+                    .eq('unlock_order', 0)
+                    .single();
+                
+                if (castleError) {
+                    console.error('⚠️ Could not find Castle 0:', castleError.message);
+                } else if (castle0) {
+                    // Create user_castle_progress entry for Castle 0
+                    const { error: progressError } = await this.supabase
+                        .from('user_castle_progress')
+                        .insert({
+                            user_id: userId,
+                            castle_id: castle0.id,
+                            unlocked: true,
+                            completed: false,
+                            completion_percentage: 0,
+                            total_xp_earned: 0
+                        });
+                    
+                    if (progressError) {
+                        console.error('⚠️ Could not create Castle 0 progress:', progressError.message);
+                    } else {
+                        console.log('✅ Castle 0 unlocked for new user');
+                    }
+                }
+            } catch (initError) {
+                // Don't fail user creation if castle initialization fails
+                console.error('⚠️ Error initializing Castle 0, but user created successfully:', initError.message);
+            }
+            
             return data
         } catch (error) {
             throw error

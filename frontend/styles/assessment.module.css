@@ -254,23 +254,7 @@
     letter-spacing: 0.02em;
 }
 
-.dialogue-button::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 0;
-    height: 0;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.3);
-    transform: translate(-50%, -50%);
-    transition: width 0.6s, height 0.6s;
-}
 
-.dialogue-button:hover::before {
-    width: 300px;
-    height: 300px;
-}
 
 .dialogue-hint {
     font-size: 0.875rem;
@@ -805,23 +789,7 @@
     margin-top: 0.5rem;
 }
 
-.start-button::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 0;
-    height: 0;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.3);
-    transform: translate(-50%, -50%);
-    transition: width 0.6s, height 0.6s;
-}
 
-.start-button:hover::before {
-    width: 300px;
-    height: 300px;
-}
 
 .start-button:hover {
     transform: translateY(-3px) scale(1.02);

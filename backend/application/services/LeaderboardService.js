@@ -15,10 +15,18 @@ class LeaderboardService {
         console.log('Invalidated room leaderboard cache:', roomId);
     }
 
-    _invalidateCompetitionLeaderboardCache(roomId) {
-        const compeBoardKey = cache.generateKey('competition_leaderboard', roomId);
-        cache.delete(compeBoardKey);
-        console.log('Invalidated competition leaderboard cache:', roomId);
+    _invalidateCompetitionLeaderboardCache(roomId, competitionId = null) {
+        // Clear the 'all competitions' cache
+        const compeBoardKeyAll = cache.generateKey('competition_leaderboard', roomId, 'all');
+        cache.delete(compeBoardKeyAll);
+        console.log('Invalidated competition leaderboard cache (all):', roomId);
+        
+        // If specific competition provided, clear that too
+        if (competitionId) {
+            const compeBoardKeySpecific = cache.generateKey('competition_leaderboard', roomId, competitionId);
+            cache.delete(compeBoardKeySpecific);
+            console.log('Invalidated competition leaderboard cache (specific):', roomId, competitionId);
+        }
     }
 
     async getRoomBoard (room_id) {
@@ -129,6 +137,8 @@ class LeaderboardService {
 
             const result = Object.values(grouped);
             
+            console.log('📊 [LeaderboardService] Returning leaderboard result:', JSON.stringify(result, null, 2));
+            
             // Cache the result
             cache.set(cacheKey, result);
             console.log('Cache miss: getCompeBoard', room_id);
@@ -206,15 +216,18 @@ class LeaderboardService {
         
         // Invalidate both caches
         this._invalidateRoomLeaderboardCache(roomId);
-        this._invalidateCompetitionLeaderboardCache(roomId);
+        this._invalidateCompetitionLeaderboardCache(roomId, competitionId);
     }
 
     async updateCompetitionLeaderboard(roomParticipantId, competitionId, xpGained) {
+        console.log(`💎 [updateCompetitionLeaderboard] Updating XP for participant ${roomParticipantId}, competition ${competitionId}, xp_gained: ${xpGained}`);
         const existing = await this.leaderRepo.getRawCompeBoard(competitionId, roomParticipantId);
         
         if (existing) {
+            console.log(`💎 [updateCompetitionLeaderboard] Found existing entry with accumulated_xp: ${existing.accumulated_xp}, new total: ${existing.accumulated_xp + xpGained}`);
             await this.leaderRepo.updateCompeBoard(competitionId, roomParticipantId, existing.accumulated_xp + xpGained);
         } else {
+            console.log(`💎 [updateCompetitionLeaderboard] No existing entry, creating new with xp: ${xpGained}`);
             await this.leaderRepo.addCompeBoard(competitionId, roomParticipantId);
             await this.leaderRepo.updateCompeBoard(competitionId, roomParticipantId, xpGained);
         }

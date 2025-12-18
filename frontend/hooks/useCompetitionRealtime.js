@@ -245,7 +245,7 @@ export const useCompetitionRealtime = (competitionId, isLoading, roomId = '', us
           console.log('✅ [DBSubscription] Successfully subscribed to database changes');
           console.log('✅ [DBSubscription] Listening for changes on room_participants where room_id =', stableRoomId);
         } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
-          console.error(`❌ [DBSubscription] Failed to connect:`, status);
+          console.warn(`⚠️ [DBSubscription] Connection issue:`, status);
           setConnectionStatus(status === 'CHANNEL_ERROR' ? 'ERROR' : 'TIMEOUT');
           setIsConnected(false);
         }

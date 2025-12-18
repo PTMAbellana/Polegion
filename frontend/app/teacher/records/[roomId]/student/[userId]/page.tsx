@@ -58,10 +58,18 @@ export default function StudentProgressReport({ params }: { params: Promise<{ us
         
         const response = await getStudentProgress(userId)
         console.log('📊 Student Progress API Response:', response);
+        console.log('📊 Full response object:', JSON.stringify(response, null, 2));
         console.log('🏰 Castles data:', response.data?.castles);
         console.log('🏰 Castles length:', response.data?.castles?.length);
+        console.log('🏰 Castles is array?:', Array.isArray(response.data?.castles));
         
         if (response.success && response.data) {
+          // Ensure castles is always an array
+          if (!response.data.castles || !Array.isArray(response.data.castles)) {
+            console.warn('⚠️ Castles data is missing or not an array, setting to empty array');
+            response.data.castles = [];
+          }
+          console.log('✅ Setting progress with', response.data.castles.length, 'castles');
           setProgress(response.data)
         } else {
           setError(response.error || 'Failed to load student progress')

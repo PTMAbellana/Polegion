@@ -188,6 +188,8 @@ function PlayPageContent({ competitionId }: { competitionId: number }) {
         formattedTime={formattedTime}
         participants={participants}
         onRefresh={() => window.location.reload()}
+        roomId={roomId}
+        roomCode={roomCode}
       />
     );
   }
