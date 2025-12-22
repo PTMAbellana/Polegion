@@ -191,16 +191,33 @@ export const getProblemLeaderboard = async(problem_id, limit = 50) => {
 
 export const submitProblemAttempt = async(problem_id, solution) => {
   try {
+    console.log('📤 Submitting problem attempt:', {
+      problem_id,
+      shapes_count: solution?.shapes?.length,
+      time_spent: solution?.time_spent
+    });
+    
     const res = await api.post(`/problems/${problem_id}/attempt`, { solution });
+    
+    console.log('✅ Submission successful:', res.data);
+    
     return {
       success: true,
       data: res.data.data
     };
   } catch (error) {
+    console.error('❌ Submission failed:', {
+      status: error.response?.status,
+      message: error.response?.data?.message,
+      error: error.response?.data?.error,
+      fullError: error
+    });
+    
     return {
       success: false,
       message: error.response?.data?.message || 'Failed to submit attempt',
-      error: error.response?.data?.error || error.message
+      error: error.response?.data?.error || error.message,
+      status: error.response?.status
     };
   }
 };

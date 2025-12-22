@@ -100,7 +100,9 @@ function PlayPageContent({ competitionId }: { competitionId: number }) {
           <div className={styles.headerContent}>
             <h1 className={styles.title}>Connection Error</h1>
             <p className={styles.status} style={{ color: '#dc2626', marginTop: '1rem' }}>
-              {realtimeError.message || 'Failed to connect to competition'}
+              {typeof realtimeError === 'object' && realtimeError !== null && 'message' in realtimeError
+                ? (realtimeError as { message?: string }).message
+                : 'Failed to connect to competition'}
             </p>
             <button 
               onClick={() => window.location.reload()}

@@ -279,12 +279,39 @@ export default function SolveProblemPage({ params }: { params: Promise<{ roomCod
           }
         });
       } else {
-        Swal.fire('Error', response.message || 'Failed to submit solution', 'error');
+        // More detailed error messages
+        console.error('❌ Submission failed:', response);
+        
+        let errorTitle = 'Submission Failed';
+        let errorMessage = response.message || 'Failed to submit solution';
+        
+        // Handle specific error cases
+        if (response.message?.includes('not public')) {
+          errorTitle = 'Problem Not Available';
+          errorMessage = 'This problem is not available for submissions.';
+        } else if (response.message?.includes('not a participant')) {
+          errorTitle = 'Access Denied';
+          errorMessage = 'You are not a participant in this room.';
+        } else if (response.error) {
+          errorMessage = `${errorMessage}\n\nDetails: ${response.error}`;
+        }
+        
+        Swal.fire(errorTitle, errorMessage, 'error');
         setTimerRunning(true); // Resume timer
       }
     } catch (error) {
-      console.error('Submission error:', error);
-      Swal.fire('Error', 'An error occurred while submitting your solution', 'error');
+      console.error('❌ Submission error:', error);
+      
+      // Log more details for debugging
+      console.error('Problem ID:', problemId);
+      console.error('Room Code:', roomCode);
+      console.error('Shapes submitted:', shapes.length);
+      
+      Swal.fire(
+        'Error', 
+        'An error occurred while submitting your solution. Please check your internet connection and try again.', 
+        'error'
+      );
       setTimerRunning(true); // Resume timer
     } finally {
       setSubmitting(false);
