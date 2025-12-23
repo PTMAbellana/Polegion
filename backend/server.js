@@ -7,12 +7,9 @@ require('dotenv').config()
 const {
     authRoutes, 
     userRoutes, 
-    roomRoutes,
     participantRoutes, 
     problemRoutes,
-    leaderboardRoutes,
     attemptsRoutes,
-    competitionRoutes,
     castleRoutes,          // Newly Added
     chapterQuizRoutes,     // Newly Added
     chapterRoutes,         // Newly Added
@@ -93,13 +90,10 @@ if (process.env.NODE_ENV === 'production' && process.env.BACKEND_URL) {
 
 //routes
 app.use('/api/auth', authRoutes)
-app.use('/api/rooms', roomRoutes)
 app.use('/api/users', userRoutes)
 app.use('/api/participants', participantRoutes)
 app.use('/api/problems', problemRoutes)
-app.use('/api/leaderboards', leaderboardRoutes)
 app.use('/api/attempts', attemptsRoutes)
-app.use('/api/competitions', competitionRoutes)
 app.use('/api/castles', castleRoutes)                     // Newly Added
 app.use('/api/chapter-quizzes', chapterQuizRoutes)        // Newly Added
 app.use('/api/chapters', chapterRoutes)                   // Newly Added

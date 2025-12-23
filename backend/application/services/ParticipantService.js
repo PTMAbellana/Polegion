@@ -1,4 +1,4 @@
-const Mailer = require('../../utils/Mailer');
+// const Mailer = require('../../utils/Mailer'); // Removed for research
 const cache = require('../cache');
 const participantModel = require('../../domain/models/Participant');
 
@@ -335,7 +335,8 @@ class ParticipantService {
             },
         }
         try {
-            await Mailer.sendMail(mailOptions);
+            // await Mailer.sendMail(mailOptions); // Removed for research
+            console.log('Email sending disabled for research');
         } catch (error) {
             throw error
         }
