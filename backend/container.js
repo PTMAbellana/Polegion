@@ -17,6 +17,7 @@ const UserChapterProgressRepository = require('./infrastructure/repository/UserC
 const UserMinigameAttemptRepository = require('./infrastructure/repository/UserMinigameAttemptRepo');
 const UserQuizAttemptRepository = require('./infrastructure/repository/UserQuizAttemptRepo');
 const AssessmentRepository = require('./infrastructure/repository/AssessmentRepo');
+const AdaptiveLearningRepository = require('./infrastructure/repository/AdaptiveLearningRepo');
 
 
 // Import services
@@ -41,6 +42,7 @@ const UserQuizAttemptService = require('./application/services/UserQuizAttemptSe
 const ChapterSeeder = require('./application/services/ChapterSeeder');
 const QuizAndMinigameSeeder = require('./application/services/QuizAndMinigameSeeder');
 const AssessmentService = require('./application/services/AssessmentService');
+const AdaptiveLearningService = require('./application/services/AdaptiveLearningService');
 
 // Import controllers
 const AuthController = require('./presentation/controllers/AuthController');
@@ -59,6 +61,7 @@ const UserChapterProgressController = require('./presentation/controllers/UserCh
 const UserMinigameAttemptController = require('./presentation/controllers/UserMinigameAttemptController');
 const UserQuizAttemptController = require('./presentation/controllers/UserQuizAttemptController');
 const AssessmentController = require('./presentation/controllers/AssessmentController');
+const AdaptiveLearningController = require('./presentation/controllers/AdaptiveLearningController');
 
 // Import middleware
 const AuthMiddleware = require('./presentation/middleware/AuthMiddleware');
@@ -80,6 +83,7 @@ const UserChapterProgressRoutes = require('./presentation/routes/UserChapterProg
 const UserMinigameAttemptRoutes = require('./presentation/routes/UserMinigameAttemptRoutes');
 const UserQuizAttemptRoutes = require('./presentation/routes/UserQuizAttemptRoutes');
 const AssessmentRoutes = require('./presentation/routes/AssessmentRoutes');
+const AdaptiveLearningRoutes = require('./presentation/routes/AdaptiveLearningRoutes');
 
 // Import services registry
 const servicesRegistry = require('./application/services');
@@ -101,6 +105,7 @@ const userChapterProgressRepository = new UserChapterProgressRepository(supabase
 const userMinigameAttemptRepository = new UserMinigameAttemptRepository(supabase);
 const userQuizAttemptRepository = new UserQuizAttemptRepository(supabase);
 const assessmentRepository = new AssessmentRepository(supabase);
+const adaptiveLearningRepository = new AdaptiveLearningRepository(supabase);
 
 // Initialize services
 const authService = new AuthService(userRepository, supabase);
@@ -137,6 +142,7 @@ const userChapterProgressService = new UserChapterProgressService(userChapterPro
 const userMinigameAttemptService = new UserMinigameAttemptService(userMinigameAttemptRepository, minigameService, xpService, leaderboardService);
 const userQuizAttemptService = new UserQuizAttemptService(userQuizAttemptRepository, chapterQuizService, xpService, leaderboardService);
 const assessmentService = new AssessmentService(assessmentRepository, userCastleProgressRepository, chapterRepository, userChapterProgressRepository);
+const adaptiveLearningService = new AdaptiveLearningService(adaptiveLearningRepository);
 
 // Register all services in the registry 🚀
 servicesRegistry.registerServices({
@@ -156,7 +162,8 @@ servicesRegistry.registerServices({
     userChapterProgressService,
     userMinigameAttemptService,
     userQuizAttemptService,
-    assessmentService
+    assessmentService,
+    adaptiveLearningService
 });
 
 // Initialize middleware
@@ -180,6 +187,7 @@ const userChapterProgressController = new UserChapterProgressController(userChap
 const userMinigameAttemptController = new UserMinigameAttemptController(userMinigameAttemptService);
 const userQuizAttemptController = new UserQuizAttemptController(userQuizAttemptService);
 const assessmentController = new AssessmentController(assessmentService);
+const adaptiveLearningController = new AdaptiveLearningController(adaptiveLearningService);
 
 // Initialize routes
 const authRoutes = new AuthRoutes(authController);
@@ -199,6 +207,7 @@ const userChapterProgressRoutes = new UserChapterProgressRoutes(userChapterProgr
 const userMinigameAttemptRoutes = new UserMinigameAttemptRoutes(userMinigameAttemptController, authMiddleware);
 const userQuizAttemptRoutes = new UserQuizAttemptRoutes(userQuizAttemptController, authMiddleware);
 const assessmentRoutes = new AssessmentRoutes(assessmentController, authMiddleware);
+const adaptiveLearningRoutes = new AdaptiveLearningRoutes(adaptiveLearningController, authMiddleware);
 
 module.exports = {
   authRoutes: authRoutes.getRouter(),
@@ -217,6 +226,7 @@ module.exports = {
   userMinigameAttemptRoutes: userMinigameAttemptRoutes.getRouter(),
   userQuizAttemptRoutes: userQuizAttemptRoutes.getRouter(),
   assessmentRoutes: assessmentRoutes.getRouter(),
+  adaptiveLearningRoutes: adaptiveLearningRoutes.getRouter(),
 
   // services (for testing or other uses)
   services: servicesRegistry.getServices()

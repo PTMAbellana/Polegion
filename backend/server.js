@@ -18,7 +18,8 @@ const {
     userChapterProgressRoutes, // Newly Added
     userMinigameAttemptRoutes, // Newly Added
     userQuizAttemptRoutes,      // Newly Added
-    assessmentRoutes           // Assessment system
+    assessmentRoutes,           // Assessment system
+    adaptiveLearningRoutes      // Adaptive learning research
 } = require('./container')
 
 const app = express()
@@ -103,6 +104,7 @@ app.use('/api/user-chapter-progress', userChapterProgressRoutes) // Newly Added
 app.use('/api/user-minigame-attempts', userMinigameAttemptRoutes) // Newly Added
 app.use('/api/user-quiz-attempts', userQuizAttemptRoutes)       // Newly Added
 app.use('/api/assessments', assessmentRoutes)                   // Assessment system
+app.use('/api/adaptive', adaptiveLearningRoutes)                // Adaptive learning research
 //swagger documentation
 app.use('/api-docs', swaggerServe, swaggerSetup)
 
