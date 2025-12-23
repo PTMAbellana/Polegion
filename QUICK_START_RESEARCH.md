@@ -55,20 +55,20 @@ git push origin research-adaptive-learning-mdp
 ## 📅 2-Week Timeline (3-Person Team)
 
 **Team Members:** 3 people  
-**Your Absence:** Dec 25-29 (5 days)
+**Note:** One member absent Dec 25-29 (5 days)
 
-| Days | Phase | Who | What to Do |
-|------|-------|-----|------------|
-| **Day 1-2** (Dec 22-23) | ✅ Feature Removal | All | Run cleanup script, test basic functionality |
-| **Day 3-4** (Dec 24-25) | Database Setup | **Member 2** | Create tables, add difficulty to questions |
-| **Day 5-6** (Dec 26-27) | Backend Service | **Member 3** | Build AdaptiveLearningService.js |
-| **Day 7** (Dec 28) | Backend API | **Member 2+3** | Create controllers/routes, test with Postman |
-| **Day 8** (Dec 29) | Integration Test | **You return** | Verify backend works end-to-end |
-| **Day 9-10** (Dec 30-31) | Simple Frontend | **All** | Basic /adaptive page, question display |
-| **Day 11** (Jan 1) | Connect UI | **All** | Wire frontend to backend API |
-| **Day 12** (Jan 2) | User Testing | **All** | Test with 5+ users, collect data |
-| **Day 13-14** (Jan 3-4) | Documentation | **All** | Write research paper, analyze results |
-| **Jan 5** | **Deadline** | **All** | Submit research |
+| Days | Phase | What to Do |
+|------|-------|------------|
+| **Day 1-2** (Dec 22-23) | ✅ Feature Removal | Run cleanup script, test basic functionality |
+| **Day 3-4** (Dec 24-25) | Database Setup | Create tables, add difficulty to questions |
+| **Day 5-6** (Dec 26-27) | Backend Service | Build AdaptiveLearningService.js |
+| **Day 7** (Dec 28) | Backend API | Create controllers/routes, test with Postman |
+| **Day 8** (Dec 29) | Integration Test | Verify backend works end-to-end |
+| **Day 9-10** (Dec 30-31) | Simple Frontend | Basic /adaptive page, question display |
+| **Day 11** (Jan 1) | Connect UI | Wire frontend to backend API |
+| **Day 12** (Jan 2) | User Testing | Test with 5+ users, collect data |
+| **Day 13-14** (Jan 3-4) | Documentation | Write research paper, analyze results |
+| **Jan 5** | **Deadline** | Submit research |
 
 ---
 
@@ -473,21 +473,21 @@ SELECT difficulty_level, COUNT(*) FROM questions GROUP BY difficulty_level;
 
 ---
 
-## ✅ What Should Be Done When You Return
+## ✅ What Should Be Done By Dec 29
 
-### Member 2 (Database):
+### Database (Task 1):
 - ✅ SQL schema file created
 - ✅ Tables exist in Supabase
 - ✅ Questions have difficulty ratings
 - ✅ Indexes created
 
-### Member 3 (Backend):
+### Backend (Task 2):
 - ✅ AdaptiveLearningService.js exists
 - ✅ API routes registered in server.js
 - ✅ Can test with Postman
 - ✅ Basic difficulty logic works
 
-### You (Integration):
+### Frontend (Task 3):
 - Build simple UI
 - Connect to backend
 - End-to-end testing
