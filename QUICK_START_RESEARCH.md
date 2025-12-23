@@ -52,18 +52,23 @@ git push origin research-adaptive-learning-mdp
 
 ---
 
-## 📅 2-Week Timeline (Updated for 5-Day Break)
+## 📅 2-Week Timeline (3-Person Team)
 
-| Days | Phase | What to Do |
-|------|-------|------------|
-| **Day 1-2** (Dec 22-23) | ✅ Feature Removal | Run cleanup script, test basic functionality |
-| **Day 3-7** (Dec 24-28) | 🚧 AUTO-BUILD | MDP Backend + Database (Automated Implementation) |
-| **Day 8** (Dec 29) | Testing | Return from break - Test backend with Postman |
-| **Day 9-10** (Dec 30-31) | Simple UI | Basic adaptive interface (no fancy design) |
-| **Day 11** (Jan 1) | Integration | Connect frontend to backend, end-to-end test |
-| **Day 12** (Jan 2) | User Testing | Collect data from 5+ test users |
-| **Day 13-14** (Jan 3-4) | Documentation | Write research paper, analyze results |
-| **Jan 5** | **Deadline** | Submit research |
+**Team Members:** 3 people  
+**Your Absence:** Dec 25-29 (5 days)
+
+| Days | Phase | Who | What to Do |
+|------|-------|-----|------------|
+| **Day 1-2** (Dec 22-23) | ✅ Feature Removal | All | Run cleanup script, test basic functionality |
+| **Day 3-4** (Dec 24-25) | Database Setup | **Member 2** | Create tables, add difficulty to questions |
+| **Day 5-6** (Dec 26-27) | Backend Service | **Member 3** | Build AdaptiveLearningService.js |
+| **Day 7** (Dec 28) | Backend API | **Member 2+3** | Create controllers/routes, test with Postman |
+| **Day 8** (Dec 29) | Integration Test | **You return** | Verify backend works end-to-end |
+| **Day 9-10** (Dec 30-31) | Simple Frontend | **All** | Basic /adaptive page, question display |
+| **Day 11** (Jan 1) | Connect UI | **All** | Wire frontend to backend API |
+| **Day 12** (Jan 2) | User Testing | **All** | Test with 5+ users, collect data |
+| **Day 13-14** (Jan 3-4) | Documentation | **All** | Write research paper, analyze results |
+| **Jan 5** | **Deadline** | **All** | Submit research |
 
 ---
 
@@ -315,42 +320,184 @@ Tomorrow:
 
 ---
 
-## 🚀 Next Steps (After 5-Day Break)
+## � Team Work Distribution (While You're Gone: Dec 25-29)
 
-### When You Return (Dec 29):
+### ⚠️ IMPORTANT: Setup Team Collaboration First
+Before you leave, ensure:
+```powershell
+# Push current work
+git push origin research-adaptive-learning-mdp
 
-**Step 1: Verify Backend**
+# Share branch with team
+# Each member should clone and checkout the research branch
+```
+
+### 📋 Member 2: Database Person (Dec 24-27)
+
+**Tasks:**
+1. Create SQL migration file with 2 tables
+2. Add difficulty levels to existing questions
+3. Test database setup
+
+**Files to create:**
+- `docs/sql/ADAPTIVE_LEARNING_SCHEMA.sql`
+
+**Detailed instructions:** See [RESEARCH_IMPLEMENTATION_PLAN.md](RESEARCH_IMPLEMENTATION_PLAN.md) Phase 3
+
+```powershell
+# Member 2 workflow
+git checkout research-adaptive-learning-mdp
+git pull origin research-adaptive-learning-mdp
+# Create SQL files
+git add docs/sql/ADAPTIVE_LEARNING_SCHEMA.sql
+git commit -m "Add adaptive learning database schema"
+git push origin research-adaptive-learning-mdp
+```
+
+---
+
+### 📋 Member 3: Backend Developer (Dec 26-28)
+
+**Tasks:**
+1. Create `AdaptiveLearningService.js`
+2. Create `AdaptiveLearningController.js`
+3. Create API routes
+4. Test with Postman
+
+**Files to create:**
+- `backend/application/services/AdaptiveLearningService.js`
+- `backend/presentation/controllers/AdaptiveLearningController.js`
+- `backend/presentation/routes/AdaptiveLearningRoutes.js`
+- `backend/infrastructure/repository/AdaptiveLearningRepo.js`
+
+**Detailed instructions:** See [RESEARCH_IMPLEMENTATION_PLAN.md](RESEARCH_IMPLEMENTATION_PLAN.md) Phase 2
+
+```powershell
+# Member 3 workflow
+git checkout research-adaptive-learning-mdp
+git pull origin research-adaptive-learning-mdp
+# Build backend files
+git add backend/
+git commit -m "Implement adaptive learning backend service"
+git push origin research-adaptive-learning-mdp
+```
+
+---
+
+### 📋 You: Integration & Frontend (Dec 29-31)
+
+**When you return Dec 29:**
+1. Pull latest changes
+2. Test backend with Postman
+3. Build simple frontend UI
+4. Connect UI to API
+
+```powershell
+# Your workflow when back
+git checkout research-adaptive-learning-mdp
+git pull origin research-adaptive-learning-mdp
+# Test everything works
+# Build frontend
+git commit -m "Add simple adaptive learning UI"
+git push origin research-adaptive-learning-mdp
+```
+
+---
+
+## 🔄 Daily Team Sync (Async Communication)
+
+**Use GitHub Issues for coordination:**
+
+Create these 3 issues now:
+1. **Issue #1:** "Database Schema for Adaptive Learning" (Assign Member 2)
+2. **Issue #2:** "Backend Service Implementation" (Assign Member 3)
+3. **Issue #3:** "Frontend UI & Integration" (Assign yourself)
+
+**Communication:**
+- Comment progress in issues
+- Push code daily with clear commit messages
+- Tag teammates: `@username need help with X`
+
+## 🚀 When You Return (Dec 29)
+
+### Step 1: Pull Latest Changes
+```powershell
+cd "c:\Users\User\Desktop\BSCS-3\Second Semester\SoftEng\Polegion"
+git checkout research-adaptive-learning-mdp
+git pull origin research-adaptive-learning-mdp
+```
 ```powershell
 cd backend
 node server.js
 # Should see: "Server running on port 5000"
 ```
 
-**Step 2: Test Adaptive API** (Use Postman/Thunder Client)
-```
-POST http://localhost:5000/api/adaptive/assess
-POST http://localhost:5000/api/adaptive/submit-answer
-GET http://localhost:5000/api/adaptive/questions/:chapterId
+### Step 2: Verify Backend (Built by Team)
+```powershell
+cd backend
+node server.js
+# Should see: "Server running on port 5000"
 ```
 
-**Step 3: Check Database Tables**
+### Step 4: Check Database Tables (Created by Member 2)
 ```sql
 SELECT * FROM student_difficulty_levels LIMIT 5;
 SELECT * FROM mdp_state_transitions LIMIT 10;
 SELECT difficulty_level, COUNT(*) FROM questions GROUP BY difficulty_level;
 ```
 
-**Step 4: Build Simple Frontend** (No fancy UI)
+### Step 5: Build Simple Frontend (Your Main Job)
 - Create `/student/adaptive` page
 - Display questions one at a time
 - Show "Correct ✓" or "Wrong ✗"
 - Display difficulty as text: "Level 3/5"
 - Show mastery: "Mastery: 75%"
 
-### What's Already Done:
-- ✅ Day 1-2: Feature removal complete
-- ✅ Day 3-7: Backend + Database implementation (automated)
+---
 
+## 📝 Before You Leave (Dec 24)
+
+**Critical Setup:**
+1. ✅ Push current work to GitHub
+2. ✅ Update this guide with teammate assignments
+3. ✅ Create 3 GitHub Issues (Database, Backend, Frontend)
+4. ✅ Share login credentials for:
+   - Supabase dashboard
+   - GitHub repository
+   - Any API keys needed
+
+**Share with team:**
+- Link to [RESEARCH_IMPLEMENTATION_PLAN.md](RESEARCH_IMPLEMENTATION_PLAN.md)
+- Link to [TEAM_FORK_SETUP.md](TEAM_FORK_SETUP.md)
+- This guide (QUICK_START_RESEARCH.md)
+
+---
+
+## ✅ What Should Be Done When You Return
+
+### Member 2 (Database):
+- ✅ SQL schema file created
+- ✅ Tables exist in Supabase
+- ✅ Questions have difficulty ratings
+- ✅ Indexes created
+
+### Member 3 (Backend):
+- ✅ AdaptiveLearningService.js exists
+- ✅ API routes registered in server.js
+- ✅ Can test with Postman
+- ✅ Basic difficulty logic works
+
+### You (Integration):
+- Build simple UI
+- Connect to backend
+- End-to-end testing
+- User testing coordination
+
+---
+
+**Check `RESEARCH_IMPLEMENTATION_PLAN.md` for detailed code specifications.**
+
+**Team collaboration guide:** [TEAM_FORK_SETUP.md](TEAM_FORK_SETUP.md)
 ### What You'll Do:
 - Day 8: Test backend
 - Day 9-10: Build simple UI
