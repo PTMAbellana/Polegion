@@ -52,17 +52,16 @@ git push origin research-adaptive-learning-mdp
 
 ---
 
-## 📅 2-Week Timeline
+## 📅 2-Week Timeline (Updated for 5-Day Break)
 
 | Days | Phase | What to Do |
 |------|-------|------------|
-| **Day 1-2** (Dec 22-23) | Feature Removal | Run cleanup script, test basic functionality |
-| **Day 3-4** (Dec 24-25) | MDP Backend | Implement adaptive learning service |
-| **Day 5-6** (Dec 26-27) | Database | Add MDP state tracking tables |
-| **Day 7** (Dec 28) | Testing | Test MDP logic with mock data |
-| **Day 8-9** (Dec 29-30) | Frontend UI | Build adaptive assessment interface |
-| **Day 10** (Dec 31) | Integration | Connect frontend to MDP backend |
-| **Day 11-12** (Jan 1-2) | User Testing | Collect data from 10+ test users |
+| **Day 1-2** (Dec 22-23) | ✅ Feature Removal | Run cleanup script, test basic functionality |
+| **Day 3-7** (Dec 24-28) | 🚧 AUTO-BUILD | MDP Backend + Database (Automated Implementation) |
+| **Day 8** (Dec 29) | Testing | Return from break - Test backend with Postman |
+| **Day 9-10** (Dec 30-31) | Simple UI | Basic adaptive interface (no fancy design) |
+| **Day 11** (Jan 1) | Integration | Connect frontend to backend, end-to-end test |
+| **Day 12** (Jan 2) | User Testing | Collect data from 5+ test users |
 | **Day 13-14** (Jan 3-4) | Documentation | Write research paper, analyze results |
 | **Jan 5** | **Deadline** | Submit research |
 
@@ -168,31 +167,34 @@ Repeat...
 
 ## ✅ MVP Features (Must Have by Jan 5)
 
-### Backend
+### Backend (Days 3-7 - Automated)
 - [x] Remove competition/room features
-- [ ] Implement adaptive learning service
-- [ ] Add MDP state tracking
-- [ ] Create difficulty adjustment API
-- [ ] Track performance metrics
+- [ ] Create `AdaptiveLearningService.js` with core logic
+- [ ] Add MDP state tracking repository
+- [ ] Create adaptive API endpoints
+- [ ] Implement difficulty adjustment algorithm
 
-### Frontend
-- [x] Remove teacher/competition pages
-- [ ] Add mastery progress bar
-- [ ] Show current difficulty level
-- [ ] Display adaptive feedback
-- [ ] Visualize learning progress
-
-### Database
+### Database (Days 3-7 - Automated)
 - [ ] Add `student_difficulty_levels` table
-- [ ] Add `mdp_state_transitions` table
-- [ ] Add `difficulty_level` to questions
-- [ ] Create indexes for performance
+- [ ] Add `mdp_state_transitions` table (for research data)
+- [ ] Add `difficulty_level` column to questions
+- [ ] Seed questions with difficulty ratings (1-5)
 
-### Testing
-- [ ] Test with 10+ students
-- [ ] Compare adaptive vs fixed difficulty
-- [ ] Collect performance data
-- [ ] Survey user experience
+### Frontend (Days 9-10 - Simple UI Only)
+- [x] Remove teacher/competition pages
+- [ ] Create `/student/adaptive` route (separate from worldmap)
+- [ ] Basic question display page
+- [ ] Answer submission form
+- [ ] Simple text feedback (correct/wrong)
+- [ ] Difficulty indicator (1-5 stars as text)
+- [ ] Mastery percentage display
+
+### Testing (Days 11-12)
+- [ ] Backend API testing with Postman
+- [ ] Verify difficulty adjustments work
+- [ ] Test with 5+ students
+- [ ] Collect mdp_state_transitions data
+- [ ] Basic performance comparison
 
 ---
 
@@ -313,13 +315,48 @@ Tomorrow:
 
 ---
 
-## 🚀 Ready to Start?
+## 🚀 Next Steps (After 5-Day Break)
 
-Run this command NOW:
+### When You Return (Dec 29):
+
+**Step 1: Verify Backend**
 ```powershell
-.\phase1-remove-features.ps1
+cd backend
+node server.js
+# Should see: "Server running on port 5000"
 ```
 
-Then check `RESEARCH_IMPLEMENTATION_PLAN.md` for detailed instructions.
+**Step 2: Test Adaptive API** (Use Postman/Thunder Client)
+```
+POST http://localhost:5000/api/adaptive/assess
+POST http://localhost:5000/api/adaptive/submit-answer
+GET http://localhost:5000/api/adaptive/questions/:chapterId
+```
+
+**Step 3: Check Database Tables**
+```sql
+SELECT * FROM student_difficulty_levels LIMIT 5;
+SELECT * FROM mdp_state_transitions LIMIT 10;
+SELECT difficulty_level, COUNT(*) FROM questions GROUP BY difficulty_level;
+```
+
+**Step 4: Build Simple Frontend** (No fancy UI)
+- Create `/student/adaptive` page
+- Display questions one at a time
+- Show "Correct ✓" or "Wrong ✗"
+- Display difficulty as text: "Level 3/5"
+- Show mastery: "Mastery: 75%"
+
+### What's Already Done:
+- ✅ Day 1-2: Feature removal complete
+- ✅ Day 3-7: Backend + Database implementation (automated)
+
+### What You'll Do:
+- Day 8: Test backend
+- Day 9-10: Build simple UI
+- Day 11: Integration testing
+- Day 12-14: User testing + documentation
+
+**Check `RESEARCH_IMPLEMENTATION_PLAN.md` for detailed specifications.**
 
 **You got this! 🎓**
