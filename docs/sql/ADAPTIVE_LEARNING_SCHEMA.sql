@@ -8,14 +8,19 @@
 -- ================================================================
 CREATE TABLE IF NOT EXISTS student_difficulty_levels (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  chapter_id UUID NOT NULL REFERENCES chapters(id) ON DELETE CASCADE,
+  user_id UUID NOT NULL,
+  chapter_id UUID NOT NULL,
   difficulty_level INTEGER DEFAULT 3 CHECK (difficulty_level BETWEEN 1 AND 5),
   mastery_level DECIMAL(5,2) DEFAULT 0.00 CHECK (mastery_level BETWEEN 0 AND 100),
+  mastery_bucket VARCHAR(20) DEFAULT 'medium',  -- very_low, low, medium, high
+  current_topic VARCHAR(100),                    -- points, lines, perimeter, area, etc.
   correct_streak INTEGER DEFAULT 0,
   wrong_streak INTEGER DEFAULT 0,
   total_attempts INTEGER DEFAULT 0,
   correct_answers INTEGER DEFAULT 0,
+  current_representation VARCHAR(20) DEFAULT 'text',  -- text, visual, real_world
+  teaching_strategy VARCHAR(50),                      -- last pedagogical action taken
+  misconception_pattern JSONB,                        -- tracks repeated error types
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   UNIQUE(user_id, chapter_id)
@@ -27,8 +32,8 @@ CREATE TABLE IF NOT EXISTS student_difficulty_levels (
 -- ================================================================
 CREATE TABLE IF NOT EXISTS mdp_state_transitions (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  chapter_id UUID REFERENCES chapters(id),
+  user_id UUID NOT NULL,
+  chapter_id UUID,
   timestamp TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   
   -- State BEFORE action
@@ -41,6 +46,9 @@ CREATE TABLE IF NOT EXISTS mdp_state_transitions (
   -- Action taken by system
   action VARCHAR(50) NOT NULL,
   action_reason TEXT,
+  pedagogical_strategy VARCHAR(100),  -- teaching approach used
+  representation_type VARCHAR(20),    -- text, visual, real_world
+  misconception_detected VARCHAR(100), -- detected error pattern
   
   -- State AFTER action
   new_mastery_level DECIMAL(5,2),
@@ -57,22 +65,38 @@ CREATE TABLE IF NOT EXISTS mdp_state_transitions (
   was_correct BOOLEAN,
   time_spent_seconds INTEGER,
   
-  -- Metadata
+  -- Q-Learning metadata (for research analysis)
+  epsilon DECIMAL(5,3),              -- Exploration rate at this step
+  q_value_before DECIMAL(10,2),      -- Q-value before update
+  q_value_after DECIMAL(10,2),       -- Q-value after update
+  used_exploration BOOLEAN,          -- Whether action was exploratory
+  
+  -- Session tracking
   session_id UUID,
   metadata JSONB
 );
 
 -- ================================================================
--- Add difficulty_level to questions table
+-- Add difficulty_level to questions table (if table exists)
 -- ================================================================
-ALTER TABLE questions 
-ADD COLUMN IF NOT EXISTS difficulty_level INTEGER DEFAULT 3 CHECK (difficulty_level BETWEEN 1 AND 5);
+DO $$ 
+BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'questions') THEN
+    ALTER TABLE questions 
+    ADD COLUMN IF NOT EXISTS difficulty_level INTEGER DEFAULT 3 CHECK (difficulty_level BETWEEN 1 AND 5);
+  END IF;
+END $$;
 
 -- ================================================================
--- Add difficulty_level to chapter_quiz_questions table
+-- Add difficulty_level to chapter_quiz_questions table (if table exists)
 -- ================================================================
-ALTER TABLE chapter_quiz_questions 
-ADD COLUMN IF NOT EXISTS difficulty_level INTEGER DEFAULT 3 CHECK (difficulty_level BETWEEN 1 AND 5);
+DO $$ 
+BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'chapter_quiz_questions') THEN
+    ALTER TABLE chapter_quiz_questions 
+    ADD COLUMN IF NOT EXISTS difficulty_level INTEGER DEFAULT 3 CHECK (difficulty_level BETWEEN 1 AND 5);
+  END IF;
+END $$;
 
 -- ================================================================
 -- Performance Indexes
@@ -92,49 +116,56 @@ ON mdp_state_transitions(chapter_id, timestamp DESC);
 CREATE INDEX IF NOT EXISTS idx_mdp_transitions_action 
 ON mdp_state_transitions(action);
 
-CREATE INDEX IF NOT EXISTS idx_questions_difficulty 
-ON questions(chapter_id, difficulty_level);
-
-CREATE INDEX IF NOT EXISTS idx_quiz_questions_difficulty 
-ON chapter_quiz_questions(chapter_quiz_id, difficulty_level);
+-- ================================================================
+-- Assign Difficulty Levels to Existing Questions (if tables exist)
+-- ================================================================
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'questions') THEN
+    UPDATE questions 
+    SET difficulty_level = (FLOOR(RANDOM() * 5) + 1)::INTEGER
+    WHERE difficulty_level IS NULL;
+  END IF;
+  
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'chapter_quiz_questions') THEN
+    UPDATE chapter_quiz_questions 
+    SET difficulty_level = (FLOOR(RANDOM() * 5) + 1)::INTEGER
+    WHERE difficulty_level IS NULL;
+  END IF;
+END $$;
 
 -- ================================================================
--- Seed Initial Difficulty Levels for Existing Questions
+-- Performance Summary View
 -- ================================================================
--- Randomly assign difficulty levels 1-5 to existing questions
--- You can update this manually based on actual question difficulty
-UPDATE questions 
-SET difficulty_level = (FLOOR(RANDOM() * 5) + 1)::INTEGER
-WHERE difficulty_level IS NULL;
-
-UPDATE chapter_quiz_questions 
-SET difficulty_level = (FLOOR(RANDOM() * 5) + 1)::INTEGER
-WHERE difficulty_level IS NULL;
-
--- ================================================================
--- Helper View: Current Student Performance
--- ================================================================
-CREATE OR REPLACE VIEW student_performance_summary AS
-SELECT 
-  sdl.user_id,
-  sdl.chapter_id,
-  u.email as student_email,
-  c.title as chapter_title,
-  sdl.difficulty_level,
-  sdl.mastery_level,
-  sdl.correct_streak,
-  sdl.wrong_streak,
-  sdl.total_attempts,
-  sdl.correct_answers,
-  CASE 
-    WHEN sdl.total_attempts > 0 THEN (sdl.correct_answers::DECIMAL / sdl.total_attempts * 100)
-    ELSE 0 
-  END as accuracy_percentage,
-  sdl.updated_at as last_activity
-FROM student_difficulty_levels sdl
-JOIN users u ON sdl.user_id = u.id
-JOIN chapters c ON sdl.chapter_id = c.id
-ORDER BY sdl.updated_at DESC;
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'chapters' AND table_schema = 'public') THEN
+    
+    EXECUTE 'CREATE OR REPLACE VIEW student_performance_summary AS
+    SELECT 
+      sdl.user_id,
+      sdl.chapter_id,
+      u.email as student_email,
+      c.title as chapter_title,
+      sdl.difficulty_level,
+      sdl.mastery_level,
+      sdl.correct_streak,
+      sdl.wrong_streak,
+      sdl.total_attempts,
+      sdl.correct_answers,
+      CASE 
+        WHEN sdl.total_attempts > 0 THEN (sdl.correct_answers::DECIMAL / sdl.total_attempts * 100)
+        ELSE 0 
+      END as accuracy_percentage,
+      sdl.updated_at as last_activity
+    FROM student_difficulty_levels sdl
+    JOIN auth.users u ON sdl.user_id = u.id
+    JOIN chapters c ON sdl.chapter_id = c.id
+    ORDER BY sdl.updated_at DESC';
+  ELSE
+    RAISE NOTICE '⚠️ Skipping view creation - chapters table not found';
+  END IF;
+END $$;
 
 -- ================================================================
 -- Helper Function: Calculate Mastery Level

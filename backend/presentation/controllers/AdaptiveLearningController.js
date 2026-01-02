@@ -166,6 +166,93 @@ class AdaptiveLearningController {
   }
 
   /**
+   * GET /api/adaptive/qlearning/stats
+   * Get Q-learning algorithm statistics
+   */
+  async getQLearningStats(req, res) {
+    try {
+      const stats = this.service.getQLearningStats();
+
+      return res.status(200).json({
+        success: true,
+        data: stats,
+        description: 'Q-Learning algorithm parameters and performance metrics'
+      });
+    } catch (error) {
+      console.error('Error in getQLearningStats:', error);
+      return res.status(500).json({
+        error: 'Failed to get Q-learning statistics',
+        message: error.message
+      });
+    }
+  }
+
+  /**
+   * GET /api/adaptive/qlearning/export
+   * Export Q-table for research analysis
+   */
+  async exportQTable(req, res) {
+    try {
+      const qTable = this.service.exportQTable();
+
+      return res.status(200).json({
+        success: true,
+        data: {
+          qTable,
+          exportedAt: new Date().toISOString(),
+          totalStates: qTable.length
+        },
+        description: 'Complete Q-table with all learned state-action values'
+      });
+    } catch (error) {
+      console.error('Error in exportQTable:', error);
+      return res.status(500).json({
+        error: 'Failed to export Q-table',
+        message: error.message
+      });
+    }
+  }
+
+  /**
+   * GET /api/adaptive/predict/:chapterId
+   * Get AI prediction for student's next performance
+   */
+  async getPrediction(req, res) {
+    try {
+      const { chapterId } = req.params;
+      const userId = req.user.id;
+
+      if (!chapterId) {
+        return res.status(400).json({
+          error: 'Chapter ID is required'
+        });
+      }
+
+      const state = await this.service.repo.getStudentDifficulty(userId, chapterId);
+      const prediction = this.service.predictNextPerformance(state);
+      const pattern = await this.service.analyzeLearningPattern(userId, chapterId);
+
+      return res.status(200).json({
+        success: true,
+        data: {
+          prediction: {
+            successProbability: (prediction.successProbability * 100).toFixed(1) + '%',
+            confidence: (prediction.confidence * 100).toFixed(1) + '%',
+            recommendation: prediction.recommendation
+          },
+          learningPattern: pattern
+        }
+      });
+    } catch (error) {
+      console.error('Error in getPrediction:', error);
+      return res.status(500).json({
+        error: 'Failed to generate prediction',
+        message: error.message
+      });
+    }
+  }
+
+  /**
    * GET /api/adaptive/health
    * Health check endpoint
    */

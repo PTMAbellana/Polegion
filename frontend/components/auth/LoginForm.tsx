@@ -45,13 +45,16 @@ export default function LoginForm({
           route = STUDENT_ROUTES.DASHBOARD;
           break;
         case "teacher":
-          route = TEACHER_ROUTES.DASHBOARD;
+          // Redirect teachers to restricted page in research build
+          route = '/teacher/restricted';
           break;
         default:
           // For general login, redirect based on actual user role
-          route = userProfile?.role === "student" 
-            ? STUDENT_ROUTES.DASHBOARD 
-            : TEACHER_ROUTES.DASHBOARD;
+          if (userProfile?.role === "teacher") {
+            route = '/teacher/restricted';
+          } else {
+            route = STUDENT_ROUTES.DASHBOARD;
+          }
           break;
       }
       

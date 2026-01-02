@@ -39,6 +39,9 @@ export const STUDENT_ROUTES = {
     // worldmap
     WORLD_MAP: `/student/worldmap`,
     
+    // adaptive learning (RESEARCH FEATURE)
+    ADAPTIVE_LEARNING: `/student/adaptive-learning`,
+    
     // practice
     PRACTICE: `/student/practice`,
     

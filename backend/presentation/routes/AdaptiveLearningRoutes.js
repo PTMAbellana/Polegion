@@ -65,6 +65,46 @@ class AdaptiveLearningRoutes {
       '/stats',
       this.controller.getResearchStats.bind(this.controller)
     );
+
+    /**
+     * @route   GET /api/adaptive/qlearning/stats
+     * @desc    Get Q-learning algorithm statistics
+     * @access  Private (authenticated - for research)
+     */
+    this.router.get(
+      '/qlearning/stats',
+      this.controller.getQLearningStats.bind(this.controller)
+    );
+
+    /**
+     * @route   GET /api/adaptive/qlearning/export
+     * @desc    Export Q-table for research analysis
+     * @access  Private (authenticated - for research)
+     */
+    this.router.get(
+      '/qlearning/export',
+      this.controller.exportQTable.bind(this.controller)
+    );
+
+    /**
+     * @route   GET /api/adaptive/predict/:chapterId
+     * @desc    Get AI prediction for next performance
+     * @access  Private (authenticated students)
+     */
+    this.router.get(
+      '/predict/:chapterId',
+      this.controller.getPrediction.bind(this.controller)
+    );
+
+    /**
+     * @route   GET /api/adaptive/health
+     * @desc    Health check for adaptive system
+     * @access  Private
+     */
+    this.router.get(
+      '/health',
+      this.controller.healthCheck.bind(this.controller)
+    );
   }
 
   getRouter() {

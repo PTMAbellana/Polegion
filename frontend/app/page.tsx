@@ -31,16 +31,16 @@ export default function Home() {
     },
     {
       id: 3,
-      title: "Pre / Post Assessments",
-      description: "Track your learning journey with comprehensive assessments that measure your geometry mastery!",
+      title: "AI Adaptive Learning",
+      description: "Experience personalized difficulty adjustment using Q-Learning algorithm that adapts to your performance in real-time!",
       image: "/images/assessment-page.webp",
       color: "#F48FB1",
       bgGradient: "linear-gradient(135deg, #FCE4EC 0%, #F8BBD0 100%)",
     },
     {
       id: 4,
-      title: "Collaborative Rooms",
-      description: "Join virtual classrooms, compete with peers, and participate in teacher-led geometry competitions!",
+      title: "Research Implementation",
+      description: "Part of an academic study on MDP-based adaptive learning systems for geometry education!",
       image: "/images/dashboard-page.webp",
       color: "#BA68C8",
       bgGradient: "linear-gradient(135deg, #F3E5F5 0%, #E1BEE7 100%)",
@@ -128,10 +128,10 @@ export default function Home() {
           <div className={styles.heroContent}>
             <h1 className={styles.heroTitle}>
               Master Geometry Through<br/>
-              Interactive Adventures
+              AI-Powered Adaptive Learning
             </h1>
             <p className={styles.heroSubtitle}>
-              An interactive geometry learning platform featuring comprehensive assessment levels. Navigate through engaging challenges, collect relics as you master concepts, and track your improvement through structured pre-test and post-test evaluations.
+              A research implementation of Q-Learning based adaptive difficulty adjustment. Experience personalized learning that adapts to your performance in real-time using reinforcement learning algorithms.
             </p>
             <button 
               className={styles.ctaButton} 
@@ -151,7 +151,7 @@ export default function Home() {
               )}
             </button>
             <p className={styles.trustText}>
-              Safe and Focused / Built for Students / Developed with AI Assistance
+              Research Build: Student Focus / AI Adaptive Learning / MDP Implementation
             </p>
           </div>
           

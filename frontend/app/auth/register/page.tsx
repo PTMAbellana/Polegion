@@ -13,7 +13,8 @@ export default function RoleSelection() {
   };
 
   const handleTeacherRegister = () => {
-    router.push(TEACHER_ROUTES.REGISTER);
+    // Redirect to restricted page for research build
+    router.push('/teacher/restricted');
   };
 
   const handleLogin = () => {
@@ -39,7 +40,7 @@ export default function RoleSelection() {
             </div>
 
             <h1 className={styles.welcomeTitle}>Join Polegion</h1>
-            <p className={styles.welcomeSubtitle}>Choose your role to get started</p>
+            <p className={styles.welcomeSubtitle}>Research Version - Student Adaptive Learning Focus</p>
 
             <div className={styles.roleOptions}>
               <div className={styles.roleCard} onClick={handleStudentRegister}>
@@ -48,23 +49,23 @@ export default function RoleSelection() {
                 </div>
                 <h2 className={styles.roleTitle}>Student</h2>
                 <p className={styles.roleDescription}>
-                  Embark on an exciting geometry adventure and learn through interactive challenges
+                  Experience AI-powered adaptive learning with Q-Learning algorithm
                 </p>
                 <button className={styles.roleButton}>
                   Register as Student
                 </button>
               </div>
 
-              <div className={styles.roleCard} onClick={handleTeacherRegister}>
+              <div className={styles.roleCard} onClick={handleTeacherRegister} style={{opacity: 0.6}}>
                 <div className={styles.roleIcon}>
                   <FaChalkboardTeacher className={styles.iconSvg} />
                 </div>
                 <h2 className={styles.roleTitle}>Teacher</h2>
                 <p className={styles.roleDescription}>
-                  Create engaging lessons and inspire students with interactive geometry education
+                  Not available in research build (student learning focus)
                 </p>
                 <button className={styles.roleButton}>
-                  Register as Teacher
+                  View Info
                 </button>
               </div>
             </div>

@@ -280,6 +280,28 @@ class AdaptiveLearningRepository {
       throw error;
     }
   }
+  /**
+   * Get recent attempts for misconception detection
+   * Returns last N state transitions for a student in a chapter
+   */
+  async getRecentAttempts(userId, chapterId, limit = 10) {
+    try {
+      const { data, error } = await this.supabase
+        .from('mdp_state_transitions')
+        .select('*')
+        .eq('user_id', userId)
+        .eq('chapter_id', chapterId)
+        .order('timestamp', { ascending: false })
+        .limit(limit);
+
+      if (error) throw error;
+      
+      return data || [];
+    } catch (error) {
+      console.error('Error getting recent attempts:', error);
+      return []; // Return empty array on error, don't crash
+    }
+  }
 }
 
 module.exports = AdaptiveLearningRepository;
