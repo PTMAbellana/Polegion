@@ -152,29 +152,56 @@ Keep the tone encouraging and age-appropriate. Use simple language. Keep total r
   /**
    * Call Google Gemini API
    */
+  /**
+   * Call Google Gemini API (v1beta endpoint - required for gemini-2.5-flash)
+   */
   async _callGemini(prompt) {
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${this.model}:generateContent?key=${this.apiKey}`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
+    // Use v1beta with models/ prefix for gemini-2.5-flash support
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${this.model}:generateContent?key=${this.apiKey}`;
+    console.log('[AIExplanation] Gemini URL:', url.replace(this.apiKey, 'API_KEY_HIDDEN'));
+    console.log('[AIExplanation] Model from env:', this.model);
+    
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        contents: [{
+          parts: [{
+            text: prompt
+          }]
+        }],
+        generationConfig: {
+          temperature: 0.7,
+          maxOutputTokens: 400,
+          topK: 40,
+          topP: 0.95
         },
-        body: JSON.stringify({
-          contents: [{
-            parts: [{
-              text: prompt
-            }]
-          }],
-          generationConfig: {
-            temperature: 0.7,
-            maxOutputTokens: 400
+        safetySettings: [
+          {
+            category: "HARM_CATEGORY_HARASSMENT",
+            threshold: "BLOCK_MEDIUM_AND_ABOVE"
+          },
+          {
+            category: "HARM_CATEGORY_HATE_SPEECH",
+            threshold: "BLOCK_MEDIUM_AND_ABOVE"
+          },
+          {
+            category: "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+            threshold: "BLOCK_MEDIUM_AND_ABOVE"
+          },
+          {
+            category: "HARM_CATEGORY_DANGEROUS_CONTENT",
+            threshold: "BLOCK_MEDIUM_AND_ABOVE"
           }
-        })
-      }
-    );
+        ]
+      })
+    });
 
     if (!response.ok) {
+      const errorText = await response.text();
+      console.error('[AIExplanation] Gemini error response:', errorText);
       throw new Error(`Gemini API error: ${response.status} ${response.statusText}`);
     }
 
