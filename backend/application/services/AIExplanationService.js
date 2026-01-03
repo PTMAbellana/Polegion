@@ -174,7 +174,7 @@ Keep the tone encouraging and age-appropriate. Use simple language. Keep total r
         }],
         generationConfig: {
           temperature: 0.7,
-          maxOutputTokens: 400,
+          maxOutputTokens: 1024,
           topK: 40,
           topP: 0.95
         },
@@ -206,7 +206,23 @@ Keep the tone encouraging and age-appropriate. Use simple language. Keep total r
     }
 
     const data = await response.json();
-    return data.candidates[0].content.parts[0].text.trim();
+    console.log('[AIExplanation] Raw Gemini response:', JSON.stringify(data, null, 2));
+    
+    if (!data.candidates || !data.candidates[0]?.content?.parts?.[0]?.text) {
+      console.error('[AIExplanation] Unexpected response structure:', data);
+      throw new Error('Invalid Gemini response format');
+    }
+    
+    const fullText = data.candidates[0].content.parts[0].text.trim();
+    console.log('[AIExplanation] Full response text:', fullText);
+    console.log('[AIExplanation] Response length:', fullText.length, 'characters');
+    
+    // Check if response was blocked by safety filters
+    if (data.candidates[0].finishReason === 'SAFETY') {
+      console.warn('[AIExplanation] Response blocked by safety filters');
+    }
+    
+    return fullText;
   }
 
   /**
