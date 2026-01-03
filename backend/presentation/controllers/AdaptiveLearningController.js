@@ -8,23 +8,43 @@ class AdaptiveLearningController {
   }
 
   /**
+   * GET /api/adaptive/topics
+   * Get all available adaptive learning topics
+   */
+  async getTopics(req, res) {
+    try {
+      const topics = await this.service.getAllTopics();
+      return res.status(200).json({
+        success: true,
+        data: topics
+      });
+    } catch (error) {
+      console.error('Error in getTopics:', error);
+      return res.status(500).json({
+        error: 'Failed to get topics',
+        message: error.message
+      });
+    }
+  }
+
+  /**
    * POST /api/adaptive/submit-answer
    * Submit an answer and get adaptive feedback
    */
   async submitAnswer(req, res) {
     try {
-      const { chapterId, questionId, isCorrect, timeSpent } = req.body;
+      const { topicId, questionId, isCorrect, timeSpent } = req.body;
       const userId = req.user.id;
 
-      if (!chapterId || !questionId || typeof isCorrect !== 'boolean') {
+      if (!topicId || !questionId || typeof isCorrect !== 'boolean') {
         return res.status(400).json({
-          error: 'Missing required fields: chapterId, questionId, isCorrect'
+          error: 'Missing required fields: topicId, questionId, isCorrect'
         });
       }
 
       const result = await this.service.processAnswer(
         userId,
-        chapterId,
+        topicId,
         questionId,
         isCorrect,
         timeSpent || 0
@@ -44,24 +64,24 @@ class AdaptiveLearningController {
   }
 
   /**
-   * GET /api/adaptive/questions/:chapterId
+   * GET /api/adaptive/questions/:topicId
    * Get adaptive questions based on student's current difficulty
    */
   async getAdaptiveQuestions(req, res) {
     try {
-      const { chapterId } = req.params;
+      const { topicId } = req.params;
       const { count = 10 } = req.query;
       const userId = req.user.id;
 
-      if (!chapterId) {
+      if (!topicId) {
         return res.status(400).json({
-          error: 'Chapter ID is required'
+          error: 'Topic ID is required'
         });
       }
 
       const result = await this.service.getAdaptiveQuestions(
         userId,
-        chapterId,
+        topicId,
         parseInt(count)
       );
 
