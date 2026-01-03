@@ -37,6 +37,31 @@ class AdaptiveLearningRepository {
   }
 
   /**
+   * Get a single topic by ID
+   */
+  async getTopicById(topicId) {
+    try {
+      const cacheKey = cache.generateKey('adaptive_topic', topicId);
+      const cached = cache.get(cacheKey);
+      if (cached) return cached;
+
+      const { data, error } = await this.supabase
+        .from('adaptive_learning_topics')
+        .select('*')
+        .eq('id', topicId)
+        .single();
+
+      if (error) throw error;
+
+      cache.set(cacheKey, data, this.CACHE_TTL);
+      return data;
+    } catch (error) {
+      console.error('Error getting topic by ID:', error);
+      return null;
+    }
+  }
+
+  /**
    * Get or create student's difficulty level for a topic
    */
   async getStudentDifficulty(userId, topicId) {
@@ -323,6 +348,115 @@ class AdaptiveLearningRepository {
     } catch (error) {
       console.error('Error getting recent attempts:', error);
       return []; // Return empty array on error, don't crash
+    }
+  }
+
+  /**
+   * Save a generated question to the database
+   */
+  async saveQuestion(questionData) {
+    try {
+      const { data, error } = await this.supabase
+        .from('adaptive_questions')
+        .insert({
+          topic_id: questionData.topicId,
+          question_text: questionData.questionText,
+          question_type: questionData.questionType,
+          options: questionData.options,
+          correct_answer: questionData.correctAnswer,
+          difficulty_level: questionData.difficultyLevel,
+          cognitive_domain: questionData.cognitiveDomain,
+          generation_params: questionData.generationParams
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error('Error saving question:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Log that a question was shown to a user
+   */
+  async logQuestionShown(userId, questionId, topicId, difficultyLevel, masteryLevel) {
+    try {
+      const { data, error } = await this.supabase
+        .from('user_question_history')
+        .insert({
+          user_id: userId,
+          question_id: questionId,
+          topic_id: topicId,
+          difficulty_at_time: difficultyLevel,
+          mastery_at_time: masteryLevel,
+          shown_at: new Date().toISOString()
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error('Error logging question shown:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Update user's answer to a question with AI explanation
+   */
+  async updateQuestionAnswer(historyId, userAnswer, isCorrect, timeSpent, transitionId = null, aiExplanation = null) {
+    try {
+      const updateData = {
+        user_answer: userAnswer,
+        is_correct: isCorrect,
+        time_spent: timeSpent,
+        transition_id: transitionId,
+        answered_at: new Date().toISOString()
+      };
+
+      // Add AI explanation if provided
+      if (aiExplanation) {
+        updateData.ai_explanation = aiExplanation;
+        updateData.explanation_generated_at = new Date().toISOString();
+      }
+
+      const { data, error } = await this.supabase
+        .from('user_question_history')
+        .update(updateData)
+        .eq('id', historyId)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error('Error updating question answer:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get questions for a specific topic and difficulty
+   */
+  async getQuestionsByTopicAndDifficulty(topicId, difficultyLevel, limit = 10) {
+    try {
+      const { data, error } = await this.supabase
+        .from('adaptive_questions')
+        .select('*')
+        .eq('topic_id', topicId)
+        .eq('difficulty_level', difficultyLevel)
+        .order('created_at', { ascending: false })
+        .limit(limit);
+
+      if (error) throw error;
+      return data || [];
+    } catch (error) {
+      console.error('Error getting questions:', error);
+      return [];
     }
   }
 }

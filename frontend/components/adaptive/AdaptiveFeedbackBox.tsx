@@ -7,6 +7,7 @@ interface AdaptiveFeedbackBoxProps {
   actionReason?: string;
   pedagogicalStrategy?: string;
   representationType?: string;
+  aiExplanation?: string; // AI-generated step-by-step explanation
 }
 
 export default function AdaptiveFeedbackBox({ 
@@ -15,7 +16,8 @@ export default function AdaptiveFeedbackBox({
   correctStreak,
   actionReason,
   pedagogicalStrategy,
-  representationType
+  representationType,
+  aiExplanation
 }: AdaptiveFeedbackBoxProps) {
   
   const getFeedbackContent = () => {
@@ -95,54 +97,110 @@ export default function AdaptiveFeedbackBox({
 
   const feedback = getFeedbackContent();
   
-  if (!feedback) return null;
+  // If no feedback and no AI explanation, return null
+  if (!feedback && !aiExplanation) return null;
 
   return (
-    <div style={{
-      backgroundColor: feedback.bgColor,
-      borderRadius: '12px',
-      padding: '16px 20px',
-      marginBottom: '20px',
-      border: '1px solid rgba(0, 0, 0, 0.06)',
-      boxShadow: '0 1px 3px rgba(0, 0, 0, 0.05)',
-      transition: 'all 0.3s ease'
-    }}>
-      <div style={{ display: 'flex', alignItems: 'flex-start', gap: '14px' }}>
+    <>
+      {/* AI Explanation Box - Displayed First */}
+      {aiExplanation && (
         <div style={{
-          width: '36px',
-          height: '36px',
-          borderRadius: '8px',
-          backgroundColor: feedback.iconBg,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          fontSize: '18px',
-          flexShrink: 0
+          backgroundColor: '#FEFCE8',
+          borderRadius: '12px',
+          padding: '20px',
+          marginBottom: '20px',
+          border: '2px solid #FDE047',
+          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
+          transition: 'all 0.3s ease'
         }}>
-          {feedback.icon}
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '14px' }}>
+            <div style={{
+              width: '36px',
+              height: '36px',
+              borderRadius: '8px',
+              backgroundColor: '#EAB308',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '18px',
+              flexShrink: 0
+            }}>
+              🤖
+            </div>
+            
+            <div style={{ flex: 1 }}>
+              <h3 style={{ 
+                fontSize: '15px', 
+                fontWeight: 600, 
+                color: '#1F2937',
+                margin: '0 0 8px 0',
+                fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+              }}>
+                AI Tutor Explanation
+              </h3>
+              <div style={{ 
+                fontSize: '14px', 
+                color: '#374151',
+                lineHeight: '1.7',
+                fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+                whiteSpace: 'pre-wrap'
+              }}>
+                {aiExplanation}
+              </div>
+            </div>
+          </div>
         </div>
-        
-        <div style={{ flex: 1 }}>
-          <h3 style={{ 
-            fontSize: '15px', 
-            fontWeight: 600, 
-            color: '#1F2937',
-            margin: '0 0 4px 0',
-            fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
-          }}>
-            {feedback.title}
-          </h3>
-          <p style={{ 
-            fontSize: '14px', 
-            color: '#4B5563',
-            margin: 0,
-            lineHeight: '1.5',
-            fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
-          }}>
-            {feedback.message}
-          </p>
+      )}
+
+      {/* MDP Action Feedback Box */}
+      {feedback && (
+        <div style={{
+          backgroundColor: feedback.bgColor,
+          borderRadius: '12px',
+          padding: '16px 20px',
+          marginBottom: '20px',
+          border: '1px solid rgba(0, 0, 0, 0.06)',
+          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.05)',
+          transition: 'all 0.3s ease'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '14px' }}>
+            <div style={{
+              width: '36px',
+              height: '36px',
+              borderRadius: '8px',
+              backgroundColor: feedback.iconBg,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '18px',
+              flexShrink: 0
+            }}>
+              {feedback.icon}
+            </div>
+            
+            <div style={{ flex: 1 }}>
+              <h3 style={{ 
+                fontSize: '15px', 
+                fontWeight: 600, 
+                color: '#1F2937',
+                margin: '0 0 4px 0',
+                fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+              }}>
+                {feedback.title}
+              </h3>
+              <p style={{ 
+                fontSize: '14px', 
+                color: '#4B5563',
+                margin: 0,
+                lineHeight: '1.5',
+                fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+              }}>
+                {feedback.message}
+              </p>
+            </div>
+          </div>
         </div>
-      </div>
-    </div>
+      )}
+    </>
   );
 }

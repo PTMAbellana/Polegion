@@ -31,6 +31,7 @@ interface AdaptiveResponse {
   feedback: string;
   pedagogicalStrategy?: string;
   representationType?: string;
+  aiExplanation?: string; // AI-generated step-by-step explanation
 }
 
 interface AdaptiveLearningProps {
@@ -214,9 +215,13 @@ export default function AdaptiveLearning({ topicId }: AdaptiveLearningProps) {
           const plane = ['circle', 'square', 'triangle', 'rectangle'];
           const solid = ['cube', 'sphere', 'cylinder', 'cone'];
           const correct = is3D ? solid[Math.floor(Math.random() * solid.length)] : plane[Math.floor(Math.random() * plane.length)];
+          
+          // Get 3 wrong answers from the opposite category
+          const wrongAnswers = is3D ? plane.slice(0, 3) : solid.slice(0, 3);
+          
           question = {
             question: `Which of these is a ${is3D ? '3D (solid)' : 'plane (2D)'} figure?`,
-            options: [...plane.slice(0, 2), ...solid.slice(0, 2)].sort(() => Math.random() - 0.5)
+            options: [correct, ...wrongAnswers].sort(() => Math.random() - 0.5)
               .map(fig => ({ label: fig.charAt(0).toUpperCase() + fig.slice(1), correct: fig === correct }))
           };
           break;
@@ -232,7 +237,7 @@ export default function AdaptiveLearning({ topicId }: AdaptiveLearningProps) {
           };
           question = {
             question: `What type of lines ${descriptions[correct]}?`,
-            options: lineTypes.map(t => ({ label: t.charAt(0).toUpperCase() + t.slice(1) + ' lines', correct: t === correct }))
+            options: lineTypes.sort(() => Math.random() - 0.5).map(t => ({ label: t.charAt(0).toUpperCase() + t.slice(1) + ' lines', correct: t === correct }))
           };
           break;
         }
@@ -262,14 +267,24 @@ export default function AdaptiveLearning({ topicId }: AdaptiveLearningProps) {
   }, [topicId]);
 
   // Submit answer with celebration on correct
-  const submitAnswer = async (isCorrect: boolean) => {
+  const submitAnswer = async (isCorrect: boolean, selectedOption: any) => {
     try {
       setSubmitting(true);
+      
+      // Prepare question data for AI explanation
+      const questionData = {
+        questionText: currentQuestion?.question,
+        options: currentQuestion?.options,
+        correctAnswer: currentQuestion?.options.find((opt: any) => opt.correct)?.label,
+        userAnswer: selectedOption?.label || selectedOption?.text
+      };
+      
       const response = await axios.post('/adaptive/submit-answer', {
         topicId,
         questionId: currentQuestion?.id || null,
         isCorrect,
-        timeSpent: Math.floor(Math.random() * 60) + 30
+        timeSpent: Math.floor(Math.random() * 60) + 30,
+        questionData // Send question data for AI explanation
       });
 
       setLastResponse(response.data.data);
@@ -397,6 +412,7 @@ export default function AdaptiveLearning({ topicId }: AdaptiveLearningProps) {
             actionReason={lastResponse.actionReason}
             pedagogicalStrategy={lastResponse.pedagogicalStrategy}
             representationType={currentRepresentation}
+            aiExplanation={lastResponse.aiExplanation}
           />
         )}
 

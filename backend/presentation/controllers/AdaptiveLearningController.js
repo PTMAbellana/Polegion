@@ -33,7 +33,7 @@ class AdaptiveLearningController {
    */
   async submitAnswer(req, res) {
     try {
-      const { topicId, questionId, isCorrect, timeSpent } = req.body;
+      const { topicId, questionId, isCorrect, timeSpent, questionData } = req.body;
       const userId = req.user.id;
 
       console.log('[AdaptiveController] submitAnswer called with:', { topicId, questionId, isCorrect, userId });
@@ -49,7 +49,8 @@ class AdaptiveLearningController {
         topicId,
         questionId,
         isCorrect,
-        timeSpent || 0
+        timeSpent || 0,
+        questionData // Pass question data for AI explanation
       );
 
       return res.status(200).json({

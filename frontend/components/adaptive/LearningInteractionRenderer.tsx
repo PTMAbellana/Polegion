@@ -5,7 +5,7 @@ import { useState } from 'react';
 interface LearningInteractionProps {
   representationType: 'text' | 'visual' | 'real_world';
   difficultyLevel: number;
-  onAnswer: (isCorrect: boolean) => void;
+  onAnswer: (isCorrect: boolean, selectedOption: any) => void;
   disabled?: boolean;
   question?: any;
 }
@@ -34,8 +34,8 @@ export default function LearningInteractionRenderer({
 }: LearningInteractionProps) {
   const [hoveredButton, setHoveredButton] = useState<number | null>(null);
 
-  const handleSubmit = (isCorrect: boolean) => {
-    onAnswer(isCorrect);
+  const handleSubmit = (isCorrect: boolean, option: any) => {
+    onAnswer(isCorrect, option);
   };
 
   const getButtonStyle = (index: number) => ({
@@ -84,18 +84,21 @@ export default function LearningInteractionRenderer({
             { value: 40, label: '40 units', correct: false },
             { value: 13, label: '13 units', correct: false },
             { value: 18, label: '18 units', correct: false }
-          ]).map((option: any, index: number) => (
-            <button
-              key={option.value || index}
-              onClick={() => !disabled && handleSubmit(option.correct || option.isCorrect)}
-              disabled={disabled}
-              style={getButtonStyle(index)}
-              onMouseEnter={() => setHoveredButton(index)}
-              onMouseLeave={() => setHoveredButton(null)}
-            >
-              {option.label || option.text}
-            </button>
-          ))}
+          ]).map((option: any, index: number) => {
+            const isCorrect = option.correct === true || option.isCorrect === true;
+            return (
+              <button
+                key={option.value || index}
+                onClick={() => !disabled && handleSubmit(isCorrect, option)}
+                disabled={disabled}
+                style={getButtonStyle(index)}
+                onMouseEnter={() => setHoveredButton(index)}
+                onMouseLeave={() => setHoveredButton(null)}
+              >
+                {option.label || option.text}
+              </button>
+            );
+          })}
         </div>
       </div>
     );
@@ -178,7 +181,7 @@ export default function LearningInteractionRenderer({
           ].map((option, index) => (
             <button
               key={option.value}
-              onClick={() => !disabled && handleSubmit(option.correct)}
+              onClick={() => !disabled && handleSubmit(option.correct, option)}
               disabled={disabled}
               style={getButtonStyle(index + 10)}
               onMouseEnter={() => setHoveredButton(index + 10)}
@@ -259,7 +262,7 @@ export default function LearningInteractionRenderer({
           ].map((option, index) => (
             <button
               key={option.value}
-              onClick={() => !disabled && handleSubmit(option.correct)}
+              onClick={() => !disabled && handleSubmit(option.correct, option)}
               disabled={disabled}
               style={getButtonStyle(index + 20)}
               onMouseEnter={() => setHoveredButton(index + 20)}

@@ -10,14 +10,17 @@
  * - State representation with multiple performance indicators
  * - Performance prediction using historical patterns
  * - Parametric question generation (infinite unique variations)
+ * - AI-generated step-by-step explanations for learning support
  */
 
 const QuestionGeneratorService = require('./QuestionGeneratorService');
+const AIExplanationService = require('./AIExplanationService');
 
 class AdaptiveLearningService {
   constructor(adaptiveLearningRepo) {
     this.repo = adaptiveLearningRepo;
     this.questionGenerator = new QuestionGeneratorService();
+    this.aiExplanation = new AIExplanationService();
     
     // MDP Actions - Enhanced with Pedagogical Strategies
     this.ACTIONS = {
@@ -106,7 +109,7 @@ class AdaptiveLearningService {
    * Main entry point: Process student answer and adjust difficulty
    * Uses Q-Learning to determine optimal action
    */
-  async processAnswer(userId, topicId, questionId, isCorrect, timeSpent) {
+  async processAnswer(userId, topicId, questionId, isCorrect, timeSpent, questionData = null) {
     try {
       // 1. Get current state
       const currentState = await this.repo.getStudentDifficulty(userId, topicId);
@@ -140,8 +143,28 @@ class AdaptiveLearningService {
       // 7. Update Q-value using Q-learning update rule
       await this.updateQValue(currentStateKey, action, reward, newStateKey);
 
-      // 8. Log transition for research analysis
-      await this.repo.logStateTransition({
+      // 8. Generate AI explanation for the answer
+      let aiExplanation = null;
+      if (questionData) {
+        try {
+          const topic = await this.repo.getTopicById(topicId);
+          aiExplanation = await this.aiExplanation.generateExplanation({
+            questionText: questionData.questionText,
+            options: questionData.options,
+            correctAnswer: questionData.correctAnswer,
+            userAnswer: questionData.userAnswer,
+            isCorrect,
+            topicName: topic?.topic_name || 'Geometry',
+            difficultyLevel: currentState.difficulty_level
+          });
+        } catch (explError) {
+          console.error('AI explanation generation failed:', explError);
+          // Continue without explanation - non-critical feature
+        }
+      }
+
+      // 9. Log transition for research analysis
+      const transition = await this.repo.logStateTransition({
         userId,
         topicId,
         prevState: currentState,
@@ -170,7 +193,9 @@ class AdaptiveLearningService {
         actionReason: reason,
         feedback: this.generateFeedback(updatedState, action),
         reward, // Include for debugging/research
-        learningMode: usedExploration ? 'exploring' : 'exploiting'
+        learningMode: usedExploration ? 'exploring' : 'exploiting',
+        aiExplanation, // AI-generated step-by-step explanation
+        transitionId: transition?.id
       };
     } catch (error) {
       console.error('Error processing answer:', error);
