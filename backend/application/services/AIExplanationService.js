@@ -10,6 +10,9 @@ class AIExplanationService {
     this.apiKey = process.env.AI_API_KEY || process.env.OPENAI_API_KEY || process.env.GEMINI_API_KEY;
     this.model = process.env.AI_MODEL || 'gpt-4o-mini'; // or 'gemini-pro'
     
+    // In-memory cache: key = hash(question+answer), value = explanation
+    this.explanationCache = new Map();
+    
     console.log('[AIExplanation] Initialized:', {
       provider: this.provider,
       model: this.model,
@@ -53,6 +56,14 @@ class AIExplanationService {
       return this._getFallbackExplanation({ questionText, correctAnswer, userAnswer, isCorrect });
     }
 
+    // Check cache first to avoid unnecessary API calls
+    const cacheKey = this._getCacheKey(questionText, userAnswer, isCorrect);
+    if (this.explanationCache.has(cacheKey)) {
+      console.log('[AIExplanation] Cache HIT - reusing cached explanation');
+      return this.explanationCache.get(cacheKey);
+    }
+    console.log('[AIExplanation] Cache MISS - calling API');
+
     const prompt = this._buildPrompt({
       questionText,
       options,
@@ -65,20 +76,36 @@ class AIExplanationService {
 
     try {
       console.log('[AIExplanation] Calling', this.provider, 'API...');
+      let result;
       if (this.provider === 'gemini') {
-        const result = await this._callGemini(prompt);
+        result = await this._callGemini(prompt);
         console.log('[AIExplanation] Gemini response received:', result.substring(0, 100) + '...');
-        return result;
       } else {
-        const result = await this._callOpenAI(prompt);
+        result = await this._callOpenAI(prompt);
         console.log('[AIExplanation] OpenAI response received:', result.substring(0, 100) + '...');
-        return result;
       }
+      
+      // Cache the result for future use
+      this.explanationCache.set(cacheKey, result);
+      console.log('[AIExplanation] Cached explanation. Cache size:', this.explanationCache.size);
+      
+      return result;
     } catch (error) {
       console.error('[AIExplanation] AI generation error:', error.message);
       console.error('[AIExplanation] Full error:', error);
       return this._getFallbackExplanation({ questionText, correctAnswer, userAnswer, isCorrect });
     }
+  }
+
+  /**
+   * Generate cache key from question and answer
+   * Same question + same answer = same explanation
+   */
+  _getCacheKey(questionText, userAnswer, isCorrect) {
+    // Simple hash: question + answer + correctness
+    const normalized = `${questionText.toLowerCase().trim()}|${userAnswer.toLowerCase().trim()}|${isCorrect}`;
+    // Use a simple hash or just return normalized string
+    return normalized;
   }
 
   /**
