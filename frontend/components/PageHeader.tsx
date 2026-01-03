@@ -37,10 +37,10 @@ const PageHeader: React.FC<PageHeaderProps> = ({
       )}
       <div className={styles["welcome-text"]}>
         <h1>{title}</h1>
-        {userName && (
+        {/* {userName && (
           <p>Welcome, {userName}</p>
-        )}
-        {subtitle && <div>{subtitle}</div>}
+        )} */}
+        {subtitle && <p>{subtitle}</p>}
       </div>
       {actionButton && (
         <div className={styles["header-actions"]}>
