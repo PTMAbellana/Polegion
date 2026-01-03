@@ -1,30 +1,8 @@
+// api/problems.js - Problems API (Student-only build)
 import api from './axios';
-import { cacheControl } from './axios';
 
-export const createProblem = async (problemData, room_code) => {
-  try {
-    const res = await api.post('/problems', {
-      problemData,
-      room_code
-    });
-    
-    return {
-      success: true,
-      message: res.data.message,
-      data: res.data.data
-    }
-  } catch (error){
-    console.error('createProblem error:', error);
-    return {
-      success: false,
-      message: error.response?.data?.message || 'Failed to create problem',
-      error: error.response?.data?.error || error.message,
-      status: error.response?.status || 500
-    }
-  }
-};
-
-export const getRoomProblems = async(room_id, type='admin') => {
+// Students can view problems in rooms they've joined
+export const getRoomProblems = async(room_id, type='student') => {
   try {
     const res = await api.get(`/problems/${room_id}`, { params: { type } });
     return {
@@ -69,58 +47,7 @@ export const getCompeProblem = async(compe_prob_id) => {
   }
 }
 
-export const deleteProblem = async(problem_id) => {
-  try {
-    const res = await api.delete(`/problems/${problem_id}`);
-    
-    return {
-      success: true,
-      message: res.data.message
-    }
-  } catch (error) {
-    return {
-      success: false,
-      message: error.response?.data?.message || 'Server error failed to delete problem',
-      error: error.response?.data?.error || error.message,
-      status: error.response?.status || 500
-    }
-  }
-}
-
-export const updateProblem = async(problem_id, problemData) => {
-  try {
-    // Clear cache to ensure fresh data
-    cacheControl.clear();
-    
-    // Add cache busting timestamp to ensure fresh data
-    const res = await api.put(`/problems/${problem_id}?t=${Date.now()}`, problemData);
-    
-    return {
-      success: true,
-      message: res.data.message,
-      data: res.data.data
-    }
-  } catch (error) {
-    return {
-      success: false,
-      message: error.response?.data?.message || 'Server error failed to update problem',
-      error: error.response?.data?.error || error.message,
-      status: error.response?.status || 500
-    }
-  }
-}
-
-export const updateTimer = async(problem_id, timer) => {
-  try {
-    const res = await api.put(`/problems/update-timer/${problem_id}`, { timer });
-    return res.data;
-  } catch (error) {
-    throw error;
-  }
-}
-
 export const getCompeProblems = async(competition_id) => {
-  console.log('getCompeProblems competition_id', competition_id);
   try {
     const res = await api.get(`/problems/compe-problems/${competition_id}`);
     return res.data;
@@ -128,34 +55,6 @@ export const getCompeProblems = async(competition_id) => {
     throw error;
   }
 }
-
-export const addCompeProblem = async(problem_id, competition_id) => {
-  try {
-    const res = await api.post(`/problems/${problem_id}/${competition_id}`);
-    
-    // Clear cache for this competition's problems
-    await api.storage.remove(`get-/problems/compe-problems/${competition_id}`);
-    
-    return res.data;
-  } catch (error) {
-    throw error;
-  }
-}
-
-export const removeCompeProblem = async(problem_id, competition_id) => {
-  try {
-    const res = await api.delete(`/problems/${problem_id}/${competition_id}`);
-    
-    // Clear cache for this competition's problems
-    await api.storage.remove(`get-/problems/compe-problems/${competition_id}`);
-    
-    return res.data;
-  } catch (error) {
-    throw error;
-  }
-}
-
-// ===== NEW: Public Problems & Grading =====
 
 export const getPublicProblems = async(room_id) => {
   try {
@@ -238,20 +137,11 @@ export const getUserProblemStats = async(problem_id) => {
   }
 };
 
-// Get all problems (for teachers to view practice problems library)
-export const getAllProblems = async() => {
-  try {
-    const res = await api.get('/problems/all/library');
-    return {
-      success: true,
-      data: res.data.data || res.data || []
-    };
-  } catch (error) {
-    console.error('[ProblemsAPI] Error fetching all problems:', error);
-    return {
-      success: false,
-      message: error.response?.data?.message || 'Failed to fetch problems',
-      error: error.response?.data?.error || error.message
-    };
-  }
-};
+// REMOVED: Teacher-only functions
+// - createProblem (teacher only)
+// - deleteProblem (teacher only)
+// - updateProblem (teacher only)
+// - updateTimer (teacher only)
+// - addCompeProblem (teacher only)
+// - removeCompeProblem (teacher only)
+// - getAllProblems (teacher library view)

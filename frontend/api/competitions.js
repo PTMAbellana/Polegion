@@ -1,19 +1,8 @@
+// api/competitions.js - Competition API (Student-only build)
 import api from './axios';
 
-export const createCompe = async (room_id, title) => {
-    try {
-        const res = await api.post(`competitions/`, {
-            room_id,
-            title
-        });
-        
-        return res.data;
-    } catch (error) {
-        throw error;
-    }
-}
-
-export const getAllCompe = async (room_id, type  = 'admin') => {
+// Students can view competitions in rooms they've joined
+export const getAllCompe = async (room_id, type = 'student') => {
     try {
         const res = await api.get(`competitions/${room_id}?type=${type}`);
         return {
@@ -32,7 +21,8 @@ export const getAllCompe = async (room_id, type  = 'admin') => {
     }
 }
 
-export const getCompeById = async (room_id, compe_id, type='creator') => {
+// Students can view specific competition details
+export const getCompeById = async (room_id, compe_id, type='student') => {
     try {
         const res = await api.get(`competitions/${room_id}/${compe_id}?type=${type}`);
         return res.data;
@@ -41,74 +31,10 @@ export const getCompeById = async (room_id, compe_id, type='creator') => {
     }
 }
 
-// PROPER BACKEND API CALLS - NO MORE DIRECT SUPABASE!
-export const startCompetition = async (compe_id, problems) => {
-    try {
-        // Call your actual backend endpoint
-        const res = await api.post(`competitions/${compe_id}/start`, {
-            problems: problems || []
-        });
-        
-        console.log('🚀 Competition started via backend!');
-        return res.data;
-    } catch (error) {
-        console.error('❌ Backend start competition error:', error.response?.data || error.message);
-        throw error;
-    }
-}
-
-export const nextProblem = async (compe_id, problems, current_index) => {
-    try {
-        console.log('🚀 Calling backend next-problem API...', { compe_id, current_index });
-        
-        // Call your backend API instead of direct Supabase
-        const response = await api.patch(`/competitions/${compe_id}/next`, {
-        problems: problems,
-        current_index: current_index
-        });
-        
-        console.log('✅ Backend next-problem response:', response.data);
-        return response.data;
-        
-    } catch (error) {
-        console.error('❌ Backend next-problem error:', error);
-        throw error;
-    }
-}
-
-export const pauseCompetition = async (compe_id) => {
-    try {
-        // Call your actual backend endpoint
-        const res = await api.patch(`competitions/${compe_id}/pause`);
-        
-        console.log('⏸️ Competition paused via backend!');
-        return res.data;
-    } catch (error) {
-        console.error('❌ Backend pause competition error:', error.response?.data || error.message);
-        throw error;
-    }
-}
-
-export const resumeCompetition = async (compe_id) => {
-    try {
-        // Call your actual backend endpoint
-        const res = await api.patch(`competitions/${compe_id}/resume`);
-        
-        console.log('▶️ Competition resumed via backend!');
-        return res.data;
-    } catch (error) {
-        console.error('❌ Backend resume competition error:', error.response?.data || error.message);
-        throw error;
-    }
-}
-
-export const autoAdvanceCompetition = async (compe_id) => {
-    try {
-        // This can be implemented later if needed
-        const res = await api.post(`competitions/${compe_id}/auto-advance`);
-        
-        return res.data;
-    } catch (error) {
-        throw error;
-    }
-}
+// REMOVED: Teacher-only functions
+// - createCompe (teacher only)
+// - startCompetition (teacher only)
+// - nextProblem (teacher only)
+// - pauseCompetition (teacher only)
+// - resumeCompetition (teacher only)
+// - autoAdvanceCompetition (teacher only)

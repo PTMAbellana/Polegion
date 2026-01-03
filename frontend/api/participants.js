@@ -1,3 +1,4 @@
+// api/participants.js - Participants API (Student-only build)
 import api from './axios';
 
 export const joinRoom = async (room_code) => {
@@ -55,24 +56,14 @@ export const totalParticipant = async (room_id) => {
   }
 };
 
-export const getAllParticipants = async (room_id, type='user', withXp=false, compe_id = -1) => {
+export const getAllParticipants = async (room_id, type='student', withXp=false, compe_id = -1) => {
   try {
     const xpParam = withXp ? 'withXp=true' : '';
     const compeParam = compe_id ? `compe_id=${compe_id}` : '';
     const query = [xpParam, compeParam].filter(Boolean).join('&');
     
-    let res;
-    switch (type) {
-      case 'student': 
-        res = await api.get(`/participants/student/lists/${room_id}${query ? '?' + query : ''}`);
-        break;
-      case 'teacher':
-      case 'creator':
-        res = await api.get(`/participants/creator/lists/${room_id}${query ? '?' + query : ''}`);
-        break;
-      default:
-        throw new Error('Invalid type parameter. Must be "user" or "creator".');  
-    }
+    // Students only see student lists
+    const res = await api.get(`/participants/student/lists/${room_id}${query ? '?' + query : ''}`);
     
     return {
       success: true,
@@ -88,6 +79,7 @@ export const getAllParticipants = async (room_id, type='user', withXp=false, com
     }
   }
 };
+
 // =====================================================
 // ACTIVE TRACKING API
 // =====================================================
@@ -136,26 +128,6 @@ export const getActiveCompetitionParticipants = async (competitionId) => {
     };
   }
 };
-export const kickParticipant = async (room_id, part_id) => {
-  try {
-    console.log({room_id, part_id});
-    const res = await api.delete(
-      `/participants/room/${room_id}/participant/${part_id}`,
-    );
-    
-    return {
-      success: true,
-      message: res.data.message || 'Participant kicked successfully',
-    };
-  } catch (error) {
-    return {
-      success: false,
-      message: error.response?.data?.message || 'Error kicking participant',
-      error: error.response?.data?.error || error.message,
-      status: error.response?.status
-    };
-  }
-};
 
 export const getJoinedRooms = async () => {
   try {
@@ -176,23 +148,6 @@ export const getJoinedRooms = async () => {
   }
 };
 
-export const inviteParticipant = async ( email, roomCode ) => {
-  try {
-    const res = await api.post('/participants/invite', {
-      email,
-      roomCode,
-    });
-
-    return {
-      success: true,
-      message: res.data.message || 'Invitation sent successfully'
-    }
-  } catch (error) {
-    return {
-      success: false,
-      message: error.response?.data?.error || 'Failed to send invitation.',
-      error: error.response?.data?.error || error.message,
-      status: error.response?.status
-    }
-  }
-};
+// REMOVED: Teacher-only functions
+// - kickParticipant (teacher admin only)
+// - inviteParticipant (teacher admin only)

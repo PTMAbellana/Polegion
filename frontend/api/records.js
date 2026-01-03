@@ -1,5 +1,7 @@
+// api/records.js - Leaderboards API (Student-only build)
 import api from './axios';
 
+// Students can view room leaderboards
 export const getRoomLeaderboards = async (room_id) => {
     try {
         const res = await api.get(`leaderboards/room/${room_id}`);
@@ -19,6 +21,7 @@ export const getRoomLeaderboards = async (room_id) => {
     }
 }
 
+// Students can view competition leaderboards
 export const getCompetitionLeaderboards = async (room_id) => {
     try {
         const res = await api.get(`leaderboards/competition/${room_id}`);
@@ -38,51 +41,6 @@ export const getCompetitionLeaderboards = async (room_id) => {
     }
 }
 
-export const downloadRoomRecordsCSV = async (room_id, type) => {
-    try {
-        const endpoint = type === 'worldmap' 
-            ? `leaderboards/room/${room_id}/export-worldmap-csv`
-            : `leaderboards/room/${room_id}/export-csv`
-        console.log('📥 Downloading CSV:', { room_id, type, endpoint })
-        const res = await api.get(endpoint, {
-            responseType: 'blob'
-        })
-        return {
-            success: true,
-            data: res.data,
-            filename: res.headers['content-disposition']?.split('filename=')[1]?.replace(/"/g, '') || `room-records.csv`
-        }
-    } catch (error) {
-        console.log('Error downloading room records CSV:', error);
-        return {
-            success: false,
-            error: error.response?.data?.error || 'Failed to download room records',
-            message: error.response?.data?.message || 'An error occurred',
-            status: error.response?.status
-        }
-    }
-}
-
-export const downloadCompetitionRecordsCSV = async (room_id, competition_id) => {
-    try {
-        const res = await api.get(`leaderboards/room/${room_id}/competition/${competition_id}/export-csv`, {
-            responseType: 'blob'
-        })
-
-        const filename = res.headers['content-disposition']
-            ?.split('filename="')[1]
-            ?.split('"')[0] || `competition-records-${new Date().toISOString().split('T')[0]}.csv`
-
-        return {
-            success: true,
-            data: res.data,
-            filename: filename
-        }
-    } catch (error) {
-        console.error('Error downloading competition records:', error)
-        return {
-            success: false,
-            error: error.response?.data?.message || error.message
-        }
-    }
-}
+// REMOVED: Teacher-only functions
+// - downloadRoomRecordsCSV (teacher only)
+// - downloadCompetitionRecordsCSV (teacher only)

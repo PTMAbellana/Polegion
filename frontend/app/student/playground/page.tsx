@@ -10,8 +10,8 @@ import ShapeLimitPopup from "@/components/shared/problem-builder/ShapeLimitPopup
 import LandscapePrompt from "@/components/LandscapePrompt";
 
 // Hooks
-import { useShapeManagement } from "@/hooks/teacher/useShapeManagement";
-import { usePropertiesManagement } from "@/hooks/teacher/usePropertiesManagement";
+import { useShapeManagement } from "@/hooks/shared/useShapeManagement";
+import { usePropertiesManagement } from "@/hooks/shared/usePropertiesManagement";
 import { useAuthStore } from "@/store/authStore";
 
 const MAX_SHAPES = 1; // Allow only one shape at a time

@@ -23,7 +23,7 @@ class AdaptiveLearningService {
     this.aiExplanation = new AIExplanationService();
     
     // MDP Actions - Enhanced with Pedagogical Strategies
-    this.ACTIONS = {
+    this. ACTIONS = {
       // Difficulty adjustments
       DECREASE_DIFFICULTY: 'decrease_difficulty',
       MAINTAIN_DIFFICULTY: 'maintain_difficulty',
