@@ -17,6 +17,9 @@ interface AdaptiveState {
   accuracy: string;
   currentRepresentation?: string;
   teachingStrategy?: string;
+  currentCognitiveDomain?: string;
+  cognitiveDomainLabel?: string;
+  cognitiveDomainDescription?: string;
 }
 
 interface AdaptiveResponse {
@@ -185,6 +188,8 @@ export default function AdaptiveLearning({ chapterId }: AdaptiveLearningProps) {
         <MasteryProgressBar 
           masteryLevel={state.masteryLevel} 
           currentTopic="Geometry Shapes"
+          cognitiveDomain={state.currentCognitiveDomain}
+          cognitiveDomainLabel={state.cognitiveDomainLabel}
         />
 
         {/* Adaptive Feedback */}

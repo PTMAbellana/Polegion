@@ -5,17 +5,35 @@
  * Instead of storing thousands of questions, we store templates and generate
  * unique variations on-the-fly with different numbers/parameters.
  * 
- * Similar to GeoDRL's problem generation but for adaptive difficulty learning
+ * Supports 6 Cognitive Domains based on Bloom's Taxonomy:
+ * - KR (Knowledge Recall): Basic definitions and facts
+ * - CU (Concept Understanding): Relationships and classifications
+ * - PS (Procedural Skills): Computations and algorithms
+ * - AT (Analytical Thinking): Patterns, logic, multi-step reasoning
+ * - PS+ (Problem Solving): Real-world applications
+ * - HOT (Higher Order Thinking): Creative and complex reasoning
  */
 
 class QuestionGeneratorService {
   constructor() {
+    // Cognitive domain constants
+    this.COGNITIVE_DOMAINS = {
+      KR: 'knowledge_recall',        // Basic facts and formulas
+      CU: 'concept_understanding',   // Relationships between concepts
+      PS: 'procedural_skills',       // Step-by-step calculations
+      AT: 'analytical_thinking',     // Multi-step reasoning
+      PSP: 'problem_solving',        // Real-world applications
+      HOT: 'higher_order_thinking'   // Creative/complex reasoning
+    };
+
     // Define question templates by difficulty level
+    // Each template now includes cognitive domain metadata
     this.templates = {
       // DIFFICULTY 1: Very Easy - Basic shapes, single-step
       1: [
         {
           type: 'rectangle_area',
+          cognitiveDomain: 'knowledge_recall', // KR - Basic formula recall
           template: 'Calculate the area of a rectangle with width {width} units and height {height} units.',
           params: {
             width: { min: 3, max: 10 },
@@ -26,6 +44,7 @@ class QuestionGeneratorService {
         },
         {
           type: 'square_perimeter',
+          cognitiveDomain: 'knowledge_recall', // KR - Basic formula
           template: 'Find the perimeter of a square with side length {side} units.',
           params: {
             side: { min: 4, max: 12 }
@@ -35,6 +54,7 @@ class QuestionGeneratorService {
         },
         {
           type: 'circle_area',
+          cognitiveDomain: 'procedural_skills', // PS - Apply π formula
           template: 'Calculate the area of a circle with radius {radius} units. (Use π ≈ 3.14)',
           params: {
             radius: { min: 2, max: 8 }
@@ -48,6 +68,7 @@ class QuestionGeneratorService {
       2: [
         {
           type: 'rectangle_perimeter',
+          cognitiveDomain: 'procedural_skills', // PS - Apply multi-step formula
           template: 'A rectangle has length {length} units and width {width} units. Find its perimeter.',
           params: {
             length: { min: 8, max: 20 },
@@ -58,6 +79,7 @@ class QuestionGeneratorService {
         },
         {
           type: 'triangle_area',
+          cognitiveDomain: 'concept_understanding', // CU - Understand triangle formula
           template: 'Calculate the area of a triangle with base {base} units and height {height} units.',
           params: {
             base: { min: 6, max: 16 },
@@ -68,6 +90,7 @@ class QuestionGeneratorService {
         },
         {
           type: 'circle_circumference',
+          cognitiveDomain: 'procedural_skills', // PS - Calculate with π
           template: 'Find the circumference of a circle with radius {radius} units. (Use π ≈ 3.14)',
           params: {
             radius: { min: 5, max: 15 }
@@ -81,6 +104,7 @@ class QuestionGeneratorService {
       3: [
         {
           type: 'composite_area',
+          cognitiveDomain: 'analytical_thinking', // AT - Decompose complex shapes
           template: 'A shape consists of a rectangle (length {length}, width {width}) with a semicircle on top (diameter = width). Find the total area.',
           params: {
             length: { min: 10, max: 20 },
@@ -96,6 +120,7 @@ class QuestionGeneratorService {
         },
         {
           type: 'pythagorean',
+          cognitiveDomain: 'concept_understanding', // CU - Understand relationship
           template: 'A right triangle has legs of length {a} units and {b} units. Find the length of the hypotenuse.',
           params: {
             a: { min: 3, max: 12 },
@@ -106,6 +131,7 @@ class QuestionGeneratorService {
         },
         {
           type: 'trapezoid_area',
+          cognitiveDomain: 'procedural_skills', // PS - Complex formula application
           template: 'Find the area of a trapezoid with parallel sides {base1} and {base2} units, and height {height} units.',
           params: {
             base1: { min: 8, max: 16 },
@@ -121,6 +147,7 @@ class QuestionGeneratorService {
       4: [
         {
           type: 'similar_triangles',
+          cognitiveDomain: 'analytical_thinking', // AT - Apply scaling relationships
           template: 'Two similar triangles have corresponding sides in ratio {ratio}:1. If the smaller triangle has area {smallArea} square units, find the area of the larger triangle.',
           params: {
             ratio: { min: 2, max: 4 },
@@ -131,6 +158,7 @@ class QuestionGeneratorService {
         },
         {
           type: 'circle_sector',
+          cognitiveDomain: 'problem_solving', // PS+ - Proportional reasoning
           template: 'Find the area of a circular sector with radius {radius} units and central angle {angle}°.',
           params: {
             radius: { min: 8, max: 15 },
@@ -141,6 +169,7 @@ class QuestionGeneratorService {
         },
         {
           type: 'annulus_area',
+          cognitiveDomain: 'analytical_thinking', // AT - Composite calculation
           template: 'Find the area between two concentric circles with outer radius {outer} units and inner radius {inner} units.',
           params: {
             outer: { min: 10, max: 20 },
@@ -155,6 +184,7 @@ class QuestionGeneratorService {
       5: [
         {
           type: 'volume_composite',
+          cognitiveDomain: 'higher_order_thinking', // HOT - Complex 3D reasoning
           template: 'A cylindrical tank (radius {radius} units, height {height} units) is topped with a hemisphere. Find the total volume.',
           params: {
             radius: { min: 5, max: 12 },
@@ -169,6 +199,7 @@ class QuestionGeneratorService {
         },
         {
           type: 'optimization',
+          cognitiveDomain: 'higher_order_thinking', // HOT - Creative problem-solving
           template: 'A rectangle is inscribed in a circle of radius {radius} units. If the rectangle has width {width} units, find its area.',
           params: {
             radius: { min: 10, max: 15 },
@@ -189,14 +220,24 @@ class QuestionGeneratorService {
   /**
    * Generate a random question at specified difficulty level
    */
-  generateQuestion(difficultyLevel, chapterId, seed = null) {
+  generateQuestion(difficultyLevel, chapterId, seed = null, cognitiveDomain = null) {
     const templates = this.templates[difficultyLevel];
     if (!templates || templates.length === 0) {
       throw new Error(`No templates available for difficulty ${difficultyLevel}`);
     }
 
+    // Filter by cognitive domain if specified
+    let filteredTemplates = templates;
+    if (cognitiveDomain) {
+      filteredTemplates = templates.filter(t => t.cognitiveDomain === cognitiveDomain);
+      if (filteredTemplates.length === 0) {
+        console.warn(`No templates found for domain ${cognitiveDomain} at difficulty ${difficultyLevel}, using all templates`);
+        filteredTemplates = templates;
+      }
+    }
+
     // Select random template
-    const template = templates[Math.floor(Math.random() * templates.length)];
+    const template = filteredTemplates[Math.floor(Math.random() * filteredTemplates.length)];
 
     // Generate random parameters
     const params = this.generateParameters(template.params, seed);
@@ -216,6 +257,7 @@ class QuestionGeneratorService {
       question_text: questionText,
       type: template.type,
       difficulty_level: difficultyLevel,
+      cognitive_domain: template.cognitiveDomain,
       parameters: params,
       solution: this.roundSolution(solution),
       hint: template.hint,
@@ -310,6 +352,100 @@ class QuestionGeneratorService {
       this.templates[difficultyLevel] = [];
     }
     this.templates[difficultyLevel].push(templateConfig);
+  }
+
+  /**
+   * Generate question by cognitive domain (regardless of difficulty)
+   */
+  generateQuestionByDomain(cognitiveDomain, chapterId, seed = null) {
+    // Collect all templates matching the cognitive domain
+    const matchingTemplates = [];
+    for (const [difficulty, templates] of Object.entries(this.templates)) {
+      for (const template of templates) {
+        if (template.cognitiveDomain === cognitiveDomain) {
+          matchingTemplates.push({ ...template, difficulty: parseInt(difficulty) });
+        }
+      }
+    }
+
+    if (matchingTemplates.length === 0) {
+      throw new Error(`No templates available for cognitive domain ${cognitiveDomain}`);
+    }
+
+    // Select random template
+    const templateWithDiff = matchingTemplates[Math.floor(Math.random() * matchingTemplates.length)];
+    
+    // Generate using the difficulty from the selected template
+    return this.generateQuestion(templateWithDiff.difficulty, chapterId, seed, cognitiveDomain);
+  }
+
+  /**
+   * Get available cognitive domains at a difficulty level
+   */
+  getDomainsForDifficulty(difficultyLevel) {
+    const templates = this.templates[difficultyLevel];
+    if (!templates) return [];
+    
+    const domains = new Set(templates.map(t => t.cognitiveDomain));
+    return Array.from(domains);
+  }
+
+  /**
+   * Get cognitive domain distribution across all templates
+   */
+  getCognitiveDomainStats() {
+    const stats = {};
+    
+    for (const domain of Object.values(this.COGNITIVE_DOMAINS)) {
+      stats[domain] = {
+        count: 0,
+        difficulties: []
+      };
+    }
+
+    for (const [difficulty, templates] of Object.entries(this.templates)) {
+      for (const template of templates) {
+        const domain = template.cognitiveDomain;
+        if (stats[domain]) {
+          stats[domain].count++;
+          if (!stats[domain].difficulties.includes(parseInt(difficulty))) {
+            stats[domain].difficulties.push(parseInt(difficulty));
+          }
+        }
+      }
+    }
+
+    return stats;
+  }
+
+  /**
+   * Get human-readable cognitive domain name
+   */
+  getCognitiveDomainLabel(domain) {
+    const labels = {
+      'knowledge_recall': 'Knowledge Recall (KR)',
+      'concept_understanding': 'Concept Understanding (CU)',
+      'procedural_skills': 'Procedural Skills (PS)',
+      'analytical_thinking': 'Analytical Thinking (AT)',
+      'problem_solving': 'Problem Solving (PS+)',
+      'higher_order_thinking': 'Higher Order Thinking (HOT)'
+    };
+    return labels[domain] || domain;
+  }
+
+  /**
+   * Get cognitive domain description
+   */
+  getCognitiveDomainDescription(domain) {
+    const descriptions = {
+      'knowledge_recall': 'Basic geometry definitions, formulas, and facts',
+      'concept_understanding': 'Understanding relationships and classifications between shapes',
+      'procedural_skills': 'Computing area, perimeter, angles, and applying formulas',
+      'analytical_thinking': 'Patterns, logic, and multi-step reasoning',
+      'problem_solving': 'Real-world geometry word problems and applications',
+      'higher_order_thinking': 'Creative thinking, complex reasoning, and synthesis'
+    };
+    return descriptions[domain] || 'No description available';
   }
 }
 

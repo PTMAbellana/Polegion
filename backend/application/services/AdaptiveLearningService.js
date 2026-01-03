@@ -45,6 +45,26 @@ class AdaptiveLearningService {
       REAL_WORLD: 'real_world' // Contextual, real-life examples
     };
 
+    // Cognitive Domains - aligned with Bloom's Taxonomy
+    this.COGNITIVE_DOMAINS = {
+      KR: 'knowledge_recall',        // Basic facts and formulas
+      CU: 'concept_understanding',   // Relationships between concepts
+      PS: 'procedural_skills',       // Step-by-step calculations
+      AT: 'analytical_thinking',     // Multi-step reasoning
+      PSP: 'problem_solving',        // Real-world applications
+      HOT: 'higher_order_thinking'   // Creative/complex reasoning
+    };
+
+    // Cognitive domain progression path (from easier to harder thinking)
+    this.DOMAIN_PROGRESSION = [
+      'knowledge_recall',
+      'concept_understanding',
+      'procedural_skills',
+      'analytical_thinking',
+      'problem_solving',
+      'higher_order_thinking'
+    ];
+
     // Q-Learning Parameters
     this.LEARNING_RATE = 0.15;      // Alpha: how quickly to update Q-values
     this.DISCOUNT_FACTOR = 0.9;     // Gamma: importance of future rewards
@@ -770,47 +790,69 @@ class AdaptiveLearningService {
 
   /**
    * Get adaptive questions based on student's current difficulty
-   * NOW USES PARAMETRIC GENERATION - Creates infinite unique questions!
+   * NOW USES PARAMETRIC GENERATION with COGNITIVE DOMAINS!
    */
-  async getAdaptiveQuestions(userId, chapterId, count = 10) {
+  async getAdaptiveQuestions(userId, chapterId, count = 10, targetCognitiveDomain = null) {
     try {
       const state = await this.repo.getStudentDifficulty(userId, chapterId);
       
-      // OPTION 1: Generate fresh questions on-the-fly (recommended)
-      const generatedQuestions = this.questionGenerator.generateQuestions(
-        state.difficulty_level,
-        chapterId,
-        count
-      );
-
-      // OPTION 2: Mix of generated + database questions (hybrid approach)
-      // Uncomment below to use hybrid approach
-      /*
-      const dbQuestions = await this.repo.getQuestionsByDifficulty(
-        chapterId,
-        state.difficulty_level,
-        Math.floor(count / 2)
-      );
-      const genCount = count - dbQuestions.length;
-      const generatedQuestions = this.questionGenerator.generateQuestions(
-        state.difficulty_level,
-        chapterId,
-        genCount
-      );
-      const allQuestions = [...dbQuestions, ...generatedQuestions];
-      */
+      // Determine cognitive domain to use
+      const cognitiveDomain = targetCognitiveDomain || this.determineCognitiveDomain(state);
+      
+      // Generate questions with cognitive domain consideration
+      const generatedQuestions = [];
+      for (let i = 0; i < count; i++) {
+        const question = this.questionGenerator.generateQuestion(
+          state.difficulty_level,
+          chapterId,
+          i,
+          cognitiveDomain
+        );
+        generatedQuestions.push(question);
+      }
 
       return {
         questions: generatedQuestions,
         currentDifficulty: state.difficulty_level,
+        currentCognitiveDomain: cognitiveDomain,
+        cognitiveDomainLabel: this.questionGenerator.getCognitiveDomainLabel(cognitiveDomain),
         masteryLevel: state.mastery_level,
         difficultyLabel: this.getDifficultyLabel(state.difficulty_level),
-        questionSource: 'parametric_generation', // NEW: indicates questions are generated
-        totalTemplates: this.questionGenerator.getTemplateStats()
+        questionSource: 'parametric_generation',
+        totalTemplates: this.questionGenerator.getTemplateStats(),
+        cognitiveDomainStats: this.questionGenerator.getCognitiveDomainStats()
       };
     } catch (error) {
       console.error('Error getting adaptive questions:', error);
       throw error;
+    }
+  }
+
+  /**
+   * Determine appropriate cognitive domain based on student performance
+   * Progressively advances through cognitive complexity
+   */
+  determineCognitiveDomain(state) {
+    const { mastery_level, difficulty_level, total_attempts } = state;
+    
+    // Early stage: Focus on knowledge recall and understanding
+    if (total_attempts < 10) {
+      return 'knowledge_recall';
+    }
+    
+    // Based on mastery level, advance through cognitive domains
+    if (mastery_level >= 90) {
+      return 'higher_order_thinking'; // HOT - Ready for complex reasoning
+    } else if (mastery_level >= 75) {
+      return difficulty_level >= 4 ? 'problem_solving' : 'analytical_thinking';
+    } else if (mastery_level >= 60) {
+      return difficulty_level >= 3 ? 'analytical_thinking' : 'procedural_skills';
+    } else if (mastery_level >= 40) {
+      return 'procedural_skills'; // PS - Build calculation skills
+    } else if (mastery_level >= 20) {
+      return 'concept_understanding'; // CU - Understand relationships
+    } else {
+      return 'knowledge_recall'; // KR - Back to basics
     }
   }
 
@@ -831,10 +873,16 @@ class AdaptiveLearningService {
       // Get Q-values for current state
       const stateKey = this.getStateKey(state);
       const qValues = this.getQValuesForState(stateKey);
+      
+      // Determine current cognitive domain
+      const cognitiveDomain = this.determineCognitiveDomain(state);
 
       return {
         currentDifficulty: state.difficulty_level,
         difficultyLabel: this.getDifficultyLabel(state.difficulty_level),
+        currentCognitiveDomain: cognitiveDomain,
+        cognitiveDomainLabel: this.questionGenerator.getCognitiveDomainLabel(cognitiveDomain),
+        cognitiveDomainDescription: this.questionGenerator.getCognitiveDomainDescription(cognitiveDomain),
         masteryLevel: state.mastery_level,
         correctStreak: state.correct_streak,
         wrongStreak: state.wrong_streak,
@@ -858,6 +906,13 @@ class AdaptiveLearningService {
           explorationRate: (this.getCurrentEpsilon(state.total_attempts) * 100).toFixed(1),
           qValues: qValues,
           totalStatesLearned: this.qTable.size
+        },
+        
+        // Cognitive domain progression info
+        cognitiveDomainProgression: {
+          current: cognitiveDomain,
+          available: this.questionGenerator.getDomainsForDifficulty(state.difficulty_level),
+          progressionPath: this.DOMAIN_PROGRESSION
         },
         
         recentHistory: history.map(h => ({
