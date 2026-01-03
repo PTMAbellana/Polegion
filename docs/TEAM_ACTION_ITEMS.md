@@ -45,7 +45,20 @@
 
 ## 📝 **Next Steps (Before Jan 5 Deadline)**
 
+### **⚠️ IMPORTANT: Setup Required First!**
+
+**Before testing, implement the new Adaptive Topics system:**
+1. Follow the complete guide in `docs/ADAPTIVE_TOPICS_IMPLEMENTATION.md`
+2. Run the SQL migration to create 16 clear geometry topics
+3. Update backend/frontend to use topics instead of worldmap chapters
+4. **Why?** Current system uses confusing story names ("Paths of Power"). New system has clear names ("Perimeter Calculations").
+
+**Estimated setup time: 2-3 hours** - Do this Jan 3 morning!
+
+---
+
 ### **Priority 1: Team Testing & Data Collection** 🔴 URGENT
+*(After topics system is implemented)*
 
 **Each team member should:**
 1. **Create test student accounts** (5-10 accounts each)
@@ -57,10 +70,17 @@
 
 3. **Testing Protocol:**
    - [ ] Each person: Complete 30-50 problems per test account
-   - [ ] Use different chapters to test various difficulty levels
+   - [ ] Use different **topics** across cognitive domains (not chapters!)
+   - [ ] Test topics from different difficulty levels (Knowledge Recall → Higher Order Thinking)
    - [ ] Intentionally answer wrong 3-5 times in a row (test difficulty decrease)
    - [ ] Answer correctly 5+ times in a row (test difficulty increase)
    - [ ] Record observations: Did difficulty adjust appropriately?
+
+**Available Topics for Testing** (16 total):
+- Knowledge Recall: "Points, Lines, and Line Segments", "Angle Types", etc.
+- Procedural Skills: "Perimeter Calculations", "Area of 2D Shapes"  
+- Problem Solving: "Geometry Word Problems"
+- Higher Order: "Geometric Proofs"
 
 4. **Data Collection:**
    - [ ] After testing, export Q-Table: `GET /api/adaptive/qlearning/export`
