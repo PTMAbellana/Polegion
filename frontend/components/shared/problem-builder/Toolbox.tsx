@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import styles from "@/styles/create-problem-teacher.module.css";
+import styles from "@/styles/problem-builder.module.css";
 import { ToolboxProps } from "@/types";
 
 const Toolbox: React.FC<ToolboxProps> = ({

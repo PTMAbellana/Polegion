@@ -1,11 +1,11 @@
 "use client";
 
-import styles from "@/styles/create-problem-teacher.module.css";
+import styles from "@/styles/problem-builder.module.css";
 import { useRouter } from "next/navigation";
 import React, { useState, useRef, useEffect, useCallback, useMemo } from "react";
 
 // Import create-problem components (these are already Konva-based)
-import PropertiesPanel from '@/components/teacher/create-problem/PropertiesPanel';
+import PropertiesPanel from '@/components/shared/problem-builder/PropertiesPanel';
 import PageHeader from '@/components/PageHeader';
 import LandscapePrompt from '@/components/LandscapePrompt';
 import { useAuthStore } from '@/store/authStore';
@@ -17,7 +17,7 @@ import { submitSolution } from '@/api/attempt';
 import Swal from "sweetalert2";
 import { useCompetitionTimer } from '@/hooks/useCompetitionTimer';
 import { useCompetitionRealtime } from '@/hooks/useCompetitionRealtime';
-import { MainArea, PromptBox, ShapeLimitPopup, Toolbox } from "./teacher/create-problem";
+import { MainArea, PromptBox, ShapeLimitPopup, Toolbox } from "./shared/problem-builder";
 
 interface CompetitionProblem {
   id: number

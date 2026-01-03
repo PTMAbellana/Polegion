@@ -1,5 +1,5 @@
 import React from "react";
-import styles from "@/styles/create-problem-teacher.module.css";
+import styles from "@/styles/problem-builder.module.css";
 
 const LandscapePrompt: React.FC = () => {
   return (

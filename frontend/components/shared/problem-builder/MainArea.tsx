@@ -1,6 +1,6 @@
 import React, { useRef, useState } from "react";
 import { Stage, Layer } from "react-konva";
-import styles from "@/styles/create-problem-teacher.module.css";
+import styles from "@/styles/problem-builder.module.css";
 import SquareShape from "./shapes/SquareShape";
 import TriangleShape from "./shapes/TriangleShape";
 import CircleShape from "./shapes/CircleShape";

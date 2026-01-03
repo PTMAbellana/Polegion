@@ -3,10 +3,10 @@
 import React from "react";
 import styles from "@/styles/create-problem-teacher.module.css";
 import PageHeader from "@/components/PageHeader";
-import Toolbox from "@/components/teacher/create-problem/Toolbox";
-import MainArea from "@/components/teacher/create-problem/MainArea";
-import PropertiesPanel from "@/components/teacher/create-problem/PropertiesPanel";
-import ShapeLimitPopup from "@/components/teacher/create-problem/ShapeLimitPopup";
+import Toolbox from "@/components/shared/problem-builder/Toolbox";
+import MainArea from "@/components/shared/problem-builder/MainArea";
+import PropertiesPanel from "@/components/shared/problem-builder/PropertiesPanel";
+import ShapeLimitPopup from "@/components/shared/problem-builder/ShapeLimitPopup";
 import LandscapePrompt from "@/components/LandscapePrompt";
 
 // Hooks

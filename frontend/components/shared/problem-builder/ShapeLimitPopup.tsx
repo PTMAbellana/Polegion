@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from "react";
-import styles from "@/styles/create-problem-teacher.module.css";
+import styles from "@/styles/problem-builder.module.css";
 import { ShapeLimitPopupProps } from "@/types";
 
 const ShapeLimitPopup: React.FC<ShapeLimitPopupProps> = ({ onClose, limit = 1 }) => {

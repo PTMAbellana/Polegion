@@ -1,9 +1,9 @@
-import { STUDENT_ROUTES, TEACHER_ROUTES } from "./routes";
-import { FaHome, FaUser, FaChalkboardTeacher, FaDungeon, FaMedal, FaUserAstronaut, FaFortAwesome, FaShapes, FaRegFileAlt, FaBrain, FaBook, FaChartLine, FaRobot } from 'react-icons/fa';
+import { STUDENT_ROUTES } from "./routes";
+import { FaHome, FaChalkboardTeacher, FaUserAstronaut, FaFortAwesome, FaShapes, FaBrain, FaRobot } from 'react-icons/fa';
 
-// Navigation items for teachers (RESTRICTED IN RESEARCH BUILD)
+// Navigation items for teachers (REMOVED - Student-only build)
 export const teacherNavItems = [
-    { path: '/teacher/restricted', icon: FaChalkboardTeacher, label: 'Teacher Access', title: 'Teacher Features Restricted' },
+    { path: '/restricted', icon: FaChalkboardTeacher, label: 'Access Restricted', title: 'Teacher Features Not Available' },
 ];
 
 // Navigation items for students (Research Focus: Adaptive Learning)

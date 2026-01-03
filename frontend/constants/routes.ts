@@ -59,35 +59,18 @@ export const STUDENT_ROUTES = {
     PLAY: `/student${ROUTES.COMPETITION}`,
 }
 
+// TEACHER_ROUTES removed - Student-only build
 export const TEACHER_ROUTES = {
-    // auth
-    LOGIN: `/teacher${ROUTES.LOGIN}`,
-    REGISTER: `/teacher${ROUTES.REGISTER}`,
-    
-    // dashboard
-    DASHBOARD: `/teacher${ROUTES.DASHBOARD}`,
-    
-    // virtual rooms
-    VIRTUAL_ROOMS: `/teacher/virtual-rooms`,
-    
-    // records
-    RECORDS: `/teacher${ROUTES.RECORDS}`,
-    
-    // student progress reports (now under records)
-    // STUDENT_PROGRESS: `/teacher/records/[roomId]/student/[userId]`, // Dynamic route
-    
-    // castle content viewer (read-only reference)
-    CASTLE_CONTENT: `/teacher/castle-content`,
-    
-    // practice problems viewer (read-only reference)
-    PRACTICE_PROBLEMS: `/teacher/practice-problems`,
-    
-    // profile
-    PROFILE: `/teacher${ROUTES.PROFILE}`,
-    EDIT_PROFILE: `/teacher${ROUTES.EDIT_PROFILE}`,
-
-    // competition
-    COMPETITION: `/teacher${ROUTES.COMPETITION}`,
+    LOGIN: '/restricted',
+    REGISTER: '/restricted',
+    DASHBOARD: '/restricted',
+    VIRTUAL_ROOMS: '/restricted',
+    RECORDS: '/restricted',
+    CASTLE_CONTENT: '/restricted',
+    PRACTICE_PROBLEMS: '/restricted',
+    PROFILE: '/restricted',
+    EDIT_PROFILE: '/restricted',
+    COMPETITION: '/restricted',
 }
 export const PUBLIC_ROUTES = [
     ROUTES.HOME,
@@ -96,8 +79,6 @@ export const PUBLIC_ROUTES = [
     ROUTES.RESET_PASSWORD,
     STUDENT_ROUTES.LOGIN,
     STUDENT_ROUTES.REGISTER,
-    TEACHER_ROUTES.LOGIN,
-    TEACHER_ROUTES.REGISTER,
     '/terms-and-conditions',
     '/privacy-policy'
 ]
