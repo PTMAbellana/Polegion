@@ -7,19 +7,16 @@ require('dotenv').config()
 const {
     authRoutes, 
     userRoutes, 
-    participantRoutes, 
-    problemRoutes,
-    attemptsRoutes,
-    castleRoutes,          // Newly Added
-    chapterQuizRoutes,     // Newly Added
-    chapterRoutes,         // Newly Added
-    minigameRoutes,       // Newly Added
-    userCastleProgressRoutes, // Newly Added
-    userChapterProgressRoutes, // Newly Added
-    userMinigameAttemptRoutes, // Newly Added
-    userQuizAttemptRoutes,      // Newly Added
-    assessmentRoutes,           // Assessment system
-    adaptiveLearningRoutes      // Adaptive learning research
+    castleRoutes,
+    chapterQuizRoutes,
+    chapterRoutes,
+    minigameRoutes,
+    userCastleProgressRoutes,
+    userChapterProgressRoutes,
+    userMinigameAttemptRoutes,
+    userQuizAttemptRoutes,
+    assessmentRoutes,
+    adaptiveLearningRoutes
 } = require('./container')
 
 const app = express()
@@ -92,19 +89,16 @@ if (process.env.NODE_ENV === 'production' && process.env.BACKEND_URL) {
 //routes
 app.use('/api/auth', authRoutes)
 app.use('/api/users', userRoutes)
-app.use('/api/participants', participantRoutes)
-app.use('/api/problems', problemRoutes)
-app.use('/api/attempts', attemptsRoutes)
-app.use('/api/castles', castleRoutes)                     // Newly Added
-app.use('/api/chapter-quizzes', chapterQuizRoutes)        // Newly Added
-app.use('/api/chapters', chapterRoutes)                   // Newly Added
-app.use('/api/minigames', minigameRoutes)                 // Newly Added
-app.use('/api/user-castle-progress', userCastleProgressRoutes) // Newly Added
-app.use('/api/user-chapter-progress', userChapterProgressRoutes) // Newly Added
-app.use('/api/user-minigame-attempts', userMinigameAttemptRoutes) // Newly Added
-app.use('/api/user-quiz-attempts', userQuizAttemptRoutes)       // Newly Added
-app.use('/api/assessments', assessmentRoutes)                   // Assessment system
-app.use('/api/adaptive', adaptiveLearningRoutes)                // Adaptive learning research
+app.use('/api/castles', castleRoutes)
+app.use('/api/chapter-quizzes', chapterQuizRoutes)
+app.use('/api/chapters', chapterRoutes)
+app.use('/api/minigames', minigameRoutes)
+app.use('/api/user-castle-progress', userCastleProgressRoutes)
+app.use('/api/user-chapter-progress', userChapterProgressRoutes)
+app.use('/api/user-minigame-attempts', userMinigameAttemptRoutes)
+app.use('/api/user-quiz-attempts', userQuizAttemptRoutes)
+app.use('/api/assessments', assessmentRoutes)
+app.use('/api/adaptive', adaptiveLearningRoutes)
 //swagger documentation
 app.use('/api-docs', swaggerServe, swaggerSetup)
 

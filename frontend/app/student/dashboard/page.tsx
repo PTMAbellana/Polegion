@@ -3,8 +3,6 @@
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { useAuthStore } from "@/store/authStore"
-import { useStudentRoomStore } from "@/store/studentRoomStore"
-import { useStudentDashboardRealtime } from "@/hooks/useStudentDashboardRealtime"
 import LoadingOverlay from "@/components/LoadingOverlay"
 import PageHeader from "@/components/PageHeader"
 import MiniProfileCard from "@/components/MiniProfileCard"
@@ -14,50 +12,19 @@ import studentStyles from "@/styles/dashboard.module.css"
 import { getAssessmentResults } from "@/api/assessments"
 import AssessmentRadarChart from "@/components/assessment/AssessmentRadarChart"
 import { getAllCastles } from "@/api/castles"
-import { FaFortAwesome, FaDungeon, FaMedal } from 'react-icons/fa'
-
-// Extended type for competitions with room context and additional fields
+import { FaFortAwesome, FaFlask } from 'react-icons/fa'
 
 export default function StudentDashboard() {
   const router = useRouter()
   const { isLoggedIn, appLoading, userProfile } = useAuthStore()
-  const { 
-    joinedRooms, 
-    loading: roomsLoading, 
-    fetchJoinedRooms 
-  } = useStudentRoomStore()
 
-  // Assessment and castle state (not affected by real-time)
+  // Assessment and castle state
   const [pretestScores, setPretestScores] = useState<any>(null)
   const [posttestScores, setPosttestScores] = useState<any>(null)
   const [assessmentLoading, setAssessmentLoading] = useState(true)
   const [castles, setCastles] = useState<any[]>([])
   const [castlesLoading, setCastlesLoading] = useState(true)
   const [activeTab, setActiveTab] = useState<'assessment' | 'castle'>('castle')
-
-  // Initial fetch on mount
-  useEffect(() => {
-    if (isLoggedIn && !appLoading) {
-      void fetchJoinedRooms()
-    }
-  }, [isLoggedIn, appLoading, fetchJoinedRooms])
-
-  // Real-time hook for competitions and leaderboards
-  const { lastUpdate } = useStudentDashboardRealtime(
-    userProfile?.id,
-    joinedRooms
-  )
-
-  // Auto-refresh rooms when real-time updates occur
-  useEffect(() => {
-    if (lastUpdate > 0 && joinedRooms.length > 0) {
-      // Debounce: only refresh if last update was recent
-      const timeSinceUpdate = Date.now() - lastUpdate
-      if (timeSinceUpdate < 1000) {
-        void fetchJoinedRooms()
-      }
-    }
-  }, [lastUpdate, fetchJoinedRooms, joinedRooms.length])
 
   // Fetch assessment results
   useEffect(() => {
@@ -123,10 +90,6 @@ export default function StudentDashboard() {
     fetchCastles()
   }, [userProfile?.id])
 
-  const handleJoinRoom = () => {
-    router.push(STUDENT_ROUTES.JOINED_ROOMS)
-  }
-
   if (appLoading || !isLoggedIn) {
     return <LoadingOverlay isLoading={true} />
   }
@@ -172,27 +135,14 @@ export default function StudentDashboard() {
             
             <button 
               className={studentStyles.quickActionCard}
-              onClick={handleJoinRoom}
+              onClick={() => router.push(STUDENT_ROUTES.ADAPTIVE_LEARNING)}
             >
               <div className={studentStyles.quickActionIcon}>
-                <FaDungeon />
+                <FaFlask />
               </div>
               <div className={studentStyles.quickActionContent}>
-                <h4>Join Room</h4>
-                <p>Enter a room code</p>
-              </div>
-            </button>
-
-            <button 
-              className={studentStyles.quickActionCard}
-              onClick={() => router.push(STUDENT_ROUTES.LEADERBOARD)}
-            >
-              <div className={studentStyles.quickActionIcon}>
-                <FaMedal />
-              </div>
-              <div className={studentStyles.quickActionContent}>
-                <h4>Leaderboard</h4>
-                <p>See top performers</p>
+                <h4>Adaptive Learning</h4>
+                <p>AI-powered learning path</p>
               </div>
             </button>
           </div>

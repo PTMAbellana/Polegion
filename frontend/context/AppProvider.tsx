@@ -2,7 +2,6 @@
 import { useEffect, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/authStore';
-import { useStudentRoomStore } from '@/store/studentRoomStore';
 import { useCastleStore } from '@/store/castleStore';
 import Loader from '@/components/Loader';
 import { ROUTES, PUBLIC_ROUTES, STUDENT_ROUTES } from '@/constants/routes';
@@ -19,7 +18,6 @@ export default function AppProvider({ children }: { children: React.ReactNode })
     syncAuthToken
   } = useAuthStore();
   
-  const { fetchJoinedRooms } = useStudentRoomStore();
   const { fetchCastles } = useCastleStore();
   
   const [localLoading, setLocalLoading] = useState(true);
@@ -107,7 +105,6 @@ export default function AppProvider({ children }: { children: React.ReactNode })
 
         // Fetch user data when authenticated and on protected routes
         if (isLoggedIn && userProfile && !PUBLIC_ROUTES.includes(pathname)) {
-          fetchJoinedRooms();
           // Fetch castles for students
           if (userProfile.id) {
             fetchCastles(userProfile.id);
@@ -130,7 +127,6 @@ export default function AppProvider({ children }: { children: React.ReactNode })
     appLoading,
     authLoading,
     authToken,
-    fetchJoinedRooms,
     fetchCastles
   ]);
 

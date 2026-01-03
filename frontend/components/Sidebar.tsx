@@ -23,7 +23,7 @@ const Sidebar = (
     const [isHovering, setIsHovering] = useState(false);
     const sidebarRef = useRef<HTMLDivElement>(null);
 
-    const navItems = userRole === 'teacher' ? teacherNavItems : studentNavItems;
+    const navItems = userRole === 'student' ? studentNavItems : teacherNavItems;
 
     useEffect(() => {
         const checkMobile = () => {

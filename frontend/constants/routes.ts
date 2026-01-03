@@ -27,36 +27,27 @@ export const ROUTES = {
 
 export const STUDENT_ROUTES = {
     // auth
-    LOGIN: `/student${ROUTES.LOGIN}`,
-    REGISTER: `/student${ROUTES.REGISTER}`,
+    LOGIN: `/student/auth/login`,
+    REGISTER: `/student/auth/register`,
     
     // dashboard
-    DASHBOARD: `/student${ROUTES.DASHBOARD}`,
-    
-    // dungeons or joined rooms
-    JOINED_ROOMS: `/student/joined-rooms`,
+    DASHBOARD: `/student/dashboard`,
     
     // worldmap
     WORLD_MAP: `/student/worldmap`,
     
     // adaptive learning (RESEARCH FEATURE)
     ADAPTIVE_LEARNING: `/student/adaptive-learning`,
-    
+
     // practice
     PRACTICE: `/student/practice`,
-    
+
     // playground
     PLAYGROUND: `/student/playground`,
     
-    // wall of fame or leaderboards
-    LEADERBOARD: `/student/leaderboard`,
-    
     // profile
-    PROFILE: `/student${ROUTES.PROFILE}`,
-    EDIT_PROFILE: `/student${ROUTES.EDIT_PROFILE}`,
-
-    // play competition
-    PLAY: `/student${ROUTES.COMPETITION}`,
+    PROFILE: `/student/profile`,
+    EDIT_PROFILE: `/student/profile/edit`,
 }
 
 // TEACHER_ROUTES removed - Student-only build
