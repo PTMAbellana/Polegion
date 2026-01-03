@@ -17,6 +17,16 @@ class AdaptiveLearningRoutes {
     this.router.use(this.authMiddleware.protect);
 
     /**
+     * @route   GET /api/adaptive/topics
+     * @desc    Get all available adaptive learning topics
+     * @access  Private (authenticated students)
+     */
+    this.router.get(
+      '/topics',
+      this.controller.getTopics.bind(this.controller)
+    );
+
+    /**
      * @route   POST /api/adaptive/submit-answer
      * @desc    Submit answer and get adaptive feedback
      * @access  Private (authenticated students)
@@ -27,32 +37,32 @@ class AdaptiveLearningRoutes {
     );
 
     /**
-     * @route   GET /api/adaptive/questions/:chapterId
+     * @route   GET /api/adaptive/questions/:topicId
      * @desc    Get adaptive questions based on student's difficulty
      * @access  Private (authenticated students)
      */
     this.router.get(
-      '/questions/:chapterId',
+      '/questions/:topicId',
       this.controller.getAdaptiveQuestions.bind(this.controller)
     );
 
     /**
-     * @route   GET /api/adaptive/state/:chapterId
+     * @route   GET /api/adaptive/state/:topicId
      * @desc    Get student's current adaptive learning state
      * @access  Private (authenticated students)
      */
     this.router.get(
-      '/state/:chapterId',
+      '/state/:topicId',
       this.controller.getStudentState.bind(this.controller)
     );
 
     /**
-     * @route   POST /api/adaptive/reset/:chapterId
-     * @desc    Reset difficulty level for a chapter
+     * @route   POST /api/adaptive/reset/:topicId
+     * @desc    Reset difficulty level for a topic
      * @access  Private (authenticated students)
      */
     this.router.post(
-      '/reset/:chapterId',
+      '/reset/:topicId',
       this.controller.resetDifficulty.bind(this.controller)
     );
 
@@ -87,12 +97,12 @@ class AdaptiveLearningRoutes {
     );
 
     /**
-     * @route   GET /api/adaptive/predict/:chapterId
+     * @route   GET /api/adaptive/predict/:topicId
      * @desc    Get AI prediction for next performance
      * @access  Private (authenticated students)
      */
     this.router.get(
-      '/predict/:chapterId',
+      '/predict/:topicId',
       this.controller.getPrediction.bind(this.controller)
     );
 

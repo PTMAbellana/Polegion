@@ -61,6 +61,7 @@ class AdaptiveLearningRepository {
         return await this.createStudentDifficulty(userId, topicId);
       }
 
+      console.log('[Repo] getStudentDifficulty returned:', JSON.stringify(data, null, 2));
       cache.set(cacheKey, data, this.CACHE_TTL);
       return data;
     } catch (error) {
@@ -92,7 +93,7 @@ class AdaptiveLearningRepository {
       if (error) throw error;
 
       // Invalidate cache
-      const cacheKey = cache.generateKey('student_difficulty', userId, chapterId);
+      const cacheKey = cache.generateKey('student_difficulty', userId, topicId);
       cache.delete(cacheKey);
 
       return data;
@@ -138,28 +139,24 @@ class AdaptiveLearningRepository {
   async logStateTransition(transitionData) {
     try {
       const { data, error } = await this.supabase
-        .from('mdp_state_transitions')
+        .from('adaptive_state_transitions')
         .insert({
           user_id: transitionData.userId,
           topic_id: transitionData.topicId,
-          prev_mastery_level: transitionData.prevState.masteryLevel,
-          prev_difficulty: transitionData.prevState.difficultyLevel,
-          prev_correct_streak: transitionData.prevState.correctStreak,
-          prev_wrong_streak: transitionData.prevState.wrongStreak,
-          prev_total_attempts: transitionData.prevState.totalAttempts,
+          prev_mastery: transitionData.prevState.mastery_level || transitionData.prevState.masteryLevel || 0,
+          prev_difficulty: transitionData.prevState.difficulty_level || transitionData.prevState.difficultyLevel || 3,
+          new_mastery: transitionData.newState.mastery_level || transitionData.newState.masteryLevel || 0,
+          new_difficulty: transitionData.newState.difficulty_level || transitionData.newState.difficultyLevel || 3,
           action: transitionData.action,
           action_reason: transitionData.actionReason,
-          new_mastery_level: transitionData.newState.masteryLevel,
-          new_difficulty: transitionData.newState.difficultyLevel,
-          new_correct_streak: transitionData.newState.correctStreak,
-          new_wrong_streak: transitionData.newState.wrongStreak,
-          new_total_attempts: transitionData.newState.totalAttempts,
           reward: transitionData.reward,
           question_id: transitionData.questionId,
           was_correct: transitionData.wasCorrect,
-          time_spent_seconds: transitionData.timeSpent,
-          session_id: transitionData.sessionId,
-          metadata: transitionData.metadata || {}
+          time_spent: transitionData.timeSpent,
+          used_exploration: transitionData.usedExploration || false,
+          q_value: transitionData.qValue || 0,
+          epsilon: transitionData.epsilon || 0,
+          session_id: transitionData.sessionId
         })
         .select()
         .single();
@@ -227,7 +224,7 @@ class AdaptiveLearningRepository {
         .select('*')
         .eq('user_id', userId)
         .eq('topic_id', topicId)
-        .order('timestamp', { ascending: false })
+        .order('created_at', { ascending: false })
         .limit(limit);
 
       if (error) throw error;
@@ -310,14 +307,14 @@ class AdaptiveLearningRepository {
    * Get recent attempts for misconception detection
    * Returns last N state transitions for a student in a chapter
    */
-  async getRecentAttempts(userId, chapterId, limit = 10) {
+  async getRecentAttempts(userId, topicId, limit = 10) {
     try {
       const { data, error } = await this.supabase
-        .from('mdp_state_transitions')
+        .from('adaptive_state_transitions')
         .select('*')
         .eq('user_id', userId)
-        .eq('chapter_id', chapterId)
-        .order('timestamp', { ascending: false })
+        .eq('topic_id', topicId)
+        .order('created_at', { ascending: false })
         .limit(limit);
 
       if (error) throw error;

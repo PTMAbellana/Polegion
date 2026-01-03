@@ -34,26 +34,52 @@ interface AdaptiveResponse {
 }
 
 interface AdaptiveLearningProps {
-  chapterId: string;
+  topicId: string;
 }
 
 /**
  * Child-Friendly Adaptive Learning Component
  * Designed for elementary students with visual learning emphasis
  */
-export default function AdaptiveLearning({ chapterId }: AdaptiveLearningProps) {
+export default function AdaptiveLearning({ topicId }: AdaptiveLearningProps) {
   const [state, setState] = useState<AdaptiveState | null>(null);
   const [lastResponse, setLastResponse] = useState<AdaptiveResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [showCelebration, setShowCelebration] = useState(false);
+  const [currentQuestion, setCurrentQuestion] = useState<any>(null);
 
   // Fetch current adaptive state
   const fetchState = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`/adaptive/state/${chapterId}`);
-      setState(response.data.data);
+      const stateResponse = await axios.get(`/adaptive/state/${topicId}`);
+      setState(stateResponse.data.data);
+      
+      // Generate random question variations
+      const length = Math.floor(Math.random() * 12) + 8;  // 8-19
+      const width = Math.floor(Math.random() * 10) + 5;   // 5-14
+      const perimeter = 2 * (length + width);
+      
+      // Generate wrong answers
+      const wrongAnswers = [
+        perimeter + Math.floor(Math.random() * 10) + 5,
+        perimeter - Math.floor(Math.random() * 8) - 3,
+        length * width  // Common mistake: area instead of perimeter
+      ];
+      
+      const allOptions = [
+        { label: `${perimeter} units`, correct: true },
+        ...wrongAnswers.map(val => ({ label: `${val} units`, correct: false }))
+      ];
+      
+      // Shuffle options
+      const shuffled = allOptions.sort(() => Math.random() - 0.5);
+      
+      setCurrentQuestion({
+        question: `A rectangle has a length of ${length} units and a width of ${width} units. What is the perimeter?`,
+        options: shuffled
+      });
     } catch (error) {
       console.error('Error fetching adaptive state:', error);
     } finally {
@@ -63,15 +89,15 @@ export default function AdaptiveLearning({ chapterId }: AdaptiveLearningProps) {
 
   useEffect(() => {
     fetchState();
-  }, [chapterId]);
+  }, [topicId]);
 
   // Submit answer with celebration on correct
   const submitAnswer = async (isCorrect: boolean) => {
     try {
       setSubmitting(true);
       const response = await axios.post('/adaptive/submit-answer', {
-        chapterId,
-        questionId: `q-${Date.now()}`,
+        topicId,
+        questionId: currentQuestion?.id || null,
         isCorrect,
         timeSpent: Math.floor(Math.random() * 60) + 30
       });
@@ -210,6 +236,7 @@ export default function AdaptiveLearning({ chapterId }: AdaptiveLearningProps) {
           difficultyLevel={state.currentDifficulty}
           onAnswer={submitAnswer}
           disabled={submitting}
+          question={currentQuestion}
         />
 
         {/* Stats Footer */}

@@ -36,9 +36,11 @@ class AdaptiveLearningController {
       const { topicId, questionId, isCorrect, timeSpent } = req.body;
       const userId = req.user.id;
 
-      if (!topicId || !questionId || typeof isCorrect !== 'boolean') {
+      console.log('[AdaptiveController] submitAnswer called with:', { topicId, questionId, isCorrect, userId });
+
+      if (!topicId || typeof isCorrect !== 'boolean') {
         return res.status(400).json({
-          error: 'Missing required fields: topicId, questionId, isCorrect'
+          error: 'Missing required fields: topicId, isCorrect'
         });
       }
 
@@ -99,21 +101,21 @@ class AdaptiveLearningController {
   }
 
   /**
-   * GET /api/adaptive/state/:chapterId
+   * GET /api/adaptive/state/:topicId
    * Get student's current adaptive learning state
    */
   async getStudentState(req, res) {
     try {
-      const { chapterId } = req.params;
+      const { topicId } = req.params;
       const userId = req.user.id;
 
-      if (!chapterId) {
+      if (!topicId) {
         return res.status(400).json({
-          error: 'Chapter ID is required'
+          error: 'Topic ID is required'
         });
       }
 
-      const state = await this.service.getStudentState(userId, chapterId);
+      const state = await this.service.getStudentState(userId, topicId);
 
       return res.status(200).json({
         success: true,
@@ -129,17 +131,17 @@ class AdaptiveLearningController {
   }
 
   /**
-   * POST /api/adaptive/reset/:chapterId
-   * Reset student's difficulty level for a chapter
+   * POST /api/adaptive/reset/:topicId
+   * Reset student's difficulty level for a topic
    */
   async resetDifficulty(req, res) {
     try {
-      const { chapterId } = req.params;
+      const { topicId } = req.params;
       const userId = req.user.id;
 
-      if (!chapterId) {
+      if (!topicId) {
         return res.status(400).json({
-          error: 'Chapter ID is required'
+          error: 'Topic ID is required'
         });
       }
 
@@ -149,7 +151,7 @@ class AdaptiveLearningController {
         success: true,
         message: 'Difficulty reset to medium level',
         data: {
-          chapterId,
+          topicId,
           difficulty: 3
         }
       });
@@ -168,9 +170,9 @@ class AdaptiveLearningController {
    */
   async getResearchStats(req, res) {
     try {
-      const { chapterId } = req.query;
+      const { topicId } = req.query;
 
-      const stats = await this.service.getResearchStats(chapterId || null);
+      const stats = await this.service.getResearchStats(topicId || null);
 
       return res.status(200).json({
         success: true,
@@ -234,23 +236,23 @@ class AdaptiveLearningController {
   }
 
   /**
-   * GET /api/adaptive/predict/:chapterId
+   * GET /api/adaptive/predict/:topicId
    * Get AI prediction for student's next performance
    */
   async getPrediction(req, res) {
     try {
-      const { chapterId } = req.params;
+      const { topicId } = req.params;
       const userId = req.user.id;
 
-      if (!chapterId) {
+      if (!topicId) {
         return res.status(400).json({
-          error: 'Chapter ID is required'
+          error: 'Topic ID is required'
         });
       }
 
-      const state = await this.service.repo.getStudentDifficulty(userId, chapterId);
+      const state = await this.service.repo.getStudentDifficulty(userId, topicId);
       const prediction = this.service.predictNextPerformance(state);
-      const pattern = await this.service.analyzeLearningPattern(userId, chapterId);
+      const pattern = await this.service.analyzeLearningPattern(userId, topicId);
 
       return res.status(200).json({
         success: true,

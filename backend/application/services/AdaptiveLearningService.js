@@ -96,18 +96,25 @@ class AdaptiveLearningService {
   }
 
   /**
+   * Get all available adaptive learning topics
+   */
+  async getAllTopics() {
+    return await this.repo.getAllTopics();
+  }
+
+  /**
    * Main entry point: Process student answer and adjust difficulty
    * Uses Q-Learning to determine optimal action
    */
-  async processAnswer(userId, chapterId, questionId, isCorrect, timeSpent) {
+  async processAnswer(userId, topicId, questionId, isCorrect, timeSpent) {
     try {
       // 1. Get current state
-      const currentState = await this.repo.getStudentDifficulty(userId, chapterId);
+      const currentState = await this.repo.getStudentDifficulty(userId, topicId);
       
       // 2. Update performance metrics
       const newState = await this.updatePerformanceMetrics(
         userId, 
-        chapterId, 
+        topicId, 
         currentState, 
         isCorrect,
         timeSpent
@@ -125,7 +132,7 @@ class AdaptiveLearningService {
       const { action, reason, usedExploration, pedagogicalStrategy, representationType } = actionResult;
 
       // 5. Apply action (adjust difficulty and/or teaching strategy)
-      const updatedState = await this.applyAction(userId, chapterId, newState, action, actionResult);
+      const updatedState = await this.applyAction(userId, topicId, newState, action, actionResult);
 
       // 6. Calculate reward based on learning theory
       const reward = this.calculateAdvancedReward(currentState, newState, action, timeSpent);
@@ -136,7 +143,7 @@ class AdaptiveLearningService {
       // 8. Log transition for research analysis
       await this.repo.logStateTransition({
         userId,
-        chapterId,
+        topicId,
         prevState: currentState,
         action,
         actionReason: reason,
@@ -175,7 +182,7 @@ class AdaptiveLearningService {
    * Update student's performance metrics based on answer
    * Enhanced with time-based learning indicators
    */
-  async updatePerformanceMetrics(userId, chapterId, currentState, isCorrect, timeSpent) {
+  async updatePerformanceMetrics(userId, topicId, currentState, isCorrect, timeSpent) {
     const totalAttempts = currentState.total_attempts + 1;
     const correctAnswers = currentState.correct_answers + (isCorrect ? 1 : 0);
     const correctStreak = isCorrect ? currentState.correct_streak + 1 : 0;
@@ -209,7 +216,7 @@ class AdaptiveLearningService {
       mastery_level: masteryLevel
     };
 
-    return await this.repo.updateStudentDifficulty(userId, chapterId, updates);
+    return await this.repo.updateStudentDifficulty(userId, topicId, updates);
   }
 
   /**
@@ -264,7 +271,9 @@ class AdaptiveLearningService {
 
     // If no Q-values exist yet, fall back to rule-based policy
     if (bestAction === null || bestQValue === 0) {
-      const fallback = this.determineActionRuleBased(state);
+      console.log('[selectActionQLearning] Calling determineActionRuleBased with state:', state);
+      const fallback = await this.determineActionRuleBased(state);
+      console.log('[selectActionQLearning] Fallback result:', fallback);
       return {
         ...fallback,
         usedExploration: false,
@@ -340,10 +349,10 @@ class AdaptiveLearningService {
    * Educational Psychology: Identifies if student is making the same type of error repeatedly
    * Critical for changing teaching approach instead of repeating failed methods
    */
-  async detectMisconception(userId, chapterId) {
+  async detectMisconception(userId, topicId) {
     try {
       // Get recent answer history (last 5-10 attempts)
-      const recentHistory = await this.repo.getRecentAttempts(userId, chapterId, 10);
+      const recentHistory = await this.repo.getRecentAttempts(userId, topicId, 10);
       
       if (!recentHistory || recentHistory.length < 3) {
         return null;
@@ -407,18 +416,29 @@ class AdaptiveLearningService {
    * Based on educational psychology - DO NOT repeat failed methods
    */
   async determineActionRuleBased(state) {
-    const { 
-      mastery_level, 
-      correct_streak, 
-      wrong_streak, 
-      difficulty_level,
-      current_representation = 'text',
-      user_id,
-      chapter_id
-    } = state;
+    try {
+      console.log('[determineActionRuleBased] Input state:', JSON.stringify(state, null, 2));
+      
+      const { 
+        mastery_level = 0, 
+        correct_streak = 0, 
+        wrong_streak = 0, 
+        difficulty_level = 3,
+        current_representation = 'text',
+        user_id,
+        topic_id
+      } = state;
 
-    // PRIORITY 1: Detect misconceptions (change approach!)
-    const misconception = await this.detectMisconception(user_id, chapter_id);
+      console.log('[determineActionRuleBased] Destructured:', { user_id, topic_id, mastery_level, correct_streak, wrong_streak, difficulty_level });
+
+      // PRIORITY 1: Detect misconceptions (change approach!)
+      // Only call if we have valid IDs
+      let misconception = null;
+      if (user_id && topic_id) {
+        misconception = await this.detectMisconception(user_id, topic_id);
+      } else {
+        console.error('[determineActionRuleBased] Missing user_id or topic_id!', { user_id, topic_id });
+      }
     
     if (misconception && wrong_streak >= 2) {
       // Student stuck with same error - CHANGE TEACHING STRATEGY
@@ -517,6 +537,16 @@ class AdaptiveLearningService {
       reason: `Steady progress: ${mastery_level.toFixed(1)}% mastery.`,
       pedagogicalStrategy: 'steady_practice'
     };
+    } catch (error) {
+      console.error('[determineActionRuleBased] ERROR:', error);
+      console.error('[determineActionRuleBased] State was:', state);
+      // Return safe default
+      return {
+        action: this.ACTIONS.MAINTAIN_DIFFICULTY,
+        reason: 'Error in rule-based decision, maintaining difficulty',
+        pedagogicalStrategy: 'error_recovery'
+      };
+    }
   }
 
   /**
@@ -526,7 +556,7 @@ class AdaptiveLearningService {
    * Apply Action - Enhanced with Pedagogical Strategies
    * Handles not just difficulty changes, but teaching approach changes
    */
-  async applyAction(userId, chapterId, currentState, action, actionMetadata = {}) {
+  async applyAction(userId, topicId, currentState, action, actionMetadata = {}) {
     let newDifficulty = currentState.difficulty_level;
     let newRepresentation = currentState.current_representation || 'text';
     let teachingStrategy = actionMetadata.pedagogicalStrategy || null;
@@ -582,15 +612,10 @@ class AdaptiveLearningService {
     if (newDifficulty !== currentState.difficulty_level) {
       updates.difficulty_level = newDifficulty;
     }
-    if (newRepresentation !== (currentState.current_representation || 'text')) {
-      updates.current_representation = newRepresentation;
-    }
-    if (teachingStrategy) {
-      updates.teaching_strategy = teachingStrategy;
-    }
+    // Note: current_representation and teaching_strategy not in adaptive_learning_state schema
 
     if (Object.keys(updates).length > 0) {
-      return await this.repo.updateStudentDifficulty(userId, chapterId, updates);
+      return await this.repo.updateStudentDifficulty(userId, topicId, updates);
     }
 
     return currentState;
@@ -732,9 +757,9 @@ class AdaptiveLearningService {
   /**
    * Analyze learning patterns for research insights
    */
-  async analyzeLearningPattern(userId, chapterId) {
+  async analyzeLearningPattern(userId, topicId) {
     try {
-      const history = await this.repo.getPerformanceHistory(userId, chapterId, 50);
+      const history = await this.repo.getPerformanceHistory(userId, topicId, 50);
       
       if (history.length < 5) {
         return { insufficient_data: true };
@@ -792,9 +817,9 @@ class AdaptiveLearningService {
    * Get adaptive questions based on student's current difficulty
    * NOW USES PARAMETRIC GENERATION with COGNITIVE DOMAINS!
    */
-  async getAdaptiveQuestions(userId, chapterId, count = 10, targetCognitiveDomain = null) {
+  async getAdaptiveQuestions(userId, topicId, count = 10, targetCognitiveDomain = null) {
     try {
-      const state = await this.repo.getStudentDifficulty(userId, chapterId);
+      const state = await this.repo.getStudentDifficulty(userId, topicId);
       
       // Determine cognitive domain to use
       const cognitiveDomain = targetCognitiveDomain || this.determineCognitiveDomain(state);
@@ -804,7 +829,7 @@ class AdaptiveLearningService {
       for (let i = 0; i < count; i++) {
         const question = this.questionGenerator.generateQuestion(
           state.difficulty_level,
-          chapterId,
+          topicId,
           i,
           cognitiveDomain
         );
@@ -841,8 +866,9 @@ class AdaptiveLearningService {
     }
     
     // Based on mastery level, advance through cognitive domains
+    // Note: higher_order_thinking only has templates at difficulty 5
     if (mastery_level >= 90) {
-      return 'higher_order_thinking'; // HOT - Ready for complex reasoning
+      return difficulty_level >= 5 ? 'higher_order_thinking' : 'problem_solving';
     } else if (mastery_level >= 75) {
       return difficulty_level >= 4 ? 'problem_solving' : 'analytical_thinking';
     } else if (mastery_level >= 60) {
@@ -859,16 +885,16 @@ class AdaptiveLearningService {
   /**
    * Get student's current state and performance with AI insights
    */
-  async getStudentState(userId, chapterId) {
+  async getStudentState(userId, topicId) {
     try {
-      const state = await this.repo.getStudentDifficulty(userId, chapterId);
-      const history = await this.repo.getPerformanceHistory(userId, chapterId, 10);
+      const state = await this.repo.getStudentDifficulty(userId, topicId);
+      const history = await this.repo.getPerformanceHistory(userId, topicId, 10);
       
       // Generate AI predictions
       const prediction = this.predictNextPerformance(state);
       
       // Get learning pattern analysis
-      const pattern = await this.analyzeLearningPattern(userId, chapterId);
+      const pattern = await this.analyzeLearningPattern(userId, topicId);
       
       // Get Q-values for current state
       const stateKey = this.getStateKey(state);
@@ -989,9 +1015,9 @@ class AdaptiveLearningService {
   /**
    * Get research statistics (for analysis)
    */
-  async getResearchStats(chapterId = null) {
+  async getResearchStats(topicId = null) {
     try {
-      return await this.repo.getResearchStatistics(chapterId);
+      return await this.repo.getResearchStatistics(topicId);
     } catch (error) {
       console.error('Error getting research stats:', error);
       throw error;
