@@ -4,71 +4,64 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import AdaptiveLearning from '@/components/adaptive/AdaptiveLearning';
 import Loader from '@/components/Loader';
-import { getCastles } from '@/api/castles';
-import { getChaptersByCastle } from '@/api/chapters';
+import axios from '@/api/axios';
 
-interface Castle {
+interface Topic {
   id: string;
-  title: string;
-  chapters: Chapter[];
+  topic_code: string;
+  topic_name: string;
+  description: string;
+  cognitive_domain: string;
 }
 
-interface Chapter {
-  id: string;
-  title: string;
-  castle_id: string;
-}
+const DOMAIN_LABELS: { [key: string]: string } = {
+  'knowledge_recall': '📚 Knowledge Recall',
+  'concept_understanding': '💡 Concept Understanding',
+  'procedural_skills': '🔧 Procedural Skills',
+  'analytical_thinking': '🧠 Analytical Thinking',
+  'problem_solving': '🎯 Problem Solving',
+  'higher_order_thinking': '🚀 Higher Order Thinking'
+};
 
 export default function AdaptiveLearningPage() {
   const router = useRouter();
-  const [castles, setCastles] = useState<Castle[]>([]);
-  const [selectedChapterId, setSelectedChapterId] = useState<string>('');
+  const [topics, setTopics] = useState<Topic[]>([]);
+  const [selectedTopicId, setSelectedTopicId] = useState<string>('');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchCastlesAndChapters();
+    fetchTopics();
   }, []);
 
-  const fetchCastlesAndChapters = async () => {
+  const fetchTopics = async () => {
     try {
-      const response = await getCastles();
+      const response = await axios.get('/adaptive/topics');
       
-      if (!response.success) {
-        console.error('Error fetching castles:', response.message);
-        setLoading(false);
-        return;
-      }
-      
-      const castlesData = response.data || [];
-      
-      // Fetch chapters for each castle
-      const castlesWithChapters = await Promise.all(
-        castlesData.map(async (castle: Castle) => {
-          try {
-            const chaptersResponse = await getChaptersByCastle(castle.id);
-            return {
-              ...castle,
-              chapters: chaptersResponse.data || chaptersResponse || []
-            };
-          } catch (error) {
-            console.error(`Error fetching chapters for castle ${castle.id}:`, error);
-            return { ...castle, chapters: [] };
-          }
-        })
-      );
-
-      setCastles(castlesWithChapters);
-      
-      // Auto-select first chapter if available
-      if (castlesWithChapters.length > 0 && castlesWithChapters[0].chapters.length > 0) {
-        setSelectedChapterId(castlesWithChapters[0].chapters[0].id);
+      if (response.data.success) {
+        const topicsData = response.data.data || [];
+        setTopics(topicsData);
+        
+        // Auto-select first topic if available
+        if (topicsData.length > 0) {
+          setSelectedTopicId(topicsData[0].id);
+        }
       }
     } catch (error) {
-      console.error('Error fetching castles:', error);
+      console.error('Error fetching topics:', error);
     } finally {
       setLoading(false);
     }
   };
+
+  // Group topics by cognitive domain
+  const topicsByDomain = topics.reduce((acc, topic) => {
+    const domain = topic.cognitive_domain;
+    if (!acc[domain]) {
+      acc[domain] = [];
+    }
+    acc[domain].push(topic);
+    return acc;
+  }, {} as { [key: string]: Topic[] });
 
   if (loading) {
     return <Loader />;
@@ -76,8 +69,8 @@ export default function AdaptiveLearningPage() {
 
   return (
     <>
-      {/* Chapter Selector Header */}
-      {castles.length > 0 && (
+      {/* Topic Selector Header */}
+      {topics.length > 0 && (
         <div style={{
           backgroundColor: 'white',
           borderBottom: '1px solid #E5E7EB',
@@ -93,11 +86,11 @@ export default function AdaptiveLearningPage() {
               marginBottom: '8px',
               fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
             }}>
-              Select a Chapter
+              Select a Geometry Topic
             </label>
             <select
-              value={selectedChapterId}
-              onChange={(e) => setSelectedChapterId(e.target.value)}
+              value={selectedTopicId}
+              onChange={(e) => setSelectedTopicId(e.target.value)}
               style={{
                 width: '100%',
                 padding: '12px 16px',
@@ -111,24 +104,34 @@ export default function AdaptiveLearningPage() {
                 outline: 'none'
               }}
             >
-              <option value="">Choose a chapter to begin</option>
-              {castles.map((castle) => (
-                <optgroup key={castle.id} label={castle.title}>
-                  {castle.chapters.map((chapter) => (
-                    <option key={chapter.id} value={chapter.id}>
-                      {chapter.title}
+              <option value="">Choose a topic to begin</option>
+              {Object.entries(topicsByDomain).map(([domain, domainTopics]) => (
+                <optgroup key={domain} label={DOMAIN_LABELS[domain] || domain}>
+                  {domainTopics.map((topic) => (
+                    <option key={topic.id} value={topic.id}>
+                      {topic.topic_name}
                     </option>
                   ))}
                 </optgroup>
               ))}
             </select>
+            {selectedTopicId && (
+              <p style={{
+                marginTop: '8px',
+                fontSize: '13px',
+                color: '#6B7280',
+                fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+              }}>
+                {topics.find(t => t.id === selectedTopicId)?.description}
+              </p>
+            )}
           </div>
         </div>
       )}
 
       {/* Adaptive Learning Component */}
-      {selectedChapterId ? (
-        <AdaptiveLearning chapterId={selectedChapterId} />
+      {selectedTopicId ? (
+        <AdaptiveLearning topicId={selectedTopicId} />
       ) : (
         <div style={{
           minHeight: '80vh',
@@ -150,7 +153,7 @@ export default function AdaptiveLearningPage() {
               justifyContent: 'center',
               fontSize: '36px'
             }}>
-              📚
+              📐
             </div>
             <h2 style={{ 
               fontSize: '20px', 
@@ -159,14 +162,14 @@ export default function AdaptiveLearningPage() {
               marginBottom: '8px',
               fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
             }}>
-              Ready to Learn
+              Ready to Learn Geometry
             </h2>
             <p style={{ 
               fontSize: '15px', 
               color: '#6B7280',
               fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
             }}>
-              Select a chapter from the menu above to start your adaptive learning session.
+              Select a geometry topic from the menu above to start your adaptive learning session.
             </p>
           </div>
         </div>

@@ -7,6 +7,7 @@ interface LearningInteractionProps {
   difficultyLevel: number;
   onAnswer: (isCorrect: boolean) => void;
   disabled?: boolean;
+  question?: any;
 }
 
 const buttonBaseStyle = {
@@ -28,7 +29,8 @@ export default function LearningInteractionRenderer({
   representationType = 'text',
   difficultyLevel,
   onAnswer,
-  disabled = false
+  disabled = false,
+  question
 }: LearningInteractionProps) {
   const [hoveredButton, setHoveredButton] = useState<number | null>(null);
 
@@ -72,27 +74,26 @@ export default function LearningInteractionRenderer({
           fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
         }}>
           <p style={{ marginBottom: '12px' }}>
-            A rectangle has a length of <strong>8 units</strong> and a width of <strong>5 units</strong>.
+            {question?.question || 'Loading question...'}
           </p>
-          <p style={{ fontWeight: 600, color: '#1F2937' }}>What is the perimeter?</p>
         </div>
         
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-          {[
+          {(question?.options || [
             { value: 26, label: '26 units', correct: true },
             { value: 40, label: '40 units', correct: false },
             { value: 13, label: '13 units', correct: false },
             { value: 18, label: '18 units', correct: false }
-          ].map((option, index) => (
+          ]).map((option: any, index: number) => (
             <button
-              key={option.value}
-              onClick={() => !disabled && handleSubmit(option.correct)}
+              key={option.value || index}
+              onClick={() => !disabled && handleSubmit(option.correct || option.isCorrect)}
               disabled={disabled}
               style={getButtonStyle(index)}
               onMouseEnter={() => setHoveredButton(index)}
               onMouseLeave={() => setHoveredButton(null)}
             >
-              {option.label}
+              {option.label || option.text}
             </button>
           ))}
         </div>
