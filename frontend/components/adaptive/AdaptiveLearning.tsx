@@ -31,7 +31,14 @@ interface AdaptiveResponse {
   feedback: string;
   pedagogicalStrategy?: string;
   representationType?: string;
-  aiExplanation?: string; // AI-generated step-by-step explanation
+  aiExplanation?: string; // AI-generated explanation (backward compatibility)
+  aiHint?: string; // AI-generated hint (new - only when wrong_streak >= 2)
+  hintMetadata?: { source: string; reason: string }; // Hint generation metadata
+  chapterUnlocked?: { // NEW: Chapter unlock notification
+    chapterId: number;
+    chapterName: string;
+    message: string;
+  };
 }
 
 interface AdaptiveLearningProps {
@@ -49,6 +56,37 @@ export default function AdaptiveLearning({ topicId }: AdaptiveLearningProps) {
   const [submitting, setSubmitting] = useState(false);
   const [showCelebration, setShowCelebration] = useState(false);
   const [currentQuestion, setCurrentQuestion] = useState<any>(null);
+  const [showChapterUnlock, setShowChapterUnlock] = useState(false);
+  const [unlockedChapter, setUnlockedChapter] = useState<any>(null);
+  const [showHintPrompt, setShowHintPrompt] = useState(false);
+  const [pendingHint, setPendingHint] = useState<string | null>(null);
+
+  // Generate a new question by calling backend API
+  const generateNewQuestion = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get(`/adaptive/question/${topicId}`);
+      
+      if (response.data.success) {
+        const questionData = response.data.data;
+        setCurrentQuestion({
+          question: questionData.question,
+          options: questionData.options,
+          questionId: questionData.questionId,
+          hint: questionData.hint
+        });
+      }
+    } catch (error) {
+      console.error('Error generating question:', error);
+      // Fallback error handling
+      setCurrentQuestion({
+        question: 'Unable to load question. Please try again.',
+        options: [{ label: 'Retry', correct: false }]
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Fetch current adaptive state
   const fetchState = async () => {
@@ -58,205 +96,10 @@ export default function AdaptiveLearning({ topicId }: AdaptiveLearningProps) {
       const stateData = stateResponse.data.data;
       setState(stateData);
       
-      // Generate topic-specific question
-      const topicResponse = await axios.get(`/adaptive/topics`);
-      const topics = topicResponse.data.data || [];
-      const currentTopic = topics.find((t: any) => t.id === topicId);
-      const topicName = currentTopic?.topic_name || '';
-      
-      let question;
-      
-      // Generate different questions based on exact topic name from database
-      switch (topicName) {
-        case 'Kinds of Angles': {
-          const angles = [
-            { type: 'acute', measure: Math.floor(Math.random() * 70) + 10, answer: 'Acute angle (less than 90°)' },
-            { type: 'right', measure: 90, answer: 'Right angle (exactly 90°)' },
-            { type: 'obtuse', measure: Math.floor(Math.random() * 80) + 100, answer: 'Obtuse angle (between 90° and 180°)' },
-            { type: 'straight', measure: 180, answer: 'Straight angle (exactly 180°)' }
-          ];
-          const selected = angles[Math.floor(Math.random() * angles.length)];
-          const allOptions = angles.map(a => a.answer);
-          question = {
-            question: `An angle measures ${selected.measure}°. What type of angle is it?`,
-            options: allOptions.sort(() => Math.random() - 0.5).map(opt => ({ label: opt, correct: opt === selected.answer }))
-          };
-          break;
-        }
-        
-        case 'Complementary and Supplementary Angles': {
-          const isSupplementary = Math.random() > 0.5;
-          const angle1 = isSupplementary ? Math.floor(Math.random() * 90) + 30 : Math.floor(Math.random() * 60) + 20;
-          const answer = isSupplementary ? 180 - angle1 : 90 - angle1;
-          const wrongAnswers = [answer + 10, answer - 15, isSupplementary ? 90 - angle1 : 180 - angle1].filter(v => v > 0);
-          question = {
-            question: `Two angles are ${isSupplementary ? 'supplementary' : 'complementary'}. If one angle is ${angle1}°, find the other angle.`,
-            options: [answer, ...wrongAnswers.slice(0, 3)].sort(() => Math.random() - 0.5).map(val => ({ label: `${val}°`, correct: val === answer }))
-          };
-          break;
-        }
-        
-        case 'Interior Angles of Polygons': {
-          const sides = Math.floor(Math.random() * 6) + 3; // 3-8 sides
-          const answer = (sides - 2) * 180;
-          const names: any = { 3: 'triangle', 4: 'quadrilateral', 5: 'pentagon', 6: 'hexagon', 7: 'heptagon', 8: 'octagon' };
-          question = {
-            question: `What is the sum of interior angles of a ${names[sides]}?`,
-            options: [answer, answer + 180, answer - 180, sides * 180].sort(() => Math.random() - 0.5).map(val => ({ label: `${val}°`, correct: val === answer }))
-          };
-          break;
-        }
-        
-        case 'Perimeter and Area of Polygons': {
-          const shapeType = Math.floor(Math.random() * 3);
-          if (shapeType === 0) {
-            const length = Math.floor(Math.random() * 12) + 8;
-            const width = Math.floor(Math.random() * 10) + 5;
-            const isPerimeter = Math.random() > 0.5;
-            const answer = isPerimeter ? 2 * (length + width) : length * width;
-            question = {
-              question: `A rectangle has length ${length} units and width ${width} units. Find the ${isPerimeter ? 'perimeter' : 'area'}.`,
-              options: [answer, isPerimeter ? length * width : 2 * (length + width), answer + 10, answer - 5]
-                .sort(() => Math.random() - 0.5).map(val => ({ label: `${val} ${isPerimeter ? 'units' : 'sq units'}`, correct: val === answer }))
-            };
-          } else if (shapeType === 1) {
-            const side = Math.floor(Math.random() * 10) + 6;
-            const isPerimeter = Math.random() > 0.5;
-            const answer = isPerimeter ? 4 * side : side * side;
-            question = {
-              question: `A square has side ${side} units. Find the ${isPerimeter ? 'perimeter' : 'area'}.`,
-              options: [answer, isPerimeter ? side * side : 4 * side, answer + 8, answer - 4]
-                .sort(() => Math.random() - 0.5).map(val => ({ label: `${val} ${isPerimeter ? 'units' : 'sq units'}`, correct: val === answer }))
-            };
-          } else {
-            const base = Math.floor(Math.random() * 10) + 6;
-            const height = Math.floor(Math.random() * 8) + 4;
-            const answer = 0.5 * base * height;
-            question = {
-              question: `A triangle has base ${base} units and height ${height} units. Find the area.`,
-              options: [answer, base * height, answer * 2, base + height]
-                .sort(() => Math.random() - 0.5).map(val => ({ label: `${val} sq units`, correct: val === answer }))
-            };
-          }
-          break;
-        }
-        
-        case 'Circumference and Area of a Circle': {
-          const radius = Math.floor(Math.random() * 8) + 5;
-          const isCircumference = Math.random() > 0.5;
-          const answer = isCircumference ? Math.round(2 * 3.14 * radius * 100) / 100 : Math.round(3.14 * radius * radius * 100) / 100;
-          question = {
-            question: `A circle has radius ${radius} units. Find the ${isCircumference ? 'circumference' : 'area'}. (Use π = 3.14)`,
-            options: [answer, isCircumference ? answer * 2 : answer / 2, answer + 5, Math.round(3.14 * radius * 100) / 100]
-              .sort(() => Math.random() - 0.5).map(val => ({ label: `${val.toFixed(2)} ${isCircumference ? 'units' : 'sq units'}`, correct: Math.abs(val - answer) < 0.1 }))
-          };
-          break;
-        }
-        
-        case 'Parts of a Circle': {
-          const parts = ['radius', 'diameter', 'chord', 'arc', 'center'];
-          const correct = parts[Math.floor(Math.random() * parts.length)];
-          const descriptions: any = {
-            radius: 'A line segment from the center to any point on the circle',
-            diameter: 'A line segment passing through the center with both endpoints on the circle',
-            chord: 'A line segment with both endpoints on the circle',
-            arc: 'A part of the circumference of the circle',
-            center: 'The fixed point from which all points on the circle are equidistant'
-          };
-          question = {
-            question: `What is the name of this circle part? "${descriptions[correct]}"`,
-            options: parts.sort(() => Math.random() - 0.5).map(p => ({ label: p.charAt(0).toUpperCase() + p.slice(1), correct: p === correct }))
-          };
-          break;
-        }
-        
-        case 'Volume of Space Figures': {
-          const figureType = Math.floor(Math.random() * 2);
-          if (figureType === 0) {
-            const side = Math.floor(Math.random() * 8) + 4;
-            const answer = side * side * side;
-            question = {
-              question: `A cube has side length ${side} units. Find the volume.`,
-              options: [answer, side * side, 6 * side * side, answer / 2]
-                .sort(() => Math.random() - 0.5).map(val => ({ label: `${val} cubic units`, correct: val === answer }))
-            };
-          } else {
-            const length = Math.floor(Math.random() * 8) + 5;
-            const width = Math.floor(Math.random() * 6) + 4;
-            const height = Math.floor(Math.random() * 7) + 3;
-            const answer = length * width * height;
-            question = {
-              question: `A rectangular prism has length ${length}, width ${width}, and height ${height} units. Find the volume.`,
-              options: [answer, length * width, 2 * (length + width + height), answer + 20]
-                .sort(() => Math.random() - 0.5).map(val => ({ label: `${val} cubic units`, correct: val === answer }))
-            };
-          }
-          break;
-        }
-        
-        case 'Polygon Identification': {
-          const polygons = [
-            { sides: 3, name: 'Triangle' },
-            { sides: 4, name: 'Quadrilateral' },
-            { sides: 5, name: 'Pentagon' },
-            { sides: 6, name: 'Hexagon' },
-            { sides: 8, name: 'Octagon' }
-          ];
-          const selected = polygons[Math.floor(Math.random() * polygons.length)];
-          question = {
-            question: `What is the name of a polygon with ${selected.sides} sides?`,
-            options: polygons.map(p => p.name).sort(() => Math.random() - 0.5).map(name => ({ label: name, correct: name === selected.name }))
-          };
-          break;
-        }
-        
-        case 'Plane and 3D Figures': {
-          const is3D = Math.random() > 0.5;
-          const plane = ['circle', 'square', 'triangle', 'rectangle'];
-          const solid = ['cube', 'sphere', 'cylinder', 'cone'];
-          const correct = is3D ? solid[Math.floor(Math.random() * solid.length)] : plane[Math.floor(Math.random() * plane.length)];
-          
-          // Get 3 wrong answers from the opposite category
-          const wrongAnswers = is3D ? plane.slice(0, 3) : solid.slice(0, 3);
-          
-          question = {
-            question: `Which of these is a ${is3D ? '3D (solid)' : 'plane (2D)'} figure?`,
-            options: [correct, ...wrongAnswers].sort(() => Math.random() - 0.5)
-              .map(fig => ({ label: fig.charAt(0).toUpperCase() + fig.slice(1), correct: fig === correct }))
-          };
-          break;
-        }
-        
-        case 'Basic Geometric Figures': {
-          const lineTypes = ['parallel', 'perpendicular', 'intersecting'];
-          const correct = lineTypes[Math.floor(Math.random() * lineTypes.length)];
-          const descriptions: any = {
-            parallel: 'never meet and are always the same distance apart',
-            perpendicular: 'meet at a 90° angle',
-            intersecting: 'cross each other at any angle'
-          };
-          question = {
-            question: `What type of lines ${descriptions[correct]}?`,
-            options: lineTypes.sort(() => Math.random() - 0.5).map(t => ({ label: t.charAt(0).toUpperCase() + t.slice(1) + ' lines', correct: t === correct }))
-          };
-          break;
-        }
-        
-        default: {
-          // Default fallback
-          const side = Math.floor(Math.random() * 10) + 5;
-          const perimeter = 4 * side;
-          question = {
-            question: `A square has side ${side} units. What is the perimeter?`,
-            options: [perimeter, side * side, perimeter + 4, perimeter - 4]
-              .sort(() => Math.random() - 0.5).map(val => ({ label: `${val} units`, correct: val === perimeter }))
-          };
-        }
-      }
-      
-      setCurrentQuestion(question);
+      // Generate first question
+      await generateNewQuestion();
     } catch (error) {
-      console.error('Error fetching adaptive state:', error);
+      console.error('Error fetching state:', error);
     } finally {
       setLoading(false);
     }
@@ -287,15 +130,42 @@ export default function AdaptiveLearning({ topicId }: AdaptiveLearningProps) {
         questionData // Send question data for AI explanation
       });
 
-      setLastResponse(response.data.data);
+      const responseData = response.data.data;
+      setLastResponse(responseData);
       
       if (isCorrect) {
         setShowCelebration(true);
         setTimeout(() => setShowCelebration(false), 2000);
+        
+        // Check for chapter unlock
+        if (responseData.chapterUnlocked) {
+          setUnlockedChapter(responseData.chapterUnlocked);
+          setTimeout(() => {
+            setShowChapterUnlock(true);
+          }, 2100); // Show after celebration
+        }
+        
+        // Refresh state and generate NEW question (only if correct)
+        const stateResponse = await axios.get(`/adaptive/state/${topicId}`);
+        setState(stateResponse.data.data);
+        
+        // Generate next question
+        await generateNewQuestion();
+      } else {
+        // Wrong answer - check if hint should be shown
+        if (responseData.aiExplanation) {
+          // Show hint modal - keep current question visible
+          setPendingHint(responseData.aiExplanation);
+          setShowHintPrompt(true);
+        } else {
+          // No hint needed - move to next question immediately
+          const stateResponse = await axios.get(`/adaptive/state/${topicId}`);
+          setState(stateResponse.data.data);
+          
+          // Generate next question
+          await generateNewQuestion();
+        }
       }
-      
-      // Refresh state
-      await fetchState();
     } catch (error) {
       console.error('Error submitting answer:', error);
     } finally {
@@ -352,6 +222,200 @@ export default function AdaptiveLearning({ topicId }: AdaptiveLearningProps) {
 
       <div style={{ maxWidth: '800px', margin: '0 auto' }}>
         
+        {/* Chapter Unlock Notification */}
+        {showChapterUnlock && unlockedChapter && (
+          <div style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.6)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 60,
+            animation: 'fadeIn 0.3s ease-out'
+          }}>
+            <div style={{
+              backgroundColor: 'white',
+              borderRadius: '20px',
+              padding: '48px',
+              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+              textAlign: 'center',
+              maxWidth: '480px',
+              border: '3px solid #10B981'
+            }}>
+              <div style={{ 
+                fontSize: '80px', 
+                marginBottom: '20px',
+                filter: 'drop-shadow(0 10px 15px rgba(16, 185, 129, 0.3))'
+              }}>
+                🎉
+              </div>
+              <div style={{
+                fontSize: '28px',
+                fontWeight: 700,
+                color: '#10B981',
+                marginBottom: '12px',
+                fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+              }}>
+                Chapter Unlocked!
+              </div>
+              <div style={{
+                fontSize: '18px',
+                color: '#1F2937',
+                marginBottom: '24px',
+                fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+                lineHeight: '1.6'
+              }}>
+                {unlockedChapter.message}
+              </div>
+              <div style={{
+                fontSize: '14px',
+                color: '#6B7280',
+                marginBottom: '24px',
+                fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+              }}>
+                You've achieved 60%+ mastery (Level 3/5) and unlocked the next chapter!
+              </div>
+              <button
+                onClick={() => {
+                  setShowChapterUnlock(false);
+                  setUnlockedChapter(null);
+                }}
+                style={{
+                  backgroundColor: '#10B981',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '12px',
+                  padding: '14px 32px',
+                  fontSize: '16px',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+                  boxShadow: '0 4px 6px rgba(16, 185, 129, 0.3)',
+                  transition: 'all 0.2s'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = '#059669';
+                  e.currentTarget.style.transform = 'translateY(-2px)';
+                  e.currentTarget.style.boxShadow = '0 6px 8px rgba(16, 185, 129, 0.4)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = '#10B981';
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = '0 4px 6px rgba(16, 185, 129, 0.3)';
+                }}
+              >
+                Continue Learning
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Hint Acknowledgment Modal */}
+        {showHintPrompt && pendingHint && (
+          <div style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.6)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 60,
+            animation: 'fadeIn 0.3s ease-out'
+          }}>
+            <div style={{
+              backgroundColor: 'white',
+              borderRadius: '20px',
+              padding: '40px',
+              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+              maxWidth: '600px',
+              width: '90%',
+              border: '3px solid #F59E0B'
+            }}>
+              <div style={{ 
+                fontSize: '60px', 
+                marginBottom: '20px',
+                textAlign: 'center'
+              }}>
+                💡
+              </div>
+              <div style={{
+                fontSize: '24px',
+                fontWeight: 700,
+                color: '#F59E0B',
+                marginBottom: '16px',
+                textAlign: 'center',
+                fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+              }}>
+                Learning Hint
+              </div>
+              <div style={{
+                fontSize: '16px',
+                color: '#1F2937',
+                marginBottom: '24px',
+                fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+                lineHeight: '1.7',
+                padding: '20px',
+                backgroundColor: '#FEF3C7',
+                borderRadius: '12px',
+                borderLeft: '4px solid #F59E0B'
+              }}>
+                {pendingHint}
+              </div>
+              <div style={{
+                fontSize: '14px',
+                color: '#6B7280',
+                marginBottom: '20px',
+                textAlign: 'center',
+                fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+              }}>
+                Read the hint carefully before continuing.
+              </div>
+              <button
+                onClick={async () => {
+                  setShowHintPrompt(false);
+                  setPendingHint(null);
+                  
+                  // Now generate the next question
+                  await generateNewQuestion();
+                }}
+                style={{
+                  backgroundColor: '#F59E0B',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '12px',
+                  padding: '14px 32px',
+                  fontSize: '16px',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+                  boxShadow: '0 4px 6px rgba(245, 158, 11, 0.3)',
+                  transition: 'all 0.2s',
+                  width: '100%'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = '#D97706';
+                  e.currentTarget.style.transform = 'translateY(-2px)';
+                  e.currentTarget.style.boxShadow = '0 6px 8px rgba(245, 158, 11, 0.4)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = '#F59E0B';
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = '0 4px 6px rgba(245, 158, 11, 0.3)';
+                }}
+              >
+                I Understand, Continue
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Success Celebration */}
         {showCelebration && (
           <div style={{
@@ -412,7 +476,8 @@ export default function AdaptiveLearning({ topicId }: AdaptiveLearningProps) {
             actionReason={lastResponse.actionReason}
             pedagogicalStrategy={lastResponse.pedagogicalStrategy}
             representationType={currentRepresentation}
-            aiExplanation={lastResponse.aiExplanation}
+            aiExplanation={lastResponse.aiHint || lastResponse.aiExplanation}
+            hintMetadata={lastResponse.hintMetadata}
           />
         )}
 
@@ -456,6 +521,38 @@ export default function AdaptiveLearning({ topicId }: AdaptiveLearningProps) {
             </div>
           </div>
           
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ 
+              fontSize: '13px', 
+              color: '#6B7280',
+              marginBottom: '4px',
+              fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+            }}>
+              Mastery Level
+            </div>
+            <div style={{ 
+              fontSize: '20px', 
+              fontWeight: 700, 
+              color: state.masteryLevel >= 90 ? '#10B981' : state.masteryLevel >= 75 ? '#3B82F6' : state.masteryLevel >= 60 ? '#8B5CF6' : state.masteryLevel >= 40 ? '#F59E0B' : state.masteryLevel >= 20 ? '#EF4444' : '#6B7280',
+              fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+            }}>
+              {state.masteryLevel >= 90 ? '⭐ MASTERED (5/5)' : 
+               state.masteryLevel >= 75 ? '💎 PROFICIENT (4/5)' : 
+               state.masteryLevel >= 60 ? '🔓 DEVELOPING (3/5)' : 
+               state.masteryLevel >= 40 ? '📚 BEGINNER (2/5)' :
+               state.masteryLevel >= 20 ? '🌱 NOVICE (1/5)' : 
+               '❓ NONE (0/5)'}
+            </div>
+            <div style={{ 
+              fontSize: '11px', 
+              color: '#9CA3AF',
+              marginTop: '2px',
+              fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+            }}>
+              {state.masteryLevel}% accuracy {state.masteryLevel >= 60 ? '• Unlocks next chapter!' : ''}
+            </div>
+          </div>
+          
           <div style={{ textAlign: 'right' }}>
             <div style={{ 
               fontSize: '13px', 
@@ -475,7 +572,6 @@ export default function AdaptiveLearning({ topicId }: AdaptiveLearningProps) {
             </div>
           </div>
         </div>
-
       </div>
     </div>
   );

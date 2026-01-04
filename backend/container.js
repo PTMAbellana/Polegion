@@ -35,6 +35,7 @@ const ChapterSeeder = require('./application/services/ChapterSeeder');
 const QuizAndMinigameSeeder = require('./application/services/QuizAndMinigameSeeder');
 const AssessmentService = require('./application/services/AssessmentService');
 const AdaptiveLearningService = require('./application/services/AdaptiveLearningService');
+const MasteryProgressionService = require('./application/services/MasteryProgressionService'); // NEW: Mastery-based unlocking
 
 // Import controllers
 const AuthController = require('./presentation/controllers/AuthController');
@@ -51,6 +52,7 @@ const UserMinigameAttemptController = require('./presentation/controllers/UserMi
 const UserQuizAttemptController = require('./presentation/controllers/UserQuizAttemptController');
 const AssessmentController = require('./presentation/controllers/AssessmentController');
 const AdaptiveLearningController = require('./presentation/controllers/AdaptiveLearningController');
+const MasteryProgressionController = require('./presentation/controllers/MasteryProgressionController'); // NEW
 
 // Import middleware
 const AuthMiddleware = require('./presentation/middleware/AuthMiddleware');
@@ -70,6 +72,7 @@ const UserMinigameAttemptRoutes = require('./presentation/routes/UserMinigameAtt
 const UserQuizAttemptRoutes = require('./presentation/routes/UserQuizAttemptRoutes');
 const AssessmentRoutes = require('./presentation/routes/AssessmentRoutes');
 const AdaptiveLearningRoutes = require('./presentation/routes/AdaptiveLearningRoutes');
+const MasteryProgressionRoutes = require('./presentation/routes/MasteryProgressionRoutes'); // NEW
 
 // Import services registry
 const servicesRegistry = require('./application/services');
@@ -108,6 +111,8 @@ const userMinigameAttemptService = new UserMinigameAttemptService(userMinigameAt
 const userQuizAttemptService = new UserQuizAttemptService(userQuizAttemptRepository, chapterQuizService, xpService);
 const assessmentService = new AssessmentService(assessmentRepository, userCastleProgressRepository, chapterRepository, userChapterProgressRepository);
 const adaptiveLearningService = new AdaptiveLearningService(adaptiveLearningRepository);
+// NEW: Mastery progression service (feeds WorldMap without modifying it)
+const masteryProgressionService = new MasteryProgressionService(adaptiveLearningRepository, userChapterProgressRepository, chapterRepository);
 
 // Register all services in the registry
 servicesRegistry.registerServices({
@@ -123,7 +128,8 @@ servicesRegistry.registerServices({
     userMinigameAttemptService,
     userQuizAttemptService,
     assessmentService,
-    adaptiveLearningService
+    adaptiveLearningService,
+    masteryProgressionService // NEW: Mastery progression service
 });
 
 // Initialize middleware
@@ -144,6 +150,7 @@ const userMinigameAttemptController = new UserMinigameAttemptController(userMini
 const userQuizAttemptController = new UserQuizAttemptController(userQuizAttemptService);
 const assessmentController = new AssessmentController(assessmentService);
 const adaptiveLearningController = new AdaptiveLearningController(adaptiveLearningService);
+const masteryProgressionController = new MasteryProgressionController(masteryProgressionService); // NEW
 
 // Initialize routes
 const authRoutes = new AuthRoutes(authController);
@@ -160,6 +167,7 @@ const userMinigameAttemptRoutes = new UserMinigameAttemptRoutes(userMinigameAtte
 const userQuizAttemptRoutes = new UserQuizAttemptRoutes(userQuizAttemptController, authMiddleware);
 const assessmentRoutes = new AssessmentRoutes(assessmentController, authMiddleware);
 const adaptiveLearningRoutes = new AdaptiveLearningRoutes(adaptiveLearningController, authMiddleware);
+const masteryProgressionRoutes = new MasteryProgressionRoutes(masteryProgressionController, authMiddleware); // NEW
 
 module.exports = {
   authRoutes: authRoutes.getRouter(),
@@ -174,6 +182,7 @@ module.exports = {
   userQuizAttemptRoutes: userQuizAttemptRoutes.getRouter(),
   assessmentRoutes: assessmentRoutes.getRouter(),
   adaptiveLearningRoutes: adaptiveLearningRoutes.getRouter(),
+  masteryProgressionRoutes: masteryProgressionRoutes.getRouter(), // NEW
 
   // services (for testing or other uses)
   services: servicesRegistry.getServices()

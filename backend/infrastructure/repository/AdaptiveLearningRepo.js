@@ -459,6 +459,24 @@ class AdaptiveLearningRepository {
       return [];
     }
   }
+
+  /**
+   * Get all adaptive states for a user (for concept unlocking)
+   */
+  async getAllStatesForUser(userId) {
+    try {
+      const { data, error } = await this.supabase
+        .from('adaptive_learning_state')
+        .select('topic_id')
+        .eq('user_id', userId);
+
+      if (error) throw error;
+      return data || [];
+    } catch (error) {
+      console.error('Error getting all states for user:', error);
+      return [];
+    }
+  }
 }
 
 module.exports = AdaptiveLearningRepository;

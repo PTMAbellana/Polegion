@@ -16,7 +16,8 @@ const {
     userMinigameAttemptRoutes,
     userQuizAttemptRoutes,
     assessmentRoutes,
-    adaptiveLearningRoutes
+    adaptiveLearningRoutes,
+    masteryProgressionRoutes // NEW: Mastery progression routes
 } = require('./container')
 
 const app = express()
@@ -99,6 +100,7 @@ app.use('/api/user-minigame-attempts', userMinigameAttemptRoutes)
 app.use('/api/user-quiz-attempts', userQuizAttemptRoutes)
 app.use('/api/assessments', assessmentRoutes)
 app.use('/api/adaptive', adaptiveLearningRoutes)
+app.use('/api/mastery', masteryProgressionRoutes) // NEW: Mastery progression API
 //swagger documentation
 app.use('/api-docs', swaggerServe, swaggerSetup)
 

@@ -57,6 +57,16 @@ class AdaptiveLearningRoutes {
     );
 
     /**
+     * @route   GET /api/adaptive/question/:topicId
+     * @desc    Generate a new question for the topic
+     * @access  Private (authenticated students)
+     */
+    this.router.get(
+      '/question/:topicId',
+      this.controller.generateQuestion.bind(this.controller)
+    );
+
+    /**
      * @route   POST /api/adaptive/reset/:topicId
      * @desc    Reset difficulty level for a topic
      * @access  Private (authenticated students)

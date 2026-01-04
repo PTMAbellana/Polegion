@@ -7,7 +7,8 @@ interface AdaptiveFeedbackBoxProps {
   actionReason?: string;
   pedagogicalStrategy?: string;
   representationType?: string;
-  aiExplanation?: string; // AI-generated step-by-step explanation
+  aiExplanation?: string; // AI-generated hint or explanation
+  hintMetadata?: { source: string; reason: string }; // Hint generation metadata
 }
 
 export default function AdaptiveFeedbackBox({ 
@@ -17,7 +18,8 @@ export default function AdaptiveFeedbackBox({
   actionReason,
   pedagogicalStrategy,
   representationType,
-  aiExplanation
+  aiExplanation,
+  hintMetadata
 }: AdaptiveFeedbackBoxProps) {
   
   const getFeedbackContent = () => {
@@ -25,7 +27,7 @@ export default function AdaptiveFeedbackBox({
     if (mdpAction === 'switch_to_visual_example' || mdpAction === 'switch_to_visual') {
       return {
         title: "Trying a visual approach",
-        message: "Let's look at this with a diagram to help you understand.",
+        message: "The next question will include visual cues and descriptions to help you understand.",
         bgColor: '#EFF6FF',
         iconBg: '#3B82F6',
         icon: '📊'
@@ -35,7 +37,7 @@ export default function AdaptiveFeedbackBox({
     if (mdpAction === 'switch_to_real_world_context' || mdpAction === 'switch_to_real_world') {
       return {
         title: "Making it practical",
-        message: "Here's how this works in a real-world situation.",
+        message: "This question has been transformed to show a real-world application.",
         bgColor: '#F0FDF4',
         iconBg: '#10B981',
         icon: '🌍'
@@ -136,7 +138,12 @@ export default function AdaptiveFeedbackBox({
                 margin: '0 0 8px 0',
                 fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
               }}>
-                AI Tutor Explanation
+                {wrongStreak >= 2 ? '💡 AI Hint' : '🤖 AI Tutor'}
+                {hintMetadata && (
+                  <span style={{ fontSize: '11px', fontWeight: 400, color: '#6B7280', marginLeft: '8px' }}>
+                    ({hintMetadata.source === 'ai' || hintMetadata.source === 'ai-cached' ? 'AI-powered' : 'Rule-based'})
+                  </span>
+                )}
               </h3>
               <div style={{ 
                 fontSize: '14px', 

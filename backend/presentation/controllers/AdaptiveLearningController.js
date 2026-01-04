@@ -73,7 +73,7 @@ class AdaptiveLearningController {
   async getAdaptiveQuestions(req, res) {
     try {
       const { topicId } = req.params;
-      const { count = 10 } = req.query;
+      const { count = 10, representationType = 'text' } = req.query;
       const userId = req.user.id;
 
       if (!topicId) {
@@ -85,7 +85,9 @@ class AdaptiveLearningController {
       const result = await this.service.getAdaptiveQuestions(
         userId,
         topicId,
-        parseInt(count)
+        parseInt(count),
+        null, // targetCognitiveDomain
+        representationType // Pass representation type from query
       );
 
       return res.status(200).json({
@@ -126,6 +128,45 @@ class AdaptiveLearningController {
       console.error('Error in getStudentState:', error);
       return res.status(500).json({
         error: 'Failed to get student state',
+        message: error.message
+      });
+    }
+  }
+
+  /**
+   * GET /api/adaptive/question/:topicId
+   * Generate a new question for the topic based on student's current difficulty
+   */
+  async generateQuestion(req, res) {
+    try {
+      const { topicId } = req.params;
+      const userId = req.user.id;
+
+      if (!topicId) {
+        return res.status(400).json({
+          error: 'Topic ID is required'
+        });
+      }
+
+      // Get current state to determine difficulty
+      const state = await this.service.getStudentState(userId, topicId);
+      
+      // Generate question using QuestionGeneratorService
+      const question = await this.service.generateQuestionForStudent(
+        userId,
+        topicId,
+        state.currentDifficulty,
+        state.currentRepresentation || 'text'
+      );
+
+      return res.status(200).json({
+        success: true,
+        data: question
+      });
+    } catch (error) {
+      console.error('Error in generateQuestion:', error);
+      return res.status(500).json({
+        error: 'Failed to generate question',
         message: error.message
       });
     }

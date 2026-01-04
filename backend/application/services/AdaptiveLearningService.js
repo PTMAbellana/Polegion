@@ -15,12 +15,14 @@
 
 const QuestionGeneratorService = require('./QuestionGeneratorService');
 const AIExplanationService = require('./AIExplanationService');
+const HintGenerationService = require('./HintGenerationService');
 
 class AdaptiveLearningService {
   constructor(adaptiveLearningRepo) {
     this.repo = adaptiveLearningRepo;
     this.questionGenerator = new QuestionGeneratorService();
     this.aiExplanation = new AIExplanationService();
+    this.hintService = new HintGenerationService(); // Production-safe AI hints
     
     // MDP Actions - Enhanced with Pedagogical Strategies
     this. ACTIONS = {
@@ -100,9 +102,39 @@ class AdaptiveLearningService {
 
   /**
    * Get all available adaptive learning topics
+   * All topics are accessible for practice
    */
   async getAllTopics() {
     return await this.repo.getAllTopics();
+  }
+
+  /**
+   * Get practiced topics for a user (for AI concept unlocking)
+   * Returns list of topic names the student has attempted
+   */
+  async getPracticedTopics(userId) {
+    try {
+      // Get all adaptive states for this user
+      const states = await this.repo.getAllStatesForUser(userId);
+      
+      if (!states || states.length === 0) {
+        return []; // No practiced topics yet
+      }
+      
+      // Get unique topic IDs from states
+      const topicIds = [...new Set(states.map(s => s.topicId))];
+      
+      // Get topic names
+      const allTopics = await this.repo.getAllTopics();
+      const practicedTopicNames = allTopics
+        .filter(topic => topicIds.includes(topic.id))
+        .map(topic => topic.topic_name);
+      
+      return practicedTopicNames;
+    } catch (error) {
+      console.error('[AdaptiveLearning] Error getting practiced topics:', error);
+      return []; // Return empty array on error (AI will work without constraints)
+    }
   }
 
   /**
@@ -143,24 +175,50 @@ class AdaptiveLearningService {
       // 7. Update Q-value using Q-learning update rule
       await this.updateQValue(currentStateKey, action, reward, newStateKey);
 
-      // 8. Generate AI explanation for the answer
-      let aiExplanation = null;
-      if (questionData) {
+      // 8. Generate AI hint ONLY when student is struggling (wrong_streak >= 2)
+      // This protects free-tier quota and is pedagogically sound
+      let aiHint = null;
+      let hintMetadata = null;
+      
+      if (!isCorrect && newState.wrong_streak >= 2 && questionData) {
         try {
           const topic = await this.repo.getTopicById(topicId);
-          aiExplanation = await this.aiExplanation.generateExplanation({
+          
+          // Calculate mastery level (0-5) for AI constraint
+          const masteryPercentage = newState.mastery_level || 0;
+          const masteryLevel = masteryPercentage >= 90 ? 5 : 
+                              masteryPercentage >= 75 ? 4 : 
+                              masteryPercentage >= 60 ? 3 : 
+                              masteryPercentage >= 40 ? 2 :
+                              masteryPercentage >= 20 ? 1 : 0;
+          
+          // Get practiced topics (unlocked concepts) for AI constraint
+          const unlockedConcepts = await this.getPracticedTopics(userId);
+          
+          const hintResult = await this.hintService.generateHint({
             questionText: questionData.questionText,
-            options: questionData.options,
-            correctAnswer: questionData.correctAnswer,
-            userAnswer: questionData.userAnswer,
-            isCorrect,
             topicName: topic?.topic_name || 'Geometry',
-            difficultyLevel: currentState.difficulty_level
+            difficultyLevel: currentState.difficulty_level,
+            wrongStreak: newState.wrong_streak,
+            mdpAction: action,
+            representationType: representationType || 'text',
+            masteryLevel, // NEW: Constrains AI to appropriate difficulty
+            unlockedConcepts // NEW: Prevents AI from introducing locked concepts
           });
-        } catch (explError) {
-          console.error('AI explanation generation failed:', explError);
-          // Continue without explanation - non-critical feature
+          
+          aiHint = hintResult.hint;
+          hintMetadata = {
+            source: hintResult.source,
+            reason: hintResult.reason
+          };
+          
+          console.log('[AdaptiveLearning] Hint generated:', hintMetadata);
+        } catch (hintError) {
+          console.error('[AdaptiveLearning] Hint generation failed (non-critical):', hintError.message);
+          // Continue without hint - learning is NOT blocked
         }
+      } else if (!isCorrect && newState.wrong_streak < 2) {
+        console.log('[AdaptiveLearning] Skipping AI hint - wrong_streak < 2');
       }
 
       // 9. Log transition for research analysis
@@ -184,6 +242,26 @@ class AdaptiveLearningService {
         }
       });
 
+      // 10. Check for chapter mastery and unlock next chapter
+      let chapterUnlocked = null;
+      try {
+        const masteryHook = require('./MasteryProgressionHook');
+        const masteryResult = await masteryHook.afterAnswerProcessed(
+          userId, 
+          topicId, 
+          updatedState, 
+          { action, reward }
+        );
+        
+        if (masteryResult && masteryResult.chapterUnlocked) {
+          chapterUnlocked = masteryResult.chapterUnlocked;
+          console.log('[AdaptiveLearning] Chapter unlocked:', chapterUnlocked.message);
+        }
+      } catch (masteryError) {
+        console.error('[AdaptiveLearning] Mastery progression failed (non-critical):', masteryError.message);
+        // Continue without mastery progression - learning is NOT blocked
+      }
+
       return {
         success: true,
         isCorrect,
@@ -191,11 +269,15 @@ class AdaptiveLearningService {
         masteryLevel: updatedState.mastery_level,
         action,
         actionReason: reason,
+        pedagogicalStrategy,
+        representationType: representationType || 'text',
         feedback: this.generateFeedback(updatedState, action),
         reward, // Include for debugging/research
         learningMode: usedExploration ? 'exploring' : 'exploiting',
-        aiExplanation, // AI-generated step-by-step explanation
-        transitionId: transition?.id
+        aiHint, // AI-generated hint (ONLY if wrong_streak >= 2)
+        hintMetadata, // Source tracking (ai/rule/cached)
+        transitionId: transition?.id,
+        chapterUnlocked // NEW: Chapter unlock notification
       };
     } catch (error) {
       console.error('Error processing answer:', error);
@@ -842,21 +924,22 @@ class AdaptiveLearningService {
    * Get adaptive questions based on student's current difficulty
    * NOW USES PARAMETRIC GENERATION with COGNITIVE DOMAINS!
    */
-  async getAdaptiveQuestions(userId, topicId, count = 10, targetCognitiveDomain = null) {
+  async getAdaptiveQuestions(userId, topicId, count = 10, targetCognitiveDomain = null, representationType = 'text') {
     try {
       const state = await this.repo.getStudentDifficulty(userId, topicId);
       
       // Determine cognitive domain to use
       const cognitiveDomain = targetCognitiveDomain || this.determineCognitiveDomain(state);
       
-      // Generate questions with cognitive domain consideration
+      // Generate questions with cognitive domain and representation type
       const generatedQuestions = [];
       for (let i = 0; i < count; i++) {
         const question = this.questionGenerator.generateQuestion(
           state.difficulty_level,
           topicId,
           i,
-          cognitiveDomain
+          cognitiveDomain,
+          representationType || 'text'
         );
         generatedQuestions.push(question);
       }
@@ -869,6 +952,7 @@ class AdaptiveLearningService {
         masteryLevel: state.mastery_level,
         difficultyLabel: this.getDifficultyLabel(state.difficulty_level),
         questionSource: 'parametric_generation',
+        representationType: representationType || 'text',
         totalTemplates: this.questionGenerator.getTemplateStats(),
         cognitiveDomainStats: this.questionGenerator.getCognitiveDomainStats()
       };
@@ -911,6 +995,119 @@ class AdaptiveLearningService {
    * Get student's current state and performance with AI insights
    */
   async getStudentState(userId, topicId) {
+    try {
+      const state = await this.repo.getStudentDifficulty(userId, topicId);
+      const history = await this.repo.getPerformanceHistory(userId, topicId, 10);
+      
+      // Generate AI predictions
+      const prediction = this.predictNextPerformance(state);
+      
+      // Get learning pattern analysis
+      const pattern = await this.analyzeLearningPattern(userId, topicId);
+      
+      // Get Q-values for current state
+      const stateKey = this.getStateKey(state);
+      const qValues = this.getQValuesForState(stateKey);
+      
+      // Determine current cognitive domain
+      const cognitiveDomain = this.determineCognitiveDomain(state);
+
+      return {
+        currentDifficulty: state.difficulty_level,
+        difficultyLabel: this.getDifficultyLabel(state.difficulty_level),
+        currentCognitiveDomain: cognitiveDomain,
+        cognitiveDomainLabel: this.questionGenerator.getCognitiveDomainLabel(cognitiveDomain),
+        cognitiveDomainDescription: this.questionGenerator.getCognitiveDomainDescription(cognitiveDomain),
+        masteryLevel: state.mastery_level,
+        correctStreak: state.correct_streak,
+        wrongStreak: state.wrong_streak,
+        totalAttempts: state.total_attempts,
+        accuracy: state.total_attempts > 0 
+          ? (state.correct_answers / state.total_attempts * 100).toFixed(1)
+          : 0,
+        
+        // AI-enhanced features
+        prediction: {
+          successProbability: (prediction.successProbability * 100).toFixed(1),
+          confidence: (prediction.confidence * 100).toFixed(1),
+          recommendation: prediction.recommendation
+        },
+        
+        learningPattern: pattern,
+        
+        qLearning: {
+          stateKey,
+          epsilon: this.getCurrentEpsilon(state.total_attempts).toFixed(3),
+          explorationRate: (this.getCurrentEpsilon(state.total_attempts) * 100).toFixed(1),
+          qValues: qValues,
+          totalStatesLearned: this.qTable.size
+        },
+        
+        // Cognitive domain progression info
+        cognitiveDomainProgression: {
+          current: cognitiveDomain,
+          available: this.questionGenerator.getDomainsForDifficulty(state.difficulty_level),
+          progressionPath: this.DOMAIN_PROGRESSION
+        },
+        
+        currentRepresentation: state.current_representation || 'text',
+        recentHistory: history
+      };
+    } catch (error) {
+      console.error('[AdaptiveLearning] Error getting student state:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Generate a new question for the student based on current state
+   * Uses QuestionGeneratorService for infinite question variations
+   */
+  async generateQuestionForStudent(userId, topicId, difficultyLevel, representationType = 'text') {
+    try {
+      // Get topic info to get chapter_id
+      const topic = await this.repo.getTopicById(topicId);
+      if (!topic) {
+        throw new Error(`Topic ${topicId} not found`);
+      }
+
+      // Get current state to determine cognitive domain
+      const state = await this.repo.getStudentDifficulty(userId, topicId);
+      const cognitiveDomain = this.determineCognitiveDomain(state);
+
+      // Generate question using QuestionGeneratorService
+      const question = this.questionGenerator.generateQuestion(
+        difficultyLevel,
+        topic.chapter_id || 1, // Default to chapter 1 if not set
+        null, // No seed (fully random)
+        cognitiveDomain,
+        representationType
+      );
+
+      return {
+        question: question.question_text,
+        options: question.options,
+        questionId: question.id,
+        hint: question.hint,
+        difficulty: difficultyLevel,
+        cognitiveDomain: question.cognitive_domain,
+        representationType: question.representation_type,
+        metadata: {
+          type: question.type,
+          parameters: question.parameters,
+          generated_at: question.generated_at
+        }
+      };
+    } catch (error) {
+      console.error('[AdaptiveLearning] Error generating question:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get student's current state and performance with AI insights (OLD VERSION)
+   */
+  async getStudentStateOld(userId, topicId) {
     try {
       const state = await this.repo.getStudentDifficulty(userId, topicId);
       const history = await this.repo.getPerformanceHistory(userId, topicId, 10);
