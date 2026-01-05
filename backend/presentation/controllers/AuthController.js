@@ -1,6 +1,7 @@
 class AuthController {
-    constructor (authService) {
-        this.authService = authService
+    constructor (authService, adaptiveLearningRepo = null) {
+        this.authService = authService;
+        this.adaptiveLearningRepo = adaptiveLearningRepo;
     }
 
     refreshToken = async (req, res) => {
@@ -103,6 +104,17 @@ class AuthController {
                 message: 'Registration failed',
                 error: 'No data returned'
             })
+
+            // Initialize adaptive learning topics for new user
+            if (this.adaptiveLearningRepo && data.user?.id) {
+                try {
+                    await this.adaptiveLearningRepo.initializeTopicsForUser(data.user.id);
+                    console.log(`Initialized topics for new user: ${data.user.id}`);
+                } catch (topicError) {
+                    console.error('Failed to initialize topics for new user:', topicError);
+                    // Don't fail registration if topic initialization fails
+                }
+            }
 
             return res.status(201).json({
                 message: 'Registration successful',

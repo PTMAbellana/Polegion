@@ -30,7 +30,7 @@ class HintGenerationService {
     };
     
     // Quota limits
-    this.DAILY_LIMIT = parseInt(process.env.HINT_DAILY_LIMIT) || 1000;
+    this.DAILY_LIMIT = parseInt(process.env.HINT_DAILY_LIMIT) || 20;
     this.PER_MINUTE_LIMIT = parseInt(process.env.HINT_PER_MINUTE_LIMIT) || 15;
     
     // Cache for identical hint requests

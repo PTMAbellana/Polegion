@@ -5,6 +5,7 @@ import axios from '@/api/axios';
 import MasteryProgressBar from './MasteryProgressBar';
 import AdaptiveFeedbackBox from './AdaptiveFeedbackBox';
 import LearningInteractionRenderer from './LearningInteractionRenderer';
+import CelebrationModal from './CelebrationModal';
 import Loader from '@/components/Loader';
 
 interface AdaptiveState {
@@ -31,25 +32,38 @@ interface AdaptiveResponse {
   feedback: string;
   pedagogicalStrategy?: string;
   representationType?: string;
-  aiExplanation?: string; // AI-generated explanation (backward compatibility)
-  aiHint?: string; // AI-generated hint (new - only when wrong_streak >= 2)
-  hintMetadata?: { source: string; reason: string }; // Hint generation metadata
-  chapterUnlocked?: { // NEW: Chapter unlock notification
+  aiExplanation?: string;
+  aiHint?: string;
+  hintMetadata?: { source: string; reason: string };
+  chapterUnlocked?: {
     chapterId: number;
     chapterName: string;
     message: string;
   };
+  topicUnlocked?: {
+    unlocked: boolean;
+    topic: any;
+    message: string;
+  };
+  masteryAchieved?: {
+    level: number;
+    message: string;
+    celebration: string;
+  };
+  attemptCount?: number;
+  showHint?: boolean;
+  hint?: string;
+  keepQuestion?: boolean;
+  generateSimilar?: boolean;
 }
 
 interface AdaptiveLearningProps {
   topicId: string;
+  topicName?: string;
+  onChangeTopic?: () => void;
 }
 
-/**
- * Child-Friendly Adaptive Learning Component
- * Designed for elementary students with visual learning emphasis
- */
-export default function AdaptiveLearning({ topicId }: AdaptiveLearningProps) {
+export default function AdaptiveLearning({ topicId, topicName: topicNameProp, onChangeTopic }: AdaptiveLearningProps) {
   const [state, setState] = useState<AdaptiveState | null>(null);
   const [lastResponse, setLastResponse] = useState<AdaptiveResponse | null>(null);
   const [loading, setLoading] = useState(true);
@@ -58,27 +72,40 @@ export default function AdaptiveLearning({ topicId }: AdaptiveLearningProps) {
   const [currentQuestion, setCurrentQuestion] = useState<any>(null);
   const [showChapterUnlock, setShowChapterUnlock] = useState(false);
   const [unlockedChapter, setUnlockedChapter] = useState<any>(null);
+  const [showHintModal, setShowHintModal] = useState(false);
+  const [hintText, setHintText] = useState<string | null>(null);
+  const [sessionId, setSessionId] = useState<string>('');
+  const [currentQuestionData, setCurrentQuestionData] = useState<any>(null);
+  const [showTopicUnlock, setShowTopicUnlock] = useState(false);
+  const [unlockedTopic, setUnlockedTopic] = useState<any>(null);
+  const [showMastery, setShowMastery] = useState(false);
+  const [masteryData, setMasteryData] = useState<any>(null);
   const [showHintPrompt, setShowHintPrompt] = useState(false);
   const [pendingHint, setPendingHint] = useState<string | null>(null);
+  const [topicName, setTopicName] = useState<string>(topicNameProp || 'Geometry Topic');
 
-  // Generate a new question by calling backend API
   const generateNewQuestion = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`/adaptive/question/${topicId}`);
+      // Add timestamp to prevent caching
+      const response = await axios.get(`/adaptive/question/${topicId}?t=${Date.now()}`);
+      
+      console.log('[AdaptiveLearning] Question API response:', response.data);
       
       if (response.data.success) {
         const questionData = response.data.data;
+        console.log('[AdaptiveLearning] Setting question:', questionData);
         setCurrentQuestion({
           question: questionData.question,
           options: questionData.options,
           questionId: questionData.questionId,
           hint: questionData.hint
         });
+      } else {
+        console.error('[AdaptiveLearning] Question API returned success=false');
       }
     } catch (error) {
-      console.error('Error generating question:', error);
-      // Fallback error handling
+      console.error('[AdaptiveLearning] Error generating question:', error);
       setCurrentQuestion({
         question: 'Unable to load question. Please try again.',
         options: [{ label: 'Retry', correct: false }]
@@ -88,16 +115,20 @@ export default function AdaptiveLearning({ topicId }: AdaptiveLearningProps) {
     }
   };
 
-  // Fetch current adaptive state
   const fetchState = async () => {
     try {
       setLoading(true);
-      const stateResponse = await axios.get(`/adaptive/state/${topicId}`);
+      const stateResponse = await axios.get(`/adaptive/state/${topicId}?t=${Date.now()}`);
       const stateData = stateResponse.data.data;
       setState(stateData);
       
-      // Generate first question
+      if (topicNameProp) {
+        setTopicName(topicNameProp);
+      }
+      
       await generateNewQuestion();
+      // Don't send sessionId - let backend generate it
+      setSessionId('');
     } catch (error) {
       console.error('Error fetching state:', error);
     } finally {
@@ -109,12 +140,10 @@ export default function AdaptiveLearning({ topicId }: AdaptiveLearningProps) {
     fetchState();
   }, [topicId]);
 
-  // Submit answer with celebration on correct
   const submitAnswer = async (isCorrect: boolean, selectedOption: any) => {
     try {
       setSubmitting(true);
       
-      // Prepare question data for AI explanation
       const questionData = {
         questionText: currentQuestion?.question,
         options: currentQuestion?.options,
@@ -122,48 +151,49 @@ export default function AdaptiveLearning({ topicId }: AdaptiveLearningProps) {
         userAnswer: selectedOption?.label || selectedOption?.text
       };
       
-      const response = await axios.post('/adaptive/submit-answer', {
+      const response = await axios.post('/adaptive/submit-answer-enhanced', {
         topicId,
-        questionId: currentQuestion?.id || null,
+        questionId: currentQuestion?.questionId || currentQuestion?.id || null,
         isCorrect,
         timeSpent: Math.floor(Math.random() * 60) + 30,
-        questionData // Send question data for AI explanation
+        questionData
       });
 
       const responseData = response.data.data;
       setLastResponse(responseData);
       
+      // Always refresh state after submission to get latest mastery
+      const stateResponse = await axios.get(`/adaptive/state/${topicId}?t=${Date.now()}`);
+      setState(stateResponse.data.data);
+      
       if (isCorrect) {
         setShowCelebration(true);
         setTimeout(() => setShowCelebration(false), 2000);
         
-        // Check for chapter unlock
-        if (responseData.chapterUnlocked) {
-          setUnlockedChapter(responseData.chapterUnlocked);
-          setTimeout(() => {
-            setShowChapterUnlock(true);
-          }, 2100); // Show after celebration
+        if (responseData.topicUnlocked && responseData.topicUnlocked.unlocked) {
+          setUnlockedTopic(responseData.topicUnlocked);
+          setTimeout(() => setShowTopicUnlock(true), 2100);
         }
-        
-        // Refresh state and generate NEW question (only if correct)
-        const stateResponse = await axios.get(`/adaptive/state/${topicId}`);
-        setState(stateResponse.data.data);
+
+        if (responseData.masteryAchieved) {
+          setMasteryData(responseData.masteryAchieved);
+          setTimeout(() => setShowMastery(true), responseData.topicUnlocked ? 6000 : 2100);
+        }
         
         // Generate next question
         await generateNewQuestion();
       } else {
-        // Wrong answer - check if hint should be shown
-        if (responseData.aiExplanation) {
-          // Show hint modal - keep current question visible
-          setPendingHint(responseData.aiExplanation);
-          setShowHintPrompt(true);
+        if (responseData.showHint && responseData.hint) {
+          setHintText(responseData.hint);
+          setShowHintModal(true);
+          setCurrentQuestionData(currentQuestion);
         } else {
-          // No hint needed - move to next question immediately
-          const stateResponse = await axios.get(`/adaptive/state/${topicId}`);
-          setState(stateResponse.data.data);
-          
-          // Generate next question
-          await generateNewQuestion();
+          // Generate similar or new question
+          if (responseData.generateSimilar) {
+            await generateNewQuestion();
+          } else if (!responseData.keepQuestion) {
+            await generateNewQuestion();
+          }
         }
       }
     } catch (error) {
@@ -173,29 +203,42 @@ export default function AdaptiveLearning({ topicId }: AdaptiveLearningProps) {
     }
   };
 
+  const handleHintClose = async () => {
+    setShowHintModal(false);
+    setHintText(null);
+    const stateResponse = await axios.get(`/adaptive/state/${topicId}?t=${Date.now()}`);
+    setState(stateResponse.data.data);
+  };
+
   if (loading) {
     return <Loader />;
   }
 
   if (!state) {
     return (
-      <div style={{
-        minHeight: '100vh',
-        background: '#F9FAFB',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '20px'
-      }}>
-        <div style={{ textAlign: 'center', maxWidth: '400px' }}>
-          <p style={{ 
-            fontSize: '16px', 
-            color: '#6B7280',
-            fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
-          }}>
-            Unable to load adaptive learning state. Please refresh the page.
-          </p>
+      <div className="adaptive-error-container">
+        <div className="adaptive-error-content">
+          <p>Unable to load adaptive learning state. Please refresh the page.</p>
         </div>
+        <style jsx>{`
+          .adaptive-error-container {
+            min-height: 100vh;
+            background: #F9FAFB;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+          }
+          .adaptive-error-content {
+            text-align: center;
+            max-width: 400px;
+          }
+          .adaptive-error-content p {
+            font-size: 16px;
+            color: #6B7280;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+          }
+        `}</style>
       </div>
     );
   }
@@ -203,272 +246,341 @@ export default function AdaptiveLearning({ topicId }: AdaptiveLearningProps) {
   const currentRepresentation = (lastResponse?.representationType || state.currentRepresentation || 'text') as 'text' | 'visual' | 'real_world';
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      background: '#F9FAFB',
-      padding: '24px 16px'
-    }}>
-      <style>
-        {`
-          @keyframes spin {
-            to { transform: rotate(360deg); }
-          }
-          @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
-          }
-        `}
-      </style>
-
-      <div style={{ maxWidth: '800px', margin: '0 auto' }}>
+    <div className="adaptive-learning-container">
+      <style jsx>{`
+        .adaptive-learning-container {
+          height: 100vh;
+          background: #F5F7FA;
+          overflow: hidden;
+          display: grid;
+          grid-template-columns: 280px 1fr 360px;
+        }
         
-        {/* Chapter Unlock Notification */}
-        {showChapterUnlock && unlockedChapter && (
-          <div style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: 'rgba(0, 0, 0, 0.6)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 60,
-            animation: 'fadeIn 0.3s ease-out'
-          }}>
-            <div style={{
-              backgroundColor: 'white',
-              borderRadius: '20px',
-              padding: '48px',
-              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
-              textAlign: 'center',
-              maxWidth: '480px',
-              border: '3px solid #10B981'
+        .sidebar {
+          background: white;
+          border-right: 1px solid #E5E7EB;
+          padding: 24px 20px;
+          display: flex;
+          flex-direction: column;
+          gap: 24px;
+          overflow-y: auto;
+        }
+        
+        .content-area {
+          padding: 32px;
+          overflow-y: auto;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+        
+        .feedback-rail {
+          background: white;
+          border-left: 1px solid #E5E7EB;
+          padding: 24px 20px;
+          overflow-y: auto;
+          display: flex;
+          flex-direction: column;
+          gap: 16px;
+        }
+        
+        .topic-header-label {
+          font-size: 12px;
+          font-weight: 600;
+          color: #6B7280;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+          margin-bottom: 8px;
+          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+        
+        .topic-header-title {
+          font-size: 16px;
+          font-weight: 700;
+          color: #1F2937;
+          margin: 0;
+          line-height: 1.3;
+          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+        
+        .mastery-card {
+          background: #F9FAFB;
+          border-radius: 12px;
+          padding: 16px;
+        }
+        
+        .mastery-row {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 8px;
+        }
+        
+        .mastery-label {
+          font-size: 13px;
+          font-weight: 600;
+          color: #374151;
+          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+        
+        .mastery-percentage {
+          font-size: 18px;
+          font-weight: 700;
+          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+        
+        .progress-bar {
+          width: 100%;
+          height: 8px;
+          background: #E5E7EB;
+          border-radius: 4px;
+          overflow: hidden;
+          margin-bottom: 8px;
+        }
+        
+        .progress-fill {
+          height: 100%;
+          transition: width 0.4s ease;
+          border-radius: 4px;
+        }
+        
+        .stat-chip {
+          background: white;
+          border: 1px solid #E5E7EB;
+          border-radius: 8px;
+          padding: 12px;
+          display: flex;
+          align-items: center;
+          gap: 12px;
+        }
+        
+        .change-topic-button {
+          width: 100%;
+          background: #EEF2FF;
+          border: 1px solid #C7D2FE;
+          color: #4338CA;
+          border-radius: 10px;
+          padding: 12px;
+          font-size: 14px;
+          font-weight: 700;
+          cursor: pointer;
+          box-shadow: 0 10px 18px rgba(67, 56, 202, 0.15);
+          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+          transition: all 0.2s;
+        }
+        
+        .change-topic-button:hover {
+          background: #E0E7FF;
+          transform: translateY(-1px);
+          box-shadow: 0 12px 20px rgba(67, 56, 202, 0.2);
+        }
+        
+        .question-card {
+          width: 100%;
+          max-width: 900px;
+        }
+        
+        .feedback-header {
+          font-size: 11px;
+          font-weight: 700;
+          color: #92400E;
+          margin-bottom: 12px;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+        
+        .motivational-text {
+          margin-top: auto;
+          padding: 16px;
+          background: #FFFBEB;
+          border-radius: 8px;
+          border: 1px solid #FDE68A;
+          text-align: center;
+          font-size: 13px;
+          color: #92400E;
+          font-weight: 500;
+          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+        
+        .hint-box {
+          margin-top: 14px;
+          background: white;
+          border-radius: 10px;
+          padding: 14px;
+          border: 1px solid #E5E7EB;
+        }
+        
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(-10px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+      `}</style>
+
+      {/* Sidebar */}
+      <div className="sidebar">
+        <div>
+          <div className="topic-header-label">Current Topic</div>
+          <h2 className="topic-header-title">{topicName}</h2>
+        </div>
+
+        <div className="mastery-card">
+          <div className="mastery-row">
+            <span className="mastery-label">Mastery</span>
+            <span className="mastery-percentage" style={{
+              color: state.masteryLevel >= 75 ? '#10B981' : state.masteryLevel >= 50 ? '#3B82F6' : '#94A3B8'
             }}>
-              <div style={{ 
-                fontSize: '80px', 
-                marginBottom: '20px',
-                filter: 'drop-shadow(0 10px 15px rgba(16, 185, 129, 0.3))'
-              }}>
-                🎉
-              </div>
-              <div style={{
-                fontSize: '28px',
-                fontWeight: 700,
-                color: '#10B981',
-                marginBottom: '12px',
-                fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
-              }}>
-                Chapter Unlocked!
-              </div>
-              <div style={{
-                fontSize: '18px',
-                color: '#1F2937',
-                marginBottom: '24px',
-                fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-                lineHeight: '1.6'
-              }}>
-                {unlockedChapter.message}
-              </div>
-              <div style={{
-                fontSize: '14px',
-                color: '#6B7280',
-                marginBottom: '24px',
-                fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
-              }}>
-                You've achieved 60%+ mastery (Level 3/5) and unlocked the next chapter!
-              </div>
-              <button
-                onClick={() => {
-                  setShowChapterUnlock(false);
-                  setUnlockedChapter(null);
-                }}
-                style={{
-                  backgroundColor: '#10B981',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '12px',
-                  padding: '14px 32px',
-                  fontSize: '16px',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-                  boxShadow: '0 4px 6px rgba(16, 185, 129, 0.3)',
-                  transition: 'all 0.2s'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = '#059669';
-                  e.currentTarget.style.transform = 'translateY(-2px)';
-                  e.currentTarget.style.boxShadow = '0 6px 8px rgba(16, 185, 129, 0.4)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = '#10B981';
-                  e.currentTarget.style.transform = 'translateY(0)';
-                  e.currentTarget.style.boxShadow = '0 4px 6px rgba(16, 185, 129, 0.3)';
-                }}
-              >
-                Continue Learning
-              </button>
+              {Math.round(state.masteryLevel)}%
+            </span>
+          </div>
+          <div className="progress-bar">
+            <div className="progress-fill" style={{
+              background: state.masteryLevel >= 75 ? '#10B981' : state.masteryLevel >= 50 ? '#3B82F6' : '#94A3B8',
+              width: `${Math.round(state.masteryLevel)}%`
+            }} />
+          </div>
+        </div>
+
+        {state.currentCognitiveDomain && (
+          <div style={{
+            background: '#EFF6FF',
+            border: '1px solid #BFDBFE',
+            borderRadius: '8px',
+            padding: '12px',
+            textAlign: 'center'
+          }}>
+            <div style={{ fontSize: '11px', color: '#6B7280', marginBottom: '4px' }}>Learning Style</div>
+            <div style={{ fontSize: '13px', fontWeight: 600, color: '#3B82F6' }}>
+              🧠 {state.cognitiveDomainLabel || 'Thinking'}
             </div>
           </div>
         )}
 
-        {/* Hint Acknowledgment Modal */}
-        {showHintPrompt && pendingHint && (
-          <div style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: 'rgba(0, 0, 0, 0.6)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 60,
-            animation: 'fadeIn 0.3s ease-out'
-          }}>
-            <div style={{
-              backgroundColor: 'white',
-              borderRadius: '20px',
-              padding: '40px',
-              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
-              maxWidth: '600px',
-              width: '90%',
-              border: '3px solid #F59E0B'
-            }}>
-              <div style={{ 
-                fontSize: '60px', 
-                marginBottom: '20px',
-                textAlign: 'center'
-              }}>
-                💡
-              </div>
-              <div style={{
-                fontSize: '24px',
-                fontWeight: 700,
-                color: '#F59E0B',
-                marginBottom: '16px',
-                textAlign: 'center',
-                fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
-              }}>
-                Learning Hint
-              </div>
-              <div style={{
-                fontSize: '16px',
-                color: '#1F2937',
-                marginBottom: '24px',
-                fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-                lineHeight: '1.7',
-                padding: '20px',
-                backgroundColor: '#FEF3C7',
-                borderRadius: '12px',
-                borderLeft: '4px solid #F59E0B'
-              }}>
-                {pendingHint}
-              </div>
-              <div style={{
-                fontSize: '14px',
-                color: '#6B7280',
-                marginBottom: '20px',
-                textAlign: 'center',
-                fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
-              }}>
-                Read the hint carefully before continuing.
-              </div>
-              <button
-                onClick={async () => {
-                  setShowHintPrompt(false);
-                  setPendingHint(null);
-                  
-                  // Now generate the next question
-                  await generateNewQuestion();
-                }}
-                style={{
-                  backgroundColor: '#F59E0B',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '12px',
-                  padding: '14px 32px',
-                  fontSize: '16px',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-                  boxShadow: '0 4px 6px rgba(245, 158, 11, 0.3)',
-                  transition: 'all 0.2s',
-                  width: '100%'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = '#D97706';
-                  e.currentTarget.style.transform = 'translateY(-2px)';
-                  e.currentTarget.style.boxShadow = '0 6px 8px rgba(245, 158, 11, 0.4)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = '#F59E0B';
-                  e.currentTarget.style.transform = 'translateY(0)';
-                  e.currentTarget.style.boxShadow = '0 4px 6px rgba(245, 158, 11, 0.3)';
-                }}
-              >
-                I Understand, Continue
-              </button>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <div className="stat-chip">
+            <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: '#F3F4F6', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '16px' }}>📝</div>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: '11px', color: '#6B7280' }}>Attempted</div>
+              <div style={{ fontSize: '16px', fontWeight: 700, color: '#1F2937' }}>{state.totalAttempts}</div>
             </div>
           </div>
-        )}
 
-        {/* Success Celebration */}
-        {showCelebration && (
-          <div style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: 'rgba(0, 0, 0, 0.4)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 50,
-            animation: 'fadeIn 0.2s ease-out'
+          <div className="stat-chip" style={{
+            background: state.correctStreak >= 3 ? '#ECFDF5' : 'white',
+            border: `1px solid ${state.correctStreak >= 3 ? '#A7F3D0' : '#E5E7EB'}`
           }}>
             <div style={{
-              backgroundColor: 'white',
-              borderRadius: '16px',
-              padding: '40px',
-              boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
-              textAlign: 'center',
-              maxWidth: '320px'
+              width: '32px', height: '32px', borderRadius: '8px',
+              background: state.correctStreak >= 3 ? '#10B981' : '#F3F4F6',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '16px'
             }}>
-              <div style={{ 
-                fontSize: '64px', 
-                marginBottom: '16px',
-                filter: 'drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1))'
-              }}>
-                ✓
+              {state.correctStreak >= 3 ? '🔥' : '✓'}
+            </div>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: '11px', color: '#6B7280' }}>Streak</div>
+              <div style={{ fontSize: '16px', fontWeight: 700, color: state.correctStreak >= 3 ? '#10B981' : '#1F2937' }}>
+                {state.correctStreak}
               </div>
-              <h2 style={{ 
-                fontSize: '24px', 
-                fontWeight: 600, 
-                color: '#10B981',
-                margin: 0,
-                fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
-              }}>
-                Correct!
-              </h2>
             </div>
           </div>
+        </div>
+
+        {onChangeTopic && (
+          <button onClick={onChangeTopic} className="change-topic-button">
+            Change topic
+          </button>
         )}
 
-        {/* Progress Bar */}
-        <MasteryProgressBar 
-          masteryLevel={state.masteryLevel} 
-          currentTopic="Geometry Shapes"
-          cognitiveDomain={state.currentCognitiveDomain}
-          cognitiveDomainLabel={state.cognitiveDomainLabel}
-        />
+        <div className="motivational-text">
+          {state.masteryLevel >= 85 ? "🎉 Amazing work!" :
+           state.masteryLevel >= 70 ? "⭐ You're doing great!" :
+           state.masteryLevel >= 50 ? "💪 Keep going!" : "🌟 Let's learn!"}
+        </div>
+      </div>
 
-        {/* Adaptive Feedback */}
-        {lastResponse && (
+      {/* Modals - Outside grid flow */}
+      <CelebrationModal
+        type="unlock"
+        title="Topic Unlocked!"
+        message={unlockedTopic?.message || "Great job! You've unlocked the next topic!"}
+        onClose={() => { setShowTopicUnlock(false); setUnlockedTopic(null); }}
+        show={showTopicUnlock}
+      />
+
+      <CelebrationModal
+        type="mastery"
+        title="Mastery Achieved!"
+        message={masteryData?.message || "🎉 Congratulations! You've mastered this topic!"}
+        onClose={() => { setShowMastery(false); setMasteryData(null); }}
+        show={showMastery}
+      />
+
+      {showHintModal && hintText && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.6)', display: 'flex',
+          alignItems: 'center', justifyContent: 'center', zIndex: 60,
+          animation: 'fadeIn 0.3s ease-out'
+        }}>
+          <div style={{
+            backgroundColor: 'white', borderRadius: '20px', padding: '40px',
+            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+            maxWidth: '600px', width: '90%', border: '3px solid #F59E0B'
+          }}>
+            <div style={{ fontSize: '60px', marginBottom: '20px', textAlign: 'center' }}>💡</div>
+            <div style={{ fontSize: '24px', fontWeight: 700, color: '#F59E0B', marginBottom: '16px', textAlign: 'center' }}>
+              Learning Hint
+            </div>
+            <div style={{
+              fontSize: '16px', color: '#1F2937', marginBottom: '24px', lineHeight: '1.7',
+              padding: '20px', backgroundColor: '#FEF3C7', borderRadius: '12px', borderLeft: '4px solid #F59E0B'
+            }}>
+              {hintText}
+            </div>
+            <button onClick={handleHintClose} style={{
+              backgroundColor: '#F59E0B', color: 'white', border: 'none',
+              borderRadius: '12px', padding: '14px 32px', fontSize: '16px',
+              fontWeight: 600, cursor: 'pointer', width: '100%'
+            }}>
+              I Understand, Continue
+            </button>
+          </div>
+        </div>
+      )}
+
+      {showCelebration && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.4)', display: 'flex',
+          alignItems: 'center', justifyContent: 'center', zIndex: 50
+        }}>
+          <div style={{
+            backgroundColor: 'white', borderRadius: '16px', padding: '40px',
+            textAlign: 'center', maxWidth: '320px'
+          }}>
+            <div style={{ fontSize: '64px', marginBottom: '16px' }}>✓</div>
+            <h2 style={{ fontSize: '24px', fontWeight: 600, color: '#10B981', margin: 0 }}>Correct!</h2>
+          </div>
+        </div>
+      )}
+
+      {/* Center Column: Question */}
+      <div className="content-area">
+        <div className="question-card">
+          <LearningInteractionRenderer
+            representationType={currentRepresentation}
+            difficultyLevel={state.currentDifficulty}
+            onAnswer={submitAnswer}
+            disabled={submitting}
+            question={currentQuestion}
+          />
+        </div>
+      </div>
+
+      {/* Right Column: Feedback/Hints */}
+      <div className="feedback-rail">
+        <div className="feedback-header">💡 Learning Feedback</div>
+        {lastResponse ? (
           <AdaptiveFeedbackBox
             mdpAction={lastResponse.action}
             wrongStreak={state.wrongStreak}
@@ -479,97 +591,19 @@ export default function AdaptiveLearning({ topicId }: AdaptiveLearningProps) {
             aiExplanation={lastResponse.aiHint || lastResponse.aiExplanation}
             hintMetadata={lastResponse.hintMetadata}
           />
+        ) : (
+          <div style={{
+            background: 'white', borderRadius: '10px', padding: '14px',
+            border: '1px dashed #FBBF24', color: '#92400E', fontSize: '13px', lineHeight: 1.5
+          }}>
+            Hints and feedback will appear here as you answer questions. Give the first one a try!
+          </div>
         )}
 
-        {/* Learning Question */}
-        <LearningInteractionRenderer
-          representationType={currentRepresentation}
-          difficultyLevel={state.currentDifficulty}
-          onAnswer={submitAnswer}
-          disabled={submitting}
-          question={currentQuestion}
-        />
-
-        {/* Stats Footer */}
-        <div style={{
-          backgroundColor: 'white',
-          borderRadius: '12px',
-          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
-          padding: '20px 24px',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          flexWrap: 'wrap',
-          gap: '16px'
-        }}>
-          <div>
-            <div style={{ 
-              fontSize: '13px', 
-              color: '#6B7280',
-              marginBottom: '4px',
-              fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
-            }}>
-              Questions Attempted
-            </div>
-            <div style={{ 
-              fontSize: '20px', 
-              fontWeight: 600, 
-              color: '#1F2937',
-              fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
-            }}>
-              {state.totalAttempts}
-            </div>
-          </div>
-          
-          <div style={{ textAlign: 'center' }}>
-            <div style={{ 
-              fontSize: '13px', 
-              color: '#6B7280',
-              marginBottom: '4px',
-              fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
-            }}>
-              Mastery Level
-            </div>
-            <div style={{ 
-              fontSize: '20px', 
-              fontWeight: 700, 
-              color: state.masteryLevel >= 90 ? '#10B981' : state.masteryLevel >= 75 ? '#3B82F6' : state.masteryLevel >= 60 ? '#8B5CF6' : state.masteryLevel >= 40 ? '#F59E0B' : state.masteryLevel >= 20 ? '#EF4444' : '#6B7280',
-              fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
-            }}>
-              {state.masteryLevel >= 90 ? '⭐ MASTERED (5/5)' : 
-               state.masteryLevel >= 75 ? '💎 PROFICIENT (4/5)' : 
-               state.masteryLevel >= 60 ? '🔓 DEVELOPING (3/5)' : 
-               state.masteryLevel >= 40 ? '📚 BEGINNER (2/5)' :
-               state.masteryLevel >= 20 ? '🌱 NOVICE (1/5)' : 
-               '❓ NONE (0/5)'}
-            </div>
-            <div style={{ 
-              fontSize: '11px', 
-              color: '#9CA3AF',
-              marginTop: '2px',
-              fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
-            }}>
-              {state.masteryLevel}% accuracy {state.masteryLevel >= 60 ? '• Unlocks next chapter!' : ''}
-            </div>
-          </div>
-          
-          <div style={{ textAlign: 'right' }}>
-            <div style={{ 
-              fontSize: '13px', 
-              color: '#6B7280',
-              marginBottom: '4px',
-              fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
-            }}>
-              Current Streak
-            </div>
-            <div style={{ 
-              fontSize: '20px', 
-              fontWeight: 600, 
-              color: state.correctStreak >= 3 ? '#10B981' : '#1F2937',
-              fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
-            }}>
-              {state.correctStreak} {state.correctStreak >= 3 ? '✓' : ''}
-            </div>
+        <div className="hint-box">
+          <div style={{ fontSize: '12px', fontWeight: 700, color: '#6B7280', marginBottom: '6px' }}>Hint</div>
+          <div style={{ fontSize: '13px', color: '#374151', lineHeight: 1.6 }}>
+            {currentQuestion?.hint || 'Hints will show up here once available.'}
           </div>
         </div>
       </div>

@@ -125,6 +125,60 @@ class AdaptiveLearningRoutes {
       '/health',
       this.controller.healthCheck.bind(this.controller)
     );
+
+    // ================================================================
+    // NEW ROUTES FOR TOPIC UNLOCKING & ENHANCED FLOW
+    // ================================================================
+
+    /**
+     * @route   GET /api/adaptive/topics-with-progress
+     * @desc    Get all topics with unlock/mastery status
+     * @access  Private (authenticated students)
+     */
+    this.router.get(
+      '/topics-with-progress',
+      this.controller.getTopicsWithProgress.bind(this.controller)
+    );
+
+    /**
+     * @route   POST /api/adaptive/initialize-topics
+     * @desc    Initialize topics for new user
+     * @access  Private (authenticated students)
+     */
+    this.router.post(
+      '/initialize-topics',
+      this.controller.initializeTopics.bind(this.controller)
+    );
+
+    /**
+     * @route   GET /api/adaptive/topic-progress/:topicId
+     * @desc    Get progress for specific topic
+     * @access  Private (authenticated students)
+     */
+    this.router.get(
+      '/topic-progress/:topicId',
+      this.controller.getTopicProgress.bind(this.controller)
+    );
+
+    /**
+     * @route   POST /api/adaptive/generate-ai-question
+     * @desc    Generate AI-powered question (difficulty 4-5)
+     * @access  Private (authenticated students)
+     */
+    this.router.post(
+      '/generate-ai-question',
+      this.controller.generateAIQuestion.bind(this.controller)
+    );
+
+    /**
+     * @route   POST /api/adaptive/submit-answer-enhanced
+     * @desc    Enhanced submit with hint logic and try-again flow
+     * @access  Private (authenticated students)
+     */
+    this.router.post(
+      '/submit-answer-enhanced',
+      this.controller.submitAnswerEnhanced.bind(this.controller)
+    );
   }
 
   getRouter() {

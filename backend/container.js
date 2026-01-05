@@ -136,7 +136,7 @@ servicesRegistry.registerServices({
 const authMiddleware = new AuthMiddleware(authService);
 
 // Initialize controllers
-const authController = new AuthController(authService);
+const authController = new AuthController(authService, adaptiveLearningRepository);
 const userController = new UserController(userService);
 
 // Castle/Chapter/Adaptive Learning Controllers

@@ -14,7 +14,8 @@
  * while MasteryProgressionService handles progression logic separately.
  */
 
-const servicesRegistry = require('./index'); // Fixed: correct path to services registry
+// Use the shared services registry defined at application/services.js
+const servicesRegistry = require('../services');
 
 /**
  * Hook: Called after AdaptiveLearningService processes an answer

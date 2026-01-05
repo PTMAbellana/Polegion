@@ -162,44 +162,45 @@ export default function AdaptiveFeedbackBox({
       {/* MDP Action Feedback Box */}
       {feedback && (
         <div style={{
-          backgroundColor: feedback.bgColor,
+          backgroundColor: 'white',
           borderRadius: '12px',
-          padding: '16px 20px',
-          marginBottom: '20px',
-          border: '1px solid rgba(0, 0, 0, 0.06)',
-          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.05)',
+          padding: '20px',
+          marginBottom: '16px',
+          border: `2px solid ${feedback.iconBg}`,
+          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
           transition: 'all 0.3s ease'
         }}>
-          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '14px' }}>
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '16px' }}>
             <div style={{
-              width: '36px',
-              height: '36px',
-              borderRadius: '8px',
+              width: '48px',
+              height: '48px',
+              borderRadius: '12px',
               backgroundColor: feedback.iconBg,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              fontSize: '18px',
-              flexShrink: 0
+              fontSize: '24px',
+              flexShrink: 0,
+              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)'
             }}>
               {feedback.icon}
             </div>
             
             <div style={{ flex: 1 }}>
               <h3 style={{ 
-                fontSize: '15px', 
-                fontWeight: 600, 
+                fontSize: '16px', 
+                fontWeight: 700, 
                 color: '#1F2937',
-                margin: '0 0 4px 0',
+                margin: '0 0 8px 0',
                 fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
               }}>
                 {feedback.title}
               </h3>
               <p style={{ 
                 fontSize: '14px', 
-                color: '#4B5563',
+                color: '#6B7280',
                 margin: 0,
-                lineHeight: '1.5',
+                lineHeight: '1.6',
                 fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
               }}>
                 {feedback.message}

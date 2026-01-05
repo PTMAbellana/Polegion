@@ -16,6 +16,7 @@
 const QuestionGeneratorService = require('./QuestionGeneratorService');
 const AIExplanationService = require('./AIExplanationService');
 const HintGenerationService = require('./HintGenerationService');
+const GeminiQuestionGenerator = require('./GeminiQuestionGenerator');
 
 class AdaptiveLearningService {
   constructor(adaptiveLearningRepo) {
@@ -23,6 +24,8 @@ class AdaptiveLearningService {
     this.questionGenerator = new QuestionGeneratorService();
     this.aiExplanation = new AIExplanationService();
     this.hintService = new HintGenerationService(); // Production-safe AI hints
+    // NOTE: Using parametric generation for all difficulties - AI generation disabled to save quota
+    // this.aiQuestionGenerator = new GeminiQuestionGenerator(); // AI question generation for difficulty 4-5
     
     // MDP Actions - Enhanced with Pedagogical Strategies
     this. ACTIONS = {
@@ -323,7 +326,13 @@ class AdaptiveLearningService {
       mastery_level: masteryLevel
     };
 
-    return await this.repo.updateStudentDifficulty(userId, topicId, updates);
+    // Update adaptive_learning_state
+    const updatedState = await this.repo.updateStudentDifficulty(userId, topicId, updates);
+    
+    // SYNC: Also update user_topic_progress.mastery_percentage
+    await this.repo.updateTopicMastery(userId, topicId, masteryLevel);
+    
+    return updatedState;
   }
 
   /**
@@ -999,6 +1008,22 @@ class AdaptiveLearningService {
       const state = await this.repo.getStudentDifficulty(userId, topicId);
       const history = await this.repo.getPerformanceHistory(userId, topicId, 10);
       
+      // Get NEW topic progress for mastery level (unified system)
+      const topicProgress = await this.repo.getTopicProgress(userId, topicId);
+      
+      // Auto-unlock first topic if this is a new user accessing for the first time
+      if (!topicProgress.unlocked) {
+        const allTopics = await this.repo.getAllTopics();
+        if (allTopics.length > 0 && allTopics[0].id === topicId) {
+          // This is the first topic - unlock it automatically for new users
+          await this.repo.updateTopicProgress(userId, topicId, {
+            unlocked: true,
+            unlocked_at: new Date().toISOString()
+          });
+          topicProgress.unlocked = true;
+        }
+      }
+      
       // Generate AI predictions
       const prediction = this.predictNextPerformance(state);
       
@@ -1009,8 +1034,8 @@ class AdaptiveLearningService {
       const stateKey = this.getStateKey(state);
       const qValues = this.getQValuesForState(stateKey);
       
-      // Determine current cognitive domain
-      const cognitiveDomain = this.determineCognitiveDomain(state);
+      // Determine current cognitive domain from topic progress
+      const cognitiveDomain = topicProgress.cognitive_domain || this.determineCognitiveDomain(state);
 
       return {
         currentDifficulty: state.difficulty_level,
@@ -1018,7 +1043,7 @@ class AdaptiveLearningService {
         currentCognitiveDomain: cognitiveDomain,
         cognitiveDomainLabel: this.questionGenerator.getCognitiveDomainLabel(cognitiveDomain),
         cognitiveDomainDescription: this.questionGenerator.getCognitiveDomainDescription(cognitiveDomain),
-        masteryLevel: state.mastery_level,
+        masteryLevel: topicProgress.mastery_percentage || 0, // Use NEW mastery from user_topic_progress
         correctStreak: state.correct_streak,
         wrongStreak: state.wrong_streak,
         totalAttempts: state.total_attempts,
@@ -1065,24 +1090,36 @@ class AdaptiveLearningService {
    */
   async generateQuestionForStudent(userId, topicId, difficultyLevel, representationType = 'text') {
     try {
-      // Get topic info to get chapter_id
+      console.log(`[AdaptiveLearning] START generateQuestionForStudent - userId: ${userId}, topicId: ${topicId}, difficulty: ${difficultyLevel}`);
+      
+      // Get topic info to get chapter_id and topic_name
       const topic = await this.repo.getTopicById(topicId);
       if (!topic) {
         throw new Error(`Topic ${topicId} not found`);
       }
+      console.log(`[AdaptiveLearning] Got topic: ${topic.topic_name}`);
 
       // Get current state to determine cognitive domain
       const state = await this.repo.getStudentDifficulty(userId, topicId);
       const cognitiveDomain = this.determineCognitiveDomain(state);
+      console.log(`[AdaptiveLearning] Cognitive domain: ${cognitiveDomain}`);
 
-      // Generate question using QuestionGeneratorService
+      // Map topic name to question type filter
+      const topicFilter = this.getTopicFilter(topic.topic_name);
+      
+      console.log(`[AdaptiveLearning] Generating question for topic "${topic.topic_name}", filter: ${topicFilter}`);
+
+      // Generate question using QuestionGeneratorService with topic filter
+      console.log(`[AdaptiveLearning] Calling questionGenerator.generateQuestion...`);
       const question = this.questionGenerator.generateQuestion(
         difficultyLevel,
-        topic.chapter_id || 1, // Default to chapter 1 if not set
+        topic.chapter_id || 1,
         null, // No seed (fully random)
         cognitiveDomain,
-        representationType
+        representationType,
+        topicFilter // NEW: Pass topic filter
       );
+      console.log(`[AdaptiveLearning] Question generated:`, question ? 'SUCCESS' : 'FAILED');
 
       return {
         question: question.question_text,
@@ -1102,6 +1139,29 @@ class AdaptiveLearningService {
       console.error('[AdaptiveLearning] Error generating question:', error);
       throw error;
     }
+  }
+  
+  /**
+   * Map topic name to question type filter
+   */
+  getTopicFilter(topicName) {
+    const topicMap = {
+      // Match by topic name (from database)
+      'Interior Angles of Polygons': 'polygon_interior',
+      'Geometric Proofs and Reasoning': 'proof|congruent',
+      'Geometry Word Problems': null, // Word problems can use any type
+      'Polygon Identification': 'polygon_identify|polygon_types',
+      'Plane and 3D Figures': 'plane_vs_solid|volume|surface_area',
+      'Perimeter and Area of Polygons': 'perimeter|area|rectangle|square|triangle|parallelogram|trapezoid',
+      'Kinds of Angles': 'angle_type|complementary|supplementary',
+      'Basic Geometric Figures': 'identify_lines|circle_parts|polygon_identify',
+      'Volume of Space Figures': 'volume',
+      'Circumference and Area of a Circle': 'circle',
+      'Complementary and Supplementary Angles': 'complementary|supplementary',
+      'Parts of a Circle': 'circle_parts|circle_circumference'
+    };
+    
+    return topicMap[topicName] || null;
   }
 
   /**
@@ -1279,7 +1339,288 @@ class AdaptiveLearningService {
    * Helper: Generate session ID
    */
   generateSessionId(userId) {
-    return `${userId}-${Date.now()}`;
+    const crypto = require('crypto');
+    return crypto.randomUUID();
+  }
+
+  // ================================================================
+  // TOPIC UNLOCKING SYSTEM
+  // ================================================================
+
+  /**
+   * Get all topics with unlock status for a user
+   */
+  async getTopicsWithProgress(userId) {
+    try {
+      // Get all topics
+      const allTopics = await this.repo.getAllTopics();
+      
+      // Get user's progress for all topics
+      const progress = await this.repo.getAllTopicProgress(userId);
+      
+      // If user has no progress, initialize it
+      if (!progress || progress.length === 0) {
+        await this.repo.initializeTopicsForUser(userId);
+        return await this.getTopicsWithProgress(userId); // Retry after initialization
+      }
+
+      // Merge topics with progress
+      const topicsWithProgress = allTopics.map(topic => {
+        const topicProgress = progress.find(p => p.topic_id === topic.id);
+        
+        return {
+          ...topic,
+          unlocked: topicProgress?.unlocked || false,
+          mastered: topicProgress?.mastered || false,
+          mastery_level: topicProgress?.mastery_level || 0,
+          mastery_percentage: topicProgress?.mastery_percentage || 0
+        };
+      });
+
+      return topicsWithProgress;
+    } catch (error) {
+      console.error('[AdaptiveLearning] Error getting topics with progress:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Check and unlock next topic if current mastery >= 3
+   */
+  async checkAndUnlockNextTopic(userId, topicId, currentMasteryLevel) {
+    try {
+      // Check if mastery level >= 3 (proficient)
+      if (currentMasteryLevel < 3) {
+        return null; // Not ready to unlock
+      }
+
+      // Get current topic progress
+      const currentProgress = await this.repo.getTopicProgress(userId, topicId);
+      
+      // Update current topic progress
+      await this.repo.updateTopicProgress(userId, topicId, {
+        mastery_level: currentMasteryLevel,
+        mastery_percentage: currentMasteryLevel * 20, // Convert 0-5 to 0-100
+        mastered: currentMasteryLevel >= 5,
+        mastered_at: currentMasteryLevel >= 5 ? new Date().toISOString() : null
+      });
+
+      // Unlock next topic
+      const unlockResult = await this.repo.unlockNextTopic(userId, topicId);
+      
+      if (unlockResult) {
+        return {
+          unlocked: true,
+          topic: unlockResult.topic,
+          message: `🎉 Great job! You've unlocked "${unlockResult.topic.topic_name}"!`
+        };
+      }
+
+      return null; // No next topic (already at end)
+    } catch (error) {
+      console.error('[AdaptiveLearning] Error checking/unlocking topic:', error);
+      return null; // Don't fail the whole flow
+    }
+  }
+
+  /**
+   * Convert mastery percentage (0-100) to mastery level (0-5)
+   */
+  getMasteryLevel(masteryPercentage) {
+    if (masteryPercentage >= 90) return 5;
+    if (masteryPercentage >= 75) return 4;
+    if (masteryPercentage >= 60) return 3;
+    if (masteryPercentage >= 40) return 2;
+    if (masteryPercentage >= 20) return 1;
+    return 0;
+  }
+
+  /**
+   * Check if topic is unlocked for user
+   */
+  async isTopicUnlocked(userId, topicId) {
+    try {
+      const progress = await this.repo.getTopicProgress(userId, topicId);
+      return progress?.unlocked || false;
+    } catch (error) {
+      console.error('[AdaptiveLearning] Error checking topic unlock:', error);
+      return false;
+    }
+  }
+
+  // ================================================================
+  // QUESTION GENERATION & UNIQUENESS
+  // ================================================================
+
+  /**
+   * Generate a new question (parametric or AI-based)
+   * Ensures uniqueness within session
+   */
+  async generateQuestion(userId, topicId, difficultyLevel, sessionId, excludeQuestionIds = []) {
+    try {
+      const topic = await this.repo.getTopicById(topicId);
+      if (!topic) {
+        throw new Error('Topic not found');
+      }
+
+      // Get shown questions in this session
+      const shownQuestions = await this.repo.getShownQuestionsInSession(userId, topicId, sessionId);
+      const shownQuestionIds = shownQuestions.map(q => q.question_id);
+      const allExcluded = [...excludeQuestionIds, ...shownQuestionIds];
+
+      let question = null;
+
+      // For difficulty 4-5, try AI generation first (if available)
+      if (difficultyLevel >= 4 && this.aiQuestionGenerator) {
+        try {
+          const state = await this.repo.getStudentDifficulty(userId, topicId);
+          const cognitiveDomain = state?.cognitive_domain || 'analytical_thinking';
+
+          question = await this.aiQuestionGenerator.generateQuestion({
+            topicName: topic.topic_name,
+            difficultyLevel,
+            cognitiveDomain,
+            excludeQuestionIds: allExcluded
+          });
+
+          if (question) {
+            console.log('[AdaptiveLearning] Generated AI question:', question.questionId);
+          }
+        } catch (aiError) {
+          console.warn('[AdaptiveLearning] AI generation failed, falling back to parametric:', aiError.message);
+        }
+      }
+
+      // Fallback to parametric templates (or for difficulty 1-3)
+      if (!question) {
+        question = await this.questionGenerator.generateQuestion(
+          topic.topic_name,
+          difficultyLevel,
+          allExcluded
+        );
+
+        if (question) {
+          question.generatedBy = 'parametric';
+          question.questionId = `param_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+          console.log('[AdaptiveLearning] Generated parametric question:', question.questionId);
+        }
+      }
+
+      if (!question) {
+        throw new Error('Failed to generate question');
+      }
+
+      // Add to question history
+      await this.repo.addToQuestionHistory(
+        userId,
+        topicId,
+        sessionId,
+        question.questionId,
+        question.questionType || 'unknown',
+        difficultyLevel,
+        null, // Not answered yet
+        question
+      );
+
+      return question;
+
+    } catch (error) {
+      console.error('[AdaptiveLearning] Error generating question:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Generate similar question (same type, different parameters)
+   * Used after 2nd wrong attempt
+   */
+  async generateSimilarQuestion(userId, topicId, previousQuestion, sessionId) {
+    try {
+      if (!previousQuestion) {
+        // No previous question, generate new one
+        const state = await this.repo.getStudentDifficulty(userId, topicId);
+        return await this.generateQuestion(
+          userId,
+          topicId,
+          state.difficulty_level,
+          sessionId
+        );
+      }
+
+      // Generate similar question with same type/difficulty
+      const question = await this.questionGenerator.generateSimilarQuestion(
+        previousQuestion.questionType,
+        previousQuestion.difficultyLevel || 3
+      );
+
+      if (question) {
+        question.questionId = `similar_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        question.generatedBy = 'parametric_similar';
+
+        // Add to history
+        await this.repo.addToQuestionHistory(
+          userId,
+          topicId,
+          sessionId,
+          question.questionId,
+          question.questionType,
+          question.difficultyLevel,
+          null,
+          question
+        );
+
+        return question;
+      }
+
+      // Fallback: generate completely new question
+      const state = await this.repo.getStudentDifficulty(userId, topicId);
+      return await this.generateQuestion(
+        userId,
+        topicId,
+        state.difficulty_level,
+        sessionId
+      );
+
+    } catch (error) {
+      console.error('[AdaptiveLearning] Error generating similar question:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Track question attempt and determine if hint is needed
+   */
+  async trackAttemptAndCheckHint(userId, questionId, topicId, sessionId, isCorrect, questionData) {
+    try {
+      // Track attempt
+      const attempt = await this.repo.trackQuestionAttempt(
+        userId,
+        questionId,
+        topicId,
+        sessionId,
+        isCorrect,
+        questionData
+      );
+
+      // Get current attempt count
+      const attemptCount = await this.repo.getQuestionAttemptCount(userId, questionId, sessionId);
+
+      return {
+        attemptCount,
+        showHint: !isCorrect && attemptCount >= 1, // Show hint on first wrong attempt
+        generateSimilar: !isCorrect && attemptCount >= 2, // Generate similar after 2nd wrong
+        keepQuestion: !isCorrect && attemptCount < 2 // Keep same question for retry
+      };
+
+    } catch (error) {
+      console.error('[AdaptiveLearning] Error tracking attempt:', error);
+      return {
+        attemptCount: 1,
+        showHint: !isCorrect,
+        generateSimilar: false,
+        keepQuestion: !isCorrect
+      };
+    }
   }
 }
 

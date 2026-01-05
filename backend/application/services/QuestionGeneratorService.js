@@ -112,6 +112,39 @@ class QuestionGeneratorService {
           solution: () => 0, // Plane
           hint: 'Does it have depth/thickness?',
           multipleChoice: ['Plane figure', 'Solid figure']
+        },
+        {
+          type: 'polygon_interior_triangle',
+          cognitiveDomain: 'knowledge_recall',
+          template: 'What is the sum of the interior angles of a triangle?',
+          params: {},
+          solution: () => 180,
+          hint: 'All triangles have the same angle sum'
+        },
+        {
+          type: 'polygon_interior_quadrilateral',
+          cognitiveDomain: 'knowledge_recall',
+          template: 'What is the sum of the interior angles of any quadrilateral (4-sided polygon)?',
+          params: {},
+          solution: () => 360,
+          hint: 'Think of a square or rectangle - their angles add to this'
+        },
+        {
+          type: 'polygon_types_sides',
+          cognitiveDomain: 'knowledge_recall',
+          template: 'How many sides does a hexagon have?',
+          params: {},
+          solution: () => 6,
+          hint: 'Hex- means six'
+        },
+        {
+          type: 'polygon_types_triangle',
+          cognitiveDomain: 'knowledge_recall',
+          template: 'Which polygon has exactly 3 sides and 3 angles?',
+          params: {},
+          solution: () => 0,
+          hint: 'Tri- means three',
+          multipleChoice: ['Triangle', 'Square', 'Pentagon', 'Hexagon']
         }
       ],
 
@@ -199,6 +232,22 @@ class QuestionGeneratorService {
           },
           solution: (p) => 6 * p.side * p.side,
           hint: 'Surface Area = 6 × side²'
+        },
+        {
+          type: 'polygon_interior_pentagon',
+          cognitiveDomain: 'procedural_skills',
+          template: 'Find the sum of interior angles of a pentagon (5-sided polygon).',
+          params: {},
+          solution: () => (5 - 2) * 180,
+          hint: 'Sum = (n - 2) × 180°, where n = number of sides'
+        },
+        {
+          type: 'polygon_interior_hexagon',
+          cognitiveDomain: 'procedural_skills',
+          template: 'Calculate the sum of interior angles of a hexagon (6-sided polygon).',
+          params: {},
+          solution: () => (6 - 2) * 180,
+          hint: 'Use the formula: (n - 2) × 180°'
         }
       ],
 
@@ -465,42 +514,69 @@ class QuestionGeneratorService {
   /**
    * Generate a random question at specified difficulty level
    */
-  generateQuestion(difficultyLevel, chapterId, seed = null, cognitiveDomain = null, representationType = 'text') {
+  generateQuestion(difficultyLevel, chapterId, seed = null, cognitiveDomain = null, representationType = 'text', topicFilter = null) {
+    console.log(`[QGen] START - difficulty: ${difficultyLevel}, cognitive: ${cognitiveDomain}, filter: ${topicFilter}`);
+    
     const templates = this.templates[difficultyLevel];
     if (!templates || templates.length === 0) {
       throw new Error(`No templates available for difficulty ${difficultyLevel}`);
     }
+    console.log(`[QGen] Found ${templates.length} templates for difficulty ${difficultyLevel}`);
 
-    // Filter by cognitive domain if specified
+    // Filter by topic if specified (e.g., "polygon_interior" matches "polygon_interior_angles")
     let filteredTemplates = templates;
-    if (cognitiveDomain) {
-      filteredTemplates = templates.filter(t => t.cognitiveDomain === cognitiveDomain);
+    if (topicFilter) {
+      filteredTemplates = templates.filter(t => t.type.includes(topicFilter) || new RegExp(topicFilter).test(t.type));
+      console.log(`[QuestionGenerator] Topic filter "${topicFilter}" reduced templates from ${templates.length} to ${filteredTemplates.length}`);
       if (filteredTemplates.length === 0) {
-        console.warn(`No templates found for domain ${cognitiveDomain} at difficulty ${difficultyLevel}, using all templates`);
+        console.warn(`No templates found for topic filter "${topicFilter}" at difficulty ${difficultyLevel}, using all templates`);
         filteredTemplates = templates;
       }
     }
+    
+    // Filter by cognitive domain if specified
+    if (cognitiveDomain && filteredTemplates.length > 1) {
+      console.log(`[QGen] Filtering by cognitive domain: ${cognitiveDomain}`);
+      const domainFiltered = filteredTemplates.filter(t => t.cognitiveDomain === cognitiveDomain);
+      if (domainFiltered.length > 0) {
+        filteredTemplates = domainFiltered;
+        console.log(`[QGen] Domain filter reduced to ${domainFiltered.length} templates`);
+      } else {
+        console.warn(`No templates found for domain ${cognitiveDomain}, using topic-filtered templates`);
+      }
+    }
 
-    // Select random template
+    console.log(`[QGen] Selecting from ${filteredTemplates.length} filtered templates`);
+    // Select random template from filtered set
     const template = filteredTemplates[Math.floor(Math.random() * filteredTemplates.length)];
+    console.log(`[QGen] Selected template type: ${template.type}`);
 
     // Generate random parameters
+    console.log(`[QGen] Generating parameters...`);
     const params = this.generateParameters(template.params, seed);
+    console.log(`[QGen] Parameters generated:`, params);
 
     // Create question text by replacing placeholders
+    console.log(`[QGen] Filling template...`);
     let questionText = this.fillTemplate(template.template, params);
+    console.log(`[QGen] Question text created`);
     
     // Transform question based on representation type
     if (representationType === 'real_world') {
+      console.log(`[QGen] Transforming to real-world...`);
       questionText = this.transformToRealWorld(questionText, template.type, params);
     } else if (representationType === 'visual') {
+      console.log(`[QGen] Transforming to visual...`);
       questionText = this.transformToVisual(questionText, template.type, params);
     }
 
     // Calculate solution
+    console.log(`[QGen] Calculating solution...`);
     const solution = template.solution(params);
+    console.log(`[QGen] Solution: ${solution}`);
 
     // Generate answer options
+    console.log(`[QGen] Generating options...`);
     let options = [];
     if (template.multipleChoice) {
       // Predefined multiple choice options
@@ -519,10 +595,14 @@ class QuestionGeneratorService {
           correct: val === correctAnswer
         }));
     }
+    console.log(`[QGen] Generated ${options.length} options`);
 
     // Generate unique question ID (includes timestamp for uniqueness)
+    console.log(`[QGen] Generating question ID...`);
     const questionId = this.generateQuestionId(difficultyLevel, template.type, seed);
+    console.log(`[QGen] Question ID: ${questionId}`);
 
+    console.log(`[QGen] COMPLETE - returning question object`);
     return {
       id: questionId,
       chapter_id: chapterId,
@@ -609,9 +689,12 @@ class QuestionGeneratorService {
    */
   generateDistractors(correctAnswer, questionType) {
     const distractors = new Set();
+    let attempts = 0;
+    const maxAttempts = 50; // Prevent infinite loops
     
     // Generate 3 unique distractors
-    while (distractors.size < 3) {
+    while (distractors.size < 3 && attempts < maxAttempts) {
+      attempts++;
       let distractor;
       
       if (questionType.includes('area') || questionType.includes('volume') || questionType.includes('surface_area')) {
@@ -625,13 +708,16 @@ class QuestionGeneratorService {
           correctAnswer / 2
         ];
         distractor = this.roundSolution(variations[Math.floor(Math.random() * variations.length)]);
-      } else if (questionType.includes('angle')) {
-        // For angles, use complementary/supplementary mistakes
+      } else if (questionType.includes('angle') || questionType.includes('polygon_interior')) {
+        // For angles and polygon interior angles, use realistic variations
         const variations = [
-          180 - correctAnswer,  // Confused supplementary
-          90 - correctAnswer,   // Confused complementary
-          correctAnswer + 15,
-          correctAnswer - 15
+          correctAnswer * 0.9,      // Common calculation error
+          correctAnswer * 1.1,      // Common calculation error
+          correctAnswer + 180,      // Added one extra triangle
+          correctAnswer - 180,      // Subtracted one triangle
+          correctAnswer + 90,       // Off by a right angle
+          correctAnswer - 90,       // Off by a right angle
+          correctAnswer + (Math.random() * 200 - 100) // Random offset
         ];
         distractor = this.roundSolution(variations[Math.floor(Math.random() * variations.length)]);
       } else {
@@ -643,6 +729,15 @@ class QuestionGeneratorService {
       // Ensure distractor is positive and different from correct answer
       if (distractor > 0 && distractor !== correctAnswer) {
         distractors.add(distractor);
+      }
+    }
+    
+    // If we couldn't generate 3 distractors, fill with simple offsets
+    while (distractors.size < 3) {
+      const offset = (distractors.size + 1) * 50;
+      const distractor = correctAnswer + (Math.random() > 0.5 ? offset : -offset);
+      if (distractor > 0 && distractor !== correctAnswer) {
+        distractors.add(this.roundSolution(distractor));
       }
     }
     

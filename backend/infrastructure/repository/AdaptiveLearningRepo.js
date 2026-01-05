@@ -66,10 +66,7 @@ class AdaptiveLearningRepository {
    */
   async getStudentDifficulty(userId, topicId) {
     try {
-      const cacheKey = cache.generateKey('student_difficulty', userId, topicId);
-      const cached = cache.get(cacheKey);
-      if (cached) return cached;
-
+      // CACHING DISABLED - Always fetch fresh data for accurate mastery tracking
       const { data, error } = await this.supabase
         .from('adaptive_learning_state')
         .select('*')
@@ -87,7 +84,6 @@ class AdaptiveLearningRepository {
       }
 
       console.log('[Repo] getStudentDifficulty returned:', JSON.stringify(data, null, 2));
-      cache.set(cacheKey, data, this.CACHE_TTL);
       return data;
     } catch (error) {
       console.error('Error getting student difficulty:', error);
@@ -146,11 +142,6 @@ class AdaptiveLearningRepository {
         .single();
 
       if (error) throw error;
-
-      // Invalidate cache
-      const cacheKey = cache.generateKey('student_difficulty', userId, topicId);
-      cache.delete(cacheKey);
-
       return data;
     } catch (error) {
       console.error('Error updating student difficulty:', error);
@@ -163,26 +154,36 @@ class AdaptiveLearningRepository {
    */
   async logStateTransition(transitionData) {
     try {
+      // Only include question_id if it's a valid UUID (from adaptive_questions table)
+      // Skip it for parametric/AI-generated questions (which are strings)
+      const isUUID = transitionData.questionId && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(transitionData.questionId);
+      
+      const insertData = {
+        user_id: transitionData.userId,
+        topic_id: transitionData.topicId,
+        prev_mastery: transitionData.prevState.mastery_level || transitionData.prevState.masteryLevel || 0,
+        prev_difficulty: transitionData.prevState.difficulty_level || transitionData.prevState.difficultyLevel || 3,
+        new_mastery: transitionData.newState.mastery_level || transitionData.newState.masteryLevel || 0,
+        new_difficulty: transitionData.newState.difficulty_level || transitionData.newState.difficultyLevel || 3,
+        action: transitionData.action,
+        action_reason: transitionData.actionReason,
+        reward: transitionData.reward,
+        was_correct: transitionData.wasCorrect,
+        time_spent: transitionData.timeSpent,
+        used_exploration: transitionData.usedExploration || false,
+        q_value: transitionData.qValue || 0,
+        epsilon: transitionData.epsilon || 0,
+        session_id: transitionData.sessionId
+      };
+      
+      // Only add question_id if it's a valid UUID
+      if (isUUID) {
+        insertData.question_id = transitionData.questionId;
+      }
+
       const { data, error } = await this.supabase
         .from('adaptive_state_transitions')
-        .insert({
-          user_id: transitionData.userId,
-          topic_id: transitionData.topicId,
-          prev_mastery: transitionData.prevState.mastery_level || transitionData.prevState.masteryLevel || 0,
-          prev_difficulty: transitionData.prevState.difficulty_level || transitionData.prevState.difficultyLevel || 3,
-          new_mastery: transitionData.newState.mastery_level || transitionData.newState.masteryLevel || 0,
-          new_difficulty: transitionData.newState.difficulty_level || transitionData.newState.difficultyLevel || 3,
-          action: transitionData.action,
-          action_reason: transitionData.actionReason,
-          reward: transitionData.reward,
-          question_id: transitionData.questionId,
-          was_correct: transitionData.wasCorrect,
-          time_spent: transitionData.timeSpent,
-          used_exploration: transitionData.usedExploration || false,
-          q_value: transitionData.qValue || 0,
-          epsilon: transitionData.epsilon || 0,
-          session_id: transitionData.sessionId
-        })
+        .insert(insertData)
         .select()
         .single();
 
@@ -380,66 +381,6 @@ class AdaptiveLearningRepository {
   }
 
   /**
-   * Log that a question was shown to a user
-   */
-  async logQuestionShown(userId, questionId, topicId, difficultyLevel, masteryLevel) {
-    try {
-      const { data, error } = await this.supabase
-        .from('user_question_history')
-        .insert({
-          user_id: userId,
-          question_id: questionId,
-          topic_id: topicId,
-          difficulty_at_time: difficultyLevel,
-          mastery_at_time: masteryLevel,
-          shown_at: new Date().toISOString()
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
-      return data;
-    } catch (error) {
-      console.error('Error logging question shown:', error);
-      throw error;
-    }
-  }
-
-  /**
-   * Update user's answer to a question with AI explanation
-   */
-  async updateQuestionAnswer(historyId, userAnswer, isCorrect, timeSpent, transitionId = null, aiExplanation = null) {
-    try {
-      const updateData = {
-        user_answer: userAnswer,
-        is_correct: isCorrect,
-        time_spent: timeSpent,
-        transition_id: transitionId,
-        answered_at: new Date().toISOString()
-      };
-
-      // Add AI explanation if provided
-      if (aiExplanation) {
-        updateData.ai_explanation = aiExplanation;
-        updateData.explanation_generated_at = new Date().toISOString();
-      }
-
-      const { data, error } = await this.supabase
-        .from('user_question_history')
-        .update(updateData)
-        .eq('id', historyId)
-        .select()
-        .single();
-
-      if (error) throw error;
-      return data;
-    } catch (error) {
-      console.error('Error updating question answer:', error);
-      throw error;
-    }
-  }
-
-  /**
    * Get questions for a specific topic and difficulty
    */
   async getQuestionsByTopicAndDifficulty(topicId, difficultyLevel, limit = 10) {
@@ -475,6 +416,384 @@ class AdaptiveLearningRepository {
     } catch (error) {
       console.error('Error getting all states for user:', error);
       return [];
+    }
+  }
+
+  // ================================================================
+  // TOPIC UNLOCKING METHODS
+  // ================================================================
+
+  /**
+   * Get or create topic progress for a user
+   */
+  async getTopicProgress(userId, topicId) {
+    try {
+      const { data, error } = await this.supabase
+        .from('user_topic_progress')
+        .select('*')
+        .eq('user_id', userId)
+        .eq('topic_id', topicId)
+        .single();
+
+      if (error && error.code !== 'PGRST116') {
+        throw error;
+      }
+
+      // If not exists, create default (locked)
+      if (!data) {
+        return await this.createTopicProgress(userId, topicId, false);
+      }
+
+      return data;
+    } catch (error) {
+      console.error('Error getting topic progress:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Create initial topic progress (locked by default)
+   */
+  async createTopicProgress(userId, topicId, unlocked = false) {
+    try {
+      const { data, error } = await this.supabase
+        .from('user_topic_progress')
+        .insert({
+          user_id: userId,
+          topic_id: topicId,
+          unlocked: unlocked,
+          mastered: false,
+          mastery_level: 0,
+          mastery_percentage: 0
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error('Error creating topic progress:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Update mastery percentage in user_topic_progress
+   * This syncs with adaptive_learning_state.mastery_level
+   */
+  async updateTopicMastery(userId, topicId, masteryPercentage) {
+    try {
+      const { data, error } = await this.supabase
+        .from('user_topic_progress')
+        .update({
+          mastery_percentage: masteryPercentage,
+          mastery_level: Math.floor(masteryPercentage / 20), // 0-5 scale
+          updated_at: new Date().toISOString()
+        })
+        .eq('user_id', userId)
+        .eq('topic_id', topicId)
+        .select()
+        .single();
+
+      if (error && error.code === 'PGRST116') {
+        // Record doesn't exist, create it
+        const { data: newData, error: insertError } = await this.supabase
+          .from('user_topic_progress')
+          .insert({
+            user_id: userId,
+            topic_id: topicId,
+            unlocked: true,
+            mastered: masteryPercentage >= 85,
+            mastery_level: Math.floor(masteryPercentage / 20),
+            mastery_percentage: masteryPercentage
+          })
+          .select()
+          .single();
+        
+        if (insertError) throw insertError;
+        return newData;
+      }
+
+      if (error) throw error;
+
+      // Invalidate cache
+      const cacheKey = cache.generateKey('user_topic_progress', userId);
+      cache.delete(cacheKey);
+
+      return data;
+    } catch (error) {
+      console.error('Error updating topic mastery:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get all topic progress for a user
+   */
+  async getAllTopicProgress(userId) {
+    try {
+      const cacheKey = cache.generateKey('user_topic_progress', userId);
+      const cached = cache.get(cacheKey);
+      if (cached) return cached;
+
+      const { data, error } = await this.supabase
+        .from('user_topic_progress')
+        .select(`
+          *,
+          adaptive_learning_topics (
+            id,
+            topic_name,
+            topic_code,
+            cognitive_domain,
+            description
+          )
+        `)
+        .eq('user_id', userId)
+        .order('topic_id');
+
+      if (error) throw error;
+
+      cache.set(cacheKey, data || [], this.CACHE_TTL);
+      return data || [];
+    } catch (error) {
+      console.error('Error getting all topic progress:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Update topic progress (unlock, mastery level, etc.)
+   */
+  async updateTopicProgress(userId, topicId, updates) {
+    try {
+      const { data, error } = await this.supabase
+        .from('user_topic_progress')
+        .update({
+          ...updates,
+          updated_at: new Date().toISOString()
+        })
+        .eq('user_id', userId)
+        .eq('topic_id', topicId)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      // Invalidate cache
+      const cacheKey = cache.generateKey('user_topic_progress', userId);
+      cache.delete(cacheKey);
+
+      return data;
+    } catch (error) {
+      console.error('Error updating topic progress:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Unlock next topic for user
+   */
+  async unlockNextTopic(userId, currentTopicId) {
+    try {
+      // Get current topic order
+      const currentTopic = await this.getTopicById(currentTopicId);
+      if (!currentTopic) return null;
+
+      // Get all topics in order
+      const allTopics = await this.getAllTopics();
+      const currentIndex = allTopics.findIndex(t => t.id === currentTopicId);
+      
+      if (currentIndex === -1 || currentIndex >= allTopics.length - 1) {
+        return null; // No next topic
+      }
+
+      const nextTopic = allTopics[currentIndex + 1];
+
+      // Get or create progress for next topic
+      let nextProgress = await this.getTopicProgress(userId, nextTopic.id);
+
+      // Unlock it
+      nextProgress = await this.updateTopicProgress(userId, nextTopic.id, {
+        unlocked: true,
+        unlocked_at: new Date().toISOString()
+      });
+
+      return {
+        topic: nextTopic,
+        progress: nextProgress
+      };
+    } catch (error) {
+      console.error('Error unlocking next topic:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Initialize all topics for a new user (Topic 1 unlocked, rest locked)
+   */
+  async initializeTopicsForUser(userId) {
+    try {
+      const allTopics = await this.getAllTopics();
+      
+      for (let i = 0; i < allTopics.length; i++) {
+        const topic = allTopics[i];
+        const unlocked = i === 0; // Only first topic unlocked
+        
+        // Check if already exists
+        const { data: existing } = await this.supabase
+          .from('user_topic_progress')
+          .select('id')
+          .eq('user_id', userId)
+          .eq('topic_id', topic.id)
+          .single();
+
+        if (!existing) {
+          await this.createTopicProgress(userId, topic.id, unlocked);
+        }
+      }
+
+      return true;
+    } catch (error) {
+      console.error('Error initializing topics for user:', error);
+      return false;
+    }
+  }
+
+  // ================================================================
+  // QUESTION ATTEMPT TRACKING
+  // ================================================================
+
+  /**
+   * Track question attempt
+   */
+  async trackQuestionAttempt(userId, questionId, topicId, sessionId, isCorrect, questionMetadata = null) {
+    try {
+      // Check if already exists
+      const { data: existing, error: selectError } = await this.supabase
+        .from('question_attempts')
+        .select('*')
+        .eq('user_id', userId)
+        .eq('question_id', questionId)
+        .eq('session_id', sessionId)
+        .single();
+
+      if (selectError && selectError.code !== 'PGRST116') {
+        throw selectError;
+      }
+
+      if (existing) {
+        // Update existing
+        const { data, error } = await this.supabase
+          .from('question_attempts')
+          .update({
+            attempts: existing.attempts + 1,
+            current_session_attempts: existing.current_session_attempts + 1,
+            is_correct: isCorrect,
+            answered_correctly_ever: existing.answered_correctly_ever || isCorrect,
+            last_attempt_at: new Date().toISOString()
+          })
+          .eq('id', existing.id)
+          .select()
+          .single();
+
+        if (error) throw error;
+        return data;
+      } else {
+        // Create new
+        const { data, error } = await this.supabase
+          .from('question_attempts')
+          .insert({
+            user_id: userId,
+            question_id: questionId,
+            topic_id: topicId,
+            session_id: sessionId,
+            attempts: 1,
+            current_session_attempts: 1,
+            is_correct: isCorrect,
+            answered_correctly_ever: isCorrect,
+            question_metadata: questionMetadata
+          })
+          .select()
+          .single();
+
+        if (error) throw error;
+        return data;
+      }
+    } catch (error) {
+      console.error('Error tracking question attempt:', error);
+      return null; // Don't fail the whole flow
+    }
+  }
+
+  /**
+   * Get question attempt count for current session
+   */
+  async getQuestionAttemptCount(userId, questionId, sessionId) {
+    try {
+      const { data, error } = await this.supabase
+        .from('question_attempts')
+        .select('current_session_attempts')
+        .eq('user_id', userId)
+        .eq('question_id', questionId)
+        .eq('session_id', sessionId)
+        .single();
+
+      if (error && error.code !== 'PGRST116') {
+        throw error;
+      }
+
+      return data ? data.current_session_attempts : 0;
+    } catch (error) {
+      console.error('Error getting question attempt count:', error);
+      return 0;
+    }
+  }
+
+  /**
+   * Get shown questions for session (to prevent repeats)
+   */
+  async getShownQuestionsInSession(userId, topicId, sessionId) {
+    try {
+      const { data, error } = await this.supabase
+        .from('user_session_questions')
+        .select('question_id, question_type')
+        .eq('user_id', userId)
+        .eq('topic_id', topicId)
+        .eq('session_id', sessionId);
+
+      if (error) throw error;
+      return data || [];
+    } catch (error) {
+      console.error('Error getting shown questions:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Add question to session history
+   */
+  async addToQuestionHistory(userId, topicId, sessionId, questionId, questionType, difficultyLevel, isCorrect, questionData = null) {
+    try {
+      const { data, error } = await this.supabase
+        .from('user_session_questions')
+        .insert({
+          user_id: userId,
+          topic_id: topicId,
+          session_id: sessionId,
+          question_id: questionId,
+          question_type: questionType,
+          difficulty_level: difficultyLevel,
+          is_correct: isCorrect,
+          question_data: questionData
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error('Error adding to question history:', error);
+      return null;
     }
   }
 }

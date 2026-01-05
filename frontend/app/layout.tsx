@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { Toaster } from "react-hot-toast";
-import Footer from "@/components/Footer";
 import AppProvider from "@/context/AppProvider";
 import GlobalLandscapePrompt from "@/components/GlobalLandscapePrompt";
 
