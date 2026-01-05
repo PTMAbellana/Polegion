@@ -364,14 +364,20 @@ class AdaptiveLearningController {
   async getTopicsWithProgress(req, res) {
     try {
       const userId = req.user.id;
+      console.log('[AdaptiveController] getTopicsWithProgress for user:', userId);
       
-      // Add timeout protection (15 seconds max)
+      const startTime = Date.now();
+      
+      // Increased timeout to 30 seconds (for new user initialization)
       const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Request timeout: topics fetch took too long')), 15000)
+        setTimeout(() => reject(new Error('Request timeout: topics fetch took too long')), 30000)
       );
       
       const topicsPromise = this.service.getTopicsWithProgress(userId);
       const topics = await Promise.race([topicsPromise, timeoutPromise]);
+      
+      const elapsed = Date.now() - startTime;
+      console.log(`[AdaptiveController] Topics fetched in ${elapsed}ms`);
 
       return res.status(200).json({
         success: true,

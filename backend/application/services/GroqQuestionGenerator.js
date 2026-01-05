@@ -64,7 +64,7 @@ class GroqQuestionGenerator {
     // Check rate limits
     const rateLimitCheck = this._checkRateLimits();
     if (!rateLimitCheck.allowed) {
-      console.warn('[GeminiQuestionGenerator] Rate limit exceeded:', rateLimitCheck.reason);
+      console.warn('[AIQuestionGenerator] Rate limit exceeded:', rateLimitCheck.reason);
       return null; // Will use fallback
     }
 
@@ -106,24 +106,37 @@ class GroqQuestionGenerator {
         return null;
       }
 
-      // Add metadata
-      question.generatedBy = 'ai';
-      question.model = this.model;
-      question.difficultyLevel = difficultyLevel;
-      question.topicName = topicName;
-      question.cognitiveDomain = cognitiveDomain;
-      question.questionId = `ai_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      // Convert Groq format to standard format expected by controller
+      const standardizedQuestion = {
+        // Standard fields expected by controller
+        id: `ai_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        questionId: `ai_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        question_text: question.questionText,  // Controller expects question_text
+        options: question.options,             // Already correct format
+        hint: question.hint,
+        correct_answer: question.correctAnswer,
+        type: 'ai_generated',
+        cognitive_domain: cognitiveDomain,
+        representation_type: 'text',
+        
+        // Metadata
+        generatedBy: 'ai',
+        model: this.model,
+        difficultyLevel: difficultyLevel,
+        topicName: topicName
+      };
 
       // Cache it
-      this.questionCache.set(cacheKey, {
-        question,
+      this.questionCache.set(`${topicName}_${difficultyLevel}`, {
+        question: standardizedQuestion,
         timestamp: Date.now()
       });
 
-      return question;
+      console.log('[AIQuestionGenerator] Generated AI question:', standardizedQuestion.id);
+      return standardizedQuestion;
 
     } catch (error) {
-      console.error('[GeminiQuestionGenerator] Error generating question:', error.message);
+      console.error('[AIQuestionGenerator] Error generating question:', error.message);
       return null; // Will use fallback
     }
   }
@@ -152,26 +165,27 @@ Create a geometry question that:
 5. Uses clear, child-friendly language
 6. Involves interesting scenarios (real-world contexts preferred)
 
-Return your response in this EXACT JSON format:
+Return ONLY valid JSON, nothing else. No markdown, no extra text. Use this exact format and MUST escape all quotes inside strings:
 {
-  "questionText": "The complete question text here",
+  "questionText": "The complete question text - escape all internal quotes with backslash",
   "options": [
-    {"label": "A", "text": "First option", "correct": false},
-    {"label": "B", "text": "Second option", "correct": true},
-    {"label": "C", "text": "Third option", "correct": false},
-    {"label": "D", "text": "Fourth option", "correct": false}
+    {"label": "A", "text": "First option - escape internal quotes", "correct": false},
+    {"label": "B", "text": "Second option - escape internal quotes", "correct": true},
+    {"label": "C", "text": "Third option - escape internal quotes", "correct": false},
+    {"label": "D", "text": "Fourth option - escape internal quotes", "correct": false}
   ],
   "correctAnswer": "B",
-  "hint": "A helpful hint that guides without giving away the answer",
-  "explanation": "Why this answer is correct (for teacher reference)"
+  "hint": "A helpful hint - escape internal quotes",
+  "explanation": "Why this is correct"
 }
 
-IMPORTANT:
-- Only output the JSON, no other text
-- Ensure the "correct" field matches the "correctAnswer"
-- Make the question engaging and age-appropriate
-- Use whole numbers when possible
-- Include units in answers (cm, m, cm², etc.)`;
+CRITICAL RULES FOR JSON:
+- MUST be valid JSON that JavaScript JSON.parse() can read
+- ALL quotes inside string values must be escaped with backslash: \\"
+- Example: If text is: What is a "square"? write it as: "text": "What is a \\"square\\"?"
+- No markdown code blocks
+- No extra text before or after the JSON
+- Exactly 4 options, exactly 1 correct`;
   }
 
   /**
@@ -192,6 +206,7 @@ IMPORTANT:
 
   /**
    * Parse AI response into question object
+   * Handles malformed JSON with fallback extraction
    */
   _parseQuestionResponse(responseText) {
     try {
@@ -200,39 +215,128 @@ IMPORTANT:
       cleaned = cleaned.replace(/```json\s*/g, '');
       cleaned = cleaned.replace(/```\s*/g, '');
       
-      // Parse JSON
-      const question = JSON.parse(cleaned);
+      let question = null;
+      
+      // Step 1: Try direct JSON parse
+      try {
+        question = JSON.parse(cleaned);
+      } catch (parseError) {
+        console.warn('[AIQuestionGenerator] Direct JSON parse failed, extracting object from response...');
+        
+        // Step 2: Extract JSON object from text
+        const jsonStart = cleaned.indexOf('{');
+        const jsonEnd = cleaned.lastIndexOf('}');
+        
+        if (jsonStart === -1 || jsonEnd === -1) {
+          throw new Error('No JSON object found in response');
+        }
+        
+        let jsonStr = cleaned.substring(jsonStart, jsonEnd + 1);
+        
+        // Step 3: Try parsing extracted JSON
+        try {
+          question = JSON.parse(jsonStr);
+        } catch (extractedError) {
+          console.warn('[AIQuestionGenerator] Extracted JSON also failed, attempting field extraction...');
+          
+          // Step 4: Last resort - extract fields manually using regex
+          question = this._extractQuestionFields(jsonStr);
+          
+          if (!question) {
+            throw new Error('Could not extract question fields');
+          }
+        }
+      }
 
       // Validate structure
-      if (!question.questionText || !question.options || !question.correctAnswer || !question.hint) {
-        console.error('[GeminiQuestionGenerator] Missing required fields in AI response');
+      if (!question || !question.questionText || !question.options || !question.correctAnswer || !question.hint) {
+        console.error('[AIQuestionGenerator] Missing required fields in AI response');
+        console.error('[AIQuestionGenerator] Got:', question);
         return null;
       }
 
       // Validate options
       if (!Array.isArray(question.options) || question.options.length !== 4) {
-        console.error('[GeminiQuestionGenerator] Invalid options array');
+        console.error('[AIQuestionGenerator] Invalid options array, expected 4 options');
         return null;
       }
 
       // Validate that one option is marked correct
-      const correctOptions = question.options.filter(opt => opt.correct);
+      const correctOptions = question.options.filter(opt => opt && opt.correct);
       if (correctOptions.length !== 1) {
-        console.error('[GeminiQuestionGenerator] Must have exactly one correct option');
+        console.error('[AIQuestionGenerator] Must have exactly one correct option');
         return null;
       }
 
       // Ensure correctAnswer matches
       const correctOption = correctOptions[0];
       if (correctOption.label !== question.correctAnswer) {
-        console.warn('[GeminiQuestionGenerator] Mismatch in correctAnswer, fixing...');
+        console.warn('[AIQuestionGenerator] Mismatch in correctAnswer, fixing...');
         question.correctAnswer = correctOption.label;
       }
 
       return question;
 
     } catch (error) {
-      console.error('[GeminiQuestionGenerator] Error parsing AI response:', error.message);
+      console.error('[AIQuestionGenerator] Error parsing AI response:', error.message);
+      return null;
+    }
+  }
+
+  /**
+   * Extract question fields manually using regex patterns
+   * Last resort when JSON parsing fails completely
+   */
+  _extractQuestionFields(jsonStr) {
+    try {
+      // Extract questionText
+      const questionMatch = jsonStr.match(/"questionText"\s*:\s*"([^"]*(?:\\"[^"]*)*?)(?<!\\)"\s*,/);
+      const questionText = questionMatch ? questionMatch[1].replace(/\\"/g, '"') : null;
+      
+      // Extract hint
+      const hintMatch = jsonStr.match(/"hint"\s*:\s*"([^"]*(?:\\"[^"]*)*?)(?<!\\)"\s*[,}]/);
+      const hint = hintMatch ? hintMatch[1].replace(/\\"/g, '"') : 'Try breaking down the problem';
+      
+      // Extract correctAnswer
+      const answerMatch = jsonStr.match(/"correctAnswer"\s*:\s*"([A-D])"/);
+      const correctAnswer = answerMatch ? answerMatch[1] : null;
+      
+      // Extract options using a simpler approach
+      const optionsMatch = jsonStr.match(/"options"\s*:\s*\[([\s\S]*?)\]/);
+      let options = [];
+      
+      if (optionsMatch) {
+        const optionsStr = optionsMatch[1];
+        // Match each option object  
+        const optMatches = optionsStr.match(/\{[^}]*"label"\s*:\s*"([A-D])"[^}]*"text"\s*:\s*"([^"]*)"[^}]*"correct"\s*:\s*(true|false)[^}]*\}/g);
+        
+        if (optMatches) {
+          options = optMatches.map(optStr => {
+            const labelMatch = optStr.match(/"label"\s*:\s*"([A-D])"/);
+            const textMatch = optStr.match(/"text"\s*:\s*"([^"]*)"/);
+            const correctMatch = optStr.match(/"correct"\s*:\s*(true|false)/);
+            
+            return {
+              label: labelMatch ? labelMatch[1] : '',
+              text: textMatch ? textMatch[1] : '',
+              correct: correctMatch ? correctMatch[1] === 'true' : false
+            };
+          });
+        }
+      }
+      
+      if (!questionText || !correctAnswer || options.length !== 4) {
+        return null;
+      }
+      
+      return {
+        questionText,
+        options,
+        correctAnswer,
+        hint
+      };
+    } catch (error) {
+      console.error('[AIQuestionGenerator] Field extraction failed:', error.message);
       return null;
     }
   }

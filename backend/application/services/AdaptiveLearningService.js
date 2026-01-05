@@ -973,7 +973,13 @@ class AdaptiveLearningService {
   determineCognitiveDomain(state) {
     const { mastery_level, difficulty_level, total_attempts } = state;
     
-    // Early stage: Focus on knowledge recall and understanding
+    // Early stage: Don't restrict by domain for first 3 attempts to allow variety
+    // This prevents students from always seeing the same first question
+    if (total_attempts < 3) {
+      return null; // null = no domain filter, pick from all domains
+    }
+    
+    // 3-10 attempts: Focus on knowledge recall and understanding
     if (total_attempts < 10) {
       return 'knowledge_recall';
     }
@@ -1348,15 +1354,24 @@ class AdaptiveLearningService {
    */
   async getTopicsWithProgress(userId) {
     try {
+      console.log('[AdaptiveLearning] getTopicsWithProgress - start');
+      
       // Get all topics
+      const topicsStart = Date.now();
       const allTopics = await this.repo.getAllTopics();
+      console.log(`[AdaptiveLearning] getAllTopics took ${Date.now() - topicsStart}ms, count: ${allTopics.length}`);
       
       // Get user's progress for all topics
+      const progressStart = Date.now();
       const progress = await this.repo.getAllTopicProgress(userId);
+      console.log(`[AdaptiveLearning] getAllTopicProgress took ${Date.now() - progressStart}ms, count: ${progress?.length || 0}`);
       
       // If user has no progress, initialize it
       if (!progress || progress.length === 0) {
+        console.log('[AdaptiveLearning] No progress found, initializing...');
+        const initStart = Date.now();
         await this.repo.initializeTopicsForUser(userId);
+        console.log(`[AdaptiveLearning] initializeTopicsForUser took ${Date.now() - initStart}ms`);
         return await this.getTopicsWithProgress(userId); // Retry after initialization
       }
 
@@ -1477,7 +1492,7 @@ class AdaptiveLearningService {
       if (difficultyLevel >= 4 && this.aiQuestionGenerator) {
         try {
           const state = await this.repo.getStudentDifficulty(userId, topicId);
-          const cognitiveDomain = state?.cognitive_domain || 'analytical_thinking';
+          const cognitiveDomain = this.determineCognitiveDomain(state) || 'analytical_thinking';
 
           // Add 10-second timeout to Groq API call
           const groqPromise = this.aiQuestionGenerator.generateQuestion({
@@ -1495,6 +1510,29 @@ class AdaptiveLearningService {
 
           if (question) {
             console.log('[AdaptiveLearning] Generated Groq question for mastery level 4-5:', question.questionId);
+            
+            // Save AI-generated question to database for research/reuse
+            try {
+              await this.repo.saveQuestion({
+                topicId,
+                questionText: question.question_text,
+                questionType: 'ai_generated',
+                options: question.options,
+                correctAnswer: question.correct_answer,
+                difficultyLevel,
+                cognitiveDomain,
+                generationParams: {
+                  model: question.model || 'groq',
+                  topicName: topic.topic_name,
+                  representationType: question.representation_type || 'text',
+                  generatedAt: new Date().toISOString()
+                }
+              });
+              console.log('[AdaptiveLearning] Saved AI question to database');
+            } catch (saveError) {
+              console.warn('[AdaptiveLearning] Failed to save AI question (non-critical):', saveError.message);
+              // Don't fail - question is already generated and can be used
+            }
           }
         } catch (aiError) {
           console.warn('[AdaptiveLearning] Groq generation failed, falling back to parametric:', aiError.message);

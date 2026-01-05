@@ -648,13 +648,18 @@ class AdaptiveLearningRepository {
    */
   async initializeTopicsForUser(userId) {
     try {
+      console.log('[Repo] initializeTopicsForUser - start');
+      const topicsStart = Date.now();
       const allTopics = await this.getAllTopics();
+      console.log(`[Repo] getAllTopics took ${Date.now() - topicsStart}ms`);
       
       // Fetch all existing progress in ONE query instead of N queries
+      const checkStart = Date.now();
       const { data: existingProgress } = await this.supabase
         .from('user_topic_progress')
         .select('topic_id')
         .eq('user_id', userId);
+      console.log(`[Repo] Check existing progress took ${Date.now() - checkStart}ms, found: ${existingProgress?.length || 0}`);
       
       const existingTopicIds = new Set(existingProgress?.map(p => p.topic_id) || []);
       
@@ -674,16 +679,22 @@ class AdaptiveLearningRepository {
       
       // Batch insert all at once (much faster than looping)
       if (toInsert.length > 0) {
+        console.log(`[Repo] Batch inserting ${toInsert.length} topic progress records`);
+        const insertStart = Date.now();
         const { error } = await this.supabase
           .from('user_topic_progress')
           .insert(toInsert);
+        console.log(`[Repo] Batch insert took ${Date.now() - insertStart}ms`);
         
         if (error) {
           console.warn('Warning: Batch insert had issues:', error.message);
           // Don't throw - race conditions are ok, some may already exist
         }
+      } else {
+        console.log('[Repo] All topics already initialized, nothing to insert');
       }
 
+      console.log('[Repo] initializeTopicsForUser - complete');
       return true;
     } catch (error) {
       console.error('Error initializing topics for user:', error);

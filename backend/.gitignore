@@ -103,6 +103,7 @@ generated/
 # Testing
 test-results/
 playwright-report/
+tests/
 
 # Docker
 Dockerfile.prod
