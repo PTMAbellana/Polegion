@@ -1,3 +1,6 @@
+# Documentation (keep local only)
+docs/
+
 # Dependencies
 node_modules/
 backend/node_modules/
