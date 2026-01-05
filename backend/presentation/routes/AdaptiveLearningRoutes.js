@@ -179,6 +179,16 @@ class AdaptiveLearningRoutes {
       '/submit-answer-enhanced',
       this.controller.submitAnswerEnhanced.bind(this.controller)
     );
+
+    /**
+     * @route   PUT /api/adaptive/hint-count/:topicId
+     * @desc    Update hint count for a question attempt
+     * @access  Private (authenticated students)
+     */
+    this.router.put(
+      '/hint-count/:topicId',
+      this.controller.updateHintCount.bind(this.controller)
+    );
   }
 
   getRouter() {

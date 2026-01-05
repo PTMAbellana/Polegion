@@ -1,18 +1,47 @@
 /**
  * QuestionGeneratorService
- * Generates parametric questions with random values for adaptive learning
+ * Parametric question generation system for adaptive learning
  * 
- * Instead of storing thousands of questions, we store templates and generate
- * unique variations on-the-fly with different numbers/parameters.
+ * CORE CONCEPT: Instead of storing thousands of static questions, we store
+ * "templates" with variable parameters. This allows infinite unique variations
+ * while maintaining pedagogical quality.
  * 
- * Supports 6 Cognitive Domains based on Bloom's Taxonomy:
- * - KR (Knowledge Recall): Basic definitions and facts
- * - CU (Concept Understanding): Relationships and classifications
- * - PS (Procedural Skills): Computations and algorithms
- * - AT (Analytical Thinking): Patterns, logic, multi-step reasoning
- * - PS+ (Problem Solving): Real-world applications
- * - HOT (Higher Order Thinking): Creative and complex reasoning
+ * Example Template:
+ *   "Find the area of a rectangle with width {width} and height {height}"
+ *   Parameters: width: {min: 3, max: 10}, height: {min: 3, max: 10}
+ *   Generates: "Find the area of a rectangle with width 5 and height 7"
+ *              (Solution: 5 × 7 = 35)
+ * 
+ * COGNITIVE DOMAINS (Bloom's Taxonomy):
+ * - Knowledge Recall (KR): Basic facts and formulas
+ * - Concept Understanding (CU): Relationships and classifications  
+ * - Procedural Skills (PS): Step-by-step computations
+ * - Analytical Thinking (AT): Multi-step reasoning and patterns
+ * - Problem Solving (PS+): Real-world applications
+ * - Higher Order Thinking (HOT): Creative and complex reasoning
+ * 
+ * ARCHITECTURE:
+ * - Templates organized by difficulty level (1-4)
+ * - Each template includes: type, cognitive domain, parameters, solution function
+ * - Supports multi-modal representations: text, visual, real-world context
+ * - Topic filtering for curriculum alignment
+ * - Recent question exclusion to prevent repetition
  */
+
+// Import modular question templates
+const circlePartsQuestions = require('./questions/CirclePartsQuestions');
+const volumeQuestions = require('./questions/VolumeQuestions');
+const basicGeometricFigures = require('./questions/BasicGeometricFigures');
+const perimeterAreaQuestions = require('./questions/PerimeterAreaQuestions');
+const pointsLinesPlanes = require('./questions/PointsLinesPlanes');
+const kindsOfAngles = require('./questions/KindsOfAngles');
+const complementarySupplementary = require('./questions/ComplementarySupplementary');
+const circleCircumferenceArea = require('./questions/CircleCircumferenceArea');
+const polygonIdentification = require('./questions/PolygonIdentification');
+const interiorAngles = require('./questions/InteriorAngles');
+const planeAnd3DFigures = require('./questions/PlaneAnd3DFigures');
+const geometryWordProblems = require('./questions/GeometryWordProblems');
+const geometricProofs = require('./questions/GeometricProofs');
 
 class QuestionGeneratorService {
   constructor() {
@@ -102,7 +131,8 @@ class QuestionGeneratorService {
             const names = { 3: 'Triangle', 4: 'Quadrilateral', 5: 'Pentagon', 6: 'Hexagon', 7: 'Heptagon', 8: 'Octagon' };
             return names[p.sides];
           },
-          hint: 'Count the number of sides'
+          hint: 'Count the number of sides',
+          multipleChoice: ['Triangle', 'Quadrilateral', 'Pentagon', 'Hexagon', 'Heptagon', 'Octagon']
         },
         {
           type: 'plane_vs_solid',
@@ -130,12 +160,51 @@ class QuestionGeneratorService {
           hint: 'Think of a square or rectangle - their angles add to this'
         },
         {
+          type: 'polygon_interior_pentagon',
+          cognitiveDomain: 'knowledge_recall',
+          template: 'What is the sum of the interior angles of a pentagon (5-sided polygon)?',
+          params: {},
+          solution: () => 540,
+          hint: 'Use the formula: (n-2) × 180° where n is the number of sides'
+        },
+        {
+          type: 'polygon_interior_hexagon',
+          cognitiveDomain: 'knowledge_recall',
+          template: 'What is the sum of the interior angles of a hexagon (6-sided polygon)?',
+          params: {},
+          solution: () => 720,
+          hint: 'Use the formula: (n-2) × 180° where n=6'
+        },
+        {
+          type: 'triangle_missing_angle_easy',
+          cognitiveDomain: 'procedural_skills',
+          template: 'A triangle has angles of {angle1}° and {angle2}°. What is the measure of the third angle?',
+          params: {
+            angle1: { min: 30, max: 70 },
+            angle2: { min: 40, max: 80 }
+          },
+          solution: (p) => 180 - p.angle1 - p.angle2,
+          hint: 'Remember: all triangle angles add up to 180°'
+        },
+        {
+          type: 'quadrilateral_missing_angle',
+          cognitiveDomain: 'procedural_skills',
+          template: 'A quadrilateral has three angles measuring {angle1}°, {angle2}°, and {angle3}°. Find the fourth angle.',
+          params: {
+            angle1: { min: 60, max: 100 },
+            angle2: { min: 70, max: 110 },
+            angle3: { min: 50, max: 90 }
+          },
+          solution: (p) => 360 - p.angle1 - p.angle2 - p.angle3,
+          hint: 'All angles in a quadrilateral sum to 360°'
+        },
+        {
           type: 'polygon_types_sides',
           cognitiveDomain: 'knowledge_recall',
           template: 'How many sides does a hexagon have?',
           params: {},
           solution: () => 6,
-          hint: 'Hex- means six'
+          hint: 'Think about the prefix "hex" - you might see it in other math terms'
         },
         {
           type: 'polygon_types_triangle',
@@ -143,7 +212,7 @@ class QuestionGeneratorService {
           template: 'Which polygon has exactly 3 sides and 3 angles?',
           params: {},
           solution: () => 0,
-          hint: 'Tri- means three',
+          hint: 'Think of the simplest polygon - what shape has the fewest sides?',
           multipleChoice: ['Triangle', 'Square', 'Pentagon', 'Hexagon']
         },
         // Points, Lines, and Planes - Foundational concepts
@@ -229,6 +298,93 @@ class QuestionGeneratorService {
           solution: () => 0,
           hint: 'It has length, width, AND height',
           multipleChoice: ['Cube', 'Circle', 'Triangle', 'Rectangle']
+        },
+        
+        // Additional Circle questions for Difficulty 1
+        {
+          type: 'circle_diameter_definition',
+          cognitiveDomain: 'knowledge_recall',
+          template: 'What is the line segment that passes through the center and connects two points on a circle called?',
+          params: {},
+          solution: () => 0,
+          hint: 'It goes all the way across through the center',
+          multipleChoice: ['Diameter', 'Radius', 'Chord', 'Arc']
+        },
+        {
+          type: 'circle_radius_relation',
+          cognitiveDomain: 'knowledge_recall',
+          template: 'The diameter of a circle is {diameter} units. What is the radius?',
+          params: {
+            diameter: { min: 6, max: 20, step: 2 }
+          },
+          solution: (p) => p.diameter / 2,
+          hint: 'The radius is half the diameter'
+        },
+        {
+          type: 'circle_basic_circumference',
+          cognitiveDomain: 'knowledge_recall',
+          template: 'What is the distance around a circle called?',
+          params: {},
+          solution: () => 0,
+          hint: 'It\'s like the perimeter of a circle',
+          multipleChoice: ['Circumference', 'Diameter', 'Radius', 'Area']
+        },
+        {
+          type: 'circle_chord_definition',
+          cognitiveDomain: 'knowledge_recall',
+          template: 'What is a line segment that connects any two points on a circle called?',
+          params: {},
+          solution: () => 0,
+          hint: 'It doesn\'t have to go through the center',
+          multipleChoice: ['Chord', 'Radius', 'Diameter', 'Tangent']
+        },
+        
+        // Additional Angle questions for Difficulty 1
+        {
+          type: 'complementary_angles_definition',
+          cognitiveDomain: 'knowledge_recall',
+          template: 'Two angles that add up to 90° are called:',
+          params: {},
+          solution: () => 0,
+          hint: 'They complete a right angle',
+          multipleChoice: ['Complementary angles', 'Supplementary angles', 'Vertical angles', 'Adjacent angles']
+        },
+        {
+          type: 'supplementary_angles_definition',
+          cognitiveDomain: 'knowledge_recall',
+          template: 'Two angles that add up to 180° are called:',
+          params: {},
+          solution: () => 0,
+          hint: 'They form a straight line',
+          multipleChoice: ['Supplementary angles', 'Complementary angles', 'Vertical angles', 'Right angles']
+        },
+        
+        // Additional Polygon questions for Difficulty 1
+        {
+          type: 'polygon_definition',
+          cognitiveDomain: 'knowledge_recall',
+          template: 'A polygon is a closed figure made up of:',
+          params: {},
+          solution: () => 0,
+          hint: 'Polygons are made of straight sides',
+          multipleChoice: ['Line segments', 'Curves', 'Circles', 'Arcs']
+        },
+        {
+          type: 'rectangle_properties',
+          cognitiveDomain: 'knowledge_recall',
+          template: 'How many right angles does a rectangle have?',
+          params: {},
+          solution: () => 4,
+          hint: 'Count all the corners'
+        },
+        {
+          type: 'square_properties',
+          cognitiveDomain: 'knowledge_recall',
+          template: 'A square has all sides:',
+          params: {},
+          solution: () => 0,
+          hint: 'All four sides are the same',
+          multipleChoice: ['Equal length', 'Different lengths', 'Parallel only', 'Perpendicular only']
         }
       ],
 
@@ -396,6 +552,121 @@ class QuestionGeneratorService {
           params: {},
           solution: () => (6 - 2) * 180,
           hint: 'Use the formula: (n - 2) × 180°'
+        },
+        
+        // Additional Circle questions for Difficulty 2
+        {
+          type: 'circle_diameter_from_radius',
+          cognitiveDomain: 'procedural_skills',
+          template: 'A circle has a radius of {radius} units. What is its diameter?',
+          params: {
+            radius: { min: 4, max: 15 }
+          },
+          solution: (p) => p.radius * 2,
+          hint: 'Diameter = 2 × radius'
+        },
+        {
+          type: 'circle_area_comparison',
+          cognitiveDomain: 'concept_understanding',
+          template: 'If you double the radius of a circle, its area becomes:',
+          params: {},
+          solution: () => 0,
+          hint: 'Area depends on r², so doubling r means area becomes 4 times larger',
+          multipleChoice: ['4 times larger', '2 times larger', '8 times larger', 'Same size']
+        },
+        {
+          type: 'circle_semicircle_perimeter',
+          cognitiveDomain: 'analytical_thinking',
+          template: 'A semicircle has a diameter of {diameter} units. What is the perimeter of the semicircle (curved part + diameter)? (Use π ≈ 3.14)',
+          params: {
+            diameter: { min: 6, max: 14, step: 2 }
+          },
+          solution: (p) => (Math.PI * p.diameter / 2) + p.diameter,
+          hint: 'Perimeter = half circumference + diameter'
+        },
+        
+        // Additional Polygon questions for Difficulty 2
+        {
+          type: 'polygon_perimeter_regular',
+          cognitiveDomain: 'procedural_skills',
+          template: 'A regular pentagon has each side measuring {side} units. What is its perimeter?',
+          params: {
+            side: { min: 5, max: 12 }
+          },
+          solution: (p) => 5 * p.side,
+          hint: 'Perimeter = number of sides × side length'
+        },
+        {
+          type: 'triangle_perimeter',
+          cognitiveDomain: 'procedural_skills',
+          template: 'A triangle has sides of {side1}, {side2}, and {side3} units. What is its perimeter?',
+          params: {
+            side1: { min: 5, max: 12 },
+            side2: { min: 6, max: 13 },
+            side3: { min: 7, max: 14 }
+          },
+          solution: (p) => p.side1 + p.side2 + p.side3,
+          hint: 'Perimeter = sum of all sides'
+        },
+        
+        // Additional Volume questions for Difficulty 2
+        {
+          type: 'volume_rectangular_prism_simple',
+          cognitiveDomain: 'procedural_skills',
+          template: 'A box is {length} units long, {width} units wide, and {height} units tall. What is its volume?',
+          params: {
+            length: { min: 4, max: 10 },
+            width: { min: 3, max: 8 },
+            height: { min: 2, max: 7 }
+          },
+          solution: (p) => p.length * p.width * p.height,
+          hint: 'Volume = length × width × height'
+        },
+        
+        // Polygon Identification - Difficulty 2
+        {
+          type: 'polygon_identify_quadrilateral',
+          cognitiveDomain: 'knowledge_recall',
+          template: 'What is the name for a polygon with 4 sides?',
+          params: {},
+          solution: () => 0,
+          hint: 'Think about the prefix for shapes with this many sides - squares and rectangles are examples',
+          multipleChoice: ['Quadrilateral', 'Triangle', 'Pentagon', 'Hexagon']
+        },
+        {
+          type: 'polygon_types_pentagon',
+          cognitiveDomain: 'knowledge_recall',
+          template: 'A polygon with 5 sides is called:',
+          params: {},
+          solution: () => 0,
+          hint: 'The prefix "penta" appears in pentathlon (5 events)',
+          multipleChoice: ['Pentagon', 'Hexagon', 'Heptagon', 'Octagon']
+        },
+        {
+          type: 'polygon_types_octagon',
+          cognitiveDomain: 'knowledge_recall',
+          template: 'How many sides does an octagon have?',
+          params: {},
+          solution: () => 8,
+          hint: 'Think of a STOP sign - count the sides'
+        },
+        {
+          type: 'polygon_identify_by_angles',
+          cognitiveDomain: 'concept_understanding',
+          template: 'A polygon has 6 sides and 6 angles. What is it called?',
+          params: {},
+          solution: () => 0,
+          hint: 'Think of honeycombs - what shape are the cells?',
+          multipleChoice: ['Hexagon', 'Pentagon', 'Heptagon', 'Octagon']
+        },
+        {
+          type: 'polygon_regular_definition',
+          cognitiveDomain: 'knowledge_recall',
+          template: 'A regular polygon has:',
+          params: {},
+          solution: () => 0,
+          hint: 'All parts are equal in a regular polygon',
+          multipleChoice: ['All sides and angles equal', 'Only sides equal', 'Only angles equal', 'No equal parts']
         }
       ],
 
@@ -422,6 +693,59 @@ class QuestionGeneratorService {
           solution: (p) => 180 - p.angle1,
           hint: 'Adjacent angles on a straight line are supplementary'
         },
+        
+        // Circles - Intermediate level
+        {
+          type: 'circle_area',
+          cognitiveDomain: 'procedural_skills',
+          template: 'A circular pool has a radius of {radius} meters. What is its area? (Use π ≈ 3.14)',
+          params: {
+            radius: { min: 5, max: 12 }
+          },
+          solution: (p) => Math.PI * p.radius * p.radius,
+          hint: 'Area = π × r²'
+        },
+        {
+          type: 'circle_circumference',
+          cognitiveDomain: 'procedural_skills',
+          template: 'A circular track has a radius of {radius} meters. How far is one complete lap around the track? (Use π ≈ 3.14)',
+          params: {
+            radius: { min: 8, max: 20 }
+          },
+          solution: (p) => 2 * Math.PI * p.radius,
+          hint: 'Circumference = 2 × π × r'
+        },
+        {
+          type: 'circle_diameter_to_circumference',
+          cognitiveDomain: 'concept_understanding',
+          template: 'A circle has a diameter of {diameter} units. What is its circumference? (Use π ≈ 3.14)',
+          params: {
+            diameter: { min: 10, max: 24 }
+          },
+          solution: (p) => Math.PI * p.diameter,
+          hint: 'Circumference = π × diameter'
+        },
+        {
+          type: 'circle_radius_from_circumference',
+          cognitiveDomain: 'analytical_thinking',
+          template: 'A circle has a circumference of {circumference} units. What is its radius? (Use π ≈ 3.14)',
+          params: {
+            circumference: { min: 31.4, max: 62.8, step: 6.28 }
+          },
+          solution: (p) => p.circumference / (2 * Math.PI),
+          hint: 'Radius = Circumference ÷ (2π)'
+        },
+        {
+          type: 'circle_area_from_diameter',
+          cognitiveDomain: 'analytical_thinking',
+          template: 'A circular garden has a diameter of {diameter} meters. What is its area? (Use π ≈ 3.14)',
+          params: {
+            diameter: { min: 8, max: 18, step: 2 }
+          },
+          solution: (p) => Math.PI * Math.pow(p.diameter / 2, 2),
+          hint: 'First find the radius (diameter ÷ 2), then use Area = π × r²'
+        },
+        
         // Plane and 3D Figures - Comparison
         {
           type: 'solid_vs_plane_comparison',
@@ -510,9 +834,63 @@ class QuestionGeneratorService {
           cognitiveDomain: 'knowledge_recall',
           template: 'How many points are needed to define a unique line?',
           params: {},
-          solution: () => 2,
-          hint: 'You need at least this many points to draw a straight line',
+          solution: () => 1, // Index 1 in the array [1, 2, 3, 4] = value 2 (correct answer)
+          hint: 'Two points determine exactly one unique line',
           multipleChoice: [1, 2, 3, 4]
+        },
+        {
+          type: 'point_naming_convention',
+          cognitiveDomain: 'concept_understanding',
+          template: 'Points are typically labeled with:',
+          params: {},
+          solution: () => 0,
+          hint: 'Points use capital letters like A, B, C',
+          multipleChoice: ['Capital letters', 'Lowercase letters', 'Numbers only', 'Greek symbols']
+        },
+        {
+          type: 'line_infinite_property',
+          cognitiveDomain: 'concept_understanding',
+          template: 'Which statement is true about a line?',
+          params: {},
+          solution: () => 0,
+          hint: 'A line has no endpoints and continues forever',
+          multipleChoice: ['It extends infinitely in both directions', 'It has two endpoints', 'It has one endpoint', 'It has a fixed length']
+        },
+        {
+          type: 'plane_points_required',
+          cognitiveDomain: 'knowledge_recall',
+          template: 'What is the minimum number of non-collinear points needed to define a unique plane?',
+          params: {},
+          solution: () => 2, // Index 2 = 3 points
+          hint: 'Think about how many legs a table needs to be stable',
+          multipleChoice: [1, 2, 3, 4]
+        },
+        {
+          type: 'ray_vs_line_segment',
+          cognitiveDomain: 'concept_understanding',
+          template: 'What is the main difference between a ray and a line segment?',
+          params: {},
+          solution: () => 0,
+          hint: 'A ray has one endpoint, a line segment has two',
+          multipleChoice: ['A ray extends infinitely in one direction, a line segment has finite length', 'A ray is curved, a line segment is straight', 'A ray has two endpoints, a line segment has one', 'There is no difference']
+        },
+        {
+          type: 'collinear_points_line',
+          cognitiveDomain: 'analytical_thinking',
+          template: 'If points A, B, and C are collinear, what can you conclude?',
+          params: {},
+          solution: () => 0,
+          hint: 'Collinear means on the same line',
+          multipleChoice: ['They all lie on the same line', 'They form a triangle', 'They are equidistant', 'They define a plane']
+        },
+        {
+          type: 'line_notation_symbols',
+          cognitiveDomain: 'knowledge_recall',
+          template: 'How is a line segment AB typically written in geometry?',
+          params: {},
+          solution: () => 0,
+          hint: 'A line segment has two endpoints and uses a bar above the letters',
+          multipleChoice: ['Segment AB with a bar on top', 'Ray AB with an arrow', 'Line AB with arrows on both ends', 'Just AB with no symbol']
         },
         {
           type: 'composite_area',
@@ -563,6 +941,52 @@ class QuestionGeneratorService {
           solution: (p) => (p.sides - 2) * 180,
           hint: 'Sum = (n - 2) × 180°'
         },
+        
+        // Polygon Identification - Difficulty 3
+        {
+          type: 'polygon_identify_heptagon',
+          cognitiveDomain: 'knowledge_recall',
+          template: 'What is a 7-sided polygon called?',
+          params: {},
+          solution: () => 0,
+          hint: 'The prefix "hepta" - it comes between hexagon and octagon',
+          multipleChoice: ['Heptagon', 'Hexagon', 'Octagon', 'Nonagon']
+        },
+        {
+          type: 'polygon_types_nonagon',
+          cognitiveDomain: 'knowledge_recall',
+          template: 'How many sides does a nonagon have?',
+          params: {},
+          solution: () => 9,
+          hint: 'This shape comes right after an octagon in the polygon sequence'
+        },
+        {
+          type: 'polygon_identify_decagon',
+          cognitiveDomain: 'knowledge_recall',
+          template: 'A polygon with 10 sides is called:',
+          params: {},
+          solution: () => 0,
+          hint: 'Think about the prefix "dec" - like decade or decimal system',
+          multipleChoice: ['Decagon', 'Nonagon', 'Hendecagon', 'Dodecagon']
+        },
+        {
+          type: 'polygon_convex_definition',
+          cognitiveDomain: 'concept_understanding',
+          template: 'A convex polygon has:',
+          params: {},
+          solution: () => 0,
+          hint: 'All interior angles are less than 180°',
+          multipleChoice: ['All interior angles less than 180°', 'At least one angle greater than 180°', 'All right angles', 'Only 3 sides']
+        },
+        {
+          type: 'polygon_diagonals',
+          cognitiveDomain: 'analytical_thinking',
+          template: 'How many diagonals can be drawn from one vertex of a hexagon?',
+          params: {},
+          solution: () => 3,
+          hint: 'From one vertex, you can draw diagonals to all non-adjacent vertices'
+        },
+        
         {
           type: 'congruent_angles',
           cognitiveDomain: 'concept_understanding',
@@ -759,6 +1183,152 @@ class QuestionGeneratorService {
           },
           solution: (p) => 2 * Math.PI * p.radius * (p.radius + p.height),
           hint: 'SA = 2πr(r + h)'
+        },
+        
+        // Additional Circle questions for Difficulty 4
+        {
+          type: 'circle_arc_length',
+          cognitiveDomain: 'analytical_thinking',
+          template: 'Find the arc length of a circle with radius {radius} units and central angle {angle}°. (Use π ≈ 3.14)',
+          params: {
+            radius: { min: 8, max: 16 },
+            angle: { min: 45, max: 270 }
+          },
+          solution: (p) => (p.angle / 360) * 2 * Math.PI * p.radius,
+          hint: 'Arc length = (angle/360) × 2πr'
+        },
+        {
+          type: 'circle_segment_area',
+          cognitiveDomain: 'higher_order_thinking',
+          template: 'A circle has radius {radius} units. If a chord divides it creating a 90° sector, what is the sector area? (Use π ≈ 3.14)',
+          params: {
+            radius: { min: 6, max: 14 }
+          },
+          solution: (p) => (90 / 360) * Math.PI * p.radius * p.radius,
+          hint: 'This is 1/4 of the circle area'
+        },
+        {
+          type: 'circle_inscribed_square',
+          cognitiveDomain: 'problem_solving',
+          template: 'A square is inscribed in a circle of radius {radius} units. What is the area of the square?',
+          params: {
+            radius: { min: 5, max: 12 }
+          },
+          solution: (p) => 2 * p.radius * p.radius,
+          hint: 'The diagonal of the square equals the diameter of the circle'
+        },
+        
+        // Additional Polygon questions for Difficulty 4
+        {
+          type: 'polygon_exterior_angles',
+          cognitiveDomain: 'analytical_thinking',
+          template: 'What is the sum of all exterior angles of any polygon?',
+          params: {},
+          solution: () => 360,
+          hint: 'This is true for ALL polygons, regardless of the number of sides'
+        },
+        {
+          type: 'regular_polygon_interior_angle',
+          cognitiveDomain: 'analytical_thinking',
+          template: 'A regular {sides}-sided polygon has interior angles. What is the measure of ONE interior angle?',
+          params: {
+            sides: { min: 5, max: 8 }
+          },
+          solution: (p) => ((p.sides - 2) * 180) / p.sides,
+          hint: 'Total interior angles = (n-2)×180°, then divide by n'
+        },
+        
+        // Additional Volume questions for Difficulty 4
+        {
+          type: 'volume_cylinder_word',
+          cognitiveDomain: 'problem_solving',
+          template: 'A cylindrical water tank has radius {radius} meters and height {height} meters. How many cubic meters of water can it hold? (Use π ≈ 3.14)',
+          params: {
+            radius: { min: 3, max: 8 },
+            height: { min: 5, max: 12 }
+          },
+          solution: (p) => Math.PI * p.radius * p.radius * p.height,
+          hint: 'Volume = π × r² × h'
+        },
+        {
+          type: 'surface_area_rectangular_prism',
+          cognitiveDomain: 'analytical_thinking',
+          template: 'A box has dimensions {length} × {width} × {height} units. What is its total surface area?',
+          params: {
+            length: { min: 6, max: 14 },
+            width: { min: 5, max: 12 },
+            height: { min: 4, max: 10 }
+          },
+          solution: (p) => 2 * (p.length * p.width + p.length * p.height + p.width * p.height),
+          hint: 'SA = 2(lw + lh + wh)'
+        },
+        
+        // Additional Angle questions for Difficulty 4
+        {
+          type: 'angle_pairs_parallel_lines',
+          cognitiveDomain: 'analytical_thinking',
+          template: 'Two parallel lines are cut by a transversal. If one angle is {angle}°, what is the alternate interior angle?',
+          params: {
+            angle: { min: 40, max: 140 }
+          },
+          solution: (p) => p.angle,
+          hint: 'Alternate interior angles are equal when lines are parallel'
+        },
+        {
+          type: 'angle_sum_pentagon',
+          cognitiveDomain: 'procedural_skills',
+          template: 'In a pentagon, four angles measure {a1}°, {a2}°, {a3}°, and {a4}°. Find the fifth angle.',
+          params: {
+            a1: { min: 80, max: 120 },
+            a2: { min: 90, max: 130 },
+            a3: { min: 85, max: 125 },
+            a4: { min: 95, max: 135 }
+          },
+          solution: (p) => 540 - p.a1 - p.a2 - p.a3 - p.a4,
+          hint: 'Sum of interior angles of pentagon = 540°'
+        },
+        
+        // Polygon Identification - Difficulty 4
+        {
+          type: 'polygon_types_dodecagon',
+          cognitiveDomain: 'knowledge_recall',
+          template: 'How many sides does a dodecagon have?',
+          params: {},
+          solution: () => 12,
+          hint: 'Think about the prefix "dodeca" - it appears in dozen'
+        },
+        {
+          type: 'polygon_total_diagonals',
+          cognitiveDomain: 'analytical_thinking',
+          template: 'How many total diagonals does a hexagon have?',
+          params: {},
+          solution: () => 9,
+          hint: 'Use formula: n(n-3)/2 where n=6'
+        },
+        {
+          type: 'polygon_identify_classification',
+          cognitiveDomain: 'concept_understanding',
+          template: 'A polygon with all sides equal and all angles equal is called:',
+          params: {},
+          solution: () => 0,
+          hint: 'Regular means all equal',
+          multipleChoice: ['Regular polygon', 'Irregular polygon', 'Concave polygon', 'Simple polygon']
+        },
+        {
+          type: 'polygon_exterior_angle_regular',
+          cognitiveDomain: 'analytical_thinking',
+          template: 'What is the measure of ONE exterior angle of a regular pentagon?',
+          params: {},
+          solution: () => 72,
+          hint: 'Exterior angles sum to 360°, divide by number of sides'
+        },
+        {
+          type: 'polygon_identify_by_diagonals',
+          cognitiveDomain: 'higher_order_thinking',
+          template: 'A polygon has 5 diagonals. How many sides does it have?',
+          params: {},
+          solution: () => 5,
+          hint: 'Use formula: n(n-3)/2 = 5, solve for n'
         }
       ],
 
@@ -915,13 +1485,52 @@ class QuestionGeneratorService {
         }
       ]
     };
+
+    // Load and merge modular question templates
+    this.loadModularTemplates();
+  }
+
+  /**
+   * Load and merge modular question templates with existing templates
+   * Adds questions from the questions/ directory to the existing inline templates
+   */
+  loadModularTemplates() {
+    const modularFiles = [
+      circlePartsQuestions,
+      volumeQuestions,
+      basicGeometricFigures,
+      perimeterAreaQuestions,
+      pointsLinesPlanes,
+      kindsOfAngles,
+      complementarySupplementary,
+      circleCircumferenceArea,
+      polygonIdentification,
+      interiorAngles,
+      planeAnd3DFigures,
+      geometryWordProblems,
+      geometricProofs
+    ];
+
+    // Merge each modular file's questions into the main templates
+    for (const modularTemplate of modularFiles) {
+      for (let difficulty = 1; difficulty <= 4; difficulty++) {
+        if (modularTemplate[difficulty]) {
+          this.templates[difficulty].push(...modularTemplate[difficulty]);
+        }
+      }
+    }
+
+    console.log(`[QuestionGenerator] Loaded modular templates:`);
+    for (let difficulty = 1; difficulty <= 4; difficulty++) {
+      console.log(`  Difficulty ${difficulty}: ${this.templates[difficulty].length} questions`);
+    }
   }
 
   /**
    * Generate a random question at specified difficulty level
    */
-  generateQuestion(difficultyLevel, chapterId, seed = null, cognitiveDomain = null, representationType = 'text', topicFilter = null) {
-    console.log(`[QGen] START - difficulty: ${difficultyLevel}, cognitive: ${cognitiveDomain}, filter: ${topicFilter}`);
+  generateQuestion(difficultyLevel, chapterId, seed = null, cognitiveDomain = null, representationType = 'text', topicFilter = null, excludeTypes = []) {
+    console.log(`[QGen] START - difficulty: ${difficultyLevel}, cognitive: ${cognitiveDomain}, filter: ${topicFilter}, excludeTypes: ${excludeTypes.join(',')}`);
     
     const templates = this.templates[difficultyLevel];
     if (!templates || templates.length === 0) {
@@ -932,27 +1541,82 @@ class QuestionGeneratorService {
     // Filter by topic if specified (e.g., "polygon_interior" matches "polygon_interior_angles")
     let filteredTemplates = templates;
     if (topicFilter) {
-      filteredTemplates = templates.filter(t => t.type.includes(topicFilter) || new RegExp(topicFilter).test(t.type));
+      // Split the filter by | and check if question type matches any of the filter parts
+      const filterParts = topicFilter.split('|');
+      filteredTemplates = templates.filter(t => 
+        filterParts.some(part => t.type === part || t.type.startsWith(part + '_'))
+      );
       console.log(`[QuestionGenerator] Topic filter "${topicFilter}" reduced templates from ${templates.length} to ${filteredTemplates.length}`);
+      
+      // Only fall back to all templates if BOTH topic filter AND cognitive domain filtering fail
+      // Don't fall back immediately - wait to see if cognitive domain helps
       if (filteredTemplates.length === 0) {
-        console.warn(`No templates found for topic filter "${topicFilter}" at difficulty ${difficultyLevel}, using all templates`);
-        filteredTemplates = templates;
+        console.warn(`No templates found for topic filter "${topicFilter}" at difficulty ${difficultyLevel}`);
+        // Keep filteredTemplates empty for now, will check cognitive domain next
       }
     }
     
     // Filter by cognitive domain if specified
-    if (cognitiveDomain && filteredTemplates.length > 1) {
+    if (cognitiveDomain) {
       console.log(`[QGen] Filtering by cognitive domain: ${cognitiveDomain}`);
-      const domainFiltered = filteredTemplates.filter(t => t.cognitiveDomain === cognitiveDomain);
-      if (domainFiltered.length > 0) {
-        filteredTemplates = domainFiltered;
-        console.log(`[QGen] Domain filter reduced to ${domainFiltered.length} templates`);
+      
+      // If topic filter found templates, filter those by domain
+      if (filteredTemplates.length > 0) {
+        const domainFiltered = filteredTemplates.filter(t => t.cognitiveDomain === cognitiveDomain);
+        if (domainFiltered.length > 0) {
+          filteredTemplates = domainFiltered;
+          console.log(`[QGen] Domain filter reduced to ${domainFiltered.length} templates`);
+        } else {
+          console.warn(`No templates found for domain ${cognitiveDomain}, keeping topic-filtered templates`);
+        }
       } else {
-        console.warn(`No templates found for domain ${cognitiveDomain}, using topic-filtered templates`);
+        // Topic filter failed, try filtering all templates by cognitive domain only
+        const domainFiltered = templates.filter(t => t.cognitiveDomain === cognitiveDomain);
+        if (domainFiltered.length > 0) {
+          filteredTemplates = domainFiltered;
+          console.log(`[QGen] Using domain-only filter: ${domainFiltered.length} templates`);
+        } else {
+          console.warn(`No templates found for domain ${cognitiveDomain}, using all templates`);
+          filteredTemplates = templates;
+        }
+      }
+    } else if (filteredTemplates.length === 0) {
+      // No cognitive domain specified and topic filter failed - use all templates as last resort
+      console.warn(`Topic filter failed and no cognitive domain specified, using all templates`);
+      filteredTemplates = templates;
+    }
+    
+    // === STEP 4: Exclude Recent Question Types (Prevent Immediate Repetition) ===
+    // WHY: Spaced repetition is more effective than immediate repetition.
+    // Exclude the 2 most recent question types to ensure variety while maintaining
+    // curriculum coverage. If only 1-2 templates available, allow repeats rather than fail.
+    if (excludeTypes && excludeTypes.length > 0 && filteredTemplates.length > 2) {
+      const beforeExclude = filteredTemplates.length;
+      const typesToExclude = excludeTypes.slice(0, 2); // Only exclude 2 most recent
+      
+      console.log(`[QGen] Before exclusion - templates:`, filteredTemplates.map(t => t.type));
+      console.log(`[QGen] Types to exclude (last 2):`, typesToExclude);
+      
+      const templatesAfterExclude = filteredTemplates.filter(t => !typesToExclude.includes(t.type));
+      console.log(`[QGen] After exclusion - templates:`, templatesAfterExclude.map(t => t.type));
+      
+      if (templatesAfterExclude.length > 0) {
+        filteredTemplates = templatesAfterExclude;
+        console.log(`[QGen] Excluded ${typesToExclude.length} recent types, reduced from ${beforeExclude} to ${filteredTemplates.length} templates`);
+      } else {
+        console.warn(`[QGen] Not enough template variety, allowing repeats`);
       }
     }
 
     console.log(`[QGen] Selecting from ${filteredTemplates.length} filtered templates`);
+    
+    // === SAFETY CHECK: Ensure Template Availability ===
+    if (filteredTemplates.length === 0) {
+      console.error(`[QGen] CRITICAL: No templates available after filtering!`);
+      console.error(`[QGen] Filters applied: difficulty=${difficultyLevel}, cognitive=${cognitiveDomain}, topicFilter=${topicFilter}`);
+      throw new Error(`No question templates available for difficulty ${difficultyLevel} with filters: topic=${topicFilter}, cognitive=${cognitiveDomain}`);
+    }
+    
     // Select random template from filtered set
     const template = filteredTemplates[Math.floor(Math.random() * filteredTemplates.length)];
     console.log(`[QGen] Selected template type: ${template.type}`);
@@ -991,17 +1655,29 @@ class QuestionGeneratorService {
         correct: typeof solution === 'number' ? idx === solution : label === solution
       }));
     } else {
-      // Generate numeric options with distractors
+      // Generate numeric options with pedagogically meaningful distractors
       const correctAnswer = this.roundSolution(solution);
-      const distractors = this.generateDistractors(correctAnswer, template.type);
-      options = [correctAnswer, ...distractors]
-        .sort(() => Math.random() - 0.5) // Shuffle
-        .map(val => ({
-          label: `${val}`,
-          correct: val === correctAnswer
-        }));
+      const distractors = this.generateDistractors(correctAnswer, template.type, params);
+      
+      // Create option set
+      options = [correctAnswer, ...distractors].map(val => ({
+        label: `${val}`,
+        correct: val === correctAnswer
+      }));
+      
+      // Randomize order AFTER creating options
+      options.sort(() => Math.random() - 0.5);
     }
     console.log(`[QGen] Generated ${options.length} options`);
+    
+    // Validate answer options (defensive check)
+    try {
+      this.validateAnswerOptions(options);
+    } catch (error) {
+      console.error(`[QGen] Validation failed:`, error.message);
+      console.error(`[QGen] Options:`, options);
+      throw error;
+    }
 
     // Generate unique question ID (deterministic based on parameters)
     console.log(`[QGen] Generating question ID...`);
@@ -1039,8 +1715,9 @@ class QuestionGeneratorService {
 
   /**
    * Generate random parameters based on constraints
+   * Optionally scales based on mastery level for adaptive difficulty
    */
-  generateParameters(paramDefs, seed = null) {
+  generateParameters(paramDefs, seed = null, masteryLevel = null) {
     const params = {};
     
     for (const [key, def] of Object.entries(paramDefs)) {
@@ -1049,10 +1726,105 @@ class QuestionGeneratorService {
         ? this.seededRandom(seed + key.charCodeAt(0)) 
         : Math.random();
       
-      params[key] = Math.floor(random * (def.max - def.min + 1)) + def.min;
+      let min = def.min;
+      let max = def.max;
+      
+      // Adjust range based on mastery level (adaptive difficulty)
+      if (masteryLevel !== null) {
+        if (masteryLevel <= 2) {
+          // LOW mastery: use lower half of range, smaller numbers
+          max = Math.floor(min + (max - min) * 0.6);
+        } else if (masteryLevel >= 4) {
+          // HIGH mastery: use upper half of range, larger numbers
+          min = Math.floor(min + (max - min) * 0.4);
+        }
+        // MEDIUM mastery (3): use full range (no adjustment)
+      }
+      
+      params[key] = Math.floor(random * (max - min + 1)) + min;
     }
     
     return params;
+  }
+  
+  /**
+   * Generate a similar question (for wrong answer regeneration)
+   * Same concept, same difficulty, different numbers/representation
+   */
+  generateSimilarQuestion(originalQuestion, masteryLevel = null) {
+    const { type, difficulty_level, chapter_id, representation_type } = originalQuestion;
+    
+    // Find the template for this question type
+    const templates = this.templates[difficulty_level] || [];
+    const template = templates.find(t => t.type === type);
+    
+    if (!template) {
+      console.warn(`[QGen] Could not find template for regeneration: ${type}`);
+      // Fallback: generate any question at this difficulty
+      return this.generateQuestion(difficulty_level, chapter_id, null, null, representation_type);
+    }
+    
+    // Generate new parameters (different from original)
+    const newSeed = Date.now(); // Ensure different values
+    const newParams = this.generateParameters(template.params, newSeed, masteryLevel);
+    
+    // Prefer different representation if mastery is low
+    let newRepresentation = representation_type;
+    if (masteryLevel !== null && masteryLevel <= 2) {
+      // Low mastery: try visual representation
+      newRepresentation = representation_type === 'visual' ? 'text' : 'visual';
+    }
+    
+    // Create question text
+    let questionText = this.fillTemplate(template.template, newParams);
+    if (newRepresentation === 'real_world') {
+      questionText = this.transformToRealWorld(questionText, template.type, newParams);
+    } else if (newRepresentation === 'visual') {
+      questionText = this.transformToVisual(questionText, template.type, newParams);
+    }
+    
+    // Calculate solution
+    const solution = template.solution(newParams);
+    
+    // Generate options
+    let options = [];
+    if (template.multipleChoice) {
+      options = template.multipleChoice.map((label, idx) => ({
+        label,
+        correct: typeof solution === 'number' ? idx === solution : label === solution
+      }));
+    } else {
+      const correctAnswer = this.roundSolution(solution);
+      const distractors = this.generateDistractors(correctAnswer, template.type, newParams);
+      options = [correctAnswer, ...distractors].map(val => ({
+        label: `${val}`,
+        correct: val === correctAnswer
+      }));
+      options.sort(() => Math.random() - 0.5);
+    }
+    
+    // Validate
+    this.validateAnswerOptions(options);
+    
+    // Generate new ID
+    const questionId = this.generateQuestionId(difficulty_level, template.type, newParams);
+    
+    return {
+      id: questionId,
+      chapter_id,
+      question_text: questionText,
+      type: template.type,
+      difficulty_level,
+      cognitive_domain: template.cognitiveDomain,
+      representation_type: newRepresentation,
+      parameters: newParams,
+      solution: this.roundSolution(solution),
+      options,
+      hint: template.hint,
+      generated_at: new Date().toISOString(),
+      is_generated: true,
+      is_regenerated: true
+    };
   }
 
   /**
@@ -1094,63 +1866,197 @@ class QuestionGeneratorService {
   }
 
   /**
-   * Generate distractor options for multiple choice
+   * Generate pedagogically meaningful distractors for multiple choice
+   * Distractors map to common misconceptions, not random values
    */
-  generateDistractors(correctAnswer, questionType) {
+  generateDistractors(correctAnswer, questionType, params = {}) {
     const distractors = new Set();
-    let attempts = 0;
-    const maxAttempts = 50; // Prevent infinite loops
+    const isInteger = Number.isInteger(correctAnswer);
     
-    // Generate 3 unique distractors
-    while (distractors.size < 3 && attempts < maxAttempts) {
-      attempts++;
-      let distractor;
+    // Count-based geometry must use integers only
+    const isCountBased = questionType.includes('_sides') || 
+                         questionType.includes('_vertices') || 
+                         questionType.includes('_edges') || 
+                         questionType.includes('_faces') ||
+                         questionType.includes('_definition') && (correctAnswer === 3 || correctAnswer === 4 || correctAnswer === 5 || correctAnswer === 6);
+    
+    // Polygon side counting (3-12 sides)
+    if (isCountBased && correctAnswer >= 3 && correctAnswer <= 12) {
+      // Off-by-one errors (most common student mistake)
+      if (correctAnswer > 3) distractors.add(correctAnswer - 1);
+      if (correctAnswer < 12) distractors.add(correctAnswer + 1);
       
-      if (questionType.includes('area') || questionType.includes('volume') || questionType.includes('surface_area')) {
-        // For area/volume, use common mistake patterns
-        const variations = [
-          correctAnswer * 0.5,      // Forgot to multiply/divide
-          correctAnswer * 2,        // Used wrong formula
-          correctAnswer + 10,       // Off by constant
-          correctAnswer - 10,
-          correctAnswer * 1.5,
-          correctAnswer / 2
-        ];
-        distractor = this.roundSolution(variations[Math.floor(Math.random() * variations.length)]);
-      } else if (questionType.includes('angle') || questionType.includes('polygon_interior')) {
-        // For angles and polygon interior angles, use realistic variations
-        const variations = [
-          correctAnswer * 0.9,      // Common calculation error
-          correctAnswer * 1.1,      // Common calculation error
-          correctAnswer + 180,      // Added one extra triangle
-          correctAnswer - 180,      // Subtracted one triangle
-          correctAnswer + 90,       // Off by a right angle
-          correctAnswer - 90,       // Off by a right angle
-          correctAnswer + (Math.random() * 200 - 100) // Random offset
-        ];
-        distractor = this.roundSolution(variations[Math.floor(Math.random() * variations.length)]);
+      // Confusion with nearby polygons
+      if (correctAnswer > 4) distractors.add(correctAnswer - 2);
+      if (correctAnswer < 11) distractors.add(correctAnswer + 2);
+      
+      // Ensure we have 3 distractors
+      const candidates = [3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+      for (const c of candidates) {
+        if (c !== correctAnswer && distractors.size < 3) {
+          distractors.add(c);
+        }
+      }
+    }
+    // Angle measurements (0-360)
+    else if (questionType.includes('angle') && correctAnswer >= 0 && correctAnswer <= 360) {
+      // Common angle confusions
+      if (correctAnswer === 90) {
+        distractors.add(180); distractors.add(45); distractors.add(60);
+      } else if (correctAnswer === 180) {
+        distractors.add(90); distractors.add(360); distractors.add(270);
+      } else if (correctAnswer === 360) {
+        distractors.add(180); distractors.add(270); distractors.add(90);
       } else {
-        // General numeric distractors
-        const offset = Math.max(5, Math.floor(correctAnswer * 0.2));
-        distractor = this.roundSolution(correctAnswer + (Math.random() > 0.5 ? offset : -offset) * (1 + Math.random()));
+        // Complementary angle (90 - x)
+        const complement = 90 - correctAnswer;
+        if (complement > 0 && complement <= 90) distractors.add(complement);
+        
+        // Supplementary angle (180 - x)
+        const supplement = 180 - correctAnswer;
+        if (supplement > 0 && supplement <= 180) distractors.add(supplement);
+        
+        // Off by ±10-30 degrees
+        if (correctAnswer > 15) distractors.add(correctAnswer - 15);
+        if (correctAnswer < 345) distractors.add(correctAnswer + 15);
+        
+        // Common multiples confusion
+        if (correctAnswer % 30 === 0) {
+          if (correctAnswer > 30) distractors.add(correctAnswer - 30);
+          if (correctAnswer < 330) distractors.add(correctAnswer + 30);
+        }
       }
-      
-      // Ensure distractor is positive and different from correct answer
-      if (distractor > 0 && distractor !== correctAnswer) {
-        distractors.add(distractor);
+    }
+    // Polygon interior angle sums
+    else if (questionType.includes('polygon_interior') || questionType.includes('angle_sum')) {
+      // Formula: (n-2) × 180
+      // Common mistakes: forgot -2, used wrong n, added instead of multiplied
+      const variations = [
+        correctAnswer + 180,  // Used (n-1) instead of (n-2)
+        correctAnswer - 180,  // Used (n-3) instead of (n-2)
+        correctAnswer / 2,    // Divided by 2 incorrectly
+        Math.round(correctAnswer * 1.5), // Multiplied by wrong factor
+      ];
+      variations.forEach(v => {
+        if (v > 0 && v !== correctAnswer && v <= 3600) distractors.add(v);
+      });
+    }
+    // Area calculations
+    else if (questionType.includes('area')) {
+      // Common mistakes: forgot to multiply, used wrong formula, forgot to divide by 2 (triangles)
+      const mistakes = [
+        correctAnswer * 2,     // Forgot to divide by 2 (triangle)
+        correctAnswer / 2,     // Divided when shouldn't have
+        correctAnswer * 1.5,   // Used wrong dimension
+        correctAnswer + (params.base || params.side || 10), // Added instead of multiplied
+      ];
+      mistakes.forEach(m => {
+        const val = isInteger ? Math.round(m) : this.roundSolution(m);
+        if (val > 0 && val !== correctAnswer) distractors.add(val);
+      });
+    }
+    // Volume calculations
+    else if (questionType.includes('volume')) {
+      // Common mistakes: forgot one dimension, used area formula, used wrong formula
+      const mistakes = [
+        correctAnswer / (params.side || params.height || params.radius || 2), // Forgot one dimension
+        correctAnswer * 2,     // Doubled incorrectly
+        Math.round(correctAnswer / 1.5), // Used 2D instead of 3D
+        Math.round(correctAnswer * 1.2), // Arithmetic error
+      ];
+      mistakes.forEach(m => {
+        const val = isInteger ? Math.round(m) : this.roundSolution(m);
+        if (val > 0 && val !== correctAnswer) distractors.add(val);
+      });
+    }
+    // Circumference/Perimeter
+    else if (questionType.includes('circumference') || questionType.includes('perimeter')) {
+      // Common mistakes: used radius instead of diameter, forgot to multiply by 2, confused with area
+      const mistakes = [
+        correctAnswer / 2,     // Used radius instead of diameter
+        correctAnswer * 2,     // Doubled incorrectly
+        Math.round(correctAnswer * 0.8), // Arithmetic error
+        Math.round(correctAnswer * 1.2), // Arithmetic error
+      ];
+      mistakes.forEach(m => {
+        const val = this.roundSolution(m);
+        if (val > 0 && val !== correctAnswer) distractors.add(val);
+      });
+    }
+    // General numeric distractors (fallback)
+    else {
+      const range = Math.max(10, Math.abs(correctAnswer * 0.3));
+      const candidates = [
+        correctAnswer - range * 0.3,
+        correctAnswer + range * 0.3,
+        correctAnswer - range * 0.6,
+        correctAnswer + range * 0.6,
+        correctAnswer * 0.75,
+        correctAnswer * 1.25,
+      ];
+      candidates.forEach(c => {
+        const val = isInteger ? Math.round(c) : this.roundSolution(c);
+        if (val > 0 && val !== correctAnswer) distractors.add(val);
+      });
+    }
+    
+    // Ensure all distractors are valid and convert to array
+    const validDistractors = Array.from(distractors)
+      .filter(d => d > 0 && d !== correctAnswer)
+      .slice(0, 3);
+    
+    // Fill to 3 distractors if needed with safe fallbacks
+    while (validDistractors.length < 3) {
+      const offset = (validDistractors.length + 1) * (isInteger ? 1 : 0.5);
+      const fallback = isInteger 
+        ? Math.round(correctAnswer + offset) 
+        : this.roundSolution(correctAnswer + offset);
+      if (fallback > 0 && fallback !== correctAnswer && !validDistractors.includes(fallback)) {
+        validDistractors.push(fallback);
       }
     }
     
-    // If we couldn't generate 3 distractors, fill with simple offsets
-    while (distractors.size < 3) {
-      const offset = (distractors.size + 1) * 50;
-      const distractor = correctAnswer + (Math.random() > 0.5 ? offset : -offset);
-      if (distractor > 0 && distractor !== correctAnswer) {
-        distractors.add(this.roundSolution(distractor));
+    return validDistractors;
+  }
+  
+  /**
+   * Validate answer options before returning question
+   * Ensures exactly one correct answer, no duplicates, consistent formatting
+   */
+  validateAnswerOptions(options) {
+    // Check: exactly one correct answer
+    const correctCount = options.filter(opt => opt.correct).length;
+    if (correctCount !== 1) {
+      throw new Error(`Invalid answer set: ${correctCount} correct answers (expected 1)`);
+    }
+    
+    // Check: no duplicate labels
+    const labels = options.map(opt => opt.label.toString().trim().toLowerCase());
+    const uniqueLabels = new Set(labels);
+    if (labels.length !== uniqueLabels.size) {
+      throw new Error(`Invalid answer set: duplicate options detected`);
+    }
+    
+    // Check: consistent numeric formatting
+    const numericOptions = options.filter(opt => !isNaN(parseFloat(opt.label)));
+    if (numericOptions.length === options.length) {
+      // All numeric - check for decimal consistency
+      const hasDecimals = numericOptions.some(opt => opt.label.includes('.'));
+      const allIntegers = numericOptions.every(opt => !opt.label.includes('.') || opt.label.endsWith('.0'));
+      // If correct is integer, all should be integers
+      const correctOption = options.find(opt => opt.correct);
+      const correctIsInt = !correctOption.label.includes('.') || correctOption.label.endsWith('.0');
+      if (correctIsInt && hasDecimals) {
+        // Some distractors have decimals but answer is integer - fix them
+        options.forEach(opt => {
+          if (opt.label.includes('.')) {
+            opt.label = Math.round(parseFloat(opt.label)).toString();
+          }
+        });
       }
     }
     
-    return Array.from(distractors);
+    return true;
   }
 
   /**

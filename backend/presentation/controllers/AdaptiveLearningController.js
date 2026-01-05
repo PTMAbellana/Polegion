@@ -141,6 +141,8 @@ class AdaptiveLearningController {
     try {
       const { topicId } = req.params;
       const userId = req.user.id;
+      // Only check req.query for forceNew since this is a GET endpoint (GET requests don't have body)
+      const forceNew = req.query.forceNew === 'true';
 
       if (!topicId) {
         return res.status(400).json({
@@ -148,39 +150,69 @@ class AdaptiveLearningController {
         });
       }
 
-      // Get current state to determine difficulty
-      const state = await this.service.getStudentState(userId, topicId);
+      // Prevent duplicate concurrent requests using a simple in-memory lock
+      const requestKey = `${userId}_${topicId}`;
+      if (!this.pendingRequests) {
+        this.pendingRequests = new Map();
+      }
       
-      // Generate session ID (use crypto.randomUUID for proper UUID format)
-      const crypto = require('crypto');
-      const sessionId = req.headers['x-session-id'] || crypto.randomUUID();
+      if (this.pendingRequests.has(requestKey)) {
+        console.log(`[AdaptiveController] Duplicate request detected for ${requestKey}, waiting for first request...`);
+        // Wait for the first request to complete
+        await new Promise(resolve => setTimeout(resolve, 100));
+      }
       
-      // Generate question with session tracking (prevents duplicates)
-      const question = await this.service.generateQuestion(
-        userId,
-        topicId,
-        state.currentDifficulty,
-        sessionId
-      );
+      this.pendingRequests.set(requestKey, true);
+      
+      try {
+        // Get current state to determine difficulty
+        const state = await this.service.getStudentState(userId, topicId);
+        
+        // Generate session ID (use crypto.randomUUID for proper UUID format)
+        const crypto = require('crypto');
+        const sessionId = req.headers['x-session-id'] || crypto.randomUUID();
+        
+        // Generate question with session tracking (prevents duplicates)
+        const question = await this.service.generateQuestion(
+          userId,
+          topicId,
+          state.currentDifficulty,
+          sessionId,
+          [], // excludeQuestionIds
+          forceNew // Force new question if requested
+        );
 
-      return res.status(200).json({
-        success: true,
-        data: {
-          question: question.question_text,
-          options: question.options,
-          questionId: question.id || question.questionId,
-          hint: question.hint,
-          difficulty: state.currentDifficulty,
-          cognitiveDomain: question.cognitive_domain,
-          representationType: question.representation_type || 'text',
-          sessionId, // Return session ID to frontend
-          metadata: {
-            type: question.type,
-            parameters: question.parameters,
-            generated_at: question.generated_at
-          }
+        if (!question) {
+          console.error('[AdaptiveController] generateQuestion returned null/undefined');
+          return res.status(500).json({
+            error: 'Failed to generate question',
+            message: 'Question generation returned no result'
+          });
         }
-      });
+
+        console.log('[AdaptiveController] Question generated successfully, sending response');
+        return res.status(200).json({
+          success: true,
+          data: {
+            question: question.question_text,
+            options: question.options,
+            questionId: question.id || question.questionId,
+            hint: question.hint,
+            difficulty: state.currentDifficulty,
+            cognitiveDomain: question.cognitive_domain,
+            representationType: question.representation_type || 'text',
+            sessionId, // Return session ID to frontend
+            metadata: {
+              type: question.type,
+              parameters: question.parameters,
+              generated_at: question.generated_at
+            }
+          }
+        });
+      } finally {
+        // Remove lock after request completes
+        this.pendingRequests.delete(requestKey);
+      }
     } catch (error) {
       console.error('Error in generateQuestion:', error);
       return res.status(500).json({
@@ -492,8 +524,19 @@ class AdaptiveLearningController {
       const userId = req.user.id;
 
       if (!topicId || typeof isCorrect !== 'boolean') {
+        console.error('[AdaptiveController] Missing topicId or isCorrect:', { topicId, isCorrect });
         return res.status(400).json({
           error: 'Missing required fields: topicId, isCorrect'
+        });
+      }
+
+      // Validate questionId - don't process if it's null or missing
+      if (!questionId) {
+        console.error('[AdaptiveController] submitAnswerEnhanced called with null/missing questionId');
+        console.error('[AdaptiveController] Request body:', JSON.stringify(req.body, null, 2));
+        return res.status(400).json({
+          error: 'Missing required field: questionId',
+          message: 'Question ID is required to track attempt. Please refresh and try again.'
         });
       }
 
@@ -558,8 +601,55 @@ class AdaptiveLearningController {
       });
     } catch (error) {
       console.error('Error in submitAnswerEnhanced:', error);
-      return res.status(500).json({
+      console.error('Error stack:', error.stack);
+      console.error('Request body:', JSON.stringify(req.body, null, 2));
+      
+      // Differentiate between validation errors (400) and server errors (500)
+      const is400Error = error.message && (
+        error.message.includes('required') ||
+        error.message.includes('invalid') ||
+        error.message.includes('missing')
+      );
+      
+      return res.status(is400Error ? 400 : 500).json({
         error: 'Failed to process answer',
+        message: error.message,
+        details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+      });
+    }
+  }
+
+  /**
+   * Update hint count for a question attempt
+   */
+  async updateHintCount(req, res) {
+    try {
+      const { topicId } = req.params;
+      const { questionId, hintsRequested } = req.body;
+      const userId = req.user?.id;
+      const sessionId = req.sessionId;
+
+      if (!userId || !questionId || hintsRequested === undefined) {
+        return res.status(400).json({
+          error: 'Missing required fields: questionId, hintsRequested'
+        });
+      }
+
+      const result = await this.service.updateHintCount(
+        userId,
+        questionId,
+        sessionId,
+        hintsRequested
+      );
+
+      return res.status(200).json({
+        success: true,
+        data: result
+      });
+    } catch (error) {
+      console.error('Error updating hint count:', error);
+      return res.status(500).json({
+        error: 'Failed to update hint count',
         message: error.message
       });
     }

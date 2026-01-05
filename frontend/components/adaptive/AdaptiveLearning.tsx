@@ -16,6 +16,7 @@ interface AdaptiveState {
   wrongStreak: number;
   totalAttempts: number;
   accuracy: string;
+  longestCorrectStreak?: number;
   currentRepresentation?: string;
   teachingStrategy?: string;
   currentCognitiveDomain?: string;
@@ -83,12 +84,16 @@ export default function AdaptiveLearning({ topicId, topicName: topicNameProp, on
   const [showHintPrompt, setShowHintPrompt] = useState(false);
   const [pendingHint, setPendingHint] = useState<string | null>(null);
   const [topicName, setTopicName] = useState<string>(topicNameProp || 'Geometry Topic');
+  const [answerSubmitted, setAnswerSubmitted] = useState(false);
+  const [hintRequestCount, setHintRequestCount] = useState(0);
+  const [showFeedback, setShowFeedback] = useState(false);
 
-  const generateNewQuestion = async () => {
+  const generateNewQuestion = async (forceNew = false) => {
     try {
       setLoading(true);
-      // Add timestamp to prevent caching
-      const response = await axios.get(`/adaptive/question/${topicId}?t=${Date.now()}`);
+      // Add timestamp to prevent caching, and forceNew parameter to skip pending question reuse
+      const forceParam = forceNew ? '&forceNew=true' : '';
+      const response = await axios.get(`/adaptive/question/${topicId}?t=${Date.now()}${forceParam}`);
       
       console.log('[AdaptiveLearning] Question API response:', response.data);
       
@@ -101,6 +106,7 @@ export default function AdaptiveLearning({ topicId, topicName: topicNameProp, on
           questionId: questionData.questionId,
           hint: questionData.hint
         });
+        setAnswerSubmitted(false); // Reset for new question
       } else {
         console.error('[AdaptiveLearning] Question API returned success=false');
       }
@@ -141,7 +147,21 @@ export default function AdaptiveLearning({ topicId, topicName: topicNameProp, on
   }, [topicId]);
 
   const submitAnswer = async (isCorrect: boolean, selectedOption: any) => {
+    if (answerSubmitted) {
+      console.log('[AdaptiveLearning] Answer already submitted, ignoring click');
+      return;
+    }
+
+    // Validate that we have a valid question with an ID before submitting
+    const questionId = currentQuestion?.questionId || currentQuestion?.id;
+    if (!questionId) {
+      console.error('[AdaptiveLearning] Cannot submit answer - no valid questionId');
+      alert('Unable to submit answer. Please refresh and try again.');
+      return;
+    }
+    
     try {
+      setAnswerSubmitted(true); // Prevent multiple submissions
       setSubmitting(true);
       
       const questionData = {
@@ -151,9 +171,16 @@ export default function AdaptiveLearning({ topicId, topicName: topicNameProp, on
         userAnswer: selectedOption?.label || selectedOption?.text
       };
       
+      console.log('[AdaptiveLearning] Submitting answer:', {
+        topicId,
+        questionId,
+        isCorrect,
+        hasQuestionData: !!questionData
+      });
+      
       const response = await axios.post('/adaptive/submit-answer-enhanced', {
         topicId,
-        questionId: currentQuestion?.questionId || currentQuestion?.id || null,
+        questionId,
         isCorrect,
         timeSpent: Math.floor(Math.random() * 60) + 30,
         questionData
@@ -161,6 +188,16 @@ export default function AdaptiveLearning({ topicId, topicName: topicNameProp, on
 
       const responseData = response.data.data;
       setLastResponse(responseData);
+      
+      // Only show feedback for significant actions (hints, difficulty changes, etc.)
+      const significantActions = [
+        'give_hint_then_retry', 'give_hint_retry',
+        'increase_difficulty', 'decrease_difficulty',
+        'switch_to_visual', 'switch_to_real_world'
+      ];
+      if (significantActions.includes(responseData.action)) {
+        setShowFeedback(true);
+      }
       
       // Always refresh state after submission to get latest mastery
       const stateResponse = await axios.get(`/adaptive/state/${topicId}?t=${Date.now()}`);
@@ -183,21 +220,62 @@ export default function AdaptiveLearning({ topicId, topicName: topicNameProp, on
         // Generate next question
         await generateNewQuestion();
       } else {
+        // Handle wrong answer responses
         if (responseData.showHint && responseData.hint) {
+          // Show hint after 2nd wrong attempt
+          const newHintCount = hintRequestCount + 1;
+          setHintRequestCount(newHintCount);
           setHintText(responseData.hint);
           setShowHintModal(true);
           setCurrentQuestionData(currentQuestion);
+          setShowFeedback(true);
+          
+          // Reset answerSubmitted so user can retry after viewing hint
+          setAnswerSubmitted(false);
+          
+          // Save hint count to database
+          try {
+            await axios.put(`/adaptive/hint-count/${topicId}`, {
+              questionId: currentQuestion?.questionId || currentQuestion?.id,
+              hintsRequested: newHintCount
+            });
+          } catch (hintError) {
+            console.error('Error saving hint count:', hintError);
+          }
+          
+          // Check if we should keep question or generate new one
+          if (responseData.generateSimilar || !responseData.keepQuestion) {
+            // Generate new similar question after hint is closed
+            // Note: This will happen when user closes the hint modal
+            console.log('[AdaptiveLearning] Will generate new question after hint');
+          } else {
+            // Keep same question for retry
+            console.log('[AdaptiveLearning] Keeping same question for retry after hint');
+          }
         } else {
-          // Generate similar or new question
-          if (responseData.generateSimilar) {
-            await generateNewQuestion();
-          } else if (!responseData.keepQuestion) {
-            await generateNewQuestion();
+          // No hint - just generate similar or keep question
+          if (responseData.generateSimilar || !responseData.keepQuestion) {
+            // Generate new question with different numbers/parameters
+            // Pass forceNew=true to skip pending question reuse
+            await generateNewQuestion(true);
+          } else {
+            // keepQuestion is true - user should retry the same question (term-based only)
+            console.log('[AdaptiveLearning] Keeping same question for retry');
+            setAnswerSubmitted(false);
+            setShowFeedback(true);
           }
         }
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error submitting answer:', error);
+      console.error('Error response:', error.response?.data);
+      
+      // Show error message to user
+      if (error.response?.data?.error) {
+        alert(`Error: ${error.response.data.error}\n${error.response.data.message || ''}`);
+      }
+      
+      setAnswerSubmitted(false); // Reset on error so user can retry
     } finally {
       setSubmitting(false);
     }
@@ -403,14 +481,6 @@ export default function AdaptiveLearning({ topicId, topicName: topicNameProp, on
           font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         }
         
-        .hint-box {
-          margin-top: 14px;
-          background: white;
-          border-radius: 10px;
-          padding: 14px;
-          border: 1px solid #E5E7EB;
-        }
-        
         @keyframes fadeIn {
           from { opacity: 0; transform: translateY(-10px); }
           to { opacity: 1; transform: translateY(0); }
@@ -537,6 +607,11 @@ export default function AdaptiveLearning({ topicId, topicName: topicNameProp, on
               <div style={{ fontSize: '16px', fontWeight: 700, color: state.correctStreak >= 3 ? '#10B981' : '#1F2937' }}>
                 {state.correctStreak}
               </div>
+              {state.longestCorrectStreak && state.longestCorrectStreak > 0 && (
+                <div style={{ fontSize: '10px', color: '#9CA3AF', marginTop: '2px' }}>
+                  🏆 Best: {state.longestCorrectStreak}
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -673,7 +748,7 @@ export default function AdaptiveLearning({ topicId, topicName: topicNameProp, on
             representationType={currentRepresentation}
             difficultyLevel={state.currentDifficulty}
             onAnswer={submitAnswer}
-            disabled={submitting}
+            disabled={submitting || answerSubmitted}
             question={currentQuestion}
           />
         </div>
@@ -682,7 +757,58 @@ export default function AdaptiveLearning({ topicId, topicName: topicNameProp, on
       {/* Right Column: Feedback/Hints */}
       <div className="feedback-rail">
         <div className="feedback-header">Learning Feedback</div>
-        {lastResponse ? (
+        
+        {/* Need Help Button - Show when question is active */}
+        {!answerSubmitted && currentQuestion?.hint && (
+          <div style={{ marginBottom: '16px' }}>
+            <button
+              onClick={() => {
+                const newCount = hintRequestCount + 1;
+                setHintRequestCount(newCount);
+                setHintText(currentQuestion.hint);
+                setShowHintModal(true);
+                
+                const questionId = currentQuestion?.questionId || currentQuestion?.id;
+                if (questionId) {
+                  axios.put(`/adaptive/hint-count/${topicId}`, {
+                    questionId,
+                    hintsRequested: newCount
+                  }).catch(err => {
+                    console.error('Error saving hint count:', err);
+                  });
+                }
+              }}
+              style={{
+                width: '100%',
+                padding: '12px 24px',
+                backgroundColor: '#F59E0B',
+                color: 'white',
+                border: 'none',
+                borderRadius: '10px',
+                fontSize: '15px',
+                fontWeight: 600,
+                cursor: 'pointer',
+                boxShadow: '0 4px 12px rgba(245, 158, 11, 0.3)',
+                transition: 'all 0.2s ease',
+                fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = '#D97706';
+                e.currentTarget.style.transform = 'translateY(-2px)';
+                e.currentTarget.style.boxShadow = '0 6px 16px rgba(245, 158, 11, 0.4)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = '#F59E0B';
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = '0 4px 12px rgba(245, 158, 11, 0.3)';
+              }}
+            >
+              Need Help? Get a Hint
+            </button>
+          </div>
+        )}
+        
+        {showFeedback && lastResponse ? (
           <AdaptiveFeedbackBox
             mdpAction={lastResponse.action}
             wrongStreak={state.wrongStreak}
@@ -696,18 +822,15 @@ export default function AdaptiveLearning({ topicId, topicName: topicNameProp, on
         ) : (
           <div style={{
             background: 'white', borderRadius: '10px', padding: '14px',
-            border: '1px dashed #FBBF24', color: '#92400E', fontSize: '13px', lineHeight: 1.5
+            border: '1px dashed #E5E7EB', color: '#6B7280', fontSize: '13px', lineHeight: 1.5
           }}>
-            Hints and feedback will appear here as you answer questions. Give the first one a try!
+            📊 Hints requested: <strong>{hintRequestCount}</strong>
+            <br/>
+            <span style={{ fontSize: '12px', color: '#9CA3AF' }}>
+              Feedback appears when you need help or difficulty changes
+            </span>
           </div>
         )}
-
-        <div className="hint-box">
-          <div style={{ fontSize: '12px', fontWeight: 700, color: '#6B7280', marginBottom: '6px' }}>Hint</div>
-          <div style={{ fontSize: '13px', color: '#374151', lineHeight: 1.6 }}>
-            {currentQuestion?.hint || 'Hints will show up here once available.'}
-          </div>
-        </div>
       </div>
     </div>
   );

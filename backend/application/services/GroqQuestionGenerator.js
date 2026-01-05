@@ -50,12 +50,13 @@ class GroqQuestionGenerator {
    * 
    * @param {Object} params
    * @param {string} params.topicName - Topic name (e.g., "Area of Triangles")
+   * @param {string} params.topicFilter - Specific subtopics (e.g., "parallel_lines|perpendicular_lines")
    * @param {number} params.difficultyLevel - 4 or 5
    * @param {string} params.cognitiveDomain - Cognitive domain (e.g., "analytical_thinking")
    * @param {Array} params.excludeQuestionIds - Question IDs to avoid duplicates
    * @returns {Promise<Object>} Generated question with options, answer, hint
    */
-  async generateQuestion({ topicName, difficultyLevel, cognitiveDomain, excludeQuestionIds = [] }) {
+  async generateQuestion({ topicName, topicFilter, difficultyLevel, cognitiveDomain, excludeQuestionIds = [] }) {
     // Validate difficulty level
     if (difficultyLevel < 4) {
       throw new Error('AI generation only for difficulty 4-5. Use parametric templates for 1-3.');
@@ -81,8 +82,8 @@ class GroqQuestionGenerator {
       // Track request
       this._trackRequest();
 
-      // Build prompt
-      const prompt = this._buildQuestionPrompt(topicName, difficultyLevel, cognitiveDomain);
+      // Build prompt with specific topic context
+      const prompt = this._buildQuestionPrompt(topicName, topicFilter, difficultyLevel, cognitiveDomain);
 
       // Call Groq
       const completion = await this.client.chat.completions.create({
@@ -143,36 +144,54 @@ class GroqQuestionGenerator {
 
   /**
    * Build the AI prompt for question generation
+   * 
+   * WHY topicFilter: The topic name alone (e.g., "Points, Lines, and Planes") is too broad.
+   * The topicFilter provides specific subtopics (e.g., "parallel_lines|perpendicular_lines")
+   * to ensure the AI generates relevant questions for the current learning focus.
    */
-  _buildQuestionPrompt(topicName, difficultyLevel, cognitiveDomain) {
+  _buildQuestionPrompt(topicName, topicFilter, difficultyLevel, cognitiveDomain) {
     const difficultyDescription = difficultyLevel === 5 
       ? 'Very challenging, requiring multi-step reasoning and creative problem-solving'
       : 'Challenging, requiring analytical thinking and complex calculations';
 
     const domainDescription = this._getCognitiveDomainDescription(cognitiveDomain);
+    
+    // Parse topic filter into readable subtopics
+    const subtopics = topicFilter ? topicFilter.split('|').map(f => 
+      f.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
+    ).join(', ') : 'general concepts';
 
     return `You are an expert geometry teacher creating a ${difficultyDescription} question for elementary students.
 
 TOPIC: ${topicName}
+SPECIFIC FOCUS: ${subtopics}
 DIFFICULTY LEVEL: ${difficultyLevel}/5
 COGNITIVE DOMAIN: ${cognitiveDomain} - ${domainDescription}
 
+CRITICAL: The question MUST be about the SPECIFIC FOCUS topics listed above.
+Example: If focus is "Parallel Lines, Perpendicular Lines", DO NOT create questions about volume, area, or unrelated topics.
+
 Create a geometry question that:
-1. Is appropriate for the topic and difficulty level
+1. Is SPECIFICALLY about the focus topics (${subtopics})
 2. Has EXACTLY 4 multiple choice options (A, B, C, D)
-3. Has only ONE correct answer
-4. Includes a helpful hint for struggling students
-5. Uses clear, child-friendly language
-6. Involves interesting scenarios (real-world contexts preferred)
+3. Each option should be SHORT and CONCISE (max 15 words per option)
+4. Has only ONE correct answer
+5. Includes a helpful hint for struggling students
+6. Uses clear, child-friendly language
+7. Involves interesting scenarios (real-world contexts preferred)
+
+IMPORTANT: Keep answer choices SHORT and to the point. Avoid long explanations in the options.
+Good example: "166 square feet"
+Bad example: "The total area is 166 square feet because we use the formula for hexagon area"
 
 Return ONLY valid JSON, nothing else. No markdown, no extra text. Use this exact format and MUST escape all quotes inside strings:
 {
   "questionText": "The complete question text - escape all internal quotes with backslash",
   "options": [
-    {"label": "A", "text": "First option - escape internal quotes", "correct": false},
-    {"label": "B", "text": "Second option - escape internal quotes", "correct": true},
-    {"label": "C", "text": "Third option - escape internal quotes", "correct": false},
-    {"label": "D", "text": "Fourth option - escape internal quotes", "correct": false}
+    {"label": "A", "text": "First option - SHORT and concise", "correct": false},
+    {"label": "B", "text": "Second option - SHORT and concise", "correct": true},
+    {"label": "C", "text": "Third option - SHORT and concise", "correct": false},
+    {"label": "D", "text": "Fourth option - SHORT and concise", "correct": false}
   ],
   "correctAnswer": "B",
   "hint": "A helpful hint - escape internal quotes",
@@ -185,7 +204,8 @@ CRITICAL RULES FOR JSON:
 - Example: If text is: What is a "square"? write it as: "text": "What is a \\"square\\"?"
 - No markdown code blocks
 - No extra text before or after the JSON
-- Exactly 4 options, exactly 1 correct`;
+- Exactly 4 options, exactly 1 correct
+- Each option text MUST be under 15 words (preferably under 10)`;
   }
 
   /**

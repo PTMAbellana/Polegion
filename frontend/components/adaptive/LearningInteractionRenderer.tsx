@@ -112,7 +112,7 @@ export default function LearningInteractionRenderer({
                   onMouseEnter={() => setHoveredButton(index)}
                   onMouseLeave={() => setHoveredButton(null)}
                 >
-                  {option.label || option.text}
+                  {option.text || option.label}
                 </button>
               );
             })}
@@ -135,8 +135,27 @@ export default function LearningInteractionRenderer({
           backgroundColor: 'white',
           borderRadius: '12px',
           boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
-          padding: '28px'
+          padding: '28px',
+          border: '2px solid #3B82F6'
         }}>
+          {/* Visual Indicator Badge */}
+          <div style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '6px',
+            backgroundColor: '#EFF6FF',
+            color: '#3B82F6',
+            padding: '4px 12px',
+            borderRadius: '6px',
+            fontSize: '13px',
+            fontWeight: 600,
+            marginBottom: '12px',
+            fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+          }}>
+            <span style={{ fontSize: '16px' }}>👁️</span>
+            VISUAL DESCRIPTION
+          </div>
+          
           <h3 style={{ 
             fontSize: '20px', 
             fontWeight: 600, 
@@ -144,14 +163,19 @@ export default function LearningInteractionRenderer({
             marginBottom: '16px',
             fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
           }}>
-            Solve the Problem
+            Visualize and Solve
           </h3>
           
           <div style={{ 
             fontSize: '16px', 
             color: '#4B5563',
-            lineHeight: '1.6',
-            fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+            lineHeight: '1.8',
+            fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+            fontStyle: 'italic',
+            backgroundColor: '#F9FAFB',
+            padding: '16px',
+            borderRadius: '8px',
+            borderLeft: '4px solid #3B82F6'
           }}>
             <p style={{ margin: 0 }}>
               {question?.question || 'Loading question...'}
@@ -188,7 +212,7 @@ export default function LearningInteractionRenderer({
                   onMouseEnter={() => setHoveredButton(index + 10)}
                   onMouseLeave={() => setHoveredButton(null)}
                 >
-                  {option.label || option.text}
+                  {option.text || option.label}
                 </button>
               );
             })}
@@ -211,8 +235,27 @@ export default function LearningInteractionRenderer({
           backgroundColor: 'white',
           borderRadius: '12px',
           boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
-          padding: '28px'
+          padding: '28px',
+          border: '2px solid #10B981'
         }}>
+          {/* Real-World Indicator Badge */}
+          <div style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '6px',
+            backgroundColor: '#F0FDF4',
+            color: '#10B981',
+            padding: '4px 12px',
+            borderRadius: '6px',
+            fontSize: '13px',
+            fontWeight: 600,
+            marginBottom: '12px',
+            fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+          }}>
+            <span style={{ fontSize: '16px' }}>🌍</span>
+            REAL-WORLD APPLICATION
+          </div>
+          
           <h3 style={{ 
             fontSize: '20px', 
             fontWeight: 600, 
@@ -226,8 +269,12 @@ export default function LearningInteractionRenderer({
           <div style={{ 
             fontSize: '16px', 
             color: '#4B5563',
-            lineHeight: '1.6',
-            fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+            lineHeight: '1.8',
+            fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+            backgroundColor: '#F9FAFB',
+            padding: '16px',
+            borderRadius: '8px',
+            borderLeft: '4px solid #10B981'
           }}>
             <p style={{ margin: 0 }}>
               {question?.question || 'Loading question...'}
@@ -264,7 +311,7 @@ export default function LearningInteractionRenderer({
                   onMouseEnter={() => setHoveredButton(index + 20)}
                   onMouseLeave={() => setHoveredButton(null)}
                 >
-                  {option.label || option.text}
+                  {option.text || option.label}
                 </button>
               );
             })}

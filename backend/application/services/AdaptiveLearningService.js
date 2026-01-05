@@ -73,6 +73,13 @@ class AdaptiveLearningService {
       'higher_order_thinking'
     ];
 
+    // Adaptive Learning Constants
+    this.MAX_ATTEMPTS_BEFORE_HINT = 2;      // Show hint after 2 wrong attempts
+    this.MIN_DIFFICULTY_FOR_AI = 4;         // Use AI generation for difficulty 4+
+    this.MIN_MASTERY_FOR_AI = 60;           // 60% mastery required for AI questions
+    this.MIN_ATTEMPTS_FOR_AI = 5;           // 5 attempts before enabling AI
+    this.HIGH_WRONG_STREAK_THRESHOLD = 5;   // Difficulty drops after 5 consecutive wrong
+
     // Q-Learning Parameters (Research-backed from IJRISS & EduQate papers)
     this.LEARNING_RATE = 0.1;       // Alpha: how quickly to update Q-values (IJRISS: 0.1, EduQate: 0.1)
     this.DISCOUNT_FACTOR = 0.95;    // Gamma: importance of future rewards (IJRISS: 0.9, EduQate: 0.95)
@@ -141,15 +148,55 @@ class AdaptiveLearningService {
   }
 
   /**
-   * Main entry point: Process student answer and adjust difficulty
-   * Uses Q-Learning to determine optimal action
+   * Main entry point: Process student answer and update adaptive learning state
+   * 
+   * Flow:
+   * 1. Validate submission (prevent duplicates)
+   * 2. Update question tracking (mark answered, handle pending questions)
+   * 3. Update performance metrics (streaks, mastery, accuracy)
+   * 4. Use Q-Learning to select optimal pedagogical action
+   * 5. Apply selected action (adjust difficulty, change teaching strategy)
+   * 6. Calculate reward and update Q-table for future learning
+   * 
+   * WHY Q-Learning: Learns optimal teaching strategies through trial-and-error,
+   * adapting to each student's learning patterns over time.
    */
-  async processAnswer(userId, topicId, questionId, isCorrect, timeSpent, questionData = null) {
+  async processAnswer(userId, topicId, questionId, isCorrect, timeSpent, questionData = null, submissionId = null) {
     try {
-      // 1. Get current state
-      const currentState = await this.repo.getStudentDifficulty(userId, topicId);
+      // === STEP 1: Validate Submission (Prevent Duplicate Processing) ===
+      // Prevents race conditions when users rapidly submit the same answer
+      if (submissionId) {
+        const isDuplicate = await this.repo.checkSubmissionDuplicate(userId, topicId, submissionId);
+        if (isDuplicate) {
+          console.warn(`[AdaptiveLearning] Duplicate submission detected: ${submissionId} - skipping processing`);
+          return {
+            success: false,
+            error: 'DUPLICATE_SUBMISSION',
+            message: 'This answer was already processed'
+          };
+        }
+        await this.repo.recordSubmission(userId, topicId, submissionId);
+      }
       
-      // 2. Update performance metrics
+      // === STEP 2: Update Question Tracking ===
+      await this.repo.markQuestionAnswered(userId, topicId, questionId, isCorrect);
+      
+      // Handle pending question flow
+      if (isCorrect) {
+        await this.repo.clearPendingQuestion(userId, topicId);
+        console.log('[AdaptiveLearning] Correct answer - cleared pending question');
+      } else {
+        const progress = await this.repo.incrementAttemptCount(userId, topicId);
+        console.log(`[AdaptiveLearning] Wrong answer - incremented attempt_count to ${progress.attempt_count}`);
+        
+        if (progress.attempt_count >= this.MAX_ATTEMPTS_BEFORE_HINT) {
+          await this.repo.clearPendingQuestion(userId, topicId);
+          console.log('[AdaptiveLearning] 2nd wrong attempt - cleared pending question for regeneration');
+        }
+      }
+      
+      // === STEP 3: Get Current State & Update Performance Metrics ===
+      const currentState = await this.repo.getStudentDifficulty(userId, topicId);
       const newState = await this.updatePerformanceMetrics(
         userId, 
         topicId, 
@@ -162,6 +209,32 @@ class AdaptiveLearningService {
       const currentStateKey = this.getStateKey(currentState);
       const newStateKey = this.getStateKey(newState);
 
+      // === Q-LEARNING DEBUG LOGS ===
+      console.log('\n============= Q-LEARNING DECISION =============');
+      console.log('[Q-Learning] User:', userId);
+      console.log('[Q-Learning] Topic:', topicId);
+      console.log('[Q-Learning] Current State Key:', currentStateKey);
+      console.log('[Q-Learning] Current State:', {
+        difficulty: currentState.difficulty_level,
+        mastery: currentState.mastery_level.toFixed(1) + '%',
+        correct_streak: currentState.correct_streak,
+        wrong_streak: currentState.wrong_streak,
+        total_attempts: currentState.total_attempts,
+        exploration_count: currentState.exploration_count,
+        exploitation_count: currentState.exploitation_count
+      });
+      console.log('[Q-Learning] New State Key:', newStateKey);
+      console.log('[Q-Learning] Answer:', isCorrect ? '✓ CORRECT' : '✗ WRONG');
+      console.log('[Q-Learning] Epsilon (exploration rate):', this.getCurrentEpsilon(newState.total_attempts).toFixed(3));
+      
+      // Show all Q-values for current state
+      const qValues = {};
+      for (const act of Object.values(this.ACTIONS)) {
+        qValues[act] = this.getQValue(newStateKey, act).toFixed(3);
+      }
+      console.log('[Q-Learning] Q-Values for state:', qValues);
+      console.log('===============================================\n');
+
       // 4. Determine next action using Q-learning with epsilon-greedy policy
       const actionResult = await this.selectActionQLearning(
         newStateKey, 
@@ -169,14 +242,41 @@ class AdaptiveLearningService {
       );
       const { action, reason, usedExploration, pedagogicalStrategy, representationType } = actionResult;
 
+      // === ACTION SELECTION LOGS ===
+      console.log('[Q-Learning] ACTION SELECTED:', action);
+      console.log('[Q-Learning] Action Reason:', reason);
+      console.log('[Q-Learning] Learning Mode:', usedExploration ? '🔍 EXPLORATION' : '💡 EXPLOITATION');
+      console.log('[Q-Learning] Pedagogical Strategy:', pedagogicalStrategy || 'none');
+
       // 5. Apply action (adjust difficulty and/or teaching strategy)
-      const updatedState = await this.applyAction(userId, topicId, newState, action, actionResult);
+      const updatedState = await this.applyAction(userId, topicId, newState, action, actionResult, usedExploration);
 
       // 6. Calculate reward based on learning theory
       const reward = this.calculateAdvancedReward(currentState, newState, action, timeSpent);
+      
+      console.log('[Q-Learning] REWARD:', reward.toFixed(2));
+      console.log('[Q-Learning] Updated State:', {
+        difficulty: updatedState.difficulty_level,
+        mastery: updatedState.mastery_level.toFixed(1) + '%',
+        correct_streak: updatedState.correct_streak,
+        wrong_streak: updatedState.wrong_streak,
+        exploration_count: updatedState.exploration_count,
+        exploitation_count: updatedState.exploitation_count
+      });
 
       // 7. Update Q-value using Q-learning update rule
+      const oldQValue = this.getQValue(currentStateKey, action);
       await this.updateQValue(currentStateKey, action, reward, newStateKey);
+      const newQValue = this.getQValue(currentStateKey, action);
+      console.log('[Q-Learning] Q-Value Update:', {
+        state: currentStateKey,
+        action: action,
+        old: oldQValue.toFixed(3),
+        new: newQValue.toFixed(3),
+        change: (newQValue - oldQValue).toFixed(3)
+      });
+      console.log('[Q-Learning] Total States in Q-Table:', this.qTable.size);
+      console.log('===============================================\n');
 
       // 8. Generate AI hint ONLY when student is struggling (wrong_streak >= 2)
       // This protects free-tier quota and is pedagogically sound
@@ -187,41 +287,77 @@ class AdaptiveLearningService {
         try {
           const topic = await this.repo.getTopicById(topicId);
           
-          // Calculate mastery level (0-5) for AI constraint
-          const masteryPercentage = newState.mastery_level || 0;
-          const masteryLevel = masteryPercentage >= 90 ? 5 : 
-                              masteryPercentage >= 75 ? 4 : 
-                              masteryPercentage >= 60 ? 3 : 
-                              masteryPercentage >= 40 ? 2 :
-                              masteryPercentage >= 20 ? 1 : 0;
+          // Mark hint as shown in database (for analytics)
+          await this.repo.markHintShown(userId, topicId);
           
-          // Get practiced topics (unlocked concepts) for AI constraint
-          const unlockedConcepts = await this.getPracticedTopics(userId);
+          // VALIDATION: Ensure we have question text for hint generation
+          const questionText = questionData.questionText || questionData.question_text || questionData.question || '';
           
-          const hintResult = await this.hintService.generateHint({
-            questionText: questionData.questionText,
-            topicName: topic?.topic_name || 'Geometry',
-            difficultyLevel: currentState.difficulty_level,
-            wrongStreak: newState.wrong_streak,
-            mdpAction: action,
-            representationType: representationType || 'text',
-            masteryLevel, // NEW: Constrains AI to appropriate difficulty
-            unlockedConcepts // NEW: Prevents AI from introducing locked concepts
-          });
-          
-          aiHint = hintResult.hint;
-          hintMetadata = {
-            source: hintResult.source,
-            reason: hintResult.reason
-          };
-          
-          console.log('[AdaptiveLearning] Hint generated:', hintMetadata);
+          if (!questionText) {
+            console.warn('[AdaptiveLearning] Cannot generate hint - missing question text');
+            // Use template hint as fallback
+            if (questionData.hint) {
+              aiHint = questionData.hint;
+              hintMetadata = {
+                source: 'template',
+                reason: 'Missing question text - using template hint'
+              };
+            }
+          } else {
+            // Calculate mastery level (0-5) for AI constraint
+            const masteryPercentage = newState.mastery_level || 0;
+            const masteryLevel = masteryPercentage >= 90 ? 5 : 
+                                masteryPercentage >= 75 ? 4 : 
+                                masteryPercentage >= 60 ? 3 : 
+                                masteryPercentage >= 40 ? 2 :
+                                masteryPercentage >= 20 ? 1 : 0;
+            
+            // Get practiced topics (unlocked concepts) for AI constraint
+            const unlockedConcepts = await this.getPracticedTopics(userId);
+            
+            const hintResult = await this.hintService.generateHint({
+              questionText,
+              topicName: topic?.topic_name || 'Geometry',
+              difficultyLevel: currentState.difficulty_level,
+              wrongStreak: newState.wrong_streak,
+              mdpAction: action,
+              representationType: representationType || 'text',
+              masteryLevel, // NEW: Constrains AI to appropriate difficulty
+              unlockedConcepts // NEW: Prevents AI from introducing locked concepts
+            });
+            
+            aiHint = hintResult.hint;
+            hintMetadata = {
+              source: hintResult.source,
+              reason: hintResult.reason
+            };
+            
+            console.log('[AdaptiveLearning] Hint generated:', hintMetadata);
+          }
         } catch (hintError) {
           console.error('[AdaptiveLearning] Hint generation failed (non-critical):', hintError.message);
+          console.error('[AdaptiveLearning] Hint error stack:', hintError.stack);
+          // Use template hint as emergency fallback
+          if (questionData?.hint) {
+            aiHint = questionData.hint;
+            hintMetadata = {
+              source: 'template-fallback',
+              reason: 'AI generation failed - using template hint'
+            };
+          }
           // Continue without hint - learning is NOT blocked
         }
       } else if (!isCorrect && newState.wrong_streak < 2) {
         console.log('[AdaptiveLearning] Skipping AI hint - wrong_streak < 2');
+        // For first wrong attempt, provide the template hint if available
+        if (questionData?.hint) {
+          aiHint = questionData.hint;
+          hintMetadata = {
+            source: 'template',
+            reason: 'First wrong attempt - using template hint'
+          };
+          console.log('[AdaptiveLearning] Using template hint for first wrong attempt');
+        }
       }
 
       // 9. Log transition for research analysis
@@ -348,6 +484,11 @@ class AdaptiveLearningService {
     // SYNC: Also update user_topic_progress.mastery_percentage
     await this.repo.updateTopicMastery(userId, topicId, masteryLevel);
     
+    // Update longest streak if current streak beat the record
+    if (isCorrect && correctStreak > 0) {
+      await this.repo.updateLongestStreak(userId, topicId, correctStreak);
+    }
+    
     return updatedState;
   }
 
@@ -374,11 +515,37 @@ class AdaptiveLearningService {
    * Q-Learning: Select action using epsilon-greedy policy
    * Balance exploration (trying new actions) vs exploitation (using best known action)
    */
+  /**
+   * Select optimal pedagogical action using epsilon-greedy Q-Learning
+   * 
+   * WHY Epsilon-Greedy: Balances exploration (trying new teaching strategies) 
+   * with exploitation (using known effective strategies). Early in learning,
+   * epsilon is high (explore more). As student progresses, epsilon decays 
+   * (exploit learned strategies more).
+   * 
+   * Formula: epsilon = max(MIN_EPSILON, INITIAL_EPSILON * EPSILON_DECAY^attempts)
+   * 
+   * @param {string} stateKey - Encoded state (e.g., "M2_D3_C4_W1")
+   * @param {Object} state - Current learning state
+   * @returns {Object} Selected action with metadata
+   */
   async selectActionQLearning(stateKey, state) {
     const epsilon = this.getCurrentEpsilon(state.total_attempts);
     const random = Math.random();
 
-    // Exploration: Random action
+    // High mastery override: Use optimal policy instead of exploring
+    // WHY: When student has 80%+ mastery, we know what works - no need to experiment
+    if (state.mastery_level >= 80) {
+      console.log(`[Q-Learning] Mastery ${state.mastery_level}% >= 80% - skipping exploration, using optimal policy`);
+      const fallback = await this.determineActionRuleBased(state);
+      return {
+        ...fallback,
+        usedExploration: false,
+        reason: `[High Mastery Override] ${fallback.reason}`
+      };
+    }
+
+    // Exploration: Try random action to discover potentially better strategies
     if (random < epsilon) {
       const actions = Object.values(this.ACTIONS);
       const randomAction = actions[Math.floor(Math.random() * actions.length)];
@@ -389,7 +556,7 @@ class AdaptiveLearningService {
       };
     }
 
-    // Exploitation: Choose action with highest Q-value
+    // Exploitation: Choose action with highest learned Q-value
     let bestAction = null;
     let bestQValue = -Infinity;
 
@@ -433,12 +600,32 @@ class AdaptiveLearningService {
 
   /**
    * Update Q-value using Q-learning update rule
-   * Q(s,a) ← Q(s,a) + α[r + γ·max Q(s',a') - Q(s,a)]
+  /**
+   * Update Q-value using Bellman equation for temporal difference learning
+   * 
+   * WHY This Formula: The Bellman equation updates our estimate of how good an action is
+   * based on immediate reward + estimated future value. This allows the system to learn
+   * optimal teaching strategies through experience.
+   * 
+   * Formula: Q(s,a) ← Q(s,a) + α[r + γ·max Q(s',a') - Q(s,a)]
+   * Where:
+   *   - s: current state (mastery, difficulty, streaks)
+   *   - a: action taken (increase difficulty, switch strategy, etc.)
+   *   - r: immediate reward (positive for good outcome, negative for bad)
+   *   - s': next state after action
+   *   - α: learning rate (0.1) - how quickly to update beliefs
+   *   - γ: discount factor (0.95) - importance of future rewards
+   * 
+   * @param {string} currentStateKey - State before action (e.g., "M2_D1_C3_W0")
+   * @param {string} action - Action taken (e.g., "increase_difficulty")
+   * @param {number} reward - Immediate reward value (-10 to +10)
+   * @param {string} nextStateKey - State after action (e.g., "M3_D2_C4_W0")
    */
   async updateQValue(currentStateKey, action, reward, nextStateKey) {
     const currentQ = this.getQValue(currentStateKey, action);
     
-    // Find max Q-value for next state
+    // Find best possible future value: max Q-value for all actions in next state
+    // WHY: We assume optimal future play (student gets best possible teaching)
     let maxNextQ = -Infinity;
     for (const nextAction of Object.values(this.ACTIONS)) {
       const nextQ = this.getQValue(nextStateKey, nextAction);
@@ -447,29 +634,41 @@ class AdaptiveLearningService {
       }
     }
     
-    // If next state has no Q-values, use 0
+    // If next state is unexplored, assume neutral value (0)
     if (maxNextQ === -Infinity) {
       maxNextQ = 0;
     }
 
-    // Q-learning update rule
+    // Apply Bellman equation: current estimate + learning rate * temporal difference
+    // Temporal difference = (reward + discounted future value) - current estimate
     const newQ = currentQ + this.LEARNING_RATE * (
       reward + this.DISCOUNT_FACTOR * maxNextQ - currentQ
     );
 
-    // Store updated Q-value
+    // Update Q-table in memory
     if (!this.qTable.has(currentStateKey)) {
       this.qTable.set(currentStateKey, {});
     }
     this.qTable.get(currentStateKey)[action] = newQ;
 
-    // Optional: Persist Q-table to database for research analysis
+    // TODO: Persist Q-table to database for research analysis and model persistence
     // await this.repo.saveQValue(currentStateKey, action, newQ);
   }
 
   /**
-   * Calculate epsilon (exploration rate) with decay
-   * Starts high (20%), decays to minimum (5%) as student completes more attempts
+   * Calculate epsilon (exploration rate) with exponential decay
+   * 
+   * WHY Decay: Early learning benefits from exploration (trying different strategies).
+   * As we learn what works, we should exploit that knowledge more.
+   * 
+   * Formula: ε = max(MIN_EPSILON, INITIAL_EPSILON * EPSILON_DECAY^attempts)
+   * 
+   * Example: 
+   *   - Attempt 1: ε = 1.0 (100% exploration)
+   *   - Attempt 10: ε = 0.95 (95% exploration)
+   *   - Attempt 100: ε = 0.60 (60% exploration)
+   *   - Attempt 500: ε = 0.08 (8% exploration)
+   *   - Attempt 1000+: ε = 0.01 (1% exploration, minimum)
    */
   getCurrentEpsilon(totalAttempts) {
     const epsilon = this.INITIAL_EPSILON * Math.pow(this.EPSILON_DECAY, totalAttempts);
@@ -595,12 +794,13 @@ class AdaptiveLearningService {
       }
     }
 
-    // Rule 1: Severe Frustration (3+ wrong)
-    if (wrong_streak >= 3) {
+    // Rule 1: Severe Frustration (3+ wrong AND low mastery)
+    // IMPORTANT: Only decrease on struggles, not random exploration
+    if (wrong_streak >= 3 && mastery_level < 60) {
       if (difficulty_level > 1) {
         return {
           action: this.ACTIONS.DECREASE_DIFFICULTY,
-          reason: `Frustration: ${wrong_streak} errors. Reducing difficulty.`,
+          reason: `Frustration: ${wrong_streak} errors, ${mastery_level.toFixed(1)}% mastery. Reducing difficulty.`,
           pedagogicalStrategy: 'confidence_building'
         };
       } else {
@@ -673,7 +873,7 @@ class AdaptiveLearningService {
    * Apply Action - Enhanced with Pedagogical Strategies
    * Handles not just difficulty changes, but teaching approach changes
    */
-  async applyAction(userId, topicId, currentState, action, actionMetadata = {}) {
+  async applyAction(userId, topicId, currentState, action, actionMetadata = {}, usedExploration = false) {
     let newDifficulty = currentState.difficulty_level;
     let newRepresentation = currentState.current_representation || 'text';
     let teachingStrategy = actionMetadata.pedagogicalStrategy || null;
@@ -723,7 +923,21 @@ class AdaptiveLearningService {
     if (newDifficulty !== currentState.difficulty_level) {
       updates.difficulty_level = newDifficulty;
     }
-    // Note: current_representation and teaching_strategy not in adaptive_learning_state schema
+    if (newRepresentation !== currentState.current_representation) {
+      updates.current_representation = newRepresentation;
+    }
+    if (teachingStrategy !== currentState.teaching_strategy) {
+      updates.teaching_strategy = teachingStrategy;
+    }
+    // Save the action taken for debugging and analysis
+    updates.last_action = action;
+    
+    // Track exploration vs exploitation for analytics
+    if (usedExploration) {
+      updates.increment_exploration = true;
+    } else {
+      updates.increment_exploitation = true;
+    }
 
     if (Object.keys(updates).length > 0) {
       return await this.repo.updateStudentDifficulty(userId, topicId, updates);
@@ -1047,6 +1261,7 @@ class AdaptiveLearningService {
         masteryLevel: topicProgress.mastery_percentage || 0, // Use NEW mastery from user_topic_progress
         correctStreak: state.correct_streak,
         wrongStreak: state.wrong_streak,
+        longestCorrectStreak: topicProgress.longest_correct_streak || 0, // 🏆 Best streak record
         totalAttempts: state.total_attempts,
         accuracy: state.total_attempts > 0 
           ? (state.correct_answers / state.total_attempts * 100).toFixed(1)
@@ -1092,6 +1307,9 @@ class AdaptiveLearningService {
   async generateQuestionForStudent(userId, topicId, difficultyLevel, representationType = 'text') {
     try {
       console.log(`[AdaptiveLearning] START generateQuestionForStudent - userId: ${userId}, topicId: ${topicId}, difficulty: ${difficultyLevel}`);
+      
+      // Clear pending questions for other topics (prevents stale state on topic switch)
+      await this.repo.clearPendingForOtherTopics(userId, topicId);
       
       // Get topic info to get chapter_id and topic_name
       const topic = await this.repo.getTopicById(topicId);
@@ -1144,26 +1362,45 @@ class AdaptiveLearningService {
   
   /**
    * Map topic name to question type filter
+   * IMPORTANT: Use exact question type names with | separator
+   * Each topic should only show questions relevant to that specific concept
    */
   getTopicFilter(topicName) {
     const topicMap = {
-      // Match by topic name (from database)
-      'Interior Angles of Polygons': 'polygon_interior',
-      'Geometric Proofs and Reasoning': 'proof|congruent',
-      'Geometry Word Problems': null, // Word problems can use any type
-      'Polygon Identification': 'polygon_identify|polygon_types',
-      'Plane and 3D Figures': 'plane_vs_solid|volume|surface_area',
-      'Perimeter and Area of Polygons': 'perimeter|area|rectangle|square|triangle|parallelogram|trapezoid',
-      'Kinds of Angles': 'angle_type|complementary|supplementary',
-      'Basic Geometric Figures': 'identify_lines|circle_parts|polygon_identify|line_segment|intersecting|perpendicular|skew|parallel',
-      'Volume of Space Figures': 'volume',
-      'Circumference and Area of a Circle': 'circle',
-      'Complementary and Supplementary Angles': 'complementary|supplementary',
-      'Parts of a Circle': 'circle_parts|circle_circumference',
-      'Points, Lines, and Planes': 'point_definition|line_segment|ray_definition|plane_definition|collinear|coplanar|intersecting|perpendicular|skew'
+      // Core Geometry Topics
+      'Points, Lines, and Planes': 'point_definition|line_segment_definition|line_segment_notation|line_naming|ray_definition|plane_definition|collinear_points|coplanar_points|point_naming_convention|line_infinite_property|plane_points_required|ray_vs_line_segment|collinear_points_line|line_notation_symbols',
+      
+      'Kinds of Angles': 'angle_type|acute_angle|right_angle|obtuse_angle|straight_angle|reflex_angle|angle_measurement|angle_bisector|complementary_angles|supplementary_angles|vertical_angles|adjacent_angles',
+      
+      'Complementary and Supplementary Angles': 'complementary_angles|supplementary_angles|missing_angle_word_problem',
+      
+      'Parts of a Circle': 'circle_parts',
+      
+      'Circumference and Area of a Circle': 'circle_circumference|circle_area|circle_sector|annulus_area',
+      
+      'Polygon Identification': 'polygon_identify|polygon_types_sides|polygon_types_triangle|polygon_identify_quadrilateral|polygon_types_pentagon|polygon_types_octagon|polygon_identify_by_angles|polygon_regular_definition|polygon_identify_heptagon|polygon_types_nonagon|polygon_identify_decagon|polygon_convex_definition|polygon_diagonals|polygon_types_dodecagon|polygon_total_diagonals|polygon_identify_classification|polygon_exterior_angle_regular|polygon_identify_by_diagonals',
+      
+      'Interior Angles of Polygons': 'polygon_interior_triangle|polygon_interior_quadrilateral|polygon_interior_pentagon|polygon_interior_hexagon|polygon_interior_angles|quadrilateral_angles|triangle_angle_sum',
+      
+      'Perimeter and Area of Polygons': 'rectangle_area|rectangle_perimeter|square_perimeter|triangle_area|parallelogram_area|trapezoid_area|composite_area|pythagorean',
+      
+      'Plane and 3D Figures': 'plane_vs_solid|identify_plane_figure|identify_solid_figure|solid_figure_properties|plane_figure_properties|solid_vs_plane_comparison|nets_of_solids',
+      
+      'Volume of Space Figures': 'volume_cube|volume_rectangular_prism|volume_cylinder|volume_pyramid|volume_cone|volume_sphere|volume_composite',
+      
+      'Geometric Proofs and Reasoning': 'angle_proof_simple|triangle_inequality|congruent_angles|similar_triangles|similar_congruent_polygons|prove_parallel_lines|exterior_angle_theorem|isosceles_triangle_proof',
+      
+      'Geometry Word Problems': 'area_word_problem|perimeter_word_problem|volume_word_problem|optimization_word_problem|scale_factor_word_problem|missing_angle_word_problem',
+      
+      'Basic Geometric Figures': 'identify_lines|polygon_identify|circle_parts|angle_type|plane_vs_solid'
     };
     
-    return topicMap[topicName] || null;
+    // Add surface area topics if they exist in database
+    const surfaceAreaTopics = {
+      'Surface Area': 'surface_area_cube|surface_area_rectangular_prism|surface_area_cylinder|surface_area_sphere|surface_area_cone|composite_solid_surface'
+    };
+    
+    return topicMap[topicName] || surfaceAreaTopics[topicName] || null;
   }
 
   /**
@@ -1313,11 +1550,13 @@ class AdaptiveLearningService {
    */
   generateFeedback(state, action) {
     const messages = {
-      [this.ACTIONS.DECREASE_DIFFICULTY]: "Let's try some easier questions to build your confidence! 💪",
+      [this.ACTIONS.DECREASE_DIFFICULTY]: "Let's build a stronger foundation first! 💪",
       [this.ACTIONS.INCREASE_DIFFICULTY]: "Great job! Ready for a bigger challenge? 🚀",
       [this.ACTIONS.ADVANCE_CHAPTER]: "Excellent! You've mastered this chapter! 🎉",
       [this.ACTIONS.MAINTAIN_DIFFICULTY]: "Keep going! You're making good progress! 📈",
-      [this.ACTIONS.REPEAT_CURRENT]: "Practice makes perfect! Let's strengthen your understanding. 📚"
+      [this.ACTIONS.REPEAT_CURRENT]: "Practice makes perfect! Let's strengthen your understanding. 📚",
+      [this.ACTIONS.SWITCH_TO_VISUAL]: "Let's try a different approach! 🎨",
+      [this.ACTIONS.GIVE_HINT_RETRY]: "Here's some help to guide you! 💡"
     };
 
     return messages[action] || "Keep learning! 👍";
@@ -1352,7 +1591,7 @@ class AdaptiveLearningService {
   /**
    * Get all topics with unlock status for a user
    */
-  async getTopicsWithProgress(userId) {
+  async getTopicsWithProgress(userId, retryCount = 0) {
     try {
       console.log('[AdaptiveLearning] getTopicsWithProgress - start');
       
@@ -1366,13 +1605,22 @@ class AdaptiveLearningService {
       const progress = await this.repo.getAllTopicProgress(userId);
       console.log(`[AdaptiveLearning] getAllTopicProgress took ${Date.now() - progressStart}ms, count: ${progress?.length || 0}`);
       
-      // If user has no progress, initialize it
+      // If user has no progress, initialize it (but prevent infinite recursion)
       if (!progress || progress.length === 0) {
+        if (retryCount > 0) {
+          console.error('[AdaptiveLearning] FATAL: Initialization failed after retry - RLS policies may be blocking inserts');
+          throw new Error('Failed to initialize user topic progress. Check RLS policies on user_topic_progress table.');
+        }
         console.log('[AdaptiveLearning] No progress found, initializing...');
         const initStart = Date.now();
-        await this.repo.initializeTopicsForUser(userId);
-        console.log(`[AdaptiveLearning] initializeTopicsForUser took ${Date.now() - initStart}ms`);
-        return await this.getTopicsWithProgress(userId); // Retry after initialization
+        const success = await this.repo.initializeTopicsForUser(userId);
+        console.log(`[AdaptiveLearning] initializeTopicsForUser took ${Date.now() - initStart}ms, success: ${success}`);
+        
+        if (!success) {
+          throw new Error('Topic initialization failed');
+        }
+        
+        return await this.getTopicsWithProgress(userId, retryCount + 1); // Retry once after initialization
       }
 
       // Merge topics with progress
@@ -1473,30 +1721,69 @@ class AdaptiveLearningService {
   /**
    * Generate a new question (parametric or AI-based)
    * Ensures uniqueness within session
+   * @param {boolean} forceNew - If true, skip reusing pending questions and generate fresh question
    */
-  async generateQuestion(userId, topicId, difficultyLevel, sessionId, excludeQuestionIds = []) {
+  async generateQuestion(userId, topicId, difficultyLevel, sessionId, excludeQuestionIds = [], forceNew = false) {
     try {
       const topic = await this.repo.getTopicById(topicId);
       if (!topic) {
         throw new Error('Topic not found');
       }
 
+      // Check for pending question in user_topic_progress (NEW SYSTEM)
+      // This ensures question persists across page refreshes
+      if (!forceNew) {
+        console.log(`[AdaptiveLearning] Checking for pending question: userId=${userId}, topicId=${topicId}`);
+        const pendingData = await this.repo.getPendingQuestion(userId, topicId);
+        
+        console.log(`[AdaptiveLearning] Pending data retrieved:`, pendingData ? {
+          has_data: !!pendingData.pending_question_data,
+          attempt_count: pendingData.attempt_count,
+          question_id: pendingData.pending_question_id
+        } : 'null');
+        
+        if (pendingData && pendingData.pending_question_data) {
+          console.log(`[AdaptiveLearning] ✅ REUSING pending question from database, attempt_count: ${pendingData.attempt_count}`);
+          return pendingData.pending_question_data;
+        } else {
+          console.log(`[AdaptiveLearning] No pending question found, will generate new`);
+        }
+      } else {
+        console.log('[AdaptiveLearning] forceNew=true, clearing pending question and generating new');
+        // Clear pending question when forcing new generation
+        await this.repo.clearPendingQuestion(userId, topicId);
+      }
+
       // Get shown questions in this session
       const shownQuestions = await this.repo.getShownQuestionsInSession(userId, topicId, sessionId);
       const shownQuestionIds = shownQuestions.map(q => q.question_id);
       const allExcluded = [...excludeQuestionIds, ...shownQuestionIds];
+      
+      // Get recent question types to avoid immediate repeats (last 3 questions)
+      const recentTypes = await this.repo.getRecentQuestionTypes(userId, topicId, 3);
+      console.log('[AdaptiveLearning] Recent question types to avoid:', recentTypes);
 
       let question = null;
 
-      // For difficulty 4-5, use Groq (via aiQuestionGenerator) for complex questions
-      if (difficultyLevel >= 4 && this.aiQuestionGenerator) {
+      // For difficulty 4+ and sufficient mastery/attempts, use Groq (via aiQuestionGenerator) for complex questions
+      if (difficultyLevel >= this.MIN_DIFFICULTY_FOR_AI && this.aiQuestionGenerator) {
         try {
           const state = await this.repo.getStudentDifficulty(userId, topicId);
           const cognitiveDomain = this.determineCognitiveDomain(state) || 'analytical_thinking';
 
+          // Guard: only use AI after learner shows adequate mastery/attempts
+          const masteryPercent = typeof state.mastery_level === 'number' ? state.mastery_level : 0;
+          const hasEnoughMastery = masteryPercent >= this.MIN_MASTERY_FOR_AI;
+          const hasAttempts = (state.total_attempts || 0) >= this.MIN_ATTEMPTS_FOR_AI;
+
+          if (!hasEnoughMastery && !hasAttempts) {
+            console.log('[AdaptiveLearning] Skipping AI generation (insufficient mastery/attempts)');
+          } else {
+
           // Add 10-second timeout to Groq API call
           const groqPromise = this.aiQuestionGenerator.generateQuestion({
             topicName: topic.topic_name,
+            topicFilter: topic.topic_filter, // Add topic filter for more specific context
             difficultyLevel,
             cognitiveDomain,
             excludeQuestionIds: allExcluded
@@ -1509,7 +1796,7 @@ class AdaptiveLearningService {
           question = await Promise.race([groqPromise, timeoutPromise]);
 
           if (question) {
-            console.log('[AdaptiveLearning] Generated Groq question for mastery level 4-5:', question.questionId);
+            console.log('[AdaptiveLearning] Generated Groq question (AI path):', question.questionId);
             
             // Save AI-generated question to database for research/reuse
             try {
@@ -1534,6 +1821,7 @@ class AdaptiveLearningService {
               // Don't fail - question is already generated and can be used
             }
           }
+          }
         } catch (aiError) {
           console.warn('[AdaptiveLearning] Groq generation failed, falling back to parametric:', aiError.message);
         }
@@ -1554,7 +1842,8 @@ class AdaptiveLearningService {
           null,                      // seed (random)
           cognitiveDomain,           // cognitive domain
           'text',                    // representation type
-          topicFilter                // topic filter (e.g., "polygon_interior")
+          topicFilter,               // topic filter (e.g., "polygon_interior")
+          recentTypes                // exclude recent question types
         );
 
         if (question) {
@@ -1586,6 +1875,10 @@ class AdaptiveLearningService {
         null, // Not answered yet
         question
       );
+
+      // Save as pending question in user_topic_progress (NEW)
+      // This enables persistence across page refreshes
+      await this.repo.savePendingQuestion(userId, topicId, question);
 
       return question;
 
@@ -1670,11 +1963,35 @@ class AdaptiveLearningService {
       // Get current attempt count
       const attemptCount = await this.repo.getQuestionAttemptCount(userId, questionId, sessionId);
 
+      // Determine if question is numerical/parametric (has changing values) vs term-based (fixed answer)
+      const isNumericalQuestion = this.isNumericalQuestion(questionData);
+
+      if (!isCorrect) {
+        if (isNumericalQuestion) {
+          // For numerical questions: always generate new similar question (different numbers)
+          // No point in keeping same question since user might memorize the specific answer
+          return {
+            attemptCount,
+            showHint: attemptCount >= 1, // Show hint on first wrong
+            generateSimilar: true, // Always generate new numbers for math problems
+            keepQuestion: false // Don't keep same numerical question
+          };
+        } else {
+          // For term-based questions: keep same question for retry on first wrong
+          return {
+            attemptCount,
+            showHint: attemptCount >= 1, // Show hint on first wrong attempt
+            generateSimilar: attemptCount >= 2, // Generate similar after 2nd wrong
+            keepQuestion: attemptCount < 2 // Keep same question for first retry
+          };
+        }
+      }
+
       return {
         attemptCount,
-        showHint: !isCorrect && attemptCount >= 1, // Show hint on first wrong attempt
-        generateSimilar: !isCorrect && attemptCount >= 2, // Generate similar after 2nd wrong
-        keepQuestion: !isCorrect && attemptCount < 2 // Keep same question for retry
+        showHint: false,
+        generateSimilar: false,
+        keepQuestion: false
       };
 
     } catch (error) {
@@ -1682,9 +1999,42 @@ class AdaptiveLearningService {
       return {
         attemptCount: 1,
         showHint: !isCorrect,
-        generateSimilar: false,
-        keepQuestion: !isCorrect
+        generateSimilar: !isCorrect, // Default to generating new question
+        keepQuestion: false
       };
+    }
+  }
+
+  /**
+   * Determine if a question is numerical (has parameters/calculations) vs term-based
+   */
+  isNumericalQuestion(questionData) {
+    if (!questionData) return false;
+
+    const questionText = questionData.questionText || '';
+    
+    // Check for numerical indicators in question text
+    const hasNumbers = /\d/.test(questionText);
+    const hasCalculationWords = /(calculate|find|compute|sum|area|perimeter|volume|surface area|total)/i.test(questionText);
+    const hasUnits = /(unit|cm|meter|degree|°)/.test(questionText);
+    
+    // Check if options are numeric
+    const options = questionData.options || [];
+    const hasNumericOptions = options.some(opt => /^\d+(\.\d+)?$/.test(opt.label || opt));
+
+    // If question has numbers AND calculation words OR numeric options, it's numerical
+    return (hasNumbers && (hasCalculationWords || hasUnits)) || hasNumericOptions;
+  }
+
+  /**
+   * Update hint count for a question attempt
+   */
+  async updateHintCount(userId, questionId, sessionId, hintsRequested) {
+    try {
+      return await this.repo.updateHintCount(userId, questionId, sessionId, hintsRequested);
+    } catch (error) {
+      console.error('[AdaptiveLearning] Error updating hint count:', error);
+      throw error;
     }
   }
 }

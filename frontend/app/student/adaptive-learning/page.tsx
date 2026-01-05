@@ -38,13 +38,26 @@ export default function AdaptiveLearningPage() {
         const topicsData = response.data.data || [];
         setTopics(topicsData);
         
-        // Auto-select first unlocked topic, or first topic if none unlocked (new user)
+        // Try to restore last selected topic from localStorage
+        const savedTopicId = localStorage.getItem('selectedTopicId');
+        if (savedTopicId) {
+          // Check if saved topic is still valid and unlocked
+          const savedTopic = topicsData.find((t: Topic) => t.id === savedTopicId && t.unlocked);
+          if (savedTopic) {
+            setSelectedTopicId(savedTopicId);
+            return;
+          }
+        }
+        
+        // Fallback: Auto-select first unlocked topic, or first topic if none unlocked (new user)
         const firstUnlocked = topicsData.find((t: Topic) => t.unlocked);
         if (firstUnlocked) {
           setSelectedTopicId(firstUnlocked.id);
+          localStorage.setItem('selectedTopicId', firstUnlocked.id);
         } else if (topicsData.length > 0) {
           // New user case: select first topic (backend will auto-unlock on first access)
           setSelectedTopicId(topicsData[0].id);
+          localStorage.setItem('selectedTopicId', topicsData[0].id);
         }
       }
     } catch (error) {
@@ -56,6 +69,7 @@ export default function AdaptiveLearningPage() {
 
   const handleTopicSelect = (topicId: string) => {
     setSelectedTopicId(topicId);
+    localStorage.setItem('selectedTopicId', topicId);
     setShowTopicSwitcher(false);
   };
 

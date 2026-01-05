@@ -143,10 +143,42 @@ class AdaptiveLearningRepository {
    */
   async updateStudentDifficulty(userId, topicId, updates) {
     try {
+      // Increment exploration/exploitation counters if specified
+      const updateData = { ...updates };
+      
+      if (updates.increment_exploration) {
+        delete updateData.increment_exploration;
+        // Use SQL increment to avoid race conditions
+        const { data: currentData } = await this.supabase
+          .from('adaptive_learning_state')
+          .select('exploration_count')
+          .eq('user_id', userId)
+          .eq('topic_id', topicId)
+          .single();
+        
+        if (currentData) {
+          updateData.exploration_count = (currentData.exploration_count || 0) + 1;
+        }
+      }
+      
+      if (updates.increment_exploitation) {
+        delete updateData.increment_exploitation;
+        const { data: currentData } = await this.supabase
+          .from('adaptive_learning_state')
+          .select('exploitation_count')
+          .eq('user_id', userId)
+          .eq('topic_id', topicId)
+          .single();
+        
+        if (currentData) {
+          updateData.exploitation_count = (currentData.exploitation_count || 0) + 1;
+        }
+      }
+      
       const { data, error } = await this.supabase
         .from('adaptive_learning_state')
         .update({
-          ...updates,
+          ...updateData,
           updated_at: new Date().toISOString(),
           last_attempt_at: new Date().toISOString()
         })
@@ -542,6 +574,49 @@ class AdaptiveLearningRepository {
   }
 
   /**
+   * Update longest correct streak if current streak beats the record
+   */
+  async updateLongestStreak(userId, topicId, currentStreak) {
+    try {
+      // Get current longest streak
+      const { data: progress } = await this.supabase
+        .from('user_topic_progress')
+        .select('longest_correct_streak')
+        .eq('user_id', userId)
+        .eq('topic_id', topicId)
+        .single();
+      
+      const currentLongest = progress?.longest_correct_streak || 0;
+      
+      // Only update if current streak beats the record
+      if (currentStreak > currentLongest) {
+        const { error } = await this.supabase
+          .from('user_topic_progress')
+          .update({
+            longest_correct_streak: currentStreak,
+            updated_at: new Date().toISOString()
+          })
+          .eq('user_id', userId)
+          .eq('topic_id', topicId);
+        
+        if (error) throw error;
+        
+        // Invalidate cache
+        const cacheKey = cache.generateKey('user_topic_progress', userId);
+        cache.delete(cacheKey);
+        
+        console.log(`[Repo] 🏆 New longest streak record for user ${userId} topic ${topicId}: ${currentStreak} (previous: ${currentLongest})`);
+      }
+      
+      return currentStreak;
+    } catch (error) {
+      console.error('Error updating longest streak:', error);
+      // Don't throw - this is not critical
+      return currentStreak;
+    }
+  }
+
+  /**
    * Get all topic progress for a user
    */
   async getAllTopicProgress(userId) {
@@ -687,9 +762,16 @@ class AdaptiveLearningRepository {
         console.log(`[Repo] Batch insert took ${Date.now() - insertStart}ms`);
         
         if (error) {
-          console.warn('Warning: Batch insert had issues:', error.message);
-          // Don't throw - race conditions are ok, some may already exist
+          console.error('[Repo] ERROR during batch insert:', error);
+          console.error('[Repo] Error details:', JSON.stringify(error, null, 2));
+          // Return false to signal failure instead of silently continuing
+          return false;
         }
+        
+        // Clear cache after successful insert to force fresh data on next read
+        const cacheKey = cache.generateKey('user_topic_progress', userId);
+        cache.delete(cacheKey);
+        console.log('[Repo] Cleared cache for user topic progress');
       } else {
         console.log('[Repo] All topics already initialized, nothing to insert');
       }
@@ -769,6 +851,30 @@ class AdaptiveLearningRepository {
   }
 
   /**
+   * Update hint count for a question attempt
+   */
+  async updateHintCount(userId, questionId, sessionId, hintsRequested) {
+    try {
+      const { data, error } = await this.supabase
+        .from('question_attempts')
+        .update({
+          hints_requested: hintsRequested
+        })
+        .eq('user_id', userId)
+        .eq('question_id', questionId)
+        .eq('session_id', sessionId)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error('Error updating hint count:', error);
+      return null;
+    }
+  }
+
+  /**
    * Get question attempt count for current session
    */
   async getQuestionAttemptCount(userId, questionId, sessionId) {
@@ -799,7 +905,7 @@ class AdaptiveLearningRepository {
     try {
       const { data, error } = await this.supabase
         .from('user_session_questions')
-        .select('question_id, question_type')
+        .select('question_id, question_type, question_data')
         .eq('user_id', userId)
         .eq('topic_id', topicId)
         .eq('session_id', sessionId);
@@ -809,6 +915,109 @@ class AdaptiveLearningRepository {
     } catch (error) {
       console.error('Error getting shown questions:', error);
       return [];
+    }
+  }
+
+  /**
+   * Get recently shown question types (last 5) to avoid immediate repeats
+   */
+  async getRecentQuestionTypes(userId, topicId, limit = 5) {
+    try {
+      const { data, error } = await this.supabase
+        .from('user_session_questions')
+        .select('question_data')
+        .eq('user_id', userId)
+        .eq('topic_id', topicId)
+        .order('created_at', { ascending: false })
+        .limit(limit);
+
+      if (error) throw error;
+      
+      // Extract question types from question_data
+      const questionTypes = (data || [])
+        .map(row => row.question_data?.type)
+        .filter(Boolean);
+      
+      return questionTypes;
+    } catch (error) {
+      console.error('Error getting recent question types:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Get the most recent unanswered question for a user/topic
+   * We ignore session to keep the question stable across refreshes
+   */
+  async getLatestUnansweredQuestion(userId, topicId) {
+    try {
+      const { data, error } = await this.supabase
+        .from('user_session_questions')
+        .select('question_data')
+        .eq('user_id', userId)
+        .eq('topic_id', topicId)
+        .is('is_correct', null)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single();
+
+      if (error && error.code !== 'PGRST116') throw error;
+      return data ? data.question_data : null;
+    } catch (error) {
+      console.error('Error getting latest unanswered question:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Mark a question as answered (update is_correct field)
+   */
+  async markQuestionAnswered(userId, topicId, questionId, isCorrect) {
+    try {
+      const { error } = await this.supabase
+        .from('user_session_questions')
+        .update({ is_correct: isCorrect })
+        .eq('user_id', userId)
+        .eq('topic_id', topicId)
+        .eq('question_id', questionId)
+        .is('is_correct', null); // Only update if not already answered
+
+      if (error) {
+        console.error('[Repo] Error marking question answered:', error);
+        return false;
+      }
+      
+      console.log(`[Repo] Marked question ${questionId} as ${isCorrect ? 'correct' : 'incorrect'}`);
+      return true;
+    } catch (error) {
+      console.error('Error marking question answered:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Mark all pending (unanswered) questions as answered
+   * Used when forcing new question generation
+   */
+  async markPendingQuestionsAnswered(userId, topicId) {
+    try {
+      const { error } = await this.supabase
+        .from('user_session_questions')
+        .update({ is_correct: false }) // Mark as incorrect to clear them
+        .eq('user_id', userId)
+        .eq('topic_id', topicId)
+        .is('is_correct', null); // Only update unanswered questions
+
+      if (error) {
+        console.error('[Repo] Error marking pending questions answered:', error);
+        return false;
+      }
+      
+      console.log(`[Repo] Marked all pending questions for user ${userId} topic ${topicId} as answered`);
+      return true;
+    } catch (error) {
+      console.error('Error marking pending questions answered:', error);
+      return false;
     }
   }
 
@@ -837,6 +1046,286 @@ class AdaptiveLearningRepository {
     } catch (error) {
       console.error('Error adding to question history:', error);
       return null;
+    }
+  }
+
+  /**
+   * Save pending question to user_topic_progress
+   * This enables question persistence across page refreshes
+   */
+  async savePendingQuestion(userId, topicId, questionData) {
+    try {
+      // Try multiple field names for question ID
+      const questionId = questionData?.questionId || questionData?.id || questionData?.question_id;
+      
+      if (!questionId) {
+        console.error('[Repo] ERROR: Cannot save pending question - no question ID found');
+        console.error('[Repo] Question data keys:', Object.keys(questionData || {}));
+        console.error('[Repo] Question data:', JSON.stringify(questionData, null, 2).substring(0, 500));
+        // Don't throw - just log and return (non-critical failure)
+        return null;
+      }
+      
+      console.log(`[Repo] Attempting to save pending question: userId=${userId}, topicId=${topicId}, questionId=${questionId}`);
+      
+      const { data, error } = await this.supabase
+        .from('user_topic_progress')
+        .update({
+          pending_question_id: questionId,
+          pending_question_data: questionData,
+          attempt_count: 0,
+          hint_shown: false,
+          updated_at: new Date().toISOString()
+        })
+        .eq('user_id', userId)
+        .eq('topic_id', topicId)
+        .select()
+        .single();
+
+      if (error && error.code === 'PGRST116') {
+        // Record doesn't exist, create it with pending question
+        console.log(`[Repo] Record not found, creating new with pending question`);
+        const { data: newData, error: insertError } = await this.supabase
+          .from('user_topic_progress')
+          .insert({
+            user_id: userId,
+            topic_id: topicId,
+            unlocked: true,
+            pending_question_id: questionId,
+            pending_question_data: questionData,
+            attempt_count: 0,
+            hint_shown: false
+          })
+          .select()
+          .single();
+        
+        if (insertError) {
+          console.error('[Repo] ERROR: Failed to insert pending question:', insertError);
+          throw insertError;
+        }
+        console.log(`[Repo] ✅ Created user_topic_progress with pending question for user ${userId} topic ${topicId}`);
+        return newData;
+      }
+
+      if (error) {
+        console.error('[Repo] ERROR: Failed to update pending question:', error);
+        throw error;
+      }
+
+      if (!data) {
+        console.error('[Repo] ERROR: Update returned no data - RLS policy may be blocking');
+        throw new Error('Update succeeded but returned no data');
+      }
+
+      // Invalidate cache
+      const cacheKey = cache.generateKey('user_topic_progress', userId);
+      cache.delete(cacheKey);
+
+      console.log(`[Repo] ✅ Saved pending question for user ${userId} topic ${topicId}, questionId=${questionId}`);
+      return data;
+    } catch (error) {
+      console.error('[Repo] Error saving pending question:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Clear pending question from user_topic_progress
+   * Called after correct answer or when generating similar question (2nd wrong)
+   */
+  async clearPendingQuestion(userId, topicId) {
+    try {
+      const { data, error } = await this.supabase
+        .from('user_topic_progress')
+        .update({
+          pending_question_id: null,
+          pending_question_data: null,
+          attempt_count: 0,
+          hint_shown: false,
+          updated_at: new Date().toISOString()
+        })
+        .eq('user_id', userId)
+        .eq('topic_id', topicId)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      // Invalidate cache
+      const cacheKey = cache.generateKey('user_topic_progress', userId);
+      cache.delete(cacheKey);
+
+      console.log(`[Repo] Cleared pending question for user ${userId} topic ${topicId}`);
+      return data;
+    } catch (error) {
+      console.error('Error clearing pending question:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Increment attempt count for pending question (ATOMIC)
+   * Called when user answers wrong
+   * Uses SQL function to prevent race conditions on concurrent submits
+   */
+  async incrementAttemptCount(userId, topicId) {
+    try {
+      // Use atomic SQL function to prevent race condition
+      const { data, error } = await this.supabase
+        .rpc('increment_attempt_count_atomic', {
+          p_user_id: userId,
+          p_topic_id: topicId
+        });
+
+      if (error) throw error;
+
+      // Function returns array with single row
+      const result = data && data[0];
+      if (!result) {
+        throw new Error('increment_attempt_count_atomic returned no data');
+      }
+
+      // Invalidate cache
+      const cacheKey = cache.generateKey('user_topic_progress', userId);
+      cache.delete(cacheKey);
+
+      console.log(`[Repo] Atomically incremented attempt_count to ${result.new_attempt_count} for user ${userId} topic ${topicId}`);
+      
+      // Return in expected format
+      return {
+        attempt_count: result.new_attempt_count,
+        pending_question_id: result.pending_question_id,
+        pending_question_data: result.pending_question_data
+      };
+    } catch (error) {
+      console.error('Error incrementing attempt count:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get pending question from user_topic_progress
+   * Returns null if no pending question exists
+   */
+  async getPendingQuestion(userId, topicId) {
+    try {
+      const { data, error } = await this.supabase
+        .from('user_topic_progress')
+        .select('pending_question_id, pending_question_data, attempt_count, hint_shown')
+        .eq('user_id', userId)
+        .eq('topic_id', topicId)
+        .single();
+
+      if (error && error.code !== 'PGRST116') throw error;
+      
+      // Return null if no record or no pending question
+      if (!data || !data.pending_question_id) return null;
+
+      console.log(`[Repo] Retrieved pending question for user ${userId} topic ${topicId}, attempt_count: ${data.attempt_count}`);
+      return data;
+    } catch (error) {
+      console.error('Error getting pending question:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Clear pending questions for all topics except current
+   * Called when user switches topics to prevent stale state
+   */
+  async clearPendingForOtherTopics(userId, currentTopicId) {
+    try {
+      const { data, error } = await this.supabase
+        .rpc('clear_all_pending_except', {
+          p_user_id: userId,
+          p_keep_topic_id: currentTopicId
+        });
+
+      if (error) throw error;
+
+      const clearedCount = data || 0;
+      if (clearedCount > 0) {
+        console.log(`[Repo] Cleared ${clearedCount} pending questions for user ${userId} (keeping topic ${currentTopicId})`);
+      }
+
+      // Invalidate cache
+      const cacheKey = cache.generateKey('user_topic_progress', userId);
+      cache.delete(cacheKey);
+
+      return clearedCount;
+    } catch (error) {
+      console.error('Error clearing pending for other topics:', error);
+      return 0;
+    }
+  }
+
+  /**
+   * Check if submission is duplicate (idempotency)
+   * Returns true if same submission_id was processed within last 5 seconds
+   */
+  async checkSubmissionDuplicate(userId, topicId, submissionId) {
+    try {
+      const { data, error } = await this.supabase
+        .rpc('check_submission_duplicate', {
+          p_user_id: userId,
+          p_topic_id: topicId,
+          p_submission_id: submissionId
+        });
+
+      if (error) throw error;
+      return data === true;
+    } catch (error) {
+      console.error('Error checking submission duplicate:', error);
+      return false; // On error, assume not duplicate (safer)
+    }
+  }
+
+  /**
+   * Record submission ID to enable idempotency
+   */
+  async recordSubmission(userId, topicId, submissionId) {
+    try {
+      const { error } = await this.supabase
+        .from('adaptive_learning_state')
+        .update({
+          last_submission_id: submissionId,
+          last_submission_at: new Date().toISOString()
+        })
+        .eq('user_id', userId)
+        .eq('topic_id', topicId);
+
+      if (error) throw error;
+      console.log(`[Repo] Recorded submission ${submissionId} for user ${userId} topic ${topicId}`);
+    } catch (error) {
+      console.error('Error recording submission:', error);
+      // Non-critical - don't throw
+    }
+  }
+
+  /**
+   * Mark hint as shown (for analytics)
+   */
+  async markHintShown(userId, topicId) {
+    try {
+      const { error } = await this.supabase
+        .from('user_topic_progress')
+        .update({
+          hint_shown: true,
+          hint_shown_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        })
+        .eq('user_id', userId)
+        .eq('topic_id', topicId);
+
+      if (error) throw error;
+      console.log(`[Repo] Marked hint as shown for user ${userId} topic ${topicId}`);
+
+      // Invalidate cache
+      const cacheKey = cache.generateKey('user_topic_progress', userId);
+      cache.delete(cacheKey);
+    } catch (error) {
+      console.error('Error marking hint shown:', error);
+      // Non-critical - don't throw
     }
   }
 }
