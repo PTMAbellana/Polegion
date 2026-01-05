@@ -1,0 +1,171 @@
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                    GEOMETRY QUESTIONS STRUCTURE                      │
+│                     Modular Topic-Based Design                       │
+└─────────────────────────────────────────────────────────────────────┘
+
+📁 docs/sql/questions/
+│
+├── 📄 base_geometry_questions.sql ─────────► PARENT CLASS
+│   │                                          (Foundation for all topics)
+│   ├── 🔧 insert_geometry_question()        Helper function
+│   ├── ✅ validate_question_structure()     Validation
+│   ├── 📚 Documentation                     Guidelines
+│   └── 📋 Topic organization                Structure
+│
+├── 📄 index.sql ──────────────────────────► MAIN ENTRY POINT
+│   │                                          (Loads everything)
+│   ├── ▶ Load base template
+│   ├── ▶ Load all topics (1-6)
+│   └── ▶ Display statistics
+│
+├── 📄 README.md ──────────────────────────► DOCUMENTATION
+│   │                                          (Complete guide)
+│   ├── 📖 Usage instructions
+│   ├── 🎯 Best practices
+│   └── 💡 Examples
+│
+└── 📁 topics/ ────────────────────────────► TOPIC FILES
+    │                                         (Organized by concept)
+    │
+    ├── 📄 01_points_lines_planes.sql
+    │   ├── Points (location with no size)
+    │   ├── Lines (infinite paths)
+    │   ├── Line segments (with endpoints)
+    │   ├── Rays (one endpoint)
+    │   └── Planes (flat surfaces)
+    │
+    ├── 📄 02_angles.sql
+    │   ├── Angle definition & vertex
+    │   ├── Types (acute, right, obtuse)
+    │   ├── Measurement (degrees)
+    │   └── Relationships (complementary, supplementary)
+    │
+    ├── 📄 03_polygons.sql
+    │   ├── Polygon definition
+    │   ├── Triangles (3 sides)
+    │   ├── Quadrilaterals (4 sides)
+    │   ├── Other polygons (5+ sides)
+    │   └── Perimeter & area
+    │
+    ├── 📄 04_triangles.sql
+    │   ├── Classification by sides
+    │   ├── Classification by angles
+    │   ├── Pythagorean theorem
+    │   ├── Triangle inequality
+    │   └── Sum of angles (180°)
+    │
+    ├── 📄 05_circles.sql
+    │   ├── Center, radius, diameter
+    │   ├── Chord, arc, sector
+    │   ├── Tangent & secant
+    │   └── Circumference & area
+    │
+    └── 📄 06_3d_shapes.sql
+        ├── Prisms & pyramids
+        ├── Cylinders, cones, spheres
+        ├── Faces, edges, vertices
+        └── Surface area & volume
+
+┌─────────────────────────────────────────────────────────────────────┐
+│                    EACH TOPIC FILE CONTAINS                          │
+└─────────────────────────────────────────────────────────────────────┘
+
+📊 6 Cognitive Domains:
+   ├── 🧠 Knowledge Recall        (kr) - Remember facts
+   ├── 💡 Concept Understanding   (cu) - Understand concepts
+   ├── 🔧 Procedural Skills       (ps) - Apply procedures
+   ├── 🔍 Analytical Thinking     (at) - Analyze relationships
+   ├── 🎯 Problem Solving         (pb) - Solve problems
+   └── 🚀 Higher Order Thinking   (ho) - Creative thinking
+
+📝 2 Test Types:
+   ├── pretest  - Initial assessment
+   └── posttest - Final assessment
+
+⚖️ 3 Difficulty Levels:
+   ├── easy   - Basic recall
+   ├── medium - Application
+   └── hard   - Complex reasoning
+
+┌─────────────────────────────────────────────────────────────────────┐
+│                       QUESTION STRUCTURE                             │
+└─────────────────────────────────────────────────────────────────────┘
+
+SELECT insert_geometry_question(
+    'kr_pre_01',                          ◄── Question ID
+         │   │   │
+         │   │   └─► Number (01-99)
+         │   └─────► Test type (pre/post)
+         └─────────► Category (kr/cu/ps/at/pb/ho)
+    
+    'Knowledge Recall',                   ◄── Category name
+    'Which is a point?',                  ◄── Question text
+    '["Line","Point","Ray","Plane"]',     ◄── 4 options (JSON)
+    'Point',                              ◄── Correct answer
+    'easy',                               ◄── Difficulty
+    'pretest',                            ◄── Test type
+    1                                     ◄── Points
+);
+
+┌─────────────────────────────────────────────────────────────────────┐
+│                         USAGE FLOW                                   │
+└─────────────────────────────────────────────────────────────────────┘
+
+    1️⃣ Run index.sql
+         ↓
+    2️⃣ Loads base_geometry_questions.sql (parent)
+         ↓
+    3️⃣ Loads all 6 topic files
+         ↓
+    4️⃣ Inserts questions into database
+         ↓
+    5️⃣ Displays statistics
+         ↓
+    ✅ Ready to use!
+
+┌─────────────────────────────────────────────────────────────────────┐
+│                     BENEFITS OF THIS STRUCTURE                       │
+└─────────────────────────────────────────────────────────────────────┘
+
+✅ Organized by topic          ✅ Reusable parent class
+✅ Easy to find questions      ✅ Built-in validation
+✅ Maintainable files          ✅ Clear naming convention
+✅ Modular updates             ✅ Complete documentation
+✅ Better version control      ✅ Scalable structure
+
+┌─────────────────────────────────────────────────────────────────────┐
+│                      FILE SIZE COMPARISON                            │
+└─────────────────────────────────────────────────────────────────────┘
+
+Before:  INSERT_ASSESSMENT_QUESTIONS.sql  →  118 KB (3658 lines)
+                                             ❌ One huge file
+
+After:   6 topic files                    →  ~20 KB each (~400 lines)
+                                             ✅ Manageable size
+         + base_geometry_questions.sql    →  ~10 KB (documentation)
+         + index.sql                      →  ~5 KB (loading script)
+         + README.md                      →  ~15 KB (guide)
+
+Total:   ~8 files, better organized, easier to maintain!
+
+┌─────────────────────────────────────────────────────────────────────┐
+│                         QUICK START                                  │
+└─────────────────────────────────────────────────────────────────────┘
+
+💻 Load all questions:
+   psql -f docs/sql/questions/index.sql
+
+📖 Read documentation:
+   docs/sql/questions/README.md
+
+➕ Add new question:
+   1. Choose topic file
+   2. Use insert_geometry_question()
+   3. Follow naming convention
+
+🔍 Find a question:
+   1. Know the topic? → Open topic file
+   2. Know the ID? → Search for it
+   3. Need help? → Check README.md
+```
