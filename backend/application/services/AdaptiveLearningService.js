@@ -16,7 +16,7 @@
 const QuestionGeneratorService = require('./QuestionGeneratorService');
 const AIExplanationService = require('./AIExplanationService');
 const HintGenerationService = require('./HintGenerationService');
-const GeminiQuestionGenerator = require('./GeminiQuestionGenerator');
+const GroqQuestionGenerator = require('./GroqQuestionGenerator');
 
 class AdaptiveLearningService {
   constructor(adaptiveLearningRepo) {
@@ -24,8 +24,8 @@ class AdaptiveLearningService {
     this.questionGenerator = new QuestionGeneratorService();
     this.aiExplanation = new AIExplanationService();
     this.hintService = new HintGenerationService(); // Production-safe AI hints
-    // NOTE: Using parametric generation for all difficulties - AI generation disabled to save quota
-    // this.aiQuestionGenerator = new GeminiQuestionGenerator(); // AI question generation for difficulty 4-5
+    // NOTE: Using Groq AI for difficulty 4-5 (14.4K requests/day free tier)
+    this.aiQuestionGenerator = new GroqQuestionGenerator(); // Uses Groq API for complex questions
     
     // MDP Actions - Enhanced with Pedagogical Strategies
     this. ACTIONS = {
@@ -73,12 +73,12 @@ class AdaptiveLearningService {
       'higher_order_thinking'
     ];
 
-    // Q-Learning Parameters
-    this.LEARNING_RATE = 0.15;      // Alpha: how quickly to update Q-values
-    this.DISCOUNT_FACTOR = 0.9;     // Gamma: importance of future rewards
-    this.INITIAL_EPSILON = 0.2;     // Initial exploration rate (20%)
-    this.EPSILON_DECAY = 0.995;     // Decay exploration over time
-    this.MIN_EPSILON = 0.05;        // Minimum exploration rate (5%)
+    // Q-Learning Parameters (Research-backed from IJRISS & EduQate papers)
+    this.LEARNING_RATE = 0.1;       // Alpha: how quickly to update Q-values (IJRISS: 0.1, EduQate: 0.1)
+    this.DISCOUNT_FACTOR = 0.95;    // Gamma: importance of future rewards (IJRISS: 0.9, EduQate: 0.95)
+    this.INITIAL_EPSILON = 1.0;     // Initial exploration rate (100%, IJRISS: 1.0 for full exploration)
+    this.EPSILON_DECAY = 0.995;     // Decay exploration over time (IJRISS: 0.005 decay per step ≈ 0.995 per episode)
+    this.MIN_EPSILON = 0.01;        // Minimum exploration rate (IJRISS: 0.01)
     
     // Q-Table: stores learned Q-values for state-action pairs
     // Structure: { stateKey: { action: qValue } }
@@ -314,9 +314,25 @@ class AdaptiveLearningService {
     const expectedTime = 60; // 60 seconds per question baseline
     const timeFactor = timeSpent > expectedTime * 2 ? -5 : 0;
     
+    // SAMPLE SIZE PENALTY: Prevent instant 100% mastery from 1 correct answer
+    // Mastery should require multiple attempts to reach high percentages
+    // Progressive caps: 1 attempt=max 20%, 2=40%, 3=60%, 5=80%, 8+=100%
+    let masteryCapByAttempts = 100; // Default: no cap for 8+ attempts
+    if (totalAttempts === 1) {
+      masteryCapByAttempts = 20;
+    } else if (totalAttempts === 2) {
+      masteryCapByAttempts = 40;
+    } else if (totalAttempts === 3) {
+      masteryCapByAttempts = 60;
+    } else if (totalAttempts < 5) {
+      masteryCapByAttempts = 70;
+    } else if (totalAttempts < 8) {
+      masteryCapByAttempts = 85;
+    }
+    
     // Calculate final mastery with all factors
     let masteryLevel = accuracy + streakBonus - streakPenalty + difficultyBonus + timeFactor;
-    masteryLevel = Math.max(0, Math.min(100, masteryLevel));
+    masteryLevel = Math.max(0, Math.min(100, Math.min(masteryLevel, masteryCapByAttempts)));
 
     const updates = {
       total_attempts: totalAttempts,
@@ -557,39 +573,24 @@ class AdaptiveLearningService {
       }
     
     if (misconception && wrong_streak >= 2) {
-      // Student stuck with same error - CHANGE TEACHING STRATEGY
+      // Student stuck with same error - PROVIDE HINT & SCAFFOLDING
       if (misconception.type === 'representation_issue') {
-        // Same format failing - switch modality
-        if (current_representation === this.REPRESENTATIONS.TEXT) {
-          return {
-            action: this.ACTIONS.SWITCH_TO_VISUAL,
-            reason: `Misconception: Text failing ${misconception.count}x. Switching to visual diagrams.`,
-            pedagogicalStrategy: 'switch_modality',
-            representationType: this.REPRESENTATIONS.VISUAL
-          };
-        } else if (current_representation === this.REPRESENTATIONS.VISUAL) {
-          return {
-            action: this.ACTIONS.SWITCH_TO_REAL_WORLD,
-            reason: `Visual not working. Trying real-world contextual examples.`,
-            pedagogicalStrategy: 'contextualization',
-            representationType: this.REPRESENTATIONS.REAL_WORLD
-          };
-        } else {
-          return {
-            action: this.ACTIONS.GIVE_HINT_RETRY,
-            reason: `Multiple formats tried. Providing scaffolding with hints.`,
-            pedagogicalStrategy: 'scaffolding',
-            representationType: current_representation
-          };
-        }
+        // Text representation failing - provide targeted hint instead of switching to visual
+        // (Visual rendering not implemented yet)
+        return {
+          action: this.ACTIONS.GIVE_HINT_RETRY,
+          reason: `Misconception: Same format failing ${misconception.count}x. Providing scaffolding with hints.`,
+          pedagogicalStrategy: 'scaffolding',
+          representationType: this.REPRESENTATIONS.TEXT
+        };
       }
       
       if (misconception.type === 'prerequisite_gap') {
         return {
-          action: this.ACTIONS.REVIEW_PREREQUISITE,
-          reason: `Basic concepts failing. Reviewing prerequisites.`,
-          pedagogicalStrategy: 'spiral_review',
-          representationType: this.REPRESENTATIONS.VISUAL
+          action: this.ACTIONS.GIVE_HINT_RETRY,
+          reason: `Basic concepts failing. Providing hints to review prerequisites.`,
+          pedagogicalStrategy: 'scaffolding',
+          representationType: this.REPRESENTATIONS.TEXT
         };
       }
     }
@@ -688,25 +689,19 @@ class AdaptiveLearningService {
         newDifficulty = 3; // Reset to medium for new topic
         break;
       
-      // Teaching strategy changes
+      // Teaching strategy changes - DISABLED: Visual/Real-world rendering not implemented
       case this.ACTIONS.SWITCH_TO_VISUAL:
-        newRepresentation = this.REPRESENTATIONS.VISUAL;
-        teachingStrategy = 'switch_modality';
+        // Disabled: Visual rendering not implemented - use hints instead
+        teachingStrategy = 'scaffolding';
         break;
       case this.ACTIONS.SWITCH_TO_REAL_WORLD:
-        newRepresentation = this.REPRESENTATIONS.REAL_WORLD;
-        teachingStrategy = 'contextualization';
+        // Disabled: Real-world rendering not implemented - use hints instead
+        teachingStrategy = 'scaffolding';
         break;
       case this.ACTIONS.REPEAT_DIFFERENT_REPRESENTATION:
-        // Cycle through representations
-        if (newRepresentation === this.REPRESENTATIONS.TEXT) {
-          newRepresentation = this.REPRESENTATIONS.VISUAL;
-        } else if (newRepresentation === this.REPRESENTATIONS.VISUAL) {
-          newRepresentation = this.REPRESENTATIONS.REAL_WORLD;
-        } else {
-          newRepresentation = this.REPRESENTATIONS.TEXT;
-        }
-        teachingStrategy = 'vary_representation';
+        // Keep text representation - others not implemented
+        newRepresentation = this.REPRESENTATIONS.TEXT;
+        teachingStrategy = 'scaffolding';
         break;
       case this.ACTIONS.GIVE_HINT_RETRY:
         teachingStrategy = 'scaffolding';
@@ -1154,11 +1149,12 @@ class AdaptiveLearningService {
       'Plane and 3D Figures': 'plane_vs_solid|volume|surface_area',
       'Perimeter and Area of Polygons': 'perimeter|area|rectangle|square|triangle|parallelogram|trapezoid',
       'Kinds of Angles': 'angle_type|complementary|supplementary',
-      'Basic Geometric Figures': 'identify_lines|circle_parts|polygon_identify',
+      'Basic Geometric Figures': 'identify_lines|circle_parts|polygon_identify|line_segment|intersecting|perpendicular|skew|parallel',
       'Volume of Space Figures': 'volume',
       'Circumference and Area of a Circle': 'circle',
       'Complementary and Supplementary Angles': 'complementary|supplementary',
-      'Parts of a Circle': 'circle_parts|circle_circumference'
+      'Parts of a Circle': 'circle_parts|circle_circumference',
+      'Points, Lines, and Planes': 'point_definition|line_segment|ray_definition|plane_definition|collinear|coplanar|intersecting|perpendicular|skew'
     };
     
     return topicMap[topicName] || null;
@@ -1389,10 +1385,15 @@ class AdaptiveLearningService {
    */
   async checkAndUnlockNextTopic(userId, topicId, currentMasteryLevel) {
     try {
+      console.log('[checkAndUnlockNextTopic] Called with:', { userId, topicId, currentMasteryLevel });
+      
       // Check if mastery level >= 3 (proficient)
       if (currentMasteryLevel < 3) {
+        console.log('[checkAndUnlockNextTopic] Mastery level < 3, not ready to unlock');
         return null; // Not ready to unlock
       }
+
+      console.log('[checkAndUnlockNextTopic] Mastery level >= 3, proceeding to unlock...');
 
       // Get current topic progress
       const currentProgress = await this.repo.getTopicProgress(userId, topicId);
@@ -1409,13 +1410,15 @@ class AdaptiveLearningService {
       const unlockResult = await this.repo.unlockNextTopic(userId, topicId);
       
       if (unlockResult) {
+        console.log('[checkAndUnlockNextTopic] Successfully unlocked:', unlockResult.topic.topic_name);
         return {
           unlocked: true,
           topic: unlockResult.topic,
-          message: `🎉 Great job! You've unlocked "${unlockResult.topic.topic_name}"!`
+          message: `Great job! You've unlocked "${unlockResult.topic.topic_name}"!`
         };
       }
 
+      console.log('[checkAndUnlockNextTopic] No next topic to unlock');
       return null; // No next topic (already at end)
     } catch (error) {
       console.error('[AdaptiveLearning] Error checking/unlocking topic:', error);
@@ -1470,39 +1473,57 @@ class AdaptiveLearningService {
 
       let question = null;
 
-      // For difficulty 4-5, try AI generation first (if available)
+      // For difficulty 4-5, use Groq (via aiQuestionGenerator) for complex questions
       if (difficultyLevel >= 4 && this.aiQuestionGenerator) {
         try {
           const state = await this.repo.getStudentDifficulty(userId, topicId);
           const cognitiveDomain = state?.cognitive_domain || 'analytical_thinking';
 
-          question = await this.aiQuestionGenerator.generateQuestion({
+          // Add 10-second timeout to Groq API call
+          const groqPromise = this.aiQuestionGenerator.generateQuestion({
             topicName: topic.topic_name,
             difficultyLevel,
             cognitiveDomain,
             excludeQuestionIds: allExcluded
           });
+          
+          const timeoutPromise = new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('Groq API timeout')), 10000)
+          );
+          
+          question = await Promise.race([groqPromise, timeoutPromise]);
 
           if (question) {
-            console.log('[AdaptiveLearning] Generated AI question:', question.questionId);
+            console.log('[AdaptiveLearning] Generated Groq question for mastery level 4-5:', question.questionId);
           }
         } catch (aiError) {
-          console.warn('[AdaptiveLearning] AI generation failed, falling back to parametric:', aiError.message);
+          console.warn('[AdaptiveLearning] Groq generation failed, falling back to parametric:', aiError.message);
         }
       }
 
       // Fallback to parametric templates (or for difficulty 1-3)
       if (!question) {
+        // Get student state for cognitive domain
+        const state = await this.repo.getStudentDifficulty(userId, topicId);
+        const cognitiveDomain = this.determineCognitiveDomain(state);
+        
+        // Get topic filter to match questions to topic
+        const topicFilter = this.getTopicFilter(topic.topic_name);
+        
         question = await this.questionGenerator.generateQuestion(
-          topic.topic_name,
-          difficultyLevel,
-          allExcluded
+          difficultyLevel,           // difficulty level (1-5)
+          topic.chapter_id || 1,     // chapter ID
+          null,                      // seed (random)
+          cognitiveDomain,           // cognitive domain
+          'text',                    // representation type
+          topicFilter                // topic filter (e.g., "polygon_interior")
         );
 
         if (question) {
           question.generatedBy = 'parametric';
-          question.questionId = `param_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-          console.log('[AdaptiveLearning] Generated parametric question:', question.questionId);
+          // Keep the deterministic ID generated by QuestionGeneratorService
+          // DON'T override it with random timestamp - this breaks duplicate detection
+          console.log('[AdaptiveLearning] Generated parametric question:', question.questionId || question.id);
         }
       }
 
@@ -1510,13 +1531,19 @@ class AdaptiveLearningService {
         throw new Error('Failed to generate question');
       }
 
+      // Ensure question has a questionId field (parametric uses 'id', AI uses 'questionId')
+      const questionId = question.questionId || question.id;
+      if (!questionId) {
+        throw new Error('Generated question missing ID');
+      }
+
       // Add to question history
       await this.repo.addToQuestionHistory(
         userId,
         topicId,
         sessionId,
-        question.questionId,
-        question.questionType || 'unknown',
+        questionId,
+        question.questionType || question.type || 'unknown',
         difficultyLevel,
         null, // Not answered yet
         question

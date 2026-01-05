@@ -117,8 +117,19 @@ export default function CelebrationModal({
         onClick={(e) => e.stopPropagation()}
       >
         {/* Icon */}
-        <div style={{ fontSize: '80px', marginBottom: '20px' }}>
-          {type === 'unlock' ? '🔓' : '🎉'}
+        <div style={{ 
+          width: '100px',
+          height: '100px',
+          margin: '0 auto 20px',
+          borderRadius: '50%',
+          backgroundColor: 'rgba(255, 255, 255, 0.2)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontSize: '48px',
+          fontWeight: 'bold'
+        }}>
+          {type === 'unlock' ? '✓' : '✓'}
         </div>
 
         {/* Title */}
@@ -170,10 +181,21 @@ export default function CelebrationModal({
           Continue Learning
         </button>
 
-        {/* Stars for mastery */}
+        {/* Mastery Level Indicator */}
         {type === 'mastery' && (
-          <div style={{ marginTop: '20px', fontSize: '24px' }}>
-            ⭐ ⭐ ⭐ ⭐ ⭐
+          <div style={{ marginTop: '20px', display: 'flex', gap: '8px', justifyContent: 'center' }}>
+            {Array.from({ length: 5 }).map((_, i) => (
+              <div
+                key={i}
+                style={{
+                  width: '12px',
+                  height: '12px',
+                  borderRadius: '50%',
+                  backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                  boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
+                }}
+              />
+            ))}
           </div>
         )}
       </div>

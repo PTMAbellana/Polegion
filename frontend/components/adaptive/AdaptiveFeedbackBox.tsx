@@ -30,7 +30,7 @@ export default function AdaptiveFeedbackBox({
         message: "The next question will include visual cues and descriptions to help you understand.",
         bgColor: '#EFF6FF',
         iconBg: '#3B82F6',
-        icon: '📊'
+        icon: 'V'
       };
     }
     
@@ -40,7 +40,7 @@ export default function AdaptiveFeedbackBox({
         message: "This question has been transformed to show a real-world application.",
         bgColor: '#F0FDF4',
         iconBg: '#10B981',
-        icon: '🌍'
+        icon: 'R'
       };
     }
     
@@ -50,7 +50,7 @@ export default function AdaptiveFeedbackBox({
         message: "This clue should help you solve the problem.",
         bgColor: '#FEF3C7',
         iconBg: '#F59E0B',
-        icon: '💡'
+        icon: 'H'
       };
     }
     
@@ -60,7 +60,7 @@ export default function AdaptiveFeedbackBox({
         message: "Let's practice with simpler examples first.",
         bgColor: '#F3F4F6',
         iconBg: '#6B7280',
-        icon: '📉'
+        icon: '↓'
       };
     }
     
@@ -70,7 +70,7 @@ export default function AdaptiveFeedbackBox({
         message: "Great work! Let's try a more challenging problem.",
         bgColor: '#F0FDF4',
         iconBg: '#10B981',
-        icon: '📈'
+        icon: '↑'
       };
     }
     
@@ -90,7 +90,7 @@ export default function AdaptiveFeedbackBox({
         message: "Let's refresh some foundational concepts.",
         bgColor: '#EFF6FF',
         iconBg: '#3B82F6',
-        icon: '↺'
+        icon: '↻'
       };
     }
     
@@ -124,10 +124,12 @@ export default function AdaptiveFeedbackBox({
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              fontSize: '18px',
+              fontSize: '16px',
+              fontWeight: 'bold',
+              color: 'white',
               flexShrink: 0
             }}>
-              🤖
+              AI
             </div>
             
             <div style={{ flex: 1 }}>
@@ -138,7 +140,7 @@ export default function AdaptiveFeedbackBox({
                 margin: '0 0 8px 0',
                 fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
               }}>
-                {wrongStreak >= 2 ? '💡 AI Hint' : '🤖 AI Tutor'}
+                {wrongStreak >= 2 ? 'AI Hint' : 'AI Tutor'}
                 {hintMetadata && (
                   <span style={{ fontSize: '11px', fontWeight: 400, color: '#6B7280', marginLeft: '8px' }}>
                     ({hintMetadata.source === 'ai' || hintMetadata.source === 'ai-cached' ? 'AI-powered' : 'Rule-based'})

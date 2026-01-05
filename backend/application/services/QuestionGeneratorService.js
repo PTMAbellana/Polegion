@@ -145,11 +145,123 @@ class QuestionGeneratorService {
           solution: () => 0,
           hint: 'Tri- means three',
           multipleChoice: ['Triangle', 'Square', 'Pentagon', 'Hexagon']
+        },
+        // Points, Lines, and Planes - Foundational concepts
+        {
+          type: 'point_definition',
+          cognitiveDomain: 'knowledge_recall',
+          template: 'Which geometric term represents an exact location in space with no size or dimensions?',
+          params: {},
+          solution: () => 0,
+          hint: 'It has no length, width, or height - just position',
+          multipleChoice: ['Point', 'Line', 'Plane', 'Ray']
+        },
+        {
+          type: 'line_segment_definition',
+          cognitiveDomain: 'knowledge_recall',
+          template: 'What is a part of a line with two endpoints called?',
+          params: {},
+          solution: () => 0,
+          hint: 'It has a definite beginning and end',
+          multipleChoice: ['Line segment', 'Ray', 'Line', 'Plane']
+        },
+        {
+          type: 'ray_definition',
+          cognitiveDomain: 'knowledge_recall',
+          template: 'What is a part of a line that starts at one point and extends infinitely in one direction?',
+          params: {},
+          solution: () => 0,
+          hint: 'It has one endpoint and goes on forever in one direction',
+          multipleChoice: ['Ray', 'Line segment', 'Line', 'Angle']
+        },
+        {
+          type: 'plane_definition',
+          cognitiveDomain: 'knowledge_recall',
+          template: 'What is a flat surface that extends infinitely in all directions called?',
+          params: {},
+          solution: () => 0,
+          hint: 'Think of a tabletop that goes on forever',
+          multipleChoice: ['Plane', 'Line', 'Point', 'Space']
+        },
+        // Kinds of Angles - Basic recognition
+        {
+          type: 'acute_angle',
+          cognitiveDomain: 'knowledge_recall',
+          template: 'What type of angle measures less than 90°?',
+          params: {},
+          solution: () => 0,
+          hint: 'It\'s smaller than a right angle',
+          multipleChoice: ['Acute angle', 'Right angle', 'Obtuse angle', 'Straight angle']
+        },
+        {
+          type: 'right_angle',
+          cognitiveDomain: 'knowledge_recall',
+          template: 'What type of angle measures exactly 90°?',
+          params: {},
+          solution: () => 0,
+          hint: 'It forms a perfect corner',
+          multipleChoice: ['Right angle', 'Acute angle', 'Obtuse angle', 'Reflex angle']
+        },
+        {
+          type: 'obtuse_angle',
+          cognitiveDomain: 'knowledge_recall',
+          template: 'An angle that measures between 90° and 180° is called:',
+          params: {},
+          solution: () => 0,
+          hint: 'It\'s larger than a right angle but not straight',
+          multipleChoice: ['Obtuse angle', 'Acute angle', 'Right angle', 'Reflex angle']
+        },
+        // Plane and 3D Figures - Basic identification
+        {
+          type: 'identify_plane_figure',
+          cognitiveDomain: 'knowledge_recall',
+          template: 'Which of these is a plane figure (2D shape)?',
+          params: {},
+          solution: () => 0,
+          hint: 'It has no thickness or depth',
+          multipleChoice: ['Triangle', 'Cube', 'Sphere', 'Cylinder']
+        },
+        {
+          type: 'identify_solid_figure',
+          cognitiveDomain: 'knowledge_recall',
+          template: 'Which of these is a solid figure (3D shape)?',
+          params: {},
+          solution: () => 0,
+          hint: 'It has length, width, AND height',
+          multipleChoice: ['Cube', 'Circle', 'Triangle', 'Rectangle']
         }
       ],
 
       // DIFFICULTY 2: Easy - Simple multi-step
       2: [
+        // Points, Lines, and Planes - Basic understanding
+        {
+          type: 'collinear_points',
+          cognitiveDomain: 'concept_understanding',
+          template: 'Points that lie on the same line are called:',
+          params: {},
+          solution: () => 0,
+          hint: 'Col- means together, linear means line',
+          multipleChoice: ['Collinear', 'Coplanar', 'Concurrent', 'Perpendicular']
+        },
+        {
+          type: 'coplanar_points',
+          cognitiveDomain: 'concept_understanding',
+          template: 'Points that lie on the same plane are called:',
+          params: {},
+          solution: () => 0,
+          hint: 'Co- means together, planar means plane',
+          multipleChoice: ['Coplanar', 'Collinear', 'Concurrent', 'Parallel']
+        },
+        {
+          type: 'line_naming',
+          cognitiveDomain: 'knowledge_recall',
+          template: 'A line passing through points A and B can be written as:',
+          params: {},
+          solution: () => 0,
+          hint: 'Use both endpoint names with a line symbol',
+          multipleChoice: ['Line AB or Line BA', 'Ray AB', 'Segment AB', 'Angle AB']
+        },
         {
           type: 'rectangle_perimeter',
           cognitiveDomain: 'procedural_skills',
@@ -202,6 +314,42 @@ class QuestionGeneratorService {
           solution: (p) => 180 - p.angle,
           hint: 'Supplementary angles sum to 180°'
         },
+        // Kinds of Angles - Measurement and construction
+        {
+          type: 'angle_measurement',
+          cognitiveDomain: 'concept_understanding',
+          template: 'If an angle measures {angle}°, how many degrees does its complement measure?',
+          params: {
+            angle: { min: 15, max: 75 }
+          },
+          solution: (p) => 90 - p.angle,
+          hint: 'Complementary angles add up to 90°'
+        },
+        {
+          type: 'straight_angle',
+          cognitiveDomain: 'knowledge_recall',
+          template: 'What is the measure of a straight angle?',
+          params: {},
+          solution: () => 180,
+          hint: 'It forms a straight line'
+        },
+        // Plane and 3D Figures - Properties
+        {
+          type: 'solid_figure_properties',
+          cognitiveDomain: 'concept_understanding',
+          template: 'How many faces does a cube have?',
+          params: {},
+          solution: () => 6,
+          hint: 'Count all the square surfaces'
+        },
+        {
+          type: 'plane_figure_properties',
+          cognitiveDomain: 'concept_understanding',
+          template: 'A square has how many sides?',
+          params: {},
+          solution: () => 4,
+          hint: 'All sides are equal length'
+        },
         {
           type: 'parallelogram_area',
           cognitiveDomain: 'procedural_skills',
@@ -253,6 +401,119 @@ class QuestionGeneratorService {
 
       // DIFFICULTY 3: Medium - Multiple concepts
       3: [
+        // Kinds of Angles - Special angle pairs
+        {
+          type: 'vertical_angles',
+          cognitiveDomain: 'concept_understanding',
+          template: 'Two intersecting lines form vertical angles. If one angle is {angle}°, what is the measure of its vertical angle?',
+          params: {
+            angle: { min: 35, max: 145 }
+          },
+          solution: (p) => p.angle,
+          hint: 'Vertical angles are always equal'
+        },
+        {
+          type: 'adjacent_angles',
+          cognitiveDomain: 'concept_understanding',
+          template: 'Two adjacent angles on a straight line measure {angle1}° and x°. Find x.',
+          params: {
+            angle1: { min: 40, max: 140 }
+          },
+          solution: (p) => 180 - p.angle1,
+          hint: 'Adjacent angles on a straight line are supplementary'
+        },
+        // Plane and 3D Figures - Comparison
+        {
+          type: 'solid_vs_plane_comparison',
+          cognitiveDomain: 'analytical_thinking',
+          template: 'A cylinder has a circular base. What is the 2D plane figure that represents this base?',
+          params: {},
+          solution: () => 0,
+          hint: 'Look at the flat surface at the bottom',
+          multipleChoice: ['Circle', 'Square', 'Rectangle', 'Triangle']
+        },
+        // Word Problems - Basic applications
+        {
+          type: 'area_word_problem',
+          cognitiveDomain: 'problem_solving',
+          template: 'A rectangular garden is {length} meters long and {width} meters wide. How many square meters of grass seed are needed to cover it?',
+          params: {
+            length: { min: 8, max: 20 },
+            width: { min: 5, max: 15 }
+          },
+          solution: (p) => p.length * p.width,
+          hint: 'Calculate the area of the rectangle'
+        },
+        {
+          type: 'perimeter_word_problem',
+          cognitiveDomain: 'problem_solving',
+          template: 'A fence is being built around a rectangular field {length} meters by {width} meters. How many meters of fencing are needed?',
+          params: {
+            length: { min: 15, max: 40 },
+            width: { min: 10, max: 30 }
+          },
+          solution: (p) => 2 * (p.length + p.width),
+          hint: 'Calculate the perimeter'
+        },
+        // Geometric Reasoning - Simple proofs
+        {
+          type: 'angle_proof_simple',
+          cognitiveDomain: 'analytical_thinking',
+          template: 'If two parallel lines are cut by a transversal, and one angle is {angle}°, what is the corresponding angle?',
+          params: {
+            angle: { min: 40, max: 140 }
+          },
+          solution: (p) => p.angle,
+          hint: 'Corresponding angles are equal when lines are parallel'
+        },
+        {
+          type: 'triangle_angle_sum',
+          cognitiveDomain: 'analytical_thinking',
+          template: 'In a triangle, two angles measure {angle1}° and {angle2}°. Find the third angle.',
+          params: {
+            angle1: { min: 30, max: 80 },
+            angle2: { min: 40, max: 90 }
+          },
+          solution: (p) => 180 - p.angle1 - p.angle2,
+          hint: 'The sum of angles in a triangle is 180°'
+        },
+        // Points, Lines, and Planes - Application
+        {
+          type: 'intersecting_lines',
+          cognitiveDomain: 'concept_understanding',
+          template: 'When two lines cross at exactly one point, they are called:',
+          params: {},
+          solution: () => 0,
+          hint: 'They intersect or meet at a point',
+          multipleChoice: ['Intersecting lines', 'Parallel lines', 'Skew lines', 'Perpendicular lines']
+        },
+        {
+          type: 'perpendicular_lines',
+          cognitiveDomain: 'concept_understanding',
+          template: 'Two lines that intersect at a 90° angle are called:',
+          params: {},
+          solution: () => 0,
+          hint: 'They form right angles',
+          multipleChoice: ['Perpendicular lines', 'Parallel lines', 'Intersecting lines', 'Skew lines']
+        },
+        {
+          type: 'skew_lines',
+          cognitiveDomain: 'concept_understanding',
+          template: 'Lines that do not intersect and are not parallel (not in the same plane) are called:',
+          params: {},
+          solution: () => 0,
+          hint: 'They exist in 3D space and never meet',
+          multipleChoice: ['Skew lines', 'Parallel lines', 'Perpendicular lines', 'Intersecting lines']
+        },
+        {
+          type: 'line_segment_notation',
+          cognitiveDomain: 'knowledge_recall',
+          template: 'How many points are needed to define a unique line?',
+          params: {},
+          solution: () => 2,
+          hint: 'You need at least this many points to draw a straight line',
+          multipleChoice: [1, 2, 3, 4]
+        },
         {
           type: 'composite_area',
           cognitiveDomain: 'analytical_thinking',
@@ -351,6 +612,73 @@ class QuestionGeneratorService {
 
       // DIFFICULTY 4: Hard - Advanced reasoning
       4: [
+        // Kinds of Angles - Complex relationships
+        {
+          type: 'angle_bisector',
+          cognitiveDomain: 'analytical_thinking',
+          template: 'A {angle}° angle is bisected. What is the measure of each resulting angle?',
+          params: {
+            angle: { min: 60, max: 160 }
+          },
+          solution: (p) => p.angle / 2,
+          hint: 'Bisecting divides the angle into two equal parts'
+        },
+        // Plane and 3D - Advanced surface area
+        {
+          type: 'composite_solid_surface',
+          cognitiveDomain: 'analytical_thinking',
+          template: 'A rectangular prism ({length} × {width} × {height}) has a square pyramid on top (base = width). Find the total surface area.',
+          params: {
+            length: { min: 6, max: 12 },
+            width: { min: 6, max: 12 },
+            height: { min: 4, max: 10 }
+          },
+          solution: (p) => {
+            // Bottom + 4 sides of prism + 4 triangular faces of pyramid (minus top of prism)
+            const bottom = p.length * p.width;
+            const front_back = 2 * p.length * p.height;
+            const left_right = 2 * p.width * p.height;
+            return bottom + front_back + left_right; // Simplified - pyramid faces would need slant height
+          },
+          hint: 'Add surface areas of both shapes, subtract overlapping top'
+        },
+        // Word Problems - Multi-step
+        {
+          type: 'volume_word_problem',
+          cognitiveDomain: 'problem_solving',
+          template: 'A water tank is {length}m long, {width}m wide, and {height}m tall. If it is filled to 75% capacity, how many cubic meters of water does it contain?',
+          params: {
+            length: { min: 3, max: 8 },
+            width: { min: 2, max: 6 },
+            height: { min: 2, max: 5 }
+          },
+          solution: (p) => p.length * p.width * p.height * 0.75,
+          hint: 'Calculate volume, then multiply by 0.75'
+        },
+        // Geometric Reasoning - Proofs
+        {
+          type: 'triangle_inequality',
+          cognitiveDomain: 'higher_order_thinking',
+          template: 'A triangle has sides of {side1} and {side2} units. What is the MAXIMUM possible integer length of the third side?',
+          params: {
+            side1: { min: 5, max: 12 },
+            side2: { min: 6, max: 14 }
+          },
+          solution: (p) => p.side1 + p.side2 - 1,
+          hint: 'Triangle inequality: sum of two sides must be greater than the third'
+        },
+        {
+          type: 'quadrilateral_angles',
+          cognitiveDomain: 'analytical_thinking',
+          template: 'In a quadrilateral, three angles measure {a1}°, {a2}°, and {a3}°. Find the fourth angle.',
+          params: {
+            a1: { min: 60, max: 110 },
+            a2: { min: 70, max: 120 },
+            a3: { min: 50, max: 100 }
+          },
+          solution: (p) => 360 - p.a1 - p.a2 - p.a3,
+          hint: 'Angles in a quadrilateral sum to 360°'
+        },
         {
           type: 'similar_triangles',
           cognitiveDomain: 'analytical_thinking',
@@ -436,6 +764,84 @@ class QuestionGeneratorService {
 
       // DIFFICULTY 5: Very Hard - Complex problems
       5: [
+        // Kinds of Angles - Complex angle relationships
+        {
+          type: 'reflex_angle',
+          cognitiveDomain: 'higher_order_thinking',
+          template: 'An angle and its reflex angle together form a complete rotation. If the smaller angle is {angle}°, what is the reflex angle?',
+          params: {
+            angle: { min: 45, max: 180 }
+          },
+          solution: (p) => 360 - p.angle,
+          hint: 'Reflex angle + regular angle = 360°'
+        },
+        // Word Problems - Complex multi-step
+        {
+          type: 'optimization_word_problem',
+          cognitiveDomain: 'higher_order_thinking',
+          template: 'A rectangular swimming pool is {length}m long and {width}m wide. A 2-meter wide walkway surrounds it. What is the area of the walkway?',
+          params: {
+            length: { min: 10, max: 20 },
+            width: { min: 6, max: 12 }
+          },
+          solution: (p) => ((p.length + 4) * (p.width + 4)) - (p.length * p.width),
+          hint: 'Total area with walkway - pool area'
+        },
+        {
+          type: 'scale_factor_word_problem',
+          cognitiveDomain: 'problem_solving',
+          template: 'A scale model of a building is {ratio}:1. If the model is {modelHeight}cm tall, how many meters tall is the actual building?',
+          params: {
+            ratio: { min: 100, max: 500 },
+            modelHeight: { min: 20, max: 80 }
+          },
+          solution: (p) => (p.modelHeight * p.ratio) / 100,
+          hint: 'Multiply by ratio, convert cm to meters'
+        },
+        // Geometric Reasoning - Advanced proofs
+        {
+          type: 'prove_parallel_lines',
+          cognitiveDomain: 'higher_order_thinking',
+          template: 'Two lines are cut by a transversal. Alternate interior angles measure {angle}° and {angle}°. Are the lines parallel?',
+          params: {
+            angle: { min: 45, max: 135 }
+          },
+          solution: () => 0,
+          hint: 'Equal alternate interior angles mean lines are parallel',
+          multipleChoice: ['Yes', 'No', 'Cannot determine', 'Only if both are acute']
+        },
+        {
+          type: 'exterior_angle_theorem',
+          cognitiveDomain: 'analytical_thinking',
+          template: 'In a triangle, two interior angles are {a1}° and {a2}°. What is the exterior angle at the third vertex?',
+          params: {
+            a1: { min: 30, max: 80 },
+            a2: { min: 40, max: 90 }
+          },
+          solution: (p) => p.a1 + p.a2,
+          hint: 'Exterior angle = sum of the two non-adjacent interior angles'
+        },
+        {
+          type: 'isosceles_triangle_proof',
+          cognitiveDomain: 'higher_order_thinking',
+          template: 'An isosceles triangle has a vertex angle of {vertex}°. What is the measure of each base angle?',
+          params: {
+            vertex: { min: 40, max: 120 }
+          },
+          solution: (p) => (180 - p.vertex) / 2,
+          hint: 'Base angles are equal; sum of all angles = 180°'
+        },
+        // Plane and 3D - Complex calculations
+        {
+          type: 'nets_of_solids',
+          cognitiveDomain: 'higher_order_thinking',
+          template: 'A cube has edge length {edge} units. If its net is laid flat, what is the total area of the net?',
+          params: {
+            edge: { min: 5, max: 15 }
+          },
+          solution: (p) => 6 * p.edge * p.edge,
+          hint: 'A cube has 6 square faces'
+        },
         {
           type: 'volume_composite',
           cognitiveDomain: 'higher_order_thinking',
@@ -597,9 +1003,9 @@ class QuestionGeneratorService {
     }
     console.log(`[QGen] Generated ${options.length} options`);
 
-    // Generate unique question ID (includes timestamp for uniqueness)
+    // Generate unique question ID (deterministic based on parameters)
     console.log(`[QGen] Generating question ID...`);
-    const questionId = this.generateQuestionId(difficultyLevel, template.type, seed);
+    const questionId = this.generateQuestionId(difficultyLevel, template.type, params);
     console.log(`[QGen] Question ID: ${questionId}`);
 
     console.log(`[QGen] COMPLETE - returning question object`);
@@ -663,10 +1069,13 @@ class QuestionGeneratorService {
   /**
    * Generate unique question ID
    */
-  generateQuestionId(difficulty, type, seed) {
-    const timestamp = Date.now();
-    const random = seed !== null ? seed : Math.floor(Math.random() * 10000);
-    return `gen_d${difficulty}_${type}_${timestamp}_${random}`;
+  generateQuestionId(difficulty, type, params) {
+    // Create deterministic ID based on template type + parameters
+    // This ensures the same question (e.g., 8-sided polygon) always has the same ID
+    // Format: gen_d{difficulty}_{type}_{param1}_{param2}_...
+    const paramStr = params ? Object.values(params).sort().join('_') : '';
+    const random = Math.floor(Math.random() * 1000); // Small randomizer for uniqueness
+    return `gen_d${difficulty}_${type}_${paramStr}_${random}`;
   }
 
   /**

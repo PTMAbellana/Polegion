@@ -30,7 +30,9 @@ export default function AdaptiveLearningPage() {
 
   const fetchTopicsWithProgress = async () => {
     try {
-      const response = await axios.get('/adaptive/topics-with-progress');
+      const response = await axios.get('/adaptive/topics-with-progress', {
+        timeout: 30000 // 30 second timeout instead of default 60s
+      });
       
       if (response.data.success) {
         const topicsData = response.data.data || [];
@@ -55,6 +57,12 @@ export default function AdaptiveLearningPage() {
   const handleTopicSelect = (topicId: string) => {
     setSelectedTopicId(topicId);
     setShowTopicSwitcher(false);
+  };
+
+  const handleOpenTopicSwitcher = () => {
+    // Refresh topics to show newly unlocked ones
+    fetchTopicsWithProgress();
+    setShowTopicSwitcher(true);
   };
 
   if (loading) {
@@ -102,7 +110,7 @@ export default function AdaptiveLearningPage() {
         <AdaptiveLearning 
           topicId={selectedTopicId}
           topicName={topics.find(t => t.id === selectedTopicId)?.topic_name || 'Geometry Topic'}
-          onChangeTopic={() => setShowTopicSwitcher(true)}
+          onChangeTopic={handleOpenTopicSwitcher}
         />
       )}
 

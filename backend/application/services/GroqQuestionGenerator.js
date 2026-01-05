@@ -1,6 +1,6 @@
 /**
- * GeminiQuestionGenerator
- * AI-powered question generation for difficulty levels 4-5
+ * GroqQuestionGenerator
+ * AI-powered question generation for difficulty levels 4-5 using Groq API
  * 
  * DESIGN PRINCIPLES:
  * 1. Use AI for high difficulty questions (levels 4-5) where parametric templates are limited
@@ -8,34 +8,36 @@
  * 3. Validate AI output to ensure proper format
  * 4. Cache AI-generated questions to save quota
  * 5. Rate limit to protect free tier
+ * 
+ * TECHNOLOGY: Groq API (llama-3.1-8b-instant)
+ * Rate Limits: 30 RPM, 14.4K RPD
  */
 
-const { GoogleGenerativeAI } = require('@google/generative-ai');
+const Groq = require('groq-sdk');
 
-class GeminiQuestionGenerator {
+class GroqQuestionGenerator {
   constructor() {
-    this.apiKey = process.env.GEMINI_API_KEY;
-    this.model = process.env.AI_MODEL || 'gemini-2.0-flash-exp';
+    this.apiKey = process.env.GROQ_API_KEY;
+    this.model = process.env.GROQ_MODEL || 'llama-3.1-8b-instant';
     
     if (this.apiKey) {
-      this.genAI = new GoogleGenerativeAI(this.apiKey);
-      this.gemini = this.genAI.getGenerativeModel({ model: this.model });
+      this.client = new Groq({ apiKey: this.apiKey });
     }
 
-    // Rate limiting
+    // Rate limiting (Groq limits: 30 RPM, 14.4K RPD)
     this.requestLog = {
       daily: new Map(),
       perMinute: []
     };
     
-    this.DAILY_LIMIT = parseInt(process.env.AI_QUESTION_DAILY_LIMIT) || 20;
-    this.PER_MINUTE_LIMIT = parseInt(process.env.AI_QUESTION_PER_MINUTE_LIMIT) || 10;
+    this.DAILY_LIMIT = 14000; // Leave some buffer
+    this.PER_MINUTE_LIMIT = 25; // Leave buffer from 30 RPM
 
     // Cache for generated questions
     this.questionCache = new Map();
     this.CACHE_TTL_MS = 1000 * 60 * 60; // 1 hour
 
-    console.log('[GeminiQuestionGenerator] Initialized:', {
+    console.log('[AIQuestionGenerator] Initialized (Groq):', {
       model: this.model,
       hasApiKey: !!this.apiKey,
       dailyLimit: this.DAILY_LIMIT,
@@ -67,8 +69,8 @@ class GeminiQuestionGenerator {
     }
 
     // Check API key
-    if (!this.apiKey || !this.gemini) {
-      console.warn('[GeminiQuestionGenerator] No API key configured');
+    if (!this.apiKey || !this.client) {
+      console.warn('[AIQuestionGenerator] No API key configured');
       return null;
     }
 
@@ -82,16 +84,25 @@ class GeminiQuestionGenerator {
       // Build prompt
       const prompt = this._buildQuestionPrompt(topicName, difficultyLevel, cognitiveDomain);
 
-      // Call Gemini
-      const result = await this.gemini.generateContent(prompt);
-      const response = await result.response;
-      const text = response.text();
+      // Call Groq
+      const completion = await this.client.chat.completions.create({
+        messages: [{ role: 'user', content: prompt }],
+        model: this.model,
+        temperature: 0.7,
+        max_tokens: 1000,
+      });
+
+      const text = completion.choices[0]?.message?.content;
+      if (!text) {
+        console.error('[AIQuestionGenerator] Empty response from Groq');
+        return null;
+      }
 
       // Parse and validate response
       const question = this._parseQuestionResponse(text);
       
       if (!question) {
-        console.error('[GeminiQuestionGenerator] Failed to parse AI response');
+        console.error('[AIQuestionGenerator] Failed to parse AI response');
         return null;
       }
 
@@ -305,4 +316,4 @@ IMPORTANT:
   }
 }
 
-module.exports = GeminiQuestionGenerator;
+module.exports = GroqQuestionGenerator;

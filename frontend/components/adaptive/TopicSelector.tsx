@@ -29,7 +29,7 @@ export default function TopicSelector({ topics, onTopicSelect, selectedTopicId }
   const handleTopicClick = (topic: Topic) => {
     if (!topic.unlocked) {
       // Show message that topic is locked
-      alert(`🔒 This topic is locked. Complete previous topics to unlock!`);
+      alert('This topic is locked. Complete previous topics to unlock!');
       return;
     }
 
@@ -67,7 +67,7 @@ export default function TopicSelector({ topics, onTopicSelect, selectedTopicId }
           color: '#1F2937'
         }}
       >
-        📚 Geometry Topics
+        Geometry Topics
       </h2>
 
       <div
@@ -116,10 +116,19 @@ export default function TopicSelector({ topics, onTopicSelect, selectedTopicId }
                   position: 'absolute',
                   top: '16px',
                   right: '16px',
-                  fontSize: '24px'
+                  width: '24px',
+                  height: '24px',
+                  borderRadius: '50%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  backgroundColor: isLocked ? '#E5E7EB' : isMastered ? '#10B981' : 'transparent',
+                  color: isLocked ? '#6B7280' : isMastered ? '#FFFFFF' : 'transparent',
+                  fontSize: '12px',
+                  fontWeight: 'bold'
                 }}
               >
-                {isLocked ? '🔒' : isMastered ? '✅' : ''}
+                {isLocked ? 'L' : isMastered ? '✓' : ''}
               </div>
 
               {/* Topic Name */}
@@ -200,18 +209,19 @@ export default function TopicSelector({ topics, onTopicSelect, selectedTopicId }
                     />
                   </div>
 
-                  {/* Mastery Stars */}
-                  <div style={{ marginTop: '8px', fontSize: '16px' }}>
+                  {/* Mastery Level Indicators */}
+                  <div style={{ marginTop: '12px', display: 'flex', gap: '4px', alignItems: 'center' }}>
                     {Array.from({ length: 5 }).map((_, i) => (
-                      <span
+                      <div
                         key={i}
                         style={{
-                          color: i < topic.mastery_level ? '#FCD34D' : '#E5E7EB',
-                          marginRight: '2px'
+                          width: '8px',
+                          height: '8px',
+                          borderRadius: '50%',
+                          backgroundColor: i < topic.mastery_level ? getMasteryColor(topic.mastery_level) : '#E5E7EB',
+                          transition: 'all 0.3s ease'
                         }}
-                      >
-                        ⭐
-                      </span>
+                      />
                     ))}
                   </div>
                 </div>

@@ -13,6 +13,17 @@ export default function MasteryProgressBar({
   cognitiveDomain,
   cognitiveDomainLabel
 }: MasteryProgressBarProps) {
+  // Calculate mastery level (1-5) from percentage
+  const getMasteryLevelFromPercentage = (): number => {
+    if (masteryLevel >= 90) return 5;
+    if (masteryLevel >= 75) return 4;
+    if (masteryLevel >= 60) return 3;
+    if (masteryLevel >= 40) return 2;
+    if (masteryLevel >= 20) return 1;
+    return 0;
+  };
+
+  const masteryLevelNum = getMasteryLevelFromPercentage();
   const getMasteryMessage = () => {
     if (masteryLevel >= 85) return "Excellent progress!";
     if (masteryLevel >= 70) return "You're doing great!";
@@ -87,13 +98,57 @@ export default function MasteryProgressBar({
             </div>
           )}
         </div>
-        <div style={{ 
-          fontSize: '24px', 
-          fontWeight: 700, 
-          color: getBarColor(),
-          fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+        
+        {/* Mastery container: Level (left) + Percentage (right) */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '16px'
         }}>
-          {Math.round(masteryLevel)}%
+          {/* Level indicator on left */}
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '4px'
+          }}>
+            <div style={{
+              width: '48px',
+              height: '48px',
+              borderRadius: '8px',
+              backgroundColor: getBarColor() + '20',
+              border: `2px solid ${getBarColor()}`,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '20px',
+              fontWeight: 700,
+              color: getBarColor(),
+              fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+            }}>
+              {masteryLevelNum}
+            </div>
+            <span style={{
+              fontSize: '11px',
+              fontWeight: 600,
+              color: '#6B7280',
+              textTransform: 'uppercase',
+              letterSpacing: '0.5px',
+              fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+            }}>
+              Level
+            </span>
+          </div>
+
+          {/* Percentage on right */}
+          <div style={{ 
+            fontSize: '24px', 
+            fontWeight: 700, 
+            color: getBarColor(),
+            fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+          }}>
+            {Math.round(masteryLevel)}%
+          </div>
         </div>
       </div>
 

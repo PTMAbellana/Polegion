@@ -151,17 +151,35 @@ class AdaptiveLearningController {
       // Get current state to determine difficulty
       const state = await this.service.getStudentState(userId, topicId);
       
-      // Generate question using QuestionGeneratorService
-      const question = await this.service.generateQuestionForStudent(
+      // Generate session ID (use crypto.randomUUID for proper UUID format)
+      const crypto = require('crypto');
+      const sessionId = req.headers['x-session-id'] || crypto.randomUUID();
+      
+      // Generate question with session tracking (prevents duplicates)
+      const question = await this.service.generateQuestion(
         userId,
         topicId,
         state.currentDifficulty,
-        state.currentRepresentation || 'text'
+        sessionId
       );
 
       return res.status(200).json({
         success: true,
-        data: question
+        data: {
+          question: question.question_text,
+          options: question.options,
+          questionId: question.id || question.questionId,
+          hint: question.hint,
+          difficulty: state.currentDifficulty,
+          cognitiveDomain: question.cognitive_domain,
+          representationType: question.representation_type || 'text',
+          sessionId, // Return session ID to frontend
+          metadata: {
+            type: question.type,
+            parameters: question.parameters,
+            generated_at: question.generated_at
+          }
+        }
       });
     } catch (error) {
       console.error('Error in generateQuestion:', error);
@@ -346,7 +364,14 @@ class AdaptiveLearningController {
   async getTopicsWithProgress(req, res) {
     try {
       const userId = req.user.id;
-      const topics = await this.service.getTopicsWithProgress(userId);
+      
+      // Add timeout protection (15 seconds max)
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Request timeout: topics fetch took too long')), 15000)
+      );
+      
+      const topicsPromise = this.service.getTopicsWithProgress(userId);
+      const topics = await Promise.race([topicsPromise, timeoutPromise]);
 
       return res.status(200).json({
         success: true,

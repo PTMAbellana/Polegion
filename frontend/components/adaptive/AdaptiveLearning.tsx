@@ -427,11 +427,52 @@ export default function AdaptiveLearning({ topicId, topicName: topicNameProp, on
         <div className="mastery-card">
           <div className="mastery-row">
             <span className="mastery-label">Mastery</span>
-            <span className="mastery-percentage" style={{
-              color: state.masteryLevel >= 75 ? '#10B981' : state.masteryLevel >= 50 ? '#3B82F6' : '#94A3B8'
-            }}>
-              {Math.round(state.masteryLevel)}%
-            </span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              {/* Level Badge 1-5 */}
+              <div style={{
+                width: '36px',
+                height: '36px',
+                borderRadius: '6px',
+                backgroundColor: (() => {
+                  if (state.masteryLevel >= 85) return '#F59E0B20';
+                  if (state.masteryLevel >= 70) return '#10B98120';
+                  if (state.masteryLevel >= 50) return '#3B82F620';
+                  return '#94A3B820';
+                })(),
+                border: `2px solid ${(() => {
+                  if (state.masteryLevel >= 85) return '#F59E0B';
+                  if (state.masteryLevel >= 70) return '#10B981';
+                  if (state.masteryLevel >= 50) return '#3B82F6';
+                  return '#94A3B8';
+                })()}`,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '16px',
+                fontWeight: 700,
+                color: (() => {
+                  if (state.masteryLevel >= 85) return '#F59E0B';
+                  if (state.masteryLevel >= 70) return '#10B981';
+                  if (state.masteryLevel >= 50) return '#3B82F6';
+                  return '#94A3B8';
+                })()
+              }}>
+                {(() => {
+                  const pct = state.masteryLevel || 0;
+                  if (pct >= 90) return 5;
+                  if (pct >= 75) return 4;
+                  if (pct >= 60) return 3;
+                  if (pct >= 40) return 2;
+                  if (pct >= 20) return 1;
+                  return 0;
+                })()}
+              </div>
+              <span className="mastery-percentage" style={{
+                color: state.masteryLevel >= 75 ? '#10B981' : state.masteryLevel >= 50 ? '#3B82F6' : '#94A3B8'
+              }}>
+                {Math.round(state.masteryLevel)}%
+              </span>
+            </div>
           </div>
           <div className="progress-bar">
             <div className="progress-fill" style={{
@@ -451,14 +492,27 @@ export default function AdaptiveLearning({ topicId, topicName: topicNameProp, on
           }}>
             <div style={{ fontSize: '11px', color: '#6B7280', marginBottom: '4px' }}>Learning Style</div>
             <div style={{ fontSize: '13px', fontWeight: 600, color: '#3B82F6' }}>
-              🧠 {state.cognitiveDomainLabel || 'Thinking'}
+              {state.cognitiveDomainLabel || 'Thinking'}
             </div>
           </div>
         )}
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
           <div className="stat-chip">
-            <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: '#F3F4F6', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '16px' }}>📝</div>
+            <div style={{ 
+              width: '32px', 
+              height: '32px', 
+              borderRadius: '8px', 
+              background: '#F3F4F6', 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'center', 
+              fontSize: '14px',
+              fontWeight: 'bold',
+              color: '#6B7280'
+            }}>
+              #
+            </div>
             <div style={{ flex: 1 }}>
               <div style={{ fontSize: '11px', color: '#6B7280' }}>Attempted</div>
               <div style={{ fontSize: '16px', fontWeight: 700, color: '#1F2937' }}>{state.totalAttempts}</div>
@@ -472,9 +526,11 @@ export default function AdaptiveLearning({ topicId, topicName: topicNameProp, on
             <div style={{
               width: '32px', height: '32px', borderRadius: '8px',
               background: state.correctStreak >= 3 ? '#10B981' : '#F3F4F6',
-              display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '16px'
+              display: 'flex', alignItems: 'center', justifyContent: 'center', 
+              fontSize: '18px', fontWeight: 'bold',
+              color: state.correctStreak >= 3 ? 'white' : '#6B7280'
             }}>
-              {state.correctStreak >= 3 ? '🔥' : '✓'}
+              {state.correctStreak >= 3 ? state.correctStreak : state.correctStreak}
             </div>
             <div style={{ flex: 1 }}>
               <div style={{ fontSize: '11px', color: '#6B7280' }}>Streak</div>
@@ -486,15 +542,45 @@ export default function AdaptiveLearning({ topicId, topicName: topicNameProp, on
         </div>
 
         {onChangeTopic && (
-          <button onClick={onChangeTopic} className="change-topic-button">
-            Change topic
+          <button 
+            onClick={onChangeTopic} 
+            className="change-topic-button"
+            style={{
+              marginTop: '16px',
+              padding: '12px 24px',
+              backgroundColor: '#3B82F6',
+              color: 'white',
+              border: 'none',
+              borderRadius: '8px',
+              fontSize: '14px',
+              fontWeight: '600',
+              cursor: 'pointer',
+              transition: 'all 0.2s ease',
+              boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = '#2563EB';
+              e.currentTarget.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.15)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = '#3B82F6';
+              e.currentTarget.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.1)';
+            }}
+          >
+            Change Topic
           </button>
         )}
 
-        <div className="motivational-text">
-          {state.masteryLevel >= 85 ? "🎉 Amazing work!" :
-           state.masteryLevel >= 70 ? "⭐ You're doing great!" :
-           state.masteryLevel >= 50 ? "💪 Keep going!" : "🌟 Let's learn!"}
+        <div className="motivational-text" style={{
+          fontSize: '14px',
+          fontWeight: '600',
+          color: state.masteryLevel >= 85 ? '#10B981' : state.masteryLevel >= 70 ? '#3B82F6' : state.masteryLevel >= 50 ? '#F59E0B' : '#6B7280',
+          textAlign: 'center',
+          marginTop: '12px'
+        }}>
+          {state.masteryLevel >= 85 ? "Amazing work!" :
+           state.masteryLevel >= 70 ? "You're doing great!" :
+           state.masteryLevel >= 50 ? "Keep going!" : "Let's learn!"}
         </div>
       </div>
 
@@ -510,7 +596,7 @@ export default function AdaptiveLearning({ topicId, topicName: topicNameProp, on
       <CelebrationModal
         type="mastery"
         title="Mastery Achieved!"
-        message={masteryData?.message || "🎉 Congratulations! You've mastered this topic!"}
+        message={masteryData?.message || "Congratulations! You've mastered this topic!"}
         onClose={() => { setShowMastery(false); setMasteryData(null); }}
         show={showMastery}
       />
@@ -527,7 +613,23 @@ export default function AdaptiveLearning({ topicId, topicName: topicNameProp, on
             boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
             maxWidth: '600px', width: '90%', border: '3px solid #F59E0B'
           }}>
-            <div style={{ fontSize: '60px', marginBottom: '20px', textAlign: 'center' }}>💡</div>
+            <div style={{ 
+              fontSize: '48px', 
+              marginBottom: '20px', 
+              textAlign: 'center',
+              width: '80px',
+              height: '80px',
+              margin: '0 auto 20px',
+              borderRadius: '50%',
+              backgroundColor: '#FEF3C7',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: '#F59E0B',
+              fontWeight: 'bold'
+            }}>
+              H
+            </div>
             <div style={{ fontSize: '24px', fontWeight: 700, color: '#F59E0B', marginBottom: '16px', textAlign: 'center' }}>
               Learning Hint
             </div>
@@ -579,7 +681,7 @@ export default function AdaptiveLearning({ topicId, topicName: topicNameProp, on
 
       {/* Right Column: Feedback/Hints */}
       <div className="feedback-rail">
-        <div className="feedback-header">💡 Learning Feedback</div>
+        <div className="feedback-header">Learning Feedback</div>
         {lastResponse ? (
           <AdaptiveFeedbackBox
             mdpAction={lastResponse.action}

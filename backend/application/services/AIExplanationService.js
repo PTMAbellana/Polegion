@@ -6,9 +6,9 @@
 
 class AIExplanationService {
   constructor() {
-    this.provider = process.env.AI_PROVIDER || 'openai'; // 'openai' or 'gemini'
-    this.apiKey = process.env.AI_API_KEY || process.env.OPENAI_API_KEY || process.env.GEMINI_API_KEY;
-    this.model = process.env.AI_MODEL || 'gpt-4o-mini'; // or 'gemini-pro'
+    this.provider = process.env.AI_PROVIDER || 'groq'; // 'openai', 'gemini', or 'groq'
+    this.apiKey = process.env.AI_API_KEY || process.env.GROQ_API_KEY || process.env.OPENAI_API_KEY || process.env.GEMINI_API_KEY;
+    this.model = process.env.AI_MODEL || 'llama-3.1-8b-instant'; // Groq default
     
     // In-memory cache: key = hash(question+answer), value = explanation
     this.explanationCache = new Map();
@@ -253,6 +253,42 @@ Keep the tone encouraging and age-appropriate. Use simple language. Keep total r
   }
 
   /**
+   * Call Groq API (same as OpenAI-compatible)
+   */
+  async _callGroq(prompt) {
+    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${this.apiKey}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        model: this.model, // llama-3.1-8b-instant
+        messages: [
+          {
+            role: 'system',
+            content: 'You are a patient, encouraging geometry tutor for middle school students.'
+          },
+          {
+            role: 'user',
+            content: prompt
+          }
+        ],
+        temperature: 0.7,
+        max_tokens: 1024
+      })
+    });
+
+    if (!response.ok) {
+      const error = await response.text();
+      throw new Error(`Groq API error: ${response.status} ${error}`);
+    }
+
+    const data = await response.json();
+    return data.choices[0].message.content.trim();
+  }
+
+  /**
    * Fallback explanation when AI is unavailable
    */
   _getFallbackExplanation({ questionText, correctAnswer, userAnswer, isCorrect }) {
@@ -286,7 +322,9 @@ Provide a helpful hint that:
 Do NOT give away the answer directly.`;
 
     try {
-      if (this.provider === 'gemini') {
+      if (this.provider === 'groq') {
+        return await this._callGroq(prompt);
+      } else if (this.provider === 'gemini') {
         return await this._callGemini(prompt);
       } else {
         return await this._callOpenAI(prompt);

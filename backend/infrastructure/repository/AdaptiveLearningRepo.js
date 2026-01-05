@@ -23,7 +23,7 @@ class AdaptiveLearningRepository {
         .from('adaptive_learning_topics')
         .select('*')
         .eq('is_active', true)
-        .order('cognitive_domain')
+        .order('display_order', { ascending: true, nullsFirst: false })
         .order('topic_name');
 
       if (error) throw error;
@@ -92,7 +92,7 @@ class AdaptiveLearningRepository {
   }
 
   /**
-   * Create initial difficulty level for student
+   * Create initial difficulty level for student (with UPSERT to handle race conditions)
    */
   async createStudentDifficulty(userId, topicId) {
     try {
@@ -111,7 +111,21 @@ class AdaptiveLearningRepository {
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        // If duplicate key error (race condition), fetch existing record
+        if (error.code === '23505') {
+          const { data: existingData, error: fetchError } = await this.supabase
+            .from('adaptive_learning_state')
+            .select('*')
+            .eq('user_id', userId)
+            .eq('topic_id', topicId)
+            .single();
+          
+          if (fetchError) throw fetchError;
+          return existingData;
+        }
+        throw error;
+      }
 
       // Invalidate cache
       const cacheKey = cache.generateKey('student_difficulty', userId, topicId);
@@ -630,25 +644,43 @@ class AdaptiveLearningRepository {
 
   /**
    * Initialize all topics for a new user (Topic 1 unlocked, rest locked)
+   * Optimized: Uses single batch query instead of N queries
    */
   async initializeTopicsForUser(userId) {
     try {
       const allTopics = await this.getAllTopics();
       
-      for (let i = 0; i < allTopics.length; i++) {
-        const topic = allTopics[i];
-        const unlocked = i === 0; // Only first topic unlocked
-        
-        // Check if already exists
-        const { data: existing } = await this.supabase
+      // Fetch all existing progress in ONE query instead of N queries
+      const { data: existingProgress } = await this.supabase
+        .from('user_topic_progress')
+        .select('topic_id')
+        .eq('user_id', userId);
+      
+      const existingTopicIds = new Set(existingProgress?.map(p => p.topic_id) || []);
+      
+      // Prepare batch insert for missing topics
+      const toInsert = allTopics
+        .map((topic, i) => ({
+          user_id: userId,
+          topic_id: topic.id,
+          unlocked: i === 0, // Only first topic unlocked
+          mastery_level: 0,
+          mastery_percentage: 0,
+          mastered: false,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        }))
+        .filter(record => !existingTopicIds.has(record.topic_id)); // Only insert missing ones
+      
+      // Batch insert all at once (much faster than looping)
+      if (toInsert.length > 0) {
+        const { error } = await this.supabase
           .from('user_topic_progress')
-          .select('id')
-          .eq('user_id', userId)
-          .eq('topic_id', topic.id)
-          .single();
-
-        if (!existing) {
-          await this.createTopicProgress(userId, topic.id, unlocked);
+          .insert(toInsert);
+        
+        if (error) {
+          console.warn('Warning: Batch insert had issues:', error.message);
+          // Don't throw - race conditions are ok, some may already exist
         }
       }
 
