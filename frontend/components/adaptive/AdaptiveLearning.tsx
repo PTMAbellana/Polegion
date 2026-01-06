@@ -832,7 +832,7 @@ export default function AdaptiveLearning({ topicId, topicName: topicNameProp, on
                 fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
               }}
               disabled={state.wrongStreak < 1}
-              title={state.wrongStreak < 1 ? 'Hint unlocks after 1 wrong attempt' : 'Click to get a helpful hint'}
+              title={state.wrongStreak < 1 ? 'Hint currently unavailable' : 'Click to get a helpful hint'}
               onMouseEnter={(e) => {
                 if (state.wrongStreak >= 1) {
                   e.currentTarget.style.backgroundColor = '#D97706';
@@ -848,7 +848,7 @@ export default function AdaptiveLearning({ topicId, topicName: topicNameProp, on
                 }
               }}
             >
-              {state.wrongStreak >= 1 ? 'Need Help? Get a Hint' : 'Hint Locked (Get 1 wrong first)'}
+              {state.wrongStreak >= 1 ? 'Need Help? Get a Hint' : 'Hint Locked'}
             </button>
           </div>
         )}
