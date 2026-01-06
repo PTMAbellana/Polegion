@@ -250,31 +250,22 @@ export default function AdaptiveLearning({ topicId, topicName: topicNameProp, on
         // Generate next question
         await generateNewQuestion();
       } else {
-        // Handle wrong answer responses
+        // Handle wrong answer responses - Do NOT auto-show hints
+        // Hints are now only shown when student clicks the hint button
         if (responseData.showHint && responseData.hint) {
-          // Show hint after 2nd wrong attempt
-          const newHintCount = hintRequestCount + 1;
-          setHintRequestCount(newHintCount);
+          // Store hint but don't auto-display - student must click hint button
           setHintText(responseData.hint);
-          setShowHintModal(true);
           setCurrentQuestionData(currentQuestion);
-          setShowFeedback(true);
+          // Don't show modal automatically - student controls when to view hint
+          // setShowHintModal(true); // REMOVED - no auto-display
           
-          // Reset answerSubmitted so user can retry after viewing hint
+          // Reset answerSubmitted so user can retry
           setAnswerSubmitted(false);
           
-          // Save hint count to database
-          const newTotalCount = totalHintCount + 1;
-          setTotalHintCount(newTotalCount);
+          // Hint count will be incremented when student clicks hint button
+          // Not auto-incremented since hints are not auto-displayed
           
-          try {
-            await axios.put(`/adaptive/hint-count/${topicId}`, {
-              questionId: currentQuestion?.questionId || currentQuestion?.id,
-              hintsRequested: newTotalCount
-            });
-          } catch (hintError) {
-            console.error('Error saving hint count:', hintError);
-          }
+          // No need to save to database here - will be saved when button is clicked
           
           // Check if we should keep question or generate new one
           if (responseData.generateSimilar || !responseData.keepQuestion) {
@@ -788,6 +779,11 @@ export default function AdaptiveLearning({ topicId, topicName: topicNameProp, on
           <div style={{ marginBottom: '16px' }}>
             <button
               onClick={async () => {
+                // Only allow hint if wrong_streak >= 1
+                if (state.wrongStreak < 1) {
+                  return; // Button is disabled, do nothing
+                }
+                
                 // Always show the hint modal
                 setHintText(currentQuestion.hint);
                 setShowHintModal(true);
@@ -823,29 +819,36 @@ export default function AdaptiveLearning({ topicId, topicName: topicNameProp, on
               style={{
                 width: '100%',
                 padding: '12px 24px',
-                backgroundColor: '#F59E0B',
+                backgroundColor: state.wrongStreak >= 1 ? '#F59E0B' : '#9CA3AF',
                 color: 'white',
                 border: 'none',
                 borderRadius: '10px',
                 fontSize: '15px',
                 fontWeight: 600,
-                cursor: 'pointer',
+                cursor: state.wrongStreak >= 1 ? 'pointer' : 'not-allowed',
+                opacity: state.wrongStreak >= 1 ? 1 : 0.6,
                 boxShadow: '0 4px 12px rgba(245, 158, 11, 0.3)',
                 transition: 'all 0.2s ease',
                 fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
               }}
+              disabled={state.wrongStreak < 1}
+              title={state.wrongStreak < 1 ? 'Hint unlocks after 1 wrong attempt' : 'Click to get a helpful hint'}
               onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = '#D97706';
-                e.currentTarget.style.transform = 'translateY(-2px)';
-                e.currentTarget.style.boxShadow = '0 6px 16px rgba(245, 158, 11, 0.4)';
+                if (state.wrongStreak >= 1) {
+                  e.currentTarget.style.backgroundColor = '#D97706';
+                  e.currentTarget.style.transform = 'translateY(-2px)';
+                  e.currentTarget.style.boxShadow = '0 6px 16px rgba(245, 158, 11, 0.4)';
+                }
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = '#F59E0B';
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = '0 4px 12px rgba(245, 158, 11, 0.3)';
+                if (state.wrongStreak >= 1) {
+                  e.currentTarget.style.backgroundColor = '#F59E0B';
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = '0 4px 12px rgba(245, 158, 11, 0.3)';
+                }
               }}
             >
-              Need Help? Get a Hint
+              {state.wrongStreak >= 1 ? 'Need Help? Get a Hint' : 'Hint Locked (Get 1 wrong first)'}
             </button>
           </div>
         )}
@@ -874,7 +877,7 @@ export default function AdaptiveLearning({ topicId, topicName: topicNameProp, on
               actionReason={lastResponse.actionReason}
               pedagogicalStrategy={lastResponse.pedagogicalStrategy}
               representationType={currentRepresentation}
-              aiExplanation={lastResponse.aiHint || lastResponse.aiExplanation}
+              aiExplanation={undefined}
               hintMetadata={lastResponse.hintMetadata}
               isCorrect={lastAnswerCorrect ?? undefined}
             />
