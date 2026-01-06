@@ -293,10 +293,12 @@ class AdaptiveLearningService {
 
       // 8. Generate AI hint ONLY when student is struggling (wrong_streak >= 2)
       // This protects free-tier quota and is pedagogically sound
+      // IMPORTANT: Generate hint REGARDLESS of MDP action when wrong_streak >= 2
       let aiHint = null;
       let hintMetadata = null;
       
       if (!isCorrect && newState.wrong_streak >= 2 && questionData) {
+        console.log('[AdaptiveLearning] Triggering AI hint - wrong_streak >= 2');
         try {
           const topic = await this.repo.getTopicById(topicId);
           
@@ -581,9 +583,41 @@ class AdaptiveLearningService {
     }
 
     // Exploration: Try random action to discover potentially better strategies
+    // BUT constrain exploration to pedagogically reasonable actions
     if (random < epsilon) {
       const actions = Object.values(this.ACTIONS);
-      const randomAction = actions[Math.floor(Math.random() * actions.length)];
+      
+      // Filter out pedagogically illogical actions based on current state
+      const validActions = actions.filter(action => {
+        // Don't increase difficulty if wrong_streak >= 2 (student is struggling)
+        if (action === this.ACTIONS.INCREASE_DIFFICULTY && state.wrong_streak >= 2) {
+          return false;
+        }
+        // Don't decrease difficulty if at difficulty 1 (can't go lower)
+        if (action === this.ACTIONS.DECREASE_DIFFICULTY && state.difficulty_level <= 1) {
+          return false;
+        }
+        // Don't increase difficulty if already at max (5)
+        if (action === this.ACTIONS.INCREASE_DIFFICULTY && state.difficulty_level >= 5) {
+          return false;
+        }
+        // Prioritize giving hints when wrong_streak >= 2
+        // Don't waste exploration on non-hint actions when student needs help
+        if (state.wrong_streak >= 2 && ![
+          this.ACTIONS.GIVE_HINT_THEN_RETRY,
+          this.ACTIONS.DECREASE_DIFFICULTY,
+          this.ACTIONS.REVIEW_PREREQUISITE_TOPIC
+        ].includes(action)) {
+          // Allow these actions only 20% of the time during high wrong streak
+          return Math.random() < 0.2;
+        }
+        return true;
+      });
+      
+      const randomAction = validActions.length > 0 
+        ? validActions[Math.floor(Math.random() * validActions.length)]
+        : this.ACTIONS.MAINTAIN_DIFFICULTY; // Safe fallback
+        
       return {
         action: randomAction,
         reason: `[Exploration] Trying ${randomAction} to learn (ε=${epsilon.toFixed(3)})`,

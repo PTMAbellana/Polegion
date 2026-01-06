@@ -750,7 +750,7 @@ class QuestionGeneratorService {
           hint: 'First find the radius (diameter ÷ 2), then use Area = π × r²'
         },
         
-        // Plane and 3D Figures - Comparison
+        // Plane and 3D Figures - Comparison and Properties
         {
           type: 'solid_vs_plane_comparison',
           cognitiveDomain: 'analytical_thinking',
@@ -759,6 +759,51 @@ class QuestionGeneratorService {
           solution: () => 0,
           hint: 'Look at the flat surface at the bottom',
           multipleChoice: ['Circle', 'Square', 'Rectangle', 'Triangle']
+        },
+        {
+          type: 'solid_figure_properties',
+          cognitiveDomain: 'concept_understanding',
+          template: 'Which of the following best describes a cube?',
+          params: {},
+          solution: () => 0,
+          hint: 'A cube has 6 faces, all of which are squares',
+          multipleChoice: ['A solid figure with 6 square faces', 'A solid figure with 2 circular bases', 'A plane figure with 4 sides', 'A solid figure with 1 circular base']
+        },
+        {
+          type: 'plane_figure_properties',
+          cognitiveDomain: 'concept_understanding',
+          template: 'What makes a shape a "plane figure"?',
+          params: {},
+          solution: () => 0,
+          hint: 'Plane figures are flat and two-dimensional',
+          multipleChoice: ['It is flat and has only length and width', 'It has length, width, and height', 'It has curved surfaces', 'It takes up space']
+        },
+        {
+          type: 'nets_of_solids',
+          cognitiveDomain: 'analytical_thinking',
+          template: 'A net is unfolded to show 6 connected squares. What solid figure does this net form when folded?',
+          params: {},
+          solution: () => 0,
+          hint: 'A solid with 6 square faces is a cube',
+          multipleChoice: ['Cube', 'Rectangular prism', 'Pyramid', 'Cylinder']
+        },
+        {
+          type: 'solid_vs_plane_comparison_cone',
+          cognitiveDomain: 'analytical_thinking',
+          template: 'A cone has a circular base and a curved surface. What 2D plane figure represents the base of a cone?',
+          params: {},
+          solution: () => 0,
+          hint: 'The bottom of a cone is flat and circular',
+          multipleChoice: ['Circle', 'Triangle', 'Square', 'Oval']
+        },
+        {
+          type: 'solid_vs_plane_comparison_prism',
+          cognitiveDomain: 'analytical_thinking',
+          template: 'A rectangular prism has rectangular faces. Which plane figure would you see if you looked at one of its faces?',
+          params: {},
+          solution: () => 0,
+          hint: 'Look at any flat side of a box',
+          multipleChoice: ['Rectangle', 'Circle', 'Triangle', 'Hexagon']
         },
         // Word Problems - Basic applications
         {

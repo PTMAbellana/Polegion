@@ -91,6 +91,7 @@ export default function AdaptiveLearning({ topicId, topicName: topicNameProp, on
   const [totalHintCount, setTotalHintCount] = useState(0); // Cumulative topic-level hint count
   const [hintUsedForCurrentQuestion, setHintUsedForCurrentQuestion] = useState(false); // Track if hint already used for this question
   const [showFeedback, setShowFeedback] = useState(false);
+  const [lastAnswerCorrect, setLastAnswerCorrect] = useState<boolean | null>(null); // Track if last submission was correct
 
   const generateNewQuestion = async (forceNew = false) => {
     try {
@@ -216,6 +217,7 @@ export default function AdaptiveLearning({ topicId, topicName: topicNameProp, on
 
       const responseData = response.data.data;
       setLastResponse(responseData);
+      setLastAnswerCorrect(isCorrect); // Track correctness for feedback display
       
       // Only show feedback for significant actions (hints, difficulty changes, etc.)
       const significantActions = [
@@ -874,6 +876,7 @@ export default function AdaptiveLearning({ topicId, topicName: topicNameProp, on
               representationType={currentRepresentation}
               aiExplanation={lastResponse.aiHint || lastResponse.aiExplanation}
               hintMetadata={lastResponse.hintMetadata}
+              isCorrect={lastAnswerCorrect ?? undefined}
             />
           </>
         ) : (

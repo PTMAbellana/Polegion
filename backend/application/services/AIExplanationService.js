@@ -164,7 +164,7 @@ Keep the tone encouraging and age-appropriate. Use simple language. Keep total r
           }
         ],
         temperature: 0.7,
-        max_tokens: 400
+        max_tokens: 1000
       })
     });
 

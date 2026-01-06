@@ -212,7 +212,7 @@ class HintGenerationService {
           }
         ],
         temperature: 0.7,
-        max_tokens: 100, // Keep hints SHORT
+        max_tokens: 300, // Increased to prevent cutoff
         top_p: 1
       })
     });

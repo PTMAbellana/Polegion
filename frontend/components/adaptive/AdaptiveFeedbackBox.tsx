@@ -9,6 +9,7 @@ interface AdaptiveFeedbackBoxProps {
   representationType?: string;
   aiExplanation?: string; // AI-generated hint or explanation
   hintMetadata?: { source: string; reason: string }; // Hint generation metadata
+  isCorrect?: boolean; // NEW: Track if last answer was correct
 }
 
 export default function AdaptiveFeedbackBox({ 
@@ -19,7 +20,8 @@ export default function AdaptiveFeedbackBox({
   pedagogicalStrategy,
   representationType,
   aiExplanation,
-  hintMetadata
+  hintMetadata,
+  isCorrect
 }: AdaptiveFeedbackBoxProps) {
   
   const getFeedbackContent = () => {
@@ -65,11 +67,16 @@ export default function AdaptiveFeedbackBox({
     }
     
     if (mdpAction === 'increase_difficulty') {
+      // Only show positive message if answer was actually correct
+      // During exploration, increase_difficulty can be chosen randomly even after wrong answers
+      const wasCorrect = isCorrect === true || (correctStreak > 0 && wrongStreak === 0);
       return {
-        title: "Ready for more",
-        message: "Great work! Let's try a more challenging problem.",
-        bgColor: '#F0FDF4',
-        iconBg: '#10B981',
+        title: wasCorrect ? "Ready for more" : "Adjusting difficulty",
+        message: wasCorrect 
+          ? "Great work! Let's try a more challenging problem." 
+          : "Let's try a different difficulty level to find the right challenge for you.",
+        bgColor: wasCorrect ? '#F0FDF4' : '#EFF6FF',
+        iconBg: wasCorrect ? '#10B981' : '#6B7280',
         icon: '↑'
       };
     }

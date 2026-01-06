@@ -176,13 +176,30 @@ Create a geometry question that:
 2. Has EXACTLY 4 multiple choice options (A, B, C, D)
 3. Each option should be SHORT and CONCISE (max 15 words per option)
 4. Has only ONE correct answer
-5. Includes a helpful hint for struggling students
-6. Uses clear, child-friendly language
-7. Involves interesting scenarios (real-world contexts preferred)
+5. The CORRECT answer MUST be included in the options list
+6. Includes a helpful hint for struggling students
+7. Uses clear, child-friendly language
+8. Involves interesting scenarios (real-world contexts preferred)
+
+CRITICAL MATHEMATICAL CORRECTNESS:
+- Calculate the correct answer FIRST
+- Then create 3 plausible but INCORRECT distractors
+- VERIFY the correct answer is one of the 4 options before returning
+- Double-check your math (e.g., rectangle perimeter = 2(length + width), NOT just length + width)
+
+CRITICAL: ALL 4 OPTIONS MUST BE DIFFERENT!
+- NEVER repeat the same value in multiple options
+- Each option must be UNIQUE and DISTINCT
+- Example BAD (WRONG): ["96 cubic meters", "96 square meters", "96 cubic meters", "96 cubic meters"] ← DUPLICATE VALUES!
+- Example GOOD (CORRECT): ["96 cubic meters", "48 cubic meters", "120 cubic meters", "192 cubic meters"] ← ALL DIFFERENT!
+- Create realistic wrong answers:
+  * Common student mistakes (e.g., forgetting to multiply by 2, using wrong formula)
+  * Off-by-one errors
+  * Different magnitude (double, half, etc.)
 
 IMPORTANT: Keep answer choices SHORT and to the point. Avoid long explanations in the options.
-Good example: "166 square feet"
-Bad example: "The total area is 166 square feet because we use the formula for hexagon area"
+Good example: "46 feet"
+Bad example: "The total perimeter is 46 feet because we use the formula 2(l+w)"
 
 Return ONLY valid JSON, nothing else. No markdown, no extra text. Use this exact format and MUST escape all quotes inside strings:
 {
@@ -288,12 +305,114 @@ CRITICAL RULES FOR JSON:
         return null;
       }
 
+      // CRITICAL: Validate NO duplicate options (all options must be unique)
+      const optionTexts = question.options.map(opt => opt.text.trim().toLowerCase());
+      const uniqueTexts = new Set(optionTexts);
+      if (uniqueTexts.size < 4) {
+        console.error('[AIQuestionGenerator] DUPLICATE OPTIONS detected!');
+        console.error('Options:', question.options.map(o => o.text));
+        console.error('AI generated identical choices - rejecting question');
+        return null; // Force fallback to parametric template
+      }
+
       // Ensure correctAnswer matches
       const correctOption = correctOptions[0];
       if (correctOption.label !== question.correctAnswer) {
         console.warn('[AIQuestionGenerator] Mismatch in correctAnswer, fixing...');
         question.correctAnswer = correctOption.label;
       }
+
+      // CRITICAL: Validate mathematical correctness for geometry questions
+      // Extract numbers from question and answer to detect obvious errors
+      const questionLower = question.questionText.toLowerCase();
+      const correctText = correctOption.text.trim();
+      
+      // Extract ALL numbers from question (dimensions, measurements)
+      const dimensionMatches = question.questionText.match(/(\d+(?:\.\d+)?)\s*(?:feet|ft|meters|m|units|cm|mm|km)/gi);
+      const correctAnswerMatch = correctText.match(/(\d+(?:\.\d+)?)/);
+      
+      if (dimensionMatches && correctAnswerMatch) {
+        const dimensions = dimensionMatches.map(d => parseFloat(d));
+        const answerNum = parseFloat(correctAnswerMatch[0]);
+        
+        // VOLUME VALIDATION (rectangular prism, cube, cylinder, etc.)
+        if (questionLower.includes('volume')) {
+          let expectedVolume = null;
+          
+          // Rectangular prism: length × width × height
+          if ((questionLower.includes('rectangular prism') || questionLower.includes('box') || questionLower.includes('container')) 
+              && dimensions.length >= 3) {
+            expectedVolume = dimensions[0] * dimensions[1] * dimensions[2];
+            console.log(`[AIQuestionGenerator] Rectangular prism volume check: ${dimensions[0]} × ${dimensions[1]} × ${dimensions[2]} = ${expectedVolume}`);
+          }
+          // Cube: side³
+          else if (questionLower.includes('cube') && dimensions.length >= 1) {
+            expectedVolume = Math.pow(dimensions[0], 3);
+            console.log(`[AIQuestionGenerator] Cube volume check: ${dimensions[0]}³ = ${expectedVolume}`);
+          }
+          // Cylinder: π × r² × h
+          else if (questionLower.includes('cylinder') && dimensions.length >= 2) {
+            const radius = questionLower.includes('radius') ? dimensions[0] : dimensions[0] / 2;
+            const height = dimensions[dimensions.length - 1];
+            expectedVolume = Math.PI * radius * radius * height;
+            console.log(`[AIQuestionGenerator] Cylinder volume check: π × ${radius}² × ${height} = ${expectedVolume}`);
+          }
+          
+          if (expectedVolume !== null && Math.abs(answerNum - expectedVolume) > 1) {
+            console.error(`[AIQuestionGenerator] MATH ERROR: Volume should be ${expectedVolume.toFixed(2)}, got ${answerNum}`);
+            console.error('Question:', question.questionText);
+            console.error('Correct answer:', correctText);
+            console.error('All options:', question.options.map(o => o.text));
+            return null; // Reject incorrect math
+          }
+        }
+        
+        // PERIMETER VALIDATION
+        else if (questionLower.includes('perimeter') && dimensions.length >= 2) {
+          let expectedPerimeter = null;
+          
+          if (questionLower.includes('rectangle')) {
+            expectedPerimeter = 2 * (dimensions[0] + dimensions[1]);
+          } else if (questionLower.includes('square')) {
+            expectedPerimeter = 4 * dimensions[0];
+          }
+          
+          if (expectedPerimeter !== null && Math.abs(answerNum - expectedPerimeter) > 0.1) {
+            console.error(`[AIQuestionGenerator] MATH ERROR: Perimeter should be ${expectedPerimeter}, got ${answerNum}`);
+            console.error('Question:', question.questionText);
+            return null;
+          }
+        }
+        
+        // AREA VALIDATION  
+        else if (questionLower.includes('area') && dimensions.length >= 1) {
+          let expectedArea = null;
+          
+          if (questionLower.includes('rectangle') && dimensions.length >= 2) {
+            expectedArea = dimensions[0] * dimensions[1];
+          } else if (questionLower.includes('square')) {
+            expectedArea = dimensions[0] * dimensions[0];
+          } else if (questionLower.includes('triangle') && dimensions.length >= 2) {
+            expectedArea = 0.5 * dimensions[0] * dimensions[1];
+          } else if (questionLower.includes('circle')) {
+            const radius = questionLower.includes('radius') ? dimensions[0] : dimensions[0] / 2;
+            expectedArea = Math.PI * radius * radius;
+          }
+          
+          if (expectedArea !== null && Math.abs(answerNum - expectedArea) > 1) {
+            console.error(`[AIQuestionGenerator] MATH ERROR: Area should be ${expectedArea.toFixed(2)}, got ${answerNum}`);
+            console.error('Question:', question.questionText);
+            return null;
+          }
+        }
+      }
+
+      // Log for debugging
+      console.log('[AIQuestionGenerator] Question validated:', {
+        question: question.questionText.substring(0, 60) + '...',
+        correctOption: correctText,
+        allOptions: question.options.map(opt => opt.text.trim())
+      });
 
       return question;
 
