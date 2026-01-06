@@ -189,6 +189,26 @@ class AdaptiveLearningRoutes {
       '/hint-count/:topicId',
       this.controller.updateHintCount.bind(this.controller)
     );
+
+    /**
+     * @route   GET /api/adaptive/stuck-students
+     * @desc    Get students who are stuck on questions (teacher dashboard)
+     * @access  Private (authenticated users)
+     */
+    this.router.get(
+      '/stuck-students',
+      this.controller.getStuckStudents.bind(this.controller)
+    );
+
+    /**
+     * @route   GET /api/adaptive/cognitive-performance
+     * @desc    Get cognitive domain performance (radar chart data)
+     * @access  Private (authenticated students)
+     */
+    this.router.get(
+      '/cognitive-performance',
+      this.controller.getCognitiveDomainPerformance.bind(this.controller)
+    );
   }
 
   getRouter() {

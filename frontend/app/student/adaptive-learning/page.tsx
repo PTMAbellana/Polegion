@@ -23,6 +23,7 @@ export default function AdaptiveLearningPage() {
   const [selectedTopicId, setSelectedTopicId] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [showTopicSwitcher, setShowTopicSwitcher] = useState(false);
+  const [userId, setUserId] = useState<string>('');
 
   useEffect(() => {
     fetchTopicsWithProgress();
@@ -37,6 +38,11 @@ export default function AdaptiveLearningPage() {
       if (response.data.success) {
         const topicsData = response.data.data || [];
         setTopics(topicsData);
+        
+        // Extract userId from response (all topics have same user_id)
+        if (topicsData.length > 0 && topicsData[0].user_id) {
+          setUserId(topicsData[0].user_id);
+        }
         
         // Try to restore last selected topic from localStorage
         const savedTopicId = localStorage.getItem('selectedTopicId');
@@ -125,6 +131,7 @@ export default function AdaptiveLearningPage() {
           topicId={selectedTopicId}
           topicName={topics.find(t => t.id === selectedTopicId)?.topic_name || 'Geometry Topic'}
           onChangeTopic={handleOpenTopicSwitcher}
+          userId={userId}
         />
       )}
 

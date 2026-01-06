@@ -197,35 +197,42 @@ class AdaptiveLearningRepository {
 
   /**
    * Log MDP state transition for research analysis
+   * 
+   * CRITICAL CHANGES:
+   * 1. Always log questionId (parametric or AI) for traceability
+   * 2. Store actual epsilon value for research analysis
+   * 3. Store updated Q-value to track learning progress
+   * 4. Handle questionId as text (parametric IDs are strings, not UUIDs)
    */
   async logStateTransition(transitionData) {
     try {
-      // Only include question_id if it's a valid UUID (from adaptive_questions table)
-      // Skip it for parametric/AI-generated questions (which are strings)
-      const isUUID = transitionData.questionId && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(transitionData.questionId);
-      
       const insertData = {
         user_id: transitionData.userId,
         topic_id: transitionData.topicId,
-        prev_mastery: transitionData.prevState.mastery_level || transitionData.prevState.masteryLevel || 0,
-        prev_difficulty: transitionData.prevState.difficulty_level || transitionData.prevState.difficultyLevel || 3,
-        new_mastery: transitionData.newState.mastery_level || transitionData.newState.masteryLevel || 0,
-        new_difficulty: transitionData.newState.difficulty_level || transitionData.newState.difficultyLevel || 3,
+        prev_mastery: transitionData.prevState?.mastery_level ?? transitionData.prevState?.masteryLevel ?? 0,
+        prev_difficulty: transitionData.prevState?.difficulty_level ?? transitionData.prevState?.difficultyLevel ?? 3,
+        new_mastery: transitionData.newState?.mastery_level ?? transitionData.newState?.masteryLevel ?? 0,
+        new_difficulty: transitionData.newState?.difficulty_level ?? transitionData.newState?.difficultyLevel ?? 3,
         action: transitionData.action,
         action_reason: transitionData.actionReason,
-        reward: transitionData.reward,
+        reward: transitionData.reward ?? 0, // Default to 0 if NaN or undefined
         was_correct: transitionData.wasCorrect,
         time_spent: transitionData.timeSpent,
         used_exploration: transitionData.usedExploration || false,
-        q_value: transitionData.qValue || 0,
-        epsilon: transitionData.epsilon || 0,
-        session_id: transitionData.sessionId
+        q_value: transitionData.qValue ?? 0, // Updated Q-value after learning
+        epsilon: transitionData.epsilon ?? 0, // Actual exploration rate
+        session_id: transitionData.sessionId,
+        question_id: transitionData.questionId || null // Always log for traceability (text field)
       };
-      
-      // Only add question_id if it's a valid UUID
-      if (isUUID) {
-        insertData.question_id = transitionData.questionId;
-      }
+
+      // Log what we're about to insert (for debugging)
+      console.log('[Repo] Logging state transition:', {
+        action: insertData.action,
+        epsilon: insertData.epsilon,
+        q_value: insertData.q_value,
+        question_id: insertData.question_id,
+        used_exploration: insertData.used_exploration
+      });
 
       const { data, error } = await this.supabase
         .from('adaptive_state_transitions')
@@ -855,6 +862,12 @@ class AdaptiveLearningRepository {
    */
   async updateHintCount(userId, questionId, sessionId, hintsRequested) {
     try {
+      // Validate inputs to prevent UUID errors
+      if (!userId || !questionId || !sessionId || sessionId === 'undefined') {
+        console.warn('[Repo] updateHintCount - invalid parameters:', { userId, questionId, sessionId });
+        return null;
+      }
+
       const { data, error } = await this.supabase
         .from('question_attempts')
         .update({
@@ -1326,6 +1339,87 @@ class AdaptiveLearningRepository {
     } catch (error) {
       console.error('Error marking hint shown:', error);
       // Non-critical - don't throw
+    }
+  }
+
+  /**
+   * Get stuck students analysis from database view
+   * Provides teacher dashboard data showing students struggling on questions
+   */
+  async getStuckStudents(minAttempts = 3, minMinutesStuck = 5) {
+    try {
+      const { data, error } = await this.supabase
+        .from('stuck_students_analysis')
+        .select('*')
+        .gte('attempt_count', minAttempts)
+        .gte('minutes_stuck', minMinutesStuck)
+        .order('attempt_count', { ascending: false })
+        .order('minutes_stuck', { ascending: false });
+
+      if (error) {
+        // View might not exist if migration 03 hasn't run
+        console.warn('[Repo] stuck_students_analysis view not available:', error.message);
+        return [];
+      }
+
+      return data || [];
+    } catch (error) {
+      console.error('Error getting stuck students:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Get cognitive domain performance for a user across all topics
+   * Returns mastery level for each of the 6 cognitive domains
+   * Uses question_attempts table with question_metadata containing cognitive domain
+   */
+  async getCognitiveDomainPerformance(userId) {
+    try {
+      const { data, error } = await this.supabase
+        .from('question_attempts')
+        .select('is_correct, question_metadata')
+        .eq('user_id', userId)
+        .not('question_metadata', 'is', null);
+
+      if (error) throw error;
+
+      // Calculate accuracy per domain
+      const domains = {
+        knowledge_recall: { correct: 0, total: 0 },
+        concept_understanding: { correct: 0, total: 0 },
+        procedural_skills: { correct: 0, total: 0 },
+        analytical_thinking: { correct: 0, total: 0 },
+        problem_solving: { correct: 0, total: 0 },
+        higher_order_thinking: { correct: 0, total: 0 }
+      };
+
+      data.forEach(attempt => {
+        // Extract cognitive domain from question metadata
+        const domain = attempt.question_metadata?.cognitiveDomain || 
+                      attempt.question_metadata?.cognitive_domain;
+        
+        if (domain && domains[domain]) {
+          domains[domain].total++;
+          if (attempt.is_correct) {
+            domains[domain].correct++;
+          }
+        }
+      });
+
+      // Calculate percentages
+      const performance = Object.keys(domains).map(domain => ({
+        domain,
+        score: domains[domain].total > 0 
+          ? Math.round((domains[domain].correct / domains[domain].total) * 100)
+          : 0,
+        attempts: domains[domain].total
+      }));
+
+      return performance;
+    } catch (error) {
+      console.error('Error getting cognitive domain performance:', error);
+      throw error;
     }
   }
 }

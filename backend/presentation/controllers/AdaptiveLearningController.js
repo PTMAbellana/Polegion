@@ -8,6 +8,54 @@ class AdaptiveLearningController {
   }
 
   /**
+   * GET /api/adaptive/stuck-students
+   * Get students who are stuck on questions (teacher dashboard)
+   */
+  async getStuckStudents(req, res) {
+    try {
+      const { minAttempts = 3, minMinutesStuck = 5 } = req.query;
+      const stuckStudents = await this.service.repo.getStuckStudents(
+        parseInt(minAttempts),
+        parseInt(minMinutesStuck)
+      );
+
+      return res.status(200).json({
+        success: true,
+        data: stuckStudents,
+        count: stuckStudents.length
+      });
+    } catch (error) {
+      console.error('Error in getStuckStudents:', error);
+      return res.status(500).json({
+        error: 'Failed to get stuck students',
+        message: error.message
+      });
+    }
+  }
+
+  /**
+   * GET /api/adaptive/cognitive-performance
+   * Get cognitive domain performance for a user (radar chart data)
+   */
+  async getCognitiveDomainPerformance(req, res) {
+    try {
+      const userId = req.user.id; // Always use authenticated user's ID
+      const performance = await this.service.repo.getCognitiveDomainPerformance(userId);
+
+      return res.status(200).json({
+        success: true,
+        data: performance
+      });
+    } catch (error) {
+      console.error('Error in getCognitiveDomainPerformance:', error);
+      return res.status(500).json({
+        error: 'Failed to get cognitive domain performance',
+        message: error.message
+      });
+    }
+  }
+
+  /**
    * GET /api/adaptive/topics
    * Get all available adaptive learning topics
    */
@@ -627,7 +675,6 @@ class AdaptiveLearningController {
       const { topicId } = req.params;
       const { questionId, hintsRequested } = req.body;
       const userId = req.user?.id;
-      const sessionId = req.sessionId;
 
       if (!userId || !questionId || hintsRequested === undefined) {
         return res.status(400).json({
@@ -635,12 +682,14 @@ class AdaptiveLearningController {
         });
       }
 
-      const result = await this.service.updateHintCount(
-        userId,
-        questionId,
-        sessionId,
-        hintsRequested
-      );
+      // Increment cumulative hint count (persisted per topic)
+      const currentState = await this.service.repo.getStudentDifficulty(userId, topicId);
+      const currentHints = currentState?.hints_shown_count || 0;
+      const newHintTotal = currentHints + 1; // one hint per question (frontend already guards)
+
+      const result = await this.service.repo.updateStudentDifficulty(userId, topicId, {
+        hints_shown_count: newHintTotal
+      });
 
       return res.status(200).json({
         success: true,

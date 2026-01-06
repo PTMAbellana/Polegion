@@ -95,11 +95,15 @@ class AdaptiveLearningService {
     this.REWARDS = {
       // Positive outcomes
       ADVANCE_WITH_MASTERY: 10,       // Student ready to progress
+      ADVANCE_CHAPTER: 10,            // Alias for ADVANCE_WITH_MASTERY (used in code)
+      ADVANCED_CHAPTER: 10,           // Another alias (used in calculateAdvancedReward)
       OPTIMAL_CHALLENGE_ZONE: 7,      // "Flow state" - just right difficulty
+      OPTIMAL_CHALLENGE: 7,           // Alias for OPTIMAL_CHALLENGE_ZONE (used in code)
       IMPROVED_AFTER_STRATEGY: 3,     // Strategy change helped
       CORRECT_ANSWER: 2,
       MAINTAINED_HIGH_MASTERY: 3,
       RAPID_MASTERY: 8,
+      MASTERY_IMPROVED: 5,            // Positive mastery change reward
       
       // Negative outcomes (pedagogical failures)
       BOREDOM: -3,                    // Too easy, long correct streak
@@ -251,6 +255,15 @@ class AdaptiveLearningService {
       // 5. Apply action (adjust difficulty and/or teaching strategy)
       const updatedState = await this.applyAction(userId, topicId, newState, action, actionResult, usedExploration);
 
+      // 5b. CRITICAL: Clear pending question if difficulty changed
+      // This ensures next question matches the new difficulty (e.g., after review_prerequisite_topic drops difficulty 3→1)
+      // Note: Pending question already cleared on correct answers (line 186), so this only affects wrong answers with difficulty changes
+      const difficultyChanged = updatedState.difficulty_level !== currentState.difficulty_level;
+      if (difficultyChanged) {
+        await this.repo.clearPendingQuestion(userId, topicId);
+        console.log(`[AdaptiveLearning] Cleared pending question due to difficulty change (${currentState.difficulty_level}→${updatedState.difficulty_level})`);
+      }
+
       // 6. Calculate reward based on learning theory
       const reward = this.calculateAdvancedReward(currentState, newState, action, timeSpent);
       
@@ -315,9 +328,24 @@ class AdaptiveLearningService {
             // Get practiced topics (unlocked concepts) for AI constraint
             const unlockedConcepts = await this.getPracticedTopics(userId);
             
+            // CRITICAL FIX: Use question-specific topic, not chapter topic
+            // For parametric questions, extract from question_id (e.g., "gen_d3_circle_inscribed_angle__350")
+            // For AI questions, use questionData.metadata.topic or fall back to chapter topic
+            let questionSpecificTopic = topic?.topic_name || 'Geometry';
+            if (questionId) {
+              // Extract topic from parametric question ID: "gen_d3_circle_inscribed_angle__350" → "circle inscribed angle"
+              const match = questionId.match(/gen_d\d+_([a-z_]+)__\d+/);
+              if (match) {
+                questionSpecificTopic = match[1].replace(/_/g, ' ');
+              } else if (questionData?.metadata?.topic) {
+                // AI-generated question - use metadata topic
+                questionSpecificTopic = questionData.metadata.topic;
+              }
+            }
+            
             const hintResult = await this.hintService.generateHint({
               questionText,
-              topicName: topic?.topic_name || 'Geometry',
+              topicName: questionSpecificTopic,
               difficultyLevel: currentState.difficulty_level,
               wrongStreak: newState.wrong_streak,
               mdpAction: action,
@@ -361,6 +389,10 @@ class AdaptiveLearningService {
       }
 
       // 9. Log transition for research analysis
+      // CRITICAL: Get Q-value AFTER update to see the learned value
+      const updatedQValue = this.getQValue(currentStateKey, action);
+      const currentEpsilon = this.getCurrentEpsilon(updatedState.total_attempts);
+      
       const transition = await this.repo.logStateTransition({
         userId,
         topicId,
@@ -369,16 +401,13 @@ class AdaptiveLearningService {
         actionReason: reason,
         newState: updatedState,
         reward,
-        questionId,
+        questionId, // Always log question ID for traceability
         wasCorrect: isCorrect,
         timeSpent,
         usedExploration,
-        qValue: this.getQValue(newStateKey, action),
-        sessionId: this.generateSessionId(userId),
-        metadata: {
-          timestamp: new Date().toISOString(),
-          epsilon: this.getCurrentEpsilon(updatedState.total_attempts)
-        }
+        qValue: updatedQValue, // Use updated Q-value, not old one
+        epsilon: currentEpsilon, // Store actual epsilon, not wrapped in metadata
+        sessionId: this.generateSessionId(userId)
       });
 
       // 10. Check for chapter mastery and unlock next chapter
@@ -956,8 +985,16 @@ class AdaptiveLearningService {
   calculateAdvancedReward(prevState, newState, action, timeSpent) {
     let reward = 0;
 
+    // Safety checks to prevent NaN
+    const prevMastery = prevState?.mastery_level ?? 0;
+    const newMastery = newState?.mastery_level ?? 0;
+    const correctStreak = newState?.correct_streak ?? 0;
+    const wrongStreak = newState?.wrong_streak ?? 0;
+    const difficulty = newState?.difficulty_level ?? 3;
+    const totalAttempts = newState?.total_attempts ?? 0;
+
     // 1. Mastery improvement rewards
-    const masteryChange = newState.mastery_level - prevState.mastery_level;
+    const masteryChange = newMastery - prevMastery;
     if (masteryChange > 0) {
       reward += this.REWARDS.MASTERY_IMPROVED * (masteryChange / 10); // Scale by improvement
     } else if (masteryChange < 0) {
@@ -965,17 +1002,17 @@ class AdaptiveLearningService {
     }
     
     // 2. Correct answer at appropriate difficulty (flow zone)
-    if (newState.correct_streak > 0) {
+    if (correctStreak > 0) {
       reward += this.REWARDS.CORRECT_ANSWER;
       
       // Bonus for being in "optimal challenge zone" (70-85% mastery)
-      if (newState.mastery_level >= 70 && newState.mastery_level <= 85) {
+      if (newMastery >= 70 && newMastery <= 85) {
         reward += this.REWARDS.OPTIMAL_CHALLENGE;
       }
     }
 
     // 3. Maintained high mastery (consistent performance)
-    if (newState.mastery_level >= 75 && prevState.mastery_level >= 75) {
+    if (newMastery >= 75 && prevMastery >= 75) {
       reward += this.REWARDS.MAINTAINED_HIGH_MASTERY;
     }
 
@@ -984,20 +1021,20 @@ class AdaptiveLearningService {
       reward += this.REWARDS.ADVANCED_CHAPTER;
       
       // Extra bonus if achieved quickly (efficiency)
-      if (newState.total_attempts < 20) {
+      if (totalAttempts < 20) {
         reward += this.REWARDS.RAPID_MASTERY;
       }
     }
 
     // 5. Frustration penalty (student struggling, likely to disengage)
-    if (newState.wrong_streak >= 5) {
+    if (wrongStreak >= 5) {
       reward += this.REWARDS.FRUSTRATION;
-    } else if (newState.wrong_streak >= 3) {
+    } else if (wrongStreak >= 3) {
       reward += this.REWARDS.FRUSTRATION / 2; // Partial penalty
     }
 
     // 6. Boredom penalty (content too easy, no learning)
-    if (newState.correct_streak >= 10 && newState.difficulty_level <= 2) {
+    if (correctStreak >= 10 && difficulty <= 2) {
       reward += this.REWARDS.BOREDOM;
     }
 
@@ -1011,12 +1048,13 @@ class AdaptiveLearningService {
 
     // 8. Difficulty appropriateness
     // Reward staying in appropriate difficulty for mastery level
-    const appropriateDifficulty = Math.ceil(newState.mastery_level / 20);
-    if (Math.abs(newState.difficulty_level - appropriateDifficulty) <= 1) {
+    const appropriateDifficulty = Math.ceil(newMastery / 20);
+    if (Math.abs(difficulty - appropriateDifficulty) <= 1) {
       reward += 2; // Good difficulty match
     }
 
-    return reward;
+    // Ensure reward is a valid number
+    return isNaN(reward) ? 0 : reward;
   }
 
   /**
@@ -1152,7 +1190,7 @@ class AdaptiveLearningService {
       // Generate questions with cognitive domain and representation type
       const generatedQuestions = [];
       for (let i = 0; i < count; i++) {
-        const question = this.questionGenerator.generateQuestion(
+        const question = await this.questionGenerator.generateQuestion(
           state.difficulty_level,
           topicId,
           i,
@@ -1266,6 +1304,8 @@ class AdaptiveLearningService {
         accuracy: state.total_attempts > 0 
           ? (state.correct_answers / state.total_attempts * 100).toFixed(1)
           : 0,
+        // Persisted hint usage for this topic
+        hints_shown_count: state.hints_shown_count || 0,
         
         // AI-enhanced features
         prediction: {
@@ -1330,7 +1370,7 @@ class AdaptiveLearningService {
 
       // Generate question using QuestionGeneratorService with topic filter
       console.log(`[AdaptiveLearning] Calling questionGenerator.generateQuestion...`);
-      const question = this.questionGenerator.generateQuestion(
+      const question = await this.questionGenerator.generateQuestion(
         difficultyLevel,
         topic.chapter_id || 1,
         null, // No seed (fully random)

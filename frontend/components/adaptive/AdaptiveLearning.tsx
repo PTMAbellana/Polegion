@@ -6,6 +6,7 @@ import MasteryProgressBar from './MasteryProgressBar';
 import AdaptiveFeedbackBox from './AdaptiveFeedbackBox';
 import LearningInteractionRenderer from './LearningInteractionRenderer';
 import CelebrationModal from './CelebrationModal';
+import CognitiveDomainRadar from './CognitiveDomainRadar';
 import Loader from '@/components/Loader';
 
 interface AdaptiveState {
@@ -62,9 +63,10 @@ interface AdaptiveLearningProps {
   topicId: string;
   topicName?: string;
   onChangeTopic?: () => void;
+  userId?: string;
 }
 
-export default function AdaptiveLearning({ topicId, topicName: topicNameProp, onChangeTopic }: AdaptiveLearningProps) {
+export default function AdaptiveLearning({ topicId, topicName: topicNameProp, onChangeTopic, userId }: AdaptiveLearningProps) {
   const [state, setState] = useState<AdaptiveState | null>(null);
   const [lastResponse, setLastResponse] = useState<AdaptiveResponse | null>(null);
   const [loading, setLoading] = useState(true);
@@ -85,7 +87,9 @@ export default function AdaptiveLearning({ topicId, topicName: topicNameProp, on
   const [pendingHint, setPendingHint] = useState<string | null>(null);
   const [topicName, setTopicName] = useState<string>(topicNameProp || 'Geometry Topic');
   const [answerSubmitted, setAnswerSubmitted] = useState(false);
-  const [hintRequestCount, setHintRequestCount] = useState(0);
+  const [hintRequestCount, setHintRequestCount] = useState(0); // Per-question hint count (resets)
+  const [totalHintCount, setTotalHintCount] = useState(0); // Cumulative topic-level hint count
+  const [hintUsedForCurrentQuestion, setHintUsedForCurrentQuestion] = useState(false); // Track if hint already used for this question
   const [showFeedback, setShowFeedback] = useState(false);
 
   const generateNewQuestion = async (forceNew = false) => {
@@ -107,6 +111,8 @@ export default function AdaptiveLearning({ topicId, topicName: topicNameProp, on
           hint: questionData.hint
         });
         setAnswerSubmitted(false); // Reset for new question
+        setHintRequestCount(0); // Reset hint count for new question
+        setHintUsedForCurrentQuestion(false); // Reset hint flag for new question
       } else {
         console.error('[AdaptiveLearning] Question API returned success=false');
       }
@@ -127,6 +133,16 @@ export default function AdaptiveLearning({ topicId, topicName: topicNameProp, on
       const stateResponse = await axios.get(`/adaptive/state/${topicId}?t=${Date.now()}`);
       const stateData = stateResponse.data.data;
       setState(stateData);
+      
+      setMasteryData({
+        level: stateData.difficulty_level,
+        percentage: Math.round(stateData.mastery_level),
+        streak: stateData.correct_streak,
+        bestStreak: stateData.best_streak || stateData.correct_streak
+      });
+
+      // Load cumulative hint count from state
+      setTotalHintCount(stateData.hints_shown_count || 0);
       
       if (topicNameProp) {
         setTopicName(topicNameProp);
@@ -234,10 +250,13 @@ export default function AdaptiveLearning({ topicId, topicName: topicNameProp, on
           setAnswerSubmitted(false);
           
           // Save hint count to database
+          const newTotalCount = totalHintCount + 1;
+          setTotalHintCount(newTotalCount);
+          
           try {
             await axios.put(`/adaptive/hint-count/${topicId}`, {
               questionId: currentQuestion?.questionId || currentQuestion?.id,
-              hintsRequested: newHintCount
+              hintsRequested: newTotalCount
             });
           } catch (hintError) {
             console.error('Error saving hint count:', hintError);
@@ -567,6 +586,8 @@ export default function AdaptiveLearning({ topicId, topicName: topicNameProp, on
           </div>
         )}
 
+        {userId && <CognitiveDomainRadar userId={userId} />}
+
         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
           <div className="stat-chip">
             <div style={{ 
@@ -645,18 +666,6 @@ export default function AdaptiveLearning({ topicId, topicName: topicNameProp, on
             Change Topic
           </button>
         )}
-
-        <div className="motivational-text" style={{
-          fontSize: '14px',
-          fontWeight: '600',
-          color: state.masteryLevel >= 85 ? '#10B981' : state.masteryLevel >= 70 ? '#3B82F6' : state.masteryLevel >= 50 ? '#F59E0B' : '#6B7280',
-          textAlign: 'center',
-          marginTop: '12px'
-        }}>
-          {state.masteryLevel >= 85 ? "Amazing work!" :
-           state.masteryLevel >= 70 ? "You're doing great!" :
-           state.masteryLevel >= 50 ? "Keep going!" : "Let's learn!"}
-        </div>
       </div>
 
       {/* Modals - Outside grid flow */}
@@ -762,20 +771,37 @@ export default function AdaptiveLearning({ topicId, topicName: topicNameProp, on
         {!answerSubmitted && currentQuestion?.hint && (
           <div style={{ marginBottom: '16px' }}>
             <button
-              onClick={() => {
-                const newCount = hintRequestCount + 1;
-                setHintRequestCount(newCount);
+              onClick={async () => {
+                // Always show the hint modal
                 setHintText(currentQuestion.hint);
                 setShowHintModal(true);
                 
-                const questionId = currentQuestion?.questionId || currentQuestion?.id;
-                if (questionId) {
-                  axios.put(`/adaptive/hint-count/${topicId}`, {
-                    questionId,
-                    hintsRequested: newCount
-                  }).catch(err => {
-                    console.error('Error saving hint count:', err);
-                  });
+                // Only increment database count on FIRST hint request for this question
+                if (!hintUsedForCurrentQuestion) {
+                  const newCount = hintRequestCount + 1;
+                  setHintRequestCount(newCount);
+                  setHintUsedForCurrentQuestion(true); // Mark hint as used for this question
+                  
+                  const questionId = currentQuestion?.questionId || currentQuestion?.id;
+                  if (questionId) {
+                    try {
+                      const response = await axios.put(`/adaptive/hint-count/${topicId}`, {
+                        questionId,
+                        hintsRequested: newCount
+                      });
+                      // Update total hint count from database response
+                      if (response.data?.data?.hints_shown_count !== undefined) {
+                        setTotalHintCount(response.data.data.hints_shown_count);
+                      } else {
+                        // Fallback: increment local count
+                        setTotalHintCount(prev => prev + 1);
+                      }
+                    } catch (err) {
+                      console.error('Error saving hint count:', err);
+                      // Still increment local count on error
+                      setTotalHintCount(prev => prev + 1);
+                    }
+                  }
                 }
               }}
               style={{
@@ -809,22 +835,39 @@ export default function AdaptiveLearning({ topicId, topicName: topicNameProp, on
         )}
         
         {showFeedback && lastResponse ? (
-          <AdaptiveFeedbackBox
-            mdpAction={lastResponse.action}
-            wrongStreak={state.wrongStreak}
-            correctStreak={state.correctStreak}
-            actionReason={lastResponse.actionReason}
-            pedagogicalStrategy={lastResponse.pedagogicalStrategy}
-            representationType={currentRepresentation}
-            aiExplanation={lastResponse.aiHint || lastResponse.aiExplanation}
-            hintMetadata={lastResponse.hintMetadata}
-          />
+          <>
+            <div style={{
+              fontSize: '16px',
+              fontWeight: '600',
+              color: state.masteryLevel >= 85 ? '#10B981' : state.masteryLevel >= 70 ? '#3B82F6' : state.masteryLevel >= 50 ? '#F59E0B' : '#6B7280',
+              textAlign: 'center',
+              marginBottom: '12px',
+              padding: '12px',
+              background: state.masteryLevel >= 85 ? '#ECFDF5' : state.masteryLevel >= 70 ? '#EFF6FF' : state.masteryLevel >= 50 ? '#FEF3C7' : '#F3F4F6',
+              borderRadius: '8px',
+              border: `1px solid ${state.masteryLevel >= 85 ? '#A7F3D0' : state.masteryLevel >= 70 ? '#BFDBFE' : state.masteryLevel >= 50 ? '#FDE68A' : '#E5E7EB'}`
+            }}>
+              {state.masteryLevel >= 85 ? "🎉 Amazing work!" :
+               state.masteryLevel >= 70 ? "🌟 You're doing great!" :
+               state.masteryLevel >= 50 ? "💪 Keep going!" : "📚 Let's learn!"}
+            </div>
+            <AdaptiveFeedbackBox
+              mdpAction={lastResponse.action}
+              wrongStreak={state.wrongStreak}
+              correctStreak={state.correctStreak}
+              actionReason={lastResponse.actionReason}
+              pedagogicalStrategy={lastResponse.pedagogicalStrategy}
+              representationType={currentRepresentation}
+              aiExplanation={lastResponse.aiHint || lastResponse.aiExplanation}
+              hintMetadata={lastResponse.hintMetadata}
+            />
+          </>
         ) : (
           <div style={{
             background: 'white', borderRadius: '10px', padding: '14px',
             border: '1px dashed #E5E7EB', color: '#6B7280', fontSize: '13px', lineHeight: 1.5
           }}>
-            📊 Hints requested: <strong>{hintRequestCount}</strong>
+            📊 Hints requested: <strong>{totalHintCount}</strong>
             <br/>
             <span style={{ fontSize: '12px', color: '#9CA3AF' }}>
               Feedback appears when you need help or difficulty changes

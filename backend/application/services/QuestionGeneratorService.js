@@ -42,9 +42,13 @@ const interiorAngles = require('./questions/InteriorAngles');
 const planeAnd3DFigures = require('./questions/PlaneAnd3DFigures');
 const geometryWordProblems = require('./questions/GeometryWordProblems');
 const geometricProofs = require('./questions/GeometricProofs');
+const GroqQuestionGenerator = require('./GroqQuestionGenerator'); // AI fallback for insufficient templates
 
 class QuestionGeneratorService {
   constructor() {
+    // Initialize AI question generator for fallback when templates are insufficient
+    this.aiQuestionGenerator = new GroqQuestionGenerator();
+    
     // Cognitive domain constants
     this.COGNITIVE_DOMAINS = {
       KR: 'knowledge_recall',        // Basic facts and formulas
@@ -1529,7 +1533,7 @@ class QuestionGeneratorService {
   /**
    * Generate a random question at specified difficulty level
    */
-  generateQuestion(difficultyLevel, chapterId, seed = null, cognitiveDomain = null, representationType = 'text', topicFilter = null, excludeTypes = []) {
+  async generateQuestion(difficultyLevel, chapterId, seed = null, cognitiveDomain = null, representationType = 'text', topicFilter = null, excludeTypes = []) {
     console.log(`[QGen] START - difficulty: ${difficultyLevel}, cognitive: ${cognitiveDomain}, filter: ${topicFilter}, excludeTypes: ${excludeTypes.join(',')}`);
     
     const templates = this.templates[difficultyLevel];
@@ -1547,6 +1551,12 @@ class QuestionGeneratorService {
         filterParts.some(part => t.type === part || t.type.startsWith(part + '_'))
       );
       console.log(`[QuestionGenerator] Topic filter "${topicFilter}" reduced templates from ${templates.length} to ${filteredTemplates.length}`);
+      
+      // TODO: Re-enable AI fallback after fixing question validation
+      // Temporarily disabled to prevent crash and bad questions (like "roads intersecting")
+      if (filteredTemplates.length < 5) {
+        console.warn(`[QuestionGenerator] Only ${filteredTemplates.length} templates for "${topicFilter}" - AI fallback temporarily disabled`);
+      }
       
       // Only fall back to all templates if BOTH topic filter AND cognitive domain filtering fail
       // Don't fall back immediately - wait to see if cognitive domain helps
@@ -2041,15 +2051,16 @@ class QuestionGeneratorService {
     const numericOptions = options.filter(opt => !isNaN(parseFloat(opt.label)));
     if (numericOptions.length === options.length) {
       // All numeric - check for decimal consistency
-      const hasDecimals = numericOptions.some(opt => opt.label.includes('.'));
-      const allIntegers = numericOptions.every(opt => !opt.label.includes('.') || opt.label.endsWith('.0'));
+      // Convert labels to strings for validation
+      const hasDecimals = numericOptions.some(opt => String(opt.label).includes('.'));
+      const allIntegers = numericOptions.every(opt => !String(opt.label).includes('.') || String(opt.label).endsWith('.0'));
       // If correct is integer, all should be integers
       const correctOption = options.find(opt => opt.correct);
-      const correctIsInt = !correctOption.label.includes('.') || correctOption.label.endsWith('.0');
+      const correctIsInt = !String(correctOption.label).includes('.') || String(correctOption.label).endsWith('.0');
       if (correctIsInt && hasDecimals) {
         // Some distractors have decimals but answer is integer - fix them
         options.forEach(opt => {
-          if (opt.label.includes('.')) {
+          if (String(opt.label).includes('.')) {
             opt.label = Math.round(parseFloat(opt.label)).toString();
           }
         });
