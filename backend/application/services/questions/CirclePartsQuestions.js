@@ -50,6 +50,24 @@ module.exports = {
       solution: () => 0,
       hint: 'It doesn\'t have to go through the center',
       multipleChoice: ['Chord', 'Radius', 'Diameter', 'Tangent']
+    },
+    {
+      type: 'circle_center_definition',
+      cognitiveDomain: 'knowledge_recall',
+      template: 'The fixed point in the middle of a circle is called the:',
+      params: {},
+      solution: () => 0,
+      hint: 'All radii extend from this point',
+      multipleChoice: ['Center', 'Vertex', 'Midpoint', 'Origin']
+    },
+    {
+      type: 'circle_diameter_radius_comparison',
+      cognitiveDomain: 'concept_understanding',
+      template: 'How many radii equal one diameter?',
+      params: {},
+      solution: () => 0,
+      hint: 'Diameter = 2 × radius',
+      multipleChoice: ['2', '1', '3', '4']
     }
   ],
   
@@ -98,6 +116,24 @@ module.exports = {
       solution: () => 0,
       hint: 'Minor means smaller',
       multipleChoice: ['Minor arc', 'Major arc', 'Semicircle', 'Full circle']
+    },
+    {
+      type: 'circle_semicircle_definition',
+      cognitiveDomain: 'concept_understanding',
+      template: 'An arc that measures exactly 180° is called:',
+      params: {},
+      solution: () => 0,
+      hint: 'Semi means half',
+      multipleChoice: ['Semicircle', 'Minor arc', 'Major arc', 'Quarter circle']
+    },
+    {
+      type: 'circle_congruent_definition',
+      cognitiveDomain: 'concept_understanding',
+      template: 'Circles with equal radii are called:',
+      params: {},
+      solution: () => 0,
+      hint: 'Congruent means identical in size and shape',
+      multipleChoice: ['Congruent circles', 'Concentric circles', 'Similar circles', 'Intersecting circles']
     }
   ],
   
@@ -146,6 +182,24 @@ module.exports = {
       solution: () => 0,
       hint: 'It\'s the single point of contact',
       multipleChoice: ['Point of tangency', 'Center', 'Vertex', 'Endpoint']
+    },
+    {
+      type: 'circle_common_tangent',
+      cognitiveDomain: 'analytical_thinking',
+      template: 'A line that is tangent to two circles is called:',
+      params: {},
+      solution: () => 0,
+      hint: 'It touches both circles',
+      multipleChoice: ['Common tangent', 'Common chord', 'Common secant', 'Common radius']
+    },
+    {
+      type: 'circle_minor_arc_comparison',
+      cognitiveDomain: 'concept_understanding',
+      template: 'If a minor arc measures 120°, what is the measure of its corresponding major arc?',
+      params: {},
+      solution: () => 0,
+      hint: 'Minor arc + Major arc = 360°',
+      multipleChoice: ['240°', '180°', '120°', '300°']
     }
   ],
   
@@ -195,6 +249,24 @@ module.exports = {
       solution: () => 0,
       hint: 'It cuts the chord into two equal parts',
       multipleChoice: ['Bisects the chord', 'Is parallel to the chord', 'Is shorter than the chord', 'Has no special relationship']
+    },
+    {
+      type: 'circle_tangent_radius_angle',
+      cognitiveDomain: 'higher_order_thinking',
+      template: 'What is the measure of the angle formed by a tangent and a radius at the point of tangency?',
+      params: {},
+      solution: () => 0,
+      hint: 'Tangent is perpendicular to radius',
+      multipleChoice: ['90°', '180°', '45°', '60°']
+    },
+    {
+      type: 'circle_inscribed_angle_arc',
+      cognitiveDomain: 'analytical_thinking',
+      template: 'If an inscribed angle measures 40°, what is the measure of its intercepted arc?',
+      params: {},
+      solution: () => 0,
+      hint: 'Inscribed angle = ½ arc measure',
+      multipleChoice: ['80°', '40°', '20°', '120°']
     }
   ]
 };

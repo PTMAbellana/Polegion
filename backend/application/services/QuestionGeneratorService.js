@@ -1597,10 +1597,11 @@ class QuestionGeneratorService {
       );
       console.log(`[QuestionGenerator] Topic filter "${topicFilter}" reduced templates from ${templates.length} to ${filteredTemplates.length}`);
       
-      // TODO: Re-enable AI fallback after fixing question validation
-      // Temporarily disabled to prevent crash and bad questions (like "roads intersecting")
-      if (filteredTemplates.length < 5) {
-        console.warn(`[QuestionGenerator] Only ${filteredTemplates.length} templates for "${topicFilter}" - AI fallback temporarily disabled`);
+      // Enable AI fallback for difficulty 4-5 when templates are insufficient
+      // With validation improvements (duplicate detection, math checking), AI generation is now safe
+      if (filteredTemplates.length < 5 && (difficultyLevel === 4 || difficultyLevel === 5)) {
+        console.log(`[QuestionGenerator] Only ${filteredTemplates.length} templates for "${topicFilter}" at difficulty ${difficultyLevel} - AI fallback will be used if needed`);
+        // AI fallback will be triggered if question generation fails or templates run out
       }
       
       // Only fall back to all templates if BOTH topic filter AND cognitive domain filtering fail
@@ -1672,6 +1673,24 @@ class QuestionGeneratorService {
     if (filteredTemplates.length === 0) {
       console.error(`[QGen] CRITICAL: No templates available after filtering!`);
       console.error(`[QGen] Filters applied: difficulty=${difficultyLevel}, cognitive=${cognitiveDomain}, topicFilter=${topicFilter}`);
+      
+      // AI Fallback for difficulty 4-5 when no templates found
+      if ((difficultyLevel === 4 || difficultyLevel === 5) && topicFilter) {
+        console.log(`[QGen] *** ACTIVATING AI FALLBACK *** Difficulty ${difficultyLevel}, topic: ${topicFilter}`);
+        try {
+          const aiQuestion = await this.aiQuestionGenerator.generateQuestion(
+            topicFilter,
+            difficultyLevel,
+            cognitiveDomain || 'problem_solving'
+          );
+          console.log(`[QGen] AI fallback successful: ${aiQuestion.question_text.substring(0, 50)}...`);
+          return aiQuestion;
+        } catch (aiError) {
+          console.error(`[QGen] AI fallback also failed:`, aiError.message);
+          throw new Error(`No question templates available and AI fallback failed for difficulty ${difficultyLevel}, topic: ${topicFilter}`);
+        }
+      }
+      
       throw new Error(`No question templates available for difficulty ${difficultyLevel} with filters: topic=${topicFilter}, cognitive=${cognitiveDomain}`);
     }
     

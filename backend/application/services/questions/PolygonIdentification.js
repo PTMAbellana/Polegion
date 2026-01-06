@@ -49,6 +49,24 @@ module.exports = {
       solution: () => 0,
       hint: 'All sides equal and all angles 90°',
       multipleChoice: ['Square', 'Rectangle', 'Rhombus', 'Trapezoid']
+    },
+    {
+      type: 'dodecagon_sides',
+      cognitiveDomain: 'knowledge_recall',
+      template: 'How many sides does a dodecagon have?',
+      params: {},
+      solution: () => 0,
+      hint: 'Dodeca means twelve',
+      multipleChoice: ['12', '11', '10', '13']
+    },
+    {
+      type: 'polygon_name_basic',
+      cognitiveDomain: 'knowledge_recall',
+      template: 'What is the name of a polygon with three sides?',
+      params: {},
+      solution: () => 0,
+      hint: 'This is the most basic polygon',
+      multipleChoice: ['Triangle', 'Quadrilateral', 'Pentagon', 'Hexagon']
     }
   ],
   
@@ -97,6 +115,24 @@ module.exports = {
       solution: () => 0,
       hint: 'All angles 90°, opposite sides equal',
       multipleChoice: ['Rectangle', 'Square', 'Rhombus', 'Trapezoid']
+    },
+    {
+      type: 'undecagon_sides',
+      cognitiveDomain: 'knowledge_recall',
+      template: 'How many sides does an undecagon have?',
+      params: {},
+      solution: () => 0,
+      hint: 'Undeca means eleven',
+      multipleChoice: ['11', '10', '12', '9']
+    },
+    {
+      type: 'polygon_properties_vertices',
+      cognitiveDomain: 'concept_understanding',
+      template: 'In any polygon, the number of sides is equal to the number of:',
+      params: {},
+      solution: () => 0,
+      hint: 'Each side connects two of these points',
+      multipleChoice: ['Vertices', 'Diagonals', 'Angles doubled', 'Edges divided by 2']
     }
   ],
   
@@ -145,6 +181,24 @@ module.exports = {
       solution: () => 0,
       hint: 'Two sides equal',
       multipleChoice: ['Isosceles', 'Equilateral', 'Scalene', 'Obtuse']
+    },
+    {
+      type: 'right_triangle_identify',
+      cognitiveDomain: 'concept_understanding',
+      template: 'A triangle with one angle equal to 90° is called:',
+      params: {},
+      solution: () => 0,
+      hint: 'One angle is exactly 90 degrees',
+      multipleChoice: ['Right triangle', 'Acute triangle', 'Obtuse triangle', 'Equilateral triangle']
+    },
+    {
+      type: 'acute_obtuse_triangle',
+      cognitiveDomain: 'analytical_thinking',
+      template: 'A triangle with one angle greater than 90° is:',
+      params: {},
+      solution: () => 0,
+      hint: 'One angle is greater than 90 degrees',
+      multipleChoice: ['Obtuse triangle', 'Acute triangle', 'Right triangle', 'Equilateral triangle']
     }
   ],
   
@@ -193,6 +247,24 @@ module.exports = {
       solution: () => 0,
       hint: 'Connects non-adjacent vertices',
       multipleChoice: ['Two non-adjacent vertices', 'Two adjacent vertices', 'A vertex to the center', 'Two midpoints']
+    },
+    {
+      type: 'concave_polygon',
+      cognitiveDomain: 'analytical_thinking',
+      template: 'A polygon with at least one interior angle greater than 180° is:',
+      params: {},
+      solution: () => 0,
+      hint: 'Has at least one angle > 180°, appears to cave inward',
+      multipleChoice: ['Concave', 'Convex', 'Regular', 'Equilateral']
+    },
+    {
+      type: 'polygon_classification_combined',
+      cognitiveDomain: 'analytical_thinking',
+      template: 'A polygon that has all equal sides and angles, and all interior angles less than 180° is both:',
+      params: {},
+      solution: () => 0,
+      hint: 'Combines two key properties: equal sides/angles and no inward angles',
+      multipleChoice: ['Regular and Convex', 'Irregular and Concave', 'Regular and Concave', 'Irregular and Convex']
     }
   ]
 };

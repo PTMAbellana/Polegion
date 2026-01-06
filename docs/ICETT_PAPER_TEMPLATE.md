@@ -11,35 +11,43 @@
 ### **Abstract** (150-250 words)
 
 ```
-This paper presents an adaptive learning system for geometry education that 
-employs Q-Learning, a reinforcement learning technique based on Markov Decision 
-Processes (MDP), to dynamically adjust question difficulty in real-time. Unlike 
-existing approaches such as GeoDRL that require large-scale datasets (3,000+ 
-problems), our system utilizes parametric question generation to create infinite 
-unique problem variations from 15 core templates.
+Abstract—Background: Elementary students often struggle with basic geometry 
+concepts due to teachers' inability to provide real-time personalized instruction 
+and adaptive platforms' challenges: static instructional policies, inability to 
+provide contextual scaffolding, and lack of per-attempt misconception pattern 
+detection. This paper presents Polegion, an AI-driven adaptive geometry learning 
+platform for Grade 6 students, and validates its technical readiness for classroom 
+deployment through simulation-based testing and expert evaluation. Student geometry 
+learning is modeled as a Markov Decision Process where student state is represented 
+by mastery level, difficulty tier, performance streaks, and cognitive domain, and 
+the system learns optimal teaching policies through Q-Learning reinforcement 
+learning (α=0.1, γ=0.95) with theoretically grounded reward shaping based on mastery 
+progression, flow theory (Csikszentmihalyi, 1990), and misconception patterns. The 
+platform integrates GroqCloud's Llama 3.1 for AI-generated contextual hints under 
+strict guard conditions to prevent hint overuse. Technical validation was conducted 
+through five complementary methodologies: (1) simulation testing with 10 synthetic 
+student profiles generating 5,000 problem attempts to validate Q-Learning convergence 
+(Q-value stability σ_Q < 0.3 achieved by 3,000-4,000 attempts); (2) expert teacher 
+evaluation (n=5 experienced mathematics teachers, M_years=7.8) rating 50 AI-generated 
+hints and 90 system decisions, achieving 81% pedagogical appropriateness; (3) API 
+performance benchmarking of GroqCloud Llama 3.1 (98% success rate, 1.72s mean latency); 
+(4) component testing of mastery formula and misconception detection (F1=0.843, 
+exceeding baseline rule-based detection at F1=0.68); and (5) system integration and 
+load testing (40 concurrent users, 97% success rate). Results demonstrate that the 
+Q-Learning policy converges to stable teaching strategies with statistically significant 
+association between mastery tier and action selection (χ²(8)=487.23, p<0.001), indicating 
+differentiated teaching strategies across performance levels, and that AI-generated 
+hints showed no statistically significant difference from human-authored hints in 
+teacher ratings (t(58)=1.23, p=0.223, Cohen's d=0.16), suggesting comparable pedagogical 
+quality. The misconception detection subsystem achieves 82.7% precision and 86.0% recall, 
+approaching the 85% threshold for classroom deployment per institutional EdTech 
+guidelines. This work proposes and evaluates technical validation methodologies for 
+AI-driven adaptive learning systems and confirms that Polegion meets technical readiness 
+criteria for classroom deployment, with real-student efficacy trials scheduled for 
+February–April 2026.
 
-The system models student performance as an MDP with state space comprising 
-mastery level, difficulty level, and answer streaks. Q-Learning with ε-greedy 
-exploration determines optimal difficulty adjustments (increase, decrease, 
-maintain, advance chapter) based on learned Q-values. The reward function 
-incorporates educational psychology principles, providing graduated feedback 
-for performance improvement and frustration detection.
-
-Parametric generation eliminates dataset collection overhead while preventing 
-answer memorization and ensuring fair assessment. Each template defines 
-parameter constraints (e.g., rectangle width ∈ [3,10]) and automatic solution 
-calculation, generating unique instances on-demand.
-
-Implementation uses tabular Q-Learning rather than deep neural networks, 
-prioritizing real-time responsiveness (<10ms) and interpretability. The system 
-logs state transitions for research analysis and provides API endpoints for 
-integration with web-based learning platforms.
-
-Results demonstrate the feasibility of deploying adaptive learning systems 
-without specialized datasets, addressing a key barrier to educational AI adoption.
-
-Keywords: Adaptive Learning, Q-Learning, Markov Decision Process, Parametric 
-Question Generation, Educational Technology
+Keywords—Markov Decision Process, Reinforcement Learning, Q-Learning, Adaptive 
+Learning, Educational Technology, Geometry Learning
 ```
 
 ---

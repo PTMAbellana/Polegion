@@ -49,6 +49,24 @@ module.exports = {
       solution: () => 0,
       hint: '90° - 90° = 0°',
       multipleChoice: ['0°', '90°', '180°', '45°']
+    },
+    {
+      type: 'complementary_vs_supplementary_identification',
+      cognitiveDomain: 'concept_understanding',
+      template: 'Which pair of angles are complementary?',
+      params: {},
+      solution: () => 0,
+      hint: 'Complementary angles add up to 90°',
+      multipleChoice: ['25° and 65°', '100° and 80°', '120° and 60°', '90° and 90°']
+    },
+    {
+      type: 'complementary_right_angle_split',
+      cognitiveDomain: 'knowledge_recall',
+      template: 'If a right angle is split into two complementary angles, one measuring 35°, the other measures:',
+      params: {},
+      solution: () => 0,
+      hint: 'A right angle is 90°, so 90° - 35° = 55°',
+      multipleChoice: ['55°', '145°', '35°', '90°']
     }
   ],
   
@@ -99,6 +117,25 @@ module.exports = {
       solution: () => 0,
       hint: '40° + 50° = 90°',
       multipleChoice: ['Complementary', 'Supplementary', 'Vertical', 'Linear pair']
+    },
+    {
+      type: 'complementary_angle_pair_calc',
+      cognitiveDomain: 'procedural_skills',
+      template: 'Two complementary angles are given by (2x + 10)° and (3x - 5)°. Find x.',
+      params: {},
+      solution: () => 0,
+      hint: '(2x + 10) + (3x - 5) = 90, so 5x + 5 = 90',
+      multipleChoice: ['17', '15', '20', '25']
+    },
+    {
+      type: 'supplementary_real_world',
+      cognitiveDomain: 'problem_solving',
+      template: 'A ladder leans against a wall at {angle}° from the ground. What angle does it make with the wall?',
+      params: {
+        angle: { min: 30, max: 80, step: 10 }
+      },
+      solution: (p) => 90 - p.angle,
+      hint: 'The wall and ground form a right angle (90°), so the angles are complementary'
     }
   ],
   
@@ -151,6 +188,25 @@ module.exports = {
       solution: () => 0,
       hint: 'It can have a supplement (60°) but not a complement',
       multipleChoice: ['A supplement only', 'A complement only', 'Both complement and supplement', 'Neither']
+    },
+    {
+      type: 'complementary_system_equations',
+      cognitiveDomain: 'problem_solving',
+      template: 'Two complementary angles satisfy x + y = 90 and 2x - y = {n}. Find x.',
+      params: {
+        n: { min: 15, max: 45, step: 15 }
+      },
+      solution: (p) => (90 + p.n) / 3,
+      hint: 'Use substitution or elimination. From first equation: y = 90 - x, substitute into second equation'
+    },
+    {
+      type: 'supplementary_multistep_word',
+      cognitiveDomain: 'problem_solving',
+      template: 'An angle is 3 times its complement. Find the supplement of this angle.',
+      params: {},
+      solution: () => 0,
+      hint: 'First find the angle: x = 3(90-x), so x = 67.5°. Then find supplement: 180 - 67.5',
+      multipleChoice: ['112.5°', '157.5°', '67.5°', '22.5°']
     }
   ],
   
@@ -205,6 +261,27 @@ module.exports = {
       solution: () => 0,
       hint: 'If A + B = 90 and B + C = 90, then A = C',
       multipleChoice: ['A = C', 'A + C = 90', 'A + C = 180', 'A + B + C = 180']
+    },
+    {
+      type: 'complementary_complex_algebraic',
+      cognitiveDomain: 'problem_solving',
+      template: 'The complement of (3x - {a})° equals the supplement of (x + {b})°. Find x.',
+      params: {
+        a: { min: 5, max: 20, step: 5 },
+        b: { min: 10, max: 30, step: 10 }
+      },
+      solution: (p) => (270 - p.a - p.b) / 4,
+      hint: '90 - (3x - a) = 180 - (x + b). Simplify: 90 - 3x + a = 180 - x - b'
+    },
+    {
+      type: 'supplementary_combined_relationships',
+      cognitiveDomain: 'analytical_thinking',
+      template: 'Three angles A, B, and C satisfy: A and B are complementary, B and C are supplementary. If A = {angle}°, find C.',
+      params: {
+        angle: { min: 20, max: 70, step: 10 }
+      },
+      solution: (p) => 90 + p.angle,
+      hint: 'A + B = 90, so B = 90 - A. Then B + C = 180, so C = 180 - B = 180 - (90 - A) = 90 + A'
     }
   ]
 };
