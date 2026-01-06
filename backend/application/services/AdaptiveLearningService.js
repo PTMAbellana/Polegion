@@ -460,8 +460,11 @@ class AdaptiveLearningService {
   async updatePerformanceMetrics(userId, topicId, currentState, isCorrect, timeSpent) {
     const totalAttempts = currentState.total_attempts + 1;
     const correctAnswers = currentState.correct_answers + (isCorrect ? 1 : 0);
+    const wrongAnswers = currentState.wrong_answers + (isCorrect ? 0 : 1);
     const correctStreak = isCorrect ? currentState.correct_streak + 1 : 0;
     const wrongStreak = !isCorrect ? currentState.wrong_streak + 1 : 0;
+
+    console.log(`[Performance] Answer: ${isCorrect ? 'CORRECT' : 'WRONG'}, correctStreak: ${correctStreak}, wrongStreak: ${wrongStreak}`);
 
     // Calculate mastery level (0-100) with advanced factors
     const accuracy = (correctAnswers / totalAttempts) * 100;
@@ -502,10 +505,13 @@ class AdaptiveLearningService {
     const updates = {
       total_attempts: totalAttempts,
       correct_answers: correctAnswers,
+      wrong_answers: wrongAnswers,
       correct_streak: correctStreak,
       wrong_streak: wrongStreak,
       mastery_level: masteryLevel
     };
+
+    console.log(`[Performance] Updates: correct_streak=${updates.correct_streak}, wrong_streak=${updates.wrong_streak}, wrong_answers=${updates.wrong_answers}`);
 
     // Update adaptive_learning_state
     const updatedState = await this.repo.updateStudentDifficulty(userId, topicId, updates);
@@ -1902,6 +1908,12 @@ class AdaptiveLearningService {
       const questionId = question.questionId || question.id;
       if (!questionId) {
         throw new Error('Generated question missing ID');
+      }
+
+      // CRITICAL: Ensure question has cognitive_domain for tracking in question_attempts table
+      if (!question.cognitive_domain) {
+        console.warn(`[AdaptiveLearning] Question missing cognitive_domain, setting to knowledge_recall`);
+        question.cognitive_domain = 'knowledge_recall';
       }
 
       // Add to question history

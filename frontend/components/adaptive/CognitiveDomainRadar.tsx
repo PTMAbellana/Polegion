@@ -1,9 +1,10 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
+import axios from '@/api/axios';
 
 interface CognitiveDomainRadarProps {
-  userId: string;
+  userId?: string; // optional, only used to trigger refetch on change
 }
 
 interface DomainPerformance {
@@ -21,26 +22,10 @@ export default function CognitiveDomainRadar({ userId }: CognitiveDomainRadarPro
 
   const fetchAndRenderRadar = async () => {
     try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        console.error('No authentication token found');
-        return;
-      }
-
-      const response = await fetch(`/api/adaptive/cognitive-performance`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
+      const response = await axios.get('/adaptive/cognitive-performance');
       
-      if (!response.ok) {
-        console.error('Failed to fetch cognitive performance');
-        return;
-      }
-
-      const data = await response.json();
-      if (data.success && data.data) {
-        drawRadarChart(data.data);
+      if (response.data.success && response.data.data) {
+        drawRadarChart(response.data.data);
       }
     } catch (error) {
       console.error('Error fetching cognitive performance:', error);
@@ -59,7 +44,7 @@ export default function CognitiveDomainRadar({ userId }: CognitiveDomainRadarPro
 
     const centerX = canvas.width / 2;
     const centerY = canvas.height / 2;
-    const radius = Math.min(centerX, centerY) - 40;
+    const radius = Math.min(centerX, centerY) - 30;
 
     // Domain labels (shortened for radar chart)
     const labels = [
@@ -164,28 +149,28 @@ export default function CognitiveDomainRadar({ userId }: CognitiveDomainRadarPro
 
     // Draw labels
     ctx.fillStyle = '#374151';
-    ctx.font = '10px system-ui, -apple-system, sans-serif';
+    ctx.font = '9px system-ui, -apple-system, sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     
     for (let i = 0; i < numSides; i++) {
       const angle = angleStep * i - Math.PI / 2;
-      const labelRadius = radius + 25;
+      const labelRadius = radius + 20;
       const x = centerX + labelRadius * Math.cos(angle);
       const y = centerY + labelRadius * Math.sin(angle);
       
       const labelLines = labels[i].split('\n');
       labelLines.forEach((line, lineIndex) => {
-        ctx.fillText(line, x, y + (lineIndex - 0.5) * 11);
+        ctx.fillText(line, x, y + (lineIndex - 0.5) * 10);
       });
 
       // Draw score
       ctx.fillStyle = '#6B7280';
-      ctx.font = 'bold 11px system-ui';
-      const scoreY = y + (labelLines.length - 0.5) * 11 + 12;
+      ctx.font = 'bold 10px system-ui';
+      const scoreY = y + (labelLines.length - 0.5) * 10 + 11;
       ctx.fillText(`${scores[i]}%`, x, scoreY);
       ctx.fillStyle = '#374151';
-      ctx.font = '10px system-ui';
+      ctx.font = '9px system-ui';
     }
   };
 
@@ -194,32 +179,32 @@ export default function CognitiveDomainRadar({ userId }: CognitiveDomainRadarPro
       background: 'white',
       border: '1px solid #E5E7EB',
       borderRadius: '12px',
-      padding: '16px',
-      marginTop: '16px'
+      padding: '12px',
+      marginTop: '8px'
     }}>
       <div style={{
-        fontSize: '12px',
+        fontSize: '11px',
         fontWeight: '600',
         color: '#374151',
-        marginBottom: '12px',
+        marginBottom: '8px',
         textAlign: 'center'
       }}>
         Cognitive Skills Profile
       </div>
       <canvas
         ref={canvasRef}
-        width={280}
-        height={280}
+        width={200}
+        height={200}
         style={{
           display: 'block',
           margin: '0 auto'
         }}
       />
       <div style={{
-        fontSize: '9px',
+        fontSize: '8px',
         color: '#9CA3AF',
         textAlign: 'center',
-        marginTop: '8px'
+        marginTop: '6px'
       }}>
         Your mastery across different thinking skills
       </div>

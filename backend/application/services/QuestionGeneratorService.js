@@ -1599,8 +1599,8 @@ class QuestionGeneratorService {
     // === STEP 4: Exclude Recent Question Types (Prevent Immediate Repetition) ===
     // WHY: Spaced repetition is more effective than immediate repetition.
     // Exclude the 2 most recent question types to ensure variety while maintaining
-    // curriculum coverage. If only 1-2 templates available, allow repeats rather than fail.
-    if (excludeTypes && excludeTypes.length > 0 && filteredTemplates.length > 2) {
+    // curriculum coverage. Only allow repeats if exclusion would eliminate ALL templates.
+    if (excludeTypes && excludeTypes.length > 0) {
       const beforeExclude = filteredTemplates.length;
       const typesToExclude = excludeTypes.slice(0, 2); // Only exclude 2 most recent
       
@@ -1611,10 +1611,13 @@ class QuestionGeneratorService {
       console.log(`[QGen] After exclusion - templates:`, templatesAfterExclude.map(t => t.type));
       
       if (templatesAfterExclude.length > 0) {
+        // Good: we have templates after exclusion
         filteredTemplates = templatesAfterExclude;
         console.log(`[QGen] Excluded ${typesToExclude.length} recent types, reduced from ${beforeExclude} to ${filteredTemplates.length} templates`);
       } else {
-        console.warn(`[QGen] Not enough template variety, allowing repeats`);
+        // Only 1-2 templates total and they're all recent types
+        // Allow repeat but warn about low diversity
+        console.warn(`[QGen] ⚠️  Not enough template variety after exclusion (${beforeExclude} total), allowing repeat to maintain flow`);
       }
     }
 

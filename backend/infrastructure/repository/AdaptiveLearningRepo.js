@@ -1376,46 +1376,60 @@ class AdaptiveLearningRepository {
    */
   async getCognitiveDomainPerformance(userId) {
     try {
+      // Query adaptive_learning_state (which has mastery_level and total_attempts)
+      // JOIN with adaptive_learning_topics to get cognitive_domain for each topic
       const { data, error } = await this.supabase
-        .from('question_attempts')
-        .select('is_correct, question_metadata')
-        .eq('user_id', userId)
-        .not('question_metadata', 'is', null);
+        .from('adaptive_learning_state')
+        .select(`
+          mastery_level,
+          total_attempts,
+          topic_id,
+          adaptive_learning_topics (
+            cognitive_domain
+          )
+        `)
+        .eq('user_id', userId);
 
       if (error) throw error;
 
-      // Calculate accuracy per domain
+      // Initialize all domains with 0
       const domains = {
-        knowledge_recall: { correct: 0, total: 0 },
-        concept_understanding: { correct: 0, total: 0 },
-        procedural_skills: { correct: 0, total: 0 },
-        analytical_thinking: { correct: 0, total: 0 },
-        problem_solving: { correct: 0, total: 0 },
-        higher_order_thinking: { correct: 0, total: 0 }
+        knowledge_recall: { score: 0, attempts: 0 },
+        concept_understanding: { score: 0, attempts: 0 },
+        procedural_skills: { score: 0, attempts: 0 },
+        analytical_thinking: { score: 0, attempts: 0 },
+        problem_solving: { score: 0, attempts: 0 },
+        higher_order_thinking: { score: 0, attempts: 0 }
       };
 
-      data.forEach(attempt => {
-        // Extract cognitive domain from question metadata
-        const domain = attempt.question_metadata?.cognitiveDomain || 
-                      attempt.question_metadata?.cognitive_domain;
+      // Aggregate by domain - take average mastery level per domain
+      const domainScores = {};
+      const domainCounts = {};
+
+      data?.forEach(state => {
+        // Get cognitive domain from joined topics table
+        const domain = state.adaptive_learning_topics?.cognitive_domain || 'knowledge_recall';
         
-        if (domain && domains[domain]) {
-          domains[domain].total++;
-          if (attempt.is_correct) {
-            domains[domain].correct++;
+        if (domains[domain]) {
+          if (!domainScores[domain]) {
+            domainScores[domain] = 0;
+            domainCounts[domain] = 0;
           }
+          domainScores[domain] += state.mastery_level || 0;
+          domainCounts[domain]++;
+          domains[domain].attempts += state.total_attempts || 0;
         }
       });
 
-      // Calculate percentages
+      // Calculate average score per domain
       const performance = Object.keys(domains).map(domain => ({
         domain,
-        score: domains[domain].total > 0 
-          ? Math.round((domains[domain].correct / domains[domain].total) * 100)
-          : 0,
-        attempts: domains[domain].total
+        score: domainCounts[domain] ? Math.round(domainScores[domain] / domainCounts[domain]) : 0,
+        attempts: domains[domain].attempts,
+        topicsCount: domainCounts[domain] || 0
       }));
 
+      console.log('[Repo] Cognitive domain performance:', performance);
       return performance;
     } catch (error) {
       console.error('Error getting cognitive domain performance:', error);

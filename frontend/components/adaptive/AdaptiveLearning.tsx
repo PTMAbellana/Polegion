@@ -108,7 +108,13 @@ export default function AdaptiveLearning({ topicId, topicName: topicNameProp, on
           question: questionData.question,
           options: questionData.options,
           questionId: questionData.questionId,
-          hint: questionData.hint
+          hint: questionData.hint,
+          // Store full metadata for submission tracking (radar chart analytics)
+          cognitive_domain: questionData.cognitive_domain,
+          cognitiveDomain: questionData.cognitive_domain, // Try both formats
+          type: questionData.type,
+          difficulty_level: questionData.difficulty_level,
+          id: questionData.id || questionData.questionId
         });
         setAnswerSubmitted(false); // Reset for new question
         setHintRequestCount(0); // Reset hint count for new question
@@ -184,14 +190,20 @@ export default function AdaptiveLearning({ topicId, topicName: topicNameProp, on
         questionText: currentQuestion?.question,
         options: currentQuestion?.options,
         correctAnswer: currentQuestion?.options.find((opt: any) => opt.correct)?.label,
-        userAnswer: selectedOption?.label || selectedOption?.text
+        userAnswer: selectedOption?.label || selectedOption?.text,
+        // CRITICAL: Include full question metadata for radar chart tracking
+        cognitive_domain: currentQuestion?.cognitive_domain,
+        cognitiveDomain: currentQuestion?.cognitiveDomain,
+        type: currentQuestion?.type,
+        hint: currentQuestion?.hint
       };
       
       console.log('[AdaptiveLearning] Submitting answer:', {
         topicId,
         questionId,
         isCorrect,
-        hasQuestionData: !!questionData
+        hasQuestionData: !!questionData,
+        cognitive_domain: questionData.cognitive_domain || questionData.cognitiveDomain
       });
       
       const response = await axios.post('/adaptive/submit-answer-enhanced', {
@@ -350,7 +362,7 @@ export default function AdaptiveLearning({ topicId, topicName: topicNameProp, on
           background: #F5F7FA;
           overflow: hidden;
           display: grid;
-          grid-template-columns: 280px 1fr 360px;
+          grid-template-columns: 320px 1fr 360px;
         }
         
         .sidebar {
@@ -359,7 +371,7 @@ export default function AdaptiveLearning({ topicId, topicName: topicNameProp, on
           padding: 24px 20px;
           display: flex;
           flex-direction: column;
-          gap: 24px;
+          gap: 12px;
           overflow-y: auto;
         }
         
@@ -586,8 +598,6 @@ export default function AdaptiveLearning({ topicId, topicName: topicNameProp, on
           </div>
         )}
 
-        {userId && <CognitiveDomainRadar userId={userId} />}
-
         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
           <div className="stat-chip">
             <div style={{ 
@@ -666,6 +676,10 @@ export default function AdaptiveLearning({ topicId, topicName: topicNameProp, on
             Change Topic
           </button>
         )}
+
+        <div style={{ marginTop: '12px' }}>
+          <CognitiveDomainRadar userId={userId} />
+        </div>
       </div>
 
       {/* Modals - Outside grid flow */}
