@@ -330,7 +330,7 @@ export default function AdaptiveLearning({ topicId, topicName: topicNameProp, on
       
       if (isCorrect) {
         setShowCelebration(true);
-        setTimeout(() => setShowCelebration(false), 2000);
+        // Don't auto-dismiss - wait for user confirmation
         
         // FIX: Only show topic unlock modal if not already shown for this topic
         if (responseData.topicUnlocked && responseData.topicUnlocked.unlocked) {
@@ -1236,15 +1236,154 @@ export default function AdaptiveLearning({ topicId, topicName: topicNameProp, on
       {showCelebration && (
         <div style={{
           position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-          backgroundColor: 'rgba(0, 0, 0, 0.4)', display: 'flex',
-          alignItems: 'center', justifyContent: 'center', zIndex: 50
-        }}>
+          backgroundColor: 'rgba(0, 0, 0, 0.6)', display: 'flex',
+          alignItems: 'center', justifyContent: 'center', zIndex: 9999,
+          fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+        }}
+        onClick={() => { setShowCelebration(false); generateNewQuestion(); }}
+        >
           <div style={{
-            backgroundColor: 'white', borderRadius: '16px', padding: '40px',
-            textAlign: 'center', maxWidth: '320px'
-          }}>
-            <div style={{ fontSize: '64px', marginBottom: '16px' }}>✓</div>
-            <h2 style={{ fontSize: '24px', fontWeight: 600, color: '#10B981', margin: 0 }}>Correct!</h2>
+            backgroundColor: '#f4e9d9',
+            borderRadius: '16px',
+            padding: 'clamp(16px, 3.5vw, 24px)',
+            maxWidth: '500px',
+            width: '92%',
+            boxShadow: '0 25px 50px -12px rgba(139, 100, 60, 0.4), inset 0 2px 8px rgba(218, 165, 32, 0.1)',
+            border: '4px solid #228b22',
+            background: 'linear-gradient(135deg, #f4e9d9 0%, #ecdcc4 30%, #e8d5ba 50%, #f0e3cf 70%, #f4e9d9 100%)',
+            position: 'relative'
+          }}
+          onClick={(e) => e.stopPropagation()}
+          >
+            {/* Parchment texture overlay */}
+            <div style={{
+              position: 'absolute',
+              inset: 0,
+              backgroundImage: `
+                repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(139, 100, 60, 0.03) 2px, rgba(139, 100, 60, 0.03) 4px),
+                repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(139, 100, 60, 0.02) 2px, rgba(139, 100, 60, 0.02) 4px)
+              `,
+              pointerEvents: 'none',
+              opacity: 0.5,
+              borderRadius: '16px'
+            }} />
+
+            <div style={{ position: 'relative', zIndex: 1 }}>
+              {/* Header Icon */}
+              <div style={{
+                width: 'clamp(60px, 12vw, 70px)',
+                height: 'clamp(60px, 12vw, 70px)',
+                margin: '0 auto 16px',
+                borderRadius: '50%',
+                background: 'radial-gradient(circle at 30% 30%, #6ee7b7, #228b22)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: 'clamp(32px, 6vw, 40px)',
+                border: '4px solid #15803d',
+                boxShadow: '0 6px 20px rgba(34, 139, 34, 0.4), inset 0 2px 4px rgba(255, 255, 255, 0.3)',
+                filter: 'drop-shadow(0 0 8px rgba(34, 139, 34, 0.3))'
+              }}>
+                ✓
+              </div>
+
+              {/* Title */}
+              <h2 style={{
+                fontSize: 'clamp(22px, 5vw, 28px)',
+                fontWeight: 800,
+                color: '#14532d',
+                marginBottom: '16px',
+                textAlign: 'center',
+                margin: '0 0 16px 0',
+                fontFamily: 'Cinzel, serif',
+                textShadow: '0 1px 2px rgba(139, 100, 60, 0.2)',
+                letterSpacing: '0.5px'
+              }}>
+                Excellent Work! 🎉
+              </h2>
+
+              {/* Correct Answer Display */}
+              <div style={{
+                background: 'rgba(209, 250, 229, 0.6)',
+                borderRadius: '10px',
+                padding: 'clamp(12px, 2.5vw, 16px)',
+                marginBottom: '14px',
+                borderLeft: '5px solid #228b22',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '10px',
+                flexWrap: 'wrap',
+                boxShadow: 'inset 0 1px 3px rgba(0, 0, 0, 0.1)'
+              }}>
+                <span style={{ fontSize: 'clamp(18px, 4vw, 24px)' }}>✅</span>
+                <span style={{ fontSize: 'clamp(13px, 3vw, 16px)', color: '#14532d', fontWeight: 700, fontFamily: 'Cinzel, serif' }}>
+                  Your answer is correct!
+                </span>
+              </div>
+
+              {/* Encouragement Message */}
+              <div style={{
+                background: 'rgba(218, 165, 32, 0.15)',
+                borderRadius: '10px',
+                padding: 'clamp(12px, 3vw, 16px)',
+                marginBottom: '14px',
+                borderLeft: '5px solid #daa520',
+                boxShadow: 'inset 0 1px 3px rgba(0, 0, 0, 0.1)'
+              }}>
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  marginBottom: '8px'
+                }}>
+                  <span style={{ fontSize: 'clamp(20px, 4.5vw, 24px)' }}>🌟</span>
+                  <div style={{ fontSize: 'clamp(13px, 2.8vw, 15px)', color: '#654321', fontWeight: 700, fontFamily: 'Cinzel, serif' }}>
+                    Keep it up!
+                  </div>
+                </div>
+                <div style={{
+                  fontSize: 'clamp(13px, 3vw, 15px)',
+                  color: '#3d2817',
+                  lineHeight: '1.7',
+                  fontFamily: 'Georgia, serif'
+                }}>
+                  You're mastering this concept! Keep up the great work and continue building your skills.
+                </div>
+              </div>
+
+              {/* Continue Button */}
+              <button
+                onClick={() => { setShowCelebration(false); generateNewQuestion(); }}
+                style={{
+                  width: '100%',
+                  background: 'linear-gradient(135deg, #228b22, #15803d)',
+                  color: '#fef5e7',
+                  border: '3px solid #14532d',
+                  borderRadius: '10px',
+                  padding: 'clamp(12px, 3vw, 16px) clamp(18px, 4.5vw, 24px)',
+                  fontSize: 'clamp(14px, 3.2vw, 18px)',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  boxShadow: '0 6px 16px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
+                  fontFamily: 'Cinzel, serif',
+                  textTransform: 'uppercase',
+                  letterSpacing: '1px'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = 'linear-gradient(135deg, #15803d, #14532d)';
+                  e.currentTarget.style.transform = 'translateY(-2px)';
+                  e.currentTarget.style.boxShadow = '0 8px 20px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = 'linear-gradient(135deg, #228b22, #15803d)';
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = '0 6px 16px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1)';
+                }}
+              >
+                Next Question →
+              </button>
+            </div>
           </div>
         </div>
       )}
