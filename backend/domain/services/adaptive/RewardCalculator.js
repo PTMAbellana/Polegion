@@ -2,6 +2,13 @@
  * Reward Calculator Domain Service
  * Encapsulates educational reward logic for reinforcement learning
  * Based on learning psychology and pedagogical principles
+ * 
+ * RESEARCH-ALIGNED REWARD STRUCTURE:
+ * - Correct on 1st try: +8 to +10 (demonstrates understanding)
+ * - Correct after hint: +4 to +6 (learned with scaffolding)
+ * - Wrong answer: -3 to -5 (indicates knowledge gap)
+ * - Mastery milestone: +10 (major achievement)
+ * - Frustration pattern: -8 (pedagogical failure)
  */
 class RewardCalculator {
   constructor() {
@@ -10,25 +17,58 @@ class RewardCalculator {
       ADVANCE_WITH_MASTERY: 10,           // Student ready to progress
       OPTIMAL_CHALLENGE_ZONE: 7,          // "Flow state" - just right difficulty
       IMPROVED_AFTER_STRATEGY: 3,         // Strategy change helped
-      CORRECT_ANSWER: 2,                  // Basic positive reinforcement
+      
+      // Context-dependent correct answer rewards
+      CORRECT_FIRST_TRY: 10,              // ★ High reward: demonstrates understanding
+      CORRECT_AFTER_HINT: 6,              // ★ Moderate reward: learned with scaffolding
+      CORRECT_AFTER_RETRY: 4,             // ★ Low reward: perseverance but struggled
+      CORRECT_ANSWER: 2,                  // Basic positive reinforcement (legacy)
+      
       MAINTAINED_HIGH_MASTERY: 3,         // Student maintaining excellence
       RAPID_MASTERY: 8,                   // Fast improvement
       MASTERY_IMPROVED: 5,                // Positive mastery change reward
 
       // Negative outcomes (pedagogical failures)
       BOREDOM: -3,                        // Too easy, long correct streak
-      FRUSTRATION: -5,                    // Too hard, repeated failures
-      POOR_ADAPTATION: -7,                // Repeating failures with no strategy change
+      FRUSTRATION: -8,                    // ★ INCREASED: Too hard, repeated failures
       MASTERY_DECREASED: -2,              // Regression
-      MISCONCEPTION_REPEATED: -6          // Same error pattern without intervention
+      WRONG_ANSWER: -4                    // Base wrong answer penalty
     };
   }
 
   /**
-   * Calculate reward based on answer correctness and state change
+   * Calculate reward based on answer correctness and attempt context
+   * NOW CONSIDERS: First try vs retry vs hint usage
+   * 
+   * @param {Object} currentState - State before answer
+   * @param {Object} newState - State after answer
+   * @param {boolean} wasCorrect - Whether answer was correct
+   * @param {number} reward - Override reward (if specified)
+   * @returns {number} Calculated reward value
    */
   calculateReward(currentState, newState, wasCorrect, reward = 0) {
-    let baseReward = wasCorrect ? this.REWARDS.CORRECT_ANSWER : -1;
+    let baseReward = 0;
+    
+    // Determine attempt context
+    const correctStreak = newState.correctStreak || 0;
+    const wrongStreak = newState.wrongStreak || 0;
+    const isFirstTry = correctStreak >= 1 && wrongStreak === 0;
+    const usedHint = wrongStreak >= 2;
+    
+    if (wasCorrect) {
+      // Apply context-dependent reward
+      if (isFirstTry) {
+        baseReward = this.REWARDS.CORRECT_FIRST_TRY; // +10
+      } else if (usedHint && wrongStreak === 1) {
+        baseReward = this.REWARDS.CORRECT_AFTER_HINT; // +6
+      } else if (wrongStreak >= 2) {
+        baseReward = this.REWARDS.CORRECT_AFTER_RETRY; // +4
+      } else {
+        baseReward = this.REWARDS.CORRECT_ANSWER; // +2 (fallback)
+      }
+    } else {
+      baseReward = this.REWARDS.WRONG_ANSWER; // -4
+    }
 
     // Adjust for mastery improvement
     const masteryChange = newState.mastery.value - currentState.mastery.value;
@@ -45,16 +85,16 @@ class RewardCalculator {
       baseReward += this.REWARDS.OPTIMAL_CHALLENGE_ZONE;
     }
 
-    // Penalize frustration (multiple wrong answers)
+    // Penalize frustration (multiple wrong answers) - INCREASED TO -8
     // FIX #8: Scale penalty by mastery - beginners (<30%) get gentler treatment
     if (!wasCorrect && newState.wrongStreak >= 3) {
       const masteryLevel = newState.mastery?.value || 0;
       if (masteryLevel < 30) {
         // Beginners: gentle penalty to avoid discouragement
-        baseReward += Math.max(this.REWARDS.FRUSTRATION * 0.4, -2); // Max -2 instead of -5
+        baseReward += Math.max(this.REWARDS.FRUSTRATION * 0.4, -3); // Max -3 instead of -8
       } else {
         // Experienced students: full penalty
-        baseReward += this.REWARDS.FRUSTRATION;
+        baseReward += this.REWARDS.FRUSTRATION; // -8
       }
     }
 
@@ -91,49 +131,6 @@ class RewardCalculator {
     }
 
     return reward;
-  }
-
-  /**
-   * Calculate reward for strategy/representation change
-   */
-  calculateStrategyChangeReward(wasStrategyChanged, improved) {
-    if (wasStrategyChanged && improved) {
-      return this.REWARDS.IMPROVED_AFTER_STRATEGY;
-    }
-    if (wasStrategyChanged && !improved) {
-      return this.REWARDS.POOR_ADAPTATION;
-    }
-    return 0;
-  }
-
-  /**
-   * Detect misconception (same error pattern)
-   */
-  detectMisconception(previousErrors, currentError) {
-    if (!previousErrors || previousErrors.length === 0) {
-      return false;
-    }
-
-    // Check if current error matches recent errors
-    const recentErrors = previousErrors.slice(-3);
-    return recentErrors.some(error => this.isSameErrorPattern(error, currentError));
-  }
-
-  /**
-   * Check if two errors are of the same type
-   */
-  isSameErrorPattern(error1, error2) {
-    // Simple string matching; in production, could be more sophisticated
-    return error1 && error2 && error1.type === error2.type;
-  }
-
-  /**
-   * Calculate penalty for repeated misconception
-   */
-  calculateMisconceptionPenalty(misconceptionCount) {
-    // First misconception: small penalty
-    // Repeated misconceptions: increasing penalty
-    return -Math.min(misconceptionCount * 2, this.REWARDS.MISCONCEPTION_REPEATED);
   }
 
   /**

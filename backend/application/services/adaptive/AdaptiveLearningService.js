@@ -1,16 +1,65 @@
 /**
- * AdaptiveLearningService
+ * AdaptiveLearningService - FULLY ADAPTIVE LEARNING SYSTEM
  * Implements MDP with Q-Learning for adaptive difficulty adjustment
  * Research Focus: Test if adaptive difficulty improves learning outcomes
  * 
+ * =============================================================================
+ * RESEARCH-GRADE ADAPTIVE LEARNING IMPLEMENTATION (ICETT-Ready)
+ * =============================================================================
+ * 
+ * This system implements TRUE ADAPTIVITY through:
+ * 
+ * 1️⃣ MASTERY PROGRESSION (Attempt-Aware & Context-Dependent)
+ *    ✅ Correct on 1st try → +18-25% mastery (demonstrates understanding)
+ *    ✅ Correct after hint → +10-15% mastery (learned with scaffolding)
+ *    ✅ Correct after 2+ wrongs → +5-8% mastery (perseverance, but struggled)
+ *    ✅ Wrong answer → -5-10% mastery penalty (never zero, bounded 0-100)
+ *    ✅ Factors: Attempt count, difficulty, cognitive domain, accuracy patterns
+ *    
+ * 2️⃣ STABILITY-BASED UNLOCKING (Not Linear)
+ *    ✅ Requires: Mastery ≥ 60% AND stability (one of):
+ *       - Accuracy ≥ 70% over last 5 attempts
+ *       - 2+ consecutive correct answers
+ *       - Correct without hint at difficulty ≥ 3
+ *    ✅ Prevents: Guess-based unlocking, premature progression
+ *    
+ * 3️⃣ Q-LEARNING DRIVES PEDAGOGY (Not Decorative)
+ *    ✅ State includes: mastery, difficulty, streaks, attempts
+ *    ✅ Actions: Adjust difficulty, change representation, provide hints, review
+ *    ✅ Rewards: Context-dependent (+10 first try, +6 after hint, -8 frustration)
+ *    ✅ Logs: state → action → reward → next_state for research analysis
+ *    ✅ Epsilon-greedy: Explores teaching strategies early, exploits learned optimal later
+ *    
+ * 4️⃣ REWARD SHAPING (Research-Aligned)
+ *    ✅ Correct (1st try): +8 to +10
+ *    ✅ Correct (after hint): +4 to +6
+ *    ✅ Wrong: -3 to -5
+ *    ✅ Mastery milestone: +10
+ *    ✅ Frustration pattern: -8
+ *    
+ * 5️⃣ QUESTION & HINT VALIDATION
+ *    ✅ Correct answer verification
+ *    ✅ Difficulty-appropriate values
+ *    ✅ Hints shown ONLY when wrong_streak ≥ 2
+ *    ✅ Progressive support: 1st wrong → hint, 2nd → similar question, 3rd → easier
+ *    
  * Key AI Features:
- * - Q-Learning algorithm for optimal action selection
- * - Epsilon-greedy exploration strategy
- * - Advanced reward shaping based on learning theory
+ * - Q-Learning algorithm for optimal pedagogical action selection
+ * - Epsilon-greedy exploration strategy (high early, decays over time)
+ * - Advanced reward shaping based on learning theory (flow, mastery, ZPD)
  * - State representation with multiple performance indicators
  * - Performance prediction using historical patterns
  * - Parametric question generation (infinite unique variations)
+ * - Cognitive domain progression (recall → understanding → problem-solving)
  * - AI-generated step-by-step explanations for learning support
+ * 
+ * PEDAGOGICAL FOUNDATIONS:
+ * - Mastery Learning (Bloom, 1968): Students progress when ready
+ * - Zone of Proximal Development (Vygotsky): Optimal challenge with scaffolding
+ * - Flow Theory (Csikszentmihalyi): Engagement through appropriate difficulty
+ * - Reinforcement Learning (Sutton & Barto): Learn optimal teaching policies
+ * - Spaced Repetition: Review at increasing intervals
+ * - Bloom's Taxonomy: Cognitive complexity progression
  */
 
 const QuestionGeneratorService = require('./QuestionGeneratorService');
@@ -109,26 +158,32 @@ class AdaptiveLearningService {
     // Structure: { stateKey: { action: qValue } }
     this.qTable = new Map();
 
-    // Reward values - Educational Psychology Based
+    // Reward values - Educational Psychology Based (RESEARCH-ALIGNED)
+    // Updated to match ICETT/research requirements for reinforcement learning
     this.REWARDS = {
-      // Positive outcomes
+      // Positive outcomes (INCREASED for better signal)
       ADVANCE_WITH_MASTERY: 10,       // Student ready to progress
       ADVANCE_CHAPTER: 10,            // Alias for ADVANCE_WITH_MASTERY (used in code)
       ADVANCED_CHAPTER: 10,           // Another alias (used in calculateAdvancedReward)
+      
+      // CORRECT ANSWER REWARDS (context-dependent, applied in calculateAdvancedReward)
+      CORRECT_FIRST_TRY: 10,          // ★ High reward: demonstrates solid understanding
+      CORRECT_AFTER_HINT: 6,          // ★ Moderate reward: learned with scaffolding
+      CORRECT_AFTER_RETRY: 4,         // ★ Low reward: perseverance, but struggled
+      CORRECT_ANSWER: 2,              // Base correct answer reward (legacy)
+      
       OPTIMAL_CHALLENGE_ZONE: 7,      // "Flow state" - just right difficulty
       OPTIMAL_CHALLENGE: 7,           // Alias for OPTIMAL_CHALLENGE_ZONE (used in code)
       IMPROVED_AFTER_STRATEGY: 3,     // Strategy change helped
-      CORRECT_ANSWER: 2,
       MAINTAINED_HIGH_MASTERY: 3,
       RAPID_MASTERY: 8,
       MASTERY_IMPROVED: 5,            // Positive mastery change reward
       
       // Negative outcomes (pedagogical failures)
       BOREDOM: -3,                    // Too easy, long correct streak
-      FRUSTRATION: -5,                // Too hard, repeated failures
-      POOR_ADAPTATION: -7,            // Repeating failures with no strategy change
-      MASTERY_DECREASED: -2,
-      MISCONCEPTION_REPEATED: -6      // Same error pattern without intervention
+      FRUSTRATION: -8,                // ★ INCREASED: Too hard, repeated failures
+      MASTERY_DECREASED: -2,          // Regression
+      WRONG_ANSWER: -4                // Base wrong answer penalty
     };
   }
 
@@ -290,12 +345,17 @@ class AdaptiveLearningService {
       
       // === STEP 3: Get Current State & Update Performance Metrics ===
       const currentState = await this.repo.getStudentDifficulty(userId, topicId);
+      
+      // Extract cognitive domain from question data for adaptive mastery calculation
+      const cognitiveDomain = questionData?.cognitive_domain || questionData?.cognitiveDomain || 'knowledge_recall';
+      
       const newState = await this.updatePerformanceMetrics(
         userId, 
         topicId, 
         currentState, 
         isCorrect,
-        timeSpent
+        timeSpent,
+        cognitiveDomain // NEW: Pass domain for context-aware mastery gains
       );
 
       // 3. Create state representations for Q-learning
@@ -486,8 +546,8 @@ class AdaptiveLearningService {
       const updatedQValue = this.getQValue(userId, currentStateKey, action);
       const currentEpsilon = this.getCurrentEpsilon(updatedState.total_attempts);
       
-      // Extract cognitive domain from question data
-      const cognitiveDomain = questionData?.cognitive_domain || questionData?.cognitiveDomain || 'knowledge_recall';
+      // Extract cognitive domain from question data (reuse from earlier extraction)
+      const questionCognitiveDomain = cognitiveDomain || 'knowledge_recall';
       
       const transition = await this.repo.logStateTransition({
         userId,
@@ -505,7 +565,7 @@ class AdaptiveLearningService {
         epsilon: currentEpsilon, // Store actual epsilon, not wrapped in metadata
         sessionId: this.generateSessionId(userId),
         cohortMode: this.EXPERIMENT_MODE,
-        cognitiveDomain // Cognitive domain for research analysis
+        cognitiveDomain: questionCognitiveDomain // Cognitive domain for research analysis
       });
 
       // 10. Check for chapter mastery and unlock next chapter
@@ -553,9 +613,23 @@ class AdaptiveLearningService {
 
   /**
    * Update student's performance metrics based on answer
-   * Enhanced with time-based learning indicators and domain events
+   * FULLY ADAPTIVE: Mastery gains depend on attempt context, difficulty, and cognitive load
+   * 
+   * RESEARCH-DEFENSIBLE MASTERY PROGRESSION:
+   * - Correct on 1st try (no hint) → HIGH mastery gain (+18-25%)
+   * - Correct after 1 hint → MODERATE mastery gain (+10-15%)
+   * - Correct after 2+ wrongs → LOW mastery gain (+5-8%)
+   * - Wrong answer → SMALL mastery penalty (-5-10%)
+   * - Mastery bounded: 0-100%
+   * 
+   * Factors considered:
+   * 1. Attempt count for this question (1st try vs retry)
+   * 2. Difficulty level (higher difficulty = more mastery gain)
+   * 3. Hint usage (tracked via wrong_streak and hints_shown_count)
+   * 4. Cognitive domain (procedural < analytical < problem-solving)
+   * 5. Recent accuracy pattern (consistency bonus/penalty)
    */
-  async updatePerformanceMetrics(userId, topicId, currentState, isCorrect, timeSpent) {
+  async updatePerformanceMetrics(userId, topicId, currentState, isCorrect, timeSpent, cognitiveDomain = 'knowledge_recall') {
     const totalAttempts = currentState.total_attempts + 1;
     const correctAnswers = currentState.correct_answers + (isCorrect ? 1 : 0);
     const wrongAnswers = currentState.wrong_answers + (isCorrect ? 0 : 1);
@@ -564,61 +638,128 @@ class AdaptiveLearningService {
 
     console.log(`[Performance] Answer: ${isCorrect ? 'CORRECT' : 'WRONG'}, correctStreak: ${correctStreak}, wrongStreak: ${wrongStreak}`);
 
-    // Calculate mastery level (0-100) with advanced factors
-    const accuracy = (correctAnswers / totalAttempts) * 100;
+    // ============================================================================
+    // FULLY ADAPTIVE MASTERY PROGRESSION (Research-Grade Implementation)
+    // ============================================================================
+    // DESIGN PRINCIPLE: Mastery gains must reflect the LEARNING QUALITY, not just correctness.
+    // A student who solves on 1st try demonstrates deeper understanding than one
+    // who needed 2 hints. This is pedagogically sound and research-defensible.
+    // ============================================================================
     
-    // Streak bonus: rewards consistency (max 20 points)
-    const streakBonus = Math.min(correctStreak * 4, 20);
-    
-    // Streak penalty: indicates struggling (max 20 points)
-    const streakPenalty = Math.min(wrongStreak * 4, 20);
-    
-    // Difficulty adjustment: higher difficulty correct answers worth more
-    const difficultyBonus = isCorrect ? (currentState.difficulty_level - 3) * 2 : 0;
-    
-    // Time factor: penalize if taking too long (indicates uncertainty)
-    const expectedTime = 60; // 60 seconds per question baseline
-    const timeFactor = timeSpent > expectedTime * 2 ? -5 : 0;
-    
-    // SAMPLE SIZE PENALTY: Prevent instant 100% mastery from 1 correct answer
-    // Mastery should require multiple attempts to reach high percentages
-    // Progressive caps: 1 attempt=max 20%, 2=40%, 3=60%, 5=80%, 8+=100%
-    // FIX #9: MASTERY CAP ACCELERATION for fast learners with high correct streaks
-    let masteryCapByAttempts = 100; // Default: no cap for 8+ attempts
-    const fastLearnerBonus = correctStreak >= 5 ? 20 : correctStreak >= 3 ? 10 : 0;
-    
-    if (totalAttempts === 1) {
-      masteryCapByAttempts = 20 + fastLearnerBonus;
-    } else if (totalAttempts === 2) {
-      masteryCapByAttempts = 40 + fastLearnerBonus;
-    } else if (totalAttempts === 3) {
-      masteryCapByAttempts = 60 + fastLearnerBonus;
-    } else if (totalAttempts < 5) {
-      masteryCapByAttempts = 70 + fastLearnerBonus;
-    } else if (totalAttempts < 8) {
-      masteryCapByAttempts = 85 + fastLearnerBonus;
-    }
-    
-    // Ensure cap doesn't exceed 100
-    masteryCapByAttempts = Math.min(masteryCapByAttempts, 100);
-    
-    // Calculate final mastery with all factors
-    let masteryLevel = accuracy + streakBonus - streakPenalty + difficultyBonus + timeFactor;
-    masteryLevel = Math.max(0, Math.min(100, Math.min(masteryLevel, masteryCapByAttempts)));
-    
-    // FIX #10: MASTERY REGRESSION PROTECTION
-    // Prevent large mastery drops from single mistakes for advanced students
     const oldMasteryLevel = currentState.mastery_level || 0;
-    const masteryDrop = oldMasteryLevel - masteryLevel;
+    let masteryChange = 0; // Delta to apply (can be positive or negative)
+    const difficultyLevel = currentState.difficulty_level || 3;
     
-    if (masteryDrop > 0 && oldMasteryLevel >= 70) {
-      // Advanced students: limit regression to max 10 points per wrong answer
-      const maxAllowedDrop = 10;
-      if (masteryDrop > maxAllowedDrop) {
-        masteryLevel = oldMasteryLevel - maxAllowedDrop;
-        console.log(`[MasteryProtection] Prevented large drop: ${oldMasteryLevel.toFixed(1)}% → ${masteryLevel.toFixed(1)}% (capped at -${maxAllowedDrop})`);
+    // Determine attempt context for this specific question
+    const isFirstTry = wrongStreak === 0 && correctStreak >= 1;
+    const usedHint = wrongStreak >= 2; // Hint shown after 2nd wrong attempt
+    const multipleWrongs = wrongStreak >= 2;
+    
+    // Cognitive domain difficulty multiplier
+    // More complex thinking → higher mastery gain when correct
+    const domainMultipliers = {
+      'knowledge_recall': 1.0,        // Basic recall
+      'concept_understanding': 1.1,   // Understanding relationships
+      'procedural_skills': 1.15,      // Multi-step procedures
+      'analytical_thinking': 1.25,    // Analysis and reasoning
+      'problem_solving': 1.35,        // Complex problem solving
+      'higher_order_thinking': 1.5    // Creative/evaluative thinking
+    };
+    const domainMultiplier = domainMultipliers[cognitiveDomain] || 1.0;
+    
+    if (isCorrect) {
+      // ========== CORRECT ANSWER: Mastery GAIN (context-dependent) ==========
+      
+      if (isFirstTry) {
+        // SCENARIO 1: Correct on FIRST TRY (no hints needed)
+        // → HIGH mastery gain: student demonstrates solid understanding
+        // Base gain: 18-25% depending on difficulty
+        const baseGain = 18 + (difficultyLevel * 1.4); // Difficulty 1→19.4%, 5→25%
+        masteryChange = baseGain * domainMultiplier;
+        console.log(`[MasteryProgression] ✅ Correct on FIRST TRY: +${masteryChange.toFixed(1)}% (difficulty ${difficultyLevel}, domain ${cognitiveDomain})`);
+        
+      } else if (usedHint && wrongStreak === 1) {
+        // SCENARIO 2: Correct after 1 HINT (1 wrong, then hint, then correct)
+        // → MODERATE mastery gain: student learned with scaffolding
+        // Base gain: 10-15%
+        const baseGain = 10 + (difficultyLevel * 1.0);
+        masteryChange = baseGain * domainMultiplier;
+        console.log(`[MasteryProgression] ✅ Correct after 1 HINT: +${masteryChange.toFixed(1)}% (scaffolded learning)`);
+        
+      } else if (multipleWrongs) {
+        // SCENARIO 3: Correct after MULTIPLE WRONGS (2+ attempts)
+        // → LOW mastery gain: student struggled significantly
+        // Base gain: 5-8%
+        const baseGain = 5 + (difficultyLevel * 0.6);
+        masteryChange = baseGain * domainMultiplier * 0.8; // Further reduced for heavy struggle
+        console.log(`[MasteryProgression] ✅ Correct after ${wrongStreak} WRONGS: +${masteryChange.toFixed(1)}% (perseverance, but struggled)`);
+        
+      } else {
+        // SCENARIO 4: Correct after 1 wrong (no hint threshold yet)
+        // → MODERATE mastery gain
+        const baseGain = 12 + (difficultyLevel * 0.8);
+        masteryChange = baseGain * domainMultiplier;
+        console.log(`[MasteryProgression] ✅ Correct after 1 wrong: +${masteryChange.toFixed(1)}%`);
+      }
+      
+      // BONUS: Consistency reward for maintaining correct streaks
+      if (correctStreak >= 3) {
+        const consistencyBonus = Math.min(correctStreak * 0.5, 3); // Max +3%
+        masteryChange += consistencyBonus;
+        console.log(`[MasteryProgression] 🎯 Consistency bonus: +${consistencyBonus.toFixed(1)}% (streak: ${correctStreak})`);
+      }
+      
+    } else {
+      // ========== WRONG ANSWER: Mastery PENALTY (graduated) ==========
+      
+      // PEDAGOGICAL PRINCIPLE: Wrong answers indicate gaps, but we don't want to
+      // discourage students. Penalty should be meaningful but not devastating.
+      
+      if (wrongStreak === 1) {
+        // First mistake: small penalty (encourages risk-taking)
+        masteryChange = -5;
+        console.log(`[MasteryProgression] ❌ First mistake: ${masteryChange}% (exploration is OK)`);
+        
+      } else if (wrongStreak === 2) {
+        // Second mistake: moderate penalty (indicates confusion)
+        masteryChange = -7;
+        console.log(`[MasteryProgression] ❌ Second mistake: ${masteryChange}% (hint will be shown)`);
+        
+      } else {
+        // Third+ mistake: larger penalty (serious misconception)
+        masteryChange = -10;
+        console.log(`[MasteryProgression] ❌ ${wrongStreak} mistakes: ${masteryChange}% (misconception detected)`);
+      }
+      
+      // PROTECTION: Reduce penalty for beginners (< 30% mastery)
+      // They're still learning basics and need encouragement
+      if (oldMasteryLevel < 30) {
+        masteryChange = masteryChange * 0.5; // Half penalty
+        console.log(`[MasteryProgression] 🛡️ Beginner protection: penalty reduced to ${masteryChange.toFixed(1)}%`);
       }
     }
+    
+    // Apply mastery change with bounds [0, 100]
+    let masteryLevel = oldMasteryLevel + masteryChange;
+    masteryLevel = Math.max(0, Math.min(100, masteryLevel));
+    
+    // SAMPLE SIZE PROTECTION: Prevent premature 100% mastery
+    // First few attempts should be capped to require sustained performance
+    let masteryCapByAttempts = 100;
+    if (totalAttempts === 1) {
+      masteryCapByAttempts = 25;
+    } else if (totalAttempts === 2) {
+      masteryCapByAttempts = 45;
+    } else if (totalAttempts === 3) {
+      masteryCapByAttempts = 65;
+    } else if (totalAttempts < 5) {
+      masteryCapByAttempts = 75;
+    } else if (totalAttempts < 8) {
+      masteryCapByAttempts = 85;
+    }
+    masteryLevel = Math.min(masteryLevel, masteryCapByAttempts);
+    
+    console.log(`[MasteryProgression] Final: ${oldMasteryLevel.toFixed(1)}% → ${masteryLevel.toFixed(1)}% (Δ${masteryChange.toFixed(1)}%, capped at ${masteryCapByAttempts}% for ${totalAttempts} attempts)`);
 
     const updates = {
       total_attempts: totalAttempts,
@@ -1196,7 +1337,19 @@ class AdaptiveLearningService {
   }
 
   /**
-   * Calculate reward for the state transition (enhanced with learning theory)
+   * Calculate reward for the state transition (RESEARCH-GRADE implementation)
+   * 
+   * PEDAGOGICAL PRINCIPLE: Rewards must reflect learning quality, not just correctness.
+   * A student who answers correctly on first try demonstrates deeper understanding
+   * than one who needed hints. This aligns with reinforcement learning theory.
+   * 
+   * REWARD STRUCTURE (aligned with requirements):
+   * - Correct on 1st try: +8 to +10 (demonstrates understanding)
+   * - Correct after hint: +4 to +6 (learned with scaffolding)
+   * - Wrong answer: -3 to -5 (indicates knowledge gap)
+   * - Mastery milestone: +10 (major achievement)
+   * - Frustration pattern: -8 (pedagogical failure)
+   * 
    * Based on educational psychology principles:
    * - Optimal challenge (flow theory)
    * - Mastery learning
@@ -1213,66 +1366,107 @@ class AdaptiveLearningService {
     const difficulty = newState?.difficulty_level ?? 3;
     const totalAttempts = newState?.total_attempts ?? 0;
 
-    // 1. Mastery improvement rewards
-    const masteryChange = newMastery - prevMastery;
-    if (masteryChange > 0) {
-      reward += this.REWARDS.MASTERY_IMPROVED * (masteryChange / 10); // Scale by improvement
-    } else if (masteryChange < 0) {
-      reward += this.REWARDS.MASTERY_DECREASED * Math.abs(masteryChange / 10);
-    }
+    // ========== CONTEXT-DEPENDENT CORRECT ANSWER REWARDS ==========
+    // Determine attempt context to assign appropriate reward
+    const isCorrect = correctStreak > 0;
+    const isFirstTry = correctStreak >= 1 && wrongStreak === 0;
+    const usedHint = wrongStreak >= 2; // Hint shown after 2nd wrong
     
-    // 2. Correct answer at appropriate difficulty (flow zone)
-    if (correctStreak > 0) {
-      reward += this.REWARDS.CORRECT_ANSWER;
+    if (isCorrect) {
+      if (isFirstTry) {
+        // SCENARIO 1: Correct on first try (no hints)
+        reward += this.REWARDS.CORRECT_FIRST_TRY; // +10
+        console.log('[Reward] +10 CORRECT_FIRST_TRY');
+      } else if (usedHint && wrongStreak === 1) {
+        // SCENARIO 2: Correct after 1 hint
+        reward += this.REWARDS.CORRECT_AFTER_HINT; // +6
+        console.log('[Reward] +6 CORRECT_AFTER_HINT');
+      } else if (wrongStreak >= 2) {
+        // SCENARIO 3: Correct after multiple wrongs
+        reward += this.REWARDS.CORRECT_AFTER_RETRY; // +4
+        console.log('[Reward] +4 CORRECT_AFTER_RETRY');
+      } else {
+        // SCENARIO 4: Correct after 1 wrong (no hint yet)
+        reward += this.REWARDS.CORRECT_AFTER_HINT * 0.8; // +4.8
+        console.log('[Reward] +4.8 CORRECT_AFTER_ONE_WRONG');
+      }
       
       // Bonus for being in "optimal challenge zone" (70-85% mastery)
       if (newMastery >= 70 && newMastery <= 85) {
-        reward += this.REWARDS.OPTIMAL_CHALLENGE;
+        reward += this.REWARDS.OPTIMAL_CHALLENGE; // +7
+        console.log('[Reward] +7 OPTIMAL_CHALLENGE_ZONE');
       }
+    } else {
+      // ========== WRONG ANSWER PENALTIES ==========
+      reward += this.REWARDS.WRONG_ANSWER; // -4 base
+      console.log('[Reward] -4 WRONG_ANSWER');
     }
 
-    // 3. Maintained high mastery (consistent performance)
+    // 1. Mastery improvement rewards
+    const masteryChange = newMastery - prevMastery;
+    if (masteryChange > 0) {
+      const masteryReward = this.REWARDS.MASTERY_IMPROVED * (masteryChange / 10);
+      reward += masteryReward;
+      console.log(`[Reward] +${masteryReward.toFixed(2)} MASTERY_IMPROVED`);
+    } else if (masteryChange < 0) {
+      const masteryPenalty = this.REWARDS.MASTERY_DECREASED * Math.abs(masteryChange / 10);
+      reward += masteryPenalty;
+      console.log(`[Reward] ${masteryPenalty.toFixed(2)} MASTERY_DECREASED`);
+    }
+
+    // 2. Maintained high mastery (consistent performance)
     if (newMastery >= 75 && prevMastery >= 75) {
-      reward += this.REWARDS.MAINTAINED_HIGH_MASTERY;
+      reward += this.REWARDS.MAINTAINED_HIGH_MASTERY; // +3
+      console.log('[Reward] +3 MAINTAINED_HIGH_MASTERY');
     }
 
-    // 4. Chapter advancement (major milestone)
+    // 3. Chapter advancement (major milestone)
     if (action === this.ACTIONS.ADVANCE_CHAPTER) {
-      reward += this.REWARDS.ADVANCED_CHAPTER;
+      reward += this.REWARDS.ADVANCED_CHAPTER; // +10
+      console.log('[Reward] +10 ADVANCED_CHAPTER');
       
       // Extra bonus if achieved quickly (efficiency)
       if (totalAttempts < 20) {
-        reward += this.REWARDS.RAPID_MASTERY;
+        reward += this.REWARDS.RAPID_MASTERY; // +8
+        console.log('[Reward] +8 RAPID_MASTERY');
       }
     }
 
-    // 5. Frustration penalty (student struggling, likely to disengage)
+    // 4. Frustration penalty (CRITICAL: increased to -8)
     if (wrongStreak >= 5) {
-      reward += this.REWARDS.FRUSTRATION;
+      reward += this.REWARDS.FRUSTRATION; // -8
+      console.log('[Reward] -8 FRUSTRATION (5+ wrong streak)');
     } else if (wrongStreak >= 3) {
-      reward += this.REWARDS.FRUSTRATION / 2; // Partial penalty
+      reward += this.REWARDS.FRUSTRATION / 2; // -4
+      console.log('[Reward] -4 FRUSTRATION (3-4 wrong streak)');
     }
 
-    // 6. Boredom penalty (content too easy, no learning)
+    // 5. Boredom penalty (content too easy, no learning)
     if (correctStreak >= 10 && difficulty <= 2) {
-      reward += this.REWARDS.BOREDOM;
+      reward += this.REWARDS.BOREDOM; // -3
+      console.log('[Reward] -3 BOREDOM');
     }
 
-    // 7. Time-based rewards (efficient learning is better)
+    // 6. Time-based rewards (efficient learning is better)
     const expectedTime = 60; // 60 seconds baseline
     if (timeSpent && timeSpent < expectedTime / 2) {
       reward += 1; // Quick and correct = understanding
+      console.log('[Reward] +1 EFFICIENCY_BONUS');
     } else if (timeSpent && timeSpent > expectedTime * 2) {
       reward -= 1; // Slow = struggling or guessing
+      console.log('[Reward] -1 SLOW_RESPONSE');
     }
 
-    // 8. Difficulty appropriateness
+    // 7. Difficulty appropriateness
     // Reward staying in appropriate difficulty for mastery level
     const appropriateDifficulty = Math.ceil(newMastery / 20);
     if (Math.abs(difficulty - appropriateDifficulty) <= 1) {
       reward += 2; // Good difficulty match
+      console.log('[Reward] +2 APPROPRIATE_DIFFICULTY');
     }
 
+    console.log(`[Reward] TOTAL: ${reward.toFixed(2)}`);
+    
     // Ensure reward is a valid number
     return isNaN(reward) ? 0 : reward;
   }

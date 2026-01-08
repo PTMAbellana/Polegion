@@ -86,7 +86,7 @@ class MasteryProgressionService {
     } else if (masteryPercentage >= 75) {
       return this.MASTERY_LEVELS.PROFICIENT; // 4
     } else if (masteryPercentage >= 60) {
-      return this.MASTERY_LEVELS.DEVELOPING; // 3 - UNLOCKS NEXT CHAPTER
+      return this.MASTERY_LEVELS.DEVELOPING; // 3 - UNLOCKS NEXT CHAPTER (with stability check)
     } else if (masteryPercentage >= 40) {
       return this.MASTERY_LEVELS.BEGINNER; // 2
     } else if (masteryPercentage >= 20) {
@@ -97,14 +97,113 @@ class MasteryProgressionService {
   }
 
   /**
+   * STABILITY-BASED UNLOCKING (Research-Grade Implementation)
+   * 
+   * DESIGN PRINCIPLE: Mastery percentage alone is insufficient for unlock.
+   * A student could reach 60% through lucky guesses or inconsistent performance.
+   * Stability ensures the student has DEMONSTRATED RELIABLE understanding.
+   * 
+   * UNLOCK CRITERIA (ALL must be met):
+   * 1. Mastery ≥ 60% (base threshold)
+   * 2. At least ONE stability condition:
+   *    a) Accuracy ≥ 70% over last 5 attempts, OR
+   *    b) 2+ consecutive correct answers (current streak), OR
+   *    c) Correct answer without hint at difficulty ≥ 3
+   * 
+   * WHY: This prevents:
+   * - Guess-based unlocking (lucky streaks)
+   * - Premature progression (unstable understanding)
+   * - Frustration from entering locked content unprepared
+   * 
+   * @param {Object} state - Adaptive learning state
+   * @param {Array} recentHistory - Last 5-10 attempts (for trend analysis)
+   * @returns {Object} {meets: boolean, reason: string, details: object}
+   */
+  async checkStabilityForUnlock(state, recentHistory = []) {
+    const masteryPercentage = state.mastery_level || 0;
+    
+    // CRITERION 1: Mastery threshold (60%)
+    if (masteryPercentage < 60) {
+      return {
+        meets: false,
+        reason: `Mastery ${masteryPercentage.toFixed(1)}% < 60% threshold`,
+        details: { masteryCheck: false }
+      };
+    }
+    
+    // Now check STABILITY conditions (at least one must be true)
+    const stabilityChecks = {
+      recentAccuracy: false,
+      consecutiveCorrect: false,
+      highDifficultySuccess: false
+    };
+    
+    // STABILITY CONDITION A: Accuracy ≥ 70% over last 5 attempts
+    if (recentHistory.length >= 5) {
+      const last5 = recentHistory.slice(-5);
+      const correctCount = last5.filter(h => h.was_correct).length;
+      const recentAccuracy = (correctCount / 5) * 100;
+      
+      if (recentAccuracy >= 70) {
+        stabilityChecks.recentAccuracy = true;
+        console.log(`[StabilityCheck] ✅ Recent accuracy: ${recentAccuracy.toFixed(0)}% ≥ 70% (${correctCount}/5)`);
+      } else {
+        console.log(`[StabilityCheck] ❌ Recent accuracy: ${recentAccuracy.toFixed(0)}% < 70% (${correctCount}/5)`);
+      }
+    } else {
+      console.log(`[StabilityCheck] ⚠️ Insufficient history: ${recentHistory.length}/5 attempts`);
+    }
+    
+    // STABILITY CONDITION B: 2+ consecutive correct answers
+    if (state.correct_streak >= 2) {
+      stabilityChecks.consecutiveCorrect = true;
+      console.log(`[StabilityCheck] ✅ Consecutive correct: ${state.correct_streak} ≥ 2`);
+    } else {
+      console.log(`[StabilityCheck] ❌ Consecutive correct: ${state.correct_streak} < 2`);
+    }
+    
+    // STABILITY CONDITION C: Correct without hint at difficulty ≥ 3
+    // Hint is shown after wrong_streak >= 2, so correct_streak >= 1 AND wrong_streak == 0 = no hint used
+    const noHintUsed = state.wrong_streak === 0 && state.correct_streak >= 1;
+    const highDifficulty = state.difficulty_level >= 3;
+    
+    if (noHintUsed && highDifficulty) {
+      stabilityChecks.highDifficultySuccess = true;
+      console.log(`[StabilityCheck] ✅ Correct without hint at difficulty ${state.difficulty_level} ≥ 3`);
+    } else {
+      console.log(`[StabilityCheck] ❌ High difficulty success: hint=${!noHintUsed}, difficulty=${state.difficulty_level}`);
+    }
+    
+    // Check if ANY stability condition is met
+    const meetsStability = Object.values(stabilityChecks).some(check => check === true);
+    
+    if (meetsStability) {
+      const metConditions = Object.keys(stabilityChecks).filter(k => stabilityChecks[k]);
+      return {
+        meets: true,
+        reason: `Mastery ${masteryPercentage.toFixed(1)}% + Stability [${metConditions.join(', ')}]`,
+        details: { masteryCheck: true, ...stabilityChecks }
+      };
+    } else {
+      return {
+        meets: false,
+        reason: `Mastery ${masteryPercentage.toFixed(1)}% OK, but stability not demonstrated`,
+        details: { masteryCheck: true, ...stabilityChecks }
+      };
+    }
+  }
+
+  /**
    * Update mastery and check for chapter unlocks
    * Called by AdaptiveLearningService after each answer is processed
+   * 
+   * NOW IMPLEMENTS: Stability-based unlocking (not just mastery threshold)
    * 
    * @param {string} userId 
    * @param {number} chapterId - Current chapter (topic)
    * @param {Object} state - Updated adaptive learning state
    * @param {Object} mdpMetrics - MDP transition metrics (action, reward, etc.)
-   * @returns {Promise<{masteryLevel: number, chapterUnlocked: object|null}>}
+   * @returns {Promise<{masteryLevel: number, chapterUnlocked: object|null, stabilityCheck: object}>}
    */
   async updateMasteryAndUnlock(userId, chapterId, state, mdpMetrics = {}) {
     try {
@@ -130,15 +229,25 @@ class MasteryProgressionService {
         timestamp: new Date().toISOString()
       });
       
-      // Check if unlock threshold reached (mastery ≥ 3)
+      // ========== STABILITY-BASED UNLOCK CHECK ==========
+      // Get recent attempt history for stability calculation
+      const recentHistory = await this.adaptiveRepo.getRecentAttempts(userId, chapterId, 10);
+      
+      // Check if unlock criteria met (mastery + stability)
+      const stabilityCheck = await this.checkStabilityForUnlock(state, recentHistory);
+      
+      console.log(`[MasteryProgression] Stability check: ${stabilityCheck.meets ? '✅ PASSED' : '❌ FAILED'} - ${stabilityCheck.reason}`);
+      
+      // Attempt unlock if stability check passed
       let chapterUnlocked = null;
-      if (masteryLevel >= this.UNLOCK_THRESHOLD) {
-        chapterUnlocked = await this.unlockNextChapter(userId, chapterId, masteryLevel, state);
+      if (stabilityCheck.meets) {
+        chapterUnlocked = await this.unlockNextChapter(userId, chapterId, masteryLevel, state, stabilityCheck);
       }
       
       return {
         masteryLevel,
-        chapterUnlocked
+        chapterUnlocked,
+        stabilityCheck // NEW: Return stability details for frontend display
       };
       
     } catch (error) {
@@ -146,7 +255,8 @@ class MasteryProgressionService {
       // Non-blocking: return safe defaults
       return {
         masteryLevel: 0,
-        chapterUnlocked: null
+        chapterUnlocked: null,
+        stabilityCheck: { meets: false, reason: 'Error during calculation' }
       };
     }
   }
@@ -154,14 +264,16 @@ class MasteryProgressionService {
   /**
    * Unlock next chapter when mastery threshold is met
    * CRITICAL: This modifies chapter_progress table, NOT WorldMap code
+   * NOW INCLUDES: Stability check results for research logging
    * 
    * @param {string} userId 
    * @param {number} currentChapterId 
    * @param {number} masteryLevel - Current mastery (should be ≥ 3)
    * @param {Object} state - Adaptive learning state
+   * @param {Object} stabilityCheck - Stability verification results
    * @returns {Promise<object|null>} - Unlock info or null if nothing to unlock
    */
-  async unlockNextChapter(userId, currentChapterId, masteryLevel, state) {
+  async unlockNextChapter(userId, currentChapterId, masteryLevel, state, stabilityCheck = {}) {
     if (!this.chapterProgressRepo || !this.chapterRepo) {
       console.warn('[MasteryProgression] Chapter repos not available');
       return null;
@@ -221,15 +333,17 @@ class MasteryProgressionService {
         unlockedByChapterId: currentChapterId,
         masteryLevel,
         masteryPercentage: state.mastery_level,
+        stabilityCheck: stabilityCheck.details || {}, // Include stability details
         timestamp: new Date().toISOString()
       });
 
-      console.log(`✅ [MasteryProgression] User ${userId} unlocked chapter ${nextChapterId}: ${nextChapter.chapter_name} (mastery ${masteryLevel}/3)`);
+      console.log(`✅ [MasteryProgression] User ${userId} unlocked chapter ${nextChapterId}: ${nextChapter.chapter_name} (mastery ${masteryLevel}/3, stability: ${stabilityCheck.reason || 'verified'})`);
       
       return {
         chapterId: nextChapterId,
         chapterName: nextChapter.chapter_name,
-        message: `🎉 Congratulations! You've unlocked: ${nextChapter.chapter_name}`
+        message: `🎉 Congratulations! You've unlocked: ${nextChapter.chapter_name}`,
+        stabilityDetails: stabilityCheck.details // Return to frontend for celebration UI
       };
 
     } catch (error) {
