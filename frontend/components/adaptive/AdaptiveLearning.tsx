@@ -344,26 +344,15 @@ export default function AdaptiveLearning({ topicId, topicName: topicNameProp, on
           }
         }
 
-        // Store mastery data if achieved, but don't show yet - wait for correct answer feedback to be dismissed
-        // Only show mastery modal when truly at 100% mastery (level 5)
-        // Check both responseData.masteryLevel and calculate from current state
-        const currentMastery = responseData.masteryLevel || responseData.mastery_level || state.masteryLevel;
-        console.log('[AdaptiveLearning] Mastery check:', { 
-          currentMastery, 
-          masteryAchieved: responseData.masteryAchieved,
-          shouldShow: currentMastery >= 100 
-        });
-        
-        if (responseData.masteryAchieved && currentMastery >= 100) {
+        // Store mastery data ONLY at 100% mastery level
+        // Check the current mastery level from state header display
+        const currentMasteryLevel = state?.masteryLevel || 0;
+        if (responseData.masteryAchieved && currentMasteryLevel >= 100) {
           const topicKey = topicId;
           if (!shownMasteryModals.has(topicKey)) {
             setMasteryData(responseData.masteryAchieved);
             setShownMasteryModals(prev => new Set(prev).add(topicKey));
-            console.log('[AdaptiveLearning] Mastery modal will be shown at 100%');
-            // Don't show immediately - will be triggered after correct answer feedback
           }
-        } else if (responseData.masteryAchieved) {
-          console.log('[AdaptiveLearning] Mastery achieved but not at 100% yet, skipping modal');
         }
         
         // Generate next question
@@ -1025,7 +1014,7 @@ export default function AdaptiveLearning({ topicId, topicName: topicNameProp, on
         onClose={() => { 
           setShowTopicUnlock(false); 
           setUnlockedTopic(null); 
-          // After topic unlock, check if mastery modal should show
+          // After topic unlock, check if mastery achieved, otherwise generate next question
           if (masteryData) {
             setTimeout(() => setShowMastery(true), 500);
           } else {
@@ -1387,7 +1376,7 @@ export default function AdaptiveLearning({ topicId, topicName: topicNameProp, on
               <button
                 onClick={() => { 
                   setShowCelebration(false); 
-                  // Show modals in sequence: topic unlock → mastery → next question
+                  // Show topic unlock modal if it exists, then check for mastery, otherwise generate next question
                   if (unlockedTopic) {
                     setTimeout(() => setShowTopicUnlock(true), 500);
                   } else if (masteryData) {
