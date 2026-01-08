@@ -722,12 +722,12 @@ class AdaptiveLearningService {
   /**
    * Preload persisted Q-values for a state into memory (lazy loading)
    */
-  async preloadQValuesForState(stateKey) {
+  async preloadQValuesForState(userId, stateKey) {
     if (this.qTable.has(stateKey) && Object.keys(this.qTable.get(stateKey)).length > 0) {
       return; // Already loaded
     }
     try {
-      const persisted = await this.repo.getQValuesByState(stateKey);
+      const persisted = await this.repo.getQValuesByState(userId, stateKey);
       if (!this.qTable.has(stateKey)) {
         this.qTable.set(stateKey, {});
       }
@@ -758,19 +758,20 @@ class AdaptiveLearningService {
    *   - α: learning rate (0.1) - how quickly to update beliefs
    *   - γ: discount factor (0.95) - importance of future rewards
    * 
+   * @param {string} userId - User ID for per-student Q-learning
    * @param {string} currentStateKey - State before action (e.g., "M2_D1_C3_W0")
    * @param {string} action - Action taken (e.g., "increase_difficulty")
    * @param {number} reward - Immediate reward value (-10 to +10)
    * @param {string} nextStateKey - State after action (e.g., "M3_D2_C4_W0")
    */
-  async updateQValue(currentStateKey, action, reward, nextStateKey) {
-    const currentQ = this.getQValue(currentStateKey, action);
+  async updateQValue(userId, currentStateKey, action, reward, nextStateKey) {
+    const currentQ = this.getQValue(userId, currentStateKey, action);
     
     // Find best possible future value: max Q-value for all actions in next state
     // WHY: We assume optimal future play (student gets best possible teaching)
     let maxNextQ = -Infinity;
     for (const nextAction of Object.values(this.ACTIONS)) {
-      const nextQ = this.getQValue(nextStateKey, nextAction);
+      const nextQ = this.getQValue(userId, nextStateKey, nextAction);
       if (nextQ > maxNextQ) {
         maxNextQ = nextQ;
       }
@@ -793,7 +794,7 @@ class AdaptiveLearningService {
     }
     this.qTable.get(currentStateKey)[action] = newQ;
     // Persist Q-value for research analysis and model continuity
-    await this.repo.saveQValue(currentStateKey, action, newQ);
+    await this.repo.saveQValue(userId, currentStateKey, action, newQ);
   }
 
   /**
@@ -1271,7 +1272,7 @@ class AdaptiveLearningService {
       
       // Get Q-values for current state
       const stateKey = this.getStateKey(state);
-      const qValues = this.getQValuesForState(stateKey);
+      const qValues = this.getQValuesForState(userId, stateKey);
       
       // Determine current cognitive domain from topic progress
       const cognitiveDomain = topicProgress.cognitive_domain || this.determineCognitiveDomain(state);
@@ -1445,7 +1446,7 @@ class AdaptiveLearningService {
       
       // Get Q-values for current state
       const stateKey = this.getStateKey(state);
-      const qValues = this.getQValuesForState(stateKey);
+      const qValues = this.getQValuesForState(userId, stateKey);
       
       // Determine current cognitive domain
       const cognitiveDomain = this.determineCognitiveDomain(state);
@@ -1505,10 +1506,10 @@ class AdaptiveLearningService {
   /**
    * Get all Q-values for a given state
    */
-  getQValuesForState(stateKey) {
+  getQValuesForState(userId, stateKey) {
     const qValues = {};
     for (const action of Object.values(this.ACTIONS)) {
-      qValues[action] = this.getQValue(stateKey, action).toFixed(2);
+      qValues[action] = this.getQValue(userId, stateKey, action).toFixed(2);
     }
     return qValues;
   }
