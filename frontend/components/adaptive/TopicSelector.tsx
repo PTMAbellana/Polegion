@@ -38,11 +38,11 @@ export default function TopicSelector({ topics, onTopicSelect, selectedTopicId }
 
   const getMasteryColor = (level: number) => {
     if (level === 0) return '#9CA3AF'; // Gray
-    if (level === 1) return '#EF4444'; // Red
-    if (level === 2) return '#F59E0B'; // Orange
-    if (level === 3) return '#3B82F6'; // Blue
-    if (level === 4) return '#8B5CF6'; // Purple
-    if (level === 5) return '#10B981'; // Green
+    if (level === 1) return '#8b4513'; // Saddle Brown
+    if (level === 2) return '#cd853f'; // Peru
+    if (level === 3) return '#daa520'; // Goldenrod
+    if (level === 4) return '#b8860b'; // Dark Goldenrod
+    if (level === 5) return '#228b22'; // Forest Green
     return '#9CA3AF';
   };
 
@@ -63,8 +63,10 @@ export default function TopicSelector({ topics, onTopicSelect, selectedTopicId }
           fontSize: '24px',
           fontWeight: 'bold',
           marginBottom: '20px',
-          fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-          color: '#1F2937'
+          fontFamily: 'Cinzel, serif',
+          color: '#654321',
+          textShadow: '0 1px 2px rgba(139, 100, 60, 0.2)',
+          letterSpacing: '0.5px'
         }}
       >
         Geometry Topics
@@ -87,26 +89,27 @@ export default function TopicSelector({ topics, onTopicSelect, selectedTopicId }
               key={topic.id}
               onClick={() => handleTopicClick(topic)}
               style={{
-                backgroundColor: isLocked ? '#F3F4F6' : '#FFFFFF',
-                border: `2px solid ${isSelected ? '#3B82F6' : isLocked ? '#E5E7EB' : '#D1D5DB'}`,
+                backgroundColor: isLocked ? '#e8dcc4' : '#f4e9d9',
+                border: `3px solid ${isSelected ? '#b8860b' : isLocked ? '#c4b5a0' : '#d4c4a8'}`,
                 borderRadius: '12px',
                 padding: '20px',
                 cursor: isLocked ? 'not-allowed' : 'pointer',
                 transition: 'all 0.2s ease',
-                opacity: isLocked ? 0.6 : 1,
+                opacity: isLocked ? 0.65 : 1,
                 position: 'relative',
-                boxShadow: isSelected ? '0 4px 12px rgba(59, 130, 246, 0.2)' : 'none'
+                boxShadow: isSelected ? '0 4px 12px rgba(184, 134, 11, 0.3)' : '0 2px 4px rgba(139, 100, 60, 0.1)',
+                background: isLocked ? '#e8dcc4' : 'linear-gradient(135deg, #f4e9d9 0%, #ecdcc4 50%, #f4e9d9 100%)'
               }}
               onMouseEnter={(e) => {
                 if (!isLocked) {
                   e.currentTarget.style.transform = 'translateY(-2px)';
-                  e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.1)';
+                  e.currentTarget.style.boxShadow = '0 6px 16px rgba(139, 100, 60, 0.25)';
                 }
               }}
               onMouseLeave={(e) => {
                 if (!isLocked) {
                   e.currentTarget.style.transform = 'translateY(0)';
-                  e.currentTarget.style.boxShadow = isSelected ? '0 4px 12px rgba(59, 130, 246, 0.2)' : 'none';
+                  e.currentTarget.style.boxShadow = isSelected ? '0 4px 12px rgba(184, 134, 11, 0.3)' : '0 2px 4px rgba(139, 100, 60, 0.1)';
                 }
               }}
             >
@@ -122,8 +125,8 @@ export default function TopicSelector({ topics, onTopicSelect, selectedTopicId }
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  backgroundColor: isLocked ? '#E5E7EB' : isMastered ? '#10B981' : 'transparent',
-                  color: isLocked ? '#6B7280' : isMastered ? '#FFFFFF' : 'transparent',
+                  backgroundColor: isLocked ? '#c4b5a0' : isMastered ? '#228b22' : 'transparent',
+                  color: isLocked ? '#6B7280' : isMastered ? '#fef5e7' : 'transparent',
                   fontSize: '12px',
                   fontWeight: 'bold'
                 }}
@@ -137,8 +140,9 @@ export default function TopicSelector({ topics, onTopicSelect, selectedTopicId }
                   fontSize: '18px',
                   fontWeight: 'bold',
                   marginBottom: '8px',
-                  color: isLocked ? '#6B7280' : '#1F2937',
-                  fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                  color: isLocked ? '#8b7355' : '#654321',
+                  fontFamily: 'Cinzel, serif',
+                  textShadow: '0 0.5px 1px rgba(139, 100, 60, 0.15)'
                 }}
               >
                 {topic.topic_name}
@@ -148,10 +152,11 @@ export default function TopicSelector({ topics, onTopicSelect, selectedTopicId }
               <p
                 style={{
                   fontSize: '13px',
-                  color: '#6B7280',
+                  color: '#8b7355',
                   marginBottom: '12px',
                   textTransform: 'capitalize',
-                  fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                  fontFamily: 'Georgia, serif',
+                  fontStyle: 'italic'
                 }}
               >
                 {topic.cognitive_domain?.replace(/_/g, ' ') || 'Geometry'}
@@ -194,9 +199,10 @@ export default function TopicSelector({ topics, onTopicSelect, selectedTopicId }
                     style={{
                       width: '100%',
                       height: '8px',
-                      backgroundColor: '#E5E7EB',
+                      backgroundColor: 'rgba(139, 100, 60, 0.2)',
                       borderRadius: '4px',
-                      overflow: 'hidden'
+                      overflow: 'hidden',
+                      boxShadow: 'inset 0 1px 2px rgba(0, 0, 0, 0.1)'
                     }}
                   >
                     <div
@@ -218,8 +224,9 @@ export default function TopicSelector({ topics, onTopicSelect, selectedTopicId }
                           width: '8px',
                           height: '8px',
                           borderRadius: '50%',
-                          backgroundColor: i < topic.mastery_level ? getMasteryColor(topic.mastery_level) : '#E5E7EB',
-                          transition: 'all 0.3s ease'
+                          backgroundColor: i < topic.mastery_level ? getMasteryColor(topic.mastery_level) : 'rgba(139, 100, 60, 0.2)',
+                          transition: 'all 0.3s ease',
+                          boxShadow: i < topic.mastery_level ? '0 1px 3px rgba(0, 0, 0, 0.2)' : 'none'
                         }}
                       />
                     ))}
@@ -233,15 +240,17 @@ export default function TopicSelector({ topics, onTopicSelect, selectedTopicId }
                   style={{
                     marginTop: '12px',
                     padding: '8px',
-                    backgroundColor: '#FEF3C7',
+                    backgroundColor: 'rgba(218, 165, 32, 0.15)',
                     borderRadius: '6px',
                     fontSize: '12px',
-                    color: '#92400E',
+                    color: '#654321',
                     textAlign: 'center',
-                    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                    fontFamily: 'Georgia, serif',
+                    fontWeight: 600,
+                    border: '1px solid rgba(218, 165, 32, 0.3)'
                   }}
                 >
-                  Complete previous topics to unlock
+                  🔒 Complete previous topics to unlock
                 </div>
               )}
             </div>

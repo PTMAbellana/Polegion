@@ -50,11 +50,12 @@ export default function LearningInteractionRenderer({
 
   const getButtonStyle = (index: number, option: any) => ({
     ...buttonBaseStyle,
-    backgroundColor: isOptionSelected(option) ? '#EFF6FF' : (hoveredButton === index && !disabled ? '#F9FAFB' : 'white'),
-    borderColor: isOptionSelected(option) ? '#3B82F6' : (hoveredButton === index && !disabled ? '#3B82F6' : '#E5E7EB'),
+    backgroundColor: isOptionSelected(option) ? '#fef5e7' : (hoveredButton === index && !disabled ? '#fffaf0' : 'white'),
+    borderColor: isOptionSelected(option) ? '#b8860b' : (hoveredButton === index && !disabled ? '#daa520' : '#E5E7EB'),
     borderWidth: isOptionSelected(option) ? '3px' : '2px',
     opacity: disabled ? 0.6 : 1,
-    cursor: disabled ? 'not-allowed' : 'pointer'
+    cursor: disabled ? 'not-allowed' : 'pointer',
+    boxShadow: isOptionSelected(option) ? '0 4px 12px rgba(184, 134, 11, 0.3), inset 0 2px 4px rgba(218, 165, 32, 0.1)' : 'none'
   });
 
   // TEXT REPRESENTATION
@@ -63,29 +64,20 @@ export default function LearningInteractionRenderer({
       <div style={{
         display: 'flex',
         flexDirection: 'column',
-        gap: '20px'
+        gap: '16px'
       }}>
         {/* Question Container */}
         <div style={{
           backgroundColor: 'white',
           borderRadius: '12px',
           boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
-          padding: '28px'
+          padding: '24px'
         }}>
-          <h3 style={{ 
-            fontSize: '20px', 
-            fontWeight: 600, 
-            color: '#1F2937',
-            marginBottom: '16px',
-            fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
-          }}>
-            Solve the Problem
-          </h3>
-          
           <div style={{ 
             fontSize: '16px', 
-            color: '#4B5563',
+            color: '#1F2937',
             lineHeight: '1.6',
+            fontWeight: 500,
             fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
           }}>
             <p style={{ margin: 0 }}>

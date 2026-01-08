@@ -151,43 +151,61 @@ export default function AdaptiveLearningPage() {
           padding: '24px'
         }}>
           <div style={{
-            backgroundColor: 'white',
+            backgroundColor: '#f4e9d9',
             borderRadius: '16px',
             width: '95%',
             maxWidth: '1100px',
             maxHeight: '85vh',
             overflow: 'hidden',
-            boxShadow: '0 24px 48px rgba(0,0,0,0.2)',
+            boxShadow: '0 24px 48px rgba(139, 100, 60, 0.4), inset 0 2px 8px rgba(218, 165, 32, 0.1)',
+            border: '4px solid #b8860b',
             display: 'flex',
-            flexDirection: 'column'
+            flexDirection: 'column',
+            background: 'linear-gradient(135deg, #f4e9d9 0%, #ecdcc4 30%, #e8d5ba 50%, #f0e3cf 70%, #f4e9d9 100%)',
+            position: 'relative'
           }}>
             <div style={{
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
               padding: '14px 18px',
-              borderBottom: '1px solid #E5E7EB'
+              borderBottom: '3px solid #b8860b',
+              background: 'linear-gradient(180deg, rgba(218, 165, 32, 0.1) 0%, transparent 100%)'
             }}>
               <div style={{
-                fontSize: '15px',
+                fontSize: '18px',
                 fontWeight: 700,
-                color: '#1F2937',
-                fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                color: '#654321',
+                fontFamily: 'Cinzel, serif',
+                textShadow: '0 1px 2px rgba(139, 100, 60, 0.2)',
+                letterSpacing: '0.5px'
               }}>
-                Choose a topic
+                📜 Choose a topic
               </div>
               <button
                 onClick={() => setShowTopicSwitcher(false)}
                 style={{
-                  background: '#F3F4F6',
-                  border: '1px solid #E5E7EB',
+                  background: 'linear-gradient(135deg, #8b7355, #654321)',
+                  border: '2px solid #3d2817',
                   borderRadius: '8px',
-                  padding: '8px 12px',
+                  padding: '8px 16px',
                   fontSize: '13px',
-                  fontWeight: 600,
+                  fontWeight: 700,
                   cursor: 'pointer',
-                  color: '#4B5563',
-                  fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                  color: '#fef5e7',
+                  fontFamily: 'Cinzel, serif',
+                  boxShadow: '0 2px 6px rgba(0, 0, 0, 0.2)',
+                  transition: 'all 0.2s ease'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = 'linear-gradient(135deg, #6d5940, #4d3520)';
+                  e.currentTarget.style.transform = 'translateY(-1px)';
+                  e.currentTarget.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.3)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = 'linear-gradient(135deg, #8b7355, #654321)';
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = '0 2px 6px rgba(0, 0, 0, 0.2)';
                 }}
               >
                 Close

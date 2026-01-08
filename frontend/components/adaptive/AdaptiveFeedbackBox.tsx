@@ -30,8 +30,8 @@ export default function AdaptiveFeedbackBox({
       return {
         title: "Let's try pictures! 🖼️",
         message: "Your next question will have drawings to help.",
-        bgColor: '#EFF6FF',
-        iconBg: '#3B82F6',
+        bgColor: 'rgba(139, 100, 60, 0.08)',
+        iconBg: '#b8860b',
         icon: '🎨'
       };
     }
@@ -40,8 +40,8 @@ export default function AdaptiveFeedbackBox({
       return {
         title: "Real-life example! 🌍",
         message: "This question shows how you'd use this in real life.",
-        bgColor: '#F0FDF4',
-        iconBg: '#10B981',
+        bgColor: 'rgba(34, 139, 34, 0.1)',
+        iconBg: '#228b22',
         icon: '🌟'
       };
     }
@@ -50,8 +50,8 @@ export default function AdaptiveFeedbackBox({
       return {
         title: "Here's a hint! 💡",
         message: "This clue will help you solve it.",
-        bgColor: '#FEF3C7',
-        iconBg: '#F59E0B',
+        bgColor: 'rgba(218, 165, 32, 0.15)',
+        iconBg: '#daa520',
         icon: '💡'
       };
     }
@@ -60,8 +60,8 @@ export default function AdaptiveFeedbackBox({
       return {
         title: "Let's practice! 📚",
         message: "Let's try some easier problems first.",
-        bgColor: '#F3F4F6',
-        iconBg: '#6B7280',
+        bgColor: 'rgba(139, 100, 60, 0.1)',
+        iconBg: '#8b7355',
         icon: '📚'
       };
     }
@@ -71,13 +71,13 @@ export default function AdaptiveFeedbackBox({
       // During exploration, increase_difficulty can be chosen randomly even after wrong answers
       const wasCorrect = isCorrect === true || (correctStreak > 0 && wrongStreak === 0);
       return {
-        title: wasCorrect ? "You're ready! 🚀" : "Let's adjust 🎯",
+        title: wasCorrect ? "You're ready! 🚀" : "Let's adjust ⚖️",
         message: wasCorrect 
           ? "Great job! Time for a bigger challenge." 
           : "Let's find the perfect challenge level for you.",
-        bgColor: wasCorrect ? '#F0FDF4' : '#EFF6FF',
-        iconBg: wasCorrect ? '#10B981' : '#6B7280',
-        icon: wasCorrect ? '🚀' : '🎯'
+        bgColor: wasCorrect ? 'rgba(34, 139, 34, 0.1)' : 'rgba(139, 100, 60, 0.08)',
+        iconBg: wasCorrect ? '#228b22' : '#b8860b',
+        icon: wasCorrect ? '🚀' : '⚖️'
       };
     }
     
@@ -85,8 +85,8 @@ export default function AdaptiveFeedbackBox({
       return {
         title: "You mastered it! 🏆",
         message: "Amazing! You're ready for new topics.",
-        bgColor: '#FEF3C7',
-        iconBg: '#F59E0B',
+        bgColor: 'rgba(218, 165, 32, 0.15)',
+        iconBg: '#daa520',
         icon: '🏆'
       };
     }
@@ -95,8 +95,8 @@ export default function AdaptiveFeedbackBox({
       return {
         title: "Quick review! 📖",
         message: "Let's refresh what we learned before.",
-        bgColor: '#EFF6FF',
-        iconBg: '#3B82F6',
+        bgColor: 'rgba(139, 100, 60, 0.08)',
+        iconBg: '#8b7355',
         icon: '📖'
       };
     }
@@ -114,51 +114,55 @@ export default function AdaptiveFeedbackBox({
       {/* AI Explanation Box - Displayed First */}
       {aiExplanation && (
         <div style={{
-          backgroundColor: '#FEFCE8',
+          backgroundColor: '#f4e9d9',
           borderRadius: '12px',
-          padding: '20px',
-          marginBottom: '20px',
-          border: '2px solid #FDE047',
-          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
-          transition: 'all 0.3s ease'
+          padding: '16px',
+          marginBottom: '16px',
+          border: '3px solid #daa520',
+          boxShadow: '0 4px 12px rgba(139, 100, 60, 0.2)',
+          transition: 'all 0.3s ease',
+          background: 'linear-gradient(135deg, #f4e9d9 0%, #ecdcc4 50%, #f4e9d9 100%)'
         }}>
           <div style={{ display: 'flex', alignItems: 'flex-start', gap: '14px' }}>
             <div style={{
               width: '36px',
               height: '36px',
               borderRadius: '8px',
-              backgroundColor: '#EAB308',
+              backgroundColor: '#b8860b',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              fontSize: '16px',
+              fontSize: '14px',
               fontWeight: 'bold',
-              color: 'white',
-              flexShrink: 0
+              color: '#fef5e7',
+              flexShrink: 0,
+              boxShadow: '0 2px 6px rgba(0, 0, 0, 0.2)',
+              fontFamily: 'Cinzel, serif'
             }}>
               AI
             </div>
             
             <div style={{ flex: 1 }}>
               <h3 style={{ 
-                fontSize: '15px', 
-                fontWeight: 600, 
-                color: '#1F2937',
+                fontSize: '14px', 
+                fontWeight: 700, 
+                color: '#654321',
                 margin: '0 0 8px 0',
-                fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                fontFamily: 'Cinzel, serif',
+                textShadow: '0 0.5px 1px rgba(139, 100, 60, 0.15)'
               }}>
                 {wrongStreak >= 2 ? 'AI Hint' : 'AI Tutor'}
                 {hintMetadata && (
-                  <span style={{ fontSize: '11px', fontWeight: 400, color: '#6B7280', marginLeft: '8px' }}>
+                  <span style={{ fontSize: '11px', fontWeight: 400, color: '#8b7355', marginLeft: '8px', fontFamily: 'Georgia, serif' }}>
                     ({hintMetadata.source === 'ai' || hintMetadata.source === 'ai-cached' ? 'AI-powered' : 'Rule-based'})
                   </span>
                 )}
               </h3>
               <div style={{ 
-                fontSize: '14px', 
-                color: '#374151',
+                fontSize: '13px', 
+                color: '#3d2817',
                 lineHeight: '1.7',
-                fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+                fontFamily: 'Georgia, serif',
                 whiteSpace: 'pre-wrap'
               }}>
                 {aiExplanation}
@@ -171,46 +175,48 @@ export default function AdaptiveFeedbackBox({
       {/* MDP Action Feedback Box */}
       {feedback && (
         <div style={{
-          backgroundColor: 'white',
+          backgroundColor: '#f4e9d9',
           borderRadius: '12px',
-          padding: '20px',
-          marginBottom: '16px',
-          border: `2px solid ${feedback.iconBg}`,
-          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
-          transition: 'all 0.3s ease'
+          padding: '16px',
+          marginBottom: '12px',
+          border: `3px solid ${feedback.iconBg}`,
+          boxShadow: '0 4px 12px rgba(139, 100, 60, 0.2)',
+          transition: 'all 0.3s ease',
+          background: 'linear-gradient(135deg, #f4e9d9 0%, #ecdcc4 50%, #f4e9d9 100%)'
         }}>
           <div style={{ display: 'flex', alignItems: 'flex-start', gap: '16px' }}>
             <div style={{
-              width: '48px',
-              height: '48px',
-              borderRadius: '12px',
+              width: '44px',
+              height: '44px',
+              borderRadius: '10px',
               backgroundColor: feedback.iconBg,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              fontSize: '24px',
+              fontSize: '22px',
               flexShrink: 0,
-              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)'
+              boxShadow: '0 3px 8px rgba(0, 0, 0, 0.2)'
             }}>
               {feedback.icon}
             </div>
             
             <div style={{ flex: 1 }}>
               <h3 style={{ 
-                fontSize: '16px', 
+                fontSize: '15px', 
                 fontWeight: 700, 
-                color: '#1F2937',
-                margin: '0 0 8px 0',
-                fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                color: '#654321',
+                margin: '0 0 6px 0',
+                fontFamily: 'Cinzel, serif',
+                textShadow: '0 0.5px 1px rgba(139, 100, 60, 0.15)'
               }}>
                 {feedback.title}
               </h3>
               <p style={{ 
-                fontSize: '14px', 
-                color: '#6B7280',
+                fontSize: '13px', 
+                color: '#8b7355',
                 margin: 0,
                 lineHeight: '1.6',
-                fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                fontFamily: 'Georgia, serif'
               }}>
                 {feedback.message}
               </p>
