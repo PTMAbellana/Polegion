@@ -95,6 +95,7 @@ export default function AdaptiveLearning({ topicId, topicName: topicNameProp, on
   const [showFeedback, setShowFeedback] = useState(false);
   const [lastAnswerCorrect, setLastAnswerCorrect] = useState<boolean | null>(null); // Track if last submission was correct
   const [shownUnlockModals, setShownUnlockModals] = useState<Set<string>>(new Set()); // Track shown unlock modals to prevent re-showing
+  const [shownMasteryModals, setShownMasteryModals] = useState<Set<string>>(new Set()); // Track shown mastery modals to prevent re-showing
   const [submitMode, setSubmitMode] = useState<'auto' | 'confirm'>('confirm'); // Default to confirm mode for safer UX
   const [selectedAnswer, setSelectedAnswer] = useState<any>(null); // Track selected answer in confirm mode
   const [showExplanationModal, setShowExplanationModal] = useState(false); // Show explanation on wrong answer
@@ -333,18 +334,24 @@ export default function AdaptiveLearning({ topicId, topicName: topicNameProp, on
         // Don't auto-dismiss - wait for user confirmation
         
         // FIX: Only show topic unlock modal if not already shown for this topic
+        // Store data but don't show yet - wait for correct answer feedback to be dismissed
         if (responseData.topicUnlocked && responseData.topicUnlocked.unlocked) {
           const topicKey = responseData.topicUnlocked.topic?.id || topicId;
           if (!shownUnlockModals.has(topicKey)) {
             setUnlockedTopic(responseData.topicUnlocked);
             setShownUnlockModals(prev => new Set(prev).add(topicKey));
-            setTimeout(() => setShowTopicUnlock(true), 2100);
+            // Don't show immediately - will be triggered after correct answer feedback
           }
         }
 
+        // Store mastery data if achieved, but don't show yet - wait for correct answer feedback to be dismissed
         if (responseData.masteryAchieved) {
-          setMasteryData(responseData.masteryAchieved);
-          setTimeout(() => setShowMastery(true), responseData.topicUnlocked ? 6000 : 2100);
+          const topicKey = topicId;
+          if (!shownMasteryModals.has(topicKey)) {
+            setMasteryData(responseData.masteryAchieved);
+            setShownMasteryModals(prev => new Set(prev).add(topicKey));
+            // Don't show immediately - will be triggered after correct answer feedback
+          }
         }
         
         // Generate next question
@@ -1003,7 +1010,16 @@ export default function AdaptiveLearning({ topicId, topicName: topicNameProp, on
         type="unlock"
         title="Topic Unlocked!"
         message={unlockedTopic?.message || "Great job! You've unlocked the next topic!"}
-        onClose={() => { setShowTopicUnlock(false); setUnlockedTopic(null); }}
+        onClose={() => { 
+          setShowTopicUnlock(false); 
+          setUnlockedTopic(null); 
+          // After topic unlock, check if mastery modal should show
+          if (masteryData) {
+            setTimeout(() => setShowMastery(true), 500);
+          } else {
+            generateNewQuestion();
+          }
+        }}
         show={showTopicUnlock}
       />
 
@@ -1011,7 +1027,11 @@ export default function AdaptiveLearning({ topicId, topicName: topicNameProp, on
         type="mastery"
         title="Mastery Achieved!"
         message={masteryData?.message || "Congratulations! You've mastered this topic!"}
-        onClose={() => { setShowMastery(false); setMasteryData(null); }}
+        onClose={() => { 
+          setShowMastery(false); 
+          setMasteryData(null); 
+          generateNewQuestion(); // Generate next question after mastery modal is dismissed
+        }}
         show={showMastery}
       />
 
@@ -1353,7 +1373,17 @@ export default function AdaptiveLearning({ topicId, topicName: topicNameProp, on
 
               {/* Continue Button */}
               <button
-                onClick={() => { setShowCelebration(false); generateNewQuestion(); }}
+                onClick={() => { 
+                  setShowCelebration(false); 
+                  // Show modals in sequence: topic unlock → mastery → next question
+                  if (unlockedTopic) {
+                    setTimeout(() => setShowTopicUnlock(true), 500);
+                  } else if (masteryData) {
+                    setTimeout(() => setShowMastery(true), 500);
+                  } else {
+                    generateNewQuestion();
+                  }
+                }}
                 style={{
                   width: '100%',
                   background: 'linear-gradient(135deg, #228b22, #15803d)',
