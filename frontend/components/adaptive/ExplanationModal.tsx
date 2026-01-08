@@ -61,11 +61,13 @@ export default function ExplanationModal({ show, data, onContinue }: Explanation
       <div
         style={{
           backgroundColor: 'white',
-          borderRadius: '20px',
-          padding: '40px',
+          borderRadius: '16px',
+          padding: 'clamp(20px, 4vw, 32px)',
           maxWidth: '650px',
-          width: '90%',
-          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+          width: '92%',
+          maxHeight: '90vh',
+          overflowY: 'auto',
+          boxShadow: '0 20px 40px -12px rgba(0, 0, 0, 0.25)',
           border: '3px solid #EF4444',
           transform: isVisible ? 'scale(1)' : 'scale(0.9)',
           transition: 'transform 0.3s ease'
@@ -74,27 +76,27 @@ export default function ExplanationModal({ show, data, onContinue }: Explanation
       >
         {/* Header Icon */}
         <div style={{
-          width: '80px',
-          height: '80px',
-          margin: '0 auto 24px',
+          width: 'clamp(50px, 12vw, 64px)',
+          height: 'clamp(50px, 12vw, 64px)',
+          margin: '0 auto 16px',
           borderRadius: '50%',
           backgroundColor: '#FEE2E2',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          fontSize: '40px'
+          fontSize: 'clamp(28px, 6vw, 36px)'
         }}>
           ❌
         </div>
 
         {/* Title */}
         <h2 style={{
-          fontSize: '28px',
+          fontSize: 'clamp(20px, 5vw, 24px)',
           fontWeight: 700,
           color: '#EF4444',
           marginBottom: '16px',
           textAlign: 'center',
-          margin: '0 0 24px 0'
+          margin: '0 0 16px 0'
         }}>
           Not quite right!
         </h2>
@@ -102,58 +104,66 @@ export default function ExplanationModal({ show, data, onContinue }: Explanation
         {/* Your Answer */}
         <div style={{
           background: '#FEE2E2',
-          borderRadius: '12px',
-          padding: '16px',
-          marginBottom: '16px',
-          borderLeft: '4px solid #EF4444'
+          borderRadius: '10px',
+          padding: 'clamp(10px, 2.5vw, 14px)',
+          marginBottom: '12px',
+          borderLeft: '3px solid #EF4444',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+          flexWrap: 'wrap'
         }}>
-          <div style={{ fontSize: '13px', color: '#991B1B', fontWeight: 600, marginBottom: '8px' }}>
+          <span style={{ fontSize: 'clamp(11px, 2.5vw, 12px)', color: '#991B1B', fontWeight: 600 }}>
             Your answer:
-          </div>
-          <div style={{ fontSize: '16px', color: '#1F2937', fontWeight: 500 }}>
+          </span>
+          <span style={{ fontSize: 'clamp(13px, 3vw, 15px)', color: '#1F2937', fontWeight: 500 }}>
             {data.userAnswer}
-          </div>
+          </span>
         </div>
 
         {/* Correct Answer */}
         <div style={{
           background: '#D1FAE5',
-          borderRadius: '12px',
-          padding: '16px',
-          marginBottom: '24px',
-          borderLeft: '4px solid #10B981'
+          borderRadius: '10px',
+          padding: 'clamp(10px, 2.5vw, 14px)',
+          marginBottom: '12px',
+          borderLeft: '3px solid #10B981',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+          flexWrap: 'wrap'
         }}>
-          <div style={{ fontSize: '13px', color: '#065F46', fontWeight: 600, marginBottom: '8px' }}>
+          <span style={{ fontSize: 'clamp(11px, 2.5vw, 12px)', color: '#065F46', fontWeight: 600 }}>
             Correct answer:
-          </div>
-          <div style={{ fontSize: '16px', color: '#1F2937', fontWeight: 500 }}>
+          </span>
+          <span style={{ fontSize: 'clamp(13px, 3vw, 15px)', color: '#1F2937', fontWeight: 500 }}>
             {data.correctAnswer}
-          </div>
+          </span>
         </div>
 
         {/* AI Explanation */}
         <div style={{
           background: '#EFF6FF',
-          borderRadius: '12px',
-          padding: '20px',
-          marginBottom: '24px',
-          borderLeft: '4px solid #3B82F6'
+          borderRadius: '10px',
+          padding: 'clamp(12px, 3vw, 16px)',
+          marginBottom: '12px',
+          borderLeft: '3px solid #3B82F6'
         }}>
           <div style={{
             display: 'flex',
             alignItems: 'center',
-            gap: '8px',
-            marginBottom: '12px'
+            gap: '6px',
+            marginBottom: '8px'
           }}>
-            <span style={{ fontSize: '20px' }}>💡</span>
-            <div style={{ fontSize: '13px', color: '#1E40AF', fontWeight: 600 }}>
+            <span style={{ fontSize: 'clamp(16px, 4vw, 18px)' }}>💡</span>
+            <div style={{ fontSize: 'clamp(11px, 2.5vw, 12px)', color: '#1E40AF', fontWeight: 600 }}>
               Let me explain:
             </div>
           </div>
           <div style={{
-            fontSize: '15px',
+            fontSize: 'clamp(12px, 3vw, 14px)',
             color: '#1F2937',
-            lineHeight: '1.7'
+            lineHeight: '1.6'
           }}>
             {data.explanation}
           </div>
@@ -163,23 +173,23 @@ export default function ExplanationModal({ show, data, onContinue }: Explanation
         {data.hint && (
           <div style={{
             background: '#FEF3C7',
-            borderRadius: '12px',
-            padding: '16px',
-            marginBottom: '24px',
-            borderLeft: '4px solid #F59E0B'
+            borderRadius: '10px',
+            padding: 'clamp(12px, 3vw, 14px)',
+            marginBottom: '12px',
+            borderLeft: '3px solid #F59E0B'
           }}>
             <div style={{
               display: 'flex',
               alignItems: 'center',
-              gap: '8px',
-              marginBottom: '8px'
+              gap: '6px',
+              marginBottom: '6px'
             }}>
-              <span style={{ fontSize: '16px' }}>📚</span>
-              <div style={{ fontSize: '13px', color: '#92400E', fontWeight: 600 }}>
+              <span style={{ fontSize: 'clamp(14px, 3.5vw, 16px)' }}>📚</span>
+              <div style={{ fontSize: 'clamp(11px, 2.5vw, 12px)', color: '#92400E', fontWeight: 600 }}>
                 Quick tip:
               </div>
             </div>
-            <div style={{ fontSize: '14px', color: '#78350F', lineHeight: '1.6' }}>
+            <div style={{ fontSize: 'clamp(12px, 2.8vw, 13px)', color: '#78350F', lineHeight: '1.5' }}>
               {data.hint}
             </div>
           </div>
@@ -193,9 +203,9 @@ export default function ExplanationModal({ show, data, onContinue }: Explanation
             backgroundColor: '#3B82F6',
             color: 'white',
             border: 'none',
-            borderRadius: '12px',
-            padding: '16px 32px',
-            fontSize: '16px',
+            borderRadius: '10px',
+            padding: 'clamp(12px, 3vw, 14px) clamp(20px, 5vw, 28px)',
+            fontSize: 'clamp(14px, 3.5vw, 15px)',
             fontWeight: 600,
             cursor: 'pointer',
             transition: 'all 0.2s ease',
