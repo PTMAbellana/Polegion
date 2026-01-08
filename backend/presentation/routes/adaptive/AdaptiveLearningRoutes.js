@@ -239,6 +239,16 @@ class AdaptiveLearningRoutes {
       '/generate-explanation',
       this.controller.generateWrongAnswerExplanation.bind(this.controller)
     );
+
+    /**
+     * @route   POST /api/adaptive/flag-question
+     * @desc    Flag a problematic question (wrong/random choices, no correct answer)
+     * @access  Private (authenticated students)
+     */
+    this.router.post(
+      '/flag-question',
+      this.controller.flagQuestion.bind(this.controller)
+    );
   }
 
   getRouter() {

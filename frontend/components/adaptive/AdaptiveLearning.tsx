@@ -93,6 +93,10 @@ export default function AdaptiveLearning({ topicId, topicName: topicNameProp, on
   const [totalHintCount, setTotalHintCount] = useState(0); // Cumulative topic-level hint count
   const [hintUsedForCurrentQuestion, setHintUsedForCurrentQuestion] = useState(false); // Track if hint already used for this question
   const [showFeedback, setShowFeedback] = useState(false);
+  const [showFlagConfirm, setShowFlagConfirm] = useState(false);
+  const [flaggedQuestionsCount, setFlaggedQuestionsCount] = useState(0); // Track flags per topic
+  const [flagCooldown, setFlagCooldown] = useState(false); // Prevent consecutive flags
+  const [flagCooldownSeconds, setFlagCooldownSeconds] = useState(0); // Countdown timer
   const [lastAnswerCorrect, setLastAnswerCorrect] = useState<boolean | null>(null); // Track if last submission was correct
   const [shownUnlockModals, setShownUnlockModals] = useState<Set<string>>(new Set()); // Track shown unlock modals to prevent re-showing
   const [shownMasteryModals, setShownMasteryModals] = useState<Set<string>>(new Set()); // Track shown mastery modals to prevent re-showing
@@ -108,6 +112,19 @@ export default function AdaptiveLearning({ topicId, topicName: topicNameProp, on
     }
   }, []);
 
+  // Countdown timer for flag cooldown
+  useEffect(() => {
+    if (flagCooldownSeconds > 0) {
+      const timer = setTimeout(() => {
+        setFlagCooldownSeconds(prev => prev - 1);
+      }, 1000);
+      return () => clearTimeout(timer);
+    } else if (flagCooldownSeconds === 0 && flagCooldown) {
+      // Cooldown ended
+      setFlagCooldown(false);
+    }
+  }, [flagCooldownSeconds, flagCooldown]);
+
   // Save submit mode preference to localStorage
   const toggleSubmitMode = (mode: 'auto' | 'confirm') => {
     setSubmitMode(mode);
@@ -115,6 +132,47 @@ export default function AdaptiveLearning({ topicId, topicName: topicNameProp, on
     // Clear selected answer when switching to auto mode
     if (mode === 'auto') {
       setSelectedAnswer(null);
+    }
+  };
+
+  /**
+   * Flag problematic question and skip to next one
+   * ANTI-ABUSE: Limits flags per topic, adds cooldown between flags
+   */
+  const flagQuestion = async () => {
+    try {
+      if (!currentQuestion?.id) return;
+      
+      // Report the problematic question to backend
+      await axios.post('/adaptive/flag-question', {
+        topicId,
+        questionId: currentQuestion.id,
+        questionText: currentQuestion.question,
+        reason: 'wrong_choices_or_no_answer',
+        wrongStreak: state.wrongStreak
+      });
+      
+      console.log('[AdaptiveLearning] Question flagged:', currentQuestion.id);
+      setShowFlagConfirm(false);
+      
+      // Increment flag count for this topic (persists until next day)
+      const newCount = flaggedQuestionsCount + 1;
+      setFlaggedQuestionsCount(newCount);
+      const today = new Date().toDateString();
+      localStorage.setItem(`flags_${topicId}`, newCount.toString());
+      localStorage.setItem(`flags_date_${topicId}`, today);
+      
+      // Set cooldown to prevent flagging next question immediately (10 seconds)
+      setFlagCooldown(true);
+      setFlagCooldownSeconds(10);
+      
+      // Skip to next question
+      await generateNewQuestion(true);
+    } catch (error) {
+      console.error('[AdaptiveLearning] Error flagging question:', error);
+      setShowFlagConfirm(false);
+      // Still skip the question even if flagging fails
+      await generateNewQuestion(true);
     }
   };
 
@@ -146,6 +204,11 @@ export default function AdaptiveLearning({ topicId, topicName: topicNameProp, on
         setHintRequestCount(0); // Reset hint count for new question
         setHintUsedForCurrentQuestion(false); // Reset hint flag for new question
         setSelectedAnswer(null); // Reset selected answer for new question
+        
+        // Clear cooldown after new question is loaded
+        if (flagCooldown) {
+          setFlagCooldown(false);
+        }
       } else {
         console.error('[AdaptiveLearning] Question API returned success=false');
       }
@@ -197,6 +260,21 @@ export default function AdaptiveLearning({ topicId, topicName: topicNameProp, on
 
       // Load cumulative hint count from state
       setTotalHintCount(stateData.hints_shown_count || 0);
+      
+      // Load flagged questions count from localStorage with daily reset
+      const today = new Date().toDateString();
+      const savedFlagsData = localStorage.getItem(`flags_${topicId}`);
+      const savedFlagsDate = localStorage.getItem(`flags_date_${topicId}`);
+      
+      if (savedFlagsDate !== today) {
+        // New day - reset flags for this topic
+        setFlaggedQuestionsCount(0);
+        localStorage.setItem(`flags_${topicId}`, '0');
+        localStorage.setItem(`flags_date_${topicId}`, today);
+      } else if (savedFlagsData) {
+        // Same day - restore count for this topic
+        setFlaggedQuestionsCount(parseInt(savedFlagsData));
+      }
       
       if (topicNameProp) {
         setTopicName(topicNameProp);
@@ -1029,6 +1107,96 @@ export default function AdaptiveLearning({ topicId, topicName: topicNameProp, on
         show={showMastery}
       />
 
+      {/* Flag Question Confirmation Modal */}
+      {showFlagConfirm && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.6)', display: 'flex',
+          alignItems: 'center', justifyContent: 'center', zIndex: 9999
+        }}>
+          <div style={{
+            backgroundColor: 'white',
+            borderRadius: '16px',
+            padding: '24px',
+            maxWidth: '450px',
+            width: '90%',
+            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
+            border: '3px solid #dc2626'
+          }}>
+            <div style={{ fontSize: '48px', textAlign: 'center', marginBottom: '16px' }}>🚩</div>
+            <h3 style={{
+              fontSize: '22px',
+              fontWeight: 700,
+              color: '#1f2937',
+              marginBottom: '12px',
+              textAlign: 'center',
+              fontFamily: 'Cinzel, serif'
+            }}>Report Question Issue?</h3>
+            <p style={{
+              fontSize: '15px',
+              color: '#6b7280',
+              marginBottom: '24px',
+              textAlign: 'center',
+              lineHeight: '1.6'
+            }}>
+              Are you sure this question has wrong/random choices or no correct answer? 
+              This will skip to the next question and report the issue.
+            </p>
+            <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
+              <button
+                onClick={() => setShowFlagConfirm(false)}
+                style={{
+                  padding: '12px 24px',
+                  background: '#e5e7eb',
+                  color: '#374151',
+                  border: '2px solid #d1d5db',
+                  borderRadius: '10px',
+                  fontSize: '14px',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = '#d1d5db';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = '#e5e7eb';
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={flagQuestion}
+                style={{
+                  padding: '12px 24px',
+                  background: 'linear-gradient(135deg, #dc2626, #b91c1c)',
+                  color: 'white',
+                  border: '2px solid #991b1b',
+                  borderRadius: '10px',
+                  fontSize: '14px',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  boxShadow: '0 4px 12px rgba(220, 38, 38, 0.3)'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = 'linear-gradient(135deg, #b91c1c, #991b1b)';
+                  e.currentTarget.style.transform = 'translateY(-2px)';
+                  e.currentTarget.style.boxShadow = '0 6px 16px rgba(220, 38, 38, 0.4)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = 'linear-gradient(135deg, #dc2626, #b91c1c)';
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = '0 4px 12px rgba(220, 38, 38, 0.3)';
+                }}
+              >
+                🚩 Report & Skip
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <ExplanationModal
         show={showExplanationModal}
         data={wrongAnswerExplanation}
@@ -1039,6 +1207,96 @@ export default function AdaptiveLearning({ topicId, topicName: topicNameProp, on
           await generateNewQuestion(true);
         }}
       />
+
+      {/* Flag Question Confirmation Modal */}
+      {showFlagConfirm && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.6)', display: 'flex',
+          alignItems: 'center', justifyContent: 'center', zIndex: 9999
+        }}>
+          <div style={{
+            backgroundColor: 'white',
+            borderRadius: '16px',
+            padding: '24px',
+            maxWidth: '450px',
+            width: '90%',
+            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
+            border: '3px solid #dc2626'
+          }}>
+            <div style={{ fontSize: '48px', textAlign: 'center', marginBottom: '16px' }}>🚩</div>
+            <h3 style={{
+              fontSize: '22px',
+              fontWeight: 700,
+              color: '#1f2937',
+              marginBottom: '12px',
+              textAlign: 'center',
+              fontFamily: 'Cinzel, serif'
+            }}>Report Question Issue?</h3>
+            <p style={{
+              fontSize: '15px',
+              color: '#6b7280',
+              marginBottom: '24px',
+              textAlign: 'center',
+              lineHeight: '1.6'
+            }}>
+              Are you sure this question has wrong/random choices or no correct answer? 
+              This will skip to the next question and report the issue.
+            </p>
+            <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
+              <button
+                onClick={() => setShowFlagConfirm(false)}
+                style={{
+                  padding: '12px 24px',
+                  background: '#e5e7eb',
+                  color: '#374151',
+                  border: '2px solid #d1d5db',
+                  borderRadius: '10px',
+                  fontSize: '14px',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = '#d1d5db';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = '#e5e7eb';
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={flagQuestion}
+                style={{
+                  padding: '12px 24px',
+                  background: 'linear-gradient(135deg, #dc2626, #b91c1c)',
+                  color: 'white',
+                  border: '2px solid #991b1b',
+                  borderRadius: '10px',
+                  fontSize: '14px',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  boxShadow: '0 4px 12px rgba(220, 38, 38, 0.3)'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = 'linear-gradient(135deg, #b91c1c, #991b1b)';
+                  e.currentTarget.style.transform = 'translateY(-2px)';
+                  e.currentTarget.style.boxShadow = '0 6px 16px rgba(220, 38, 38, 0.4)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = 'linear-gradient(135deg, #dc2626, #b91c1c)';
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = '0 4px 12px rgba(220, 38, 38, 0.3)';
+                }}
+              >
+                🚩 Report & Skip
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {showHintModal && hintText && (
         <div style={{
@@ -1451,7 +1709,7 @@ export default function AdaptiveLearning({ topicId, topicName: topicNameProp, on
           <div style={{
             background: 'white',
             border: '3px solid #8b643c',
-            borderRadius: '10px 10px 12px 12px',
+            borderRadius: '0 0 12px 12px',
             borderTop: 'none',
             borderBottom: 'none',
             padding: '20px',
@@ -1530,14 +1788,68 @@ export default function AdaptiveLearning({ topicId, topicName: topicNameProp, on
 
       {/* Right Column: Encouragement & Feedback */}
       <div className="feedback-rail">
+        {/* Red Flag Button - Report problematic question */}
+        {!answerSubmitted && (
+          <div style={{ marginBottom: '12px' }}>
+            <button
+              onClick={() => {
+                // Check validation before showing confirm modal
+                const MAX_FLAGS_PER_TOPIC = 3;
+                if (flaggedQuestionsCount >= MAX_FLAGS_PER_TOPIC) {
+                  alert(`You've reached the maximum of ${MAX_FLAGS_PER_TOPIC} reports for this topic. If you continue to encounter issues, please contact your teacher.`);
+                  return;
+                }
+                if (flagCooldown) {
+                  alert('Please wait for the next question before reporting again.');
+                  return;
+                }
+                setShowFlagConfirm(true);
+              }}
+              disabled={submitting || flaggedQuestionsCount >= 3 || flagCooldown}
+              style={{
+                width: '100%',
+                padding: '10px 16px',
+                background: (flaggedQuestionsCount >= 3 || flagCooldown) ? '#f3f4f6' : 'transparent',
+                color: (flaggedQuestionsCount >= 3 || flagCooldown) ? '#9ca3af' : '#dc2626',
+                border: `2px solid ${(flaggedQuestionsCount >= 3 || flagCooldown) ? '#d1d5db' : '#dc2626'}`,
+                borderRadius: '8px',
+                fontSize: '13px',
+                fontWeight: 600,
+                cursor: (submitting || flaggedQuestionsCount >= 3 || flagCooldown) ? 'not-allowed' : 'pointer',
+                transition: 'all 0.2s ease',
+                fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '6px',
+                opacity: (flaggedQuestionsCount >= 3 || flagCooldown) ? 0.5 : 1
+              }}
+              onMouseEnter={(e) => {
+                if (!submitting && flaggedQuestionsCount < 3 && !flagCooldown) {
+                  e.currentTarget.style.background = '#dc2626';
+                  e.currentTarget.style.color = 'white';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!submitting && flaggedQuestionsCount < 3 && !flagCooldown) {
+                  e.currentTarget.style.background = 'transparent';
+                  e.currentTarget.style.color = '#dc2626';
+                }
+              }}
+              title={flaggedQuestionsCount >= 3 ? 'Maximum reports reached for this topic' : flagCooldown ? `Wait ${flagCooldownSeconds} seconds before reporting again` : 'Report if this question has wrong/random choices or no correct answer'}
+            >
+              {flagCooldown ? `⏳ Wait ${flagCooldownSeconds}s` : `🚩 Report Issue (${flaggedQuestionsCount}/3)`}
+            </button>
+          </div>
+        )}
+        
         {/* Submit Mode Toggle */}
         <div style={{
           background: 'linear-gradient(145deg, rgba(255, 248, 235, 0.9), rgba(250, 240, 220, 0.9))',
           borderRadius: '12px',
           padding: '16px',
           border: '2px solid rgba(184, 134, 11, 0.3)',
-          boxShadow: '0 4px 12px rgba(139, 100, 60, 0.15)',
-          marginBottom: '12px'
+          boxShadow: '0 4px 12px rgba(139, 100, 60, 0.15)'
         }}>
           <div style={{
             fontSize: '11px',
@@ -1632,8 +1944,7 @@ export default function AdaptiveLearning({ topicId, topicName: topicNameProp, on
           padding: '16px',
           border: '2px solid #10b981',
           boxShadow: '0 4px 12px rgba(16, 185, 129, 0.2)',
-          textAlign: 'center',
-          marginBottom: '12px'
+          textAlign: 'center'
         }}>
           <div style={{
             fontSize: '32px',

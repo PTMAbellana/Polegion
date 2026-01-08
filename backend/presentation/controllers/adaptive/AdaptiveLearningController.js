@@ -843,6 +843,46 @@ class AdaptiveLearningController {
       });
     }
   }
+
+  /**
+   * Flag a problematic question
+   */
+  async flagQuestion(req, res) {
+    try {
+      const { topicId, questionId, questionText, reason } = req.body;
+      const userId = req.user?.id;
+
+      if (!userId || !topicId || !questionId) {
+        return res.status(400).json({
+          error: 'Missing required fields: topicId, questionId'
+        });
+      }
+
+      // Log the flagged question for review
+      console.log('[AdaptiveLearning] FLAGGED QUESTION:', {
+        userId,
+        topicId,
+        questionId,
+        questionText: questionText?.substring(0, 100),
+        reason,
+        timestamp: new Date().toISOString()
+      });
+
+      // Store in database for tracking (you can create a flagged_questions table later)
+      // For now, just acknowledge the flag
+      
+      return res.status(200).json({
+        success: true,
+        message: 'Question flagged successfully'
+      });
+    } catch (error) {
+      console.error('Error flagging question:', error);
+      return res.status(500).json({
+        error: 'Failed to flag question',
+        message: error.message
+      });
+    }
+  }
 }
 
 module.exports = AdaptiveLearningController;
