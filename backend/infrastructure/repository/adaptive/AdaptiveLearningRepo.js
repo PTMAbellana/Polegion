@@ -1,4 +1,4 @@
-const cache = require('../../application/cache');
+const cache = require('../../../application/cache');
 
 /**
  * AdaptiveLearningRepository
@@ -223,7 +223,7 @@ class AdaptiveLearningRepository {
         epsilon: transitionData.epsilon ?? 0, // Actual exploration rate
         session_id: transitionData.sessionId,
         question_id: transitionData.questionId || null, // Always log for traceability (text field)
-        cohort_mode: transitionData.cohortMode || null
+        cognitive_domain: transitionData.cognitiveDomain || 'knowledge_recall' // Cognitive domain for this transition
       };
 
       // Log what we're about to insert (for debugging)
@@ -233,7 +233,7 @@ class AdaptiveLearningRepository {
         q_value: insertData.q_value,
         question_id: insertData.question_id,
         used_exploration: insertData.used_exploration,
-        cohort_mode: insertData.cohort_mode
+        cognitive_domain: insertData.cognitive_domain
       });
 
       const { data, error } = await this.supabase
@@ -252,39 +252,52 @@ class AdaptiveLearningRepository {
 
   /**
    * Persist Q-value for a given state-action
+   * CRITICAL: Includes user_id for per-student Q-learning isolation
    * Ensures reproducibility and supports research exports
    */
-  async saveQValue(stateKey, action, qValue) {
+  async saveQValue(userId, stateKey, action, qValue) {
     try {
+      if (!userId) {
+        throw new Error('user_id is required for Q-value persistence');
+      }
+
       const payload = {
+        user_id: userId, // CRITICAL: Per-student isolation
         state_key: stateKey,
         action,
         q_value: Number.isFinite(qValue) ? qValue : 0,
-        updated_at: new Date().toISOString()
+        last_updated: new Date().toISOString()
       };
 
       const { data, error } = await this.supabase
         .from('adaptive_q_values')
-        .upsert(payload, { onConflict: 'state_key,action' })
+        .upsert(payload, { onConflict: 'user_id,state_key,action' })
         .select()
         .single();
 
       if (error) throw error;
+      console.log(`[Repo] Saved Q-value for user ${userId}: ${stateKey}_${action} = ${qValue.toFixed(4)}`);
       return data;
     } catch (error) {
-      console.error('Error saving Q-value:', { stateKey, action, qValue, error });
+      console.error('[Repo] Error saving Q-value:', { userId, stateKey, action, qValue, error });
       return null;
     }
   }
 
   /**
    * Retrieve Q-value for a specific state-action
+   * CRITICAL: Filters by user_id for per-student isolation
    */
-  async getQValue(stateKey, action) {
+  async getQValue(userId, stateKey, action) {
     try {
+      if (!userId) {
+        throw new Error('user_id is required for Q-value retrieval');
+      }
+
       const { data, error } = await this.supabase
         .from('adaptive_q_values')
         .select('q_value')
+        .eq('user_id', userId) // CRITICAL: Per-student isolation
         .eq('state_key', stateKey)
         .eq('action', action)
         .single();
@@ -292,19 +305,25 @@ class AdaptiveLearningRepository {
       if (error && error.code !== 'PGRST116') throw error;
       return data?.q_value ?? null;
     } catch (error) {
-      console.error('Error getting Q-value:', { stateKey, action, error });
+      console.error('[Repo] Error getting Q-value:', { userId, stateKey, action, error });
       return null;
     }
   }
 
   /**
    * Retrieve all Q-values for a given state
+   * CRITICAL: Filters by user_id for per-student isolation
    */
-  async getQValuesByState(stateKey) {
+  async getQValuesByState(userId, stateKey) {
     try {
+      if (!userId) {
+        throw new Error('user_id is required for Q-values retrieval');
+      }
+
       const { data, error } = await this.supabase
         .from('adaptive_q_values')
         .select('action,q_value')
+        .eq('user_id', userId) // CRITICAL: Per-student isolation
         .eq('state_key', stateKey);
 
       if (error) throw error;
@@ -312,7 +331,7 @@ class AdaptiveLearningRepository {
       (data || []).forEach(row => { map[row.action] = row.q_value; });
       return map;
     } catch (error) {
-      console.error('Error getting Q-values by state:', { stateKey, error });
+      console.error('[Repo] Error getting Q-values by state:', { userId, stateKey, error });
       return {};
     }
   }
@@ -336,17 +355,16 @@ class AdaptiveLearningRepository {
 
   /**
    * Retrieve adaptive state transitions for CSV export
-   * Optional filters: topicId, userId, cohortMode
+   * Optional filters: topicId, userId
    */
-  async getTransitionsForExport({ topicId = null, userId = null, cohortMode = null } = {}) {
+  async getTransitionsForExport({ topicId = null, userId = null } = {}) {
     try {
       let query = this.supabase
         .from('adaptive_state_transitions')
-        .select('user_id,topic_id,prev_mastery,prev_difficulty,new_mastery,new_difficulty,action,action_reason,reward,was_correct,time_spent,used_exploration,q_value,epsilon,session_id,question_id,cohort_mode');
+        .select('user_id,topic_id,prev_mastery,prev_difficulty,new_mastery,new_difficulty,action,action_reason,reward,was_correct,time_spent,used_exploration,q_value,epsilon,session_id,question_id');
 
       if (topicId) query = query.eq('topic_id', topicId);
       if (userId) query = query.eq('user_id', userId);
-      if (cohortMode) query = query.eq('cohort_mode', cohortMode);
 
       const { data, error } = await query;
       if (error) throw error;
@@ -1547,52 +1565,14 @@ class AdaptiveLearningRepository {
   }
 
   /**
-   * Assign user to A/B testing cohort (adaptive vs control)
-   * @param {string} userId - User UUID
-   * @returns {Promise<string>} - 'adaptive' or 'control'
+   * ================================================================
+   * A/B TESTING: COHORT ASSIGNMENT METHODS
+   * ================================================================
    */
-  async assignUserToCohort(userId) {
-    try {
-      const { data, error } = await this.supabase
-        .rpc('assign_user_to_balanced_cohort', { p_user_id: userId });
-      
-      if (error) {
-        console.error('[CohortAssignment] Failed:', error);
-        throw error;
-      }
-      
-      console.log(`[CohortAssignment] User ${userId} assigned to: ${data}`);
-      return data; // Returns 'adaptive' or 'control'
-    } catch (error) {
-      console.error('[CohortAssignment] Error:', error);
-      throw error;
-    }
-  }
 
   /**
-   * Get current cohort counts for analytics
-   * @returns {Promise<{adaptive_count: number, control_count: number}>}
-   */
-  async getCohortCounts() {
-    try {
-      const { data, error } = await this.supabase.rpc('get_cohort_counts');
-      
-      if (error) {
-        console.error('[CohortCounts] Failed:', error);
-        throw error;
-      }
-      
-      return data; // { adaptive_count, control_count }
-    } catch (error) {
-      console.error('[CohortCounts] Error:', error);
-      throw error;
-    }
-  }
-
-  /**
-   * Get user's cohort assignment
-   * @param {string} userId - User UUID
-   * @returns {Promise<string|null>} - 'adaptive', 'control', or null if not assigned
+   * Get user's research cohort assignment
+   * @returns {string|null} 'adaptive', 'control', or null if not assigned
    */
   async getUserCohort(userId) {
     try {
@@ -1601,14 +1581,93 @@ class AdaptiveLearningRepository {
         .select('research_cohort')
         .eq('user_id', userId)
         .single();
-      
-      if (error && error.code !== 'PGRST116') {
-        throw error;
-      }
-      
+
+      if (error && error.code !== 'PGRST116') throw error;
       return data?.research_cohort || null;
     } catch (error) {
-      console.error('[GetUserCohort] Error:', error);
+      console.error('[Repo] Error getting user cohort:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Get current cohort counts for balancing
+   * @returns {Object} { adaptive: number, control: number }
+   */
+  async getCohortCounts() {
+    try {
+      const { data, error } = await this.supabase
+        .rpc('get_cohort_counts');
+
+      if (error) throw error;
+      
+      return {
+        adaptive: parseInt(data[0]?.adaptive_count || 0),
+        control: parseInt(data[0]?.control_count || 0)
+      };
+    } catch (error) {
+      console.error('[Repo] Error getting cohort counts:', error);
+      return { adaptive: 0, control: 0 };
+    }
+  }
+
+  /**
+   * Assign user to balanced cohort using database function
+   * Uses balanced random assignment for research validity
+   */
+  async assignUserToBalancedCohort(userId) {
+    try {
+      const { data, error } = await this.supabase
+        .rpc('assign_user_to_balanced_cohort', {
+          p_user_id: userId
+        });
+
+      if (error) throw error;
+      
+      console.log(`[Repo] User ${userId} assigned to cohort: ${data}`);
+      return data; // Returns 'adaptive' or 'control'
+    } catch (error) {
+      console.error('[Repo] Error assigning user to cohort:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Manually set user cohort (admin override)
+   */
+  async setUserCohort(userId, cohort) {
+    try {
+      if (!['adaptive', 'control'].includes(cohort)) {
+        throw new Error('Invalid cohort. Must be "adaptive" or "control"');
+      }
+
+      const { data, error } = await this.supabase
+        .from('user_research_cohort')
+        .upsert({
+          user_id: userId,
+          research_cohort: cohort,
+          assignment_method: 'manual'
+        }, {
+          onConflict: 'user_id'
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      // Log the manual assignment
+      await this.supabase
+        .from('cohort_assignment_log')
+        .insert({
+          user_id: userId,
+          research_cohort: cohort,
+          assignment_method: 'manual'
+        });
+
+      console.log(`[Repo] User ${userId} manually assigned to ${cohort} cohort`);
+      return data;
+    } catch (error) {
+      console.error('[Repo] Error setting user cohort:', error);
       throw error;
     }
   }

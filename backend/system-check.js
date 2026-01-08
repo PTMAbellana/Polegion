@@ -96,11 +96,11 @@ async function runSystemCheck() {
   const path = require('path');
 
   const requiredFiles = [
-    'application/services/AdaptiveLearningService.js',
-    'application/services/HintGenerationService.js',
-    'application/services/AIExplanationService.js',
-    'infrastructure/repository/AdaptiveLearningRepo.js',
-    'presentation/controllers/AdaptiveLearningController.js'
+    'application/services/adaptive/AdaptiveLearningService.js',
+    'application/services/adaptive/HintGenerationService.js',
+    'application/services/adaptive/AIExplanationService.js',
+    'infrastructure/repository/adaptive/AdaptiveLearningRepo.js',
+    'presentation/controllers/adaptive/AdaptiveLearningController.js'
   ];
 
   for (const file of requiredFiles) {
@@ -116,8 +116,7 @@ async function runSystemCheck() {
   section('SERVICE INSTANTIATION CHECK');
 
   try {
-    const HintGenerationService = require('./application/services/HintGenerationService');
-    const hintService = new HintGenerationService();
+    const HintGenerationService = require('./application/services/adaptive/HintGenerationService');
     pass('HintGenerationService instantiates successfully');
     
     // Check configuration
@@ -138,7 +137,7 @@ async function runSystemCheck() {
   }
 
   try {
-    const AdaptiveLearningService = require('./application/services/AdaptiveLearningService');
+    const AdaptiveLearningService = require('./application/services/adaptive/AdaptiveLearningService');
     // Note: Can't fully instantiate without repo, but can check it loads
     pass('AdaptiveLearningService loads successfully');
   } catch (error) {

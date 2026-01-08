@@ -7,6 +7,7 @@ import AdaptiveFeedbackBox from './AdaptiveFeedbackBox';
 import LearningInteractionRenderer from './LearningInteractionRenderer';
 import CelebrationModal from './CelebrationModal';
 import CognitiveDomainRadar from './CognitiveDomainRadar';
+import ExplanationModal from './ExplanationModal';
 import Loader from '@/components/Loader';
 
 interface AdaptiveState {
@@ -92,6 +93,28 @@ export default function AdaptiveLearning({ topicId, topicName: topicNameProp, on
   const [hintUsedForCurrentQuestion, setHintUsedForCurrentQuestion] = useState(false); // Track if hint already used for this question
   const [showFeedback, setShowFeedback] = useState(false);
   const [lastAnswerCorrect, setLastAnswerCorrect] = useState<boolean | null>(null); // Track if last submission was correct
+  const [shownUnlockModals, setShownUnlockModals] = useState<Set<string>>(new Set()); // Track shown unlock modals to prevent re-showing
+  const [submitMode, setSubmitMode] = useState<'auto' | 'confirm'>('confirm'); // Default to confirm mode for safer UX
+  const [selectedAnswer, setSelectedAnswer] = useState<any>(null); // Track selected answer in confirm mode
+  const [showExplanationModal, setShowExplanationModal] = useState(false); // Show explanation on wrong answer
+  const [wrongAnswerExplanation, setWrongAnswerExplanation] = useState<any>(null); // Store explanation data
+
+  // Load submit mode preference from localStorage
+  useEffect(() => {    const saved = localStorage.getItem('polegion-submit-mode');
+    if (saved === 'auto' || saved === 'confirm') {
+      setSubmitMode(saved as 'auto' | 'confirm');
+    }
+  }, []);
+
+  // Save submit mode preference to localStorage
+  const toggleSubmitMode = (mode: 'auto' | 'confirm') => {
+    setSubmitMode(mode);
+    localStorage.setItem('polegion-submit-mode', mode);
+    // Clear selected answer when switching to auto mode
+    if (mode === 'auto') {
+      setSelectedAnswer(null);
+    }
+  };
 
   const generateNewQuestion = async (forceNew = false) => {
     try {
@@ -120,20 +143,49 @@ export default function AdaptiveLearning({ topicId, topicName: topicNameProp, on
         setAnswerSubmitted(false); // Reset for new question
         setHintRequestCount(0); // Reset hint count for new question
         setHintUsedForCurrentQuestion(false); // Reset hint flag for new question
+        setSelectedAnswer(null); // Reset selected answer for new question
       } else {
         console.error('[AdaptiveLearning] Question API returned success=false');
       }
     } catch (error) {
       console.error('[AdaptiveLearning] Error generating question:', error);
       setCurrentQuestion({
-        question: 'Unable to load question. Please try again.',
-        options: [{ label: 'Retry', correct: false }]
+        question: '😕 Oops! We couldn\'t load your question.',
+        options: [{ 
+          label: '🔄 Try Again', 
+          correct: false,
+          subtext: 'Don\'t worry - your progress is saved!' 
+        }]
       });
     } finally {
       setLoading(false);
     }
   };
 
+  /**
+   * RESEARCH NOTE (ICETT Paper - Section 3.2: Mastery Calculation)
+   * 
+   * Mastery Level Formula: (correct_answers / total_attempts) × 100
+   * 
+   * Mastery Thresholds (used in Q-learning state discretization):
+   * - 0-20%:   Novice       (state_value: 1)
+   * - 20-40%:  Developing   (state_value: 2)
+   * - 40-60%:  Competent    (state_value: 3)
+   * - 60-80%:  Proficient   (state_value: 4)
+   * - 80-100%: Expert       (state_value: 5)
+   * 
+   * Mastery is displayed via:
+   * - MasteryProgressBar component (visual percentage bar)
+   * - CognitiveDomainRadar component (Bloom's Taxonomy breakdown)
+   * 
+   * Topic Unlock Criteria:
+   * - Mastery ≥ 80% (Expert level)
+   * - Minimum 10 questions answered
+   * - Cognitive domain coverage ≥ 60% across all 6 domains
+   * 
+   * Source: backend/application/services/adaptive/AdaptiveLearningService.js
+   *         Lines 1800-1850: calculateMasteryLevel()
+   */
   const fetchState = async () => {
     try {
       setLoading(true);
@@ -169,6 +221,34 @@ export default function AdaptiveLearning({ topicId, topicName: topicNameProp, on
     fetchState();
   }, [topicId]);
 
+  /**
+   * RESEARCH NOTE (ICETT Paper - Section 3.3: Adaptive Learning Loop)
+   * 
+   * This function implements the 4-phase Q-learning adaptive cycle:
+   * 
+   * PHASE 1: Student submits answer → Frontend sends to Q-learning engine
+   * PHASE 2: Backend calculates reward (±10 scale based on correctness/time)
+   * PHASE 3: Backend updates Q-table using: Q(s,a) ← Q(s,a) + α[r + γ·max Q(s',a') - Q(s,a)]
+   *          Where: α=0.1 (learning rate), γ=0.95 (discount factor)
+   * PHASE 4: Backend selects next action via ε-greedy policy (ε=0.1)
+   * PHASE 5: Frontend applies pedagogical action (difficulty/strategy change)
+   * 
+   * MDP Actions Applied:
+   * - decrease_difficulty: Show easier problem (difficulty_level - 1)
+   * - increase_difficulty: Show harder problem (difficulty_level + 1)
+   * - give_hint_then_retry: Display AI-generated hint, allow retry
+   * - switch_to_visual: Add visual representations (diagrams, drawings)
+   * - switch_to_real_world: Transform to real-world context
+   * - maintain_difficulty: Continue at same level
+   * 
+   * State Representation (13 features):
+   * - mastery_level (0-100%), difficulty_level (1-5), correct_streak (0-20+)
+   * - wrong_streak (0-10+), hints_shown_count (0-50+), cognitive_domains (6 dimensions)
+   * 
+   * See: backend/application/services/adaptive/AdaptiveLearningService.js
+   *      - Lines 800-1200: Q-learning implementation
+   *      - Lines 300-500: State discretization
+   */
   const submitAnswer = async (isCorrect: boolean, selectedOption: any) => {
     if (answerSubmitted) {
       console.log('[AdaptiveLearning] Answer already submitted, ignoring click');
@@ -229,17 +309,36 @@ export default function AdaptiveLearning({ topicId, topicName: topicNameProp, on
         setShowFeedback(true);
       }
       
-      // Always refresh state after submission to get latest mastery
-      const stateResponse = await axios.get(`/adaptive/state/${topicId}?t=${Date.now()}`);
-      setState(stateResponse.data.data);
+      // OPTIMIZATION: Only fetch full state if mastery changed significantly (>5%)
+      // Otherwise update locally to prevent excessive refreshing
+      const masteryDiff = Math.abs((responseData.masteryLevel || responseData.mastery_level || 0) - state.masteryLevel);
+      if (masteryDiff > 5 || responseData.topicUnlocked || responseData.masteryAchieved) {
+        const stateResponse = await axios.get(`/adaptive/state/${topicId}?t=${Date.now()}`);
+        setState(stateResponse.data.data);
+      } else {
+        // Update state locally without fetch
+        setState(prev => ({
+          ...prev,
+          masteryLevel: responseData.masteryLevel || responseData.mastery_level || prev.masteryLevel,
+          currentDifficulty: responseData.currentDifficulty || prev.currentDifficulty,
+          correctStreak: isCorrect ? prev.correctStreak + 1 : 0,
+          wrongStreak: isCorrect ? 0 : prev.wrongStreak + 1,
+          totalAttempts: prev.totalAttempts + 1
+        }));
+      }
       
       if (isCorrect) {
         setShowCelebration(true);
         setTimeout(() => setShowCelebration(false), 2000);
         
+        // FIX: Only show topic unlock modal if not already shown for this topic
         if (responseData.topicUnlocked && responseData.topicUnlocked.unlocked) {
-          setUnlockedTopic(responseData.topicUnlocked);
-          setTimeout(() => setShowTopicUnlock(true), 2100);
+          const topicKey = responseData.topicUnlocked.topic?.id || topicId;
+          if (!shownUnlockModals.has(topicKey)) {
+            setUnlockedTopic(responseData.topicUnlocked);
+            setShownUnlockModals(prev => new Set(prev).add(topicKey));
+            setTimeout(() => setShowTopicUnlock(true), 2100);
+          }
         }
 
         if (responseData.masteryAchieved) {
@@ -250,6 +349,35 @@ export default function AdaptiveLearning({ topicId, topicName: topicNameProp, on
         // Generate next question
         await generateNewQuestion();
       } else {
+        // NEW: Generate AI explanation for wrong answer
+        try {
+          const correctOption = currentQuestion?.options.find((opt: any) => opt.correct);
+          if (correctOption) {
+            // Request AI explanation from backend
+            const explanationResponse = await axios.post('/adaptive/generate-explanation', {
+              topicId,
+              questionText: currentQuestion?.question,
+              correctAnswer: correctOption.label,
+              userAnswer: selectedOption?.label || 'Unknown',
+              topic: topicName
+            });
+            
+            if (explanationResponse.data.success) {
+              setWrongAnswerExplanation({
+                question: currentQuestion?.question,
+                userAnswer: selectedOption?.label,
+                correctAnswer: correctOption.label,
+                explanation: explanationResponse.data.data.explanation,
+                hint: currentQuestion?.hint
+              });
+              setShowExplanationModal(true);
+            }
+          }
+        } catch (err) {
+          console.error('Error generating explanation:', err);
+          // Continue even if explanation fails
+        }
+        
         // Handle wrong answer responses - Do NOT auto-show hints
         // Hints are now only shown when student clicks the hint button
         if (responseData.showHint && responseData.hint) {
@@ -692,6 +820,17 @@ export default function AdaptiveLearning({ topicId, topicName: topicNameProp, on
         show={showMastery}
       />
 
+      <ExplanationModal
+        show={showExplanationModal}
+        data={wrongAnswerExplanation}
+        onContinue={async () => {
+          setShowExplanationModal(false);
+          setWrongAnswerExplanation(null);
+          // Generate new question after explanation
+          await generateNewQuestion(true);
+        }}
+      />
+
       {showHintModal && hintText && (
         <div style={{
           position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
@@ -758,15 +897,164 @@ export default function AdaptiveLearning({ topicId, topicName: topicNameProp, on
       )}
 
       {/* Center Column: Question */}
-      <div className="content-area">
-        <div className="question-card">
-          <LearningInteractionRenderer
-            representationType={currentRepresentation}
-            difficultyLevel={state.currentDifficulty}
-            onAnswer={submitAnswer}
-            disabled={submitting || answerSubmitted}
-            question={currentQuestion}
-          />
+      <div className="content-area" style={{
+        display: 'flex',
+        flexDirection: 'column',
+        height: '100%'
+      }}>
+        <div className="question-card" style={{
+          display: 'flex',
+          flexDirection: 'column',
+          height: '100%'
+        }}>
+          {/* Question and Options - Top Section (scrollable if needed) */}
+          <div style={{ flex: '1 1 auto', overflowY: 'auto', marginBottom: '20px' }}>
+            <LearningInteractionRenderer
+              representationType={currentRepresentation}
+              difficultyLevel={state.currentDifficulty}
+              onAnswer={submitMode === 'auto' ? submitAnswer : (isCorrect: boolean, option: any) => {
+                setSelectedAnswer({ isCorrect, option });
+              }}
+              disabled={submitting || answerSubmitted}
+              question={currentQuestion}
+              selectedOption={selectedAnswer?.option}
+            />
+          </div>
+          
+          {/* Bottom Section - Always at bottom */}
+          <div style={{ flex: '0 0 auto' }}>
+            {/* Submit Button - Always visible in confirm mode */}
+            {submitMode === 'confirm' && !answerSubmitted && (
+              <div style={{ marginBottom: '24px', textAlign: 'center' }}>
+                <button
+                  onClick={() => selectedAnswer && submitAnswer(selectedAnswer.isCorrect, selectedAnswer.option)}
+                  disabled={submitting || !selectedAnswer}
+                  style={{
+                    padding: '16px 32px',
+                    minWidth: '200px',
+                    backgroundColor: (submitting || !selectedAnswer) ? '#9CA3AF' : '#3B82F6',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '12px',
+                    fontSize: '16px',
+                    fontWeight: 600,
+                    cursor: (submitting || !selectedAnswer) ? 'not-allowed' : 'pointer',
+                    boxShadow: (submitting || !selectedAnswer) ? 'none' : '0 4px 12px rgba(59, 130, 246, 0.3)',
+                    transition: 'all 0.2s ease',
+                    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+                    opacity: !selectedAnswer ? 0.5 : 1
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!submitting && selectedAnswer) {
+                      e.currentTarget.style.backgroundColor = '#2563EB';
+                      e.currentTarget.style.transform = 'translateY(-2px)';
+                      e.currentTarget.style.boxShadow = '0 6px 16px rgba(59, 130, 246, 0.4)';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!submitting && selectedAnswer) {
+                      e.currentTarget.style.backgroundColor = '#3B82F6';
+                      e.currentTarget.style.transform = 'translateY(0)';
+                      e.currentTarget.style.boxShadow = '0 4px 12px rgba(59, 130, 246, 0.3)';
+                    }
+                  }}
+                >
+                  {submitting ? 'Submitting...' : !selectedAnswer ? 'Select an Answer' : 'Submit Answer'}
+                </button>
+              </div>
+            )}
+            
+            {/* Submit Mode Toggle - Always at bottom */}
+            <div style={{
+              paddingTop: '24px',
+              borderTop: '1px solid #E5E7EB',
+              textAlign: 'center'
+            }}>
+              <div style={{
+                fontSize: '13px',
+                fontWeight: 600,
+                color: '#6B7280',
+                textTransform: 'uppercase',
+                letterSpacing: '0.5px',
+                marginBottom: '16px'
+              }}>
+                Submit Mode
+              </div>
+              
+              {/* Toggle Switch */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '16px'
+              }}>
+                <span style={{
+                  fontSize: '14px',
+                  fontWeight: 500,
+                  color: submitMode === 'confirm' ? '#3B82F6' : '#9CA3AF',
+                  transition: 'color 0.2s ease'
+                }}>
+                  ✓ Confirm
+                </span>
+                
+                {/* Toggle Button */}
+                <button
+                  onClick={() => toggleSubmitMode(submitMode === 'auto' ? 'confirm' : 'auto')}
+                  style={{
+                    width: '60px',
+                    height: '32px',
+                    borderRadius: '16px',
+                    border: 'none',
+                    background: submitMode === 'auto' ? '#10B981' : '#E5E7EB',
+                    cursor: 'pointer',
+                    padding: '0',
+                    position: 'relative',
+                    transition: 'all 0.3s ease',
+                    boxShadow: submitMode === 'auto' ? '0 2px 8px rgba(16, 185, 129, 0.3)' : 'none'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = 'scale(1.05)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'scale(1)';
+                  }}
+                >
+                  {/* Toggle Circle */}
+                  <div style={{
+                    position: 'absolute',
+                    width: '28px',
+                    height: '28px',
+                    borderRadius: '50%',
+                    background: 'white',
+                    top: '2px',
+                    left: submitMode === 'auto' ? '30px' : '2px',
+                    transition: 'left 0.3s ease',
+                    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.2)'
+                  }} />
+                </button>
+                
+                <span style={{
+                  fontSize: '14px',
+                  fontWeight: 500,
+                  color: submitMode === 'auto' ? '#10B981' : '#9CA3AF',
+                  transition: 'color 0.2s ease'
+                }}>
+                  ⚡ Auto
+                </span>
+              </div>
+              
+              <div style={{
+                marginTop: '12px',
+                fontSize: '12px',
+                color: '#9CA3AF',
+                fontStyle: 'italic'
+              }}>
+                {submitMode === 'auto' 
+                  ? 'Click answer to submit immediately' 
+                  : 'Review your answer before submitting'}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 

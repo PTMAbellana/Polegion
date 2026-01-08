@@ -36,12 +36,36 @@ export function useChapterAudio({
         console.log(`[Audio] File not found (optional): ${fullPath}`)
       }
       
-      audio.play().catch(err => {
-        // Silently fail - audio is optional
-        console.log(`[Audio] Playback skipped (optional): ${fullPath}`)
-      })
+      // Store play promise to properly handle cleanup
+      const playPromise = audio.play();
+      if (playPromise !== undefined) {
+        playPromise.catch(err => {
+          // Silently fail - audio is optional
+          console.log(`[Audio] Playback skipped (optional): ${fullPath}`)
+        });
+      }
       
       audioRef.current = audio
+      
+      // Cleanup function
+      return () => {
+        if (audioRef.current) {
+          if (playPromise) {
+            playPromise.then(() => {
+              if (audioRef.current) {
+                audioRef.current.pause();
+                audioRef.current = null;
+              }
+            }).catch(() => {
+              // Already failed, just clear ref
+              audioRef.current = null;
+            });
+          } else {
+            audioRef.current.pause();
+            audioRef.current = null;
+          }
+        }
+      };
     } catch (error) {
       // Silently fail - audio is optional
       console.log('[Audio] Audio playback is optional, continuing without sound')

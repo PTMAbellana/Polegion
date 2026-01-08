@@ -25,44 +25,44 @@ export default function AdaptiveFeedbackBox({
 }: AdaptiveFeedbackBoxProps) {
   
   const getFeedbackContent = () => {
-    // Representation changes
+    // Representation changes (Grade 6 UX: simplified language, emojis, max 10 words)
     if (mdpAction === 'switch_to_visual_example' || mdpAction === 'switch_to_visual') {
       return {
-        title: "Trying a visual approach",
-        message: "The next question will include visual cues and descriptions to help you understand.",
+        title: "Let's try pictures! 🖼️",
+        message: "Your next question will have drawings to help.",
         bgColor: '#EFF6FF',
         iconBg: '#3B82F6',
-        icon: 'V'
+        icon: '🎨'
       };
     }
     
     if (mdpAction === 'switch_to_real_world_context' || mdpAction === 'switch_to_real_world') {
       return {
-        title: "Making it practical",
-        message: "This question has been transformed to show a real-world application.",
+        title: "Real-life example! 🌍",
+        message: "This question shows how you'd use this in real life.",
         bgColor: '#F0FDF4',
         iconBg: '#10B981',
-        icon: 'R'
+        icon: '🌟'
       };
     }
     
     if (mdpAction === 'give_hint_then_retry' || mdpAction === 'give_hint_retry') {
       return {
-        title: "Here's a hint",
-        message: "This clue should help you solve the problem.",
+        title: "Here's a hint! 💡",
+        message: "This clue will help you solve it.",
         bgColor: '#FEF3C7',
         iconBg: '#F59E0B',
-        icon: 'H'
+        icon: '💡'
       };
     }
     
     if (mdpAction === 'decrease_difficulty') {
       return {
-        title: "Adjusting difficulty",
-        message: "Let's practice with simpler examples first.",
+        title: "Let's practice! 📚",
+        message: "Let's try some easier problems first.",
         bgColor: '#F3F4F6',
         iconBg: '#6B7280',
-        icon: '↓'
+        icon: '📚'
       };
     }
     
@@ -71,33 +71,33 @@ export default function AdaptiveFeedbackBox({
       // During exploration, increase_difficulty can be chosen randomly even after wrong answers
       const wasCorrect = isCorrect === true || (correctStreak > 0 && wrongStreak === 0);
       return {
-        title: wasCorrect ? "Ready for more" : "Adjusting difficulty",
+        title: wasCorrect ? "You're ready! 🚀" : "Let's adjust 🎯",
         message: wasCorrect 
-          ? "Great work! Let's try a more challenging problem." 
-          : "Let's try a different difficulty level to find the right challenge for you.",
+          ? "Great job! Time for a bigger challenge." 
+          : "Let's find the perfect challenge level for you.",
         bgColor: wasCorrect ? '#F0FDF4' : '#EFF6FF',
         iconBg: wasCorrect ? '#10B981' : '#6B7280',
-        icon: '↑'
+        icon: wasCorrect ? '🚀' : '🎯'
       };
     }
     
     if (mdpAction === 'advance_topic') {
       return {
-        title: "Topic mastered!",
-        message: "You're ready to move on to new concepts.",
+        title: "You mastered it! 🏆",
+        message: "Amazing! You're ready for new topics.",
         bgColor: '#FEF3C7',
         iconBg: '#F59E0B',
-        icon: '✓'
+        icon: '🏆'
       };
     }
     
     if (mdpAction === 'review_prerequisite') {
       return {
-        title: "Quick review",
-        message: "Let's refresh some foundational concepts.",
+        title: "Quick review! 📖",
+        message: "Let's refresh what we learned before.",
         bgColor: '#EFF6FF',
         iconBg: '#3B82F6',
-        icon: '↻'
+        icon: '📖'
       };
     }
     

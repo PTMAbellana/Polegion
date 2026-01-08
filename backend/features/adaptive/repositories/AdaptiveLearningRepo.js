@@ -1,4 +1,4 @@
-const cache = require('../../application/cache');
+const cache = require('../../../application/cache');
 
 /**
  * AdaptiveLearningRepository
@@ -1542,73 +1542,6 @@ class AdaptiveLearningRepository {
       return performance;
     } catch (error) {
       console.error('Error getting cognitive domain performance:', error);
-      throw error;
-    }
-  }
-
-  /**
-   * Assign user to A/B testing cohort (adaptive vs control)
-   * @param {string} userId - User UUID
-   * @returns {Promise<string>} - 'adaptive' or 'control'
-   */
-  async assignUserToCohort(userId) {
-    try {
-      const { data, error } = await this.supabase
-        .rpc('assign_user_to_balanced_cohort', { p_user_id: userId });
-      
-      if (error) {
-        console.error('[CohortAssignment] Failed:', error);
-        throw error;
-      }
-      
-      console.log(`[CohortAssignment] User ${userId} assigned to: ${data}`);
-      return data; // Returns 'adaptive' or 'control'
-    } catch (error) {
-      console.error('[CohortAssignment] Error:', error);
-      throw error;
-    }
-  }
-
-  /**
-   * Get current cohort counts for analytics
-   * @returns {Promise<{adaptive_count: number, control_count: number}>}
-   */
-  async getCohortCounts() {
-    try {
-      const { data, error } = await this.supabase.rpc('get_cohort_counts');
-      
-      if (error) {
-        console.error('[CohortCounts] Failed:', error);
-        throw error;
-      }
-      
-      return data; // { adaptive_count, control_count }
-    } catch (error) {
-      console.error('[CohortCounts] Error:', error);
-      throw error;
-    }
-  }
-
-  /**
-   * Get user's cohort assignment
-   * @param {string} userId - User UUID
-   * @returns {Promise<string|null>} - 'adaptive', 'control', or null if not assigned
-   */
-  async getUserCohort(userId) {
-    try {
-      const { data, error } = await this.supabase
-        .from('user_research_cohort')
-        .select('research_cohort')
-        .eq('user_id', userId)
-        .single();
-      
-      if (error && error.code !== 'PGRST116') {
-        throw error;
-      }
-      
-      return data?.research_cohort || null;
-    } catch (error) {
-      console.error('[GetUserCohort] Error:', error);
       throw error;
     }
   }
