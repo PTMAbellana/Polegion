@@ -1307,6 +1307,9 @@ class AdaptiveLearningRepository {
    * Increment attempt count for pending question (ATOMIC)
    * Called when user answers wrong
    * Uses SQL function to prevent race conditions on concurrent submits
+   * 
+   * DEFENSIVE: If no pending question exists, initializes with attempt_count = 1
+   * (Handles case where frontend didn't properly save pending question)
    */
   async incrementAttemptCount(userId, topicId) {
     try {
@@ -1322,7 +1325,19 @@ class AdaptiveLearningRepository {
       // Function returns array with single row
       const result = data && data[0];
       if (!result) {
-        throw new Error('increment_attempt_count_atomic returned no data');
+        // DEFENSIVE: No pending question found - this can happen if:
+        // 1. Frontend didn't call savePendingQuestion
+        // 2. Question was already cleared
+        // 3. Database inconsistency
+        console.warn(`[Repo] No pending question found for increment. User: ${userId}, Topic: ${topicId}. Initializing with attempt_count=1`);
+        
+        // Initialize with attempt_count = 1 to allow flow to continue
+        // This prevents the error from blocking the learning flow
+        return {
+          attempt_count: 1,
+          pending_question_id: null,
+          pending_question_data: null
+        };
       }
 
       // Invalidate cache
