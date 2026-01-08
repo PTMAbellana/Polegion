@@ -67,6 +67,11 @@ const AIExplanationService = require('./AIExplanationService');
 const HintGenerationService = require('./HintGenerationService');
 const GroqQuestionGenerator = require('./GroqQuestionGenerator');
 
+// Extracted Application Services (SRP Refactoring)
+const MasteryCalculationService = require('./MasteryCalculationService');
+const StateManagementService = require('./StateManagementService');
+const ActionSelectionService = require('./ActionSelectionService');
+
 // Domain Models & Services (DDD Pattern)
 const StudentAdaptiveState = require('../../../domain/models/adaptive/StudentAdaptiveState');
 const Difficulty = require('../../../domain/models/adaptive/Difficulty');
@@ -87,9 +92,22 @@ class AdaptiveLearningService {
     // Experiment mode toggle: 'adaptive' (default) or 'control'
     this.EXPERIMENT_MODE = (process.env.ADAPTIVE_MODE || 'adaptive').toLowerCase();
     
-    // Domain Services
+    // Domain Services (DDD Pattern)
     this.qLearningPolicy = new QLearningPolicy();
     this.rewardCalculator = new RewardCalculator();
+    
+    // ✅ NEW: Extracted Application Services (SRP Refactoring)
+    this.masteryCalculator = new MasteryCalculationService(adaptiveLearningRepo);
+    this.stateManager = new StateManagementService({
+      initialEpsilon: 1.0,
+      epsilonDecay: 0.995,
+      minEpsilon: 0.01
+    });
+    this.actionSelector = new ActionSelectionService(
+      adaptiveLearningRepo,
+      null, // Will set ACTIONS after initialization
+      this.EXPERIMENT_MODE
+    );
     
     // Event aggregation for research/reporting
     this.domainEvents = [];
@@ -185,6 +203,9 @@ class AdaptiveLearningService {
       MASTERY_DECREASED: -2,          // Regression
       WRONG_ANSWER: -4                // Base wrong answer penalty
     };
+    
+    // ✅ Pass ACTIONS to ActionSelector after initialization
+    this.actionSelector.ACTIONS = this.ACTIONS;
   }
 
   
@@ -613,334 +634,76 @@ class AdaptiveLearningService {
 
   /**
    * Update student's performance metrics based on answer
-   * FULLY ADAPTIVE: Mastery gains depend on attempt context, difficulty, and cognitive load
    * 
-   * RESEARCH-DEFENSIBLE MASTERY PROGRESSION:
-   * - Correct on 1st try (no hint) → HIGH mastery gain (+18-25%)
-   * - Correct after 1 hint → MODERATE mastery gain (+10-15%)
-   * - Correct after 2+ wrongs → LOW mastery gain (+5-8%)
-   * - Wrong answer → SMALL mastery penalty (-5-10%)
-   * - Mastery bounded: 0-100%
-   * 
-   * Factors considered:
-   * 1. Attempt count for this question (1st try vs retry)
-   * 2. Difficulty level (higher difficulty = more mastery gain)
-   * 3. Hint usage (tracked via wrong_streak and hints_shown_count)
-   * 4. Cognitive domain (procedural < analytical < problem-solving)
-   * 5. Recent accuracy pattern (consistency bonus/penalty)
+   * ✅ REFACTORED: Now delegates to MasteryCalculationService (SRP)
    */
   async updatePerformanceMetrics(userId, topicId, currentState, isCorrect, timeSpent, cognitiveDomain = 'knowledge_recall') {
-    const totalAttempts = currentState.total_attempts + 1;
-    const correctAnswers = currentState.correct_answers + (isCorrect ? 1 : 0);
-    const wrongAnswers = currentState.wrong_answers + (isCorrect ? 0 : 1);
-    const correctStreak = isCorrect ? currentState.correct_streak + 1 : 0;
-    const wrongStreak = !isCorrect ? currentState.wrong_streak + 1 : 0;
-
-    console.log(`[Performance] Answer: ${isCorrect ? 'CORRECT' : 'WRONG'}, correctStreak: ${correctStreak}, wrongStreak: ${wrongStreak}`);
-
-    // ============================================================================
-    // FULLY ADAPTIVE MASTERY PROGRESSION (Research-Grade Implementation)
-    // ============================================================================
-    // DESIGN PRINCIPLE: Mastery gains must reflect the LEARNING QUALITY, not just correctness.
-    // A student who solves on 1st try demonstrates deeper understanding than one
-    // who needed 2 hints. This is pedagogically sound and research-defensible.
-    // ============================================================================
+    const result = await this.masteryCalculator.calculateMasteryUpdate(
+      userId,
+      topicId,
+      currentState,
+      isCorrect,
+      cognitiveDomain
+    );
     
-    const oldMasteryLevel = currentState.mastery_level || 0;
-    let masteryChange = 0; // Delta to apply (can be positive or negative)
-    const difficultyLevel = currentState.difficulty_level || 3;
+    // Publish domain events
+    result.events.forEach(event => this.publishEvent(event));
     
-    // Determine attempt context for this specific question
-    const isFirstTry = wrongStreak === 0 && correctStreak >= 1;
-    const usedHint = wrongStreak >= 2; // Hint shown after 2nd wrong attempt
-    const multipleWrongs = wrongStreak >= 2;
-    
-    // Cognitive domain difficulty multiplier
-    // More complex thinking → higher mastery gain when correct
-    const domainMultipliers = {
-      'knowledge_recall': 1.0,        // Basic recall
-      'concept_understanding': 1.1,   // Understanding relationships
-      'procedural_skills': 1.15,      // Multi-step procedures
-      'analytical_thinking': 1.25,    // Analysis and reasoning
-      'problem_solving': 1.35,        // Complex problem solving
-      'higher_order_thinking': 1.5    // Creative/evaluative thinking
-    };
-    const domainMultiplier = domainMultipliers[cognitiveDomain] || 1.0;
-    
-    if (isCorrect) {
-      // ========== CORRECT ANSWER: Mastery GAIN (context-dependent) ==========
-      
-      if (isFirstTry) {
-        // SCENARIO 1: Correct on FIRST TRY (no hints needed)
-        // → HIGH mastery gain: student demonstrates solid understanding
-        // Base gain: 18-25% depending on difficulty
-        const baseGain = 18 + (difficultyLevel * 1.4); // Difficulty 1→19.4%, 5→25%
-        masteryChange = baseGain * domainMultiplier;
-        console.log(`[MasteryProgression] ✅ Correct on FIRST TRY: +${masteryChange.toFixed(1)}% (difficulty ${difficultyLevel}, domain ${cognitiveDomain})`);
-        
-      } else if (usedHint && wrongStreak === 1) {
-        // SCENARIO 2: Correct after 1 HINT (1 wrong, then hint, then correct)
-        // → MODERATE mastery gain: student learned with scaffolding
-        // Base gain: 10-15%
-        const baseGain = 10 + (difficultyLevel * 1.0);
-        masteryChange = baseGain * domainMultiplier;
-        console.log(`[MasteryProgression] ✅ Correct after 1 HINT: +${masteryChange.toFixed(1)}% (scaffolded learning)`);
-        
-      } else if (multipleWrongs) {
-        // SCENARIO 3: Correct after MULTIPLE WRONGS (2+ attempts)
-        // → LOW mastery gain: student struggled significantly
-        // Base gain: 5-8%
-        const baseGain = 5 + (difficultyLevel * 0.6);
-        masteryChange = baseGain * domainMultiplier * 0.8; // Further reduced for heavy struggle
-        console.log(`[MasteryProgression] ✅ Correct after ${wrongStreak} WRONGS: +${masteryChange.toFixed(1)}% (perseverance, but struggled)`);
-        
-      } else {
-        // SCENARIO 4: Correct after 1 wrong (no hint threshold yet)
-        // → MODERATE mastery gain
-        const baseGain = 12 + (difficultyLevel * 0.8);
-        masteryChange = baseGain * domainMultiplier;
-        console.log(`[MasteryProgression] ✅ Correct after 1 wrong: +${masteryChange.toFixed(1)}%`);
-      }
-      
-      // BONUS: Consistency reward for maintaining correct streaks
-      if (correctStreak >= 3) {
-        const consistencyBonus = Math.min(correctStreak * 0.5, 3); // Max +3%
-        masteryChange += consistencyBonus;
-        console.log(`[MasteryProgression] 🎯 Consistency bonus: +${consistencyBonus.toFixed(1)}% (streak: ${correctStreak})`);
-      }
-      
-    } else {
-      // ========== WRONG ANSWER: Mastery PENALTY (graduated) ==========
-      
-      // PEDAGOGICAL PRINCIPLE: Wrong answers indicate gaps, but we don't want to
-      // discourage students. Penalty should be meaningful but not devastating.
-      
-      if (wrongStreak === 1) {
-        // First mistake: small penalty (encourages risk-taking)
-        masteryChange = -5;
-        console.log(`[MasteryProgression] ❌ First mistake: ${masteryChange}% (exploration is OK)`);
-        
-      } else if (wrongStreak === 2) {
-        // Second mistake: moderate penalty (indicates confusion)
-        masteryChange = -7;
-        console.log(`[MasteryProgression] ❌ Second mistake: ${masteryChange}% (hint will be shown)`);
-        
-      } else {
-        // Third+ mistake: larger penalty (serious misconception)
-        masteryChange = -10;
-        console.log(`[MasteryProgression] ❌ ${wrongStreak} mistakes: ${masteryChange}% (misconception detected)`);
-      }
-      
-      // PROTECTION: Reduce penalty for beginners (< 30% mastery)
-      // They're still learning basics and need encouragement
-      if (oldMasteryLevel < 30) {
-        masteryChange = masteryChange * 0.5; // Half penalty
-        console.log(`[MasteryProgression] 🛡️ Beginner protection: penalty reduced to ${masteryChange.toFixed(1)}%`);
-      }
-    }
-    
-    // Apply mastery change with bounds [0, 100]
-    let masteryLevel = oldMasteryLevel + masteryChange;
-    masteryLevel = Math.max(0, Math.min(100, masteryLevel));
-    
-    // SAMPLE SIZE PROTECTION: Prevent premature 100% mastery
-    // First few attempts should be capped to require sustained performance
-    let masteryCapByAttempts = 100;
-    if (totalAttempts === 1) {
-      masteryCapByAttempts = 25;
-    } else if (totalAttempts === 2) {
-      masteryCapByAttempts = 45;
-    } else if (totalAttempts === 3) {
-      masteryCapByAttempts = 65;
-    } else if (totalAttempts < 5) {
-      masteryCapByAttempts = 75;
-    } else if (totalAttempts < 8) {
-      masteryCapByAttempts = 85;
-    }
-    masteryLevel = Math.min(masteryLevel, masteryCapByAttempts);
-    
-    console.log(`[MasteryProgression] Final: ${oldMasteryLevel.toFixed(1)}% → ${masteryLevel.toFixed(1)}% (Δ${masteryChange.toFixed(1)}%, capped at ${masteryCapByAttempts}% for ${totalAttempts} attempts)`);
-
-    const updates = {
-      total_attempts: totalAttempts,
-      correct_answers: correctAnswers,
-      wrong_answers: wrongAnswers,
-      correct_streak: correctStreak,
-      wrong_streak: wrongStreak,
-      mastery_level: masteryLevel
-    };
-
-    console.log(`[Performance] Updates: correct_streak=${updates.correct_streak}, wrong_streak=${updates.wrong_streak}, wrong_answers=${updates.wrong_answers}`);
-
-    // Update adaptive_learning_state
-    const updatedState = await this.repo.updateStudentDifficulty(userId, topicId, updates);
-    
-    // SYNC: Also update user_topic_progress.mastery_percentage
-    await this.repo.updateTopicMastery(userId, topicId, masteryLevel);
-    
-    // Update longest streak if current streak beat the record
-    if (isCorrect && correctStreak > 0) {
-      await this.repo.updateLongestStreak(userId, topicId, correctStreak);
-    }
-
-    // === DOMAIN EVENTS: Track significant learning milestones ===
-    // Check if student reached mastery threshold for first time
-    const oldMastery = new Mastery(currentState.mastery_level);
-    const newMastery = new Mastery(masteryLevel);
-
-    // Transition to advanced level
-    if (!oldMastery.isAdvanced() && newMastery.isAdvanced()) {
-      const event = MasteredTopicEvent.create(userId, topicId, masteryLevel);
-      this.publishEvent(event);
-      console.log(`[DomainEvent] Student reached Advanced mastery on topic ${topicId}`);
-    }
-
-    // Transition to expert level
-    if (!oldMastery.isExpert() && newMastery.isExpert()) {
-      const event = MasteredTopicEvent.create(userId, topicId, masteryLevel);
-      this.publishEvent(event);
-      console.log(`[DomainEvent] Student reached Expert mastery on topic ${topicId}`);
-    }
-
-    return updatedState;
+    return result.updatedState;
   }
 
   /**
    * Generate state key for Q-table
-   * Discretizes continuous state space into buckets
+   * 
+   * ✅ REFACTORED: Now delegates to StateManagementService (SRP)
    */
   getStateKey(state) {
-    // Discretize mastery level into ranges
-    const masteryBucket = Math.floor(state.mastery_level / 20); // 0-4 (0-20, 20-40, 40-60, 60-80, 80-100)
-    
-    // Discretize streaks (cap at 5+)
-    const correctStreakBucket = Math.min(Math.floor(state.correct_streak / 2), 3); // 0, 1-2, 3-4, 5+
-    const wrongStreakBucket = Math.min(state.wrong_streak, 3); // 0, 1, 2, 3+
-    
-    // Current difficulty level
-    const difficulty = state.difficulty_level;
-    
-    // Create state key combining all features
-    return `M${masteryBucket}_D${difficulty}_C${correctStreakBucket}_W${wrongStreakBucket}`;
+    return this.stateManager.getStateKey(state);
   }
 
   /**
-   * Q-Learning: Select action using epsilon-greedy policy
-   * Balance exploration (trying new actions) vs exploitation (using best known action)
+   * Calculate current epsilon for exploration
+   * 
+   * ✅ REFACTORED: Now delegates to StateManagementService (SRP)
    */
+  getCurrentEpsilon(attemptCount) {
+    return this.stateManager.getCurrentEpsilon(attemptCount);
+  }
+
+  /**
+   * Generate session ID for research logs
+   * 
+   * ✅ REFACTORED: Now delegates to StateManagementService (SRP)
+   */
+  generateSessionId(userId) {
+    return this.stateManager.generateSessionId(userId);
+  }
+
   /**
    * Select optimal pedagogical action using epsilon-greedy Q-Learning
    * 
-   * WHY Epsilon-Greedy: Balances exploration (trying new teaching strategies) 
-   * with exploitation (using known effective strategies). Early in learning,
-   * epsilon is high (explore more). As student progresses, epsilon decays 
-   * (exploit learned strategies more).
-   * 
-   * Formula: epsilon = max(MIN_EPSILON, INITIAL_EPSILON * EPSILON_DECAY^attempts)
-   * 
-   * @param {string} userId - User ID for per-student Q-value isolation
-   * @param {string} stateKey - Encoded state (e.g., "M2_D3_C4_W1")
-   * @param {Object} state - Current learning state
-   * @returns {Object} Selected action with metadata
+   * ✅ REFACTORED: Now delegates to ActionSelectionService (SRP)
    */
   async selectActionQLearning(userId, stateKey, state) {
-    // Experiment mode: Control cohort uses fixed policy (maintain difficulty)
-    if (this.EXPERIMENT_MODE === 'control') {
-      return {
-        action: this.ACTIONS.MAINTAIN_DIFFICULTY,
-        reason: '[Control Mode] Fixed policy: maintain difficulty',
-        usedExploration: false
-      };
-    }
-
-    await this.preloadQValuesForState(userId, stateKey);
     const epsilon = this.getCurrentEpsilon(state.total_attempts);
-    const random = Math.random();
+    
+    return await this.actionSelector.selectAction(
+      userId,
+      stateKey,
+      state,
+      epsilon,
+      this.getQValue.bind(this),
+      this.preloadQValuesForState.bind(this)
+    );
+  }
 
-    // High mastery override: Use optimal policy instead of exploring
-    // WHY: When student has 80%+ mastery, we know what works - no need to experiment
-    if (state.mastery_level >= 80) {
-      console.log(`[Q-Learning] Mastery ${state.mastery_level}% >= 80% - skipping exploration, using optimal policy`);
-      const fallback = await this.determineActionRuleBased(state);
-      return {
-        ...fallback,
-        usedExploration: false,
-        reason: `[High Mastery Override] ${fallback.reason}`
-      };
-    }
-
-    // Exploration: Try random action to discover potentially better strategies
-    // BUT constrain exploration to pedagogically reasonable actions
-    if (random < epsilon) {
-      const actions = Object.values(this.ACTIONS);
-      
-      // Filter out pedagogically illogical actions based on current state
-      const validActions = actions.filter(action => {
-        // Don't increase difficulty if wrong_streak >= 2 (student is struggling)
-        if (action === this.ACTIONS.INCREASE_DIFFICULTY && state.wrong_streak >= 2) {
-          return false;
-        }
-        // Don't decrease difficulty if at difficulty 1 (can't go lower)
-        if (action === this.ACTIONS.DECREASE_DIFFICULTY && state.difficulty_level <= 1) {
-          return false;
-        }
-        // Don't increase difficulty if already at max (5)
-        if (action === this.ACTIONS.INCREASE_DIFFICULTY && state.difficulty_level >= 5) {
-          return false;
-        }
-        // Prioritize giving hints when wrong_streak >= 2
-        // Don't waste exploration on non-hint actions when student needs help
-        if (state.wrong_streak >= 2 && ![
-          this.ACTIONS.GIVE_HINT_THEN_RETRY,
-          this.ACTIONS.DECREASE_DIFFICULTY,
-          this.ACTIONS.REVIEW_PREREQUISITE_TOPIC
-        ].includes(action)) {
-          // Allow these actions only 20% of the time during high wrong streak
-          return Math.random() < 0.2;
-        }
-        return true;
-      });
-      
-      const randomAction = validActions.length > 0 
-        ? validActions[Math.floor(Math.random() * validActions.length)]
-        : this.ACTIONS.MAINTAIN_DIFFICULTY; // Safe fallback
-        
-      return {
-        action: randomAction,
-        reason: `[Exploration] Trying ${randomAction} to learn (ε=${epsilon.toFixed(3)})`,
-        usedExploration: true
-      };
-    }
-
-    // Exploitation: Choose action with highest learned Q-value
-    let bestAction = null;
-    let bestQValue = -Infinity;
-
-    for (const action of Object.values(this.ACTIONS)) {
-      const qValue = this.getQValue(userId, stateKey, action);
-      if (qValue > bestQValue) {
-        bestQValue = qValue;
-        bestAction = action;
-      }
-    }
-
-    // If no Q-values exist yet, fall back to rule-based policy
-    if (bestAction === null || bestQValue === 0) {
-      console.log('[selectActionQLearning] Calling determineActionRuleBased with state:', state);
-      const fallback = await this.determineActionRuleBased(state);
-      console.log('[selectActionQLearning] Fallback result:', fallback);
-      return {
-        ...fallback,
-        usedExploration: false,
-        reason: `[Bootstrap] ${fallback.reason} (no Q-values yet)`
-      };
-    }
-
-    return {
-      action: bestAction,
-      reason: `[Exploitation] Best action based on Q-value=${bestQValue.toFixed(2)}`,
-      usedExploration: false
-    };
+  /**
+   * Rule-based policy fallback
+   * 
+   * ✅ REFACTORED: Now delegates to ActionSelectionService (SRP)
+   */
+  async determineActionRuleBased(state) {
+    return await this.actionSelector.determineActionRuleBased(state);
   }
 
   /**
@@ -1051,197 +814,6 @@ class AdaptiveLearningService {
   getCurrentEpsilon(totalAttempts) {
     const epsilon = this.INITIAL_EPSILON * Math.pow(this.EPSILON_DECAY, totalAttempts);
     return Math.max(this.MIN_EPSILON, epsilon);
-  }
-
-  /**
-   * Detect Misconception Patterns
-   * Educational Psychology: Identifies if student is making the same type of error repeatedly
-   * Critical for changing teaching approach instead of repeating failed methods
-   */
-  async detectMisconception(userId, topicId) {
-    try {
-      // Get recent answer history (last 5-10 attempts)
-      const recentHistory = await this.repo.getRecentAttempts(userId, topicId, 10);
-      
-      if (!recentHistory || recentHistory.length < 3) {
-        return null;
-      }
-
-      const incorrectAnswers = recentHistory.filter(a => !a.was_correct);
-      
-      if (incorrectAnswers.length < 2) {
-        return null; // Not enough errors to detect pattern
-      }
-
-      // Pattern 1: Same representation type keeps failing
-      const representations = incorrectAnswers.map(a => a.representation_type || 'text');
-      const sameRepCount = representations.filter(r => r === representations[0]).length;
-      
-      if (sameRepCount === incorrectAnswers.length && incorrectAnswers.length >= 2) {
-        return {
-          type: 'representation_issue',
-          pattern: representations[0],
-          count: sameRepCount,
-          recommendation: this.ACTIONS.REPEAT_DIFFERENT_REPRESENTATION
-        };
-      }
-
-      // Pattern 2: Stuck at same difficulty level
-      const difficulties = incorrectAnswers.map(a => a.prev_difficulty || a.new_difficulty);
-      const sameDiffCount = difficulties.filter(d => d === difficulties[0]).length;
-      
-      if (sameDiffCount >= 3 && difficulties[0] > 2) {
-        return {
-          type: 'difficulty_mismatch',
-          pattern: `stuck_at_level_${difficulties[0]}`,
-          count: sameDiffCount,
-          recommendation: this.ACTIONS.DECREASE_DIFFICULTY
-        };
-      }
-
-      // Pattern 3: Prerequisite gaps (failures at beginner level)
-      const beginnerFailures = incorrectAnswers.filter(a => 
-        (a.prev_difficulty || a.new_difficulty || 3) <= 2
-      );
-      if (beginnerFailures.length >= 3) {
-        return {
-          type: 'prerequisite_gap',
-          pattern: 'basic_concept_confusion',
-          count: beginnerFailures.length,
-          recommendation: this.ACTIONS.REVIEW_PREREQUISITE
-        };
-      }
-
-      return null;
-    } catch (error) {
-      console.error('Error detecting misconception:', error);
-      return null;
-    }
-  }
-
-  /**
-   * Enhanced Pedagogical Policy: Fallback when Q-values not yet learned
-   * CRITICAL: Changes teaching approach, not just difficulty
-   * Based on educational psychology - DO NOT repeat failed methods
-   */
-  async determineActionRuleBased(state) {
-    try {
-      console.log('[determineActionRuleBased] Input state:', JSON.stringify(state, null, 2));
-      
-      const { 
-        mastery_level = 0, 
-        correct_streak = 0, 
-        wrong_streak = 0, 
-        difficulty_level = 3,
-        current_representation = 'text',
-        user_id,
-        topic_id
-      } = state;
-
-      console.log('[determineActionRuleBased] Destructured:', { user_id, topic_id, mastery_level, correct_streak, wrong_streak, difficulty_level });
-
-      // PRIORITY 1: Detect misconceptions (change approach!)
-      // Only call if we have valid IDs
-      let misconception = null;
-      if (user_id && topic_id) {
-        misconception = await this.detectMisconception(user_id, topic_id);
-      } else {
-        console.error('[determineActionRuleBased] Missing user_id or topic_id!', { user_id, topic_id });
-      }
-    
-    if (misconception && wrong_streak >= 2) {
-      // Student stuck with same error - PROVIDE HINT & SCAFFOLDING
-      if (misconception.type === 'representation_issue') {
-        // Text representation failing - provide targeted hint instead of switching to visual
-        // (Visual rendering not implemented yet)
-        return {
-          action: this.ACTIONS.GIVE_HINT_RETRY,
-          reason: `Misconception: Same format failing ${misconception.count}x. Providing scaffolding with hints.`,
-          pedagogicalStrategy: 'scaffolding',
-          representationType: this.REPRESENTATIONS.TEXT
-        };
-      }
-      
-      if (misconception.type === 'prerequisite_gap') {
-        return {
-          action: this.ACTIONS.GIVE_HINT_RETRY,
-          reason: `Basic concepts failing. Providing hints to review prerequisites.`,
-          pedagogicalStrategy: 'scaffolding',
-          representationType: this.REPRESENTATIONS.TEXT
-        };
-      }
-    }
-
-    // Rule 1: Severe Frustration (3+ wrong AND low mastery)
-    // IMPORTANT: Only decrease on struggles, not random exploration
-    if (wrong_streak >= 3 && mastery_level < 60) {
-      if (difficulty_level > 1) {
-        return {
-          action: this.ACTIONS.DECREASE_DIFFICULTY,
-          reason: `Frustration: ${wrong_streak} errors, ${mastery_level.toFixed(1)}% mastery. Reducing difficulty.`,
-          pedagogicalStrategy: 'confidence_building'
-        };
-      } else {
-        // Already easiest - need strategy change
-        return {
-          action: this.ACTIONS.GIVE_HINT_RETRY,
-          reason: `At easiest level, still struggling. Adding hints.`,
-          pedagogicalStrategy: 'scaffolding'
-        };
-      }
-    }
-
-    // Rule 2: Mastery Achieved
-    if (mastery_level >= 85 && correct_streak >= 3) {
-      if (difficulty_level < 5) {
-        return {
-          action: this.ACTIONS.INCREASE_DIFFICULTY,
-          reason: `Mastery ${mastery_level.toFixed(1)}%. Increasing challenge.`,
-          pedagogicalStrategy: 'progressive_challenge'
-        };
-      } else {
-        return {
-          action: this.ACTIONS.ADVANCE_TOPIC,
-          reason: `Mastery at max difficulty. Advancing topic.`,
-          pedagogicalStrategy: 'progression'
-        };
-      }
-    }
-
-    // Rule 3: Flow State (Optimal Challenge)
-    if (mastery_level >= 60 && mastery_level < 85 && wrong_streak <= 1 && correct_streak >= 2) {
-      return {
-        action: this.ACTIONS.MAINTAIN_DIFFICULTY,
-        reason: `Flow state: ${mastery_level.toFixed(1)}% mastery. Optimal challenge.`,
-        pedagogicalStrategy: 'flow_maintenance'
-      };
-    }
-
-    // Rule 4: Boredom (too easy)
-    if (correct_streak >= 7 && difficulty_level <= 2 && mastery_level >= 75) {
-      return {
-        action: this.ACTIONS.INCREASE_DIFFICULTY,
-        reason: `Boredom risk: ${correct_streak} streak at easy level.`,
-        pedagogicalStrategy: 'engagement'
-      };
-    }
-
-    // Default: Steady practice
-    return {
-      action: this.ACTIONS.MAINTAIN_DIFFICULTY,
-      reason: `Steady progress: ${mastery_level.toFixed(1)}% mastery.`,
-      pedagogicalStrategy: 'steady_practice'
-    };
-    } catch (error) {
-      console.error('[determineActionRuleBased] ERROR:', error);
-      console.error('[determineActionRuleBased] State was:', state);
-      // Return safe default
-      return {
-        action: this.ACTIONS.MAINTAIN_DIFFICULTY,
-        reason: 'Error in rule-based decision, maintaining difficulty',
-        pedagogicalStrategy: 'error_recovery'
-      };
-    }
   }
 
   /**
