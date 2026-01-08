@@ -194,13 +194,6 @@ export default function AdaptiveLearning({ topicId, topicName: topicNameProp, on
       const stateResponse = await axios.get(`/adaptive/state/${topicId}?t=${Date.now()}`);
       const stateData = stateResponse.data.data;
       setState(stateData);
-      
-      setMasteryData({
-        level: stateData.difficulty_level,
-        percentage: Math.round(stateData.mastery_level),
-        streak: stateData.correct_streak,
-        bestStreak: stateData.best_streak || stateData.correct_streak
-      });
 
       // Load cumulative hint count from state
       setTotalHintCount(stateData.hints_shown_count || 0);
@@ -345,9 +338,9 @@ export default function AdaptiveLearning({ topicId, topicName: topicNameProp, on
         }
 
         // Store mastery data ONLY at 100% mastery level
-        // Check the current mastery level from state header display
-        const currentMasteryLevel = state?.masteryLevel || 0;
-        if (responseData.masteryAchieved && currentMasteryLevel >= 100) {
+        // Use the NEW mastery level from response, not old state
+        const newMasteryLevel = responseData.masteryLevel || responseData.mastery_level || 0;
+        if (responseData.masteryAchieved && newMasteryLevel >= 100) {
           const topicKey = topicId;
           if (!shownMasteryModals.has(topicKey)) {
             setMasteryData(responseData.masteryAchieved);
@@ -1458,6 +1451,7 @@ export default function AdaptiveLearning({ topicId, topicName: topicNameProp, on
           <div style={{
             background: 'white',
             border: '3px solid #8b643c',
+            borderRadius: '10px 10px 12px 12px',
             borderTop: 'none',
             borderBottom: 'none',
             padding: '20px',
@@ -1492,7 +1486,7 @@ export default function AdaptiveLearning({ topicId, topicName: topicNameProp, on
                     background: (submitting || !selectedAnswer) ? 'linear-gradient(135deg, #d1d5db, #9ca3af)' : 'linear-gradient(135deg, #b8860b, #daa520)',
                     color: 'white',
                     border: `2px solid ${(submitting || !selectedAnswer) ? '#9ca3af' : 'rgba(139, 100, 60, 0.5)'}`,
-                    borderRadius: '10px',
+                    borderRadius: '10px 10px',
                     fontSize: '15px',
                     fontWeight: 600,
                     cursor: (submitting || !selectedAnswer) ? 'not-allowed' : 'pointer',

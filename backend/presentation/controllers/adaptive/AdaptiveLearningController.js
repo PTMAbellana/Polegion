@@ -729,8 +729,9 @@ class AdaptiveLearningController {
         response.topicUnlocked = unlockResult;
       }
 
-      // Add mastery celebration if reached level 5
-      if (masteryLevel >= 5) {
+      // Add mastery celebration ONLY at 100% mastery
+      // Use the actual percentage (result.masteryLevel) not the level (which is 0-5)
+      if (result.masteryLevel >= 100) {
         response.masteryAchieved = {
           level: 5,
           message: '🎉 Congratulations! You\'ve mastered this topic!',

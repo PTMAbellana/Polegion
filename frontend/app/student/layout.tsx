@@ -48,7 +48,10 @@ export default function StudentLayout({
       <div className={styles['page-layout']}>
         <Sidebar userRole="teacher" />
         <main className={styles['main-content']}>
-          <h1>You are not authorized to access this page.</h1>
+          <div className={styles['error-title']}>
+            <h1>Error 403</h1>
+            You are not authorized to access this page.
+          </div>
         </main>
       </div>
     );
