@@ -66,6 +66,7 @@ const QuestionGeneratorService = require('./QuestionGeneratorService');
 const AIExplanationService = require('./AIExplanationService');
 const HintGenerationService = require('./HintGenerationService');
 const GroqQuestionGenerator = require('./GroqQuestionGenerator');
+const CSVQuestionBankService = require('./CSVQuestionBankService');
 
 // Extracted Application Services (SRP Refactoring)
 const MasteryCalculationService = require('./MasteryCalculationService');
@@ -82,13 +83,15 @@ const MasteredTopicEvent = require('../../../domain/events/adaptive/MasteredTopi
 const DifficultyAdjustedEvent = require('../../../domain/events/adaptive/DifficultyAdjustedEvent');
 
 class AdaptiveLearningService {
-  constructor(adaptiveLearningRepo) {
+  constructor(adaptiveLearningRepo, supabaseClient = null) {
     this.repo = adaptiveLearningRepo;
     this.questionGenerator = new QuestionGeneratorService();
     this.aiExplanation = new AIExplanationService();
     this.hintService = new HintGenerationService(); // Production-safe AI hints
     // NOTE: Using Groq AI for difficulty 4-5 (14.4K requests/day free tier)
     this.aiQuestionGenerator = new GroqQuestionGenerator(); // Uses Groq API for complex questions
+    // ✅ NEW: CSV Question Bank Service (guaranteed correct answers in options)
+    this.csvQuestionBank = supabaseClient ? new CSVQuestionBankService(supabaseClient) : null;
     // Experiment mode toggle: 'adaptive' (default) or 'control'
     this.EXPERIMENT_MODE = (process.env.ADAPTIVE_MODE || 'adaptive').toLowerCase();
     
@@ -463,14 +466,22 @@ class AdaptiveLearningService {
       console.log('[Q-Learning] Total States in Q-Table:', this.qTable.size);
       console.log('===============================================\n');
 
-      // 8. Generate AI hint ONLY when student is struggling (wrong_streak >= 2)
+      // 8. Generate AI hint when student is struggling OR when Q-learning recommends it
+      // Triggers: (1) wrong_streak >= 2, OR (2) action == GIVE_HINT_RETRY
       // This protects free-tier quota and is pedagogically sound
-      // IMPORTANT: Generate hint REGARDLESS of MDP action when wrong_streak >= 2
       let aiHint = null;
       let hintMetadata = null;
       
-      if (!isCorrect && newState.wrong_streak >= 2 && questionData) {
-        console.log('[AdaptiveLearning] Triggering AI hint - wrong_streak >= 2');
+      const shouldGenerateHint = !isCorrect && questionData && (
+        newState.wrong_streak >= 2 || 
+        action === this.ACTIONS.GIVE_HINT_RETRY
+      );
+      
+      if (shouldGenerateHint) {
+        const hintReason = action === this.ACTIONS.GIVE_HINT_RETRY 
+          ? 'Q-learning recommended GIVE_HINT_RETRY action'
+          : `wrong_streak >= 2 (${newState.wrong_streak})`;
+        console.log(`[AdaptiveLearning] Triggering AI hint - ${hintReason}`);
         try {
           const topic = await this.repo.getTopicById(topicId);
           
@@ -549,8 +560,8 @@ class AdaptiveLearningService {
           }
           // Continue without hint - learning is NOT blocked
         }
-      } else if (!isCorrect && newState.wrong_streak < 2) {
-        console.log('[AdaptiveLearning] Skipping AI hint - wrong_streak < 2');
+      } else if (!isCorrect && newState.wrong_streak < 2 && action !== this.ACTIONS.GIVE_HINT_RETRY) {
+        console.log('[AdaptiveLearning] Skipping AI hint - wrong_streak < 2 and action is not GIVE_HINT_RETRY');
         // For first wrong attempt, provide the template hint if available
         if (questionData?.hint) {
           aiHint = questionData.hint;
@@ -840,21 +851,35 @@ class AdaptiveLearningService {
         newDifficulty = 3; // Reset to medium for new topic
         break;
       
-      // Teaching strategy changes - DISABLED: Visual/Real-world rendering not implemented
+      // ✅ Teaching strategy changes - IMPLEMENTED: Multi-modal representation switching
       case this.ACTIONS.SWITCH_TO_VISUAL:
-        // Disabled: Visual rendering not implemented - use hints instead
+        // Switch to visual representation (diagrams, illustrations, visual examples)
+        newRepresentation = this.REPRESENTATIONS.VISUAL;
         teachingStrategy = 'scaffolding';
+        console.log('[ApplyAction] Switching to VISUAL representation');
         break;
       case this.ACTIONS.SWITCH_TO_REAL_WORLD:
-        // Disabled: Real-world rendering not implemented - use hints instead
+        // Switch to real-world context (practical examples, applications)
+        newRepresentation = this.REPRESENTATIONS.REAL_WORLD;
         teachingStrategy = 'scaffolding';
+        console.log('[ApplyAction] Switching to REAL_WORLD representation');
         break;
       case this.ACTIONS.REPEAT_DIFFERENT_REPRESENTATION:
-        // Keep text representation - others not implemented
-        newRepresentation = this.REPRESENTATIONS.TEXT;
+        // Cycle through representations: text → visual → real_world → text
+        const currentRep = currentState.current_representation || 'text';
+        if (currentRep === 'text') {
+          newRepresentation = this.REPRESENTATIONS.VISUAL;
+        } else if (currentRep === 'visual') {
+          newRepresentation = this.REPRESENTATIONS.REAL_WORLD;
+        } else {
+          newRepresentation = this.REPRESENTATIONS.TEXT; // Cycle back to text
+        }
         teachingStrategy = 'scaffolding';
+        console.log(`[ApplyAction] Cycling representation: ${currentRep} → ${newRepresentation}`);
         break;
       case this.ACTIONS.GIVE_HINT_RETRY:
+        // ✅ IMPLEMENTED: Hint generation triggered in processAnswer() when this action is selected
+        // See hint generation logic around line 467 - checks for (wrong_streak >= 2 OR action === GIVE_HINT_RETRY)
         teachingStrategy = 'scaffolding';
         break;
       case this.ACTIONS.REVIEW_PREREQUISITE:
@@ -1860,28 +1885,57 @@ class AdaptiveLearningService {
 
       // Fallback to parametric templates (or for difficulty 1-3)
       if (!question) {
-        // Get student state for cognitive domain
+        // Get student state for cognitive domain AND representation type
         const state = await this.repo.getStudentDifficulty(userId, topicId);
         const cognitiveDomain = this.determineCognitiveDomain(state);
+        
+        // ✅ Get current representation type from state (updated by SWITCH_TO_VISUAL/REAL_WORLD actions)
+        const representationType = state.current_representation || 'text';
+        console.log(`[AdaptiveLearning] Using representation type: ${representationType}`);
         
         // Get topic filter to match questions to topic
         const topicFilter = this.getTopicFilter(topic.topic_name);
         
-        question = await this.questionGenerator.generateQuestion(
-          difficultyLevel,           // difficulty level (1-5)
-          topic.chapter_id || 1,     // chapter ID
-          null,                      // seed (random)
-          cognitiveDomain,           // cognitive domain
-          'text',                    // representation type
-          topicFilter,               // topic filter (e.g., "polygon_interior")
-          recentTypes                // exclude recent question types
-        );
-
-        if (question) {
-          question.generatedBy = 'parametric';
-          // Keep the deterministic ID generated by QuestionGeneratorService
-          // DON'T override it with random timestamp - this breaks duplicate detection
-          console.log('[AdaptiveLearning] Generated parametric question:', question.questionId || question.id);
+        // ✅ 3-TIER FALLBACK STRATEGY (Highest quality → Most flexible)
+        // Tier 1: Try CSV Question Bank (pre-validated, guaranteed correct options)
+        if (this.csvQuestionBank) {
+          try {
+            console.log('[AdaptiveLearning] Attempting CSV Question Bank (Tier 1)...');
+            const csvQuestion = await this.csvQuestionBank.getQuestion(
+              difficultyLevel,
+              topic.topic_name,
+              representationType,
+              allExcluded
+            );
+            
+            if (csvQuestion) {
+              question = csvQuestion;
+              console.log('[AdaptiveLearning] ✅ CSV Question Bank success (guaranteed correct answer)');
+            } else {
+              console.log('[AdaptiveLearning] CSV Question Bank: No matching questions found');
+            }
+          } catch (csvError) {
+            console.warn('[AdaptiveLearning] CSV Question Bank error:', csvError.message);
+          }
+        }
+        
+        // Tier 2: Parametric Generation (fallback if CSV unavailable)
+        if (!question) {
+          console.log('[AdaptiveLearning] Falling back to Parametric Generation (Tier 2)...');
+          question = await this.questionGenerator.generateQuestion(
+            difficultyLevel,           // difficulty level (1-5)
+            topic.chapter_id || 1,     // chapter ID
+            null,                      // seed (random)
+            cognitiveDomain,           // cognitive domain
+            representationType,        // ✅ representation type from student state (text/visual/real_world)
+            topicFilter,               // topic filter (e.g., "polygon_interior")
+            recentTypes                // exclude recent question types
+          );
+          
+          if (question) {
+            question.generatedBy = 'parametric';
+            console.log('[AdaptiveLearning] ✅ Parametric generation success');
+          }
         }
       }
 

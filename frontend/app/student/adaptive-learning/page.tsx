@@ -31,11 +31,22 @@ export default function AdaptiveLearningPage() {
 
   const fetchTopicsWithProgress = async () => {
     try {
+      // Check if user is logged in before making request
+      const accessToken = localStorage.getItem('access_token');
+      if (!accessToken) {
+        console.error('❌ No access token found - user not logged in');
+        // Redirect to login
+        window.location.href = '/auth/login';
+        return;
+      }
+
+      console.log('📤 Fetching topics with progress...');
       const response = await axios.get('/adaptive/topics-with-progress', {
         timeout: 30000 // 30 second timeout instead of default 60s
       });
       
       if (response.data.success) {
+        console.log('✅ Topics fetched successfully:', response.data.data?.length || 0);
         const topicsData = response.data.data || [];
         setTopics(topicsData);
         
@@ -66,8 +77,19 @@ export default function AdaptiveLearningPage() {
           localStorage.setItem('selectedTopicId', topicsData[0].id);
         }
       }
-    } catch (error) {
-      console.error('Error fetching topics:', error);
+    } catch (error: any) {
+      console.error('❌ Error fetching topics:', error);
+      
+      // Handle 401 - token expired or invalid
+      if (error.response?.status === 401) {
+        console.error('🔒 Authentication failed - redirecting to login');
+        localStorage.clear(); // Clear all auth data
+        window.location.href = '/auth/login';
+        return;
+      }
+      
+      // Show user-friendly error message
+      alert(`Failed to load topics: ${error.response?.data?.error || error.message || 'Unknown error'}`);
     } finally {
       setLoading(false);
     }

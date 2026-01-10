@@ -217,32 +217,37 @@ class CastleService {
 
             // 4. Initialize chapter progress for each chapter
             const chapterProgressPromises = chapters.map(async (chapter) => {
-                const existing = await this.userChapterProgressRepo.getUserChapterProgressByUserAndChapter(userId, chapter.id);
-                
-                if (!existing) {
-                    console.log(`[CastleService] Creating progress for chapter ${chapter.chapterNumber}`);
-                    // Unlock first chapter if castle is unlocked
-                    return await this.userChapterProgressRepo.createUserChapterProgress({
-                        user_id: userId,
-                        chapter_id: chapter.id,
-                        unlocked: castleProgress.unlocked && chapter.chapterNumber === 1,
-                        completed: false,
-                        xp_earned: 0,
-                        quiz_passed: false
-                    });
+                try {
+                    const existing = await this.userChapterProgressRepo.getUserChapterProgressByUserAndChapter(userId, chapter.id);
+                    
+                    if (!existing) {
+                        console.log(`[CastleService] Creating progress for chapter ${chapter.chapterNumber}`);
+                        // Unlock first chapter if castle is unlocked
+                        return await this.userChapterProgressRepo.createUserChapterProgress({
+                            user_id: userId,
+                            chapter_id: chapter.id,
+                            unlocked: castleProgress.unlocked && chapter.chapterNumber === 1,
+                            completed: false,
+                            xp_earned: 0,
+                            quiz_passed: false
+                        });
+                    }
+                    return existing;
+                } catch (error) {
+                    console.error(`[CastleService] Error creating chapter progress:`, error);
+                    return null;
                 }
-                return existing;
             });
 
             const chapterProgresses = await Promise.all(chapterProgressPromises);
 
-            // 5. Return combined data
+            // 5. Return combined data with null safety
             return {
-                castle: castle.toJSON(),
-                castleProgress: castleProgress.toJSON(),
-                chapters: chapters.map((chapter, index) => ({
-                    ...chapter.toJSON(),
-                    progress: chapterProgresses[index] ? chapterProgresses[index].toJSON() : null
+                castle: castle?.toJSON() || null,
+                castleProgress: castleProgress?.toJSON() || null,
+                chapters: (chapters || []).map((chapter, index) => ({
+                    ...chapter?.toJSON() || {},
+                    progress: chapterProgresses[index] ? chapterProgresses[index]?.toJSON() : null
                 }))
             };
 

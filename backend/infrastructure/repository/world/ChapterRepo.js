@@ -27,25 +27,47 @@ class ChapterRepo extends BaseRepo {
     }
 
     async getChapterById(id) {
-        const { data, error } = await this.supabase
-            .from('chapters')
-            .select('*')
-            .eq('id', id)
-            .single();
-        
-        if (error && error.code !== 'PGRST116') throw error;
-        return data ? Chapter.fromDatabase(data) : null;
+        try {
+            return await this.withRetry(async () => {
+                const { data, error } = await this.supabase
+                    .from('chapters')
+                    .select('*')
+                    .eq('id', id)
+                    .single();
+                
+                if (error && error.code !== 'PGRST116') {
+                    console.error('[ChapterRepo] Error in getChapterById:', error);
+                    throw error;
+                }
+                return data ? Chapter.fromDatabase(data) : null;
+            });
+        } catch (error) {
+            console.error('[ChapterRepo] Failed to get chapter by id:', id, error);
+            return null;
+        }
     }
 
     async getChaptersByCastleId(castleId) {
-        const { data, error } = await this.supabase
-            .from('chapters')
-            .select('*')
-            .eq('castle_id', castleId)
-            .order('chapter_number', { ascending: true });
-        
-        if (error) throw error;
-        return data ? data.map(Chapter.fromDatabase) : [];
+        try {
+            return await this.withRetry(async () => {
+                const { data, error } = await this.supabase
+                    .from('chapters')
+                    .select('*')
+                    .eq('castle_id', castleId)
+                    .order('chapter_number', { ascending: true });
+                
+                if (error) {
+                    console.error('[ChapterRepo] Error in getChaptersByCastleId:', error);
+                    throw error;
+                }
+                
+                console.log(`[ChapterRepo] Fetched ${data?.length || 0} chapters for castle ${castleId}`);
+                return data ? data.map(Chapter.fromDatabase) : [];
+            });
+        } catch (error) {
+            console.error('[ChapterRepo] Failed to get chapters for castle:', castleId, error);
+            return [];
+        }
     }
 
     async getAllChapters() {

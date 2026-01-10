@@ -39,6 +39,25 @@ const supabase = createClient(supabaseUrl, supabaseKey, {
     }
 })
 
+// Add connection health check
+const checkConnection = async () => {
+    try {
+        const { error } = await supabase.from('users').select('count').limit(1);
+        if (error) {
+            console.error('[Supabase] Connection check failed:', error.message);
+            return false;
+        }
+        console.log('[Supabase] Connection healthy ✓');
+        return true;
+    } catch (error) {
+        console.error('[Supabase] Connection check error:', error);
+        return false;
+    }
+};
+
+// Check connection on startup
+checkConnection();
+
 // Verify service key is being used (should show 'service_role')
 if (supabaseKey.includes('service_role')) {
     console.log('[Supabase] Using service_role key - RLS will be bypassed')
