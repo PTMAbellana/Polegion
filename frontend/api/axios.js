@@ -193,8 +193,9 @@ api.interceptors.request.use(
 		const accessToken = localStorage.getItem("access_token");
 		
 		if (!accessToken) {
-			console.warn("⚠️ No access token found for request:", config.url);
-			return config;
+			console.error("❌ No access token found for protected request:", config.url);
+			console.error("💡 Hint: User might not be logged in or token was cleared");
+			return config; // Let request fail with 401
 		}
 
 		// Check if token is expired or expiring soon
