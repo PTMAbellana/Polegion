@@ -120,8 +120,28 @@ app.get('/', (req, res) => {
 })
 
 //start server
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`)
+})
+
+// Graceful shutdown
+process.on('SIGTERM', () => {
+    console.log('SIGTERM signal received: closing HTTP server')
+    server.close(() => {
+        console.log('HTTP server closed')
+        process.exit(0)
+    })
+})
+
+// Handle uncaught errors
+process.on('uncaughtException', (error) => {
+    console.error('Uncaught Exception:', error)
+    process.exit(1)
+})
+
+process.on('unhandledRejection', (reason, promise) => {
+    console.error('Unhandled Rejection at:', promise, 'reason:', reason)
+    process.exit(1)
 })
 
 module.exports = app
