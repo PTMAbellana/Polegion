@@ -429,16 +429,16 @@ class AdaptiveLearningRepository {
   async getAllStudentDifficulties(chapterId = null) {
     try {
       let query = this.supabase
-        .from('student_difficulty_levels')
+        .from('adaptive_learning_state')
         .select(`
           *,
           users:user_id (email, name),
-          chapters:chapter_id (title)
+          topics:topic_id (topic_name, topic_code)
         `)
         .order('updated_at', { ascending: false });
 
       if (chapterId) {
-        query = query.eq('chapter_id', chapterId);
+        query = query.eq('topic_id', chapterId);
       }
 
       const { data, error } = await query;
@@ -456,11 +456,11 @@ class AdaptiveLearningRepository {
   async getResearchStatistics(chapterId = null) {
     try {
       let query = this.supabase
-        .from('student_difficulty_levels')
+        .from('adaptive_learning_state')
         .select('*');
 
       if (chapterId) {
-        query = query.eq('chapter_id', chapterId);
+        query = query.eq('topic_id', chapterId);
       }
 
       const { data, error } = await query;

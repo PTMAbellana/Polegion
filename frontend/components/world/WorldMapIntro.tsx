@@ -63,6 +63,7 @@ export default function WorldMapIntro({ onIntroComplete }: WorldMapIntroProps) {
   const audioRefs = useRef<(HTMLAudioElement | null)[]>([]);
   const typingIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const currentAudioRef = useRef<HTMLAudioElement | null>(null);
+  const currentPlayPromiseRef = useRef<Promise<void> | null>(null);
   const isInitialized = useRef(false);
 
   // Save progress to localStorage whenever line changes
