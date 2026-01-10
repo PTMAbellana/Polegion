@@ -80,6 +80,9 @@ class AIExplanationService {
       if (this.provider === 'gemini') {
         result = await this._callGemini(prompt);
         console.log('[AIExplanation] Gemini response received:', result.substring(0, 100) + '...');
+      } else if (this.provider === 'groq') {
+        result = await this._callGroq(prompt);
+        console.log('[AIExplanation] Groq response received:', result.substring(0, 100) + '...');
       } else {
         result = await this._callOpenAI(prompt);
         console.log('[AIExplanation] OpenAI response received:', result.substring(0, 100) + '...');
@@ -170,6 +173,42 @@ Keep the tone encouraging and age-appropriate. Use simple language. Keep total r
 
     if (!response.ok) {
       throw new Error(`OpenAI API error: ${response.status} ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    return data.choices[0].message.content.trim();
+  }
+
+  /**
+   * Call Groq API (OpenAI-compatible endpoint)
+   */
+  async _callGroq(prompt) {
+    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${this.apiKey}`
+      },
+      body: JSON.stringify({
+        model: this.model,
+        messages: [
+          {
+            role: 'system',
+            content: 'You are a patient, encouraging geometry tutor for middle school students. Provide clear, step-by-step explanations that build understanding.'
+          },
+          {
+            role: 'user',
+            content: prompt
+          }
+        ],
+        temperature: 0.7,
+        max_tokens: 1000
+      })
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Groq API error: ${response.status} ${response.statusText} - ${errorText}`);
     }
 
     const data = await response.json();

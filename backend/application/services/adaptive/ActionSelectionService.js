@@ -141,7 +141,12 @@ class ActionSelectionService {
       // Detect misconceptions
       let misconception = null;
       if (user_id && topic_id) {
-        misconception = await this._detectMisconception(user_id, topic_id);
+        try {
+          misconception = await this._detectMisconception(user_id, topic_id);
+        } catch (error) {
+          console.error('[ActionSelection] Error detecting misconception:', error);
+          misconception = null;
+        }
       }
     
       if (misconception && wrong_streak >= 2) {
@@ -227,7 +232,11 @@ class ActionSelectionService {
    */
   async _detectMisconception(userId, topicId) {
     try {
-      const recentHistory = await this.repo.getRecentAnswers(userId, topicId, 5);
+      // TODO: Implement getRecentAnswers in repository
+      // Temporarily return null until method is implemented
+      return null;
+      
+      // const recentHistory = await this.repo.getRecentAnswers(userId, topicId, 5);
       
       if (!recentHistory || recentHistory.length < 2) {
         return null;
