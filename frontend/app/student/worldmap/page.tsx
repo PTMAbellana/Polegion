@@ -189,7 +189,10 @@ export default function WorldMapPage() {
   const playWhoosh = () => {
     if (whooshAudioRef.current) {
       whooshAudioRef.current.currentTime = 0;
-      whooshAudioRef.current.play().catch(err => console.log('Audio play failed:', err));
+      const playPromise = whooshAudioRef.current.play();
+      if (playPromise !== undefined) {
+        playPromise.catch(err => console.log('Audio play failed:', err));
+      }
     }
   };
 

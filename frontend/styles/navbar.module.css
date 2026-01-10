@@ -72,6 +72,13 @@
   scrollbar-color: #22c55e #f0fdf4;
 }
 
+.error-title {
+  color: #FF4D4F;
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: auto;
+  text-align: center;
+}
 /* Content wrapper - Add this for proper spacing */
 .content-wrapper {
   flex: 1;

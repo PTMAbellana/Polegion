@@ -1,101 +1,87 @@
 const supabase = require('./config/supabase')
 
 // Import repositories
-const UserRepository = require('./infrastructure/repository/UserRepo');
-const ParticipantRepository = require('./infrastructure/repository/ParticipantRepo');
-const ProblemRepository = require('./infrastructure/repository/ProblemRepo');
-const AttemptsRepository = require('./infrastructure/repository/AttemptsRepo');
-const XPRepository = require('./infrastructure/repository/XPRepo');
+const UserRepository = require('./infrastructure/repository/auth/UserRepo');
+const XPRepository = require('./infrastructure/repository/world/XPRepo');
 
-// Newly Added Repositories
-const CastleRepository = require('./infrastructure/repository/CastleRepo');
-const ChapterQuizRepository = require('./infrastructure/repository/ChapterQuizRepo');
-const ChapterRepository = require('./infrastructure/repository/ChapterRepo');
-const MinigameRepository = require('./infrastructure/repository/MinigameRepo');
-const UserCastleProgressRepository = require('./infrastructure/repository/UserCastleProgressRepo');
-const UserChapterProgressRepository = require('./infrastructure/repository/UserChapterProgressRepo');
-const UserMinigameAttemptRepository = require('./infrastructure/repository/UserMinigameAttemptRepo');
-const UserQuizAttemptRepository = require('./infrastructure/repository/UserQuizAttemptRepo');
-const AssessmentRepository = require('./infrastructure/repository/AssessmentRepo');
-const AdaptiveLearningRepository = require('./infrastructure/repository/AdaptiveLearningRepo');
+// Castle/Chapter/Adaptive Learning Repositories
+const CastleRepository = require('./infrastructure/repository/world/CastleRepo');
+const ChapterQuizRepository = require('./infrastructure/repository/world/ChapterQuizRepo');
+const ChapterRepository = require('./infrastructure/repository/world/ChapterRepo');
+const MinigameRepository = require('./infrastructure/repository/world/MinigameRepo');
+const UserCastleProgressRepository = require('./infrastructure/repository/world/UserCastleProgressRepo');
+const UserChapterProgressRepository = require('./infrastructure/repository/world/UserChapterProgressRepo');
+const UserMinigameAttemptRepository = require('./infrastructure/repository/world/UserMinigameAttemptRepo');
+const UserQuizAttemptRepository = require('./infrastructure/repository/world/UserQuizAttemptRepo');
+const AssessmentRepository = require('./infrastructure/repository/adaptive/AssessmentRepo');
+const AdaptiveLearningRepository = require('./infrastructure/repository/adaptive/AdaptiveLearningRepo');
 
 
 // Import services
-const AuthService = require('./application/services/AuthService');
-const UserService = require('./application/services/UserService');
-const ParticipantService = require('./application/services/ParticipantService');
-const ProblemService = require('./application/services/ProblemService');
-const AttemptsService = require('./application/services/AttemptsService');
-const XPService = require('./application/services/XPService');
-const GradingService = require('./application/services/GradingService');
+const AuthService = require('./application/services/auth/AuthService');
+const UserService = require('./application/services/auth/UserService');
+const XPService = require('./application/services/world/XPService');
 
-
-// Newly Added Services
-const CastleService = require('./application/services/CastleService');
-const ChapterQuizService = require('./application/services/ChapterQuizService');
-const ChapterService = require('./application/services/ChapterService');
-const MinigameService = require('./application/services/MinigameService');
-const UserCastleProgressService = require('./application/services/UserCastleProgressService');
-const UserChapterProgressService = require('./application/services/UserChapterProgressService');
-const UserMinigameAttemptService = require('./application/services/UserMinigameAttemptService');
-const UserQuizAttemptService = require('./application/services/UserQuizAttemptService');
+// Castle/Chapter/Adaptive Learning Services
+const CastleService = require('./application/services/world/CastleService');
+const ChapterQuizService = require('./application/services/world/ChapterQuizService');
+const ChapterService = require('./application/services/world/ChapterService');
+const MinigameService = require('./application/services/world/MinigameService');
+const UserCastleProgressService = require('./application/services/world/UserCastleProgressService');
+const UserChapterProgressService = require('./application/services/world/UserChapterProgressService');
+const UserMinigameAttemptService = require('./application/services/world/UserMinigameAttemptService');
+const UserQuizAttemptService = require('./application/services/world/UserQuizAttemptService');
 const ChapterSeeder = require('./application/services/ChapterSeeder');
 const QuizAndMinigameSeeder = require('./application/services/QuizAndMinigameSeeder');
-const AssessmentService = require('./application/services/AssessmentService');
-const AdaptiveLearningService = require('./application/services/AdaptiveLearningService');
+const AssessmentService = require('./application/services/adaptive/AssessmentService');
+const AdaptiveLearningService = require('./application/services/adaptive/AdaptiveLearningService');
+const MasteryProgressionService = require('./application/services/adaptive/MasteryProgressionService'); // NEW: Mastery-based unlocking
 
 // Import controllers
-const AuthController = require('./presentation/controllers/AuthController');
-const UserController = require('./presentation/controllers/UserController');
-const ParticipantController = require('./presentation/controllers/ParticipantController');
-const ProblemController = require('./presentation/controllers/ProblemController');
-const AttemptsController = require('./presentation/controllers/AttemptsController');
+const AuthController = require('./presentation/controllers/auth/AuthController');
+const UserController = require('./presentation/controllers/auth/UserController');
 
-// Newly Added Controllers
-const CastleController = require('./presentation/controllers/CastleController');
-const ChapterQuizController = require('./presentation/controllers/ChapterQuizController');
-const ChapterController = require('./presentation/controllers/ChapterController');
-const MinigameController = require('./presentation/controllers/MinigameController');
-const UserCastleProgressController = require('./presentation/controllers/UserCastleProgressController');
-const UserChapterProgressController = require('./presentation/controllers/UserChapterProgressController');
-const UserMinigameAttemptController = require('./presentation/controllers/UserMinigameAttemptController');
-const UserQuizAttemptController = require('./presentation/controllers/UserQuizAttemptController');
-const AssessmentController = require('./presentation/controllers/AssessmentController');
-const AdaptiveLearningController = require('./presentation/controllers/AdaptiveLearningController');
+// Castle/Chapter/Adaptive Learning Controllers
+const CastleController = require('./presentation/controllers/world/CastleController');
+const ChapterQuizController = require('./presentation/controllers/world/ChapterQuizController');
+const ChapterController = require('./presentation/controllers/world/ChapterController');
+const MinigameController = require('./presentation/controllers/world/MinigameController');
+const UserCastleProgressController = require('./presentation/controllers/world/UserCastleProgressController');
+const UserChapterProgressController = require('./presentation/controllers/world/UserChapterProgressController');
+const UserMinigameAttemptController = require('./presentation/controllers/world/UserMinigameAttemptController');
+const UserQuizAttemptController = require('./presentation/controllers/world/UserQuizAttemptController');
+const AssessmentController = require('./presentation/controllers/adaptive/AssessmentController');
+const AdaptiveLearningController = require('./presentation/controllers/adaptive/AdaptiveLearningController');
+const MasteryProgressionController = require('./presentation/controllers/adaptive/MasteryProgressionController'); // NEW
 
 // Import middleware
 const AuthMiddleware = require('./presentation/middleware/AuthMiddleware');
 
 // Import routes
-const AuthRoutes = require('./presentation/routes/AuthRoutes');
-const UserRoutes = require('./presentation/routes/UserRoutes');
-const ParticipantRoutes = require('./presentation/routes/ParticipantRoutes');
-const ProblemRoutes = require('./presentation/routes/ProblemRoutes');
-const AttemptsRoutes = require('./presentation/routes/AttemptsRoutes');
+const AuthRoutes = require('./presentation/routes/auth/AuthRoutes');
+const UserRoutes = require('./presentation/routes/auth/UserRoutes');
 
-// Newly Added Routes
-const CastleRoutes = require('./presentation/routes/CastleRoutes');
-const ChapterQuizRoutes = require('./presentation/routes/ChapterQuizRoutes');
-const ChapterRoutes = require('./presentation/routes/ChapterRoutes');
-const MinigameRoutes = require('./presentation/routes/MinigameRoutes');
-const UserCastleProgressRoutes = require('./presentation/routes/UserCastleProgressRoutes');
-const UserChapterProgressRoutes = require('./presentation/routes/UserChapterProgressRoutes');
-const UserMinigameAttemptRoutes = require('./presentation/routes/UserMinigameAttemptRoutes');
-const UserQuizAttemptRoutes = require('./presentation/routes/UserQuizAttemptRoutes');
-const AssessmentRoutes = require('./presentation/routes/AssessmentRoutes');
-const AdaptiveLearningRoutes = require('./presentation/routes/AdaptiveLearningRoutes');
+// Castle/Chapter/Adaptive Learning Routes
+const CastleRoutes = require('./presentation/routes/world/CastleRoutes');
+const ChapterQuizRoutes = require('./presentation/routes/world/ChapterQuizRoutes');
+const ChapterRoutes = require('./presentation/routes/world/ChapterRoutes');
+const MinigameRoutes = require('./presentation/routes/world/MinigameRoutes');
+const UserCastleProgressRoutes = require('./presentation/routes/world/UserCastleProgressRoutes');
+const UserChapterProgressRoutes = require('./presentation/routes/world/UserChapterProgressRoutes');
+const UserMinigameAttemptRoutes = require('./presentation/routes/world/UserMinigameAttemptRoutes');
+const UserQuizAttemptRoutes = require('./presentation/routes/world/UserQuizAttemptRoutes');
+const AssessmentRoutes = require('./presentation/routes/adaptive/AssessmentRoutes');
+const AdaptiveLearningRoutes = require('./presentation/routes/adaptive/AdaptiveLearningRoutes');
+const MasteryProgressionRoutes = require('./presentation/routes/adaptive/MasteryProgressionRoutes'); // NEW
 
 // Import services registry
 const servicesRegistry = require('./application/services');
 
 // Initialize repositories
 const userRepository = new UserRepository(supabase);
-const participantRepository = new ParticipantRepository(supabase);
-const problemRepository = new ProblemRepository(supabase);
-const attemptsRepository = new AttemptsRepository(supabase);
 const xpRepository = new XPRepository(supabase);
 
-// Newly Added Repositories
+// Castle/Chapter/Adaptive Learning Repositories
 const castleRepository = new CastleRepository(supabase);
 const chapterQuizRepository = new ChapterQuizRepository(supabase);
 const chapterRepository = new ChapterRepository(supabase);
@@ -110,27 +96,9 @@ const adaptiveLearningRepository = new AdaptiveLearningRepository(supabase);
 // Initialize services
 const authService = new AuthService(userRepository, supabase);
 const userService = new UserService(userRepository);
-
-// Create stubs for removed services (for dependencies)
-const roomService = { getRoomByCodeUsers: () => { throw new Error('Room feature removed for research'); } };
-const leaderboardService = { updateLeaderboard: () => {}, getLeaderboard: () => [] };
-
-const problemService = new ProblemService(problemRepository, roomService);
-const gradingService = new GradingService();
 const xpService = new XPService(xpRepository);
-const participantService = new ParticipantService(participantRepository, roomService, userService, leaderboardService);
-const attemptsService = new AttemptsService(
-  attemptsRepository,
-  xpService,
-  leaderboardService,
-  gradingService,
-  participantService,
-  userService
-);
-// Competition service removed for adaptive learning research
-// const competitionService = new CompetitionService(...);
 
-// Added Newly Added Services
+// Castle/Chapter/Adaptive Learning Services
 const chapterSeeder = new ChapterSeeder(chapterRepository);
 const quizAndMinigameSeeder = new QuizAndMinigameSeeder(chapterQuizRepository, minigameRepository);
 const castleService = new CastleService(castleRepository, userCastleProgressRepository, chapterRepository, userChapterProgressRepository, chapterSeeder, quizAndMinigameSeeder);
@@ -139,21 +107,18 @@ const chapterService = new ChapterService(chapterRepository, chapterQuizService)
 const minigameService = new MinigameService(minigameRepository);
 const userCastleProgressService = new UserCastleProgressService(userCastleProgressRepository, castleService);
 const userChapterProgressService = new UserChapterProgressService(userChapterProgressRepository, chapterRepository, userCastleProgressRepository, userMinigameAttemptRepository, userQuizAttemptRepository);
-const userMinigameAttemptService = new UserMinigameAttemptService(userMinigameAttemptRepository, minigameService, xpService, leaderboardService);
-const userQuizAttemptService = new UserQuizAttemptService(userQuizAttemptRepository, chapterQuizService, xpService, leaderboardService);
+const userMinigameAttemptService = new UserMinigameAttemptService(userMinigameAttemptRepository, minigameService, xpService);
+const userQuizAttemptService = new UserQuizAttemptService(userQuizAttemptRepository, chapterQuizService, xpService);
 const assessmentService = new AssessmentService(assessmentRepository, userCastleProgressRepository, chapterRepository, userChapterProgressRepository);
 const adaptiveLearningService = new AdaptiveLearningService(adaptiveLearningRepository);
+// NEW: Mastery progression service (feeds WorldMap without modifying it)
+const masteryProgressionService = new MasteryProgressionService(adaptiveLearningRepository, userChapterProgressRepository, chapterRepository);
 
-// Register all services in the registry 🚀
+// Register all services in the registry
 servicesRegistry.registerServices({
     authService,
     userService,
-    problemService,
-    gradingService,
     xpService,
-    participantService,
-    attemptsService,
-    // Removed: roomService, competitionService, leaderboardService
     castleService,
     chapterQuizService,
     chapterService,
@@ -163,21 +128,18 @@ servicesRegistry.registerServices({
     userMinigameAttemptService,
     userQuizAttemptService,
     assessmentService,
-    adaptiveLearningService
+    adaptiveLearningService,
+    masteryProgressionService // NEW: Mastery progression service
 });
 
 // Initialize middleware
 const authMiddleware = new AuthMiddleware(authService);
 
 // Initialize controllers
-const authController = new AuthController(authService);
+const authController = new AuthController(authService, adaptiveLearningRepository);
 const userController = new UserController(userService);
-// Removed: roomController, leaderboardController, competitionController
-const participantController = new ParticipantController(participantService);
-const problemController = new ProblemController(problemService);
-const attemptsController = new AttemptsController(attemptsService);
 
-// Added New Controllers
+// Castle/Chapter/Adaptive Learning Controllers
 const castleController = new CastleController(castleService);
 const chapterQuizController = new ChapterQuizController(chapterQuizService);
 const chapterController = new ChapterController(chapterService);
@@ -188,16 +150,13 @@ const userMinigameAttemptController = new UserMinigameAttemptController(userMini
 const userQuizAttemptController = new UserQuizAttemptController(userQuizAttemptService);
 const assessmentController = new AssessmentController(assessmentService);
 const adaptiveLearningController = new AdaptiveLearningController(adaptiveLearningService);
+const masteryProgressionController = new MasteryProgressionController(masteryProgressionService); // NEW
 
 // Initialize routes
 const authRoutes = new AuthRoutes(authController);
 const userRoutes = new UserRoutes(userController, authMiddleware);
-// Removed: roomRoutes, leaderboardRoutes, competitionRoutes
-const participantRoutes = new ParticipantRoutes(participantController, authMiddleware);
-const problemRoutes = new ProblemRoutes(problemController, authMiddleware);
-const attemptsRoutes = new AttemptsRoutes(attemptsController, authMiddleware);
 
-// Added New Routes
+// Castle/Chapter/Adaptive Learning Routes
 const castleRoutes = new CastleRoutes(castleController, authMiddleware);
 const chapterQuizRoutes = new ChapterQuizRoutes(chapterQuizController, authMiddleware);
 const chapterRoutes = new ChapterRoutes(chapterController, authMiddleware);
@@ -208,15 +167,11 @@ const userMinigameAttemptRoutes = new UserMinigameAttemptRoutes(userMinigameAtte
 const userQuizAttemptRoutes = new UserQuizAttemptRoutes(userQuizAttemptController, authMiddleware);
 const assessmentRoutes = new AssessmentRoutes(assessmentController, authMiddleware);
 const adaptiveLearningRoutes = new AdaptiveLearningRoutes(adaptiveLearningController, authMiddleware);
+const masteryProgressionRoutes = new MasteryProgressionRoutes(masteryProgressionController, authMiddleware); // NEW
 
 module.exports = {
   authRoutes: authRoutes.getRouter(),
   userRoutes: userRoutes.getRouter(),
-  participantRoutes: participantRoutes.getRouter(),
-  problemRoutes: problemRoutes.getRouter(),
-  attemptsRoutes: attemptsRoutes.getRouter(),
-  // Removed: roomRoutes, leaderboardRoutes, competitionRoutes
-  // Newly Added Routes
   castleRoutes: castleRoutes.getRouter(),
   chapterQuizRoutes: chapterQuizRoutes.getRouter(),
   chapterRoutes: chapterRoutes.getRouter(),
@@ -227,6 +182,7 @@ module.exports = {
   userQuizAttemptRoutes: userQuizAttemptRoutes.getRouter(),
   assessmentRoutes: assessmentRoutes.getRouter(),
   adaptiveLearningRoutes: adaptiveLearningRoutes.getRouter(),
+  masteryProgressionRoutes: masteryProgressionRoutes.getRouter(), // NEW
 
   // services (for testing or other uses)
   services: servicesRegistry.getServices()

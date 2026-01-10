@@ -3,15 +3,15 @@
 import React from "react";
 import styles from "@/styles/create-problem-teacher.module.css";
 import PageHeader from "@/components/PageHeader";
-import Toolbox from "@/components/teacher/create-problem/Toolbox";
-import MainArea from "@/components/teacher/create-problem/MainArea";
-import PropertiesPanel from "@/components/teacher/create-problem/PropertiesPanel";
-import ShapeLimitPopup from "@/components/teacher/create-problem/ShapeLimitPopup";
+import Toolbox from "@/components/shared/problem-builder/Toolbox";
+import MainArea from "@/components/shared/problem-builder/MainArea";
+import PropertiesPanel from "@/components/shared/problem-builder/PropertiesPanel";
+import ShapeLimitPopup from "@/components/shared/problem-builder/ShapeLimitPopup";
 import LandscapePrompt from "@/components/LandscapePrompt";
 
 // Hooks
-import { useShapeManagement } from "@/hooks/teacher/useShapeManagement";
-import { usePropertiesManagement } from "@/hooks/teacher/usePropertiesManagement";
+import { useShapeManagement } from "@/hooks/shared/useShapeManagement";
+import { usePropertiesManagement } from "@/hooks/shared/usePropertiesManagement";
 import { useAuthStore } from "@/store/authStore";
 
 const MAX_SHAPES = 1; // Allow only one shape at a time

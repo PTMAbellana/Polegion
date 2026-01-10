@@ -280,7 +280,7 @@ export default function Home() {
 
 
 
-        {/* Footer */}}
+        {/* Footer */}
         <footer className={styles.footer}>
           <div className={styles.footerContent}>
             <div className={styles.footerBrand}>

@@ -7,6 +7,9 @@ interface AdaptiveFeedbackBoxProps {
   actionReason?: string;
   pedagogicalStrategy?: string;
   representationType?: string;
+  aiExplanation?: string; // AI-generated hint or explanation
+  hintMetadata?: { source: string; reason: string }; // Hint generation metadata
+  isCorrect?: boolean; // NEW: Track if last answer was correct
 }
 
 export default function AdaptiveFeedbackBox({ 
@@ -15,78 +18,86 @@ export default function AdaptiveFeedbackBox({
   correctStreak,
   actionReason,
   pedagogicalStrategy,
-  representationType
+  representationType,
+  aiExplanation,
+  hintMetadata,
+  isCorrect
 }: AdaptiveFeedbackBoxProps) {
   
   const getFeedbackContent = () => {
-    // Representation changes
+    // Representation changes (Grade 6 UX: simplified language, emojis, max 10 words)
     if (mdpAction === 'switch_to_visual_example' || mdpAction === 'switch_to_visual') {
       return {
-        title: "Trying a visual approach",
-        message: "Let's look at this with a diagram to help you understand.",
-        bgColor: '#EFF6FF',
-        iconBg: '#3B82F6',
-        icon: '📊'
+        title: "Let's try pictures! 🖼️",
+        message: "Your next question will have drawings to help.",
+        bgColor: 'rgba(139, 100, 60, 0.08)',
+        iconBg: '#b8860b',
+        icon: '🎨'
       };
     }
     
     if (mdpAction === 'switch_to_real_world_context' || mdpAction === 'switch_to_real_world') {
       return {
-        title: "Making it practical",
-        message: "Here's how this works in a real-world situation.",
-        bgColor: '#F0FDF4',
-        iconBg: '#10B981',
-        icon: '🌍'
+        title: "Real-life example! 🌍",
+        message: "This question shows how you'd use this in real life.",
+        bgColor: 'rgba(34, 139, 34, 0.1)',
+        iconBg: '#228b22',
+        icon: '🌟'
       };
     }
     
     if (mdpAction === 'give_hint_then_retry' || mdpAction === 'give_hint_retry') {
       return {
-        title: "Here's a hint",
-        message: "This clue should help you solve the problem.",
-        bgColor: '#FEF3C7',
-        iconBg: '#F59E0B',
+        title: "Here's a hint! 💡",
+        message: "This clue will help you solve it.",
+        bgColor: 'rgba(218, 165, 32, 0.15)',
+        iconBg: '#daa520',
         icon: '💡'
       };
     }
     
     if (mdpAction === 'decrease_difficulty') {
       return {
-        title: "Adjusting difficulty",
-        message: "Let's practice with simpler examples first.",
-        bgColor: '#F3F4F6',
-        iconBg: '#6B7280',
-        icon: '📉'
+        title: "Let's practice! 📚",
+        message: "Let's try some easier problems first.",
+        bgColor: 'rgba(139, 100, 60, 0.1)',
+        iconBg: '#8b7355',
+        icon: '📚'
       };
     }
     
     if (mdpAction === 'increase_difficulty') {
+      // Only show positive message if answer was actually correct
+      // During exploration, increase_difficulty can be chosen randomly even after wrong answers
+      const wasCorrect = isCorrect === true || (correctStreak > 0 && wrongStreak === 0);
       return {
-        title: "Ready for more",
-        message: "Great work! Let's try a more challenging problem.",
-        bgColor: '#F0FDF4',
-        iconBg: '#10B981',
-        icon: '📈'
+        title: wasCorrect ? "You're ready! 🚀" : "Let's adjust ⚖️",
+        message: wasCorrect 
+          ? "Great job! Time for a bigger challenge." 
+          : "Let's find the perfect challenge level for you.",
+        bgColor: wasCorrect ? 'rgba(34, 139, 34, 0.1)' : 'rgba(139, 100, 60, 0.08)',
+        iconBg: wasCorrect ? '#228b22' : '#b8860b',
+        icon: wasCorrect ? '🚀' : '⚖️'
       };
     }
     
     if (mdpAction === 'advance_topic') {
       return {
-        title: "Topic mastered!",
-        message: "You're ready to move on to new concepts.",
-        bgColor: '#FEF3C7',
-        iconBg: '#F59E0B',
-        icon: '✓'
+        title: "You mastered it! 🏆",
+        message: "Amazing! You're ready for new topics.",
+        bgColor: 'rgba(218, 165, 32, 0.15)',
+        iconBg: '#daa520',
+        icon: '🏆'
       };
     }
     
     if (mdpAction === 'review_prerequisite') {
       return {
-        title: "Quick review",
-        message: "Let's refresh some foundational concepts.",
-        bgColor: '#EFF6FF',
-        iconBg: '#3B82F6',
-        icon: '↺'
+        title: "Quick review! 📖",
+        message: "Let's refresh what we learned before.",
+        bgColor: 'rgba(139, 100, 60, 0.08)',
+        iconBg: '#8b7355',
+        icon: '📖'
       };
     }
     
@@ -95,54 +106,124 @@ export default function AdaptiveFeedbackBox({
 
   const feedback = getFeedbackContent();
   
-  if (!feedback) return null;
+  // If no feedback and no AI explanation, return null
+  if (!feedback && !aiExplanation) return null;
 
   return (
-    <div style={{
-      backgroundColor: feedback.bgColor,
-      borderRadius: '12px',
-      padding: '16px 20px',
-      marginBottom: '20px',
-      border: '1px solid rgba(0, 0, 0, 0.06)',
-      boxShadow: '0 1px 3px rgba(0, 0, 0, 0.05)',
-      transition: 'all 0.3s ease'
-    }}>
-      <div style={{ display: 'flex', alignItems: 'flex-start', gap: '14px' }}>
+    <>
+      {/* AI Explanation Box - Displayed First */}
+      {aiExplanation && (
         <div style={{
-          width: '36px',
-          height: '36px',
-          borderRadius: '8px',
-          backgroundColor: feedback.iconBg,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          fontSize: '18px',
-          flexShrink: 0
+          backgroundColor: '#f4e9d9',
+          borderRadius: '12px',
+          padding: '16px',
+          marginBottom: '16px',
+          border: '3px solid #daa520',
+          boxShadow: '0 4px 12px rgba(139, 100, 60, 0.2)',
+          transition: 'all 0.3s ease',
+          background: 'linear-gradient(135deg, #f4e9d9 0%, #ecdcc4 50%, #f4e9d9 100%)'
         }}>
-          {feedback.icon}
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '14px' }}>
+            <div style={{
+              width: '36px',
+              height: '36px',
+              borderRadius: '8px',
+              backgroundColor: '#b8860b',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '14px',
+              fontWeight: 'bold',
+              color: '#fef5e7',
+              flexShrink: 0,
+              boxShadow: '0 2px 6px rgba(0, 0, 0, 0.2)',
+              fontFamily: 'Cinzel, serif'
+            }}>
+              AI
+            </div>
+            
+            <div style={{ flex: 1 }}>
+              <h3 style={{ 
+                fontSize: '14px', 
+                fontWeight: 700, 
+                color: '#654321',
+                margin: '0 0 8px 0',
+                fontFamily: 'Cinzel, serif',
+                textShadow: '0 0.5px 1px rgba(139, 100, 60, 0.15)'
+              }}>
+                {wrongStreak >= 2 ? 'AI Hint' : 'AI Tutor'}
+                {hintMetadata && (
+                  <span style={{ fontSize: '11px', fontWeight: 400, color: '#8b7355', marginLeft: '8px', fontFamily: 'Georgia, serif' }}>
+                    ({hintMetadata.source === 'ai' || hintMetadata.source === 'ai-cached' ? 'AI-powered' : 'Rule-based'})
+                  </span>
+                )}
+              </h3>
+              <div style={{ 
+                fontSize: '13px', 
+                color: '#3d2817',
+                lineHeight: '1.7',
+                fontFamily: 'Georgia, serif',
+                whiteSpace: 'pre-wrap'
+              }}>
+                {aiExplanation}
+              </div>
+            </div>
+          </div>
         </div>
-        
-        <div style={{ flex: 1 }}>
-          <h3 style={{ 
-            fontSize: '15px', 
-            fontWeight: 600, 
-            color: '#1F2937',
-            margin: '0 0 4px 0',
-            fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
-          }}>
-            {feedback.title}
-          </h3>
-          <p style={{ 
-            fontSize: '14px', 
-            color: '#4B5563',
-            margin: 0,
-            lineHeight: '1.5',
-            fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
-          }}>
-            {feedback.message}
-          </p>
+      )}
+
+      {/* MDP Action Feedback Box */}
+      {feedback && (
+        <div style={{
+          backgroundColor: '#f4e9d9',
+          borderRadius: '12px',
+          padding: '16px',
+          marginBottom: '12px',
+          border: `3px solid ${feedback.iconBg}`,
+          boxShadow: '0 4px 12px rgba(139, 100, 60, 0.2)',
+          transition: 'all 0.3s ease',
+          background: 'linear-gradient(135deg, #f4e9d9 0%, #ecdcc4 50%, #f4e9d9 100%)'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '16px' }}>
+            <div style={{
+              width: '44px',
+              height: '44px',
+              borderRadius: '10px',
+              backgroundColor: feedback.iconBg,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '22px',
+              flexShrink: 0,
+              boxShadow: '0 3px 8px rgba(0, 0, 0, 0.2)'
+            }}>
+              {feedback.icon}
+            </div>
+            
+            <div style={{ flex: 1 }}>
+              <h3 style={{ 
+                fontSize: '15px', 
+                fontWeight: 700, 
+                color: '#654321',
+                margin: '0 0 6px 0',
+                fontFamily: 'Cinzel, serif',
+                textShadow: '0 0.5px 1px rgba(139, 100, 60, 0.15)'
+              }}>
+                {feedback.title}
+              </h3>
+              <p style={{ 
+                fontSize: '13px', 
+                color: '#8b7355',
+                margin: 0,
+                lineHeight: '1.6',
+                fontFamily: 'Georgia, serif'
+              }}>
+                {feedback.message}
+              </p>
+            </div>
+          </div>
         </div>
-      </div>
-    </div>
+      )}
+    </>
   );
 }

@@ -2,7 +2,7 @@
 import { useRouter } from "next/navigation";
 import Head from "next/head";
 import { FaGraduationCap, FaChalkboardTeacher } from "react-icons/fa";
-import { STUDENT_ROUTES, TEACHER_ROUTES, ROUTES } from "@/constants/routes";
+import { STUDENT_ROUTES, ROUTES } from "@/constants/routes";
 import styles from "@/styles/role-selection.module.css";
 
 export default function RoleSelection() {

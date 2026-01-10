@@ -7,7 +7,7 @@ import Loader from '@/components/Loader'
 import ProfileInfoItem from '@/components/profile/ProfileInfoItem'
 import AnimatedAvatar from '@/components/profile/AnimatedAvatar'
 import styles from '@/styles/profile.module.css'
-import { ROUTES, STUDENT_ROUTES, TEACHER_ROUTES } from '@/constants/routes'
+import { ROUTES, STUDENT_ROUTES } from '@/constants/routes'
 import { ProfileCardProps } from '@/types/props/profile'
 
 
@@ -27,18 +27,8 @@ export default function ProfileCard({
     }
 
     const handleEditProfile = () => {
-        let route;
-        switch(userType) {
-            case "student":
-                route = STUDENT_ROUTES.EDIT_PROFILE;
-                break;
-            case "teacher":
-                route = TEACHER_ROUTES.EDIT_PROFILE;
-                break;
-            default:
-                route = ROUTES.EDIT_PROFILE;
-        }
-        router.push(route)
+        const route = userType === "student" ? STUDENT_ROUTES.EDIT_PROFILE : ROUTES.EDIT_PROFILE;
+        router.push(route);
     }
 
     const getDisplayName = () => {

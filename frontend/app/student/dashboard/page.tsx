@@ -3,74 +3,28 @@
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { useAuthStore } from "@/store/authStore"
-import { useStudentRoomStore } from "@/store/studentRoomStore"
-import { useStudentDashboardRealtime } from "@/hooks/useStudentDashboardRealtime"
-import Loader from "@/components/Loader"
 import LoadingOverlay from "@/components/LoadingOverlay"
 import PageHeader from "@/components/PageHeader"
 import MiniProfileCard from "@/components/MiniProfileCard"
-import RoomCardsList from "@/components/RoomCardsList"
 import { STUDENT_ROUTES } from "@/constants/routes"
-import { getRoomLeaderboards } from "@/api/records"
 import dashboardStyles from "@/styles/dashboard-wow.module.css"
 import studentStyles from "@/styles/dashboard.module.css"
-import competitionStyles from "@/styles/competitions-dashboard.module.css"
-import { Competition } from "@/types/common/competition"
-import { LeaderboardData } from "@/types/common/leaderboard"
-import AnimatedAvatar from "@/components/profile/AnimatedAvatar"
 import { getAssessmentResults } from "@/api/assessments"
 import AssessmentRadarChart from "@/components/assessment/AssessmentRadarChart"
 import { getAllCastles } from "@/api/castles"
-import { FaFortAwesome, FaDungeon, FaMedal } from 'react-icons/fa'
-
-// Extended type for competitions with room context and additional fields
-interface CompetitionWithRoom extends Competition {
-  roomTitle?: string;
-  roomCode?: string;
-  problems?: Array<{ id: number }>;
-  participants?: Array<{ id: number }>;
-}
+import { FaFortAwesome, FaFlask } from 'react-icons/fa'
 
 export default function StudentDashboard() {
   const router = useRouter()
   const { isLoggedIn, appLoading, userProfile } = useAuthStore()
-  const { 
-    joinedRooms, 
-    loading: roomsLoading, 
-    fetchJoinedRooms 
-  } = useStudentRoomStore()
 
-  // Assessment and castle state (not affected by real-time)
+  // Assessment and castle state
   const [pretestScores, setPretestScores] = useState<any>(null)
   const [posttestScores, setPosttestScores] = useState<any>(null)
   const [assessmentLoading, setAssessmentLoading] = useState(true)
   const [castles, setCastles] = useState<any[]>([])
   const [castlesLoading, setCastlesLoading] = useState(true)
   const [activeTab, setActiveTab] = useState<'assessment' | 'castle'>('castle')
-
-  // Initial fetch on mount
-  useEffect(() => {
-    if (isLoggedIn && !appLoading) {
-      void fetchJoinedRooms()
-    }
-  }, [isLoggedIn, appLoading, fetchJoinedRooms])
-
-  // Real-time hook for competitions and leaderboards
-  const { activeCompetitions, leaderboards, lastUpdate } = useStudentDashboardRealtime(
-    userProfile?.id,
-    joinedRooms
-  )
-
-  // Auto-refresh rooms when real-time updates occur
-  useEffect(() => {
-    if (lastUpdate > 0 && joinedRooms.length > 0) {
-      // Debounce: only refresh if last update was recent
-      const timeSinceUpdate = Date.now() - lastUpdate
-      if (timeSinceUpdate < 1000) {
-        void fetchJoinedRooms()
-      }
-    }
-  }, [lastUpdate, fetchJoinedRooms, joinedRooms.length])
 
   // Fetch assessment results
   useEffect(() => {
@@ -136,23 +90,6 @@ export default function StudentDashboard() {
     fetchCastles()
   }, [userProfile?.id])
 
-  const handleJoinRoom = () => {
-    router.push(STUDENT_ROUTES.JOINED_ROOMS)
-  }
-
-  const handleViewRoom = (roomCode: string | number) => {
-    router.push(`/student/joined-rooms/${roomCode}`)
-  }
-
-  const handleCompetitionClick = (competition: CompetitionWithRoom) => {
-    const roomParam = competition.room_id ? `?room=${competition.room_id}` : '';
-    if (competition.status === 'ONGOING') {
-      router.push(`/student/competition/${competition.id}/play${roomParam}`)
-    } else {
-      router.push(`/student/competition/${competition.id}${roomParam}`)
-    }
-  }
-
   if (appLoading || !isLoggedIn) {
     return <LoadingOverlay isLoading={true} />
   }
@@ -198,27 +135,14 @@ export default function StudentDashboard() {
             
             <button 
               className={studentStyles.quickActionCard}
-              onClick={handleJoinRoom}
+              onClick={() => router.push(STUDENT_ROUTES.ADAPTIVE_LEARNING)}
             >
               <div className={studentStyles.quickActionIcon}>
-                <FaDungeon />
+                <FaFlask />
               </div>
               <div className={studentStyles.quickActionContent}>
-                <h4>Join Room</h4>
-                <p>Enter a room code</p>
-              </div>
-            </button>
-
-            <button 
-              className={studentStyles.quickActionCard}
-              onClick={() => router.push(STUDENT_ROUTES.LEADERBOARD)}
-            >
-              <div className={studentStyles.quickActionIcon}>
-                <FaMedal />
-              </div>
-              <div className={studentStyles.quickActionContent}>
-                <h4>Leaderboard</h4>
-                <p>See top performers</p>
+                <h4>Adaptive Learning</h4>
+                <p>AI-powered learning path</p>
               </div>
             </button>
           </div>
@@ -338,152 +262,6 @@ export default function StudentDashboard() {
             </div>
           </section>
         ) : null}
-
-        {/* Active Competitions Section */}
-        {activeCompetitions.length > 0 && (
-          <section className={dashboardStyles["card"]}>
-            <div className={competitionStyles.section_header}>
-              <div>
-                <h2 className={`${competitionStyles.section_title} ${competitionStyles.student}`}>
-                  <span className={competitionStyles.icon}>⚡</span>
-                  Active Competitions
-                </h2>
-                <p className={competitionStyles.section_subtitle}>
-                  Jump into ongoing or upcoming competitions
-                </p>
-              </div>
-            </div>
-            
-            <div className={competitionStyles.competitions_grid}>
-              {activeCompetitions.map((competition: CompetitionWithRoom) => (
-                <div 
-                  key={competition.id} 
-                  className={`${competitionStyles.competition_card} ${competitionStyles.student_card}`}
-                  onClick={() => handleCompetitionClick(competition)}
-                >
-                  <div className={competitionStyles.competition_header}>
-                    <h3 className={`${competitionStyles.competition_title} ${competitionStyles.student_title}`}>{competition.title}</h3>
-                    <span className={`${competitionStyles.status_badge} ${competitionStyles[competition.status.toLowerCase()]}`}>
-                      {competition.status === 'ONGOING' ? '🔴 LIVE' : '⏳ Starting Soon'}
-                    </span>
-                  </div>
-                  
-                  <div className={`${competitionStyles.competition_meta} ${competitionStyles.student_meta}`}>
-                    <span className={competitionStyles.meta_item}>
-                      📚 {competition.roomTitle || 'Unknown Room'}
-                    </span>
-                    <span className={competitionStyles.meta_item}>
-                      🎯 {competition.problems?.length || 0} Problems
-                    </span>
-                    {competition.participants && (
-                      <span className={competitionStyles.meta_item}>
-                        👥 {competition.participants.length} Participants
-                      </span>
-                    )}
-                  </div>
-
-                  <div className={competitionStyles.competition_action}>
-                    {competition.status === 'ONGOING' ? (
-                      <button className={competitionStyles.join_button}>
-                        🎮 Join Now
-                      </button>
-                    ) : (
-                      <button className={competitionStyles.view_button}>
-                        👀 View Details
-                      </button>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
-
-        {/* Leaderboards Section */}
-        {leaderboards.length > 0 && (
-          <section className={studentStyles.leaderboardsSection}>
-            <div className={studentStyles.sectionHeader}>
-              <h2>🏆 Top Performers</h2>
-              <button 
-                className={studentStyles.viewAllButton}
-                onClick={() => router.push(STUDENT_ROUTES.LEADERBOARD)}
-              >
-                View All Rankings
-              </button>
-            </div>
-            
-            <div className={studentStyles.leaderboardsGrid}>
-              {leaderboards.map((leaderboard: any) => (
-                <div key={leaderboard.id} className={studentStyles.leaderboardCard}>
-                  <h3 className={studentStyles.leaderboardTitle}>
-                    📚 {leaderboard.title}
-                  </h3>
-                  <div className={studentStyles.leaderboardList}>
-                    {leaderboard.data.map((item: any, index: number) => {
-                      const participant = Array.isArray(item.participants) 
-                        ? item.participants[0] 
-                        : item.participants
-                      return (
-                        <div key={index} className={studentStyles.leaderboardItem}>
-                          <div className={studentStyles.leaderboardRank}>
-                            {index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `#${index + 1}`}
-                          </div>
-                          <div className={studentStyles.leaderboardUser}>
-                            <div className={studentStyles.leaderboardUserAvatar}>
-                              {participant?.first_name?.charAt(0).toUpperCase() || '?'}
-                            </div>
-                            <span className={studentStyles.leaderboardUserName}>
-                              {participant?.first_name} {participant?.last_name}
-                            </span>
-                          </div>
-                          <div className={studentStyles.leaderboardScore}>
-                            {item.accumulated_xp} XP
-                          </div>
-                        </div>
-                      )
-                    })}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
-
-        {/* Joined Rooms Section */}
-        <section className={studentStyles.roomsSection}>
-          <div className={studentStyles.sectionHeader}>
-            <h2>📚 Your Rooms</h2>
-            {joinedRooms.length > 3 && (
-              <button 
-                className={studentStyles.viewAllButton}
-                onClick={() => router.push(STUDENT_ROUTES.JOINED_ROOMS)}
-              >
-                View All Rooms
-              </button>
-            )}
-          </div>
-          
-          {roomsLoading ? (
-            <div className={dashboardStyles["loading-container"]}>
-              <Loader />
-            </div>
-          ) : joinedRooms.length > 0 ? (
-            <div className={dashboardStyles["room-cards"]}>
-              <RoomCardsList 
-                rooms={joinedRooms.slice(0, 4)} // Show first 3
-                onViewRoom={handleViewRoom}
-              />
-            </div>
-          ) : (
-            <div className={dashboardStyles["no-data"]}>
-              <span className={dashboardStyles["no-data-icon"]}>📚</span>
-              <p className={dashboardStyles["no-data-text"]}>No Rooms Yet</p>
-              <p className={dashboardStyles["no-data-subtext"]}>
-                Join your first room to start learning!
-              </p>
-            </div>
-          )}
-        </section>
 
       </div>
     </div>
