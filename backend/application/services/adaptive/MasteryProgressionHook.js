@@ -15,7 +15,7 @@
  */
 
 // Use the shared services registry defined at application/services.js
-const servicesRegistry = require('../services');
+const servicesRegistry = require('../services.js');
 
 /**
  * Hook: Called after AdaptiveLearningService processes an answer
