@@ -19,8 +19,8 @@ class QLearningRepository {
         prev_difficulty: transitionData.prevState?.difficulty_level ?? transitionData.prevState?.difficultyLevel ?? 3,
         new_mastery: transitionData.newState?.mastery_level ?? transitionData.newState?.masteryLevel ?? 0,
         new_difficulty: transitionData.newState?.difficulty_level ?? transitionData.newState?.difficultyLevel ?? 3,
-        action: transitionData.action,
-        action_reason: transitionData.actionReason,
+        action: transitionData.action || 'MAINTAIN_DIFFICULTY', // Default to MAINTAIN_DIFFICULTY if action is missing
+        action_reason: transitionData.actionReason || 'Action not specified',
         reward: transitionData.reward ?? 0,
         was_correct: transitionData.wasCorrect,
         time_spent: transitionData.timeSpent,
@@ -31,6 +31,12 @@ class QLearningRepository {
         question_id: transitionData.questionId || null,
         cognitive_domain: transitionData.cognitiveDomain || 'knowledge_recall'
       };
+
+      // Validation: Warn if action was missing
+      if (!transitionData.action) {
+        console.warn('[QLearning] WARNING: Action was null/undefined, defaulting to MAINTAIN_DIFFICULTY');
+        console.warn('[QLearning] TransitionData:', JSON.stringify(transitionData, null, 2));
+      }
 
       console.log('[QLearning] Logging state transition:', {
         action: insertData.action,

@@ -667,24 +667,40 @@ class AdaptiveLearningService {
       // Extract cognitive domain from question data (reuse from earlier extraction)
       const questionCognitiveDomain = cognitiveDomain || 'knowledge_recall';
       
-      const transition = await this.repo.logStateTransition({
-        userId,
-        topicId,
-        prevState: currentState,
-        action,
-        actionReason: reason,
-        newState: updatedState,
-        reward,
-        questionId, // Always log question ID for traceability
-        wasCorrect: isCorrect,
-        timeSpent,
-        usedExploration,
-        qValue: updatedQValue, // Use updated Q-value, not old one
-        epsilon: currentEpsilon, // Store actual epsilon, not wrapped in metadata
-        sessionId: this.generateSessionId(userId),
-        cohortMode: this.EXPERIMENT_MODE,
-        cognitiveDomain: questionCognitiveDomain // Cognitive domain for research analysis
-      });
+      // Log state transition with validation (declare outside try-catch for return statement)
+      let transition = null;
+      try {
+        if (!action) {
+          console.error('[AdaptiveLearning] Cannot log transition - action is undefined');
+        } else {
+          transition = await this.repo.logStateTransition({
+            userId,
+            topicId,
+            prevState: currentState,
+            action,
+            actionReason: reason,
+            newState: updatedState,
+            reward,
+            questionId, // Always log question ID for traceability
+            wasCorrect: isCorrect,
+            timeSpent,
+            usedExploration,
+            qValue: updatedQValue, // Use updated Q-value, not old one
+            epsilon: currentEpsilon, // Store actual epsilon, not wrapped in metadata
+            sessionId: this.generateSessionId(userId),
+            cohortMode: this.EXPERIMENT_MODE,
+            cognitiveDomain: questionCognitiveDomain // Cognitive domain for research analysis
+          });
+        }
+      } catch (transitionError) {
+        console.error('Error logging state transition:', {
+          code: transitionError.code,
+          details: transitionError.details,
+          hint: transitionError.hint,
+          message: transitionError.message
+        });
+        // Continue - transition logging is non-critical for learning flow
+      }
 
       // 10. Check for chapter mastery and unlock next chapter
       let chapterUnlocked = null;

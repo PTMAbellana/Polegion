@@ -59,11 +59,46 @@ const checkConnection = async () => {
 // Check connection on startup
 checkConnection();
 
-// Verify service key is being used (should show 'service_role')
-if (supabaseKey.includes('service_role')) {
-    console.log('[Supabase] Using service_role key - RLS will be bypassed')
-} else {
-    console.warn('[Supabase] WARNING: Not using service_role key - RLS policies will apply')
+// ✅ FIX: Properly verify service key by decoding JWT payload
+function verifyServiceRoleKey(key) {
+    try {
+        // JWT format: header.payload.signature
+        // Decode the payload (second part)
+        const parts = key.split('.');
+        if (parts.length !== 3) {
+            console.error('[Supabase] Invalid JWT format - should have 3 parts');
+            return false;
+        }
+        
+        // Decode base64 payload
+        const payload = JSON.parse(Buffer.from(parts[1], 'base64').toString());
+        console.log('[Supabase] JWT Role:', payload.role);
+        
+        if (payload.role === 'service_role') {
+            console.log('[Supabase] ✅ Using service_role key - RLS will be bypassed');
+            return true;
+        } else {
+            console.error('[Supabase] ❌ WARNING: Using', payload.role, 'key - RLS policies WILL apply!');
+            console.error('[Supabase] Expected: service_role, Got:', payload.role);
+            return false;
+        }
+    } catch (error) {
+        console.error('[Supabase] Error decoding JWT:', error.message);
+        return false;
+    }
+}
+
+// Verify the service key
+const isServiceRole = verifyServiceRoleKey(supabaseKey);
+
+if (!isServiceRole) {
+    console.error('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    console.error('⚠️  CRITICAL: NOT USING SERVICE ROLE KEY!');
+    console.error('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    console.error('Current SUPABASE_SERVICE_KEY in .env is NOT a service_role key.');
+    console.error('Please copy the correct service_role key from Supabase dashboard:');
+    console.error('Settings → API → service_role (secret)');
+    console.error('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
 }
 
 // async function testToken(token) {
