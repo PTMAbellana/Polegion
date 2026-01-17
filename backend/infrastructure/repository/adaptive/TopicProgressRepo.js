@@ -425,8 +425,8 @@ class TopicProgressRepository {
       const { data, error } = await this.supabase
         .from('user_topic_progress')
         .update({
-          pending_question: questionData,
-          pending_question_created_at: new Date().toISOString(),
+          pending_question_id: questionData?.id || questionData?.question_id || null,
+          pending_question_data: questionData,
           attempt_count: 0
         })
         .eq('user_id', userId)
@@ -454,8 +454,8 @@ class TopicProgressRepository {
       const { error } = await this.supabase
         .from('user_topic_progress')
         .update({
-          pending_question: null,
-          pending_question_created_at: null,
+          pending_question_id: null,
+          pending_question_data: null,
           attempt_count: 0
         })
         .eq('user_id', userId)
@@ -497,13 +497,13 @@ class TopicProgressRepository {
     try {
       const { data, error } = await this.supabase
         .from('user_topic_progress')
-        .select('pending_question, attempt_count, pending_question_created_at')
+        .select('pending_question_id, pending_question_data, attempt_count')
         .eq('user_id', userId)
         .eq('topic_id', topicId)
         .single();
 
       if (error) throw error;
-      return data?.pending_question || null;
+      return data?.pending_question_data || null;
     } catch (error) {
       console.error('Error getting pending question:', error);
       return null;
