@@ -18,7 +18,7 @@ class QuestionAttemptRepository {
         topic_id: topicId,
         session_id: sessionId,
         is_correct: isCorrect,
-        attempted_at: new Date().toISOString(),
+        last_attempt_at: new Date().toISOString(), // ✅ FIX: attempted_at → last_attempt_at
         question_metadata: questionMetadata || {}
       };
 
@@ -111,7 +111,7 @@ class QuestionAttemptRepository {
         .select('question_metadata')
         .eq('user_id', userId)
         .eq('topic_id', topicId)
-        .order('attempted_at', { ascending: false })
+        .order('last_attempt_at', { ascending: false }) // ✅ FIX: attempted_at → last_attempt_at
         .limit(limit);
 
       if (error) throw error;

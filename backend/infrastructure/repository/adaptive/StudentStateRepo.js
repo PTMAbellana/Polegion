@@ -49,10 +49,10 @@ class StudentStateRepository {
               mastery_level: 0,
               exploration_count: 0,
               exploitation_count: 0,
-              correct_count: 0,
-              incorrect_count: 0,
-              current_correct_streak: 0,
-              longest_correct_streak: 0
+              correct_answers: 0, // ✅ FIX: correct_count → correct_answers
+              wrong_answers: 0, // ✅ FIX: incorrect_count → wrong_answers
+              correct_streak: 0, // ✅ FIX: current_correct_streak → correct_streak
+              wrong_streak: 0 // ✅ FIX: Added wrong_streak
             },
             { onConflict: 'user_id,topic_id', ignoreDuplicates: false }
           )

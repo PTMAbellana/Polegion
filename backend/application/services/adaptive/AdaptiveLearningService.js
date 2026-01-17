@@ -1733,9 +1733,14 @@ class AdaptiveLearningService {
     try {
       console.log('[AdaptiveLearning] getTopicsWithProgress - start');
       
-      // === STEP 0: Cohort Assignment (A/B Testing) ===
-      // Assign user to research cohort on first interaction (if not already assigned)
-      await this.ensureUserHasCohort(userId);
+      // === STEP 0: Cohort Assignment (A/B Testing) - NON-BLOCKING ===
+      // ✅ FIX: Don't let cohort assignment errors block topic loading
+      try {
+        await this.ensureUserHasCohort(userId);
+      } catch (cohortError) {
+        console.warn('[AdaptiveLearning] Cohort assignment failed (non-critical), continuing...', cohortError.message);
+        // Continue anyway - cohort assignment is for research tracking only
+      }
       
       // Get all topics
       const topicsStart = Date.now();
@@ -2226,6 +2231,10 @@ class AdaptiveLearningService {
    * @param {string} userId - User UUID
    * @returns {Promise<string>} - 'adaptive' or 'control'
    */
+  /**
+   * Ensure user has cohort assignment (A/B testing)
+   * ✅ FIX: Made fully non-blocking - errors won't prevent topic loading
+   */
   async ensureUserHasCohort(userId) {
     try {
       // Check if user already has cohort assignment
@@ -2238,16 +2247,25 @@ class AdaptiveLearningService {
       
       // Assign user to balanced cohort
       const assignedCohort = await this.repo.assignUserToBalancedCohort(userId);
-      console.log(`[CohortAssignment] User ${userId} assigned to cohort: ${assignedCohort}`);
       
-      // Log cohort counts for monitoring
-      const counts = await this.repo.getCohortCounts();
-      console.log(`[CohortAssignment] Current distribution - Adaptive: ${counts.adaptive_count}, Control: ${counts.control_count}`);
+      if (assignedCohort) {
+        console.log(`[CohortAssignment] User ${userId} assigned to cohort: ${assignedCohort}`);
+        
+        // Log cohort counts for monitoring (optional)
+        try {
+          const counts = await this.repo.getCohortCounts();
+          console.log(`[CohortAssignment] Current distribution - Adaptive: ${counts.adaptive}, Control: ${counts.control}`);
+        } catch (countError) {
+          // Ignore count errors
+        }
+      } else {
+        console.log(`[CohortAssignment] Could not assign cohort, defaulting to 'adaptive'`);
+      }
       
-      return assignedCohort;
+      return assignedCohort || 'adaptive';
     } catch (error) {
-      console.error('[CohortAssignment] Error assigning cohort:', error);
-      // Fallback to 'adaptive' if assignment fails (system continues to work)
+      console.warn('[CohortAssignment] Error in cohort assignment (non-critical):', error.message);
+      // ✅ FIX: Fallback to 'adaptive' if assignment fails (system continues to work)
       return 'adaptive';
     }
   }

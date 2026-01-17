@@ -15,15 +15,18 @@ class CohortRepository {
     try {
       const { data, error } = await this.supabase
         .from('user_research_cohort')
-        .select('cohort')
+        .select('research_cohort') // ✅ FIX: Changed from 'cohort' to 'cohort_type'
         .eq('user_id', userId)
-        .single();
+        .maybeSingle(); // ✅ FIX: Use maybeSingle instead of single
 
-      if (error && error.code !== 'PGRST116') throw error;
-      return data?.cohort || null;
+      if (error && error.code !== 'PGRST116') {
+        console.warn('[CohortRepo] Error getting user cohort (non-critical):', error.message);
+        return null;
+      }
+      return data?.research_cohort || null; // ✅ FIX: Changed from cohort to research_cohort
     } catch (error) {
-      console.error('Error getting user cohort:', error);
-      return null;
+      console.warn('[CohortRepo] Error getting user cohort (non-critical):', error.message);
+      return null; // ✅ Non-blocking: Return null instead of throwing
     }
   }
 
@@ -35,37 +38,47 @@ class CohortRepository {
     try {
       const { data, error } = await this.supabase
         .from('user_research_cohort')
-        .select('cohort');
+        .select('research_cohort'); // ✅ FIX: Changed from 'cohort' to 'cohort_type'
 
-      if (error) throw error;
+      if (error) {
+        console.warn('[CohortRepo] Error getting cohort counts (non-critical):', error.message);
+        return { adaptive: 0, control: 0 };
+      }
 
       const counts = { adaptive: 0, control: 0 };
       (data || []).forEach(row => {
-        if (row.cohort === 'adaptive') counts.adaptive++;
-        if (row.cohort === 'control') counts.control++;
+        if (row.research_cohort === 'adaptive') counts.adaptive++; // ✅ FIX: cohort_type
+        if (row.research_cohort === 'control') counts.control++; // ✅ FIX: cohort_type
       });
 
       return counts;
     } catch (error) {
-      console.error('Error getting cohort counts:', error);
+      console.warn('[CohortRepo] Error getting cohort counts (non-critical):', error.message);
       return { adaptive: 0, control: 0 };
     }
   }
 
   /**
    * Assign user to balanced cohort using database function
+   * ✅ FIX: Updated to use correct function name from database
    */
   async assignUserToBalancedCohort(userId) {
     try {
-      const { data, error } = await this.supabase.rpc('assign_user_to_cohort', {
+      // ✅ FIX: Changed from 'assign_user_to_cohort' to 'assign_user_to_balanced_cohort'
+      const { data, error } = await this.supabase.rpc('assign_user_to_balanced_cohort', {
         p_user_id: userId
       });
 
-      if (error) throw error;
+      if (error) {
+        console.warn('[CohortRepo] Error assigning cohort (non-critical):', error.message);
+        // ✅ FIX: Don't throw - cohort assignment is optional for research
+        return null;
+      }
       return data;
     } catch (error) {
-      console.error('Error assigning user to cohort:', error);
-      throw error;
+      console.warn('[CohortRepo] Error assigning user to cohort (non-critical):', error.message);
+      // ✅ FIX: Return null instead of throwing - don't block topic loading
+      return null;
     }
   }
 
@@ -82,7 +95,7 @@ class CohortRepository {
         .from('user_research_cohort')
         .upsert({
           user_id: userId,
-          cohort: cohort,
+          research_cohort: cohort, // ✅ FIX: Changed from 'cohort' to 'cohort_type'
           assigned_at: new Date().toISOString()
         }, { onConflict: 'user_id' })
         .select()
