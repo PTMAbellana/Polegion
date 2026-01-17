@@ -1,8 +1,10 @@
 const express = require('express');
+const requestDeduplication = require('../../middleware/requestDeduplication');
 
 /**
  * AdaptiveLearningRoutes
  * API routes for adaptive learning system
+ * ✅ FIX: Added request deduplication middleware to prevent race conditions
  */
 class AdaptiveLearningRoutes {
   constructor(adaptiveLearningController, authMiddleware) {
@@ -50,9 +52,11 @@ class AdaptiveLearningRoutes {
      * @route   GET /api/adaptive/state/:topicId
      * @desc    Get student's current adaptive learning state
      * @access  Private (authenticated students)
+     * ✅ FIX: Added deduplication to prevent concurrent state initialization
      */
     this.router.get(
       '/state/:topicId',
+      requestDeduplication(), // ✅ Deduplicate concurrent requests
       this.controller.getStudentState.bind(this.controller)
     );
 
@@ -60,9 +64,11 @@ class AdaptiveLearningRoutes {
      * @route   GET /api/adaptive/question/:topicId
      * @desc    Generate a new question for the topic
      * @access  Private (authenticated students)
+     * ✅ FIX: Added deduplication to prevent generating duplicate questions
      */
     this.router.get(
       '/question/:topicId',
+      requestDeduplication(), // ✅ Deduplicate concurrent requests
       this.controller.generateQuestion.bind(this.controller)
     );
 
@@ -154,9 +160,11 @@ class AdaptiveLearningRoutes {
      * @route   GET /api/adaptive/topics-with-progress
      * @desc    Get all topics with unlock/mastery status
      * @access  Private (authenticated students)
+     * ✅ FIX: Added deduplication to prevent race conditions during initialization
      */
     this.router.get(
       '/topics-with-progress',
+      requestDeduplication(), // ✅ Deduplicate concurrent requests
       this.controller.getTopicsWithProgress.bind(this.controller)
     );
 
