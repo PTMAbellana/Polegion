@@ -12,11 +12,12 @@ import studentStyles from "@/styles/dashboard.module.css"
 import { getAssessmentResults } from "@/api/assessments"
 import AssessmentRadarChart from "@/components/assessment/AssessmentRadarChart"
 import { getAllCastles } from "@/api/castles"
-import { FaFortAwesome, FaFlask } from 'react-icons/fa'
+import { FaFortAwesome, FaFlask, FaFire, FaCalendarCheck, FaClock, FaQuestionCircle, FaCheckCircle } from 'react-icons/fa'
+import axios from "axios"
 
 export default function StudentDashboard() {
   const router = useRouter()
-  const { isLoggedIn, appLoading, userProfile } = useAuthStore()
+  const { isLoggedIn, appLoading, userProfile, authToken } = useAuthStore()
 
   // Assessment and castle state
   const [pretestScores, setPretestScores] = useState<any>(null)
@@ -25,6 +26,58 @@ export default function StudentDashboard() {
   const [castles, setCastles] = useState<any[]>([])
   const [castlesLoading, setCastlesLoading] = useState(true)
   const [activeTab, setActiveTab] = useState<'assessment' | 'castle'>('castle')
+  const [analyticsData, setAnalyticsData] = useState<any>(null)
+  const [weeklyActivity, setWeeklyActivity] = useState<any[]>([])
+  const [recentSessions, setRecentSessions] = useState<any[]>([])
+
+  // Fetch analytics
+  useEffect(() => {
+    const fetchAnalytics = async () => {
+      if (!authToken) return
+      
+      try {
+        const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5000'
+        
+        // Fetch summary
+        const summaryRes = await axios.get(`${backendUrl}/api/analytics/summary`, {
+          headers: { Authorization: `Bearer ${authToken}` }
+        })
+        setAnalyticsData(summaryRes.data.data)
+
+        // Fetch weekly activity
+        const weeklyRes = await axios.get(`${backendUrl}/api/analytics/weekly`, {
+          headers: { Authorization: `Bearer ${authToken}` }
+        })
+        setWeeklyActivity(weeklyRes.data.data)
+
+        // Fetch recent sessions
+        const sessionsRes = await axios.get(`${backendUrl}/api/analytics/sessions?limit=3`, {
+          headers: { Authorization: `Bearer ${authToken}` }
+        })
+        setRecentSessions(sessionsRes.data.data)
+      } catch (error) {
+        console.error('[Dashboard] Error fetching analytics:', error)
+      }
+    }
+
+    fetchAnalytics()
+  }, [authToken])
+
+  const formatTime = (minutes: number) => {
+    if (minutes < 60) return `${minutes}m`
+    const hours = Math.floor(minutes / 60)
+    const mins = minutes % 60
+    return `${hours}h ${mins}m`
+  }
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    })
+  }
 
   // Fetch assessment results
   useEffect(() => {
@@ -118,35 +171,138 @@ export default function StudentDashboard() {
             profileRoute={STUDENT_ROUTES.PROFILE}
           />
 
-          {/* Quick Actions Cards */}
-          <div className={studentStyles.quickActionsGrid}>
-            <button 
-              className={studentStyles.quickActionCard}
-              onClick={() => router.push(STUDENT_ROUTES.WORLD_MAP)}
-            >
-              <div className={studentStyles.quickActionIcon}>
-                <FaFortAwesome />
+          {/* Analytics Stats Card - Main Position */}
+          {analyticsData && (
+            <div className={studentStyles.analyticsCard}>
+              <h3 className={studentStyles.analyticsTitle}>Learning Stats</h3>
+              <div className={studentStyles.analyticsStatsGrid}>
+                <div className={studentStyles.analyticsStatItem}>
+                  <div className={studentStyles.analyticsIconWrapper} style={{ background: 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)' }}>
+                    <FaFire />
+                  </div>
+                  <div className={studentStyles.analyticsStatInfo}>
+                    <div className={studentStyles.analyticsStatValue}>{analyticsData.streak?.currentStreak || 0}</div>
+                    <div className={studentStyles.analyticsStatLabel}>Day Streak</div>
+                  </div>
+                </div>
+                <div className={studentStyles.analyticsStatItem}>
+                  <div className={studentStyles.analyticsIconWrapper} style={{ background: 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)' }}>
+                    <FaCalendarCheck />
+                  </div>
+                  <div className={studentStyles.analyticsStatInfo}>
+                    <div className={studentStyles.analyticsStatValue}>{analyticsData.totalDays || 0}</div>
+                    <div className={studentStyles.analyticsStatLabel}>Active Days</div>
+                  </div>
+                </div>
+                <div className={studentStyles.analyticsStatItem}>
+                  <div className={studentStyles.analyticsIconWrapper} style={{ background: 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)' }}>
+                    <FaClock />
+                  </div>
+                  <div className={studentStyles.analyticsStatInfo}>
+                    <div className={studentStyles.analyticsStatValue}>{formatTime(analyticsData.totalTime || 0)}</div>
+                    <div className={studentStyles.analyticsStatLabel}>Total Time</div>
+                  </div>
+                </div>
+                <div className={studentStyles.analyticsStatItem}>
+                  <div className={studentStyles.analyticsIconWrapper} style={{ background: 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)' }}>
+                    <FaQuestionCircle />
+                  </div>
+                  <div className={studentStyles.analyticsStatInfo}>
+                    <div className={studentStyles.analyticsStatValue}>{analyticsData.totalQuestions || 0}</div>
+                    <div className={studentStyles.analyticsStatLabel}>Questions</div>
+                  </div>
+                </div>
+                <div className={studentStyles.analyticsStatItem}>
+                  <div className={studentStyles.analyticsIconWrapper} style={{ background: 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)' }}>
+                    <FaCheckCircle />
+                  </div>
+                  <div className={studentStyles.analyticsStatInfo}>
+                    <div className={studentStyles.analyticsStatValue}>{analyticsData.accuracyRate?.toFixed(1) || 0}%</div>
+                    <div className={studentStyles.analyticsStatLabel}>Accuracy</div>
+                  </div>
+                </div>
               </div>
-              <div className={studentStyles.quickActionContent}>
-                <h4>Adventure Mode</h4>
-                <p>Explore the world map</p>
+              
+              {/* Quick Action Buttons - Smaller and inside analytics card */}
+              <div className={studentStyles.quickActionsCompact}>
+                <button 
+                  className={studentStyles.quickActionButtonSmall}
+                  onClick={() => router.push(STUDENT_ROUTES.WORLD_MAP)}
+                >
+                  <FaFortAwesome />
+                  <span>Adventure Mode</span>
+                </button>
+                
+                <button 
+                  className={studentStyles.quickActionButtonSmall}
+                  onClick={() => router.push(STUDENT_ROUTES.ADAPTIVE_LEARNING)}
+                >
+                  <FaFlask />
+                  <span>Adaptive Learning</span>
+                </button>
               </div>
-            </button>
-            
-            <button 
-              className={studentStyles.quickActionCard}
-              onClick={() => router.push(STUDENT_ROUTES.ADAPTIVE_LEARNING)}
-            >
-              <div className={studentStyles.quickActionIcon}>
-                <FaFlask />
-              </div>
-              <div className={studentStyles.quickActionContent}>
-                <h4>Adaptive Learning</h4>
-                <p>AI-powered learning path</p>
-              </div>
-            </button>
-          </div>
+            </div>
+          )}
         </div>
+
+        {/* Weekly Activity & Recent Sessions */}
+        {analyticsData && (
+          <div className={studentStyles.activitySection}>
+            {/* Weekly Activity */}
+            <div className={studentStyles.weeklyActivityCard}>
+              <h3 className={studentStyles.activityCardTitle}>Weekly Activity</h3>
+              <div className={studentStyles.weeklyChart}>
+                {weeklyActivity.map((day, idx) => {
+                  const maxQuestions = Math.max(...weeklyActivity.map(d => d.questionsAnswered), 1)
+                  const heightPercent = (day.questionsAnswered / maxQuestions) * 100
+                  return (
+                    <div key={idx} className={studentStyles.chartBarWrapper}>
+                      <div
+                        className={studentStyles.chartBar}
+                        style={{
+                          height: `${heightPercent}%`,
+                          backgroundColor: day.questionsAnswered > 0 ? '#8b4513' : '#e0e0e0'
+                        }}
+                        title={`${day.questionsAnswered} questions, ${formatTime(day.totalTimeMinutes)}`}
+                      >
+                        <span className={studentStyles.chartBarValue}>
+                          {day.questionsAnswered > 0 ? day.questionsAnswered : ''}
+                        </span>
+                      </div>
+                      <div className={studentStyles.chartBarLabel}>{day.dayName}</div>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+
+            {/* Recent Sessions */}
+            <div className={studentStyles.recentSessionsCard}>
+              <h3 className={studentStyles.activityCardTitle}>Recent Sessions</h3>
+              {recentSessions.length === 0 ? (
+                <p className={studentStyles.noSessionsText}>No sessions yet. Start learning!</p>
+              ) : (
+                <div className={studentStyles.sessionsList}>
+                  {recentSessions.map((session) => (
+                    <div key={session.id} className={studentStyles.sessionItem}>
+                      <div className={studentStyles.sessionDate}>{formatDate(session.session_start)}</div>
+                      <div className={studentStyles.sessionStats}>
+                        <span><FaClock /> {formatTime(session.duration_minutes || 0)}</span>
+                        <span><FaQuestionCircle /> {session.questions_attempted}</span>
+                        <span><FaCheckCircle /> {session.questions_correct}</span>
+                        <span className={studentStyles.sessionAccuracy}>
+                          {session.questions_attempted > 0
+                            ? `${((session.questions_correct / session.questions_attempted) * 100).toFixed(0)}%`
+                            : '0%'}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Performance Tracking Section with Tabs */}
         {(!assessmentLoading && (pretestScores || posttestScores)) || (!castlesLoading && castles.length > 0) ? (

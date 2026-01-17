@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useAuthStore } from "@/store/authStore";
 import axios from "axios";
+import LandscapePrompt from "@/components/LandscapePrompt";
 import styles from "./analytics.module.css";
 import { 
   FaCalendarCheck, 
@@ -142,13 +143,15 @@ export default function AnalyticsPage() {
 
   return (
     <div className={styles.container}>
-      <div className={styles.header}>
-        <h1>Learning Analytics</h1>
-        <p>Track your progress and stay motivated!</p>
-      </div>
+      <LandscapePrompt />
+      <div className={styles.contentWrapper}>
+        <div className={styles.header}>
+          <h1>Learning Analytics</h1>
+          <p>Track your progress and stay motivated!</p>
+        </div>
 
-      {/* Streak Section */}
-      <div className={styles.streakSection}>
+        {/* Streak Section */}
+        <div className={styles.streakSection}>
         <div className={styles.streakCard}>
           <FaFire className={styles.fireIcon} />
           <div className={styles.streakInfo}>
@@ -271,6 +274,7 @@ export default function AnalyticsPage() {
             ))}
           </div>
         )}
+      </div>
       </div>
     </div>
   );
