@@ -6,7 +6,7 @@ import { useAuthStore } from '@/store/authStore'
 import Loader from '@/components/Loader'
 import ProfileInfoItem from '@/components/profile/ProfileInfoItem'
 import AnimatedAvatar from '@/components/profile/AnimatedAvatar'
-import styles from '@/styles/profile.module.css'
+import styles from '@/styles/profile.module.css' 
 import { ROUTES, STUDENT_ROUTES } from '@/constants/routes'
 import { ProfileCardProps } from '@/types/props/profile'
 

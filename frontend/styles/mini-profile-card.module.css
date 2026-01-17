@@ -77,11 +77,6 @@
   height: 120px;
   border-radius: 50%;
   overflow: visible;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.miniProfileCard:hover .miniProfileAvatar {
-  transform: scale(1.08);
 }
 
 /* Avatar with image */
@@ -90,18 +85,7 @@
   height: 100%;
   border-radius: 50%;
   object-fit: cover;
-  border: 4px solid rgba(34, 197, 94, 0.3);
-  box-shadow: 
-    0 8px 32px rgba(34, 197, 94, 0.25),
-    0 0 0 8px rgba(34, 197, 94, 0.1);
-  transition: all 0.3s ease;
-}
-
-.miniProfileCard:hover .miniProfileImg {
-  border-color: rgba(34, 197, 94, 0.6);
-  box-shadow: 
-    0 12px 48px rgba(34, 197, 94, 0.35),
-    0 0 0 12px rgba(34, 197, 94, 0.15);
+  /* border: 4px solid rgba(34, 197, 94, 0.5); */
 }
 
 /* Avatar with letter */
@@ -112,7 +96,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: 'Poppins', sans-serif;
+  font-family: 'Cinzel', serif;
   font-size: 3rem;
   font-weight: 800;
   background: linear-gradient(135deg, #22c55e 0%, #84cc16 50%, #eab308 100%);
@@ -161,7 +145,7 @@
 }
 
 .miniProfileName {
-  font-family: 'Poppins', sans-serif;
+  font-family: 'Cinzel', serif;
   font-size: 1.375rem;
   font-weight: 700;
   background: linear-gradient(135deg, #166534 0%, #22c55e 50%, #16a34a 100%);
@@ -174,7 +158,7 @@
 }
 
 .miniProfileRole {
-  font-family: 'Poppins', sans-serif;
+  font-family: 'Crimson Text', serif;
   font-size: 0.9375rem;
   color: #6b7280;
   font-weight: 600;
@@ -206,7 +190,7 @@
 
 /* View Profile Button */
 .viewProfileButton {
-  font-family: 'Poppins', sans-serif;
+  font-family: 'Cinzel', serif;
   margin-top: 0.75rem;
   padding: 0.75rem 1.75rem;
   background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);

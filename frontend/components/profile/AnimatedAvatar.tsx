@@ -16,8 +16,6 @@ export default function AnimatedAvatar({
                 src={src || "/images/defaultImageProfile.webp"}
                 alt={alt}
             />
-            <div className={styles['avatar-glow']}></div>
-            <div className={styles['avatar-ring']}></div>
         </div>
     )
 }

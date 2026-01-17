@@ -103,16 +103,9 @@
   height: 7.5rem;
   border-radius: 50%;
   object-fit: cover;
-  border: 0.25rem solid #FABC60;
-  box-shadow: 0 0 1.5rem #FABC6099;
+  border: 0.25rem solid #34D399;
   z-index: 2;
   position: relative;
-  animation: avatarBounce 2s infinite alternate;
-}
-
-@keyframes avatarBounce {
-  0% { transform: translateY(0); }
-  100% { transform: translateY(-0.5rem); }
 }
 
 .avatar-glow {
@@ -150,7 +143,7 @@
 }
 
 .profile-title {
-  font-family: 'Poppins', sans-serif;
+  font-family: 'Cinzel', serif;
   font-size: clamp(1.5rem, 4vw, 2.5rem);
   font-weight: 700;
   color: #1f2937;
@@ -163,7 +156,7 @@
   color: white;
   padding: 0.5rem 1.25rem;
   border-radius: 1.25rem;
-  font-family: 'Poppins', sans-serif;
+  font-family: 'Crimson Text', serif;
   font-size: 0.875rem;
   font-weight: 600;
   display: inline-block;
@@ -232,6 +225,85 @@
 .edit-icon {
   font-size: 1.3em;
   margin-right: 0.2em;
+}
+
+/* Analytics Summary Section */
+.analytics-summary {
+  margin-top: 1.5rem;
+  padding: 1.5rem;
+  background: linear-gradient(135deg, #f4e9d9 0%, #ecdcc4 50%, #f4e9d9 100%);
+  border: 3px solid #c4b5a0;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(139, 100, 60, 0.2), inset 0 1px 2px rgba(255, 255, 255, 0.5);
+}
+
+.analytics-title {
+  font-family: 'Cinzel', serif;
+  font-size: 1.3rem;
+  color: #654321;
+  margin: 0 0 1rem 0;
+  text-shadow: 0 1px 2px rgba(139, 100, 60, 0.2);
+  letter-spacing: 0.5px;
+}
+
+.analytics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0.75rem;
+}
+
+.analytics-stat {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  background: linear-gradient(135deg, #fef5e7 0%, #f9f0e0 100%);
+  border: 2px solid #d4c4a8;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.analytics-stat:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(139, 100, 60, 0.2);
+  border-color: #c4b5a0;
+}
+
+.stat-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fef5e7;
+  font-size: 1.2rem;
+  box-shadow: 0 2px 8px rgba(139, 100, 60, 0.3);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  flex-shrink: 0;
+}
+
+.stat-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.stat-value {
+  font-family: 'Cinzel', serif;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #654321;
+  text-shadow: 0 1px 2px rgba(139, 100, 60, 0.1);
+  line-height: 1.2;
+}
+
+.stat-label {
+  font-family: 'Crimson Text', serif;
+  font-size: 0.75rem;
+  color: #8b7355;
+  letter-spacing: 0.3px;
+  line-height: 1.2;
 }
 
 /* Two-Column Layout Classes */
