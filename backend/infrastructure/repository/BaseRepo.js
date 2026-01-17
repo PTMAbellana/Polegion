@@ -24,6 +24,12 @@ class BaseRepo {
                     throw error;
                 }
                 
+                // ✅ FIX: Don't retry on timeout errors - fail fast
+                if (error.code === 'ETIMEDOUT' || error.message?.includes('timeout')) {
+                    console.error('[BaseRepo] Timeout detected - failing fast');
+                    throw error;
+                }
+                
                 if (attempt < maxRetries) {
                     console.log(`[BaseRepo] Retrying in ${delay}ms...`);
                     await new Promise(resolve => setTimeout(resolve, delay));

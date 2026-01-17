@@ -92,6 +92,9 @@ class AdaptiveLearningController {
         });
       }
 
+      // 🔧 FIX: Ensure Q-table is loaded before processing answers
+      await this.service.ensureInitialized();
+
       const result = await this.service.processAnswer(
         userId,
         topicId,
@@ -197,6 +200,9 @@ class AdaptiveLearningController {
           error: 'Topic ID is required'
         });
       }
+
+      // 🔧 FIX: Ensure Q-table is loaded before generating questions
+      await this.service.ensureInitialized();
 
       // Prevent duplicate concurrent requests using a simple in-memory lock
       const requestKey = `${userId}_${topicId}`;

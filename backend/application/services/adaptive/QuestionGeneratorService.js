@@ -42,12 +42,12 @@ const interiorAngles = require('../questions/InteriorAngles');
 const planeAnd3DFigures = require('../questions/PlaneAnd3DFigures');
 const geometryWordProblems = require('../questions/GeometryWordProblems');
 const geometricProofs = require('../questions/GeometricProofs');
-const GroqQuestionGenerator = require('./GroqQuestionGenerator'); // AI fallback for insufficient templates
+const AIQuestionGenerator = require('./AIQuestionGenerator'); // Hybrid AI: OpenAI primary, Groq failsafe
 
 class QuestionGeneratorService {
   constructor() {
-    // Initialize AI question generator for fallback when templates are insufficient
-    this.aiQuestionGenerator = new GroqQuestionGenerator();
+    // Initialize AI question generator (OpenAI → Groq → Rule-based fallback)
+    this.aiQuestionGenerator = new AIQuestionGenerator();
     
     // Cognitive domain constants
     this.COGNITIVE_DOMAINS = {
@@ -2279,7 +2279,9 @@ class QuestionGeneratorService {
    * Transform question to real-world context
    */
   transformToRealWorld(questionText, questionType, params) {
+    // Real-world contextual variations for geometric concepts
     const realWorldContexts = {
+      // Area calculations
       'rectangle_area': [
         `A farmer has a rectangular field with width ${params.width} meters and length ${params.height} meters. How many square meters of area does the field cover?`,
         `You're designing a rectangular garden that is ${params.width} feet wide and ${params.height} feet long. What is the total area you'll need to cover with soil?`,
@@ -2295,6 +2297,16 @@ class QuestionGeneratorService {
         `You're cutting a triangular sail with base ${params.base} feet and height ${params.height} feet. How much fabric (in square feet) do you need?`,
         `A triangular rooftop has a base of ${params.base} meters and rises ${params.height} meters high. What is its area?`
       ],
+      'parallelogram_area': [
+        `A parking lot has a parallelogram shape with base ${params.base} meters and height ${params.height} meters. What is the total parking area?`,
+        `A slanted billboard has a parallelogram face with base ${params.base} feet and height ${params.height} feet. What is its advertising area?`
+      ],
+      'trapezoid_area': [
+        `A bridge cross-section is trapezoidal with parallel sides of ${params.base1} and ${params.base2} meters, and height ${params.height} meters. What is the cross-sectional area?`,
+        `A farmer's trapezoidal field has top edge ${params.base1} meters, bottom edge ${params.base2} meters, and width ${params.height} meters. How much land is available for planting?`
+      ],
+      
+      // Circle calculations
       'circle_circumference': [
         `A circular running track has a radius of ${params.radius} meters. How far do you run if you complete one lap around the track?`,
         `A round pizza has a radius of ${params.radius} inches. What is the distance around the edge of the pizza?`,
@@ -2305,25 +2317,65 @@ class QuestionGeneratorService {
         `You're installing a circular pool with radius ${params.radius} feet. How many square feet of pool liner do you need?`,
         `A circular rug has a radius of ${params.radius} meters. What is the total area it covers on the floor?`
       ],
+      'circle_diameter_from_radius': [
+        `A circular satellite dish has radius ${params.radius} meters. What is the diameter (widest part) of the dish for shipping purposes?`,
+        `A round table has a radius of ${params.radius} feet from center to edge. What is the full width across the table?`
+      ],
+      
+      // Angles
+      'complementary_angles': [
+        `Two road intersections form angles that together make a right turn (90°). If one angle is ${params.angle}°, what is the other angle?`,
+        `A carpenter is cutting two angled pieces that must fit together to form a 90° corner. If one piece is ${params.angle}°, what angle should the other piece be?`
+      ],
+      'supplementary_angles': [
+        `Two adjacent lots on a straight street total 180°. If one lot's angle is ${params.angle}°, what is the angle of the neighboring lot?`,
+        `A bridge support has two angles that together form a straight line (180°). If one angle is ${params.angle}°, find the other angle.`
+      ],
+      'vertical_angles': [
+        `Two roads cross, forming four angles. If one angle measures ${params.angle}°, what is the measure of the angle directly opposite to it?`,
+        `When cutting two pieces of wood at an intersection, opposite angles are equal. If one angle is ${params.angle}°, what is the vertical angle across from it?`
+      ],
+      
+      // Polygons
       'polygon_interior_angles': [
-        `An architect is designing an ${params.sides}-sided gazebo. To calculate the roof angles, what is the sum of all interior angles?`,
+        `An architect is designing a ${params.sides}-sided gazebo. To calculate the roof angles, what is the sum of all interior angles?`,
         `A stop sign is an octagon (8-sided shape). If you measured all the interior angles and added them up, what would the total be?`,
         `You're building a ${params.sides}-sided deck. To cut the boards at the correct angles, you need to know: what is the sum of interior angles?`
       ],
-      'pythagorean': [
-        `A ladder ${params.hypotenuse} feet long leans against a wall ${params.leg1} feet high. How far is the base of the ladder from the wall?`,
-        `You're walking ${params.leg1} meters north, then ${params.leg2} meters east. What is the straight-line distance back to where you started?`,
-        `A diagonal brace across a ${params.leg1} by ${params.leg2} meter door frame needs to be cut. How long should the brace be?`
+      'rectangle_perimeter': [
+        `A rectangular swimming pool is ${params.length} meters long and ${params.width} meters wide. How much rope is needed to mark the boundary?`,
+        `You're framing a rectangular picture that is ${params.length} by ${params.width} inches. How much frame material do you need for all four sides?`
       ],
+      
+      // Pythagorean theorem
+      'pythagorean': [
+        `A ladder reaches ${params.b} feet up a wall. The base of the ladder is ${params.a} feet away from the wall. How long is the ladder?`,
+        `You walk ${params.a} meters north, then ${params.b} meters east. What is the straight-line distance back to where you started?`,
+        `A rectangular door frame is ${params.a} by ${params.b} meters. How long should the diagonal brace be?`
+      ],
+      
+      // Volume calculations
       'volume_rectangular_prism': [
         `A shipping box is ${params.length} cm long, ${params.width} cm wide, and ${params.height} cm tall. What is its total volume?`,
         `You're filling a fish tank that's ${params.length} inches by ${params.width} inches by ${params.height} inches. How much water (in cubic inches) does it hold?`,
         `A storage container measures ${params.length} by ${params.width} by ${params.height} meters. What is its storage capacity in cubic meters?`
       ],
+      'volume_cube': [
+        `A Rubik's Cube has edges of ${params.side} cm. What is the total volume of the cube?`,
+        `A storage cube has sides of ${params.side} feet. How much can it hold (in cubic feet)?`
+      ],
       'volume_cylinder': [
-        `A cylindrical water tank has a radius of ${params.radius} meters and height of ${params.height} meters. What is its volume?`,
-        `You're filling a round swimming pool with radius ${params.radius} feet and depth ${params.height} feet. How many cubic feet of water does it hold?`,
+        `A cylindrical water tank has a radius of ${params.radius} meters and height of ${params.height} meters. How much water can it hold?`,
+        `You're filling a round swimming pool with radius ${params.radius} feet and depth ${params.height} feet. What is the volume of water needed?`,
         `A cylindrical grain silo has radius ${params.radius} meters and height ${params.height} meters. What is its storage capacity?`
+      ],
+      'volume_cone': [
+        `An ice cream cone has a radius of ${params.radius} cm and height ${params.height} cm. What volume of ice cream fits inside?`,
+        `A conical tent has a base radius of ${params.radius} meters and height ${params.height} meters. What is the interior volume?`
+      ],
+      'volume_sphere': [
+        `A spherical water tank has a radius of ${params.radius} meters. What is its total capacity?`,
+        `A basketball has a radius of ${params.radius} inches. What is its volume?`
       ]
     };
 
@@ -2338,19 +2390,149 @@ class QuestionGeneratorService {
   }
 
   /**
-   * Transform question to visual description
+   * Transform question to visual representation with SVG diagrams
+   * Creates visual geometry representations to aid visual learners
    */
   transformToVisual(questionText, questionType, params) {
+    // Visual representations with SVG diagrams and spatial descriptions
     const visualDescriptions = {
-      'rectangle_area': `Imagine a rectangle drawn on graph paper. It's ${params.width} units wide and ${params.height} units tall. If you count all the square units inside, what's the total area?`,
-      'square_perimeter': `Picture a square with each side measuring ${params.side} units. If you trace your finger around all four sides, how many units do you travel?`,
-      'triangle_area': `Visualize a triangle with a base of ${params.base} units and a perpendicular height of ${params.height} units. What is the space inside?`,
-      'circle_circumference': `Imagine a circle with a radius of ${params.radius} units from the center to the edge. If you walk around the entire circle, how far do you walk?`,
-      'circle_area': `Picture a circle with radius ${params.radius} units. If you filled it with unit squares, how many would fit inside?`,
-      'polygon_interior_angles': `Imagine drawing an ${params.sides}-sided polygon. At each corner (vertex), there's an interior angle. If you measured and added all these angles, what's the sum?`
+      // Rectangle visualizations
+      'rectangle_area': `<svg width="200" height="150" xmlns="http://www.w3.org/2000/svg">
+  <rect x="20" y="20" width="${params.width * 10}" height="${params.height * 10}" fill="#E3F2FD" stroke="#1976D2" stroke-width="2"/>
+  <text x="${20 + (params.width * 10)/2}" y="15" text-anchor="middle" font-size="12" fill="#1976D2">width = ${params.width} units</text>
+  <text x="10" y="${20 + (params.height * 10)/2}" text-anchor="middle" font-size="12" fill="#1976D2" transform="rotate(-90, 10, ${20 + (params.height * 10)/2})">height = ${params.height} units</text>
+  <text x="${20 + (params.width * 10)/2}" y="${30 + (params.height * 10)/2}" text-anchor="middle" font-size="14" font-weight="bold" fill="#0D47A1">Area = ?</text>
+</svg>
+
+**Visual Question**: Look at the rectangle above. It's ${params.width} units wide and ${params.height} units tall. Calculate the total area inside the rectangle.`,
+
+      // Square visualizations
+      'square_perimeter': `<svg width="200" height="200" xmlns="http://www.w3.org/2000/svg">
+  <rect x="40" y="40" width="${params.side * 12}" height="${params.side * 12}" fill="#FFF3E0" stroke="#F57C00" stroke-width="3" stroke-dasharray="5,5"/>
+  <text x="${40 + (params.side * 12)/2}" y="30" text-anchor="middle" font-size="14" fill="#F57C00" font-weight="bold">${params.side} units</text>
+  <text x="${50 + params.side * 12}" y="${40 + (params.side * 12)/2}" text-anchor="start" font-size="14" fill="#F57C00" font-weight="bold">${params.side} units</text>
+  <circle cx="40" cy="40" r="3" fill="#D84315"/>
+  <circle cx="${40 + params.side * 12}" cy="40" r="3" fill="#D84315"/>
+  <circle cx="${40 + params.side * 12}" cy="${40 + params.side * 12}" r="3" fill="#D84315"/>
+  <circle cx="40" cy="${40 + params.side * 12}" r="3" fill="#D84315"/>
+</svg>
+
+**Visual Question**: Imagine walking around this square, starting at any corner. Each side is ${params.side} units long. What is the total distance you travel around all 4 sides?`,
+
+      // Triangle visualizations  
+      'triangle_area': `<svg width="220" height="180" xmlns="http://www.w3.org/2000/svg">
+  <polygon points="20,150 ${20 + params.base * 15},150 110,${150 - params.height * 12}" fill="#E8F5E9" stroke="#388E3C" stroke-width="2"/>
+  <line x1="110" y1="${150 - params.height * 12}" x2="110" y2="150" stroke="#D32F2F" stroke-width="2" stroke-dasharray="3,3"/>
+  <text x="${20 + (params.base * 15)/2}" y="170" text-anchor="middle" font-size="12" fill="#388E3C" font-weight="bold">base = ${params.base} units</text>
+  <text x="120" y="${150 - (params.height * 12)/2}" font-size="12" fill="#D32F2F" font-weight="bold">h = ${params.height}</text>
+</svg>
+
+**Visual Question**: The triangle shown has a base of ${params.base} units and a perpendicular height (shown in red dashed line) of ${params.height} units. What is the area enclosed by the triangle?`,
+
+      // Circle visualizations
+      'circle_circumference': `<svg width="220" height="220" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="110" cy="110" r="${params.radius * 8}" fill="#F3E5F5" stroke="#7B1FA2" stroke-width="3"/>
+  <line x1="110" y1="110" x2="${110 + params.radius * 8}" y2="110" stroke="#C2185B" stroke-width="2"/>
+  <text x="${110 + (params.radius * 8)/2}" y="105" text-anchor="middle" font-size="12" fill="#C2185B" font-weight="bold">r = ${params.radius}</text>
+  <circle cx="110" cy="110" r="3" fill="#7B1FA2"/>
+  <path d="M ${110 + params.radius * 8} 110 A ${params.radius * 8} ${params.radius * 8} 0 0 1 ${110} ${110 + params.radius * 8}" stroke="#6A1B9A" stroke-width="2" fill="none" stroke-dasharray="8,4"/>
+  <text x="110" y="200" text-anchor="middle" font-size="13" fill="#4A148C">Circumference = ?</text>
+</svg>
+
+**Visual Question**: The circle above has a radius of ${params.radius} units (shown as the red line from center to edge). If you walked completely around the circle's edge (circumference), how far would you travel?`,
+
+      'circle_area': `<svg width="200" height="200" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="100" cy="100" r="${params.radius * 8}" fill="#FFF9C4" stroke="#F57F17" stroke-width="2"/>
+  <line x1="100" y1="100" x2="${100 + params.radius * 8}" y2="100" stroke="#E65100" stroke-width="2" stroke-dasharray="4,2"/>
+  <text x="${100 + (params.radius * 8)/2}" y="95" text-anchor="middle" font-size="11" fill="#E65100" font-weight="bold">radius=${params.radius}</text>
+  <circle cx="100" cy="100" r="3" fill="#F57F17"/>
+</svg>
+
+**Visual Question**: This circle has a radius of ${params.radius} units. Calculate the total area of the shaded region inside the circle.`,
+
+      // Angle visualizations
+      'complementary_angles': `<svg width="200" height="150" xmlns="http://www.w3.org/2000/svg">
+  <line x1="20" y1="130" x2="180" y2="130" stroke="#424242" stroke-width="2"/>
+  <line x1="100" y1="130" x2="100" y2="30" stroke="#424242" stroke-width="2"/>
+  <line x1="100" y1="130" x2="160" y2="70" stroke="#1976D2" stroke-width="2"/>
+  <path d="M 100 110 A 20 20 0 0 1 110 103" stroke="#D32F2F" stroke-width="2" fill="none"/>
+  <text x="115" y="108" font-size="12" fill="#D32F2F" font-weight="bold">${params.angle}°</text>
+  <path d="M 110 103 A 20 20 0 0 1 100 85" stroke="#388E3C" stroke-width="2" fill="none"/>
+  <text x="105" y="90" font-size="12" fill="#388E3C" font-weight="bold">?</text>
+</svg>
+
+**Visual Question**: Two angles together form a right angle (90° total). One angle measures ${params.angle}°. What is the measure of the other angle?`,
+
+      'supplementary_angles': `<svg width="250" height="120" xmlns="http://www.w3.org/2000/svg">
+  <line x1="20" y1="80" x2="230" y2="80" stroke="#424242" stroke-width="3"/>
+  <line x1="125" y1="80" x2="180" y2="30" stroke="#E91E63" stroke-width="2"/>
+  <path d="M 145 80 A 20 20 0 0 1 152 72" stroke="#D32F2F" stroke-width="2" fill="none"/>
+  <text x="160" y="75" font-size="13" fill="#D32F2F" font-weight="bold">${params.angle}°</text>
+  <path d="M 105 80 A 20 20 0 0 0 112 72" stroke="#1976D2" stroke-width="2" fill="none"/>
+  <text x="90" y="75" font-size="13" fill="#1976D2" font-weight="bold">? °</text>
+</svg>
+
+**Visual Question**: These two angles sit on a straight line, so they must add up to 180°. If one angle is ${params.angle}°, what is the other angle?`,
+
+      // Polygon visualizations
+      'polygon_interior_angles': `<svg width="200" height="200" xmlns="http://www.w3.org/2000/svg">
+  <text x="100" y="30" text-anchor="middle" font-size="14" fill="#6A1B9A" font-weight="bold">${params.sides}-sided polygon</text>
+  <circle cx="100" cy="100" r="60" fill="none" stroke="#9C27B0" stroke-width="2" stroke-dasharray="10,5"/>
+  <text x="100" y="105" text-anchor="middle" font-size="12" fill="#4A148C">${params.sides} vertices</text>
+  <text x="100" y="120" text-anchor="middle" font-size="12" fill="#4A148C">${params.sides} interior angles</text>
+  <text x="100" y="180" text-anchor="middle" font-size="13" fill="#D32F2F">Sum of all angles = ?</text>
+</svg>
+
+**Visual Question**: Imagine a ${params.sides}-sided polygon (${params.sides} corners). At each corner, there's an interior angle. If you measured all ${params.sides} angles and added them together, what would be the total?`,
+
+      // 3D Volume visualizations
+      'volume_cube': `<svg width="200" height="200" xmlns="http://www.w3.org/2000/svg">
+  <polygon points="50,80 50,30 100,30 100,80" fill="#BBDEFB" stroke="#1976D2" stroke-width="2"/>
+  <polygon points="100,80 100,30 150,50 150,100" fill="#90CAF9" stroke="#1565C0" stroke-width="2"/>
+  <polygon points="50,80 100,80 150,100 100,130" fill="#64B5F6" stroke="#0D47A1" stroke-width="2"/>
+  <text x="75" y="55" font-size="11" fill="#0D47A1">${params.side}</text>
+  <text x="125" y="65" font-size="11" fill="#0D47A1">${params.side}</text>
+  <text x="75" y="110" font-size="11" fill="#0D47A1">${params.side}</text>
+  <text x="100" y="160" text-anchor="middle" font-size="12" fill="#D32F2F" font-weight="bold">Volume = ?</text>
+</svg>
+
+**Visual Question**: This cube has edges of ${params.side} units on all sides. What is the total volume (space) inside the cube?`,
+
+      'volume_rectangular_prism': `<svg width="220" height="200" xmlns="http://www.w3.org/2000/svg">
+  <polygon points="30,100 30,40 120,40 120,100" fill="#C8E6C9" stroke="#388E3C" stroke-width="2"/>
+  <polygon points="120,100 120,40 180,60 180,120" fill="#A5D6A7" stroke="#2E7D32" stroke-width="2"/>
+  <polygon points="30,100 120,100 180,120 90,140" fill="#81C784" stroke="#1B5E20" stroke-width="2"/>
+  <text x="75" y="70" font-size="10" fill="#1B5E20">L=${params.length}</text>
+  <text x="150" y="80" font-size="10" fill="#1B5E20">W=${params.width}</text>
+  <text x="60" y="125" font-size="10" fill="#1B5E20">H=${params.height}</text>
+</svg>
+
+**Visual Question**: This rectangular box is ${params.length} units long, ${params.width} units wide, and ${params.height} units tall. Calculate its total volume.`,
+
+      'volume_cylinder': `<svg width="200" height="220" xmlns="http://www.w3.org/2000/svg">
+  <ellipse cx="100" cy="50" rx="${params.radius * 6}" ry="${params.radius * 3}" fill="#FFECB3" stroke="#F57C00" stroke-width="2"/>
+  <line x1="${100 - params.radius * 6}" y1="50" x2="${100 - params.radius * 6}" y2="${50 + params.height * 10}" stroke="#EF6C00" stroke-width="2"/>
+  <line x1="${100 + params.radius * 6}" y1="50" x2="${100 + params.radius * 6}" y2="${50 + params.height * 10}" stroke="#EF6C00" stroke-width="2"/>
+  <ellipse cx="100" cy="${50 + params.height * 10}" rx="${params.radius * 6}" ry="${params.radius * 3}" fill="#FFE082" stroke="#F57C00" stroke-width="2"/>
+  <line x1="100" y1="50" x2="${100 + params.radius * 6}" y2="50" stroke="#D32F2F" stroke-width="1" stroke-dasharray="2,2"/>
+  <text x="${100 + (params.radius * 6)/2}" y="45" font-size="10" fill="#D32F2F">r=${params.radius}</text>
+  <text x="${100 + params.radius * 6 + 5}" y="${50 + (params.height * 10)/2}" font-size="10" fill="#EF6C00">h=${params.height}</text>
+</svg>
+
+**Visual Question**: This cylinder has a radius of ${params.radius} units and height of ${params.height} units. What is its volume?`
     };
 
-    return visualDescriptions[questionType] || `[Visual representation] ${questionText}`;
+    const visual = visualDescriptions[questionType];
+    if (visual) {
+      return visual;
+    }
+
+    // Fallback: spatial description
+    const spatialFallback = {
+      default: `**Visualize this**: ${questionText}\n\n*Imagine drawing this shape on paper. Picture the dimensions and how they relate to each other.*`
+    };
+
+    return spatialFallback.default;
   }
 }
 

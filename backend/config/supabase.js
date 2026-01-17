@@ -42,7 +42,8 @@ const supabase = createClient(supabaseUrl, supabaseKey, {
 // Add connection health check
 const checkConnection = async () => {
     try {
-        const { error } = await supabase.from('users').select('count').limit(1);
+        // Query any public table to verify connection (castles table exists in public schema)
+        const { error } = await supabase.from('castles').select('count').limit(1);
         if (error) {
             console.error('[Supabase] Connection check failed:', error.message);
             return false;

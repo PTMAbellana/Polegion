@@ -115,6 +115,10 @@ class AdaptiveLearningService {
     // Event aggregation for research/reporting
     this.domainEvents = [];
     
+    // 🔧 FIX: Q-table initialization from database
+    this.isInitialized = false;
+    this.initializationPromise = null;
+    
     // MDP Actions - Enhanced with Pedagogical Strategies
     this.ACTIONS = {
       // Difficulty adjustments
@@ -179,6 +183,10 @@ class AdaptiveLearningService {
     // Structure: { stateKey: { action: qValue } }
     this.qTable = new Map();
 
+    // 🔧 FIX: Q-table initialization from database
+    this.isInitialized = false;
+    this.initializationPromise = null;
+
     // Reward values - Educational Psychology Based (RESEARCH-ALIGNED)
     // Updated to match ICETT/research requirements for reinforcement learning
     this.REWARDS = {
@@ -209,6 +217,79 @@ class AdaptiveLearningService {
     
     // ✅ Pass ACTIONS to ActionSelector after initialization
     this.actionSelector.ACTIONS = this.ACTIONS;
+  }
+
+  /**
+   * 🔧 NEW METHOD: Ensure Q-table is loaded from database
+   * Call this before any adaptive learning operation to restore learning progress
+   */
+  async ensureInitialized() {
+    if (this.isInitialized) {
+      return;
+    }
+    
+    if (this.initializationPromise) {
+      return this.initializationPromise;
+    }
+    
+    this.initializationPromise = this._loadQTableFromDatabase();
+    await this.initializationPromise;
+    this.isInitialized = true;
+  }
+
+  /**
+   * 🔧 NEW METHOD: Load Q-values from database into memory
+   * This restores learning progress after server restarts
+   */
+  async _loadQTableFromDatabase() {
+    try {
+      console.log('[AdaptiveLearning] 🔄 Loading Q-table from database...');
+      const startTime = Date.now();
+      
+      // Get all Q-values from database
+      const qValues = await this.repo.getAllQValues();
+      
+      if (!qValues || qValues.length === 0) {
+        console.log('[AdaptiveLearning] ℹ️  No Q-values found in database (fresh start)');
+        return;
+      }
+      
+      let loadedCount = 0;
+      for (const qValue of qValues) {
+        const key = this._getQKey(qValue.user_id, qValue.state_key, qValue.action);
+        // 🔧 FIX: Store in main qTable (not actionSelector.qTable)
+        this.qTable.set(key, parseFloat(qValue.q_value));
+        loadedCount++;
+      }
+      
+      const elapsed = Date.now() - startTime;
+      console.log(`[AdaptiveLearning] ✅ Loaded ${loadedCount} Q-values in ${elapsed}ms`);
+      
+      // Log sample Q-values for verification
+      if (loadedCount > 0) {
+        let sampleCount = 0;
+        console.log('[AdaptiveLearning] Sample Q-values:');
+        for (const [key, value] of this.qTable.entries()) {
+          if (sampleCount++ < 3) {
+            console.log(`  ${key} = ${value}`);
+          } else {
+            break;
+          }
+        }
+      }
+      
+    } catch (error) {
+      console.error('[AdaptiveLearning] ❌ Error loading Q-table:', error);
+      // Don't throw - allow system to work with empty Q-table
+      console.log('[AdaptiveLearning] ⚠️  Continuing with empty Q-table...');
+    }
+  }
+
+  /**
+   * 🔧 NEW METHOD: Generate Q-table key for consistency
+   */
+  _getQKey(userId, stateKey, action) {
+    return `${userId}_${stateKey}_${action}`;
   }
 
   
@@ -353,18 +434,23 @@ class AdaptiveLearningService {
       // === STEP 2: Update Question Tracking ===
       await this.repo.markQuestionAnswered(userId, topicId, questionId, isCorrect);
       
-      // Handle pending question flow
-      if (isCorrect) {
-        await this.repo.clearPendingQuestion(userId, topicId);
-        console.log('[AdaptiveLearning] Correct answer - cleared pending question');
-      } else {
-        const progress = await this.repo.incrementAttemptCount(userId, topicId);
-        console.log(`[AdaptiveLearning] Wrong answer - incremented attempt_count to ${progress.attempt_count}`);
-        
-        if (progress.attempt_count >= this.MAX_ATTEMPTS_BEFORE_HINT) {
+      // Handle pending question flow (optional feature)
+      try {
+        if (isCorrect) {
           await this.repo.clearPendingQuestion(userId, topicId);
-          console.log('[AdaptiveLearning] 2nd wrong attempt - cleared pending question for regeneration');
+          console.log('[AdaptiveLearning] Correct answer - cleared pending question');
+        } else {
+          const progress = await this.repo.incrementAttemptCount(userId, topicId);
+          console.log(`[AdaptiveLearning] Wrong answer - incremented attempt_count to ${progress.attempt_count}`);
+          
+          if (progress.attempt_count >= this.MAX_ATTEMPTS_BEFORE_HINT) {
+            await this.repo.clearPendingQuestion(userId, topicId);
+            console.log('[AdaptiveLearning] 2nd wrong attempt - cleared pending question for regeneration');
+          }
         }
+      } catch (pendingError) {
+        // Silently ignore - pending question feature is optional
+        console.log('[AdaptiveLearning] Pending question operations skipped (optional feature)');
       }
       
       // === STEP 3: Get Current State & Update Performance Metrics ===
@@ -1967,9 +2053,14 @@ class AdaptiveLearningService {
         question
       );
 
-      // Save as pending question in user_topic_progress (NEW)
-      // This enables persistence across page refreshes
-      await this.repo.savePendingQuestion(userId, topicId, question);
+      // Save as pending question in user_topic_progress (OPTIONAL - for persistence)
+      // Non-critical: continues even if column doesn't exist
+      try {
+        await this.repo.savePendingQuestion(userId, topicId, question);
+      } catch (pendingError) {
+        // Silently ignore - this is optional functionality
+        console.log('[AdaptiveLearning] Pending question save skipped (optional feature)');
+      }
 
       return question;
 

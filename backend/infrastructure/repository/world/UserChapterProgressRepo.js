@@ -3,23 +3,36 @@ const UserChapterProgress = require('../../../domain/models/world/UserChapterPro
 
 class UserChapterProgressRepo extends BaseRepo {
     async createUserChapterProgress(data) {
-        const { data: result, error } = await this.supabase
-            .from('user_chapter_progress')
-            .insert({
-                user_id: data.user_id,
-                chapter_id: data.chapter_id,
-                unlocked: data.unlocked || false,
-                completed: data.completed || false,
-                xp_earned: data.xp_earned || 0,
-                quiz_passed: data.quiz_passed || false,
-                started_at: data.started_at || null,
-                completed_at: data.completed_at || null
-            })
-            .select()
-            .single();
-        
-        if (error) throw error;
-        return UserChapterProgress.fromDatabase(result);
+        return await this.withRetry(async () => {
+            const { data: result, error } = await this.supabase
+                .from('user_chapter_progress')
+                .insert({
+                    user_id: data.user_id,
+                    chapter_id: data.chapter_id,
+                    unlocked: data.unlocked || false,
+                    completed: data.completed || false,
+                    xp_earned: data.xp_earned || 0,
+                    quiz_passed: data.quiz_passed || false,
+                    started_at: data.started_at || null,
+                    completed_at: data.completed_at || null
+                })
+                .select()
+                .single();
+            
+            // ✅ FIX: Handle duplicate key error (race condition)
+            if (error) {
+                if (error.code === '23505') { // PostgreSQL duplicate key
+                    console.warn('[UserChapterProgressRepo] Progress already exists (race condition), fetching existing');
+                    const existing = await this.getUserChapterProgressByUserAndChapter(data.user_id, data.chapter_id);
+                    if (existing) {
+                        return existing;
+                    }
+                }
+                throw error;
+            }
+            
+            return UserChapterProgress.fromDatabase(result);
+        });
     }
 
     async getUserChapterProgressById(id) {

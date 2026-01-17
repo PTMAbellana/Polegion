@@ -21,7 +21,17 @@ class UserCastleProgressRepo extends BaseRepo {
                 .select()
                 .single();
             
+            // ✅ FIX: Handle duplicate key error (race condition)
             if (error) {
+                if (error.code === '23505') { // PostgreSQL duplicate key error
+                    console.warn('[UserCastleProgressRepo] Progress already exists (race condition), fetching existing');
+                    const existing = await this.getUserCastleProgressByUserAndCastle(data.user_id, data.castle_id);
+                    if (existing) {
+                        return existing;
+                    }
+                    // If still not found, throw original error
+                }
+                
                 console.error('[UserCastleProgressRepo] Insert error:', error);
                 console.error('[UserCastleProgressRepo] Error code:', error.code);
                 console.error('[UserCastleProgressRepo] Error details:', error.details);

@@ -25,7 +25,14 @@ export default function CognitiveDomainRadar({ userId }: CognitiveDomainRadarPro
       const response = await axios.get('/adaptive/cognitive-performance');
       
       if (response.data.success && response.data.data) {
-        drawRadarChart(response.data.data);
+        // Convert object to array format
+        const performanceData = response.data.data;
+        const performanceArray = Object.keys(performanceData).map(domain => ({
+          domain,
+          score: performanceData[domain],
+          attempts: 0 // Not provided by backend
+        }));
+        drawRadarChart(performanceArray);
       }
     } catch (error) {
       console.error('Error fetching cognitive performance:', error);

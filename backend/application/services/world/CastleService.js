@@ -9,15 +9,29 @@ class CastleService {
         this.userChapterProgressRepo = userChapterProgressRepo;
         this.chapterSeeder = chapterSeeder;
         this.quizAndMinigameSeeder = quizAndMinigameSeeder;
-        this.CACHE_TTL = 2 * 60 * 1000; // 2 minutes - shorter for progress updates
+        this.CACHE_TTL = 1 * 60 * 1000; // ✅ REDUCED: 1 minute for better concurrency
     }
 
-    _invalidateCastleCache(castleId = null) {
+    _invalidateCastleCache(castleId = null, userId = null) {
         if (castleId) {
             const key = cache.generateKey('castle', castleId);
             cache.delete(key);
+            
+            // ✅ FIX: Invalidate user-specific cache for this castle
+            if (userId) {
+                const userCastleKey = cache.generateKey('castle_user', castleId, userId);
+                cache.delete(userCastleKey);
+            }
         }
+        
+        // ✅ FIX: Invalidate all-castles cache
         cache.delete(cache.generateKey('all_castles'));
+        
+        // ✅ FIX: Invalidate user's worldmap cache
+        if (userId) {
+            const userCastlesKey = cache.generateKey('all_castles_user', userId);
+            cache.delete(userCastlesKey);
+        }
     }
 
     async createCastle(data) {
@@ -61,9 +75,12 @@ class CastleService {
     async getAllCastlesWithUserProgress(userId) {
         console.log(`[CastleService] getAllCastlesWithUserProgress for userId: ${userId}`);
         
+        // ✅ FIX: Reduce cache TTL for better concurrency, check cache freshness
         const cacheKey = cache.generateKey('all_castles_user', userId);
         const cached = cache.get(cacheKey);
-        if (cached) {
+        
+        // Only use cache if data looks valid (has at least one castle)
+        if (cached && Array.isArray(cached) && cached.length > 0) {
             console.log(`[CastleService] Returning cached castles for user ${userId}`);
             return cached;
         }
@@ -77,21 +94,26 @@ class CastleService {
             if (!hasAnyProgress) {
                 console.log(`[CastleService] New user detected - auto-initializing Castle 0 (Pretest)`);
                 
+                // ✅ FIX: Clear cache BEFORE initialization to prevent race conditions
+                cache.delete(cacheKey);
+                
                 // Find Castle 0
                 const castle0 = castles.find(c => c.unlock_order === 0);
                 
                 if (castle0) {
                     try {
-                        // Create progress for Castle 0 - unlocked by default
-                        const castle0Progress = await this.userCastleProgressRepo.createUserCastleProgress({
-                            user_id: userId,
-                            castle_id: castle0.id,
-                            unlocked: true, // Auto-unlock Castle 0 for new users
-                            completed: false,
-                            total_xp_earned: 0,
-                            completion_percentage: 0,
-                            started_at: new Date().toISOString()
-                        });
+                        // ✅ FIX: Use UPSERT to handle concurrent initialization attempts
+                        const castle0Progress = await this.userCastleProgressRepo.upsertUserCastleProgress(
+                            userId,
+                            castle0.id,
+                            {
+                                unlocked: true, // Auto-unlock Castle 0 for new users
+                                completed: false,
+                                total_xp_earned: 0,
+                                completion_percentage: 0,
+                                started_at: new Date().toISOString()
+                            }
+                        );
                         
                         console.log(`[CastleService] Castle 0 auto-unlocked for new user ${userId}`);
                         
@@ -105,7 +127,11 @@ class CastleService {
             }
         }
         
-        cache.set(cacheKey, castles, this.CACHE_TTL);
+        // ✅ FIX: Only cache if initialization succeeded or was not needed
+        if (castles.some(c => c.progress) || !this.userCastleProgressRepo) {
+            cache.set(cacheKey, castles, this.CACHE_TTL);
+        }
+        
         return castles;
     }
 
@@ -142,35 +168,20 @@ class CastleService {
 
             console.log(`[CastleService] Found castle:`, castle.toJSON());
 
-            // 2. Check if user has castle progress
-            let castleProgress = await this.userCastleProgressRepo.getUserCastleProgressByUserAndCastle(userId, castle.id);
-            
-            if (!castleProgress) {
-                console.log(`[CastleService] Creating castle progress for user ${userId}`);
-                try {
-                    // Create castle progress - unlocked if it's Castle 0 (unlock_order = 0)
-                    castleProgress = await this.userCastleProgressRepo.createUserCastleProgress({
-                        user_id: userId,
-                        castle_id: castle.id,
-                        unlocked: castle.unlockOrder === 0, // Auto-unlock Castle 0 (Pretest)
-                        completed: false,
-                        total_xp_earned: 0,
-                        completion_percentage: 0,
-                        started_at: new Date().toISOString()
-                    });
-                } catch (error) {
-                    // If duplicate key error (race condition), fetch the existing progress
-                    if (error.message && error.message.includes('duplicate key')) {
-                        console.log(`[CastleService] Progress already exists (race condition), fetching existing`);
-                        castleProgress = await this.userCastleProgressRepo.getUserCastleProgressByUserAndCastle(userId, castle.id);
-                        if (!castleProgress) {
-                            throw new Error('Failed to create or fetch castle progress');
-                        }
-                    } else {
-                        throw error;
-                    }
+            // 2. ✅ FIX: Use UPSERT to handle concurrent initialization atomically
+            let castleProgress = await this.userCastleProgressRepo.upsertUserCastleProgress(
+                userId,
+                castle.id,
+                {
+                    unlocked: castle.unlockOrder === 0, // Auto-unlock Castle 0 (Pretest)
+                    completed: false,
+                    total_xp_earned: 0,
+                    completion_percentage: 0,
+                    started_at: new Date().toISOString()
                 }
-            }
+            );
+            
+            console.log(`[CastleService] Castle progress initialized/fetched for user ${userId}`);
 
             // 3. Get all chapters for this castle (seed if needed)
             let chapters = await this.chapterRepo.getChaptersByCastleId(castle.id);
@@ -215,15 +226,18 @@ class CastleService {
                 }
             }
 
-            // 4. Initialize chapter progress for each chapter
-            const chapterProgressPromises = chapters.map(async (chapter) => {
+            // 4. ✅ FIX: Initialize chapter progress with better concurrency handling
+            const chapterProgresses = [];
+            
+            for (const chapter of chapters) {
                 try {
-                    const existing = await this.userChapterProgressRepo.getUserChapterProgressByUserAndChapter(userId, chapter.id);
+                    // Try to fetch existing progress first
+                    let existing = await this.userChapterProgressRepo.getUserChapterProgressByUserAndChapter(userId, chapter.id);
                     
                     if (!existing) {
                         console.log(`[CastleService] Creating progress for chapter ${chapter.chapterNumber}`);
-                        // Unlock first chapter if castle is unlocked
-                        return await this.userChapterProgressRepo.createUserChapterProgress({
+                        // Create new progress (createUserChapterProgress now handles race conditions)
+                        existing = await this.userChapterProgressRepo.createUserChapterProgress({
                             user_id: userId,
                             chapter_id: chapter.id,
                             unlocked: castleProgress.unlocked && chapter.chapterNumber === 1,
@@ -232,14 +246,13 @@ class CastleService {
                             quiz_passed: false
                         });
                     }
-                    return existing;
+                    
+                    chapterProgresses.push(existing);
                 } catch (error) {
-                    console.error(`[CastleService] Error creating chapter progress:`, error);
-                    return null;
+                    console.error(`[CastleService] Error with chapter progress:`, error);
+                    chapterProgresses.push(null);
                 }
-            });
-
-            const chapterProgresses = await Promise.all(chapterProgressPromises);
+            }
 
             // 5. Return combined data with null safety
             return {

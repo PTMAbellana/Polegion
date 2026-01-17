@@ -15,6 +15,7 @@ const UserMinigameAttemptRepository = require('./infrastructure/repository/world
 const UserQuizAttemptRepository = require('./infrastructure/repository/world/UserQuizAttemptRepo');
 const AssessmentRepository = require('./infrastructure/repository/adaptive/AssessmentRepo');
 const AdaptiveLearningRepository = require('./infrastructure/repository/adaptive/AdaptiveLearningRepo');
+const SessionAnalyticsRepository = require('./infrastructure/repository/analytics/SessionAnalyticsRepo');
 
 
 // Import services
@@ -53,6 +54,7 @@ const UserQuizAttemptController = require('./presentation/controllers/world/User
 const AssessmentController = require('./presentation/controllers/adaptive/AssessmentController');
 const AdaptiveLearningController = require('./presentation/controllers/adaptive/AdaptiveLearningController');
 const MasteryProgressionController = require('./presentation/controllers/adaptive/MasteryProgressionController'); // NEW
+const SessionAnalyticsController = require('./presentation/controllers/analytics/SessionAnalyticsController'); // NEW
 
 // Import middleware
 const AuthMiddleware = require('./presentation/middleware/AuthMiddleware');
@@ -73,6 +75,7 @@ const UserQuizAttemptRoutes = require('./presentation/routes/world/UserQuizAttem
 const AssessmentRoutes = require('./presentation/routes/adaptive/AssessmentRoutes');
 const AdaptiveLearningRoutes = require('./presentation/routes/adaptive/AdaptiveLearningRoutes');
 const MasteryProgressionRoutes = require('./presentation/routes/adaptive/MasteryProgressionRoutes'); // NEW
+const SessionAnalyticsRoutes = require('./presentation/routes/analytics/SessionAnalyticsRoutes'); // NEW
 
 // Import services registry
 const servicesRegistry = require('./application/services');
@@ -92,6 +95,7 @@ const userMinigameAttemptRepository = new UserMinigameAttemptRepository(supabase
 const userQuizAttemptRepository = new UserQuizAttemptRepository(supabase);
 const assessmentRepository = new AssessmentRepository(supabase);
 const adaptiveLearningRepository = new AdaptiveLearningRepository(supabase);
+const sessionAnalyticsRepository = new SessionAnalyticsRepository();
 
 // Initialize services
 const authService = new AuthService(userRepository, supabase);
@@ -151,6 +155,7 @@ const userQuizAttemptController = new UserQuizAttemptController(userQuizAttemptS
 const assessmentController = new AssessmentController(assessmentService);
 const adaptiveLearningController = new AdaptiveLearningController(adaptiveLearningService);
 const masteryProgressionController = new MasteryProgressionController(masteryProgressionService); // NEW
+const sessionAnalyticsController = new SessionAnalyticsController(sessionAnalyticsRepository); // NEW
 
 // Initialize routes
 const authRoutes = new AuthRoutes(authController);
@@ -168,6 +173,7 @@ const userQuizAttemptRoutes = new UserQuizAttemptRoutes(userQuizAttemptControlle
 const assessmentRoutes = new AssessmentRoutes(assessmentController, authMiddleware);
 const adaptiveLearningRoutes = new AdaptiveLearningRoutes(adaptiveLearningController, authMiddleware);
 const masteryProgressionRoutes = new MasteryProgressionRoutes(masteryProgressionController, authMiddleware); // NEW
+const sessionAnalyticsRoutes = new SessionAnalyticsRoutes(sessionAnalyticsController, authMiddleware); // NEW
 
 module.exports = {
   authRoutes: authRoutes.getRouter(),
@@ -183,6 +189,7 @@ module.exports = {
   assessmentRoutes: assessmentRoutes.getRouter(),
   adaptiveLearningRoutes: adaptiveLearningRoutes.getRouter(),
   masteryProgressionRoutes: masteryProgressionRoutes.getRouter(), // NEW
+  sessionAnalyticsRoutes: sessionAnalyticsRoutes.getRouter(), // NEW
 
   // services (for testing or other uses)
   services: servicesRegistry.getServices()

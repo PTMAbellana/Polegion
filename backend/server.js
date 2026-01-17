@@ -17,8 +17,12 @@ const {
     userQuizAttemptRoutes,
     assessmentRoutes,
     adaptiveLearningRoutes,
-    masteryProgressionRoutes // NEW: Mastery progression routes
+    masteryProgressionRoutes, // NEW: Mastery progression routes
+    sessionAnalyticsRoutes // NEW: Session analytics routes
 } = require('./container')
+
+// Import middleware
+const { sessionTracking, trackQuestionAttempt } = require('./presentation/middleware/sessionTracking');
 
 const app = express()
 const PORT = process.env.PORT || 5000
@@ -68,6 +72,16 @@ app.use(bodyParser.urlencoded({
     extended: true
 }))
 
+// ✅ FIX: Add request timeout to prevent hanging connections
+app.use((req, res, next) => {
+    req.setTimeout(30000); // 30 second timeout
+    res.setTimeout(30000);
+    next();
+});
+
+// Session tracking middleware (tracks user activity automatically)
+app.use(sessionTracking);
+
 // Health check endpoint (prevents cold starts and verifies server status)
 app.get('/health', (req, res) => {
     res.status(200).json({ 
@@ -99,8 +113,9 @@ app.use('/api/user-chapter-progress', userChapterProgressRoutes)
 app.use('/api/user-minigame-attempts', userMinigameAttemptRoutes)
 app.use('/api/user-quiz-attempts', userQuizAttemptRoutes)
 app.use('/api/assessments', assessmentRoutes)
-app.use('/api/adaptive', adaptiveLearningRoutes)
+app.use('/api/adaptive', trackQuestionAttempt, adaptiveLearningRoutes) // Track questions in adaptive learning
 app.use('/api/mastery', masteryProgressionRoutes) // NEW: Mastery progression API
+app.use('/api/analytics', sessionAnalyticsRoutes) // NEW: Session analytics API
 //swagger documentation
 app.use('/api-docs', swaggerServe, swaggerSetup)
 
