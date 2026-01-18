@@ -26,6 +26,21 @@ const buttonBaseStyle = {
   width: '100%'
 };
 
+/**
+ * Process question text to handle markdown and formatting
+ * - Converts \n to <br> for line breaks
+ * - Converts **text** to <strong>text</strong> for bold
+ */
+const processQuestionText = (text: string): string => {
+  if (!text) return 'Loading question...';
+  
+  return text
+    // Convert escaped newlines to actual line breaks
+    .replace(/\\n/g, '<br>')
+    // Convert **text** to bold
+    .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+};
+
 export default function LearningInteractionRenderer({
   representationType = 'text',
   difficultyLevel,
@@ -80,9 +95,11 @@ export default function LearningInteractionRenderer({
             fontWeight: 500,
             fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
           }}>
-            <p style={{ margin: 0 }}>
-              {question?.question || 'Loading question...'}
-            </p>
+            {/* Render with markdown formatting (line breaks and bold) */}
+            <div 
+              style={{ margin: 0 }} 
+              dangerouslySetInnerHTML={{ __html: processQuestionText(question?.question) }}
+            />
           </div>
         </div>
         
@@ -152,37 +169,25 @@ export default function LearningInteractionRenderer({
             borderRadius: '6px',
             fontSize: '13px',
             fontWeight: 600,
-            marginBottom: '12px',
             fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
           }}>
             <span style={{ fontSize: '16px' }}>👁️</span>
             VISUAL DESCRIPTION
           </div>
           
-          <h3 style={{ 
-            fontSize: '20px', 
-            fontWeight: 600, 
-            color: '#1F2937',
-            marginBottom: '16px',
-            fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
-          }}>
-            Visualize and Solve
-          </h3>
-          
+          {/* Render question directly without extra container */}
           <div style={{ 
             fontSize: '16px', 
             color: '#4B5563',
             lineHeight: '1.8',
             fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
             fontStyle: 'italic',
-            backgroundColor: '#F9FAFB',
-            padding: '16px',
-            borderRadius: '8px',
-            borderLeft: '4px solid #3B82F6'
+            marginTop: '16px'
           }}>
-            <p style={{ margin: 0 }}>
-              {question?.question || 'Loading question...'}
-            </p>
+            <div 
+              style={{ margin: 0 }} 
+              dangerouslySetInnerHTML={{ __html: processQuestionText(question?.question) }}
+            />
           </div>
         </div>
         
@@ -252,36 +257,24 @@ export default function LearningInteractionRenderer({
             borderRadius: '6px',
             fontSize: '13px',
             fontWeight: 600,
-            marginBottom: '12px',
             fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
           }}>
             <span style={{ fontSize: '16px' }}>🌍</span>
             REAL-WORLD APPLICATION
           </div>
           
-          <h3 style={{ 
-            fontSize: '20px', 
-            fontWeight: 600, 
-            color: '#1F2937',
-            marginBottom: '16px',
-            fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
-          }}>
-            Real-World Problem
-          </h3>
-          
+          {/* Render question directly without extra container */}
           <div style={{ 
             fontSize: '16px', 
             color: '#4B5563',
             lineHeight: '1.8',
             fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-            backgroundColor: '#F9FAFB',
-            padding: '16px',
-            borderRadius: '8px',
-            borderLeft: '4px solid #10B981'
+            marginTop: '16px'
           }}>
-            <p style={{ margin: 0 }}>
-              {question?.question || 'Loading question...'}
-            </p>
+            <div 
+              style={{ margin: 0 }} 
+              dangerouslySetInnerHTML={{ __html: processQuestionText(question?.question) }}
+            />
           </div>
         </div>
         

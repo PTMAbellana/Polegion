@@ -343,8 +343,9 @@ export default function AdaptiveLearning({ topicId, topicName: topicNameProp, on
       const questionData = {
         questionText: currentQuestion?.question,
         options: currentQuestion?.options,
-        correctAnswer: currentQuestion?.options.find((opt: any) => opt.correct)?.label,
-        userAnswer: selectedOption?.label || selectedOption?.text,
+        // Show text if available, otherwise show label
+        correctAnswer: currentQuestion?.options.find((opt: any) => opt.correct)?.text || currentQuestion?.options.find((opt: any) => opt.correct)?.label,
+        userAnswer: selectedOption?.text || selectedOption?.label,
         // CRITICAL: Include full question metadata for radar chart tracking
         cognitive_domain: currentQuestion?.cognitive_domain,
         cognitiveDomain: currentQuestion?.cognitiveDomain,
@@ -438,15 +439,15 @@ export default function AdaptiveLearning({ topicId, topicName: topicNameProp, on
               topicId,
               questionText: currentQuestion?.question,
               correctAnswer: correctOption.label,
-              userAnswer: selectedOption?.label || 'Unknown',
+              userAnswer: selectedOption?.text || selectedOption?.label || 'Unknown',
               topic: topicName
             });
             
             if (explanationResponse.data.success) {
               setWrongAnswerExplanation({
                 question: currentQuestion?.question,
-                userAnswer: selectedOption?.label,
-                correctAnswer: correctOption.label,
+                userAnswer: selectedOption?.text || selectedOption?.label,
+                correctAnswer: correctOption?.text || correctOption?.label,
                 explanation: explanationResponse.data.data.explanation,
                 hint: currentQuestion?.hint
               });

@@ -15,6 +15,28 @@ interface ExplanationModalProps {
 }
 
 /**
+ * Format explanation text for better readability
+ * - Converts **text** to bold
+ * - Properly formats numbered lists
+ * - Adds spacing between sections
+ */
+const formatExplanationText = (text: string): string => {
+  if (!text) return '';
+  
+  return text
+    // Convert **text** to bold
+    .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+    // Add line break before bold section headers (for spacing between sections)
+    .replace(/(<strong>)/g, '<br>$1')
+    // Add line break before numbered list items (only when preceded by space and followed by capital letter)
+    .replace(/(\s)(\d+)\.\s+([A-Z])/g, '$1<br>$2. $3')
+    // Clean up: remove line breaks at the very start
+    .replace(/^(<br>\s*)+/, '')
+    // Clean up: limit consecutive line breaks to max 2
+    .replace(/(<br>\s*){3,}/g, '<br><br>');
+};
+
+/**
  * ExplanationModal
  * Shows AI-generated explanation when student gets a question wrong
  * Helps with formative assessment by teaching the correct concept
@@ -63,10 +85,8 @@ export default function ExplanationModal({ show, data, onContinue }: Explanation
           backgroundColor: '#f4e9d9',
           borderRadius: '16px',
           padding: 'clamp(16px, 3.5vw, 24px)',
-          maxWidth: '600px',
+          maxWidth: '1000px',
           width: '92%',
-          maxHeight: '85vh',
-          overflowY: 'auto',
           boxShadow: '0 25px 50px -12px rgba(139, 100, 60, 0.4), inset 0 2px 8px rgba(218, 165, 32, 0.1)',
           border: '4px solid #b8860b',
           transform: isVisible ? 'scale(1)' : 'scale(0.9)',
@@ -113,9 +133,9 @@ export default function ExplanationModal({ show, data, onContinue }: Explanation
             fontSize: 'clamp(20px, 4.5vw, 24px)',
             fontWeight: 800,
             color: '#7c2d12',
-            marginBottom: '12px',
+            marginBottom: '16px',
             textAlign: 'center',
-            margin: '0 0 12px 0',
+            margin: '0 0 16px 0',
             fontFamily: 'Cinzel, serif',
             textShadow: '0 1px 2px rgba(139, 100, 60, 0.2)',
             letterSpacing: '0.5px'
@@ -123,104 +143,105 @@ export default function ExplanationModal({ show, data, onContinue }: Explanation
             Not quite right!
           </h2>
 
-          {/* Your Answer */}
+          {/* Two Column Layout */}
           <div style={{
-            background: 'rgba(254, 226, 226, 0.5)',
-            borderRadius: '8px',
-            padding: 'clamp(8px, 2vw, 10px)',
-            marginBottom: '8px',
-            borderLeft: '5px solid #dc2626',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-            flexWrap: 'wrap',
-            boxShadow: 'inset 0 1px 3px rgba(0, 0, 0, 0.1)'
+            display: 'grid',
+            gridTemplateColumns: '1fr 2fr',
+            gap: '16px',
+            marginBottom: '12px'
           }}>
-            <span style={{ fontSize: 'clamp(11px, 2.5vw, 12px)', color: '#7f1d1d', fontWeight: 700, fontFamily: 'Cinzel, serif' }}>
-              Your answer:
-            </span>
-            <span style={{ fontSize: 'clamp(13px, 3vw, 15px)', color: '#3d2817', fontWeight: 600, fontFamily: 'Georgia, serif' }}>
-              {data.userAnswer}
-            </span>
-          </div>
+            {/* Left Column: Answers & Tip */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              {/* Your Answer */}
+              <div style={{
+                background: 'rgba(254, 226, 226, 0.5)',
+                borderRadius: '8px',
+                padding: 'clamp(8px, 2vw, 10px)',
+                borderLeft: '5px solid #dc2626',
+                boxShadow: 'inset 0 1px 3px rgba(0, 0, 0, 0.1)'
+              }}>
+                <div style={{ fontSize: 'clamp(11px, 2.5vw, 12px)', color: '#7f1d1d', fontWeight: 700, fontFamily: 'Cinzel, serif', marginBottom: '4px' }}>
+                  Your answer:
+                </div>
+                <div style={{ fontSize: 'clamp(13px, 3vw, 15px)', color: '#3d2817', fontWeight: 600, fontFamily: 'Georgia, serif' }}>
+                  {data.userAnswer}
+                </div>
+              </div>
 
-          {/* Correct Answer */}
-          <div style={{
-            background: 'rgba(209, 250, 229, 0.5)',
-            borderRadius: '8px',
-            padding: 'clamp(8px, 2vw, 10px)',
-            marginBottom: '10px',
-            borderLeft: '5px solid #16a34a',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-            flexWrap: 'wrap',
-            boxShadow: 'inset 0 1px 3px rgba(0, 0, 0, 0.1)'
-          }}>
-            <span style={{ fontSize: 'clamp(11px, 2.5vw, 12px)', color: '#14532d', fontWeight: 700, fontFamily: 'Cinzel, serif' }}>
-              Correct answer:
-            </span>
-            <span style={{ fontSize: 'clamp(13px, 3vw, 15px)', color: '#3d2817', fontWeight: 600, fontFamily: 'Georgia, serif' }}>
-              {data.correctAnswer}
-            </span>
-          </div>
+              {/* Correct Answer */}
+              <div style={{
+                background: 'rgba(209, 250, 229, 0.5)',
+                borderRadius: '8px',
+                padding: 'clamp(8px, 2vw, 10px)',
+                borderLeft: '5px solid #16a34a',
+                boxShadow: 'inset 0 1px 3px rgba(0, 0, 0, 0.1)'
+              }}>
+                <div style={{ fontSize: 'clamp(11px, 2.5vw, 12px)', color: '#14532d', fontWeight: 700, fontFamily: 'Cinzel, serif', marginBottom: '4px' }}>
+                  Correct answer:
+                </div>
+                <div style={{ fontSize: 'clamp(13px, 3vw, 15px)', color: '#3d2817', fontWeight: 600, fontFamily: 'Georgia, serif' }}>
+                  {data.correctAnswer}
+                </div>
+              </div>
 
-          {/* AI Explanation */}
-          <div style={{
-            background: 'rgba(139, 100, 60, 0.08)',
-            borderRadius: '8px',
-            padding: 'clamp(10px, 2.5vw, 12px)',
-            marginBottom: '8px',
-            borderLeft: '5px solid #b8860b',
-            boxShadow: 'inset 0 1px 3px rgba(0, 0, 0, 0.1)'
-          }}>
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '6px',
-            marginBottom: '6px'
-          }}>
-            <span style={{ fontSize: 'clamp(20px, 4.5vw, 24px)' }}>💡</span>
-            <div style={{ fontSize: 'clamp(13px, 2.8vw, 14px)', color: '#654321', fontWeight: 700, fontFamily: 'Cinzel, serif' }}>
-              Let me explain:
+              {/* Quick Tip (if hint available) */}
+              {data.hint && (
+                <div style={{
+                  background: 'rgba(254, 243, 199, 0.6)',
+                  borderRadius: '8px',
+                  padding: 'clamp(10px, 2.5vw, 12px)',
+                  borderLeft: '5px solid #d97706',
+                  boxShadow: 'inset 0 1px 3px rgba(0, 0, 0, 0.1)'
+                }}>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    marginBottom: '6px'
+                  }}>
+                    <span style={{ fontSize: 'clamp(18px, 4vw, 20px)' }}>📚</span>
+                    <div style={{ fontSize: 'clamp(13px, 2.8vw, 14px)', color: '#78350f', fontWeight: 700, fontFamily: 'Cinzel, serif' }}>
+                      Quick tip:
+                    </div>
+                  </div>
+                  <div style={{ fontSize: 'clamp(13px, 3vw, 14px)', color: '#3d2817', lineHeight: '1.6', fontFamily: 'Georgia, serif' }}>
+                    {data.hint}
+                  </div>
+                </div>
+              )}
             </div>
-          </div>
-          <div style={{
-            fontSize: 'clamp(13px, 3vw, 15px)',
-            color: '#3d2817',
-            lineHeight: '1.7',
-            fontFamily: 'Georgia, serif'
-          }}>
-            {data.explanation}
-          </div>
-        </div>
 
-        {/* Quick Tip (if hint available) */}
-        {data.hint && (
-          <div style={{
-            background: 'rgba(254, 243, 199, 0.6)',
-            borderRadius: '8px',
-            padding: 'clamp(10px, 2.5vw, 12px)',
-            marginBottom: '10px',
-            borderLeft: '5px solid #d97706',
-            boxShadow: 'inset 0 1px 3px rgba(0, 0, 0, 0.1)'
-          }}>
+            {/* Right Column: AI Explanation */}
             <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              marginBottom: '6px'
+              background: 'rgba(139, 100, 60, 0.08)',
+              borderRadius: '8px',
+              padding: 'clamp(10px, 2.5vw, 12px)',
+              borderLeft: '5px solid #b8860b',
+              boxShadow: 'inset 0 1px 3px rgba(0, 0, 0, 0.1)',
+              maxHeight: '60vh',
+              overflowY: 'auto'
             }}>
-              <span style={{ fontSize: 'clamp(18px, 4vw, 20px)' }}>📚</span>
-              <div style={{ fontSize: 'clamp(13px, 2.8vw, 14px)', color: '#78350f', fontWeight: 700, fontFamily: 'Cinzel, serif' }}>
-                Quick tip:
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                marginBottom: '6px'
+              }}>
+                <span style={{ fontSize: 'clamp(20px, 4.5vw, 24px)' }}>💡</span>
+                <div style={{ fontSize: 'clamp(13px, 2.8vw, 14px)', color: '#654321', fontWeight: 700, fontFamily: 'Cinzel, serif' }}>
+                  Let me explain:
+                </div>
+              </div>
+              <div style={{
+                fontSize: 'clamp(13px, 3vw, 15px)',
+                color: '#3d2817',
+                lineHeight: '1.7',
+                fontFamily: 'Georgia, serif'
+              }}>
+                <div dangerouslySetInnerHTML={{ __html: formatExplanationText(data.explanation) }} />
               </div>
             </div>
-            <div style={{ fontSize: 'clamp(13px, 3vw, 14px)', color: '#3d2817', lineHeight: '1.6', fontFamily: 'Georgia, serif' }}>
-              {data.hint}
-            </div>
           </div>
-        )}
 
         {/* Continue Button */}
         <button
