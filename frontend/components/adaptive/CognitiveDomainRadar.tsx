@@ -171,11 +171,11 @@ export default function CognitiveDomainRadar({ userId }: CognitiveDomainRadarPro
         ctx.fillText(line, x, y + (lineIndex - 0.5) * 10);
       });
 
-      // Draw score
+      // Draw score (rounded to 1 decimal place)
       ctx.fillStyle = '#6B7280';
       ctx.font = 'bold 10px system-ui';
       const scoreY = y + (labelLines.length - 0.5) * 10 + 11;
-      ctx.fillText(`${scores[i]}%`, x, scoreY);
+      ctx.fillText(`${scores[i].toFixed(1)}%`, x, scoreY);
       ctx.fillStyle = '#374151';
       ctx.font = '9px system-ui';
     }

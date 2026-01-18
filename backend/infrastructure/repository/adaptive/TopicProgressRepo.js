@@ -222,10 +222,21 @@ class TopicProgressRepository {
       // This prevents race conditions when multiple requests arrive simultaneously
       const lockId = this.hashUserId(userId); // Convert UUID to integer for advisory lock
       
-      // Try to acquire advisory lock (non-blocking)
-      const { data: lockAcquired } = await this.supabase.rpc('pg_try_advisory_lock', {
-        key: lockId
-      });
+      // Try to acquire advisory lock with 5-second timeout (prevents indefinite hangs)
+      const lockPromise = this.supabase.rpc('pg_try_advisory_lock', { key: lockId });
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Lock timeout')), 5000)
+      );
+      
+      let lockResult;
+      try {
+        lockResult = await Promise.race([lockPromise, timeoutPromise]);
+      } catch (timeoutError) {
+        console.warn('[TopicProgress] Lock acquisition timeout - proceeding without lock');
+        lockResult = { data: false };
+      }
+      
+      const lockAcquired = lockResult?.data || false;
       
       try {
         // Check if topics already initialized (after acquiring lock)
@@ -301,7 +312,7 @@ class TopicProgressRepository {
           
           console.log('[TopicProgress] Topics exist despite error, proceeding');
         } else {
-          console.log(`[TopicProgress] Successfully initialized/verified ${topicsToUpsert.length} topics`);
+          console.log(`[TopicProgress] Successfully initialized/verified ${topicsToInsert.length} topics`);
         }
 
         // Clear cache
@@ -310,9 +321,15 @@ class TopicProgressRepository {
 
         return true;
       } finally {
-        // Always release advisory lock
+        // CRITICAL: Always release advisory lock, even if unlock fails
         if (lockAcquired) {
-          await this.supabase.rpc('pg_advisory_unlock', { key: lockId });
+          try {
+            await this.supabase.rpc('pg_advisory_unlock', { key: lockId });
+            console.log('[TopicProgress] Advisory lock released:', lockId);
+          } catch (unlockError) {
+            console.error('[TopicProgress] Failed to release advisory lock (non-critical):', unlockError.message);
+            // Don't throw - unlocking failure shouldn't block the user
+          }
         }
       }
     } catch (error) {

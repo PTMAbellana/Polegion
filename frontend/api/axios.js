@@ -19,7 +19,7 @@ const baseAxios = axios.create({
 	headers: {
 		"Content-Type": "application/json",
 	},
-	timeout: 60000, // 60 seconds for production (cold starts, heavy operations)
+	timeout: 15000, // Reduced to 15 seconds (backend should respond faster now)
 });
 
 // Setup cache interceptor

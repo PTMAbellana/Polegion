@@ -458,6 +458,11 @@ class AdaptiveLearningService {
       
       // Extract cognitive domain from question data for adaptive mastery calculation
       const cognitiveDomain = questionData?.cognitive_domain || questionData?.cognitiveDomain || 'knowledge_recall';
+      console.log('[AdaptiveLearning] Current difficulty:', currentState.difficulty_level);
+      console.log('[AdaptiveLearning] Question cognitive_domain:', cognitiveDomain);
+      console.log('[AdaptiveLearning] ⚠️  questionData keys:', questionData ? Object.keys(questionData) : 'null');
+      console.log('[AdaptiveLearning] ⚠️  questionData.cognitive_domain:', questionData?.cognitive_domain);
+      console.log('[AdaptiveLearning] ⚠️  questionData.cognitiveDomain:', questionData?.cognitiveDomain);
       
       const newState = await this.updatePerformanceMetrics(
         userId, 
@@ -931,6 +936,20 @@ class AdaptiveLearningService {
   }
 
   /**
+   * Get expected cognitive domains for a difficulty level (for logging/debugging)
+   */
+  getExpectedDomainsForDifficulty(difficulty) {
+    const domainMap = {
+      1: 'knowledge_recall, concept_understanding',
+      2: 'knowledge_recall, concept_understanding',
+      3: 'procedural_skills, concept_understanding',
+      4: 'analytical_thinking, problem_solving',
+      5: 'problem_solving, higher_order_thinking'
+    };
+    return domainMap[difficulty] || 'knowledge_recall';
+  }
+
+  /**
    * Apply the determined action (adjust difficulty)
    */
   /**
@@ -948,6 +967,8 @@ class AdaptiveLearningService {
         break;
       case this.ACTIONS.INCREASE_DIFFICULTY:
         newDifficulty = Math.min(5, currentState.difficulty_level + 1);
+        console.log(`[AdaptiveLearning] 📈 DIFFICULTY INCREASED: ${currentState.difficulty_level} → ${newDifficulty}`);
+        console.log(`[AdaptiveLearning] New cognitive domains expected: D${newDifficulty} = ${this.getExpectedDomainsForDifficulty(newDifficulty)}`);
         break;
       case this.ACTIONS.ADVANCE_TOPIC:
         newDifficulty = 3; // Reset to medium for new topic
@@ -1340,31 +1361,35 @@ class AdaptiveLearningService {
     const { mastery_level, difficulty_level, total_attempts } = state;
     
     // Early stage: Don't restrict by domain for first 3 attempts to allow variety
-    // This prevents students from always seeing the same first question
     if (total_attempts < 3) {
       return null; // null = no domain filter, pick from all domains
     }
     
-    // 3-10 attempts: Focus on knowledge recall and understanding
-    if (total_attempts < 10) {
-      return 'knowledge_recall';
+    // PRIMARY: Difficulty level determines cognitive domain
+    // This ensures progression follows difficulty increases, not just attempt count
+    
+    // Difficulty 5: Highest cognitive complexity
+    if (difficulty_level >= 5) {
+      return mastery_level >= 80 ? 'higher_order_thinking' : 'problem_solving';
     }
     
-    // Based on mastery level, advance through cognitive domains
-    // Note: higher_order_thinking only has templates at difficulty 5
-    if (mastery_level >= 90) {
-      return difficulty_level >= 5 ? 'higher_order_thinking' : 'problem_solving';
-    } else if (mastery_level >= 75) {
-      return difficulty_level >= 4 ? 'problem_solving' : 'analytical_thinking';
-    } else if (mastery_level >= 60) {
-      return difficulty_level >= 3 ? 'analytical_thinking' : 'procedural_skills';
-    } else if (mastery_level >= 40) {
-      return 'procedural_skills'; // PS - Build calculation skills
-    } else if (mastery_level >= 20) {
-      return 'concept_understanding'; // CU - Understand relationships
-    } else {
-      return 'knowledge_recall'; // KR - Back to basics
+    // Difficulty 4: Advanced analytical skills
+    if (difficulty_level >= 4) {
+      return mastery_level >= 70 ? 'problem_solving' : 'analytical_thinking';
     }
+    
+    // Difficulty 3: Procedural and analytical
+    if (difficulty_level >= 3) {
+      return mastery_level >= 60 ? 'analytical_thinking' : 'procedural_skills';
+    }
+    
+    // Difficulty 2: Conceptual understanding
+    if (difficulty_level >= 2) {
+      return mastery_level >= 40 ? 'concept_understanding' : 'knowledge_recall';
+    }
+    
+    // Difficulty 1: Foundational knowledge
+    return 'knowledge_recall';
   }
 
   /**
@@ -2153,6 +2178,28 @@ class AdaptiveLearningService {
    */
   async trackAttemptAndCheckHint(userId, questionId, topicId, sessionId, isCorrect, questionData) {
     try {
+      // CRITICAL FIX: Ensure cognitive_domain is always tracked
+      // If questionData doesn't have cognitive_domain, extract from question history
+      if (questionData && !questionData.cognitive_domain && !questionData.cognitiveDomain) {
+        try {
+          // Try to get the question from history
+          const questionHistory = await this.repo.getShownQuestionsInSession(userId, topicId, sessionId);
+          const matchingQuestion = questionHistory.find(q => q.question_id === questionId);
+          
+          if (matchingQuestion && matchingQuestion.question_data) {
+            questionData.cognitive_domain = matchingQuestion.question_data.cognitive_domain || 'knowledge_recall';
+            console.log(`[AdaptiveLearning] Recovered cognitive_domain from question history: ${questionData.cognitive_domain}`);
+          } else {
+            // Last resort: assign based on difficulty from the question text/options
+            console.warn('[AdaptiveLearning] No cognitive_domain found, defaulting to knowledge_recall');
+            questionData.cognitive_domain = 'knowledge_recall';
+          }
+        } catch (error) {
+          console.warn('[AdaptiveLearning] Could not recover cognitive_domain:', error.message);
+          questionData.cognitive_domain = 'knowledge_recall';
+        }
+      }
+
       // Track attempt
       const attempt = await this.repo.trackQuestionAttempt(
         userId,

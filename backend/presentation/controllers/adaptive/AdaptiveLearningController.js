@@ -85,6 +85,9 @@ class AdaptiveLearningController {
       const userId = req.user.id;
 
       console.log('[AdaptiveController] submitAnswer called with:', { topicId, questionId, isCorrect, userId });
+      console.log('[AdaptiveController] ⚠️  questionData received:', questionData ? JSON.stringify(questionData, null, 2) : 'null');
+      console.log('[AdaptiveController] ⚠️  questionData.cognitive_domain:', questionData?.cognitive_domain);
+      console.log('[AdaptiveController] ⚠️  questionData.cognitiveDomain:', questionData?.cognitiveDomain);
 
       if (!topicId || typeof isCorrect !== 'boolean') {
         return res.status(400).json({

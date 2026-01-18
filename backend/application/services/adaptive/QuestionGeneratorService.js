@@ -1747,6 +1747,10 @@ class QuestionGeneratorService {
     }
     console.log(`[QGen] Generated ${options.length} options`);
     
+    // Log correct answer position for debugging
+    const correctIndex = options.findIndex(opt => opt.correct);
+    console.log(`[QGen] Correct answer at index: ${correctIndex} (shuffled: ${correctIndex !== 0})`);
+    
     // Validate answer options (defensive check)
     try {
       this.validateAnswerOptions(options);

@@ -12,6 +12,18 @@ class QuestionAttemptRepository {
    */
   async trackQuestionAttempt(userId, questionId, topicId, sessionId, isCorrect, questionMetadata = null) {
     try {
+      // Extract cognitive domain from questionMetadata
+      const cognitiveDomain = questionMetadata?.cognitive_domain 
+        || questionMetadata?.cognitiveDomain 
+        || 'knowledge_recall';
+
+      // Log for debugging
+      console.log('[QuestionAttemptRepo] Tracking attempt with cognitive_domain:', cognitiveDomain);
+      if (!questionMetadata?.cognitive_domain && !questionMetadata?.cognitiveDomain) {
+        console.warn('[QuestionAttemptRepo] ⚠️  questionMetadata missing cognitive_domain, defaulting to knowledge_recall');
+        console.warn('[QuestionAttemptRepo] questionMetadata keys:', questionMetadata ? Object.keys(questionMetadata) : 'null');
+      }
+
       const attemptData = {
         user_id: userId,
         question_id: questionId,
@@ -19,7 +31,10 @@ class QuestionAttemptRepository {
         session_id: sessionId,
         is_correct: isCorrect,
         last_attempt_at: new Date().toISOString(), // ✅ FIX: attempted_at → last_attempt_at
-        question_metadata: questionMetadata || {}
+        question_metadata: {
+          ...questionMetadata,
+          cognitive_domain: cognitiveDomain // Ensure it's always set
+        }
       };
 
       const { data, error } = await this.supabase
@@ -138,7 +153,14 @@ class QuestionAttemptRepository {
       if (error) throw error;
 
       const domainStats = {};
-      const domains = ['knowledge_recall', 'comprehension', 'application', 'analysis', 'synthesis', 'evaluation'];
+      const domains = [
+        'knowledge_recall',
+        'concept_understanding',
+        'procedural_skills',
+        'analytical_thinking',
+        'problem_solving',
+        'higher_order_thinking'
+      ];
       
       domains.forEach(domain => {
         domainStats[domain] = { correct: 0, total: 0 };

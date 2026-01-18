@@ -45,7 +45,7 @@ class StudentStateRepository {
             {
               user_id: userId,
               topic_id: topicId,
-              difficulty_level: 3,
+              difficulty_level: 2, // Start at D2 for cognitive domain variety (D1=only knowledge_recall)
               mastery_level: 0,
               exploration_count: 0,
               exploitation_count: 0,

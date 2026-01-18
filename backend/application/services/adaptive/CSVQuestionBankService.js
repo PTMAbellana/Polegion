@@ -47,6 +47,11 @@ class CSVQuestionBankService {
       
       // Shuffle options to prevent answer position bias
       const options = this.shuffleOptions(question.options, question.correct_answer);
+      console.log('[CSVQuestionBank] Options shuffled - correct answer at index:', options.correctIndex);
+
+      // Assign cognitive domain based on difficulty if not explicitly set
+      const cognitiveDomain = question.cognitive_domain || this.assignCognitiveDomainByDifficulty(difficultyLevel, question.question_text);
+      console.log('[CSVQuestionBank] Assigned cognitive_domain:', cognitiveDomain);
 
       return {
         id: `csv_${question.id}`,
@@ -57,7 +62,7 @@ class CSVQuestionBankService {
         correctIndex: options.correctIndex,
         hint: question.hint || this.generateDefaultHint(question.question_text),
         difficulty: difficultyLevel,
-        cognitive_domain: question.cognitive_domain || 'knowledge_recall',
+        cognitive_domain: cognitiveDomain,
         representation_type: question.representation_type || 'text',
         type: 'csv_imported',
         source: 'csv_question_bank',
@@ -72,6 +77,52 @@ class CSVQuestionBankService {
       console.error('[CSVQuestionBank] Error fetching question:', error);
       return null;
     }
+  }
+
+  /**
+   * Assign cognitive domain based on difficulty level and question content
+   * Maps difficulty to appropriate cognitive skill level
+   */
+  assignCognitiveDomainByDifficulty(difficulty, questionText) {
+    // Check question text for keywords to refine assignment
+    const text = questionText.toLowerCase();
+    const hasCalculation = /calculate|compute|find|solve|determine/.test(text);
+    const hasAnalysis = /analyze|compare|why|explain|evaluate/.test(text);
+    const hasApplication = /apply|use|demonstrate|show/.test(text);
+    const hasDefinition = /what is|define|identify|name|list/.test(text);
+
+    // Difficulty 1: Basic recall and recognition
+    if (difficulty === 1) {
+      return hasDefinition ? 'knowledge_recall' : 'concept_understanding';
+    }
+    
+    // Difficulty 2: Conceptual understanding
+    if (difficulty === 2) {
+      return hasDefinition ? 'knowledge_recall' : 'concept_understanding';
+    }
+    
+    // Difficulty 3: Application and procedures
+    if (difficulty === 3) {
+      if (hasCalculation) return 'procedural_skills';
+      if (hasApplication) return 'procedural_skills';
+      return 'concept_understanding';
+    }
+    
+    // Difficulty 4: Analysis and critical thinking
+    if (difficulty === 4) {
+      if (hasAnalysis) return 'analytical_thinking';
+      if (hasCalculation) return 'problem_solving';
+      return 'analytical_thinking';
+    }
+    
+    // Difficulty 5: Complex problem solving
+    if (difficulty === 5) {
+      if (hasAnalysis) return 'higher_order_thinking';
+      return 'problem_solving';
+    }
+
+    // Default fallback
+    return 'knowledge_recall';
   }
 
   /**
