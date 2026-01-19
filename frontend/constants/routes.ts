@@ -38,9 +38,6 @@ export const STUDENT_ROUTES = {
     
     // adaptive learning (RESEARCH FEATURE)
     ADAPTIVE_LEARNING: `/student/adaptive-learning`,
-    
-    // analytics (RESEARCH FEATURE)
-    ANALYTICS: `/student/analytics`,
 
     // practice
     PRACTICE: `/student/practice`,

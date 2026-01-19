@@ -171,75 +171,84 @@ export default function StudentDashboard() {
             profileRoute={STUDENT_ROUTES.PROFILE}
           />
 
-          {/* Analytics Stats Card - Main Position */}
+          {/* Analytics Stats Section */}
           {analyticsData && (
-            <div className={studentStyles.analyticsCard}>
-              <h3 className={studentStyles.analyticsTitle}>Learning Stats</h3>
-              <div className={studentStyles.analyticsStatsGrid}>
-                <div className={studentStyles.analyticsStatItem}>
-                  <div className={studentStyles.analyticsIconWrapper} style={{ background: 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)' }}>
-                    <FaFire />
-                  </div>
-                  <div className={studentStyles.analyticsStatInfo}>
-                    <div className={studentStyles.analyticsStatValue}>{analyticsData.streak?.currentStreak || 0}</div>
-                    <div className={studentStyles.analyticsStatLabel}>Day Streak</div>
-                  </div>
-                </div>
-                <div className={studentStyles.analyticsStatItem}>
-                  <div className={studentStyles.analyticsIconWrapper} style={{ background: 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)' }}>
-                    <FaCalendarCheck />
-                  </div>
-                  <div className={studentStyles.analyticsStatInfo}>
-                    <div className={studentStyles.analyticsStatValue}>{analyticsData.totalDays || 0}</div>
-                    <div className={studentStyles.analyticsStatLabel}>Active Days</div>
-                  </div>
-                </div>
-                <div className={studentStyles.analyticsStatItem}>
-                  <div className={studentStyles.analyticsIconWrapper} style={{ background: 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)' }}>
-                    <FaClock />
-                  </div>
-                  <div className={studentStyles.analyticsStatInfo}>
-                    <div className={studentStyles.analyticsStatValue}>{formatTime(analyticsData.totalTime || 0)}</div>
-                    <div className={studentStyles.analyticsStatLabel}>Total Time</div>
-                  </div>
-                </div>
-                <div className={studentStyles.analyticsStatItem}>
-                  <div className={studentStyles.analyticsIconWrapper} style={{ background: 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)' }}>
-                    <FaQuestionCircle />
-                  </div>
-                  <div className={studentStyles.analyticsStatInfo}>
-                    <div className={studentStyles.analyticsStatValue}>{analyticsData.totalQuestions || 0}</div>
-                    <div className={studentStyles.analyticsStatLabel}>Questions</div>
-                  </div>
-                </div>
-                <div className={studentStyles.analyticsStatItem}>
-                  <div className={studentStyles.analyticsIconWrapper} style={{ background: 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)' }}>
-                    <FaCheckCircle />
-                  </div>
-                  <div className={studentStyles.analyticsStatInfo}>
-                    <div className={studentStyles.analyticsStatValue}>{analyticsData.accuracyRate?.toFixed(1) || 0}%</div>
-                    <div className={studentStyles.analyticsStatLabel}>Accuracy</div>
-                  </div>
-                </div>
+            <div> 
+              <div className={studentStyles.sectionHeader}>
+                <h2>Learning Statistics</h2>
               </div>
-              
-              {/* Quick Action Buttons - Smaller and inside analytics card */}
-              <div className={studentStyles.quickActionsCompact}>
-                <button 
-                  className={studentStyles.quickActionButtonSmall}
-                  onClick={() => router.push(STUDENT_ROUTES.WORLD_MAP)}
-                >
-                  <FaFortAwesome />
-                  <span>Adventure Mode</span>
-                </button>
+              <div className={studentStyles.analyticsCard}>
+                {/* Emphasized Day Streak Card */}
+                <div className={studentStyles.streakCardLarge}>
+                  <FaFire className={studentStyles.fireIcon} />
+                  <div className={studentStyles.streakInfo}>
+                    <div className={studentStyles.streakValue}>{analyticsData.streak?.currentStreak || 0}</div>
+                    <div className={studentStyles.streakLabel}>Day Streak</div>
+                  </div>
+                  <div className={studentStyles.streakExtras}>
+                    <span>🏆 Longest: {analyticsData.streak?.longestStreak || 0} days</span>
+                    <span>📅 Total: {analyticsData.streak?.totalLoginDays || 0} days</span>
+                  </div>
+                </div>
                 
-                <button 
-                  className={studentStyles.quickActionButtonSmall}
-                  onClick={() => router.push(STUDENT_ROUTES.ADAPTIVE_LEARNING)}
-                >
-                  <FaFlask />
-                  <span>Adaptive Learning</span>
-                </button>
+                {/* Other 4 Stats in a Row */}
+                <div className={studentStyles.statsRow}>
+                  <div className={studentStyles.analyticsStatItem}>
+                    <div className={studentStyles.analyticsIconWrapper} style={{ background: 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)' }}>
+                      <FaCalendarCheck />
+                    </div>
+                    <div className={studentStyles.analyticsStatInfo}>
+                      <div className={studentStyles.analyticsStatValue}>{analyticsData.totalDays || 0}</div>
+                      <div className={studentStyles.analyticsStatLabel}>Active Days</div>
+                    </div>
+                  </div>
+                  <div className={studentStyles.analyticsStatItem}>
+                    <div className={studentStyles.analyticsIconWrapper} style={{ background: 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)' }}>
+                      <FaClock />
+                    </div>
+                    <div className={studentStyles.analyticsStatInfo}>
+                      <div className={studentStyles.analyticsStatValue}>{formatTime(analyticsData.totalTime || 0)}</div>
+                      <div className={studentStyles.analyticsStatLabel}>Total Time</div>
+                    </div>
+                  </div>
+                  <div className={studentStyles.analyticsStatItem}>
+                    <div className={studentStyles.analyticsIconWrapper} style={{ background: 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)' }}>
+                      <FaQuestionCircle />
+                    </div>
+                    <div className={studentStyles.analyticsStatInfo}>
+                      <div className={studentStyles.analyticsStatValue}>{analyticsData.totalQuestions || 0}</div>
+                      <div className={studentStyles.analyticsStatLabel}>Questions</div>
+                    </div>
+                  </div>
+                  <div className={studentStyles.analyticsStatItem}>
+                    <div className={studentStyles.analyticsIconWrapper} style={{ background: 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)' }}>
+                      <FaCheckCircle />
+                    </div>
+                    <div className={studentStyles.analyticsStatInfo}>
+                      <div className={studentStyles.analyticsStatValue}>{analyticsData.accuracyRate?.toFixed(1) || 0}%</div>
+                      <div className={studentStyles.analyticsStatLabel}>Accuracy</div>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Quick Action Buttons */}
+                <div className={studentStyles.quickActionsCompact}>
+                  <button 
+                    className={studentStyles.quickActionButtonSmall}
+                    onClick={() => router.push(STUDENT_ROUTES.WORLD_MAP)}
+                  >
+                    <FaFortAwesome />
+                    <span>Adventure Mode</span>
+                  </button>
+                  
+                  <button 
+                    className={studentStyles.quickActionButtonSmall}
+                    onClick={() => router.push(STUDENT_ROUTES.ADAPTIVE_LEARNING)}
+                  >
+                    <FaFlask />
+                    <span>Adaptive Learning</span>
+                  </button>
+                </div>
               </div>
             </div>
           )}
@@ -249,8 +258,11 @@ export default function StudentDashboard() {
         {analyticsData && (
           <div className={studentStyles.activitySection}>
             {/* Weekly Activity */}
-            <div className={studentStyles.weeklyActivityCard}>
-              <h3 className={studentStyles.activityCardTitle}>Weekly Activity</h3>
+            <div className={studentStyles.activityWrapper}>
+              <div className={studentStyles.sectionHeader}>
+                <h2>Weekly Activity</h2>
+              </div>
+              <div className={studentStyles.weeklyActivityCard}>
               <div className={studentStyles.weeklyChart}>
                 {weeklyActivity.map((day, idx) => {
                   const maxQuestions = Math.max(...weeklyActivity.map(d => d.questionsAnswered), 1)
@@ -274,11 +286,15 @@ export default function StudentDashboard() {
                   )
                 })}
               </div>
+              </div>
             </div>
 
             {/* Recent Sessions */}
-            <div className={studentStyles.recentSessionsCard}>
-              <h3 className={studentStyles.activityCardTitle}>Recent Sessions</h3>
+            <div className={studentStyles.sessionsWrapper}>
+              <div className={studentStyles.sectionHeader}>
+                <h2>Recent Sessions</h2>
+              </div>
+              <div className={studentStyles.recentSessionsCard}>
               {recentSessions.length === 0 ? (
                 <p className={studentStyles.noSessionsText}>No sessions yet. Start learning!</p>
               ) : (
@@ -300,6 +316,7 @@ export default function StudentDashboard() {
                   ))}
                 </div>
               )}
+              </div>
             </div>
           </div>
         )}
