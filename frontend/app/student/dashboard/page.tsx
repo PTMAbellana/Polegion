@@ -37,21 +37,21 @@ export default function StudentDashboard() {
       if (!authToken) return
       
       try {
-        const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5000'
+        const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'
         
         // Fetch summary
-        const summaryRes = await axios.get(`${backendUrl}/api/analytics/summary`, {
+        const summaryRes = await axios.get(`${backendUrl}/analytics/summary`, {
           headers: { Authorization: `Bearer ${authToken}` }
         })
         setAnalyticsData(summaryRes.data.data)
 
         // Fetch weekly activity
-        const weeklyRes = await axios.get(`${backendUrl}/api/analytics/weekly`, {
+        const weeklyRes = await axios.get(`${backendUrl}/analytics/weekly`, {
           headers: { Authorization: `Bearer ${authToken}` }
         })
         setWeeklyActivity(weeklyRes.data.data)
 
-        const sessionsRes = await axios.get(`${backendUrl}/api/analytics/sessions?limit=3`, {
+        const sessionsRes = await axios.get(`${backendUrl}/analytics/sessions?limit=3`, {
           headers: { Authorization: `Bearer ${authToken}` }
         })
         setRecentSessions(sessionsRes.data.data)
