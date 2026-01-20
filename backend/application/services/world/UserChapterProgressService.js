@@ -18,6 +18,16 @@ class UserChapterProgressService {
         cache.delete(cache.generateKey('all_user_chapter_progress'));
     }
 
+    // Clear castle caches so world map reflects newest completion/XP state immediately
+    _invalidateCastleCacheForUser(userId, castleId = null) {
+        if (userId) {
+            cache.delete(cache.generateKey('all_castles_user', userId));
+        }
+        if (userId && castleId) {
+            cache.delete(cache.generateKey('castle_user', castleId, userId));
+        }
+    }
+
     async createUserChapterProgress(data) {
         // Example: use this.chapterService if needed for business logic
         const result = await this.userChapterProgressRepo.createUserChapterProgress(data);
@@ -203,7 +213,12 @@ class UserChapterProgressService {
         });
         
         // Update castle progress XP by recalculating from all chapters
+        console.log(`[UserChapterProgressService] ===== UPDATING CASTLE PROGRESS =====`);
+        console.log(`[UserChapterProgressService] User: ${userId}, Castle: ${currentChapter.castleId}`);
         const castleProgress = await this.userCastleProgressRepo.getUserCastleProgressByUserAndCastle(userId, currentChapter.castleId);
+        if (!castleProgress) {
+            console.error(`[UserChapterProgressService] WARNING: No castle progress found for user ${userId}, castle ${currentChapter.castleId}`);
+        }
         if (castleProgress) {
             // Get all chapter progress for this castle to recalculate total XP
             const { data: allChapterProgress, error } = await this.userChapterProgressRepo.supabase
@@ -213,7 +228,8 @@ class UserChapterProgressService {
                 .eq('chapters.castle_id', currentChapter.castleId);
             
             if (error) {
-                console.error('[UserChapterProgressService] Error fetching chapter progress:', error);
+                console.error('[UserChapterProgressService] ERROR fetching chapter progress:', error);
+                throw error; // Throw instead of silent fail
             }
             
             // Calculate total XP from all completed chapters in this castle
@@ -242,11 +258,17 @@ class UserChapterProgressService {
             // Update castle progress
             // Note: completion_percentage is also calculated automatically by database trigger
             // when chapters are marked complete, but we update it here for immediate consistency
-            await this.userCastleProgressRepo.updateUserCastleProgress(castleProgress.id, {
+            console.log(`[UserChapterProgressService] Updating castle progress ID: ${castleProgress.id}`);
+            const updateResult = await this.userCastleProgressRepo.updateUserCastleProgress(castleProgress.id, {
                 total_xp_earned: totalCastleXP,
                 completion_percentage: completionPercentage,
                 completed: isCastleCompleted
             });
+            console.log(`[UserChapterProgressService] Castle progress updated successfully:`, updateResult?.toJSON());
+
+            // Bust world-map caches so UI picks up the updated completion percentage immediately
+            this._invalidateCastleCacheForUser(userId, currentChapter.castleId);
+            console.log(`[UserChapterProgressService] ===== CASTLE PROGRESS UPDATE COMPLETE =====`);
         }
         
         // Unlock next chapter or castle
@@ -302,6 +324,7 @@ class UserChapterProgressService {
                             unlocked: true
                         });
                         console.log(`[UserChapterProgressService] Updated existing castle progress`);
+                        this._invalidateCastleCacheForUser(userId, nextCastle.id);
                     } else {
                         // Create new castle progress
                         nextCastleProgress = await this.userCastleProgressRepo.createUserCastleProgress({
@@ -313,6 +336,7 @@ class UserChapterProgressService {
                             completion_percentage: 0
                         });
                         console.log(`[UserChapterProgressService] Created new castle progress`);
+                        this._invalidateCastleCacheForUser(userId, nextCastle.id);
                     }
                     
                     // Also unlock the first chapter of the next castle

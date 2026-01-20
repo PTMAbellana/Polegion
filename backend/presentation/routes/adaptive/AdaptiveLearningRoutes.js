@@ -73,6 +73,16 @@ class AdaptiveLearningRoutes {
     );
 
     /**
+     * @route   GET /api/adaptive/pending-question/:topicId
+     * @desc    Get pending question for the topic (restores question on page refresh)
+     * @access  Private (authenticated students)
+     */
+    this.router.get(
+      '/pending-question/:topicId',
+      this.controller.getPendingQuestion.bind(this.controller)
+    );
+
+    /**
      * @route   POST /api/adaptive/reset/:topicId
      * @desc    Reset difficulty level for a topic
      * @access  Private (authenticated students)

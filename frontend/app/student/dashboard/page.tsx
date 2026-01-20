@@ -12,7 +12,7 @@ import studentStyles from "@/styles/dashboard.module.css"
 import { getAssessmentResults } from "@/api/assessments"
 import AssessmentRadarChart from "@/components/assessment/AssessmentRadarChart"
 import { getAllCastles } from "@/api/castles"
-import { FaFortAwesome, FaFlask, FaFire, FaCalendarCheck, FaClock, FaQuestionCircle, FaCheckCircle } from 'react-icons/fa'
+import { FaFortAwesome, FaFlask, FaFire, FaCalendarCheck, FaClock, FaQuestionCircle, FaCheckCircle, FaChartBar, FaHistory, FaGraduationCap, FaBook, FaPercentage } from 'react-icons/fa'
 import axios from "axios"
 
 export default function StudentDashboard() {
@@ -106,10 +106,19 @@ export default function StudentDashboard() {
   }, [authToken])
 
   const formatTime = (minutes: number) => {
-    if (minutes < 60) return `${minutes}m`
-    const hours = Math.floor(minutes / 60)
-    const mins = minutes % 60
-    return `${hours}h ${mins}m`
+    // Handle NaN, null, undefined, or negative values
+    if (!minutes || isNaN(minutes) || minutes < 0) return '0m';
+    
+    // Round to nearest minute
+    const roundedMinutes = Math.round(minutes);
+    
+    if (roundedMinutes < 60) return `${roundedMinutes}m`;
+    
+    const hours = Math.floor(roundedMinutes / 60);
+    const mins = roundedMinutes % 60;
+    
+    if (mins === 0) return `${hours}h`;
+    return `${hours}h ${mins}m`;
   }
 
   const formatDate = (dateString: string) => {
@@ -259,7 +268,7 @@ export default function StudentDashboard() {
                     </div>
                     <div className={studentStyles.analyticsStatInfo}>
                       <div className={studentStyles.analyticsStatValue}>{analyticsData.totalQuestions || 0}</div>
-                      <div className={studentStyles.analyticsStatLabel}>Questions</div>
+                      <div className={studentStyles.analyticsStatLabel}>Questions Answered</div>
                     </div>
                   </div>
                   <div className={studentStyles.analyticsStatItem}>
@@ -295,74 +304,6 @@ export default function StudentDashboard() {
             </div>
           )}
         </div>
-
-        {/* Weekly Activity & Recent Sessions */}
-        {analyticsData && (
-          <div className={studentStyles.activitySection}>
-            {/* Weekly Activity */}
-            <div className={studentStyles.activityWrapper}>
-              <div className={studentStyles.sectionHeader}>
-                <h2>Weekly Activity</h2>
-              </div>
-              <div className={studentStyles.weeklyActivityCard}>
-              <div className={studentStyles.weeklyChart}>
-                {weeklyActivity.map((day, idx) => {
-                  const maxQuestions = Math.max(...weeklyActivity.map(d => d.questionsAnswered), 1)
-                  const heightPercent = (day.questionsAnswered / maxQuestions) * 100
-                  return (
-                    <div key={idx} className={studentStyles.chartBarWrapper}>
-                      <div
-                        className={studentStyles.chartBar}
-                        style={{
-                          height: `${heightPercent}%`,
-                          backgroundColor: day.questionsAnswered > 0 ? '#8b4513' : '#e0e0e0'
-                        }}
-                        title={`${day.questionsAnswered} questions, ${formatTime(day.totalTimeMinutes)}`}
-                      >
-                        <span className={studentStyles.chartBarValue}>
-                          {day.questionsAnswered > 0 ? day.questionsAnswered : ''}
-                        </span>
-                      </div>
-                      <div className={studentStyles.chartBarLabel}>{day.dayName}</div>
-                    </div>
-                  )
-                })}
-              </div>
-              </div>
-            </div>
-
-            {/* Recent Sessions - Show Adaptive Learning Sessions */}
-            <div className={studentStyles.sessionsWrapper}>
-              <div className={studentStyles.sectionHeader}>
-                <h2>Recent Sessions</h2>
-              </div>
-              <div className={studentStyles.recentSessionsCard}>
-              {adaptiveRecentSessions.length === 0 ? (
-                <p className={studentStyles.noSessionsText}>No Smart Learning sessions yet. Start learning!</p>
-              ) : (
-                <div className={studentStyles.sessionsList}>
-                  {adaptiveRecentSessions.map((session) => (
-                    <div key={session.id} className={studentStyles.sessionItem}>
-                      <div className={studentStyles.sessionInfo}>
-                        <div className={studentStyles.sessionTopic}>📚 {session.topic_name || 'Unknown Topic'}</div>
-                        <div className={studentStyles.sessionDate}>{formatDate(session.session_start)}</div>
-                      </div>
-                      <div className={studentStyles.sessionStats}>
-                        <span><FaClock /> {formatTime(Math.floor((session.duration_seconds || 0) / 60))}</span>
-                        <span><FaQuestionCircle /> {session.questions_attempted || 0}</span>
-                        <span><FaCheckCircle /> {session.questions_correct || 0}</span>
-                        <span className={studentStyles.sessionAccuracy}>
-                          {session.accuracy_percentage ? `${parseFloat(session.accuracy_percentage).toFixed(0)}%` : '0%'}
-                        </span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-              </div>
-            </div>
-          </div>
-        )}
 
         {/* Performance Tracking Section with Tabs */}
         {(!assessmentLoading && (pretestScores || posttestScores)) || (!castlesLoading && castles.length > 0) ? (

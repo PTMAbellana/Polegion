@@ -74,16 +74,9 @@ class CastleService {
 
     async getAllCastlesWithUserProgress(userId) {
         console.log(`[CastleService] getAllCastlesWithUserProgress for userId: ${userId}`);
-        
-        // ✅ FIX: Reduce cache TTL for better concurrency, check cache freshness
+        // Always fetch fresh to avoid stale worldmap progress; user-specific caching caused stale completion bars
         const cacheKey = cache.generateKey('all_castles_user', userId);
-        const cached = cache.get(cacheKey);
-        
-        // Only use cache if data looks valid (has at least one castle)
-        if (cached && Array.isArray(cached) && cached.length > 0) {
-            console.log(`[CastleService] Returning cached castles for user ${userId}`);
-            return cached;
-        }
+        cache.delete(cacheKey);
 
         let castles = await this.castleRepo.getAllCastlesWithUserProgress(userId);
         
@@ -127,11 +120,6 @@ class CastleService {
             }
         }
         
-        // ✅ FIX: Only cache if initialization succeeded or was not needed
-        if (castles.some(c => c.progress) || !this.userCastleProgressRepo) {
-            cache.set(cacheKey, castles, this.CACHE_TTL);
-        }
-        
         return castles;
     }
 
@@ -169,11 +157,27 @@ class CastleService {
             console.log(`[CastleService] Found castle:`, castle.toJSON());
 
             // 2. ✅ FIX: Use UPSERT to handle concurrent initialization atomically
+            //    IMPORTANT: Never re-lock a castle that is already unlocked.
+            let initialUnlocked = castle.unlockOrder === 0; // Only auto-unlock Castle 0 (Pretest)
+
+            // For non-pretest castles, preserve existing unlocked status if it exists
+            if (castle.unlockOrder !== 0) {
+                try {
+                    const existingProgress = await this.userCastleProgressRepo.getUserCastleProgressByUserAndCastle(userId, castle.id);
+                    if (existingProgress && typeof existingProgress.unlocked === 'boolean') {
+                        initialUnlocked = existingProgress.unlocked;
+                        console.log(`[CastleService] Preserving existing unlocked status for castle ${castle.id}:`, initialUnlocked);
+                    }
+                } catch (lookupError) {
+                    console.warn('[CastleService] Warning: failed to read existing castle progress before upsert:', lookupError.message);
+                }
+            }
+
             let castleProgress = await this.userCastleProgressRepo.upsertUserCastleProgress(
                 userId,
                 castle.id,
                 {
-                    unlocked: castle.unlockOrder === 0, // Auto-unlock Castle 0 (Pretest)
+                    unlocked: initialUnlocked,
                     completed: false,
                     total_xp_earned: 0,
                     completion_percentage: 0,

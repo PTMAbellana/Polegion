@@ -227,7 +227,9 @@ class QuestionAttemptRepository {
           correct_answer: questionData.correctAnswer,
           difficulty_level: questionData.difficultyLevel,
           cognitive_domain: questionData.cognitiveDomain,
-          generation_params: questionData.generationParams
+          representation_type: questionData.representationType || 'text',
+          generation_params: questionData.generationParams,
+          created_at: new Date().toISOString()
         })
         .select()
         .single();
@@ -237,6 +239,41 @@ class QuestionAttemptRepository {
     } catch (error) {
       console.error('Error saving question:', error);
       throw error;
+    }
+  }
+
+  /**
+   * Get cached questions from database for performance optimization
+   */
+  async getCachedQuestions(topicId, difficultyLevel, excludeQuestionIds = []) {
+    try {
+      let query = this.supabase
+        .from('adaptive_questions')
+        .select('*')
+        .eq('topic_id', topicId)
+        .eq('difficulty_level', difficultyLevel)
+        .limit(5); // Get up to 5 cached questions
+
+      // Exclude specific question IDs if provided
+      if (excludeQuestionIds && excludeQuestionIds.length > 0) {
+        // Filter out cached questions by their IDs
+        const excludeIds = excludeQuestionIds
+          .filter(id => id && id.toString().startsWith('cached_'))
+          .map(id => id.toString().replace('cached_', ''));
+        
+        if (excludeIds.length > 0) {
+          query = query.not('id', 'in', `(${excludeIds.join(',')})`);
+        }
+      }
+
+      const { data, error } = await query;
+      if (error) throw error;
+      
+      console.log(`[QuestionAttemptRepo] 💾 Found ${data?.length || 0} cached questions for topic ${topicId}, difficulty ${difficultyLevel}`);
+      return data || [];
+    } catch (error) {
+      console.error('Error getting cached questions:', error);
+      return []; // Return empty array on error, don't fail the request
     }
   }
 

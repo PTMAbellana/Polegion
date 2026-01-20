@@ -20,6 +20,7 @@ import {
     getAssessmentComparison 
 } from '@/api/assessments';
 import { authUtils } from '@/api/axios';
+import { useCastleStore } from '@/store/castleStore';
 import toast from 'react-hot-toast';
 
 type AssessmentStage = 'intro' | 'dialogue' | 'assessment' | 'results';
@@ -127,6 +128,9 @@ export default function AssessmentPageBase({ config }: { config: AssessmentConfi
     const [isLoading, setIsLoading] = useState(false);
     const [elapsedSeconds, setElapsedSeconds] = useState(0);
     const [restoredProgress, setRestoredProgress] = useState(false);
+
+    // Castle store for refreshing data after assessment completion
+    const { fetchCastles } = useCastleStore();
 
     const castleNumber = config.type === 'pretest' ? 0 : config.type === 'posttest' ? 6 : null;
     const castleBackgroundColors = (() => {
@@ -591,6 +595,19 @@ export default function AssessmentPageBase({ config }: { config: AssessmentConfi
                 setResults(transformedResults);
                 setStage('results');
                 console.log(`[${config.type}] State updated to results - rendering now`);
+                
+                // Refresh castle data after assessment completion (for castle unlocking)
+                try {
+                    const userId = authUtils.getCurrentUserId();
+                    if (userId && config.type === 'pretest') {
+                        console.log(`[${config.type}] Refreshing castle data after pretest completion`);
+                        await fetchCastles(userId);
+                        console.log(`[${config.type}] Castle data refreshed - Castle 1 should now be unlocked`);
+                    }
+                } catch (error) {
+                    console.warn(`[${config.type}] Failed to refresh castle data:`, error);
+                    // Don't show error to user - this is non-critical
+                }
                 
                 toast.success('Assessment completed!');
             } else {

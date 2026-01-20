@@ -2,21 +2,31 @@ const { createClient } = require('@supabase/supabase-js')
 require('dotenv').config()
 
 const supabaseUrl = process.env.SUPABASE_URL
-const supabaseKey = process.env.SUPABASE_SERVICE_KEY
+
+// Use ANON key for production (respects RLS), SERVICE key for dev/admin operations
+const supabaseKey = process.env.NODE_ENV === 'production' 
+    ? process.env.SUPABASE_ANON_KEY 
+    : (process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_ANON_KEY)
+
+// Determine key type for logging
+const keyType = supabaseKey === process.env.SUPABASE_SERVICE_KEY ? 'service_role' : 'anon'
 
 // Add validation
 if (!supabaseUrl || !supabaseKey) {
     console.error('Missing Supabase environment variables:')
     console.error('SUPABASE_URL:', supabaseUrl ? 'Present' : 'Missing')
-    console.error('SUPABASE_SERVICE_KEY:', supabaseKey ? 'Present' : 'Missing')
+    console.error('SUPABASE_KEY:', supabaseKey ? 'Present' : 'Missing')
     process.exit(1)
 }
 
-// console.log('Supabase URL:', supabaseUrl)
-// console.log('Service Key present:', !!supabaseKey)
+console.log(`[Supabase] JWT Role: ${keyType}`)
+if (keyType === 'service_role') {
+    console.log('[Supabase] ✅ Using service_role key - RLS will be bypassed')
+} else {
+    console.log('[Supabase] ✅ Using anon key - RLS policies active')
+}
 
 // Create Supabase client with connection pooling configuration
-// Service role key bypasses RLS policies automatically
 const supabase = createClient(supabaseUrl, supabaseKey, {
     auth: {
         autoRefreshToken: false,

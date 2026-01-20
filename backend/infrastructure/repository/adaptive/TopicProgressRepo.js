@@ -435,56 +435,63 @@ class TopicProgressRepository {
   }
 
   /**
-   * Save pending question to user_topic_progress
+   * Save current question to user_topic_progress table (simpler approach)
    */
   async savePendingQuestion(userId, topicId, questionData) {
     try {
+      console.log('[TopicProgressRepo] Saving current question to user_topic_progress:', { userId, topicId, questionId: questionData?.id });
+      
+      // Use upsert to create record if it doesn't exist yet
       const { data, error } = await this.supabase
         .from('user_topic_progress')
-        .update({
-          pending_question_id: questionData?.id || questionData?.question_id || null,
-          pending_question_data: questionData,
-          attempt_count: 0
+        .upsert({
+          user_id: userId,
+          topic_id: topicId,
+          // Store question data in notes field
+          notes: JSON.stringify({
+            current_question: questionData,
+            saved_at: new Date().toISOString()
+          })
+        }, {
+          onConflict: 'user_id,topic_id' // Update if record exists
         })
-        .eq('user_id', userId)
-        .eq('topic_id', topicId)
         .select()
         .single();
 
       if (error) {
-        // Column might not exist - non-critical, just log
-        console.warn('[TopicProgressRepo] Could not save pending question (column may not exist):', error.message);
+        console.warn('[TopicProgressRepo] Could not save current question to user_topic_progress:', error.message);
+        console.warn('[TopicProgressRepo] Error details:', error);
         return null;
       }
+      console.log('[TopicProgressRepo] ✅ Current question saved successfully to notes field');
       return data;
     } catch (error) {
-      console.warn('[TopicProgressRepo] Error saving pending question (non-critical):', error.message);
-      return null; // Don't throw - this is optional functionality
+      console.warn('[TopicProgressRepo] Error saving current question:', error.message);
+      return null;
     }
   }
 
   /**
-   * Clear pending question from user_topic_progress
+   * Clear current question from user_topic_progress table
    */
   async clearPendingQuestion(userId, topicId) {
     try {
+      console.log('[TopicProgressRepo] Clearing current question:', { userId, topicId });
+      
       const { error } = await this.supabase
         .from('user_topic_progress')
-        .update({
-          pending_question_id: null,
-          pending_question_data: null,
-          attempt_count: 0
-        })
+        .update({ notes: null })
         .eq('user_id', userId)
         .eq('topic_id', topicId);
 
       if (error) {
-        console.warn('[TopicProgressRepo] Could not clear pending question (column may not exist):', error.message);
+        console.warn('[TopicProgressRepo] Could not clear current question:', error.message);
         return false;
       }
+      console.log('[TopicProgressRepo] ✅ Current question cleared successfully');
       return true;
     } catch (error) {
-      console.warn('[TopicProgressRepo] Error clearing pending question (non-critical):', error.message);
+      console.warn('[TopicProgressRepo] Error clearing current question:', error.message);
       return false;
     }
   }
@@ -508,21 +515,40 @@ class TopicProgressRepository {
   }
 
   /**
-   * Get pending question from user_topic_progress
+   * Get current question from user_topic_progress table
    */
   async getPendingQuestion(userId, topicId) {
     try {
+      console.log('[TopicProgressRepo] Getting current question from user_topic_progress:', { userId, topicId });
+      
       const { data, error } = await this.supabase
         .from('user_topic_progress')
-        .select('pending_question_id, pending_question_data, attempt_count')
+        .select('notes')
         .eq('user_id', userId)
         .eq('topic_id', topicId)
         .single();
 
-      if (error) throw error;
-      return data?.pending_question_data || null;
+      if (error) {
+        console.error('Error getting current question:', error);
+        return null;
+      }
+      
+      if (data && data.notes) {
+        try {
+          const parsed = JSON.parse(data.notes);
+          if (parsed.current_question) {
+            console.log('[TopicProgressRepo] ✅ Found current question in notes');
+            return parsed.current_question;
+          }
+        } catch (parseError) {
+          console.warn('[TopicProgressRepo] Could not parse notes field:', parseError);
+        }
+      }
+      
+      console.log('[TopicProgressRepo] No current question found in notes');
+      return null;
     } catch (error) {
-      console.error('Error getting pending question:', error);
+      console.error('Error getting current question:', error);
       return null;
     }
   }

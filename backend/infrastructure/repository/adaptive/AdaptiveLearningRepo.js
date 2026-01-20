@@ -71,12 +71,20 @@ class AdaptiveLearningRepository {
     return this.qLearningRepo.saveQValue(userId, stateKey, action, qValue);
   }
 
+  async upsertQValue(userId, stateKey, action, qValue) {
+    return this.qLearningRepo.upsertQValue(userId, stateKey, action, qValue);
+  }
+
   async getQValue(userId, stateKey, action) {
     return this.qLearningRepo.getQValue(userId, stateKey, action);
   }
 
   async getQValuesByState(userId, stateKey) {
     return this.qLearningRepo.getQValuesByState(userId, stateKey);
+  }
+
+  async getQValuesForState(userId, stateKey) {
+    return this.qLearningRepo.getQValuesForState(userId, stateKey);
   }
 
   async getAllQValues() {
@@ -93,6 +101,16 @@ class AdaptiveLearningRepository {
 
   async getRecentAttempts(userId, topicId, limit = 10) {
     return this.qLearningRepo.getRecentAttempts(userId, topicId, limit);
+  }
+
+  // Add the missing getRecentTransitions method that PerformanceAnalyticsService expects
+  async getRecentTransitions(userId, topicId, limit = 10) {
+    return this.qLearningRepo.getPerformanceHistory(userId, topicId, limit);
+  }
+
+  // Add getUserTopicState alias for compatibility
+  async getUserTopicState(userId, topicId) {
+    return this.studentStateRepo.getStudentDifficulty(userId, topicId);
   }
 
   async getResearchStatistics(chapterId = null) {
@@ -129,6 +147,11 @@ class AdaptiveLearningRepository {
 
   async saveQuestion(questionData) {
     return this.questionAttemptRepo.saveQuestion(questionData);
+  }
+
+  // Get cached questions from database for performance optimization
+  async getCachedQuestions(topicId, difficultyLevel, excludeQuestionIds = []) {
+    return this.questionAttemptRepo.getCachedQuestions(topicId, difficultyLevel, excludeQuestionIds);
   }
 
   async getQuestionsByTopicAndDifficulty(topicId, difficultyLevel, limit = 10) {

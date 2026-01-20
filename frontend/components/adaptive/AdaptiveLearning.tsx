@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import axios from '@/api/axios';
+import { useAuthStore } from '@/store/authStore';
 import MasteryProgressBar from './MasteryProgressBar';
 import AdaptiveFeedbackBox from './AdaptiveFeedbackBox';
 import LearningInteractionRenderer from './LearningInteractionRenderer';
@@ -70,6 +71,9 @@ interface AdaptiveLearningProps {
 }
 
 export default function AdaptiveLearning({ topicId, topicName: topicNameProp, onChangeTopic, userId, analytics }: AdaptiveLearningProps) {
+  // Get auth token from store
+  const { authToken } = useAuthStore();
+  
   const [state, setState] = useState<AdaptiveState | null>(null);
   const [lastResponse, setLastResponse] = useState<AdaptiveResponse | null>(null);
   const [loading, setLoading] = useState(true);
@@ -151,7 +155,7 @@ export default function AdaptiveLearning({ topicId, topicName: topicNameProp, on
         questionId: currentQuestion.id,
         questionText: currentQuestion.question,
         reason: 'wrong_choices_or_no_answer',
-        wrongStreak: state.wrongStreak
+        wrongStreak: state?.wrongStreak || 0
       });
       
       console.log('[AdaptiveLearning] Question flagged:', currentQuestion.id);
@@ -181,9 +185,14 @@ export default function AdaptiveLearning({ topicId, topicName: topicNameProp, on
   const generateNewQuestion = async (forceNew = false) => {
     try {
       setLoading(true);
-      // Add timestamp to prevent caching, and forceNew parameter to skip pending question reuse
+      // Use environment variable or fallback to localhost
+      const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
       const forceParam = forceNew ? '&forceNew=true' : '';
-      const response = await axios.get(`/adaptive/question/${topicId}?t=${Date.now()}${forceParam}`);
+      const response = await axios.get(`${backendUrl}/adaptive/question/${topicId}?t=${Date.now()}${forceParam}`, {
+        headers: {
+          Authorization: `Bearer ${authToken}`
+        }
+      });
       
       console.log('[AdaptiveLearning] Question API response:', response.data);
       
@@ -201,6 +210,7 @@ export default function AdaptiveLearning({ topicId, topicName: topicNameProp, on
           options: questionData.options,
           questionId: questionData.questionId,
           hint: questionData.hint,
+          representationType: questionData.representationType || 'text', // Include representation type from API
           // Store full metadata for submission tracking (radar chart analytics)
           cognitive_domain: cogDomain, // Store as snake_case for backend
           cognitiveDomain: cogDomain,   // Store as camelCase too
@@ -237,6 +247,96 @@ export default function AdaptiveLearning({ topicId, topicName: topicNameProp, on
   };
 
   /**
+   * Check for pending question before generating new one (preserves question on page refresh)
+   */
+  const checkForPendingQuestion = async () => {
+    try {
+      console.log('[AdaptiveLearning] 🔍 Checking for pending question... topicId:', topicId, 'authToken exists:', !!authToken);
+      
+      // Ensure we have an auth token
+      if (!authToken) {
+        console.log('[AdaptiveLearning] ⚠️ No auth token, generating new question');
+        await generateNewQuestion();
+        return;
+      }
+      
+      // Use same URL pattern as generateNewQuestion
+      const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+      const pendingUrl = `${backendUrl}/adaptive/pending-question/${topicId}?t=${Date.now()}`;
+      console.log('[AdaptiveLearning] 🌐 Making request to:', pendingUrl);
+      
+      const pendingResponse = await axios.get(pendingUrl, {
+        headers: {
+          Authorization: `Bearer ${authToken}`
+        },
+        timeout: 10000 // 10 second timeout to prevent hanging
+      });
+      
+      console.log('[AdaptiveLearning] 📡 Pending question API response:', pendingResponse.data);
+      
+      if (pendingResponse.data.success && pendingResponse.data.data) {
+        const questionData = pendingResponse.data.data;
+        console.log('[AdaptiveLearning] 🔄 Restored pending question from database:', questionData);
+        
+        // Restore the question state
+        const cogDomain = questionData.cognitiveDomain || questionData.cognitive_domain || 'knowledge_recall';
+        setCurrentQuestion({
+          question: questionData.question_text || questionData.question,
+          options: questionData.options,
+          questionId: questionData.id || questionData.questionId,
+          hint: questionData.hint,
+          representationType: questionData.representation_type || questionData.representationType || 'text',
+          cognitive_domain: cogDomain,
+          cognitiveDomain: cogDomain,
+          type: questionData.type,
+          difficulty_level: questionData.difficulty_level || questionData.difficultyLevel,
+          id: questionData.id || questionData.questionId
+        });
+        
+        setAnswerSubmitted(false);
+        setHintRequestCount(0);
+        setHintUsedForCurrentQuestion(false);
+        setSelectedAnswer(null);
+        
+        console.log('[AdaptiveLearning] ✅ Question state restored successfully');
+        return; // Exit early - we restored the question
+      } else {
+        console.log('[AdaptiveLearning] 📭 No pending question found in response');
+      }
+    } catch (error: any) {
+      console.log('[AdaptiveLearning] ❌ Error checking pending question:', {
+        status: error.response?.status,
+        message: error.message,
+        url: error.config?.url
+      });
+    }
+    
+    // If no pending question found or error occurred, generate a new one
+    console.log('[AdaptiveLearning] 🔄 Generating new question...');
+    await generateNewQuestion();
+  };
+
+  /**
+   * End adaptive learning session (called on component unmount or topic change)
+   */
+  const endAdaptiveSession = async () => {
+    try {
+      if (!sessionId) return;
+      
+      console.log('[AdaptiveLearning] 🏁 Ending adaptive learning session:', sessionId);
+      await axios.post('/adaptive-analytics/end-session', {
+        sessionId: sessionId,
+        finalMastery: state?.masteryLevel || 0,
+        questionsAttempted: state?.totalAttempts || 0,
+        questionsCorrect: Math.floor((state?.totalAttempts || 0) * (parseFloat(state?.accuracy || '0') / 100))
+      });
+      console.log('[AdaptiveLearning] ✅ Session ended successfully');
+    } catch (error) {
+      console.warn('[AdaptiveLearning] Could not end session tracking:', error);
+    }
+  };
+
+  /**
    * RESEARCH NOTE (ICETT Paper - Section 3.2: Mastery Calculation)
    * 
    * Mastery Level Formula: (correct_answers / total_attempts) × 100
@@ -263,9 +363,12 @@ export default function AdaptiveLearning({ topicId, topicName: topicNameProp, on
   const fetchState = async () => {
     try {
       setLoading(true);
+      console.log('[AdaptiveLearning] 📡 Fetching state for topic:', topicId);
+      
       const stateResponse = await axios.get(`/adaptive/state/${topicId}?t=${Date.now()}`);
       const stateData = stateResponse.data.data;
       setState(stateData);
+      console.log('[AdaptiveLearning] ✅ State fetched successfully');
 
       // Load cumulative hint count from state
       setTotalHintCount(stateData.hints_shown_count || 0);
@@ -289,11 +392,22 @@ export default function AdaptiveLearning({ topicId, topicName: topicNameProp, on
         setTopicName(topicNameProp);
       }
       
-      await generateNewQuestion();
+      // 🔄 Check for pending question first (restores question on page refresh)
+      console.log('[AdaptiveLearning] 🔄 Checking for pending question...');
+      await checkForPendingQuestion();
+      
       // Don't send sessionId - let backend generate it
       setSessionId('');
     } catch (error) {
       console.error('Error fetching state:', error);
+      setLoading(false); // Ensure loading stops even on error
+      // Try to show a fallback or generate a question anyway
+      try {
+        console.log('[AdaptiveLearning] ⚠️ State fetch failed, trying to generate question anyway');
+        await generateNewQuestion();
+      } catch (fallbackError) {
+        console.error('Fallback question generation failed:', fallbackError);
+      }
     } finally {
       setLoading(false);
     }
@@ -301,6 +415,33 @@ export default function AdaptiveLearning({ topicId, topicName: topicNameProp, on
 
   useEffect(() => {
     fetchState();
+    
+    // Start adaptive learning session
+    const startAdaptiveSession = async () => {
+      try {
+        console.log('[AdaptiveLearning] 🚀 Starting adaptive learning session for topic:', topicId);
+        const response = await axios.post('/adaptive-analytics/start-session', {
+          topicId: topicId,
+          sessionType: 'adaptive_learning'
+        });
+        if (response.data.success) {
+          const sessionId = response.data.sessionId;
+          setSessionId(sessionId);
+          console.log('[AdaptiveLearning] ✅ Session started:', sessionId);
+        }
+      } catch (error) {
+        console.warn('[AdaptiveLearning] Could not start session tracking:', error);
+      }
+    };
+    
+    startAdaptiveSession();
+    
+    // End session when component unmounts
+    return () => {
+      if (sessionId) {
+        endAdaptiveSession();
+      }
+    };
   }, [topicId]);
 
   /**
@@ -407,20 +548,23 @@ export default function AdaptiveLearning({ topicId, topicName: topicNameProp, on
       
       // OPTIMIZATION: Only fetch full state if mastery changed significantly (>5%)
       // Otherwise update locally to prevent excessive refreshing
-      const masteryDiff = Math.abs((responseData.masteryLevel || responseData.mastery_level || 0) - state.masteryLevel);
+      const masteryDiff = Math.abs((responseData.masteryLevel || responseData.mastery_level || 0) - (state?.masteryLevel || 0));
       if (masteryDiff > 5 || responseData.topicUnlocked || responseData.masteryAchieved) {
         const stateResponse = await axios.get(`/adaptive/state/${topicId}?t=${Date.now()}`);
         setState(stateResponse.data.data);
       } else {
         // Update state locally without fetch
-        setState(prev => ({
-          ...prev,
-          masteryLevel: responseData.masteryLevel || responseData.mastery_level || prev.masteryLevel,
-          currentDifficulty: responseData.currentDifficulty || prev.currentDifficulty,
-          correctStreak: isCorrect ? prev.correctStreak + 1 : 0,
-          wrongStreak: isCorrect ? 0 : prev.wrongStreak + 1,
-          totalAttempts: prev.totalAttempts + 1
-        }));
+        setState(prev => {
+          if (!prev) return null;
+          return {
+            ...prev,
+            masteryLevel: responseData.masteryLevel || responseData.mastery_level || prev.masteryLevel,
+            currentDifficulty: responseData.currentDifficulty || prev.currentDifficulty,
+            correctStreak: isCorrect ? prev.correctStreak + 1 : 0,
+            wrongStreak: isCorrect ? 0 : prev.wrongStreak + 1,
+            totalAttempts: prev.totalAttempts + 1
+          };
+        });
       }
       
       if (isCorrect) {
@@ -576,7 +720,7 @@ export default function AdaptiveLearning({ topicId, topicName: topicNameProp, on
     );
   }
 
-  const currentRepresentation = (lastResponse?.representationType || state.currentRepresentation || 'text') as 'text' | 'visual' | 'real_world';
+  const currentRepresentation = (currentQuestion?.representationType || lastResponse?.representationType || state?.currentRepresentation || 'text') as 'text' | 'visual' | 'real_world';
 
   return (
     <div className="adaptive-learning-container">

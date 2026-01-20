@@ -144,6 +144,96 @@ export default function LearningInteractionRenderer({
 
   // VISUAL REPRESENTATION
   if (representationType === 'visual') {
+    // Check if question has meaningful visual content (SVG, meaningful visual descriptions)
+    const hasRealVisualContent = question?.question && (
+      question.question.includes('<svg') || 
+      question.question.includes('**Visual Question**') ||
+      (question.question.includes('**Visualize this**') && question.question.length > 100)
+    );
+
+    // If no real visual content, render as text instead
+    if (!hasRealVisualContent) {
+      const onSelectAnswer = (option: any) => {
+        const isCorrect = option.correct === true || option.isCorrect === true;
+        handleSubmit(isCorrect, option);
+      };
+
+      return (
+        <div style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '20px'
+        }}>
+          {/* Question Container - render as regular text */}
+          <div style={{
+            backgroundColor: 'white',
+            borderRadius: '12px',
+            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
+            padding: '28px',
+            border: '2px solid #16A34A'
+          }}>
+            <div style={{ 
+              fontSize: '18px', 
+              color: '#111827',
+              lineHeight: '1.6',
+              fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+              fontWeight: 500
+            }}>
+              <div 
+                style={{ margin: 0 }} 
+                dangerouslySetInnerHTML={{ __html: processQuestionText(question?.question) }}
+              />
+            </div>
+          </div>
+
+          {/* Answer Options */}
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '16px'
+          }}>
+            {question?.options?.map((option: any, index: number) => (
+              <div
+                key={index}
+                onClick={() => onSelectAnswer?.(option)}
+                style={{
+                  backgroundColor: isOptionSelected(option) ? '#DCFCE7' : 'white',
+                  border: isOptionSelected(option) ? '3px solid #16A34A' : '2px solid #E5E7EB',
+                  borderRadius: '12px',
+                  padding: '20px',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  boxShadow: isOptionSelected(option) ? '0 4px 12px rgba(0, 0, 0, 0.15)' : '0 2px 4px rgba(0, 0, 0, 0.1)',
+                  fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                }}
+                onMouseEnter={(e) => {
+                  if (!isOptionSelected(option)) {
+                    e.currentTarget.style.borderColor = '#9CA3AF';
+                    e.currentTarget.style.backgroundColor = '#F9FAFB';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!isOptionSelected(option)) {
+                    e.currentTarget.style.borderColor = '#E5E7EB';
+                    e.currentTarget.style.backgroundColor = 'white';
+                  }
+                }}
+              >
+                <div style={{ fontSize: '16px', color: '#374151', fontWeight: 500 }}>
+                  {option.label || option}
+                </div>
+                {option.subtext && (
+                  <div style={{ fontSize: '14px', color: '#6B7280', marginTop: '4px' }}>
+                    {option.subtext}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    }
+
     return (
       <div style={{
         display: 'flex',
@@ -158,7 +248,7 @@ export default function LearningInteractionRenderer({
           padding: '28px',
           border: '2px solid #3B82F6'
         }}>
-          {/* Visual Indicator Badge */}
+          {/* Visual Indicator Badge - only show for questions with real visual content */}
           <div style={{
             display: 'inline-flex',
             alignItems: 'center',

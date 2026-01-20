@@ -227,9 +227,13 @@ class AssessmentService {
 
             // UNLOCK PROGRESSION: Handle castle unlocking after assessment
             try {
+                console.log(`[AssessmentService] 🏰 Starting castle unlock logic for user: ${userId}, testType: ${testType}`);
                 await this.handleCastleUnlockAfterAssessment(userId, testType);
+                console.log(`[AssessmentService] ✅ Castle unlock completed successfully`);
             } catch (error) {
-                console.warn('⚠️ Castle unlock failed (non-critical):', error.message);
+                console.error('❌ Castle unlock failed (non-critical):', error);
+                console.error('❌ Error details:', error.message);
+                console.error('❌ Stack trace:', error.stack);
                 // Don't throw - assessment was successful even if unlock fails
             }
 
@@ -420,31 +424,44 @@ class AssessmentService {
                 const castle1 = castles.find(c => c.unlock_order === 1);
 
                 if (!castle0 || !castle1) {
-                    console.log('[AssessmentService] Castle 0 or Castle 1 not found');
-                    return;
+                    console.error('[AssessmentService] ❌ Castle 0 or Castle 1 not found');
+                    console.error('[AssessmentService] Castle 0:', castle0);
+                    console.error('[AssessmentService] Castle 1:', castle1);
+                    console.error('[AssessmentService] Available castles:', castles.map(c => ({ id: c.id, name: c.name, unlock_order: c.unlock_order })));
+                    throw new Error('Castle 0 or Castle 1 not found in database');
                 }
 
                 // Mark Castle 0 as completed
+                console.log(`[AssessmentService] Looking for Castle 0 progress for user: ${userId}, castle: ${castle0.id}`);
                 const castle0Progress = await this.userCastleProgressRepo.getUserCastleProgressByUserAndCastle(userId, castle0.id);
+                console.log(`[AssessmentService] Castle 0 progress found:`, castle0Progress);
+                
                 if (castle0Progress) {
+                    console.log(`[AssessmentService] Updating Castle 0 as completed`);
                     await this.userCastleProgressRepo.updateUserCastleProgress(castle0Progress.id, {
                         completed: true,
                         completion_percentage: 100,
                         completed_at: new Date().toISOString()
                     });
-                    console.log('[AssessmentService] Castle 0 marked as completed');
+                    console.log('[AssessmentService] ✅ Castle 0 marked as completed');
+                } else {
+                    console.warn('[AssessmentService] ⚠️ No Castle 0 progress found - this is unusual');
                 }
 
                 // Unlock Castle 1
+                console.log(`[AssessmentService] Looking for Castle 1 progress for user: ${userId}, castle: ${castle1.id}`);
                 let castle1Progress = await this.userCastleProgressRepo.getUserCastleProgressByUserAndCastle(userId, castle1.id);
+                console.log(`[AssessmentService] Castle 1 progress found:`, castle1Progress);
                 
                 if (castle1Progress) {
+                    console.log(`[AssessmentService] Updating existing Castle 1 progress to unlocked`);
                     await this.userCastleProgressRepo.updateUserCastleProgress(castle1Progress.id, {
                         unlocked: true
                     });
-                    console.log('[AssessmentService] Castle 1 unlocked (updated existing)');
+                    console.log('[AssessmentService] ✅ Castle 1 unlocked (updated existing)');
                 } else {
-                    await this.userCastleProgressRepo.createUserCastleProgress({
+                    console.log(`[AssessmentService] Creating new Castle 1 progress for user`);
+                    const newProgress = await this.userCastleProgressRepo.createUserCastleProgress({
                         user_id: userId,
                         castle_id: castle1.id,
                         unlocked: true,
@@ -453,13 +470,23 @@ class AssessmentService {
                         completion_percentage: 0,
                         started_at: new Date().toISOString()
                     });
-                    console.log('[AssessmentService] Castle 1 unlocked (created new)');
+                    console.log('[AssessmentService] ✅ Castle 1 unlocked (created new):', newProgress);
                 }
 
                 // Clear castle cache for this user to ensure frontend gets fresh data
                 const cache = require('../../cache');
                 cache.clearUserCache(userId);
-                console.log('[AssessmentService] Cleared castle cache for user after pretest');
+                console.log('[AssessmentService] 🗑️ Cleared castle cache for user after pretest');
+
+                // Verify Castle 1 is actually unlocked (double-check)
+                const verifyProgress = await this.userCastleProgressRepo.getUserCastleProgressByUserAndCastle(userId, castle1.id);
+                if (verifyProgress && verifyProgress.unlocked) {
+                    console.log('[AssessmentService] ✅ VERIFICATION: Castle 1 is confirmed unlocked');
+                } else {
+                    console.error('[AssessmentService] ❌ VERIFICATION FAILED: Castle 1 is NOT unlocked after operation');
+                    console.error('[AssessmentService] Verification result:', verifyProgress);
+                    throw new Error('Castle 1 unlock verification failed');
+                }
 
                 // Unlock first chapter of Castle 1
                 if (this.chapterRepo && this.userChapterProgressRepo) {

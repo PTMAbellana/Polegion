@@ -74,8 +74,8 @@ export default function WorldMapPage() {
   // Refetch castles when navigating back to this page (not on tab switches)
   useEffect(() => {
     const handleVisibilityChange = () => {
-      // Only refetch if the page is becoming visible (not hidden)
-      if (!document.hidden && userProfile?.id) {
+      // Only refetch if the page is becoming visible AND we've already fetched before
+      if (!document.hidden && userProfile?.id && hasFetchedRef.current) {
         console.log('[WorldMap] Page visible - refetching castles');
         fetchCastles(userProfile.id);
       }

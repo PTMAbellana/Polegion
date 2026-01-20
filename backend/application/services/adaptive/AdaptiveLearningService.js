@@ -72,6 +72,11 @@ const CSVQuestionBankService = require('./CSVQuestionBankService');
 const MasteryCalculationService = require('./MasteryCalculationService');
 const StateManagementService = require('./StateManagementService');
 const ActionSelectionService = require('./ActionSelectionService');
+const QLearningService = require('./QLearningService');
+const TopicProgressionService = require('./TopicProgressionService');
+const CohortManagementService = require('./CohortManagementService');
+const QuestionOrchestrationService = require('./QuestionOrchestrationService');
+const PerformanceAnalyticsService = require('./PerformanceAnalyticsService');
 
 // Domain Models & Services (DDD Pattern)
 const StudentAdaptiveState = require('../../../domain/models/adaptive/StudentAdaptiveState');
@@ -99,7 +104,11 @@ class AdaptiveLearningService {
     this.qLearningPolicy = new QLearningPolicy();
     this.rewardCalculator = new RewardCalculator();
     
-    // ✅ NEW: Extracted Application Services (SRP Refactoring)
+    // ✅ Extracted Application Services (SRP Refactoring)
+    this.qLearning = new QLearningService(adaptiveLearningRepo);
+    this.topicProgression = new TopicProgressionService(adaptiveLearningRepo);
+    this.cohortManager = new CohortManagementService(adaptiveLearningRepo);
+    this.performanceAnalytics = new PerformanceAnalyticsService(adaptiveLearningRepo);
     this.masteryCalculator = new MasteryCalculationService(adaptiveLearningRepo);
     this.stateManager = new StateManagementService({
       initialEpsilon: 1.0,
@@ -110,6 +119,14 @@ class AdaptiveLearningService {
       adaptiveLearningRepo,
       null, // Will set ACTIONS after initialization
       this.EXPERIMENT_MODE
+    );
+    
+    // ✅ Question Orchestration Service (initialized after question generators)
+    this.questionOrchestrator = new QuestionOrchestrationService(
+      this.questionGenerator,
+      this.aiQuestionGenerator,
+      this.csvQuestionBank,
+      adaptiveLearningRepo
     );
     
     // Event aggregation for research/reporting
@@ -220,77 +237,14 @@ class AdaptiveLearningService {
   }
 
   /**
-   * 🔧 NEW METHOD: Ensure Q-table is loaded from database
-   * Call this before any adaptive learning operation to restore learning progress
+   * Ensure Q-table is loaded from database
+   * ✅ DELEGATED to QLearningService
    */
   async ensureInitialized() {
-    if (this.isInitialized) {
-      return;
-    }
-    
-    if (this.initializationPromise) {
-      return this.initializationPromise;
-    }
-    
-    this.initializationPromise = this._loadQTableFromDatabase();
-    await this.initializationPromise;
-    this.isInitialized = true;
+    return this.qLearning.ensureInitialized();
   }
 
-  /**
-   * 🔧 NEW METHOD: Load Q-values from database into memory
-   * This restores learning progress after server restarts
-   */
-  async _loadQTableFromDatabase() {
-    try {
-      console.log('[AdaptiveLearning] 🔄 Loading Q-table from database...');
-      const startTime = Date.now();
-      
-      // Get all Q-values from database
-      const qValues = await this.repo.getAllQValues();
-      
-      if (!qValues || qValues.length === 0) {
-        console.log('[AdaptiveLearning] ℹ️  No Q-values found in database (fresh start)');
-        return;
-      }
-      
-      let loadedCount = 0;
-      for (const qValue of qValues) {
-        const key = this._getQKey(qValue.user_id, qValue.state_key, qValue.action);
-        // 🔧 FIX: Store in main qTable (not actionSelector.qTable)
-        this.qTable.set(key, parseFloat(qValue.q_value));
-        loadedCount++;
-      }
-      
-      const elapsed = Date.now() - startTime;
-      console.log(`[AdaptiveLearning] ✅ Loaded ${loadedCount} Q-values in ${elapsed}ms`);
-      
-      // Log sample Q-values for verification
-      if (loadedCount > 0) {
-        let sampleCount = 0;
-        console.log('[AdaptiveLearning] Sample Q-values:');
-        for (const [key, value] of this.qTable.entries()) {
-          if (sampleCount++ < 3) {
-            console.log(`  ${key} = ${value}`);
-          } else {
-            break;
-          }
-        }
-      }
-      
-    } catch (error) {
-      console.error('[AdaptiveLearning] ❌ Error loading Q-table:', error);
-      // Don't throw - allow system to work with empty Q-table
-      console.log('[AdaptiveLearning] ⚠️  Continuing with empty Q-table...');
-    }
-  }
 
-  /**
-   * 🔧 NEW METHOD: Generate Q-table key for consistency
-   */
-  _getQKey(userId, stateKey, action) {
-    return `${userId}_${stateKey}_${action}`;
-  }
 
   
   // ============================================
@@ -365,10 +319,10 @@ class AdaptiveLearningService {
 
   /**
    * Get all available adaptive learning topics
-   * All topics are accessible for practice
+   * ✅ DELEGATED to TopicProgressionService
    */
   async getAllTopics() {
-    return await this.repo.getAllTopics();
+    return this.topicProgression.getAllTopics();
   }
 
   /**
@@ -433,6 +387,22 @@ class AdaptiveLearningService {
       
       // === STEP 2: Update Question Tracking ===
       await this.repo.markQuestionAnswered(userId, topicId, questionId, isCorrect);
+      
+      // Track question attempt with full metadata (for cognitive domain analytics)
+      const sessionId = this.generateSessionId(userId);
+      try {
+        await this.repo.trackQuestionAttempt(
+          userId,
+          questionId,
+          topicId,
+          sessionId,
+          isCorrect,
+          questionData // Pass full question data including cognitive_domain
+        );
+        console.log('[AdaptiveLearning] ✅ Question attempt tracked with cognitive_domain:', questionData?.cognitive_domain || questionData?.cognitiveDomain);
+      } catch (trackError) {
+        console.warn('[AdaptiveLearning] Failed to track question attempt (non-critical):', trackError.message);
+      }
       
       // Handle pending question flow (optional feature)
       try {
@@ -504,12 +474,24 @@ class AdaptiveLearningService {
       console.log('[Q-Learning] Q-Values for state:', qValues);
       console.log('===============================================\n');
 
-      // 4. Determine next action using Q-learning with epsilon-greedy policy
-      const actionResult = await this.selectActionQLearning(
-        userId,
-        newStateKey, 
-        newState
-      );
+      // 4. Determine next action based on user's learning_strategy (qlearning or rulebased)
+      const userStrategy = await this.getUserLearningStrategy(userId);
+      console.log(`[Q-Learning] User Learning Strategy: ${userStrategy || 'not set (defaulting to qlearning)'}`);
+      
+      let actionResult;
+      if (userStrategy === 'rulebased') {
+        // Use rule-based policy for control group
+        actionResult = await this.determineActionRuleBased(newState);
+        console.log('[Q-Learning] Using RULE-BASED policy (control group)');
+      } else {
+        // Use Q-learning for experimental group (default)
+        actionResult = await this.selectActionQLearning(
+          userId,
+          newStateKey, 
+          newState
+        );
+        console.log('[Q-Learning] Using Q-LEARNING policy (experimental group)');
+      }
       const { action, reason, usedExploration, pedagogicalStrategy, representationType } = actionResult;
 
       // === ACTION SELECTION LOGS ===
@@ -825,43 +807,40 @@ class AdaptiveLearningService {
   }
 
   /**
+   * Get user's learning strategy from user_profiles
+   * Returns 'qlearning', 'rulebased', or null
+   * 
+   * ✅ NEW: Per-student adaptive vs control assignment
+   */
+  async getUserLearningStrategy(userId) {
+    try {
+      const profile = await this.repo.getUserProfile(userId);
+      return profile?.learning_strategy || null;
+    } catch (error) {
+      console.error('[AdaptiveLearning] Error fetching user learning strategy:', error);
+      return null; // Default to Q-learning if error
+    }
+  }
+
+  /**
    * Get Q-value for state-action pair
-   * CRITICAL: Now includes userId for per-student Q-learning
+   * ✅ DELEGATED to QLearningService
    */
   getQValue(userId, stateKey, action) {
-    // First check in-memory cache
-    if (!this.qTable.has(stateKey)) {
-      this.qTable.set(stateKey, {});
-    }
-    const stateActions = this.qTable.get(stateKey);
-    return stateActions[action] || 0; // Initialize to 0 if not seen
+    return this.qLearning.getQValue(userId, stateKey, action);
   }
 
   /**
    * Preload persisted Q-values for a state into memory (lazy loading)
+   * ✅ DELEGATED to QLearningService
    */
   async preloadQValuesForState(userId, stateKey) {
-    if (this.qTable.has(stateKey) && Object.keys(this.qTable.get(stateKey)).length > 0) {
-      return; // Already loaded
-    }
-    try {
-      const persisted = await this.repo.getQValuesByState(userId, stateKey);
-      if (!this.qTable.has(stateKey)) {
-        this.qTable.set(stateKey, {});
-      }
-      const stateActions = this.qTable.get(stateKey);
-      for (const [action, q] of Object.entries(persisted)) {
-        stateActions[action] = q;
-      }
-    } catch (error) {
-      console.warn('[AdaptiveLearning] Failed to preload Q-values for state:', stateKey, error);
-    }
+    return this.qLearning.preloadQValuesForState(userId, stateKey);
   }
 
   /**
-   * Update Q-value using Q-learning update rule
-  /**
    * Update Q-value using Bellman equation for temporal difference learning
+   * ✅ DELEGATED to QLearningService
    * 
    * WHY This Formula: The Bellman equation updates our estimate of how good an action is
    * based on immediate reward + estimated future value. This allows the system to learn
@@ -883,36 +862,7 @@ class AdaptiveLearningService {
    * @param {string} nextStateKey - State after action (e.g., "M3_D2_C4_W0")
    */
   async updateQValue(userId, currentStateKey, action, reward, nextStateKey) {
-    const currentQ = this.getQValue(userId, currentStateKey, action);
-    
-    // Find best possible future value: max Q-value for all actions in next state
-    // WHY: We assume optimal future play (student gets best possible teaching)
-    let maxNextQ = -Infinity;
-    for (const nextAction of Object.values(this.ACTIONS)) {
-      const nextQ = this.getQValue(userId, nextStateKey, nextAction);
-      if (nextQ > maxNextQ) {
-        maxNextQ = nextQ;
-      }
-    }
-    
-    // If next state is unexplored, assume neutral value (0)
-    if (maxNextQ === -Infinity) {
-      maxNextQ = 0;
-    }
-
-    // Apply Bellman equation: current estimate + learning rate * temporal difference
-    // Temporal difference = (reward + discounted future value) - current estimate
-    const newQ = currentQ + this.LEARNING_RATE * (
-      reward + this.DISCOUNT_FACTOR * maxNextQ - currentQ
-    );
-
-    // Update Q-table in memory
-    if (!this.qTable.has(currentStateKey)) {
-      this.qTable.set(currentStateKey, {});
-    }
-    this.qTable.get(currentStateKey)[action] = newQ;
-    // Persist Q-value for research analysis and model continuity
-    await this.repo.saveQValue(userId, currentStateKey, action, newQ);
+    return this.qLearning.updateQValue(userId, currentStateKey, action, reward, nextStateKey);
   }
 
   /**
@@ -1255,45 +1205,12 @@ class AdaptiveLearningService {
   /**
    * Analyze learning patterns for research insights
    */
+  /**
+   * Analyze learning patterns and trends for a user on a specific topic
+   * ✅ DELEGATED to PerformanceAnalyticsService
+   */
   async analyzeLearningPattern(userId, topicId) {
-    try {
-      const history = await this.repo.getPerformanceHistory(userId, topicId, 50);
-      
-      if (history.length < 5) {
-        return { insufficient_data: true };
-      }
-
-      // Calculate various metrics
-      const accuracy = history.filter(h => h.was_correct).length / history.length;
-      const avgDifficulty = history.reduce((sum, h) => sum + h.new_difficulty, 0) / history.length;
-      const difficultyChanges = history.filter((h, i) => 
-        i > 0 && h.new_difficulty !== history[i-1].new_difficulty
-      ).length;
-      
-      // Detect learning velocity (mastery gain per attempt)
-      const firstMastery = history[0].new_mastery_level || 0;
-      const lastMastery = history[history.length - 1].new_mastery_level || 0;
-      const learningVelocity = (lastMastery - firstMastery) / history.length;
-
-      // Detect patterns
-      const hasUpwardTrend = learningVelocity > 0.5;
-      const hasDownwardTrend = learningVelocity < -0.5;
-      const isStagnant = Math.abs(learningVelocity) < 0.2;
-
-      return {
-        accuracy: (accuracy * 100).toFixed(1),
-        avgDifficulty: avgDifficulty.toFixed(1),
-        difficultyChanges,
-        learningVelocity: learningVelocity.toFixed(2),
-        pattern: hasUpwardTrend ? 'improving' : 
-                 hasDownwardTrend ? 'declining' : 
-                 isStagnant ? 'stagnant' : 'variable',
-        recommendation: this.getPatternRecommendation(learningVelocity, accuracy)
-      };
-    } catch (error) {
-      console.error('Error analyzing learning pattern:', error);
-      return { error: 'Analysis failed' };
-    }
+    return this.performanceAnalytics.analyzeLearningPattern(userId, topicId, this.getPatternRecommendation.bind(this));
   }
 
   /**
@@ -1582,78 +1499,7 @@ class AdaptiveLearningService {
     return topicMap[topicName] || surfaceAreaTopics[topicName] || null;
   }
 
-  /**
-   * Get student's current state and performance with AI insights (OLD VERSION)
-   */
-  async getStudentStateOld(userId, topicId) {
-    try {
-      const state = await this.repo.getStudentDifficulty(userId, topicId);
-      const history = await this.repo.getPerformanceHistory(userId, topicId, 10);
-      
-      // Generate AI predictions
-      const prediction = this.predictNextPerformance(state);
-      
-      // Get learning pattern analysis
-      const pattern = await this.analyzeLearningPattern(userId, topicId);
-      
-      // Get Q-values for current state
-      const stateKey = this.getStateKey(state);
-      const qValues = this.getQValuesForState(userId, stateKey);
-      
-      // Determine current cognitive domain
-      const cognitiveDomain = this.determineCognitiveDomain(state);
 
-      return {
-        currentDifficulty: state.difficulty_level,
-        difficultyLabel: this.getDifficultyLabel(state.difficulty_level),
-        currentCognitiveDomain: cognitiveDomain,
-        cognitiveDomainLabel: this.questionGenerator.getCognitiveDomainLabel(cognitiveDomain),
-        cognitiveDomainDescription: this.questionGenerator.getCognitiveDomainDescription(cognitiveDomain),
-        masteryLevel: state.mastery_level,
-        correctStreak: state.correct_streak,
-        wrongStreak: state.wrong_streak,
-        totalAttempts: state.total_attempts,
-        accuracy: state.total_attempts > 0 
-          ? (state.correct_answers / state.total_attempts * 100).toFixed(1)
-          : 0,
-        
-        // AI-enhanced features
-        prediction: {
-          successProbability: (prediction.successProbability * 100).toFixed(1),
-          confidence: (prediction.confidence * 100).toFixed(1),
-          recommendation: prediction.recommendation
-        },
-        
-        learningPattern: pattern,
-        
-        qLearning: {
-          stateKey,
-          epsilon: this.getCurrentEpsilon(state.total_attempts).toFixed(3),
-          explorationRate: (this.getCurrentEpsilon(state.total_attempts) * 100).toFixed(1),
-          qValues: qValues,
-          totalStatesLearned: this.qTable.size
-        },
-        
-        // Cognitive domain progression info
-        cognitiveDomainProgression: {
-          current: cognitiveDomain,
-          available: this.questionGenerator.getDomainsForDifficulty(state.difficulty_level),
-          progressionPath: this.DOMAIN_PROGRESSION
-        },
-        
-        recentHistory: history.map(h => ({
-          action: h.action,
-          wasCorrect: h.was_correct,
-          difficultyChange: h.new_difficulty - h.prev_difficulty,
-          reward: h.reward,
-          timestamp: h.timestamp
-        }))
-      };
-    } catch (error) {
-      console.error('Error getting student state:', error);
-      throw error;
-    }
-  }
 
   /**
    * Get all Q-values for a given state
@@ -1715,13 +1561,12 @@ class AdaptiveLearningService {
   /**
    * Get research statistics (for analysis)
    */
+  /**
+   * Get research statistics for A/B testing analysis
+   * ✅ DELEGATED to PerformanceAnalyticsService
+   */
   async getResearchStats(topicId = null) {
-    try {
-      return await this.repo.getResearchStatistics(topicId);
-    } catch (error) {
-      console.error('Error getting research stats:', error);
-      throw error;
-    }
+    return this.performanceAnalytics.getResearchStats(topicId);
   }
 
   /**
@@ -1769,112 +1614,18 @@ class AdaptiveLearningService {
 
   /**
    * Get all topics with unlock status for a user
+   * ✅ DELEGATED to TopicProgressionService
    */
   async getTopicsWithProgress(userId, retryCount = 0) {
-    try {
-      console.log('[AdaptiveLearning] getTopicsWithProgress - start');
-      
-      // === STEP 0: Cohort Assignment (A/B Testing) - NON-BLOCKING ===
-      // ✅ FIX: Don't let cohort assignment errors block topic loading
-      try {
-        await this.ensureUserHasCohort(userId);
-      } catch (cohortError) {
-        console.warn('[AdaptiveLearning] Cohort assignment failed (non-critical), continuing...', cohortError.message);
-        // Continue anyway - cohort assignment is for research tracking only
-      }
-      
-      // Get all topics
-      const topicsStart = Date.now();
-      const allTopics = await this.repo.getAllTopics();
-      console.log(`[AdaptiveLearning] getAllTopics took ${Date.now() - topicsStart}ms, count: ${allTopics.length}`);
-      
-      // Get user's progress for all topics
-      const progressStart = Date.now();
-      const progress = await this.repo.getAllTopicProgress(userId);
-      console.log(`[AdaptiveLearning] getAllTopicProgress took ${Date.now() - progressStart}ms, count: ${progress?.length || 0}`);
-      
-      // If user has no progress, initialize it (but prevent infinite recursion)
-      if (!progress || progress.length === 0) {
-        if (retryCount > 0) {
-          console.error('[AdaptiveLearning] FATAL: Initialization failed after retry - RLS policies may be blocking inserts');
-          throw new Error('Failed to initialize user topic progress. Check RLS policies on user_topic_progress table.');
-        }
-        console.log('[AdaptiveLearning] No progress found, initializing...');
-        const initStart = Date.now();
-        const success = await this.repo.initializeTopicsForUser(userId);
-        console.log(`[AdaptiveLearning] initializeTopicsForUser took ${Date.now() - initStart}ms, success: ${success}`);
-        
-        if (!success) {
-          throw new Error('Topic initialization failed');
-        }
-        
-        return await this.getTopicsWithProgress(userId, retryCount + 1); // Retry once after initialization
-      }
-
-      // Merge topics with progress
-      const topicsWithProgress = allTopics.map(topic => {
-        const topicProgress = progress.find(p => p.topic_id === topic.id);
-        
-        return {
-          ...topic,
-          unlocked: topicProgress?.unlocked || false,
-          mastered: topicProgress?.mastered || false,
-          mastery_level: topicProgress?.mastery_level || 0,
-          mastery_percentage: topicProgress?.mastery_percentage || 0
-        };
-      });
-
-      return topicsWithProgress;
-    } catch (error) {
-      console.error('[AdaptiveLearning] Error getting topics with progress:', error);
-      throw error;
-    }
+    return this.topicProgression.getTopicsWithProgress(userId, retryCount, this.ensureUserHasCohort.bind(this));
   }
 
   /**
    * Check and unlock next topic if current mastery >= 3
+   * ✅ DELEGATED to TopicProgressionService
    */
   async checkAndUnlockNextTopic(userId, topicId, currentMasteryLevel) {
-    try {
-      console.log('[checkAndUnlockNextTopic] Called with:', { userId, topicId, currentMasteryLevel });
-      
-      // Check if mastery level >= 3 (proficient)
-      if (currentMasteryLevel < 3) {
-        console.log('[checkAndUnlockNextTopic] Mastery level < 3, not ready to unlock');
-        return null; // Not ready to unlock
-      }
-
-      console.log('[checkAndUnlockNextTopic] Mastery level >= 3, proceeding to unlock...');
-
-      // Get current topic progress
-      const currentProgress = await this.repo.getTopicProgress(userId, topicId);
-      
-      // Update current topic progress
-      await this.repo.updateTopicProgress(userId, topicId, {
-        mastery_level: currentMasteryLevel,
-        mastery_percentage: currentMasteryLevel * 20, // Convert 0-5 to 0-100
-        mastered: currentMasteryLevel >= 5,
-        mastered_at: currentMasteryLevel >= 5 ? new Date().toISOString() : null
-      });
-
-      // Unlock next topic
-      const unlockResult = await this.repo.unlockNextTopic(userId, topicId);
-      
-      if (unlockResult) {
-        console.log('[checkAndUnlockNextTopic] Successfully unlocked:', unlockResult.topic.topic_name);
-        return {
-          unlocked: true,
-          topic: unlockResult.topic,
-          message: `Great job! You've unlocked "${unlockResult.topic.topic_name}"!`
-        };
-      }
-
-      console.log('[checkAndUnlockNextTopic] No next topic to unlock');
-      return null; // No next topic (already at end)
-    } catch (error) {
-      console.error('[AdaptiveLearning] Error checking/unlocking topic:', error);
-      return null; // Don't fail the whole flow
-    }
+    return this.topicProgression.checkAndUnlockNextTopic(userId, topicId, currentMasteryLevel);
   }
 
   /**
@@ -1891,15 +1642,10 @@ class AdaptiveLearningService {
 
   /**
    * Check if topic is unlocked for user
+   * ✅ DELEGATED to TopicProgressionService
    */
   async isTopicUnlocked(userId, topicId) {
-    try {
-      const progress = await this.repo.getTopicProgress(userId, topicId);
-      return progress?.unlocked || false;
-    } catch (error) {
-      console.error('[AdaptiveLearning] Error checking topic unlock:', error);
-      return false;
-    }
+    return this.topicProgression.isTopicUnlocked(userId, topicId);
   }
 
   // ================================================================
@@ -1909,354 +1655,32 @@ class AdaptiveLearningService {
   /**
    * Generate a new question (parametric or AI-based)
    * Ensures uniqueness within session
+   * ✅ DELEGATED to QuestionOrchestrationService
    * @param {boolean} forceNew - If true, skip reusing pending questions and generate fresh question
    */
   async generateQuestion(userId, topicId, difficultyLevel, sessionId, excludeQuestionIds = [], forceNew = false) {
-    try {
-      const topic = await this.repo.getTopicById(topicId);
-      if (!topic) {
-        throw new Error('Topic not found');
-      }
-
-      // Check for pending question in user_topic_progress (NEW SYSTEM)
-      // This ensures question persists across page refreshes
-      if (!forceNew) {
-        console.log(`[AdaptiveLearning] Checking for pending question: userId=${userId}, topicId=${topicId}`);
-        const pendingData = await this.repo.getPendingQuestion(userId, topicId);
-        
-        console.log(`[AdaptiveLearning] Pending data retrieved:`, pendingData ? {
-          has_data: !!pendingData.pending_question_data,
-          attempt_count: pendingData.attempt_count,
-          question_id: pendingData.pending_question_id
-        } : 'null');
-        
-        if (pendingData && pendingData.pending_question_data) {
-          console.log(`[AdaptiveLearning] ✅ REUSING pending question from database, attempt_count: ${pendingData.attempt_count}`);
-          return pendingData.pending_question_data;
-        } else {
-          console.log(`[AdaptiveLearning] No pending question found, will generate new`);
-        }
-      } else {
-        console.log('[AdaptiveLearning] forceNew=true, clearing pending question and generating new');
-        // Clear pending question when forcing new generation
-        await this.repo.clearPendingQuestion(userId, topicId);
-      }
-
-      // Get shown questions in this session
-      const shownQuestions = await this.repo.getShownQuestionsInSession(userId, topicId, sessionId);
-      const shownQuestionIds = shownQuestions.map(q => q.question_id);
-      const allExcluded = [...excludeQuestionIds, ...shownQuestionIds];
-      
-      // Get recent question types to avoid immediate repeats (last 3 questions)
-      const recentTypes = await this.repo.getRecentQuestionTypes(userId, topicId, 3);
-      console.log('[AdaptiveLearning] Recent question types to avoid:', recentTypes);
-
-      let question = null;
-
-      // For difficulty 4+ and sufficient mastery/attempts, use Groq (via aiQuestionGenerator) for complex questions
-      if (difficultyLevel >= this.MIN_DIFFICULTY_FOR_AI && this.aiQuestionGenerator) {
-        try {
-          const state = await this.repo.getStudentDifficulty(userId, topicId);
-          const cognitiveDomain = this.determineCognitiveDomain(state) || 'analytical_thinking';
-
-          // Guard: only use AI after learner shows adequate mastery/attempts
-          const masteryPercent = typeof state.mastery_level === 'number' ? state.mastery_level : 0;
-          const hasEnoughMastery = masteryPercent >= this.MIN_MASTERY_FOR_AI;
-          const hasAttempts = (state.total_attempts || 0) >= this.MIN_ATTEMPTS_FOR_AI;
-
-          if (!hasEnoughMastery && !hasAttempts) {
-            console.log('[AdaptiveLearning] Skipping AI generation (insufficient mastery/attempts)');
-          } else {
-
-          // Add 10-second timeout to Groq API call
-          const groqPromise = this.aiQuestionGenerator.generateQuestion({
-            topicName: topic.topic_name,
-            topicFilter: topic.topic_filter, // Add topic filter for more specific context
-            difficultyLevel,
-            cognitiveDomain,
-            excludeQuestionIds: allExcluded
-          });
-          
-          const timeoutPromise = new Promise((_, reject) => 
-            setTimeout(() => reject(new Error('Groq API timeout')), 10000)
-          );
-          
-          question = await Promise.race([groqPromise, timeoutPromise]);
-
-          if (question) {
-            console.log('[AdaptiveLearning] Generated Groq question (AI path):', question.questionId);
-            
-            // Save AI-generated question to database for research/reuse
-            try {
-              await this.repo.saveQuestion({
-                topicId,
-                questionText: question.question_text,
-                questionType: 'ai_generated',
-                options: question.options,
-                correctAnswer: question.correct_answer,
-                difficultyLevel,
-                cognitiveDomain,
-                generationParams: {
-                  model: question.model || 'groq',
-                  topicName: topic.topic_name,
-                  representationType: question.representation_type || 'text',
-                  generatedAt: new Date().toISOString()
-                }
-              });
-              console.log('[AdaptiveLearning] Saved AI question to database');
-            } catch (saveError) {
-              console.warn('[AdaptiveLearning] Failed to save AI question (non-critical):', saveError.message);
-              // Don't fail - question is already generated and can be used
-            }
-          }
-          }
-        } catch (aiError) {
-          console.warn('[AdaptiveLearning] Groq generation failed, falling back to parametric:', aiError.message);
-        }
-      }
-
-      // Fallback to parametric templates (or for difficulty 1-3)
-      if (!question) {
-        // Get student state for cognitive domain AND representation type
-        const state = await this.repo.getStudentDifficulty(userId, topicId);
-        const cognitiveDomain = this.determineCognitiveDomain(state);
-        
-        // ✅ Get current representation type from state (updated by SWITCH_TO_VISUAL/REAL_WORLD actions)
-        const representationType = state.current_representation || 'text';
-        console.log(`[AdaptiveLearning] Using representation type: ${representationType}`);
-        
-        // Get topic filter to match questions to topic
-        const topicFilter = this.getTopicFilter(topic.topic_name);
-        
-        // ✅ 3-TIER FALLBACK STRATEGY (Highest quality → Most flexible)
-        // Tier 1: Try CSV Question Bank (pre-validated, guaranteed correct options)
-        if (this.csvQuestionBank) {
-          try {
-            console.log('[AdaptiveLearning] Attempting CSV Question Bank (Tier 1)...');
-            const csvQuestion = await this.csvQuestionBank.getQuestion(
-              difficultyLevel,
-              topic.topic_name,
-              representationType,
-              allExcluded
-            );
-            
-            if (csvQuestion) {
-              question = csvQuestion;
-              console.log('[AdaptiveLearning] ✅ CSV Question Bank success (guaranteed correct answer)');
-            } else {
-              console.log('[AdaptiveLearning] CSV Question Bank: No matching questions found');
-            }
-          } catch (csvError) {
-            console.warn('[AdaptiveLearning] CSV Question Bank error:', csvError.message);
-          }
-        }
-        
-        // Tier 2: Parametric Generation (fallback if CSV unavailable)
-        if (!question) {
-          console.log('[AdaptiveLearning] Falling back to Parametric Generation (Tier 2)...');
-          question = await this.questionGenerator.generateQuestion(
-            difficultyLevel,           // difficulty level (1-5)
-            topic.chapter_id || 1,     // chapter ID
-            null,                      // seed (random)
-            cognitiveDomain,           // cognitive domain
-            representationType,        // ✅ representation type from student state (text/visual/real_world)
-            topicFilter,               // topic filter (e.g., "polygon_interior")
-            recentTypes                // exclude recent question types
-          );
-          
-          if (question) {
-            question.generatedBy = 'parametric';
-            console.log('[AdaptiveLearning] ✅ Parametric generation success');
-          }
-        }
-      }
-
-      if (!question) {
-        throw new Error('Failed to generate question');
-      }
-
-      // Ensure question has a questionId field (parametric uses 'id', AI uses 'questionId')
-      const questionId = question.questionId || question.id;
-      if (!questionId) {
-        throw new Error('Generated question missing ID');
-      }
-
-      // CRITICAL: Ensure question has cognitive_domain for tracking in question_attempts table
-      if (!question.cognitive_domain) {
-        console.warn(`[AdaptiveLearning] Question missing cognitive_domain, setting to knowledge_recall`);
-        question.cognitive_domain = 'knowledge_recall';
-      }
-
-      // Add to question history
-      await this.repo.addToQuestionHistory(
-        userId,
-        topicId,
-        sessionId,
-        questionId,
-        question.questionType || question.type || 'unknown',
-        difficultyLevel,
-        null, // Not answered yet
-        question
-      );
-
-      // Save as pending question in user_topic_progress (OPTIONAL - for persistence)
-      // Non-critical: continues even if column doesn't exist
-      try {
-        await this.repo.savePendingQuestion(userId, topicId, question);
-      } catch (pendingError) {
-        // Silently ignore - this is optional functionality
-        console.log('[AdaptiveLearning] Pending question save skipped (optional feature)');
-      }
-
-      return question;
-
-    } catch (error) {
-      console.error('[AdaptiveLearning] Error generating question:', error);
-      throw error;
-    }
+    return this.questionOrchestrator.generateQuestion(userId, topicId, difficultyLevel, sessionId, excludeQuestionIds, forceNew);
   }
 
   /**
-   * Generate similar question (same type, different parameters)
-   * Used after 2nd wrong attempt
+   * Generate a similar question to help student practice
+   * ✅ DELEGATED to QuestionOrchestrationService
    */
   async generateSimilarQuestion(userId, topicId, previousQuestion, sessionId) {
-    try {
-      if (!previousQuestion) {
-        // No previous question, generate new one
-        const state = await this.repo.getStudentDifficulty(userId, topicId);
-        return await this.generateQuestion(
-          userId,
-          topicId,
-          state.difficulty_level,
-          sessionId
-        );
-      }
-
-      // Generate similar question with same type/difficulty
-      const question = await this.questionGenerator.generateSimilarQuestion(
-        previousQuestion.questionType,
-        previousQuestion.difficultyLevel || 3
-      );
-
-      if (question) {
-        question.questionId = `similar_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-        question.generatedBy = 'parametric_similar';
-
-        // Add to history
-        await this.repo.addToQuestionHistory(
-          userId,
-          topicId,
-          sessionId,
-          question.questionId,
-          question.questionType,
-          question.difficultyLevel,
-          null,
-          question
-        );
-
-        return question;
-      }
-
-      // Fallback: generate completely new question
-      const state = await this.repo.getStudentDifficulty(userId, topicId);
-      return await this.generateQuestion(
-        userId,
-        topicId,
-        state.difficulty_level,
-        sessionId
-      );
-
-    } catch (error) {
-      console.error('[AdaptiveLearning] Error generating similar question:', error);
-      throw error;
-    }
+    return this.questionOrchestrator.generateSimilarQuestion(userId, topicId, previousQuestion, sessionId);
   }
 
   /**
    * Track question attempt and determine if hint is needed
+   * ✅ DELEGATED to QuestionOrchestrationService
    */
   async trackAttemptAndCheckHint(userId, questionId, topicId, sessionId, isCorrect, questionData) {
-    try {
-      // CRITICAL FIX: Ensure cognitive_domain is always tracked
-      // If questionData doesn't have cognitive_domain, extract from question history
-      if (questionData && !questionData.cognitive_domain && !questionData.cognitiveDomain) {
-        try {
-          // Try to get the question from history
-          const questionHistory = await this.repo.getShownQuestionsInSession(userId, topicId, sessionId);
-          const matchingQuestion = questionHistory.find(q => q.question_id === questionId);
-          
-          if (matchingQuestion && matchingQuestion.question_data) {
-            questionData.cognitive_domain = matchingQuestion.question_data.cognitive_domain || 'knowledge_recall';
-            console.log(`[AdaptiveLearning] Recovered cognitive_domain from question history: ${questionData.cognitive_domain}`);
-          } else {
-            // Last resort: assign based on difficulty from the question text/options
-            console.warn('[AdaptiveLearning] No cognitive_domain found, defaulting to knowledge_recall');
-            questionData.cognitive_domain = 'knowledge_recall';
-          }
-        } catch (error) {
-          console.warn('[AdaptiveLearning] Could not recover cognitive_domain:', error.message);
-          questionData.cognitive_domain = 'knowledge_recall';
-        }
-      }
-
-      // Track attempt
-      const attempt = await this.repo.trackQuestionAttempt(
-        userId,
-        questionId,
-        topicId,
-        sessionId,
-        isCorrect,
-        questionData
-      );
-
-      // Get current attempt count
-      const attemptCount = await this.repo.getQuestionAttemptCount(userId, questionId, sessionId);
-
-      // Determine if question is numerical/parametric (has changing values) vs term-based (fixed answer)
-      const isNumericalQuestion = this.isNumericalQuestion(questionData);
-
-      if (!isCorrect) {
-        if (isNumericalQuestion) {
-          // For numerical questions: always generate new similar question (different numbers)
-          // No point in keeping same question since user might memorize the specific answer
-          return {
-            attemptCount,
-            showHint: attemptCount >= 1, // Show hint on first wrong
-            generateSimilar: true, // Always generate new numbers for math problems
-            keepQuestion: false // Don't keep same numerical question
-          };
-        } else {
-          // For term-based questions: keep same question for retry on first wrong
-          return {
-            attemptCount,
-            showHint: attemptCount >= 1, // Show hint on first wrong attempt
-            generateSimilar: attemptCount >= 2, // Generate similar after 2nd wrong
-            keepQuestion: attemptCount < 2 // Keep same question for first retry
-          };
-        }
-      }
-
-      return {
-        attemptCount,
-        showHint: false,
-        generateSimilar: false,
-        keepQuestion: false
-      };
-
-    } catch (error) {
-      console.error('[AdaptiveLearning] Error tracking attempt:', error);
-      return {
-        attemptCount: 1,
-        showHint: !isCorrect,
-        generateSimilar: !isCorrect, // Default to generating new question
-        keepQuestion: false
-      };
-    }
+    return this.questionOrchestrator.trackAttemptAndCheckHint(userId, questionId, topicId, sessionId, isCorrect, questionData, this.isNumericalQuestion.bind(this));
   }
 
   /**
    * Determine if a question is numerical (has parameters/calculations) vs term-based
+   * ✅ UTILITY METHOD - Used by QuestionOrchestrationService (passed as callback)
    */
   isNumericalQuestion(questionData) {
     if (!questionData) return false;
@@ -2296,56 +1720,18 @@ class AdaptiveLearningService {
    */
   /**
    * Ensure user has cohort assignment (A/B testing)
-   * ✅ FIX: Made fully non-blocking - errors won't prevent topic loading
+   * ✅ DELEGATED to CohortManagementService
    */
   async ensureUserHasCohort(userId) {
-    try {
-      // Check if user already has cohort assignment
-      const existingCohort = await this.repo.getUserCohort(userId);
-      
-      if (existingCohort) {
-        console.log(`[CohortAssignment] User ${userId} already in cohort: ${existingCohort}`);
-        return existingCohort;
-      }
-      
-      // Assign user to balanced cohort
-      const assignedCohort = await this.repo.assignUserToBalancedCohort(userId);
-      
-      if (assignedCohort) {
-        console.log(`[CohortAssignment] User ${userId} assigned to cohort: ${assignedCohort}`);
-        
-        // Log cohort counts for monitoring (optional)
-        try {
-          const counts = await this.repo.getCohortCounts();
-          console.log(`[CohortAssignment] Current distribution - Adaptive: ${counts.adaptive}, Control: ${counts.control}`);
-        } catch (countError) {
-          // Ignore count errors
-        }
-      } else {
-        console.log(`[CohortAssignment] Could not assign cohort, defaulting to 'adaptive'`);
-      }
-      
-      return assignedCohort || 'adaptive';
-    } catch (error) {
-      console.warn('[CohortAssignment] Error in cohort assignment (non-critical):', error.message);
-      // ✅ FIX: Fallback to 'adaptive' if assignment fails (system continues to work)
-      return 'adaptive';
-    }
+    return this.cohortManager.ensureUserHasCohort(userId);
   }
 
   /**
    * Get user's cohort for conditional feature enablement
-   * @param {string} userId - User UUID
-   * @returns {Promise<string>} - 'adaptive', 'control', or 'adaptive' (fallback)
+   * ✅ DELEGATED to CohortManagementService
    */
   async getUserCohort(userId) {
-    try {
-      const cohort = await this.repo.getUserCohort(userId);
-      return cohort || 'adaptive'; // Default to adaptive if not assigned
-    } catch (error) {
-      console.error('[CohortAssignment] Error getting user cohort:', error);
-      return 'adaptive'; // Fallback to adaptive
-    }
+    return this.cohortManager.getUserCohort(userId);
   }
 }
 

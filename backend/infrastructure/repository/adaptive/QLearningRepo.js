@@ -92,6 +92,13 @@ class QLearningRepository {
   }
 
   /**
+   * Upsert Q-value (alias for saveQValue - required by QLearningService)
+   */
+  async upsertQValue(userId, stateKey, action, qValue) {
+    return this.saveQValue(userId, stateKey, action, qValue);
+  }
+
+  /**
    * Retrieve Q-value for a specific state-action
    */
   async getQValue(userId, stateKey, action) {
@@ -139,6 +146,13 @@ class QLearningRepository {
       console.error('[QLearning] Error getting Q-values by state:', { userId, stateKey, error });
       return {};
     }
+  }
+
+  /**
+   * Get Q-values for a specific state (alias for getQValuesByState - required by QLearningService)
+   */
+  async getQValuesForState(userId, stateKey) {
+    return this.getQValuesByState(userId, stateKey);
   }
 
   /**

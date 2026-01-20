@@ -107,6 +107,16 @@ class AdaptiveLearningController {
         questionData // Pass question data for AI explanation
       );
 
+      // ✅ Clear pending question after successful answer submission
+      try {
+        console.log('[AdaptiveController] Clearing pending question after answer submission');
+        await this.service.repo.clearPendingQuestion(userId, topicId);
+        console.log('[AdaptiveController] ✅ Pending question cleared');
+      } catch (clearError) {
+        // Don't fail the request if clearing fails - just log it
+        console.warn('[AdaptiveController] ⚠️ Failed to clear pending question:', clearError.message);
+      }
+
       return res.status(200).json({
         success: true,
         data: result
@@ -182,6 +192,48 @@ class AdaptiveLearningController {
       console.error('Error in getStudentState:', error);
       return res.status(500).json({
         error: 'Failed to get student state',
+        message: error.message
+      });
+    }
+  }
+
+  /**
+   * GET /api/adaptive/pending-question/:topicId
+   * Get any pending (unsaved) question for the student in this topic
+   */
+  async getPendingQuestion(req, res) {
+    try {
+      const { topicId } = req.params;
+      const userId = req.user.id;
+
+      if (!topicId) {
+        return res.status(400).json({
+          error: 'Topic ID is required'
+        });
+      }
+
+      console.log('[AdaptiveController] getPendingQuestion called:', { userId, topicId });
+
+      // Get pending question from repository
+      const pendingQuestion = await this.service.repo.getPendingQuestion(userId, topicId);
+
+      if (!pendingQuestion) {
+        return res.status(404).json({
+          success: false,
+          message: 'No pending question found'
+        });
+      }
+
+      console.log('[AdaptiveController] Found pending question:', pendingQuestion.id);
+
+      return res.status(200).json({
+        success: true,
+        data: pendingQuestion
+      });
+    } catch (error) {
+      console.error('Error in getPendingQuestion:', error);
+      return res.status(500).json({
+        error: 'Failed to get pending question',
         message: error.message
       });
     }
