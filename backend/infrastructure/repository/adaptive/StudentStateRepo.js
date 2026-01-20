@@ -57,7 +57,33 @@ class StudentStateRepository {
             { onConflict: 'user_id,topic_id', ignoreDuplicates: false }
           )
           .select()
-          .single();
+          .maybeSingle(); // Use maybeSingle() to handle concurrent upserts
+
+        // If RLS policy violation (42501), try to fetch existing record
+        if (error && error.code === '42501') {
+          console.log('[StudentStateRepo] RLS blocked creation, fetching existing record');
+          const { data: existingData, error: fetchError } = await this.supabase
+            .from('adaptive_learning_state')
+            .select('*')
+            .eq('user_id', userId)
+            .eq('topic_id', topicId)
+            .maybeSingle();
+          
+          if (existingData) return existingData;
+          if (fetchError) throw fetchError;
+        }
+
+        // If multiple results or no result, fetch the record explicitly
+        if (error && error.code === 'PGRST116') {
+          const { data: existingData } = await this.supabase
+            .from('adaptive_learning_state')
+            .select('*')
+            .eq('user_id', userId)
+            .eq('topic_id', topicId)
+            .maybeSingle();
+          
+          if (existingData) return existingData;
+        }
 
         if (error) throw error;
         return data;
