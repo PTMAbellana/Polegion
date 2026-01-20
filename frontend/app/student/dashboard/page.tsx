@@ -306,34 +306,37 @@ export default function StudentDashboard() {
         </div>
 
         {/* Performance Tracking Section with Tabs */}
-        {(!assessmentLoading && (pretestScores || posttestScores)) || (!castlesLoading && castles.length > 0) ? (
-          <section className={studentStyles.performanceSection}>
-            <div className={studentStyles.sectionHeader}>
-              <h2>Your Progress</h2>
+        <section className={studentStyles.performanceSection}>
+          <div className={studentStyles.sectionHeader}>
+            <h2>Your Progress</h2>
+          </div>
+          
+          <div className={studentStyles.performanceCard}>
+            {/* Tab Navigation */}
+            <div className={studentStyles.tabNavigation}>
+              <button
+                className={`${studentStyles.tabButton} ${activeTab === 'castle' ? studentStyles.tabButtonActive : ''}`}
+                onClick={() => setActiveTab('castle')}
+              >
+                Castle Progress
+              </button>
+              <button
+                className={`${studentStyles.tabButton} ${activeTab === 'assessment' ? studentStyles.tabButtonActive : ''}`}
+                onClick={() => setActiveTab('assessment')}
+                disabled={!pretestScores && !posttestScores}
+              >
+                Assessment Performance
+              </button>
             </div>
-            
-            <div className={studentStyles.performanceCard}>
-              {/* Tab Navigation */}
-              <div className={studentStyles.tabNavigation}>
-                <button
-                  className={`${studentStyles.tabButton} ${activeTab === 'castle' ? studentStyles.tabButtonActive : ''}`}
-                  onClick={() => setActiveTab('castle')}
-                  disabled={castles.length === 0}
-                >
-                  Castle Progress
-                </button>
-                <button
-                  className={`${studentStyles.tabButton} ${activeTab === 'assessment' ? studentStyles.tabButtonActive : ''}`}
-                  onClick={() => setActiveTab('assessment')}
-                  disabled={!pretestScores && !posttestScores}
-                >
-                  Assessment Performance
-                </button>
-              </div>
 
-              {/* Tab Content */}
-              <div className={studentStyles.tabContent}>
-                {activeTab === 'castle' && castles.length > 0 && (
+            {/* Tab Content */}
+            <div className={studentStyles.tabContent}>
+              {activeTab === 'castle' && (
+                castlesLoading ? (
+                  <div className={studentStyles.loadingMessage}>
+                    <p>Loading castle progress...</p>
+                  </div>
+                ) : castles.length > 0 ? (
                   <div className={studentStyles.castleContent}>
                     <div className={studentStyles.castleGrid}>
                       {castles.map((castle) => {
@@ -382,9 +385,20 @@ export default function StudentDashboard() {
                       })}
                     </div>
                   </div>
-                )}
+                ) : (
+                  <div className={studentStyles.emptyState}>
+                    <p>🏰 No castle progress yet</p>
+                    <p>Visit the <strong>World Map</strong> or complete the <strong>Pretest</strong> to unlock your first castle!</p>
+                  </div>
+                )
+              )}
 
-                {activeTab === 'assessment' && (pretestScores || posttestScores) && (
+              {activeTab === 'assessment' && (
+                assessmentLoading ? (
+                  <div className={studentStyles.loadingMessage}>
+                    <p>Loading assessment results...</p>
+                  </div>
+                ) : (pretestScores || posttestScores) ? (
                   <div className={studentStyles.assessmentContent}>
                     <div className={studentStyles.assessmentInfo}>
                       <h3>Knowledge Assessment Progress</h3>
@@ -414,11 +428,16 @@ export default function StudentDashboard() {
                       />
                     </div>
                   </div>
-                )}
-              </div>
+                ) : (
+                  <div className={studentStyles.emptyState}>
+                    <p>📊 No assessment results yet</p>
+                    <p>Complete the <strong>Pretest</strong> or <strong>Posttest</strong> to see your performance!</p>
+                  </div>
+                )
+              )}
             </div>
-          </section>
-        ) : null}
+          </div>
+        </section>
 
       </div>
     </div>

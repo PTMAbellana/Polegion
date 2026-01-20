@@ -1475,3 +1475,40 @@
 .assessmentSection {
   animation: fadeInUp 0.6s ease-out 0.15s both;
 }
+
+/* ========================================
+   EMPTY STATE & LOADING MESSAGES
+   ======================================== */
+
+.emptyState {
+  text-align: center;
+  padding: 3rem 2rem;
+  color: #2C514C;
+}
+
+.emptyState p:first-child {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 0.75rem;
+  font-family: 'Cinzel', serif;
+}
+
+.emptyState p:last-child {
+  font-size: 1rem;
+  color: #5A7C76;
+  font-family: 'Crimson Text', serif;
+  line-height: 1.6;
+}
+
+.emptyState strong {
+  color: #16a34a;
+  font-weight: 600;
+}
+
+.loadingMessage {
+  text-align: center;
+  padding: 3rem 2rem;
+  color: #5A7C76;
+  font-family: 'Crimson Text', serif;
+  font-size: 1rem;
+}
