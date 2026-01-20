@@ -5,6 +5,7 @@ import axios from '@/api/axios';
 
 interface CognitiveDomainRadarProps {
   userId?: string; // optional, only used to trigger refetch on change
+  refreshTrigger?: number; // increment this to force refetch
 }
 
 interface DomainPerformance {
@@ -13,20 +14,27 @@ interface DomainPerformance {
   attempts: number;
 }
 
-export default function CognitiveDomainRadar({ userId }: CognitiveDomainRadarProps) {
+export default function CognitiveDomainRadar({ userId, refreshTrigger }: CognitiveDomainRadarProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
+    console.log('[CognitiveDomainRadar] 🔄 useEffect triggered! refreshTrigger:', refreshTrigger);
     fetchAndRenderRadar();
-  }, [userId]);
+  }, [userId, refreshTrigger]); // Re-fetch when userId OR refreshTrigger changes
 
   const fetchAndRenderRadar = async () => {
     try {
-      const response = await axios.get('/adaptive/cognitive-performance');
+      console.log('[CognitiveDomainRadar] 🎯 Fetching cognitive performance data... (trigger:', refreshTrigger, ')');
+      // Add timestamp to prevent caching
+      const timestamp = Date.now();
+      const response = await axios.get(`/adaptive/cognitive-performance?t=${timestamp}`);
+      
+      console.log('[CognitiveDomainRadar] ✅ Response:', response.data);
       
       if (response.data.success && response.data.data) {
         // Convert object to array format
         const performanceData = response.data.data;
+        console.log('[CognitiveDomainRadar] 📊 Performance data:', performanceData);
         const performanceArray = Object.keys(performanceData).map(domain => ({
           domain,
           score: performanceData[domain],
@@ -41,10 +49,18 @@ export default function CognitiveDomainRadar({ userId }: CognitiveDomainRadarPro
 
   const drawRadarChart = (performance: DomainPerformance[]) => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
+    if (!canvas) {
+      console.log('[CognitiveDomainRadar] ⚠️ Canvas ref is null, cannot draw');
+      return;
+    }
 
     const ctx = canvas.getContext('2d');
-    if (!ctx) return;
+    if (!ctx) {
+      console.log('[CognitiveDomainRadar] ⚠️ Cannot get 2D context');
+      return;
+    }
+
+    console.log('[CognitiveDomainRadar] 🎨 Drawing radar chart with performance:', performance);
 
     // Clear canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -78,6 +94,8 @@ export default function CognitiveDomainRadar({ userId }: CognitiveDomainRadarPro
       const perf = performance.find(p => p.domain === domainKey);
       return perf ? perf.score : 0;
     });
+    
+    console.log('[CognitiveDomainRadar] 📈 Scores to display:', scores);
 
     const numSides = labels.length;
     const angleStep = (Math.PI * 2) / numSides;

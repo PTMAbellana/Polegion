@@ -104,6 +104,7 @@ export default function AdaptiveLearning({ topicId, topicName: topicNameProp, on
   const [selectedAnswer, setSelectedAnswer] = useState<any>(null); // Track selected answer in confirm mode
   const [showExplanationModal, setShowExplanationModal] = useState(false); // Show explanation on wrong answer
   const [wrongAnswerExplanation, setWrongAnswerExplanation] = useState<any>(null); // Store explanation data
+  const [radarRefreshTrigger, setRadarRefreshTrigger] = useState(0); // Increment to trigger radar chart refresh
 
   // Load submit mode preference from localStorage
   useEffect(() => {    const saved = localStorage.getItem('polegion-submit-mode');
@@ -188,14 +189,20 @@ export default function AdaptiveLearning({ topicId, topicName: topicNameProp, on
       if (response.data.success) {
         const questionData = response.data.data;
         console.log('[AdaptiveLearning] Setting question:', questionData);
+        console.log('[AdaptiveLearning] 🎯 Question cognitive_domain:', questionData.cognitive_domain);
+        console.log('[AdaptiveLearning] 🎯 Question cognitiveDomain:', questionData.cognitiveDomain);
+        
+        // Backend sends cognitiveDomain (camelCase), store as both for compatibility
+        const cogDomain = questionData.cognitiveDomain || questionData.cognitive_domain || 'knowledge_recall';
+        
         setCurrentQuestion({
           question: questionData.question,
           options: questionData.options,
           questionId: questionData.questionId,
           hint: questionData.hint,
           // Store full metadata for submission tracking (radar chart analytics)
-          cognitive_domain: questionData.cognitive_domain,
-          cognitiveDomain: questionData.cognitive_domain, // Try both formats
+          cognitive_domain: cogDomain, // Store as snake_case for backend
+          cognitiveDomain: cogDomain,   // Store as camelCase too
           type: questionData.type,
           difficulty_level: questionData.difficulty_level,
           id: questionData.id || questionData.questionId
@@ -353,6 +360,13 @@ export default function AdaptiveLearning({ topicId, topicName: topicNameProp, on
         hint: currentQuestion?.hint
       };
       
+      console.log('[AdaptiveLearning] 🧠 cognitive_domain being sent:', {
+        cognitive_domain: questionData.cognitive_domain,
+        cognitiveDomain: questionData.cognitiveDomain,
+        currentQuestion_cognitive_domain: currentQuestion?.cognitive_domain,
+        currentQuestion_cognitiveDomain: currentQuestion?.cognitiveDomain
+      });
+      
       console.log('[AdaptiveLearning] Submitting answer:', {
         topicId,
         questionId,
@@ -372,6 +386,12 @@ export default function AdaptiveLearning({ topicId, topicName: topicNameProp, on
       const responseData = response.data.data;
       setLastResponse(responseData);
       setLastAnswerCorrect(isCorrect); // Track correctness for feedback display
+      
+      // Small delay to ensure backend has written to database before radar refreshes
+      setTimeout(() => {
+        console.log('[AdaptiveLearning] 🔄 Triggering radar chart refresh...');
+        setRadarRefreshTrigger(prev => prev + 1);
+      }, 300); // 300ms delay to ensure data is written
       
       // Only show feedback for significant actions (hints, difficulty changes, etc.)
       const significantActions = [
@@ -1042,7 +1062,7 @@ export default function AdaptiveLearning({ topicId, topicName: topicNameProp, on
             textAlign: 'center'
           }}>Skills Profile</h3>
           <div style={{ marginTop: '8px' }}>
-            <CognitiveDomainRadar userId={userId} />
+            <CognitiveDomainRadar userId={userId} refreshTrigger={radarRefreshTrigger} />
           </div>
         </div>
 
