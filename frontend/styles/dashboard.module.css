@@ -547,11 +547,24 @@
   border-color: rgba(34, 197, 94, 0.5);
 }
 
+.sessionInfo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.sessionTopic {
+  font-size: 0.9rem;
+  color: #2d5f4d;
+  font-weight: 600;
+  font-family: 'Crimson Text', serif;
+}
+
 .sessionDate {
   font-size: 0.85rem;
   color: #3d7c5e;
   font-weight: 700;
-  margin-bottom: 0.5rem;
   font-family: 'Cinzel', serif;
 }
 

@@ -5,6 +5,7 @@ import AdaptiveLearning from '@/components/adaptive/AdaptiveLearning';
 import TopicSelector from '@/components/adaptive/TopicSelector';
 import Loader from '@/components/Loader';
 import axios from '@/api/axios';
+import { useAdaptiveLearningAnalytics } from '@/hooks/adaptive/useAdaptiveLearningAnalytics';
 
 interface Topic {
   id: string;
@@ -24,6 +25,9 @@ export default function AdaptiveLearningPage() {
   const [loading, setLoading] = useState(true);
   const [showTopicSwitcher, setShowTopicSwitcher] = useState(false);
   const [userId, setUserId] = useState<string>('');
+
+  // Analytics hook for simple stats
+  const analytics = useAdaptiveLearningAnalytics();
 
   useEffect(() => {
     fetchTopicsWithProgress();
@@ -152,6 +156,7 @@ export default function AdaptiveLearningPage() {
         <AdaptiveLearning 
           topicId={selectedTopicId}
           topicName={topics.find(t => t.id === selectedTopicId)?.topic_name || 'Geometry Topic'}
+          analytics={analytics}
           onChangeTopic={handleOpenTopicSwitcher}
           userId={userId}
         />

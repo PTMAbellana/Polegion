@@ -66,9 +66,10 @@ interface AdaptiveLearningProps {
   topicName?: string;
   onChangeTopic?: () => void;
   userId?: string;
+  analytics?: any; // Analytics hook from parent
 }
 
-export default function AdaptiveLearning({ topicId, topicName: topicNameProp, onChangeTopic, userId }: AdaptiveLearningProps) {
+export default function AdaptiveLearning({ topicId, topicName: topicNameProp, onChangeTopic, userId, analytics }: AdaptiveLearningProps) {
   const [state, setState] = useState<AdaptiveState | null>(null);
   const [lastResponse, setLastResponse] = useState<AdaptiveResponse | null>(null);
   const [loading, setLoading] = useState(true);
@@ -207,6 +208,7 @@ export default function AdaptiveLearning({ topicId, topicName: topicNameProp, on
           difficulty_level: questionData.difficulty_level,
           id: questionData.id || questionData.questionId
         });
+        
         setAnswerSubmitted(false); // Reset for new question
         setHintRequestCount(0); // Reset hint count for new question
         setHintUsedForCurrentQuestion(false); // Reset hint flag for new question

@@ -29,6 +29,7 @@ export default function StudentDashboard() {
   const [analyticsData, setAnalyticsData] = useState<any>(null)
   const [weeklyActivity, setWeeklyActivity] = useState<any[]>([])
   const [recentSessions, setRecentSessions] = useState<any[]>([])
+  const [adaptiveRecentSessions, setAdaptiveRecentSessions] = useState<any[]>([]) // Adaptive learning sessions
 
   // Fetch analytics
   useEffect(() => {
@@ -50,11 +51,52 @@ export default function StudentDashboard() {
         })
         setWeeklyActivity(weeklyRes.data.data)
 
-        // Fetch recent sessions
         const sessionsRes = await axios.get(`${backendUrl}/api/analytics/sessions?limit=3`, {
           headers: { Authorization: `Bearer ${authToken}` }
         })
         setRecentSessions(sessionsRes.data.data)
+
+        // Fetch adaptive learning analytics - REPLACE the main stats
+        try {
+          const adaptiveSummaryRes = await axios.get(`${backendUrl}/api/adaptive-analytics/simple`, {
+            headers: { Authorization: `Bearer ${authToken}` }
+          })
+          const adaptiveData = adaptiveSummaryRes.data.data
+          console.log('[Dashboard] Adaptive stats:', adaptiveData)
+          
+          // REPLACE analyticsData with adaptive learning stats
+          setAnalyticsData({
+            streak: {
+              currentStreak: adaptiveData.currentStreak || 0,
+              longestStreak: adaptiveData.longestStreak || 0,
+              totalLoginDays: adaptiveData.totalActiveDays || 0
+            },
+            totalDays: adaptiveData.totalActiveDays || 0,
+            totalTime: Math.floor((adaptiveData.totalTime || 0) / 60), // Convert seconds to minutes
+            totalQuestions: adaptiveData.totalQuestions || 0,
+            accuracyRate: adaptiveData.overallAccuracy || 0
+          })
+
+          const adaptiveWeeklyRes = await axios.get(`${backendUrl}/api/adaptive-analytics/weekly`, {
+            headers: { Authorization: `Bearer ${authToken}` }
+          })
+          // REPLACE weeklyActivity with adaptive weekly data
+          const adaptiveWeeklyData = adaptiveWeeklyRes.data.data.map((day: any) => ({
+            date: day.date,
+            questionsAnswered: day.questions_answered || 0,
+            timeSpent: Math.floor((day.total_time_seconds || 0) / 60), // Convert to minutes
+            sessionsCount: day.sessions_count || 0
+          }))
+          setWeeklyActivity(adaptiveWeeklyData)
+
+          // Fetch adaptive recent sessions
+          const adaptiveSessionsRes = await axios.get(`${backendUrl}/api/adaptive-analytics/sessions?limit=3`, {
+            headers: { Authorization: `Bearer ${authToken}` }
+          })
+          setAdaptiveRecentSessions(adaptiveSessionsRes.data.data)
+        } catch (adaptiveError) {
+          console.log('[Dashboard] Adaptive analytics not available yet:', adaptiveError)
+        }
       } catch (error) {
         console.error('[Dashboard] Error fetching analytics:', error)
       }
@@ -289,27 +331,28 @@ export default function StudentDashboard() {
               </div>
             </div>
 
-            {/* Recent Sessions */}
+            {/* Recent Sessions - Show Adaptive Learning Sessions */}
             <div className={studentStyles.sessionsWrapper}>
               <div className={studentStyles.sectionHeader}>
                 <h2>Recent Sessions</h2>
               </div>
               <div className={studentStyles.recentSessionsCard}>
-              {recentSessions.length === 0 ? (
-                <p className={studentStyles.noSessionsText}>No sessions yet. Start learning!</p>
+              {adaptiveRecentSessions.length === 0 ? (
+                <p className={studentStyles.noSessionsText}>No Smart Learning sessions yet. Start learning!</p>
               ) : (
                 <div className={studentStyles.sessionsList}>
-                  {recentSessions.map((session) => (
+                  {adaptiveRecentSessions.map((session) => (
                     <div key={session.id} className={studentStyles.sessionItem}>
-                      <div className={studentStyles.sessionDate}>{formatDate(session.session_start)}</div>
+                      <div className={studentStyles.sessionInfo}>
+                        <div className={studentStyles.sessionTopic}>📚 {session.topic_name || 'Unknown Topic'}</div>
+                        <div className={studentStyles.sessionDate}>{formatDate(session.session_start)}</div>
+                      </div>
                       <div className={studentStyles.sessionStats}>
-                        <span><FaClock /> {formatTime(session.duration_minutes || 0)}</span>
-                        <span><FaQuestionCircle /> {session.questions_attempted}</span>
-                        <span><FaCheckCircle /> {session.questions_correct}</span>
+                        <span><FaClock /> {formatTime(Math.floor((session.duration_seconds || 0) / 60))}</span>
+                        <span><FaQuestionCircle /> {session.questions_attempted || 0}</span>
+                        <span><FaCheckCircle /> {session.questions_correct || 0}</span>
                         <span className={studentStyles.sessionAccuracy}>
-                          {session.questions_attempted > 0
-                            ? `${((session.questions_correct / session.questions_attempted) * 100).toFixed(0)}%`
-                            : '0%'}
+                          {session.accuracy_percentage ? `${parseFloat(session.accuracy_percentage).toFixed(0)}%` : '0%'}
                         </span>
                       </div>
                     </div>

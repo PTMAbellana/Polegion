@@ -18,7 +18,8 @@ const {
     assessmentRoutes,
     adaptiveLearningRoutes,
     masteryProgressionRoutes, // NEW: Mastery progression routes
-    sessionAnalyticsRoutes // NEW: Session analytics routes
+    sessionAnalyticsRoutes, // NEW: Session analytics routes
+    adaptiveLearningAnalyticsRoutes // NEW: Adaptive learning analytics routes
 } = require('./container')
 
 // Import middleware
@@ -116,6 +117,7 @@ app.use('/api/assessments', assessmentRoutes)
 app.use('/api/adaptive', trackQuestionAttempt, adaptiveLearningRoutes) // Track questions in adaptive learning
 app.use('/api/mastery', masteryProgressionRoutes) // NEW: Mastery progression API
 app.use('/api/analytics', sessionAnalyticsRoutes) // NEW: Session analytics API
+app.use('/api/adaptive-analytics', adaptiveLearningAnalyticsRoutes) // NEW: Adaptive learning analytics API
 //swagger documentation
 app.use('/api-docs', swaggerServe, swaggerSetup)
 

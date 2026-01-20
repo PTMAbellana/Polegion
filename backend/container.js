@@ -16,6 +16,7 @@ const UserQuizAttemptRepository = require('./infrastructure/repository/world/Use
 const AssessmentRepository = require('./infrastructure/repository/adaptive/AssessmentRepo');
 const AdaptiveLearningRepository = require('./infrastructure/repository/adaptive/AdaptiveLearningRepo');
 const SessionAnalyticsRepository = require('./infrastructure/repository/analytics/SessionAnalyticsRepo');
+const AdaptiveLearningAnalyticsRepository = require('./infrastructure/repository/analytics/AdaptiveLearningAnalyticsRepo');
 
 
 // Import services
@@ -55,6 +56,7 @@ const AssessmentController = require('./presentation/controllers/adaptive/Assess
 const AdaptiveLearningController = require('./presentation/controllers/adaptive/AdaptiveLearningController');
 const MasteryProgressionController = require('./presentation/controllers/adaptive/MasteryProgressionController'); // NEW
 const SessionAnalyticsController = require('./presentation/controllers/analytics/SessionAnalyticsController'); // NEW
+const AdaptiveLearningAnalyticsController = require('./presentation/controllers/analytics/AdaptiveLearningAnalyticsController'); // NEW
 
 // Import middleware
 const AuthMiddleware = require('./presentation/middleware/AuthMiddleware');
@@ -76,6 +78,7 @@ const AssessmentRoutes = require('./presentation/routes/adaptive/AssessmentRoute
 const AdaptiveLearningRoutes = require('./presentation/routes/adaptive/AdaptiveLearningRoutes');
 const MasteryProgressionRoutes = require('./presentation/routes/adaptive/MasteryProgressionRoutes'); // NEW
 const SessionAnalyticsRoutes = require('./presentation/routes/analytics/SessionAnalyticsRoutes'); // NEW
+const AdaptiveLearningAnalyticsRoutes = require('./presentation/routes/analytics/AdaptiveLearningAnalyticsRoutes'); // NEW
 
 // Import services registry
 const servicesRegistry = require('./application/services');
@@ -96,6 +99,7 @@ const userQuizAttemptRepository = new UserQuizAttemptRepository(supabase);
 const assessmentRepository = new AssessmentRepository(supabase);
 const adaptiveLearningRepository = new AdaptiveLearningRepository(supabase);
 const sessionAnalyticsRepository = new SessionAnalyticsRepository();
+const adaptiveLearningAnalyticsRepository = new AdaptiveLearningAnalyticsRepository();
 
 // Initialize services
 const authService = new AuthService(userRepository, supabase);
@@ -154,7 +158,8 @@ const userMinigameAttemptController = new UserMinigameAttemptController(userMini
 const userQuizAttemptController = new UserQuizAttemptController(userQuizAttemptService);
 const assessmentController = new AssessmentController(assessmentService);
 const adaptiveLearningController = new AdaptiveLearningController(adaptiveLearningService);
-const masteryProgressionController = new MasteryProgressionController(masteryProgressionService); // NEW
+const masteryProgressionController = new MasteryProgressionController(masteryProgressionService); // 
+const adaptiveLearningAnalyticsController = new AdaptiveLearningAnalyticsController(adaptiveLearningAnalyticsRepository); // NEWNEW
 const sessionAnalyticsController = new SessionAnalyticsController(sessionAnalyticsRepository); // NEW
 
 // Initialize routes
@@ -172,7 +177,8 @@ const userMinigameAttemptRoutes = new UserMinigameAttemptRoutes(userMinigameAtte
 const userQuizAttemptRoutes = new UserQuizAttemptRoutes(userQuizAttemptController, authMiddleware);
 const assessmentRoutes = new AssessmentRoutes(assessmentController, authMiddleware);
 const adaptiveLearningRoutes = new AdaptiveLearningRoutes(adaptiveLearningController, authMiddleware);
-const masteryProgressionRoutes = new MasteryProgressionRoutes(masteryProgressionController, authMiddleware); // NEW
+const masteryProgressionRoutes = new MasteryProgressionRoutes(masteryProgressionController, authMiddleware); 
+const adaptiveLearningAnalyticsRoutes = new AdaptiveLearningAnalyticsRoutes(adaptiveLearningAnalyticsController, authMiddleware); // NEW// NEW
 const sessionAnalyticsRoutes = new SessionAnalyticsRoutes(sessionAnalyticsController, authMiddleware); // NEW
 
 module.exports = {
@@ -189,6 +195,7 @@ module.exports = {
   assessmentRoutes: assessmentRoutes.getRouter(),
   adaptiveLearningRoutes: adaptiveLearningRoutes.getRouter(),
   masteryProgressionRoutes: masteryProgressionRoutes.getRouter(), // NEW
+  adaptiveLearningAnalyticsRoutes: adaptiveLearningAnalyticsRoutes.getRouter(), // NEW
   sessionAnalyticsRoutes: sessionAnalyticsRoutes.getRouter(), // NEW
 
   // services (for testing or other uses)
