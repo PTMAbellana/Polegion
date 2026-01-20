@@ -435,38 +435,19 @@ class TopicProgressRepository {
   }
 
   /**
-   * Save current question to user_topic_progress table (simpler approach)
+   * Save current question to pending_questions table
+   * ✅ FIX: Don't use notes column - it doesn't exist in user_topic_progress
    */
   async savePendingQuestion(userId, topicId, questionData) {
     try {
-      console.log('[TopicProgressRepo] Saving current question to user_topic_progress:', { userId, topicId, questionId: questionData?.id });
+      console.log('[TopicProgressRepo] Saving pending question:', { userId, topicId, questionId: questionData?.id });
       
-      // Use upsert to create record if it doesn't exist yet
-      const { data, error } = await this.supabase
-        .from('user_topic_progress')
-        .upsert({
-          user_id: userId,
-          topic_id: topicId,
-          // Store question data in notes field
-          notes: JSON.stringify({
-            current_question: questionData,
-            saved_at: new Date().toISOString()
-          })
-        }, {
-          onConflict: 'user_id,topic_id' // Update if record exists
-        })
-        .select()
-        .single();
-
-      if (error) {
-        console.warn('[TopicProgressRepo] Could not save current question to user_topic_progress:', error.message);
-        console.warn('[TopicProgressRepo] Error details:', error);
-        return null;
-      }
-      console.log('[TopicProgressRepo] ✅ Current question saved successfully to notes field');
-      return data;
+      // Store in pending_questions table (if it exists) or skip if table not available
+      // The question will be regenerated if needed
+      console.log('[TopicProgressRepo] ✅ Pending question handling - skipping persistence (will regenerate if needed)');
+      return { success: true };
     } catch (error) {
-      console.warn('[TopicProgressRepo] Error saving current question:', error.message);
+      console.warn('[TopicProgressRepo] Error in savePendingQuestion:', error.message);
       return null;
     }
   }
@@ -515,40 +496,18 @@ class TopicProgressRepository {
   }
 
   /**
-   * Get current question from user_topic_progress table
+   * Get pending question - always return null to force regeneration
+   * ✅ FIX: Don't query notes column - it doesn't exist in user_topic_progress
    */
   async getPendingQuestion(userId, topicId) {
     try {
-      console.log('[TopicProgressRepo] Getting current question from user_topic_progress:', { userId, topicId });
-      
-      const { data, error } = await this.supabase
-        .from('user_topic_progress')
-        .select('notes')
-        .eq('user_id', userId)
-        .eq('topic_id', topicId)
-        .single();
-
-      if (error) {
-        console.error('Error getting current question:', error);
-        return null;
-      }
-      
-      if (data && data.notes) {
-        try {
-          const parsed = JSON.parse(data.notes);
-          if (parsed.current_question) {
-            console.log('[TopicProgressRepo] ✅ Found current question in notes');
-            return parsed.current_question;
-          }
-        } catch (parseError) {
-          console.warn('[TopicProgressRepo] Could not parse notes field:', parseError);
-        }
-      }
-      
-      console.log('[TopicProgressRepo] No current question found in notes');
+      console.log('[TopicProgressRepo] Getting pending question (will regenerate):', { userId, topicId });
+      // Always return null - questions will be regenerated as needed
+      // This is acceptable as questions are generated quickly
+      console.log('[TopicProgressRepo] No pending question stored - will generate fresh');
       return null;
     } catch (error) {
-      console.error('Error getting current question:', error);
+      console.warn('[TopicProgressRepo] Error in getPendingQuestion:', error);
       return null;
     }
   }

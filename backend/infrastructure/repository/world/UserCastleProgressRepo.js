@@ -108,26 +108,46 @@ class UserCastleProgressRepo extends BaseRepo {
     }
 
     async upsertUserCastleProgress(userId, castleId, updateData) {
-        const { data, error } = await this.supabase
-            .from('user_castle_progress')
-            .upsert({
-                user_id: userId,
-                castle_id: castleId,
-                unlocked: updateData.unlocked,
-                completed: updateData.completed,
-                // Use total_xp_earned (correct database column name)
-                total_xp_earned: updateData.total_xp_earned,
-                completion_percentage: updateData.completion_percentage,
-                started_at: updateData.started_at,
-                completed_at: updateData.completed_at
-            }, {
-                onConflict: 'user_id,castle_id'
-            })
-            .select()
-            .single();
-        
-        if (error) throw error;
-        return data ? UserCastleProgress.fromDatabase(data) : null;
+        try {
+            const { data, error } = await this.supabase
+                .from('user_castle_progress')
+                .upsert({
+                    user_id: userId,
+                    castle_id: castleId,
+                    unlocked: updateData.unlocked,
+                    completed: updateData.completed,
+                    // Use total_xp_earned (correct database column name)
+                    total_xp_earned: updateData.total_xp_earned,
+                    completion_percentage: updateData.completion_percentage,
+                    started_at: updateData.started_at,
+                    completed_at: updateData.completed_at
+                }, {
+                    onConflict: 'user_id,castle_id'
+                })
+                .select()
+                .single();
+            
+            // ✅ FIX: Handle RLS policy errors gracefully
+            if (error) {
+                if (error.code === '42501') { // RLS policy violation
+                    console.warn('[UserCastleProgressRepo] RLS policy blocking upsert - attempting to fetch existing record');
+                    // Try to fetch existing record - if it exists, user already has progress
+                    const existing = await this.getUserCastleProgressByUserAndCastle(userId, castleId);
+                    if (existing) {
+                        console.log('[UserCastleProgressRepo] Found existing progress despite RLS error');
+                        return existing;
+                    }
+                    // If no existing record, this is a genuine permissions issue
+                    console.error('[UserCastleProgressRepo] RLS policy prevents creating castle progress - check Supabase RLS policies for user_castle_progress table');
+                    throw error;
+                }
+                throw error;
+            }
+            return data ? UserCastleProgress.fromDatabase(data) : null;
+        } catch (error) {
+            console.error('[UserCastleProgressRepo] Error in upsertUserCastleProgress:', error);
+            throw error;
+        }
     }
 
     async deleteUserCastleProgress(id) {

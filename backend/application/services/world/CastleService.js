@@ -113,8 +113,16 @@ class CastleService {
                         // Refetch castles to include the new progress
                         castles = await this.castleRepo.getAllCastlesWithUserProgress(userId);
                     } catch (error) {
-                        console.error(`[CastleService] Error auto-initializing Castle 0:`, error);
-                        // Continue even if initialization fails
+                        // ✅ FIX: Handle RLS errors gracefully - don't block worldmap
+                        if (error.code === '42501') {
+                            console.error(`[CastleService] RLS policy blocks Castle 0 initialization`);
+                            console.error(`[CastleService] Please fix Supabase RLS policies for user_castle_progress table`);
+                            console.error(`[CastleService] Required policy: Allow users to INSERT their own progress records`);
+                            // Return castles anyway - user can still see locked state
+                        } else {
+                            console.error(`[CastleService] Error auto-initializing Castle 0:`, error);
+                        }
+                        // Continue even if initialization fails - return castles in locked state
                     }
                 }
             }
