@@ -58,7 +58,7 @@ export default function StudentDashboard() {
 
         // Fetch adaptive learning analytics - REPLACE the main stats
         try {
-          const adaptiveSummaryRes = await axios.get(`${backendUrl}/api/adaptive-analytics/simple`, {
+          const adaptiveSummaryRes = await axios.get(`${backendUrl}/adaptive-analytics/simple`, {
             headers: { Authorization: `Bearer ${authToken}` }
           })
           const adaptiveData = adaptiveSummaryRes.data.data
@@ -77,7 +77,7 @@ export default function StudentDashboard() {
             accuracyRate: adaptiveData.overallAccuracy || 0
           })
 
-          const adaptiveWeeklyRes = await axios.get(`${backendUrl}/api/adaptive-analytics/weekly`, {
+          const adaptiveWeeklyRes = await axios.get(`${backendUrl}/adaptive-analytics/weekly`, {
             headers: { Authorization: `Bearer ${authToken}` }
           })
           // REPLACE weeklyActivity with adaptive weekly data
@@ -90,7 +90,7 @@ export default function StudentDashboard() {
           setWeeklyActivity(adaptiveWeeklyData)
 
           // Fetch adaptive recent sessions
-          const adaptiveSessionsRes = await axios.get(`${backendUrl}/api/adaptive-analytics/sessions?limit=3`, {
+          const adaptiveSessionsRes = await axios.get(`${backendUrl}/adaptive-analytics/sessions?limit=3`, {
             headers: { Authorization: `Bearer ${authToken}` }
           })
           setAdaptiveRecentSessions(adaptiveSessionsRes.data.data)
