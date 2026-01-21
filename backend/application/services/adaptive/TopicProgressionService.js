@@ -81,7 +81,10 @@ class TopicProgressionService {
       }
 
       // Unlock the next topic
-      await this.repo.unlockTopic(userId, nextTopic.id);
+      await this.repo.updateTopicProgress(userId, nextTopic.id, {
+        unlocked: true,
+        unlocked_at: new Date().toISOString()
+      });
       
       console.log(`[TopicProgression] ✅ Unlocked topic ${nextTopic.id} (${nextTopic.topic_name}) for user ${userId} with mastery ${currentMasteryLevel}% and stability`);
 

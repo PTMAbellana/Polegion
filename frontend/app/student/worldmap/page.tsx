@@ -48,22 +48,38 @@ export default function WorldMapPage() {
   const lastUserIdRef = useRef<string | null>(null);
   const animationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const whooshAudioRef = useRef<HTMLAudioElement | null>(null);
+  const isMountedRef = useRef<boolean>(true);
 
   // Initialize audio
   useEffect(() => {
+    isMountedRef.current = true;
+    
     if (typeof window !== 'undefined') {
       whooshAudioRef.current = new Audio('/audio/whoosh.mp3');
       whooshAudioRef.current.volume = 0.5;
       // Preload the audio
       whooshAudioRef.current.load();
     }
+    
+    return () => {
+      isMountedRef.current = false;
+      // Clean up audio
+      if (whooshAudioRef.current) {
+        whooshAudioRef.current.pause();
+        whooshAudioRef.current = null;
+      }
+      // Clear any pending animation timeouts
+      if (animationTimeoutRef.current) {
+        clearTimeout(animationTimeoutRef.current);
+      }
+    };
   }, []);
 
   // Fetch castles on mount or when user changes
   useEffect(() => {
     const userId = userProfile?.id;
     
-    if (userId && (!hasFetchedRef.current || lastUserIdRef.current !== userId)) {
+    if (userId && (!hasFetchedRef.current || lastUserIdRef.current !== userId) && isMountedRef.current) {
       console.log('[WorldMap] Fetching castles for user:', userId);
       hasFetchedRef.current = true;
       lastUserIdRef.current = userId;
@@ -74,16 +90,16 @@ export default function WorldMapPage() {
   // Refetch castles when navigating back to this page
   useEffect(() => {
     const handleVisibilityChange = () => {
-      // Refetch if the page is becoming visible
-      if (!document.hidden && userProfile?.id && hasFetchedRef.current) {
+      // Only refetch if component is still mounted and page is visible
+      if (!document.hidden && userProfile?.id && hasFetchedRef.current && isMountedRef.current) {
         console.log('[WorldMap] Page visible - refetching castles');
         fetchCastles(userProfile.id);
       }
     };
 
     const handleFocus = () => {
-      // Refetch when window regains focus (user returns from another page/tab)
-      if (userProfile?.id && hasFetchedRef.current) {
+      // Only refetch if component is still mounted
+      if (userProfile?.id && hasFetchedRef.current && isMountedRef.current) {
         console.log('[WorldMap] Window focused - refetching castles');
         fetchCastles(userProfile.id);
       }
@@ -100,7 +116,7 @@ export default function WorldMapPage() {
 
   // Update selectedCastle when castles data refreshes (to show fresh progress in modal)
   useEffect(() => {
-    if (selectedCastle) {
+    if (selectedCastle && isMountedRef.current) {
       const updatedCastle = castles.find(c => c.id === selectedCastle.id);
       if (updatedCastle && JSON.stringify(updatedCastle.progress) !== JSON.stringify(selectedCastle.progress)) {
         console.log('[WorldMap] Castle data refreshed - updating modal with new progress');
@@ -220,7 +236,7 @@ export default function WorldMapPage() {
   };
 
   const triggerCastleAnimation = (currentIdx: number) => {
-    if (castles.length === 0) return;
+    if (castles.length === 0 || !isMountedRef.current) return;
     
     // Set transitioning state
     setIsTransitioning(true);
@@ -228,9 +244,16 @@ export default function WorldMapPage() {
     // Play whoosh sound immediately when animation starts
     playWhoosh();
     
+    // Clear previous timeout if exists
+    if (animationTimeoutRef.current) {
+      clearTimeout(animationTimeoutRef.current);
+    }
+    
     // Clear transitioning after animation completes (0.5s)
-    setTimeout(() => {
-      setIsTransitioning(false);
+    animationTimeoutRef.current = setTimeout(() => {
+      if (isMountedRef.current) {
+        setIsTransitioning(false);
+      }
     }, 500);
   };
 

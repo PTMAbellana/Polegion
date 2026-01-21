@@ -689,24 +689,23 @@ class AdaptiveLearningService {
         // Continue - transition logging is non-critical for learning flow
       }
 
-      // 10. Check for chapter mastery and unlock next chapter
-      let chapterUnlocked = null;
+      // 10. Check for topic mastery and unlock next topic
+      let topicUnlocked = null;
       try {
-        const masteryHook = require('./MasteryProgressionHook');
-        const masteryResult = await masteryHook.afterAnswerProcessed(
+        // Check if topic should be unlocked based on current mastery
+        const unlockResult = await this.checkAndUnlockNextTopic(
           userId, 
           topicId, 
-          updatedState, 
-          { action, reward }
+          updatedState.mastery_level
         );
         
-        if (masteryResult && masteryResult.chapterUnlocked) {
-          chapterUnlocked = masteryResult.chapterUnlocked;
-          console.log('[AdaptiveLearning] Chapter unlocked:', chapterUnlocked.message);
+        if (unlockResult && unlockResult.unlocked) {
+          topicUnlocked = unlockResult;
+          console.log('[AdaptiveLearning] Topic unlocked:', unlockResult.message);
         }
-      } catch (masteryError) {
-        console.error('[AdaptiveLearning] Mastery progression failed (non-critical):', masteryError.message);
-        // Continue without mastery progression - learning is NOT blocked
+      } catch (unlockError) {
+        console.error('[AdaptiveLearning] Topic unlock check failed (non-critical):', unlockError.message);
+        // Continue without unlock check - learning is NOT blocked
       }
 
       return {
@@ -724,7 +723,7 @@ class AdaptiveLearningService {
         aiHint, // AI-generated hint (ONLY if wrong_streak >= 2)
         hintMetadata, // Source tracking (ai/rule/cached)
         transitionId: transition?.id,
-        chapterUnlocked // NEW: Chapter unlock notification
+        topicUnlocked // NEW: Topic unlock notification
       };
     } catch (error) {
       console.error('Error processing answer:', error);
