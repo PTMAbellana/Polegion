@@ -164,36 +164,36 @@ class CastleService {
 
             console.log(`[CastleService] Found castle:`, castle.toJSON());
 
-            // 2. ✅ FIX: Use UPSERT to handle concurrent initialization atomically
-            //    IMPORTANT: Never re-lock a castle that is already unlocked.
-            let initialUnlocked = castle.unlockOrder === 0; // Only auto-unlock Castle 0 (Pretest)
-
-            // For non-pretest castles, preserve existing unlocked status if it exists
-            if (castle.unlockOrder !== 0) {
-                try {
-                    const existingProgress = await this.userCastleProgressRepo.getUserCastleProgressByUserAndCastle(userId, castle.id);
-                    if (existingProgress && typeof existingProgress.unlocked === 'boolean') {
-                        initialUnlocked = existingProgress.unlocked;
-                        console.log(`[CastleService] Preserving existing unlocked status for castle ${castle.id}:`, initialUnlocked);
-                    }
-                } catch (lookupError) {
-                    console.warn('[CastleService] Warning: failed to read existing castle progress before upsert:', lookupError.message);
-                }
-            }
-
-            let castleProgress = await this.userCastleProgressRepo.upsertUserCastleProgress(
-                userId,
-                castle.id,
-                {
+            // 2. ✅ FIX: Fetch existing progress first, only create if it doesn't exist
+            //    IMPORTANT: Never overwrite existing progress data
+            let castleProgress = await this.userCastleProgressRepo.getUserCastleProgressByUserAndCastle(userId, castle.id);
+            
+            if (castleProgress) {
+                // Progress already exists - return it without modification
+                console.log(`[CastleService] Castle progress already exists for user ${userId}, preserving existing data:`, {
+                    unlocked: castleProgress.unlocked,
+                    completed: castleProgress.completed,
+                    total_xp_earned: castleProgress.totalXpEarned,
+                    completion_percentage: castleProgress.completionPercentage
+                });
+            } else {
+                // No progress exists - create initial progress record
+                console.log(`[CastleService] Creating new castle progress for user ${userId}`);
+                
+                const initialUnlocked = castle.unlockOrder === 0; // Only auto-unlock Castle 0 (Pretest)
+                
+                castleProgress = await this.userCastleProgressRepo.createUserCastleProgress({
+                    user_id: userId,
+                    castle_id: castle.id,
                     unlocked: initialUnlocked,
                     completed: false,
                     total_xp_earned: 0,
                     completion_percentage: 0,
                     started_at: new Date().toISOString()
-                }
-            );
-            
-            console.log(`[CastleService] Castle progress initialized/fetched for user ${userId}`);
+                });
+                
+                console.log(`[CastleService] Castle progress created for user ${userId}`);
+            }
 
             // 3. Get all chapters for this castle (seed if needed)
             let chapters = await this.chapterRepo.getChaptersByCastleId(castle.id);
