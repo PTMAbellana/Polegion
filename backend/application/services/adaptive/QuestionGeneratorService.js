@@ -1531,6 +1531,64 @@ class QuestionGeneratorService {
           },
           solution: (p) => (90 + p.difference) / 2,
           hint: 'Let angles be x and (x + difference). They sum to 90°'
+        },
+        // Enhanced templates for better coverage
+        {
+          type: 'point_distance_formula',
+          cognitiveDomain: 'procedural_skills',
+          template: 'Using the distance formula, find the distance between points ({x1}, {y1}) and ({x2}, {y2}). Round to 1 decimal place.',
+          params: {
+            x1: { min: 0, max: 5 },
+            y1: { min: 0, max: 5 },
+            x2: { min: 6, max: 12 },
+            y2: { min: 6, max: 12 }
+          },
+          solution: (p) => Math.sqrt(Math.pow(p.x2 - p.x1, 2) + Math.pow(p.y2 - p.y1, 2)),
+          hint: 'd = √[(x₂-x₁)² + (y₂-y₁)²]'
+        },
+        {
+          type: 'angle_in_polygon_advanced',
+          cognitiveDomain: 'analytical_thinking',
+          template: 'A regular {sides}-sided polygon has each interior angle measuring how many degrees?',
+          params: {
+            sides: { min: 6, max: 12 }
+          },
+          solution: (p) => (180 * (p.sides - 2)) / p.sides,
+          hint: 'Interior angle = 180° × (n-2) / n'
+        },
+        {
+          type: 'circle_tangent_chord_angle',
+          cognitiveDomain: 'higher_order_thinking',
+          template: 'A tangent to a circle makes an angle with a chord at the point of tangency. If the chord subtends a central angle of {angle}°, what angle does the tangent make with the chord?',
+          params: {
+            angle: { min: 40, max: 120 }
+          },
+          solution: (p) => p.angle / 2,
+          hint: 'The angle equals half the intercepted arc'
+        },
+        {
+          type: 'three_d_volume_combination',
+          cognitiveDomain: 'higher_order_thinking',
+          template: 'A composite solid consists of a rectangular prism with dimensions {l}×{w}×{h} units and a pyramid on top with the same base and height {ph} units. What is the total volume?',
+          params: {
+            l: { min: 3, max: 8 },
+            w: { min: 3, max: 8 },
+            h: { min: 4, max: 10 },
+            ph: { min: 3, max: 6 }
+          },
+          solution: (p) => (p.l * p.w * p.h) + ((1/3) * p.l * p.w * p.ph),
+          hint: 'Total = Prism volume + Pyramid volume'
+        },
+        {
+          type: 'scaling_geometry_problem',
+          cognitiveDomain: 'analytical_thinking',
+          template: 'If a figure is scaled by a factor of {scale}, and the original area is {area} square units, what is the new area?',
+          params: {
+            scale: { min: 2, max: 5 },
+            area: { min: 10, max: 50 }
+          },
+          solution: (p) => p.area * p.scale * p.scale,
+          hint: 'New area = Original area × (scale factor)²'
         }
       ]
     };

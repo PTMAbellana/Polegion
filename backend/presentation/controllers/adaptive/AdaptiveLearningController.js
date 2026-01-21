@@ -757,6 +757,14 @@ class AdaptiveLearningController {
         questionData
       );
 
+      // Handle null result from disabled hint tracking
+      const safeAttemptInfo = attemptInfo || {
+        attemptCount: 1,
+        showHint: false,
+        keepQuestion: false,
+        generateSimilar: false
+      };
+
       // Process answer (updates Q-learning, difficulty, mastery)
       const result = await this.service.processAnswer(
         userId,
@@ -778,11 +786,11 @@ class AdaptiveLearningController {
       // Prepare response
       const response = {
         ...result,
-        attemptCount: attemptInfo.attemptCount,
-        showHint: attemptInfo.showHint && result.aiHint,
-        hint: attemptInfo.showHint ? result.aiHint : null,
-        keepQuestion: attemptInfo.keepQuestion,
-        generateSimilar: attemptInfo.generateSimilar
+        attemptCount: safeAttemptInfo.attemptCount,
+        showHint: safeAttemptInfo.showHint && result.aiHint,
+        hint: safeAttemptInfo.showHint ? result.aiHint : null,
+        keepQuestion: safeAttemptInfo.keepQuestion,
+        generateSimilar: safeAttemptInfo.generateSimilar
       };
 
       // Add unlock notification if applicable

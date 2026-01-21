@@ -71,22 +71,45 @@ export default function WorldMapPage() {
     }
   }, [userProfile?.id, fetchCastles]);
 
-  // Refetch castles when navigating back to this page (not on tab switches)
+  // Refetch castles when navigating back to this page
   useEffect(() => {
     const handleVisibilityChange = () => {
-      // Only refetch if the page is becoming visible AND we've already fetched before
+      // Refetch if the page is becoming visible
       if (!document.hidden && userProfile?.id && hasFetchedRef.current) {
         console.log('[WorldMap] Page visible - refetching castles');
         fetchCastles(userProfile.id);
       }
     };
 
+    const handleFocus = () => {
+      // Refetch when window regains focus (user returns from another page/tab)
+      if (userProfile?.id && hasFetchedRef.current) {
+        console.log('[WorldMap] Window focused - refetching castles');
+        fetchCastles(userProfile.id);
+      }
+    };
+
     document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('focus', handleFocus);
     
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('focus', handleFocus);
     };
   }, [userProfile?.id, fetchCastles]);
+
+  // Update selectedCastle when castles data refreshes (to show fresh progress in modal)
+  useEffect(() => {
+    if (selectedCastle) {
+      const updatedCastle = castles.find(c => c.id === selectedCastle.id);
+      if (updatedCastle && JSON.stringify(updatedCastle.progress) !== JSON.stringify(selectedCastle.progress)) {
+        console.log('[WorldMap] Castle data refreshed - updating modal with new progress');
+        console.log('[WorldMap] Old progress:', selectedCastle.progress);
+        console.log('[WorldMap] New progress:', updatedCastle.progress);
+        setSelectedCastle(updatedCastle);
+      }
+    }
+  }, [castles]);
 
   // Intro display - use user-specific localStorage key (only check once per session)
   const hasCheckedIntroRef = useRef<string | null>(null);
@@ -242,7 +265,7 @@ export default function WorldMapPage() {
     return () => window.removeEventListener('keydown', onKey);
   }, [goPrev, goNext, selectedCastle]);
 
-  const handleCastleClick = (castle: CastleWithProgress) => {
+  const handleCastleClick = async (castle: CastleWithProgress) => {
     if (!castle.progress?.unlocked) {
       return;
     }
@@ -260,7 +283,18 @@ export default function WorldMapPage() {
         }, 500);
       }
     } else {
-      setSelectedCastle(selectedCastle?.id === castle.id ? null : castle);
+      // Toggle modal open/close
+      if (selectedCastle?.id === castle.id) {
+        setSelectedCastle(null);
+      } else {
+        // Open modal first, then refetch in background
+        setSelectedCastle(castle);
+        // Refetch castle data to update with fresh progress (useEffect will sync)
+        if (userProfile?.id) {
+          console.log('[WorldMap] Modal opened - refetching for fresh data');
+          fetchCastles(userProfile.id);
+        }
+      }
     }
   };
 

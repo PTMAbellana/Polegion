@@ -357,6 +357,26 @@ class AdaptiveLearningRepository {
   async withRetry(fn, maxRetries = 3) {
     return this.studentStateRepo.withRetry(fn, maxRetries);
   }
+
+  /**
+   * Get user profile from user_profiles table
+   * Used to fetch learning_strategy field
+   */
+  async getUserProfile(userId) {
+    try {
+      const { data, error } = await this.supabase
+        .from('user_profiles')
+        .select('*')
+        .eq('id', userId)
+        .single();
+      
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error('Error getting user profile:', error);
+      return null;
+    }
+  }
 }
 
 module.exports = AdaptiveLearningRepository;

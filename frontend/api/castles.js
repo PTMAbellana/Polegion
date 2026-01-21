@@ -24,32 +24,36 @@ export const getCastles = async () => {
 }
 
 // Get all castles with optional user progress
-export const getAllCastles = async (userId) => {
+export const getAllCastles = async (userId, forceRefresh = false) => {
     try {
         // Add timestamp to bypass all caching layers
-        const timestamp = Date.now()
+        const timestamp = forceRefresh ? Date.now() : null;
         
         // Validate userId - must be a valid UUID string
-        let validUserId = null
+        let validUserId = null;
         if (userId) {
             // Convert to string if needed
-            const userIdStr = String(userId).trim()
+            const userIdStr = String(userId).trim();
             
             // Only use userId if it's a valid UUID
             if (UUID_REGEX.test(userIdStr)) {
-                validUserId = userIdStr
-                console.log('[CastleAPI] Valid userId format, using for progress fetch:', validUserId)
+                validUserId = userIdStr;
+                console.log('[CastleAPI] Valid userId format, using for progress fetch:', validUserId);
             } else {
-                console.warn('[CastleAPI] Invalid userId format, will fetch without user progress:', userIdStr, 'Type:', typeof userIdStr)
+                console.warn('[CastleAPI] Invalid userId format, will fetch without user progress:', userIdStr, 'Type:', typeof userIdStr);
             }
         }
         
         // Always try to fetch without userId first as fallback
-        const endpoint = validUserId 
-            ? `castles?userId=${encodeURIComponent(validUserId)}&_t=${timestamp}` 
-            : `castles?_t=${timestamp}`
+        let endpoint = validUserId 
+            ? `castles?userId=${encodeURIComponent(validUserId)}` 
+            : `castles`;
+
+        if (timestamp) {
+            endpoint += endpoint.includes('?') ? `&_t=${timestamp}` : `?_t=${timestamp}`;
+        }
         
-        console.log('[CastleAPI] Fetching from endpoint:', endpoint, 'validUserId:', !!validUserId)
+        console.log('[CastleAPI] Fetching from endpoint:', endpoint, 'validUserId:', !!validUserId);
         
         // Disable cache for this request to avoid CORS issues
         const res = await api.get(endpoint, {

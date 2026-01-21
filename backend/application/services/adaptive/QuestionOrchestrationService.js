@@ -28,6 +28,18 @@ class QuestionOrchestrationService {
    */
   async generateQuestion(userId, topicId, difficultyLevel, sessionId, excludeQuestionIds = [], forceNew = false) {
     try {
+      // 🔍 BUGFIX: Fetch topic to get topic_code for filtering
+      // topicId is a UUID, but templates are filtered by topic_code (e.g., "points", "volume")
+      const topic = await this.repo.getTopicById(topicId);
+      const topicCode = topic?.topic_code || null;
+      const topicName = topic?.topic_name || 'Unknown Topic';
+      
+      if (!topicCode) {
+        console.warn(`[QuestionOrchestration] No topic_code found for topicId ${topicId}`);
+      } else {
+        console.log(`[QuestionOrchestration] Topic: ${topicName}, Code: ${topicCode}`);
+      }
+      
       let question = null;
       let source = 'parametric';
 
@@ -60,14 +72,14 @@ class QuestionOrchestrationService {
       if (!question && this.csvQuestionBank && !forceNew) {
         try {
           question = await this.csvQuestionBank.getRandomQuestion(
-            topicId,
+            topicCode,
             difficultyLevel,
             excludeQuestionIds
           );
           
           if (question) {
             source = 'csv_bank';
-            console.log(`[QuestionOrchestration] ✅ Using CSV question bank for topic ${topicId}, difficulty ${difficultyLevel}`);
+            console.log(`[QuestionOrchestration] ✅ Using CSV question bank for topic ${topicName} (${topicCode}), difficulty ${difficultyLevel}`);
           }
         } catch (csvError) {
           console.log(`[QuestionOrchestration] CSV bank unavailable (${csvError.message}), falling back to generation`);
@@ -75,11 +87,27 @@ class QuestionOrchestrationService {
       }
 
       // Priority 2: AI Generation (for difficulty 4-5 or when requested)
-      if (!question && (difficultyLevel >= this.MIN_DIFFICULTY_FOR_AI || forceNew)) {
+      // ⚠️ DISABLED for topics requiring precision (definitions, terminology, classifications)
+      // AI excels at: word problems, calculations, varied scenarios
+      // AI struggles with: exact definitions, terminology, conceptual clarity
+      const DISABLE_AI_FOR_TOPICS = [
+        'points', 'line_', 'segment_', 'ray_', 'plane_', 'parallel',  // Points, Lines, Planes
+        'angle_',  // Kinds of Angles (classification)
+        'complementary_', 'supplementary_',  // Angle relationships (simple math, but safer with templates)
+        'circle_parts', 'radius_', 'diameter_', 'chord_',  // Parts of a Circle (terminology)
+        'polygon_interior',  // Interior Angles (formulas)
+        'polygon_identify', 'polygon_sides',  // Polygon Identification (classification)
+        'plane_vs_solid', 'solid_figure', 'face_', 'edge_', 'vertex_',  // Plane/3D (classification)
+        'rectangle_', 'square_', 'triangle_', 'shape_'  // Basic Geometric Figures (definitions)
+      ];
+      
+      const shouldUseAI = topicCode && !DISABLE_AI_FOR_TOPICS.some(prefix => topicCode.includes(prefix));
+      
+      if (!question && shouldUseAI && (difficultyLevel >= this.MIN_DIFFICULTY_FOR_AI || forceNew)) {
         try {
-          question = await this.aiQuestionGenerator.generateQuestion(topicId, difficultyLevel);
+          question = await this.aiQuestionGenerator.generateQuestion(topicName, difficultyLevel);
           source = 'ai_groq';
-          console.log(`[QuestionOrchestration] ✅ Generated AI question for topic ${topicId}, difficulty ${difficultyLevel}`);
+          console.log(`[QuestionOrchestration] ✅ Generated AI question for topic ${topicName}, difficulty ${difficultyLevel}`);
         } catch (aiError) {
           console.log(`[QuestionOrchestration] AI generation failed (${aiError.message}), falling back to parametric`);
         }
@@ -87,9 +115,16 @@ class QuestionOrchestrationService {
 
       // Priority 3: Parametric Generation (fallback, always works)
       if (!question) {
-        question = this.questionGenerator.generateQuestion(difficultyLevel, topicId);
+        question = this.questionGenerator.generateQuestion(
+          difficultyLevel, 
+          null,  // chapterId
+          null,  // seed
+          null,  // cognitiveDomain
+          'text', // representationType
+          topicCode // ✅ BUGFIX: Use topic_code instead of UUID for filtering
+        );
         source = 'parametric';
-        console.log(`[QuestionOrchestration] ✅ Generated parametric question for topic ${topicId}, difficulty ${difficultyLevel}`);
+        console.log(`[QuestionOrchestration] ✅ Generated parametric question for topic ${topicName} (${topicCode}), difficulty ${difficultyLevel}`);
         
         // 🚀 PERFORMANCE: Save generated question with SVG content to database for caching
         try {
@@ -161,6 +196,11 @@ class QuestionOrchestrationService {
    */
   async generateSimilarQuestion(userId, topicId, previousQuestion, sessionId) {
     try {
+      // Fetch topic to get topic_code (same as generateQuestion)
+      const topic = await this.repo.getTopicById(topicId);
+      const topicCode = topic?.topic_code || null;
+      const topicName = topic?.topic_name || 'Unknown Topic';
+      
       const difficultyLevel = previousQuestion.difficulty || 3;
       const excludeIds = [previousQuestion.id];
 
@@ -168,7 +208,7 @@ class QuestionOrchestrationService {
       if (previousQuestion.source === 'csv_bank' && this.csvQuestionBank) {
         try {
           const question = await this.csvQuestionBank.getRandomQuestion(
-            topicId,
+            topicCode,
             difficultyLevel,
             excludeIds
           );
@@ -183,9 +223,20 @@ class QuestionOrchestrationService {
         }
       }
 
-      if (previousQuestion.source === 'ai_groq' || difficultyLevel >= this.MIN_DIFFICULTY_FOR_AI) {
+      // Try AI generation if applicable (skip for precision-requiring topics)
+      const DISABLE_AI_FOR_TOPICS = [
+        'points', 'line_', 'segment_', 'ray_', 'plane_', 'parallel',
+        'angle_', 'complementary_', 'supplementary_',
+        'circle_parts', 'radius_', 'diameter_', 'chord_',
+        'polygon_interior', 'polygon_identify', 'polygon_sides',
+        'plane_vs_solid', 'solid_figure', 'face_', 'edge_', 'vertex_',
+        'rectangle_', 'square_', 'triangle_', 'shape_'
+      ];
+      const shouldUseAI = topicCode && !DISABLE_AI_FOR_TOPICS.some(prefix => topicCode.includes(prefix));
+      
+      if (previousQuestion.source === 'ai_groq' && shouldUseAI) {
         try {
-          const question = await this.aiQuestionGenerator.generateQuestion(topicId, difficultyLevel);
+          const question = await this.aiQuestionGenerator.generateQuestion(topicName, difficultyLevel);
           question.source = 'ai_groq';
           question.sessionId = sessionId;
           return question;
@@ -195,7 +246,14 @@ class QuestionOrchestrationService {
       }
 
       // Fallback: parametric generation
-      const question = this.questionGenerator.generateQuestion(topicId, difficultyLevel);
+      const question = this.questionGenerator.generateQuestion(
+        difficultyLevel,
+        null,  // chapterId
+        null,  // seed
+        null,  // cognitiveDomain
+        'text', // representationType
+        topicCode // Use topic_code for filtering
+      );
       question.source = 'parametric';
       question.difficulty = difficultyLevel;
       question.sessionId = sessionId;
@@ -213,9 +271,14 @@ class QuestionOrchestrationService {
    */
   async trackAttemptAndCheckHint(userId, questionId, topicId, sessionId, isCorrect, questionData) {
     try {
-      // Get or create attempt tracking
-      let attempt = await this.repo.getQuestionAttempt(userId, questionId);
+      // 🔧 DISABLED: getQuestionAttempt method doesn't exist in repo
+      // This feature tracks hints but isn't critical for functionality
+      // let attempt = await this.repo.getQuestionAttempt(userId, questionId);
       
+      // Simplified: Return null (no hint eligibility tracking for now)
+      return null;
+      
+      /* DISABLED: Hint tracking feature (incomplete implementation)
       if (!attempt) {
         // First attempt
         attempt = await this.repo.createQuestionAttempt({
@@ -260,6 +323,7 @@ class QuestionOrchestrationService {
         showHint,
         answeredCorrectlyEver
       };
+      */
     } catch (error) {
       console.error('[QuestionOrchestration] Error tracking attempt:', error);
       return {
