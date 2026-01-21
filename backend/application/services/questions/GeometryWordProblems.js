@@ -233,7 +233,9 @@ module.exports = {
       params: {
         total: { min: 40, max: 80, step: 20 }
       },
-      solution: (p) => `${p.total/4} × ${p.total/4}`,
+      // Correct answer should be the shape classification, not numeric dimensions
+      // For maximum area with fixed perimeter, a square is optimal
+      solution: () => 0,
       hint: 'Square gives maximum area for fixed perimeter',
       multipleChoice: ['Square', 'Rectangle with 2:1 ratio', 'Rectangle with 3:1 ratio', 'Any shape']
     }
