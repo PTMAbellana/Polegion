@@ -436,13 +436,13 @@ class TopicProgressRepository {
 
   /**
    * Save current question to pending_questions table
-   * Stores question data in notes JSONB column for restoration on page refresh
+   * Stores question data in pending_question_data JSONB column for restoration on page refresh
    */
   async savePendingQuestion(userId, topicId, questionData) {
     try {
       console.log('[TopicProgressRepo] Saving pending question:', { userId, topicId, questionId: questionData?.id });
       
-      // Store the question data in the notes JSONB column
+      // Store the question data in the pending_question_data JSONB column
       const pendingData = {
         id: questionData.id || questionData.questionId,
         question_text: questionData.question_text || questionData.question,
@@ -461,7 +461,10 @@ class TopicProgressRepository {
       
       const { error } = await this.supabase
         .from('user_topic_progress')
-        .update({ notes: pendingData })
+        .update({ 
+          pending_question_data: pendingData,
+          pending_question_id: pendingData.id
+        })
         .eq('user_id', userId)
         .eq('topic_id', topicId);
 
@@ -487,7 +490,10 @@ class TopicProgressRepository {
       
       const { error } = await this.supabase
         .from('user_topic_progress')
-        .update({ notes: null })
+        .update({ 
+          pending_question_data: null,
+          pending_question_id: null
+        })
         .eq('user_id', userId)
         .eq('topic_id', topicId);
 
@@ -513,7 +519,10 @@ class TopicProgressRepository {
       
       const { error } = await this.supabase
         .from('user_topic_progress')
-        .update({ notes: null })
+        .update({ 
+          pending_question_data: null,
+          pending_question_id: null
+        })
         .eq('user_id', userId)
         .neq('topic_id', currentTopicId);
 
@@ -548,7 +557,7 @@ class TopicProgressRepository {
   }
 
   /**
-   * Get pending question from notes column
+   * Get pending question from pending_question_data column
    * Returns the saved question or null if none exists
    */
   async getPendingQuestion(userId, topicId) {
@@ -557,7 +566,7 @@ class TopicProgressRepository {
       
       const { data, error } = await this.supabase
         .from('user_topic_progress')
-        .select('notes')
+        .select('pending_question_data')
         .eq('user_id', userId)
         .eq('topic_id', topicId)
         .single();
@@ -567,13 +576,13 @@ class TopicProgressRepository {
         return null;
       }
       
-      if (!data || !data.notes) {
+      if (!data || !data.pending_question_data) {
         console.log('[TopicProgressRepo] No pending question found');
         return null;
       }
       
-      console.log('[TopicProgressRepo] ✅ Found pending question:', data.notes.id);
-      return data.notes;
+      console.log('[TopicProgressRepo] ✅ Found pending question:', data.pending_question_data.id);
+      return data.pending_question_data;
     } catch (error) {
       console.warn('[TopicProgressRepo] Error in getPendingQuestion:', error);
       return null;

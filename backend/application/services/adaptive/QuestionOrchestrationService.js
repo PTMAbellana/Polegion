@@ -25,6 +25,9 @@ class QuestionOrchestrationService {
   /**
    * Generate a question for a student
    * Orchestrates between cached, parametric, AI, and CSV question sources
+   * 
+   * CRITICAL: Checks for pending questions FIRST before generating new ones
+   * This ensures questions persist across page refreshes and topic switches
    */
   async generateQuestion(userId, topicId, difficultyLevel, sessionId, excludeQuestionIds = [], forceNew = false) {
     try {
@@ -38,6 +41,43 @@ class QuestionOrchestrationService {
         console.warn(`[QuestionOrchestration] No topic_code found for topicId ${topicId}`);
       } else {
         console.log(`[QuestionOrchestration] Topic: ${topicName}, Code: ${topicCode}`);
+      }
+      
+      // ✅ PRIORITY 0: Check for PENDING QUESTION first (unless forcing new)
+      // This prevents questions from changing on page refresh or topic switch
+      if (!forceNew) {
+        try {
+          const pendingQuestion = await this.repo.getPendingQuestion(userId, topicId);
+          
+          if (pendingQuestion && pendingQuestion.question_text) {
+            console.log(`[QuestionOrchestration] 🔄 RESTORED pending question for topic ${topicName}:`, pendingQuestion.id);
+            
+            // Return the pending question with proper format
+            return {
+              question: pendingQuestion.question_text,
+              options: pendingQuestion.options,
+              questionId: pendingQuestion.id,
+              hint: pendingQuestion.hint,
+              difficulty: pendingQuestion.difficulty || pendingQuestion.difficultyLevel,
+              cognitive_domain: pendingQuestion.cognitive_domain || pendingQuestion.cognitiveDomain,
+              representation_type: pendingQuestion.representation_type || pendingQuestion.representationType || 'text',
+              sessionId: pendingQuestion.session_id || sessionId,
+              source: pendingQuestion.source || 'restored_pending',
+              type: pendingQuestion.type,
+              metadata: pendingQuestion.metadata,
+              // Include all fields for compatibility
+              question_text: pendingQuestion.question_text,
+              id: pendingQuestion.id
+            };
+          } else {
+            console.log(`[QuestionOrchestration] No pending question found for topic ${topicName}, generating new...`);
+          }
+        } catch (pendingError) {
+          console.warn(`[QuestionOrchestration] Error checking pending question:`, pendingError.message);
+          // Continue to generate new question
+        }
+      } else {
+        console.log(`[QuestionOrchestration] forceNew=true, skipping pending question check`);
       }
       
       let question = null;

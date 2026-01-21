@@ -1403,8 +1403,9 @@ class AdaptiveLearningService {
     try {
       console.log(`[AdaptiveLearning] START generateQuestionForStudent - userId: ${userId}, topicId: ${topicId}, difficulty: ${difficultyLevel}`);
       
-      // Clear pending questions for other topics (prevents stale state on topic switch)
-      await this.repo.clearPendingForOtherTopics(userId, topicId);
+      // ✅ FIX: Don't clear other topics' questions - let them persist across topic switches
+      // Questions are only cleared when: (1) answered correctly, (2) answered wrong 2+ times, (3) difficulty changes
+      // This allows users to switch topics and come back to the same question
       
       // Get topic info to get chapter_id and topic_name
       const topic = await this.repo.getTopicById(topicId);

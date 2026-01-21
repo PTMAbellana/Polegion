@@ -181,6 +181,9 @@ Example: If focus is "Parallel Lines, Perpendicular Lines", DO NOT create questi
 FORBIDDEN QUESTION TYPES (NEVER CREATE THESE):
 ❌ NEVER ask "How many points make up a [shape]?" - Geometric shapes contain INFINITE points!
 ❌ NEVER ask "Total number of points in a [shape]?" - This is mathematically nonsensical!
+❌ NEVER use undefined points/variables - If you mention "angle ABX", point X MUST be defined first!
+   Example BAD: "What is angle ABX?" when X is never introduced
+   Example GOOD: "Point X is on line AB. What is angle ABX?"
 ❌ For row/line problems: If items are in a row, the length is (number of items × length per item)
    Example: 8 chairs, 2 feet each → 8 × 2 = 16 feet (NOT 48 feet!)
 
@@ -320,6 +323,30 @@ CRITICAL RULES FOR JSON:
           console.error('[AIQuestionGenerator] REJECTED: Nonsensical question about points in geometric figures');
           console.error('Question:', question.questionText);
           return null; // Geometric figures contain infinite points - this question is invalid
+        }
+      }
+      
+      // CRITICAL: Reject questions with undefined points/variables
+      // Extract all point names mentioned in the question (A, B, C, X, Y, Z, etc.)
+      const pointsInQuestion = question.questionText.match(/\b[A-Z]\b/g) || [];
+      const uniquePoints = [...new Set(pointsInQuestion)];
+      
+      // Check if any point is used but not defined/introduced
+      for (const point of uniquePoints) {
+        // Check if point appears in a context suggesting it should be defined
+        const anglePattern = new RegExp(`angle\\s+\\w*${point}\\w*`, 'i');
+        const segmentPattern = new RegExp(`segment\\s+\\w*${point}\\w*|${point}\\w+\\s+(?:is|has)`, 'i');
+        
+        if (anglePattern.test(question.questionText) || segmentPattern.test(question.questionText)) {
+          // Point is used in an angle or segment - make sure it's introduced
+          const introPattern = new RegExp(`(?:point[s]?|endpoint[s]?|vertex|vertices)\\s+(?:\\w+\\s+(?:and\\s+)?)*${point}`, 'i');
+          const drawPattern = new RegExp(`draw[s]?.*${point}`, 'i');
+          
+          if (!introPattern.test(question.questionText) && !drawPattern.test(question.questionText)) {
+            console.error(`[AIQuestionGenerator] REJECTED: Question uses undefined point '${point}'`);
+            console.error('Question:', question.questionText);
+            return null; // Point used but never defined
+          }
         }
       }
 
