@@ -215,10 +215,22 @@ class UserChapterProgressService {
         // Update castle progress XP by recalculating from all chapters
         console.log(`[UserChapterProgressService] ===== UPDATING CASTLE PROGRESS =====`);
         console.log(`[UserChapterProgressService] User: ${userId}, Castle: ${currentChapter.castleId}`);
-        const castleProgress = await this.userCastleProgressRepo.getUserCastleProgressByUserAndCastle(userId, currentChapter.castleId);
+        let castleProgress = await this.userCastleProgressRepo.getUserCastleProgressByUserAndCastle(userId, currentChapter.castleId);
+        
+        // Create castle progress if it doesn't exist
         if (!castleProgress) {
-            console.error(`[UserChapterProgressService] WARNING: No castle progress found for user ${userId}, castle ${currentChapter.castleId}`);
+            console.log(`[UserChapterProgressService] No castle progress found - creating new record for user ${userId}, castle ${currentChapter.castleId}`);
+            castleProgress = await this.userCastleProgressRepo.createUserCastleProgress({
+                user_id: userId,
+                castle_id: currentChapter.castleId,
+                unlocked: true,
+                completed: false,
+                total_xp_earned: 0,
+                completion_percentage: 0
+            });
+            console.log(`[UserChapterProgressService] Created castle progress with ID: ${castleProgress.id}`);
         }
+        
         if (castleProgress) {
             // Get all chapter progress for this castle to recalculate total XP
             const { data: allChapterProgress, error } = await this.userChapterProgressRepo.supabase

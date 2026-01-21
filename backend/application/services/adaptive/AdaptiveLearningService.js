@@ -151,8 +151,8 @@ class AdaptiveLearningService {
       
       // Topic navigation
       ADVANCE_TOPIC: 'advance_to_next_topic',
-      REVIEW_PREREQUISITE: 'review_prerequisite_topic',
-      REPEAT_CURRENT: 'repeat_current'
+      REVIEW_PREREQUISITE: 'review_prerequisite_topic'
+      // REPEAT_CURRENT: 'repeat_current' // ❌ COMMENTED OUT: Never selected by any decision logic (dead code)
     };
 
     // Representation types for multi-modal learning
@@ -960,7 +960,7 @@ class AdaptiveLearningService {
         teachingStrategy = 'spiral_review';
         break;
       
-      case this.ACTIONS.REPEAT_CURRENT:
+      // case this.ACTIONS.REPEAT_CURRENT: // ❌ COMMENTED OUT: Never selected by any decision logic (dead code)
       case this.ACTIONS.MAINTAIN_DIFFICULTY:
       default:
         // No change
@@ -1578,7 +1578,7 @@ class AdaptiveLearningService {
       [this.ACTIONS.INCREASE_DIFFICULTY]: "Great job! Ready for a bigger challenge? 🚀",
       [this.ACTIONS.ADVANCE_CHAPTER]: "Excellent! You've mastered this chapter! 🎉",
       [this.ACTIONS.MAINTAIN_DIFFICULTY]: "Keep going! You're making good progress! 📈",
-      [this.ACTIONS.REPEAT_CURRENT]: "Practice makes perfect! Let's strengthen your understanding. 📚",
+      // [this.ACTIONS.REPEAT_CURRENT]: "Practice makes perfect! Let's strengthen your understanding. 📚", // ❌ COMMENTED OUT: Never used
       [this.ACTIONS.SWITCH_TO_VISUAL]: "Let's try a different approach! 🎨",
       [this.ACTIONS.GIVE_HINT_RETRY]: "Here's some help to guide you! 💡"
     };
