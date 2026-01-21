@@ -207,6 +207,10 @@ class AdaptiveLearningRepository {
     return this.topicProgressRepo.clearPendingQuestion(userId, topicId);
   }
 
+  async clearPendingForOtherTopics(userId, currentTopicId) {
+    return this.topicProgressRepo.clearPendingForOtherTopics(userId, currentTopicId);
+  }
+
   async incrementAttemptCount(userId, topicId) {
     return this.topicProgressRepo.incrementAttemptCount(userId, topicId);
   }

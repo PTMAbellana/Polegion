@@ -436,15 +436,41 @@ class TopicProgressRepository {
 
   /**
    * Save current question to pending_questions table
-   * ✅ FIX: Don't use notes column - it doesn't exist in user_topic_progress
+   * Stores question data in notes JSONB column for restoration on page refresh
    */
   async savePendingQuestion(userId, topicId, questionData) {
     try {
       console.log('[TopicProgressRepo] Saving pending question:', { userId, topicId, questionId: questionData?.id });
       
-      // Store in pending_questions table (if it exists) or skip if table not available
-      // The question will be regenerated if needed
-      console.log('[TopicProgressRepo] ✅ Pending question handling - skipping persistence (will regenerate if needed)');
+      // Store the question data in the notes JSONB column
+      const pendingData = {
+        id: questionData.id || questionData.questionId,
+        question_text: questionData.question_text || questionData.question,
+        options: questionData.options,
+        hint: questionData.hint,
+        difficulty: questionData.difficulty || questionData.difficultyLevel,
+        difficultyLevel: questionData.difficulty || questionData.difficultyLevel,
+        cognitive_domain: questionData.cognitive_domain || questionData.cognitiveDomain,
+        representation_type: questionData.representation_type || questionData.representationType || 'text',
+        session_id: questionData.session_id || questionData.sessionId,
+        source: questionData.source,
+        type: questionData.type,
+        metadata: questionData.metadata,
+        saved_at: new Date().toISOString()
+      };
+      
+      const { error } = await this.supabase
+        .from('user_topic_progress')
+        .update({ notes: pendingData })
+        .eq('user_id', userId)
+        .eq('topic_id', topicId);
+
+      if (error) {
+        console.warn('[TopicProgressRepo] Could not save pending question:', error.message);
+        return null;
+      }
+      
+      console.log('[TopicProgressRepo] ✅ Pending question saved successfully');
       return { success: true };
     } catch (error) {
       console.warn('[TopicProgressRepo] Error in savePendingQuestion:', error.message);
@@ -478,6 +504,32 @@ class TopicProgressRepository {
   }
 
   /**
+   * Clear pending questions for all topics EXCEPT the current one
+   * Called when user switches to a different topic to prevent stale questions
+   */
+  async clearPendingForOtherTopics(userId, currentTopicId) {
+    try {
+      console.log('[TopicProgressRepo] Clearing pending questions for other topics:', { userId, keepTopicId: currentTopicId });
+      
+      const { error } = await this.supabase
+        .from('user_topic_progress')
+        .update({ notes: null })
+        .eq('user_id', userId)
+        .neq('topic_id', currentTopicId);
+
+      if (error) {
+        console.warn('[TopicProgressRepo] Could not clear other pending questions:', error.message);
+        return false;
+      }
+      console.log('[TopicProgressRepo] ✅ Other pending questions cleared successfully');
+      return true;
+    } catch (error) {
+      console.warn('[TopicProgressRepo] Error clearing other pending questions:', error.message);
+      return false;
+    }
+  }
+
+  /**
    * Increment attempt count for pending question (ATOMIC)
    */
   async incrementAttemptCount(userId, topicId) {
@@ -496,16 +548,32 @@ class TopicProgressRepository {
   }
 
   /**
-   * Get pending question - always return null to force regeneration
-   * ✅ FIX: Don't query notes column - it doesn't exist in user_topic_progress
+   * Get pending question from notes column
+   * Returns the saved question or null if none exists
    */
   async getPendingQuestion(userId, topicId) {
     try {
-      console.log('[TopicProgressRepo] Getting pending question (will regenerate):', { userId, topicId });
-      // Always return null - questions will be regenerated as needed
-      // This is acceptable as questions are generated quickly
-      console.log('[TopicProgressRepo] No pending question stored - will generate fresh');
-      return null;
+      console.log('[TopicProgressRepo] Getting pending question:', { userId, topicId });
+      
+      const { data, error } = await this.supabase
+        .from('user_topic_progress')
+        .select('notes')
+        .eq('user_id', userId)
+        .eq('topic_id', topicId)
+        .single();
+
+      if (error) {
+        console.warn('[TopicProgressRepo] Error fetching pending question:', error.message);
+        return null;
+      }
+      
+      if (!data || !data.notes) {
+        console.log('[TopicProgressRepo] No pending question found');
+        return null;
+      }
+      
+      console.log('[TopicProgressRepo] ✅ Found pending question:', data.notes.id);
+      return data.notes;
     } catch (error) {
       console.warn('[TopicProgressRepo] Error in getPendingQuestion:', error);
       return null;

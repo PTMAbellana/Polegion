@@ -178,6 +178,12 @@ GRADE 6 CONSTRAINTS:
 CRITICAL: The question MUST be about the SPECIFIC FOCUS topics listed above.
 Example: If focus is "Parallel Lines, Perpendicular Lines", DO NOT create questions about volume, area, or unrelated topics.
 
+FORBIDDEN QUESTION TYPES (NEVER CREATE THESE):
+❌ NEVER ask "How many points make up a [shape]?" - Geometric shapes contain INFINITE points!
+❌ NEVER ask "Total number of points in a [shape]?" - This is mathematically nonsensical!
+❌ For row/line problems: If items are in a row, the length is (number of items × length per item)
+   Example: 8 chairs, 2 feet each → 8 × 2 = 16 feet (NOT 48 feet!)
+
 Create a geometry question that:
 1. Is SPECIFICALLY about the focus topics (${subtopics})
 2. Has EXACTLY 4 multiple choice options (A, B, C, D)
@@ -187,6 +193,7 @@ Create a geometry question that:
 6. Includes a helpful hint for struggling students
 7. Uses clear, Grade 6 appropriate language (no jargon)
 8. Involves Grade 6 relatable scenarios (classroom, sports, simple real-world contexts)
+9. MUST be mathematically valid and make sense
 
 CRITICAL MATHEMATICAL CORRECTNESS:
 - Calculate the correct answer FIRST
@@ -297,6 +304,23 @@ CRITICAL RULES FOR JSON:
         console.error('[AIQuestionGenerator] Missing required fields in AI response');
         console.error('[AIQuestionGenerator] Got:', question);
         return null;
+      }
+
+      // CRITICAL: Reject mathematically nonsensical questions
+      const forbiddenPatterns = [
+        /how many points.*(?:make up|in|form).*(?:rectangle|triangle|circle|square|polygon)/i,
+        /total (?:number of )?points.*(?:rectangle|triangle|circle|square|polygon)/i,
+        /number of points.*(?:needed|required).*(?:rectangle|triangle|circle|square|polygon)/i,
+        /points that (?:make|form|create).*(?:rectangle|triangle|circle|square|polygon)/i
+      ];
+      
+      const questionTextLower = question.questionText.toLowerCase();
+      for (const pattern of forbiddenPatterns) {
+        if (pattern.test(questionTextLower)) {
+          console.error('[AIQuestionGenerator] REJECTED: Nonsensical question about points in geometric figures');
+          console.error('Question:', question.questionText);
+          return null; // Geometric figures contain infinite points - this question is invalid
+        }
       }
 
       // Validate options
@@ -430,6 +454,25 @@ CRITICAL RULES FOR JSON:
             console.error(`[AIQuestionGenerator] MATH ERROR: Area should be ${expectedArea.toFixed(2)}, got ${answerNum}`);
             console.error('Question:', question.questionText);
             return null;
+          }
+        }
+        
+        // LENGTH/DISTANCE VALIDATION (e.g., row of objects, total length)
+        else if ((questionLower.includes('length') || questionLower.includes('row') || questionLower.includes('line')) 
+                 && dimensions.length >= 2) {
+          // Check for multiplication patterns: "X items, Y length each" → X * Y
+          const multiplyWords = ['each', 'per', 'apiece'];
+          const hasMultiplyContext = multiplyWords.some(word => questionLower.includes(word));
+          
+          if (hasMultiplyContext) {
+            // Expected: number of items × length per item
+            const expectedLength = dimensions[0] * dimensions[1];
+            
+            if (Math.abs(answerNum - expectedLength) > 0.1) {
+              console.error(`[AIQuestionGenerator] MATH ERROR: Length should be ${expectedLength} (${dimensions[0]} × ${dimensions[1]}), got ${answerNum}`);
+              console.error('Question:', question.questionText);
+              return null;
+            }
           }
         }
       }
