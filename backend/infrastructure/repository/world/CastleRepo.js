@@ -221,6 +221,20 @@ class CastleRepo extends BaseRepo {
                         started_at: castleProgress.started_at,
                         completed_at: castleProgress.completed_at
                     };
+                } else {
+                    // No progress record found - provide default values
+                    // Only Castle 0 is unlocked by default
+                    castleData.progress = {
+                        id: null,
+                        user_id: userId,
+                        castle_id: castle.id,
+                        unlocked: castle.unlock_order === 0, // Castle 0 is unlocked by default
+                        completed: false,
+                        total_xp_earned: 0,
+                        completion_percentage: 0,
+                        started_at: null,
+                        completed_at: null
+                    };
                 }
                 
                 return castleData;
@@ -280,6 +294,20 @@ class CastleRepo extends BaseRepo {
                     completion_percentage: progress.completion_percentage,
                     started_at: progress.started_at,
                     completed_at: progress.completed_at
+                };
+            } else {
+                // No progress record found - provide default values
+                // Only Castle 0 is unlocked by default
+                castleData.progress = {
+                    id: null,
+                    user_id: userId,
+                    castle_id: castle.id,
+                    unlocked: castle.unlock_order === 0, // Castle 0 is unlocked by default
+                    completed: false,
+                    total_xp_earned: 0,
+                    completion_percentage: 0,
+                    started_at: null,
+                    completed_at: null
                 };
             }
 
