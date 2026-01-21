@@ -332,12 +332,17 @@ export default function StudentDashboard() {
             {/* Tab Content */}
             <div className={studentStyles.tabContent}>
               {activeTab === 'castle' && (
-                castlesLoading ? (
-                  <div className={studentStyles.loadingMessage}>
-                    <p>Loading castle progress...</p>
-                  </div>
-                ) : castles.length > 0 ? (
-                  <div className={studentStyles.castleContent}>
+                <div className={studentStyles.castleContent}>
+                  {castlesLoading ? (
+                    <div className={studentStyles.loadingMessage}>
+                      <p>Loading castle progress...</p>
+                    </div>
+                  ) : castles.length === 0 ? (
+                    <div className={studentStyles.emptyState}>
+                      <p>🏰 No castle progress yet</p>
+                      <p>Visit the <strong>World Map</strong> or complete the <strong>Pretest</strong> to unlock your first castle!</p>
+                    </div>
+                  ) : (
                     <div className={studentStyles.castleGrid}>
                       {castles.map((castle) => {
                         console.log('[Dashboard] Castle:', castle.name, 'total_chapters:', castle.total_chapters, 'full data:', castle)
@@ -384,56 +389,53 @@ export default function StudentDashboard() {
                         )
                       })}
                     </div>
-                  </div>
-                ) : (
-                  <div className={studentStyles.emptyState}>
-                    <p>🏰 No castle progress yet</p>
-                    <p>Visit the <strong>World Map</strong> or complete the <strong>Pretest</strong> to unlock your first castle!</p>
-                  </div>
-                )
+                  )}
+                </div>
               )}
 
               {activeTab === 'assessment' && (
-                assessmentLoading ? (
-                  <div className={studentStyles.loadingMessage}>
-                    <p>Loading assessment results...</p>
-                  </div>
-                ) : (pretestScores || posttestScores) ? (
-                  <div className={studentStyles.assessmentContent}>
-                    <div className={studentStyles.assessmentInfo}>
-                      <h3>Knowledge Assessment Progress</h3>
-                      <p>
-                        {pretestScores && posttestScores
-                          ? "View your learning journey from pretest to posttest"
-                          : pretestScores
-                          ? "Complete your posttest to see your improvement"
-                          : "Your posttest results are ready"}
-                      </p>
-                      <div className={studentStyles.assessmentStats}>
-                        <div className={studentStyles.statBadge}>
-                          <span className={studentStyles.statIcon}>{pretestScores ? '✓' : '○'}</span>
-                          <span>Pretest {pretestScores ? 'Complete' : 'Pending'}</span>
-                        </div>
-                        <div className={studentStyles.statBadge}>
-                          <span className={studentStyles.statIcon}>{posttestScores ? '✓' : '○'}</span>
-                          <span>Posttest {posttestScores ? 'Complete' : 'Pending'}</span>
+                <div className={studentStyles.assessmentContent}>
+                  {assessmentLoading ? (
+                    <div className={studentStyles.loadingMessage}>
+                      <p>Loading assessment results...</p>
+                    </div>
+                  ) : !(pretestScores || posttestScores) ? (
+                    <div className={studentStyles.emptyState}>
+                      <p>📊 No assessment results yet</p>
+                      <p>Complete the <strong>Pretest</strong> or <strong>Posttest</strong> to see your performance!</p>
+                    </div>
+                  ) : (
+                    <>
+                      <div className={studentStyles.assessmentInfo}>
+                        <h3>Knowledge Assessment Progress</h3>
+                        <p>
+                          {pretestScores && posttestScores
+                            ? "View your learning journey from pretest to posttest"
+                            : pretestScores
+                            ? "Complete your posttest to see your improvement"
+                            : "Your posttest results are ready"}
+                        </p>
+                        <div className={studentStyles.assessmentStats}>
+                          <div className={studentStyles.statBadge}>
+                            <span className={studentStyles.statIcon}>{pretestScores ? '✓' : '○'}</span>
+                            <span>Pretest {pretestScores ? 'Complete' : 'Pending'}</span>
+                          </div>
+                          <div className={studentStyles.statBadge}>
+                            <span className={studentStyles.statIcon}>{posttestScores ? '✓' : '○'}</span>
+                            <span>Posttest {posttestScores ? 'Complete' : 'Pending'}</span>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                    
-                    <div className={studentStyles.assessmentChartWrapper}>
-                      <AssessmentRadarChart
-                        currentScores={posttestScores || pretestScores}
-                        pretestScores={posttestScores ? pretestScores : undefined}
-                      />
-                    </div>
-                  </div>
-                ) : (
-                  <div className={studentStyles.emptyState}>
-                    <p>📊 No assessment results yet</p>
-                    <p>Complete the <strong>Pretest</strong> or <strong>Posttest</strong> to see your performance!</p>
-                  </div>
-                )
+                      
+                      <div className={studentStyles.assessmentChartWrapper}>
+                        <AssessmentRadarChart
+                          currentScores={posttestScores || pretestScores}
+                          pretestScores={posttestScores ? pretestScores : undefined}
+                        />
+                      </div>
+                    </>
+                  )}
+                </div>
               )}
             </div>
           </div>

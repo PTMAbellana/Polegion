@@ -482,7 +482,7 @@ class TopicProgressRepository {
    */
   async incrementAttemptCount(userId, topicId) {
     try {
-      const { data, error } = await this.supabase.rpc('increment_attempt_count', {
+      const { data, error } = await this.supabase.rpc('increment_attempt_count_atomic', {
         p_user_id: userId,
         p_topic_id: topicId
       });

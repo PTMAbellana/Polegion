@@ -22,8 +22,8 @@ class QLearningPolicy {
       SWITCH_TO_REAL_WORLD: 'switch_to_real_world_context',
       GIVE_HINT_RETRY: 'give_hint_then_retry',
       ADVANCE_TOPIC: 'advance_to_next_topic',
-      REVIEW_PREREQUISITE: 'review_prerequisite_topic',
-      REPEAT_CURRENT: 'repeat_current'
+      REVIEW_PREREQUISITE: 'review_prerequisite_topic'
+      // REPEAT_CURRENT: 'repeat_current' // ❌ COMMENTED OUT: Never selected by any decision logic (dead code)
     };
   }
 

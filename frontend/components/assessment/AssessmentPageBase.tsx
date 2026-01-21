@@ -598,7 +598,8 @@ export default function AssessmentPageBase({ config }: { config: AssessmentConfi
                 
                 // Refresh castle data after assessment completion (for castle unlocking)
                 try {
-                    const userId = authUtils.getCurrentUserId();
+                    const authData = authUtils.getAuthData();
+                    const userId = authData.user?.id;
                     if (userId && config.type === 'pretest') {
                         console.log(`[${config.type}] Refreshing castle data after pretest completion`);
                         await fetchCastles(userId);

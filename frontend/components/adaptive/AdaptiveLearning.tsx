@@ -182,16 +182,21 @@ export default function AdaptiveLearning({ topicId, topicName: topicNameProp, on
     }
   };
 
-  const generateNewQuestion = async (forceNew = false) => {
+  const generateNewQuestion = async (forceNew = false, retryCount = 0) => {
+    const MAX_RETRIES = 2;
+    
     try {
       setLoading(true);
       // Use environment variable or fallback to localhost
       const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
       const forceParam = forceNew ? '&forceNew=true' : '';
+      
+      // Increased timeout for AI question generation with multiple users
       const response = await axios.get(`${backendUrl}/adaptive/question/${topicId}?t=${Date.now()}${forceParam}`, {
         headers: {
           Authorization: `Bearer ${authToken}`
-        }
+        },
+        timeout: 45000 // 45 seconds for AI generation
       });
       
       console.log('[AdaptiveLearning] Question API response:', response.data);
@@ -233,14 +238,29 @@ export default function AdaptiveLearning({ topicId, topicName: topicNameProp, on
       }
     } catch (error) {
       console.error('[AdaptiveLearning] Error generating question:', error);
+      
+      // Retry with exponential backoff for timeout errors
+      if (retryCount < MAX_RETRIES && (error.code === 'ECONNABORTED' || error.message?.includes('timeout'))) {
+        const delay = Math.pow(2, retryCount) * 1000; // 1s, 2s, 4s
+        console.log(`[AdaptiveLearning] Retrying question generation (${retryCount + 1}/${MAX_RETRIES}) after ${delay}ms...`);
+        
+        await new Promise(resolve => setTimeout(resolve, delay));
+        return generateNewQuestion(forceNew, retryCount + 1);
+      }
+      
+      // If all retries failed or other error, show error with functional retry button
+      const errorMessage = error.code === 'ECONNABORTED' 
+        ? '⏱️ Question generation is taking longer than usual. This can happen when multiple students are using the system.'
+        : '😕 Oops! We couldn\'t load your question.';
+      
       setCurrentQuestion({
-        question: '😕 Oops! We couldn\'t load your question.',
-        options: [{ 
-          label: '🔄 Try Again', 
-          correct: false,
-          subtext: 'Don\'t worry - your progress is saved!' 
-        }]
+        question: errorMessage,
+        options: [],
+        isError: true // Flag to indicate error state
       });
+      
+      // Show error notification
+      console.error('[AdaptiveLearning] Question generation failed after retries:', error);
     } finally {
       setLoading(false);
     }
@@ -1887,16 +1907,70 @@ export default function AdaptiveLearning({ topicId, topicName: topicNameProp, on
             flexDirection: 'column'
           }}>
             <div style={{ flex: '1 1 auto', minHeight: 0, overflowY: 'auto' }}>
-              <LearningInteractionRenderer
-                representationType={currentRepresentation}
-                difficultyLevel={state.currentDifficulty}
-                onAnswer={submitMode === 'auto' ? submitAnswer : (isCorrect: boolean, option: any) => {
-                  setSelectedAnswer({ isCorrect, option });
-                }}
-                disabled={submitting || answerSubmitted}
-                question={currentQuestion}
-                selectedOption={selectedAnswer?.option}
-              />
+              {/* Error State with Retry Button */}
+              {currentQuestion?.isError ? (
+                <div style={{
+                  textAlign: 'center',
+                  padding: '40px 20px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: '24px'
+                }}>
+                  <div style={{
+                    fontSize: '48px',
+                    marginBottom: '8px'
+                  }}>⏱️</div>
+                  <p style={{
+                    fontSize: '18px',
+                    color: '#6b4423',
+                    fontFamily: 'Crimson Text, serif',
+                    fontWeight: 600,
+                    margin: 0,
+                    lineHeight: 1.6
+                  }}>
+                    {currentQuestion.question}
+                  </p>
+                  <p style={{
+                    fontSize: '14px',
+                    color: '#8b7355',
+                    fontFamily: 'Crimson Text, serif',
+                    margin: 0
+                  }}>
+                    Don't worry - your progress is saved!
+                  </p>
+                  <button
+                    onClick={() => generateNewQuestion(true)}
+                    disabled={loading}
+                    style={{
+                      padding: '14px 32px',
+                      background: loading ? 'linear-gradient(135deg, #d1d5db, #9ca3af)' : 'linear-gradient(135deg, #22c55e, #16a34a)',
+                      color: 'white',
+                      border: '2px solid rgba(34, 197, 94, 0.5)',
+                      borderRadius: '10px',
+                      fontSize: '16px',
+                      fontWeight: 600,
+                      cursor: loading ? 'not-allowed' : 'pointer',
+                      boxShadow: loading ? 'none' : '0 4px 12px rgba(34, 197, 94, 0.3)',
+                      transition: 'all 0.2s ease',
+                      fontFamily: 'Cinzel, serif'
+                    }}
+                  >
+                    {loading ? '⏳ Loading...' : '🔄 Try Again'}
+                  </button>
+                </div>
+              ) : (
+                <LearningInteractionRenderer
+                  representationType={currentRepresentation}
+                  difficultyLevel={state.currentDifficulty}
+                  onAnswer={submitMode === 'auto' ? submitAnswer : (isCorrect: boolean, option: any) => {
+                    setSelectedAnswer({ isCorrect, option });
+                  }}
+                  disabled={submitting || answerSubmitted}
+                  question={currentQuestion}
+                  selectedOption={selectedAnswer?.option}
+                />
+              )}
             </div>
             
             {/* Submit Button - Always visible in confirm mode, inside the box */}

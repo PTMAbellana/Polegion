@@ -40,7 +40,7 @@ export const useCastleStore = create<CastleState>()(
             showIntro: false,
 
             // Actions
-            fetchCastles: async (userId: string) => {
+            fetchCastles: async (userId: string, forceRefresh = false) => {
                 // Validate userId before making request
                 const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
                 
@@ -54,7 +54,7 @@ export const useCastleStore = create<CastleState>()(
                 
                 try {
                     logger.log('[CastleStore] Fetching castles for user:', userId)
-                    const castles = await getAllCastles(userId)
+                    const castles = await getAllCastles(userId, forceRefresh)
                     logger.log('[CastleStore] Fetched castles:', castles)
                     logger.log('[CastleStore] Castle progress details:', castles.map((c: any) => ({
                         name: c.name,
