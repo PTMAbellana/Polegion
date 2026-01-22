@@ -27,14 +27,17 @@ class TopicProgressionService {
    * Requirements:
    * - Mastery ≥ 60%
    * - Stability criteria (one of):
-   *   - Accuracy ≥ 70% over last 5 attempts
+   *   - Accuracy ≥ 60% over last 5 attempts (lowered from 70%)
    *   - 2+ consecutive correct answers
-   *   - Correct without hint at difficulty ≥ 3
+   *   - Mastery ≥ 70% (regardless of stability)
    */
   async checkAndUnlockNextTopic(userId, topicId, currentMasteryLevel) {
     try {
+      console.log(`[TopicProgression] 🔍 Checking unlock for user ${userId}, topic ${topicId}, mastery ${currentMasteryLevel}%`);
+      
       // Check if mastery threshold is met
       if (currentMasteryLevel < this.MIN_MASTERY_FOR_UNLOCK) {
+        console.log(`[TopicProgression] ❌ Mastery ${currentMasteryLevel}% < 60% threshold`);
         return null;
       }
 
@@ -51,15 +54,21 @@ class TopicProgressionService {
       const currentState = await this.repo.getUserTopicState(userId, topicId);
       const consecutiveCorrect = currentState?.correct_streak || 0;
 
-      // Check stability criteria
-      const isStable = 
-        recentAccuracy >= this.MIN_ACCURACY_FOR_UNLOCK ||
-        consecutiveCorrect >= this.MIN_CONSECUTIVE_CORRECT;
+      console.log(`[TopicProgression] 📊 Stats - Recent accuracy: ${(recentAccuracy*100).toFixed(1)}% (${correctCount}/${recentAttempts.length}), Streak: ${consecutiveCorrect}`);
+
+      // RELAXED stability criteria - more forgiving for unlocking
+      const hasRecentAccuracy = recentAccuracy >= 0.60; // Lowered from 70% to 60%
+      const hasStreak = consecutiveCorrect >= this.MIN_CONSECUTIVE_CORRECT;
+      const hasHighMastery = currentMasteryLevel >= 70; // Auto-unlock at 70% mastery
+      
+      const isStable = hasRecentAccuracy || hasStreak || hasHighMastery;
 
       if (!isStable) {
-        console.log(`[TopicProgression] User ${userId} topic ${topicId}: Mastery OK (${currentMasteryLevel}%) but not stable yet (accuracy=${(recentAccuracy*100).toFixed(1)}%, streak=${consecutiveCorrect})`);
+        console.log(`[TopicProgression] ❌ Not stable - need one of: 60% recent accuracy (${(recentAccuracy*100).toFixed(1)}%), 2+ streak (${consecutiveCorrect}), or 70% mastery (${currentMasteryLevel}%)`);
         return null;
       }
+      
+      console.log(`[TopicProgression] ✅ Stability met via: ${hasRecentAccuracy ? 'recent accuracy' : hasStreak ? 'streak' : 'high mastery'}`);
 
       // Find next topic to unlock
       const allTopics = await this.repo.getAllTopics();
