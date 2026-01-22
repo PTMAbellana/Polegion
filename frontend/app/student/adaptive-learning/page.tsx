@@ -25,6 +25,7 @@ export default function AdaptiveLearningPage() {
   const [loading, setLoading] = useState(true);
   const [showTopicSwitcher, setShowTopicSwitcher] = useState(false);
   const [userId, setUserId] = useState<string>('');
+  const [refreshing, setRefreshing] = useState(false);
 
   // Analytics hook for simple stats
   const analytics = useAdaptiveLearningAnalytics();
@@ -33,8 +34,10 @@ export default function AdaptiveLearningPage() {
     fetchTopicsWithProgress();
   }, []);
 
-  const fetchTopicsWithProgress = async () => {
+  const fetchTopicsWithProgress = async (silent = false) => {
     try {
+      if (!silent) setRefreshing(true);
+      
       // Check if user is logged in before making request
       const accessToken = localStorage.getItem('access_token');
       if (!accessToken) {
@@ -93,10 +96,19 @@ export default function AdaptiveLearningPage() {
       }
       
       // Show user-friendly error message
-      alert(`Failed to load topics: ${error.response?.data?.error || error.message || 'Unknown error'}`);
+      if (!silent) {
+        alert(`Failed to load topics: ${error.response?.data?.error || error.message || 'Unknown error'}`);
+      }
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
+  };
+
+  // Handle topic unlock - refresh topics list silently
+  const handleTopicUnlocked = async () => {
+    console.log('[AdaptiveLearningPage] 🔔 Topic unlocked - refreshing topics list...');
+    await fetchTopicsWithProgress(true); // Silent refresh
   };
 
   const handleTopicSelect = (topicId: string) => {
@@ -159,6 +171,7 @@ export default function AdaptiveLearningPage() {
           analytics={analytics}
           onChangeTopic={handleOpenTopicSwitcher}
           userId={userId}
+          onTopicUnlocked={handleTopicUnlocked}
         />
       )}
 

@@ -598,6 +598,11 @@ export default function AdaptiveLearning({ topicId, topicName: topicNameProp, on
           if (!shownUnlockModals.has(topicKey)) {
             setUnlockedTopic(responseData.topicUnlocked);
             setShownUnlockModals(prev => new Set(prev).add(topicKey));
+            // Notify parent to refresh topics list immediately
+            if (onTopicUnlocked) {
+              console.log('[AdaptiveLearning] 🔔 Notifying parent: Topic unlocked!');
+              onTopicUnlocked();
+            }
             // Don't show immediately - will be triggered after correct answer feedback
           }
         }

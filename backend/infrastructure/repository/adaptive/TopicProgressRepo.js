@@ -183,28 +183,76 @@ class TopicProgressRepository {
 
   /**
    * Update topic progress (unlock, mastery level, etc.)
+   * CRITICAL FIX: Uses UPSERT to create row if it doesn't exist
+   * This fixes the bug where unlocking failed if student never practiced the topic
    */
   async updateTopicProgress(userId, topicId, updates) {
     try {
-      const { data, error } = await this.supabase
+      // Check if row exists
+      const { data: existing, error: checkError } = await this.supabase
         .from('user_topic_progress')
-        .update({
-          ...updates,
-          updated_at: new Date().toISOString()
-        })
+        .select('id')
         .eq('user_id', userId)
         .eq('topic_id', topicId)
-        .select()
-        .single();
+        .maybeSingle(); // Don't throw if not found
 
-      if (error) throw error;
+      if (checkError) {
+        console.error('[TopicProgressRepo] Error checking existing progress:', checkError);
+        throw checkError;
+      }
 
+      let result;
+      if (existing) {
+        // Row exists - UPDATE it
+        const { data, error } = await this.supabase
+          .from('user_topic_progress')
+          .update({
+            ...updates,
+            updated_at: new Date().toISOString()
+          })
+          .eq('user_id', userId)
+          .eq('topic_id', topicId)
+          .select()
+          .single();
+
+        if (error) throw error;
+        result = data;
+        console.log(`[TopicProgressRepo] ✅ Updated progress for topic ${topicId}`);
+      } else {
+        // Row doesn't exist - INSERT it with initial values
+        const { data, error } = await this.supabase
+          .from('user_topic_progress')
+          .insert({
+            user_id: userId,
+            topic_id: topicId,
+            mastery_level: 0,
+            difficulty_level: 1,
+            total_attempts: 0,
+            correct_answers: 0,
+            correct_streak: 0,
+            wrong_streak: 0,
+            hints_shown_count: 0,
+            mastery_percentage: 0,
+            mastered: false,
+            ...updates, // Apply the updates (like unlocked: true)
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          })
+          .select()
+          .single();
+
+        if (error) throw error;
+        result = data;
+        console.log(`[TopicProgressRepo] ✅ Created new progress row for topic ${topicId} with unlock`);
+      }
+
+      // Clear cache
       const cacheKey = cache.generateKey('user_topic_progress', userId);
       cache.delete(cacheKey);
 
-      return data;
+      return result;
     } catch (error) {
-      console.error('Error updating topic progress:', error);
+      console.error('[TopicProgressRepo] ❌ Error updating topic progress:', error);
       throw error;
     }
   }

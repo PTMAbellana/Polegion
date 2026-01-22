@@ -98,7 +98,19 @@ export default function AssessmentQuiz({
         }
     };
 
-    const allQuestionsAnswered = Object.keys(userAnswers).length === questions.length;
+    // Check if all questions answered - filter out null/undefined values
+    const answeredCount = Object.values(userAnswers).filter(answer => answer !== null && answer !== undefined && answer !== '').length;
+    const allQuestionsAnswered = answeredCount === questions.length;
+    
+    // Log for debugging
+    React.useEffect(() => {
+        console.log('[AssessmentQuiz] Progress:', {
+            answeredCount,
+            totalQuestions: questions.length,
+            allAnswered: allQuestionsAnswered,
+            userAnswers
+        });
+    }, [answeredCount, questions.length, allQuestionsAnswered]);
 
     const formatTime = (seconds: number) => {
         const mins = Math.floor(seconds / 60);
@@ -216,19 +228,19 @@ export default function AssessmentQuiz({
                         Previous
                     </button>
                     
-                    {allQuestionsAnswered ? (
-                        <button 
-                            onClick={onSubmitAssessment}
-                            className={styles['submit-assessment-button']}
-                            disabled={isSubmitting}
-                        >
-                            {isSubmitting ? 'Submitting...' : 'Submit Assessment'}
-                        </button>
-                    ) : (
-                        <span className={styles['submit-hint']}>
-                            Answer all questions to submit
-                        </span>
-                    )}
+                    {/* ALWAYS show submit button, just disable it if not all answered */}
+                    <button 
+                        onClick={onSubmitAssessment}
+                        className={styles['submit-assessment-button']}
+                        disabled={!allQuestionsAnswered || isSubmitting}
+                        style={{
+                            opacity: allQuestionsAnswered ? 1 : 0.5,
+                            cursor: allQuestionsAnswered ? 'pointer' : 'not-allowed'
+                        }}
+                        title={!allQuestionsAnswered ? `Answer all ${questions.length} questions to submit (${answeredCount}/${questions.length} answered)` : 'Submit your assessment'}
+                    >
+                        {isSubmitting ? '⏳ Submitting...' : allQuestionsAnswered ? '✅ Submit Assessment' : `⏸️ Submit (${answeredCount}/${questions.length})`}
+                    </button>
                     
                     <button 
                         onClick={handleNext}
