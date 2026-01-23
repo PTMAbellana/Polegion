@@ -294,7 +294,12 @@ export default function AdaptiveLearning({ topicId, topicName: topicNameProp, on
       
       console.log('[AdaptiveLearning] 📡 Pending question API response:', pendingResponse.data);
       
-      if (pendingResponse.data.success && pendingResponse.data.data) {
+      // Check if we have a valid pending question (not null, not undefined, and has required fields)
+      const hasPendingQuestion = pendingResponse.data.success && 
+                                 pendingResponse.data.data && 
+                                 pendingResponse.data.data.question_text;
+      
+      if (hasPendingQuestion) {
         const questionData = pendingResponse.data.data;
         console.log('[AdaptiveLearning] 🔄 Restored pending question from database:', questionData);
         
