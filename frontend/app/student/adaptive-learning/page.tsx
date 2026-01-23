@@ -152,7 +152,7 @@ export default function AdaptiveLearningPage() {
               marginBottom: '20px',
               fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
             }}>
-              Complete topics to unlock new ones. Reach mastery level 3 to unlock the next topic!
+              Unlock new topics by reaching <strong>60% mastery</strong> and showing stable performance (2+ correct answers in a row, or 60% accuracy in last 5 attempts).
             </p>
             <TopicSelector 
               topics={topics}

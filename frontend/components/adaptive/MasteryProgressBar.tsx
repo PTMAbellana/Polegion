@@ -26,7 +26,8 @@ export default function MasteryProgressBar({
   const masteryLevelNum = getMasteryLevelFromPercentage();
   const getMasteryMessage = () => {
     if (masteryLevel >= 85) return "Excellent progress!";
-    if (masteryLevel >= 70) return "You're doing great!";
+    if (masteryLevel >= 70) return "You're doing great! Next topic will unlock soon.";
+    if (masteryLevel >= 60) return "Almost there! Get 2 correct in a row to unlock next topic.";
     if (masteryLevel >= 50) return "Keep practicing!";
     if (masteryLevel >= 25) return "Good start!";
     return "Let's begin learning";
