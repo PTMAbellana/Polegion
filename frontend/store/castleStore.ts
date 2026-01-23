@@ -67,16 +67,21 @@ export const useCastleStore = create<CastleState>()(
                         (a: any, b: any) => a.unlock_order - b.unlock_order
                     )
                     
-                    // Find first unlocked castle
-                    const firstUnlockedIndex = sortedCastles.findIndex(
-                        (c: any) => c.progress?.unlocked
-                    )
+                    // Find last unlocked castle (most recent progress)
+                    // This shows the castle the user is currently working on
+                    let lastUnlockedIndex = -1
+                    for (let i = sortedCastles.length - 1; i >= 0; i--) {
+                        if (sortedCastles[i].progress?.unlocked) {
+                            lastUnlockedIndex = i
+                            break
+                        }
+                    }
                     
-                    logger.log('[CastleStore] First unlocked castle index:', firstUnlockedIndex)
+                    logger.log('[CastleStore] Last unlocked castle index:', lastUnlockedIndex)
                     
                     set({
                         castles: sortedCastles,
-                        currentCastleIndex: firstUnlockedIndex >= 0 ? firstUnlockedIndex : 0,
+                        currentCastleIndex: lastUnlockedIndex >= 0 ? lastUnlockedIndex : 0,
                         loading: false,
                         error: null,
                         initialized: true
