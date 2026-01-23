@@ -531,6 +531,7 @@ class TopicProgressRepository {
 
   /**
    * Clear current question from user_topic_progress table
+   * Also resets attempt_count to prevent constraint violations
    */
   async clearPendingQuestion(userId, topicId) {
     try {
@@ -540,7 +541,8 @@ class TopicProgressRepository {
         .from('user_topic_progress')
         .update({ 
           pending_question_data: null,
-          pending_question_id: null
+          pending_question_id: null,
+          attempt_count: 0  // Reset attempt count to prevent check constraint violation
         })
         .eq('user_id', userId)
         .eq('topic_id', topicId);
@@ -549,7 +551,7 @@ class TopicProgressRepository {
         console.warn('[TopicProgressRepo] Could not clear current question:', error.message);
         return false;
       }
-      console.log('[TopicProgressRepo] ✅ Current question cleared successfully');
+      console.log('[TopicProgressRepo] ✅ Current question cleared and attempt_count reset');
       return true;
     } catch (error) {
       console.warn('[TopicProgressRepo] Error clearing current question:', error.message);
@@ -569,7 +571,8 @@ class TopicProgressRepository {
         .from('user_topic_progress')
         .update({ 
           pending_question_data: null,
-          pending_question_id: null
+          pending_question_id: null,
+          attempt_count: 0  // Reset attempt count to prevent constraint violations
         })
         .eq('user_id', userId)
         .neq('topic_id', currentTopicId);
@@ -578,7 +581,7 @@ class TopicProgressRepository {
         console.warn('[TopicProgressRepo] Could not clear other pending questions:', error.message);
         return false;
       }
-      console.log('[TopicProgressRepo] ✅ Other pending questions cleared successfully');
+      console.log('[TopicProgressRepo] ✅ Other pending questions cleared and attempt counts reset');
       return true;
     } catch (error) {
       console.warn('[TopicProgressRepo] Error clearing other pending questions:', error.message);
