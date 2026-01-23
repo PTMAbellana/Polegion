@@ -52,11 +52,12 @@ class QuestionOrchestrationService {
           if (pendingQuestion && pendingQuestion.question_text) {
             console.log(`[QuestionOrchestration] 🔄 RESTORED pending question for topic ${topicName}:`, pendingQuestion.id);
             
-            // Return the pending question with proper format
+            // ✅ FIX: Return the pending question with proper format (include both property names for compatibility)
             return {
-              question: pendingQuestion.question_text,
+              // Primary fields (what controller expects)
+              question_text: pendingQuestion.question_text,
               options: pendingQuestion.options,
-              questionId: pendingQuestion.id,
+              id: pendingQuestion.id,
               hint: pendingQuestion.hint,
               difficulty: pendingQuestion.difficulty || pendingQuestion.difficultyLevel,
               cognitive_domain: pendingQuestion.cognitive_domain || pendingQuestion.cognitiveDomain,
@@ -65,9 +66,10 @@ class QuestionOrchestrationService {
               source: pendingQuestion.source || 'restored_pending',
               type: pendingQuestion.type,
               metadata: pendingQuestion.metadata,
-              // Include all fields for compatibility
-              question_text: pendingQuestion.question_text,
-              id: pendingQuestion.id
+              // Legacy compatibility fields
+              question: pendingQuestion.question_text,
+              questionId: pendingQuestion.id,
+              generated_at: pendingQuestion.metadata?.generated_at
             };
           } else {
             console.log(`[QuestionOrchestration] No pending question found for topic ${topicName}, generating new...`);
@@ -130,6 +132,9 @@ class QuestionOrchestrationService {
       // ⚠️ DISABLED for topics requiring precision (definitions, terminology, classifications)
       // AI excels at: word problems, calculations, varied scenarios
       // AI struggles with: exact definitions, terminology, conceptual clarity
+      // ⚠️ COMMENTED OUT: AI questions disabled for mastery 4-5 due to reliability concerns
+      // Only using AI for hints/explanations, not question generation
+      /*
       const DISABLE_AI_FOR_TOPICS = [
         'points', 'line_', 'segment_', 'ray_', 'plane_', 'parallel',  // Points, Lines, Planes
         'angle_',  // Kinds of Angles (classification)
@@ -152,6 +157,7 @@ class QuestionOrchestrationService {
           console.log(`[QuestionOrchestration] AI generation failed (${aiError.message}), falling back to parametric`);
         }
       }
+      */
 
       // Priority 3: Parametric Generation (fallback, always works)
       if (!question) {
@@ -202,7 +208,7 @@ class QuestionOrchestrationService {
         console.log(`[QuestionOrchestration] Saving question as current for user ${userId}, topic ${topicId}`);
         await this.repo.savePendingQuestion(userId, topicId, {
           id: question.id || question.questionId,
-          question_text: question.question,
+          question_text: question.question_text || question.question, // ✅ FIX: Handle both property names
           options: question.options,
           hint: question.hint,
           difficulty: difficultyLevel,

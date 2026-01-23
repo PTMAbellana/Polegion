@@ -476,21 +476,26 @@ class AdaptiveLearningService {
 
       // 4. Determine next action based on user's learning_strategy (qlearning or rulebased)
       const userStrategy = await this.getUserLearningStrategy(userId);
-      console.log(`[Q-Learning] User Learning Strategy: ${userStrategy || 'not set (defaulting to qlearning)'}`);
+      const strategy = userStrategy || 'rulebased'; // Default to rulebased if NULL/empty
+      console.log(`[Q-Learning] User Learning Strategy: ${strategy} ${!userStrategy ? '(defaulted from NULL)' : ''}`);
       
       let actionResult;
-      if (userStrategy === 'rulebased') {
+      if (strategy === 'rulebased') {
         // Use rule-based policy for control group
         actionResult = await this.determineActionRuleBased(newState);
         console.log('[Q-Learning] Using RULE-BASED policy (control group)');
-      } else {
-        // Use Q-learning for experimental group (default)
+      } else if (strategy === 'qlearning') {
+        // Use Q-learning for experimental group
         actionResult = await this.selectActionQLearning(
           userId,
           newStateKey, 
           newState
         );
         console.log('[Q-Learning] Using Q-LEARNING policy (experimental group)');
+      } else {
+        // Fallback: Invalid strategy value, default to rulebased
+        console.warn(`[Q-Learning] Unknown strategy '${strategy}', defaulting to RULE-BASED`);
+        actionResult = await this.determineActionRuleBased(newState);
       }
       const { action, reason, usedExploration, pedagogicalStrategy, representationType } = actionResult;
 
@@ -810,14 +815,30 @@ class AdaptiveLearningService {
    * Returns 'qlearning', 'rulebased', or null
    * 
    * ✅ NEW: Per-student adaptive vs control assignment
+   * ✅ Handles NULL, empty string, and invalid values
    */
   async getUserLearningStrategy(userId) {
     try {
       const profile = await this.repo.getUserProfile(userId);
-      return profile?.learning_strategy || null;
+      const strategy = profile?.learning_strategy;
+      
+      // Return null for NULL, empty string, or undefined
+      if (!strategy || strategy.trim() === '') {
+        return null;
+      }
+      
+      // Validate and return normalized value
+      const normalized = strategy.toLowerCase().trim();
+      if (normalized === 'qlearning' || normalized === 'rulebased') {
+        return normalized;
+      }
+      
+      // Invalid value, return null (will default to rulebased)
+      console.warn(`[AdaptiveLearning] Invalid learning_strategy: '${strategy}', returning null`);
+      return null;
     } catch (error) {
       console.error('[AdaptiveLearning] Error fetching user learning strategy:', error);
-      return null; // Default to Q-learning if error
+      return null; // Default to rulebased if error
     }
   }
 
