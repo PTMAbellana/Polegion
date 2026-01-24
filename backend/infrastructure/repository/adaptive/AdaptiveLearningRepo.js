@@ -371,7 +371,7 @@ class AdaptiveLearningRepository {
       const { data, error } = await this.supabase
         .from('user_profiles')
         .select('*')
-        .eq('id', userId)
+        .eq('user_id', userId)
         .single();
       
       if (error) throw error;

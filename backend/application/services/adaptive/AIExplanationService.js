@@ -106,7 +106,9 @@ class AIExplanationService {
    */
   _getCacheKey(questionText, userAnswer, isCorrect) {
     // Simple hash: question + answer + correctness
-    const normalized = `${questionText.toLowerCase().trim()}|${userAnswer.toLowerCase().trim()}|${isCorrect}`;
+    // Convert userAnswer to string to handle numbers and null values
+    const answerStr = userAnswer != null ? String(userAnswer) : '';
+    const normalized = `${questionText.toLowerCase().trim()}|${answerStr.toLowerCase().trim()}|${isCorrect}`;
     // Use a simple hash or just return normalized string
     return normalized;
   }

@@ -114,7 +114,7 @@ class TopicProgressionService {
    */
   async isTopicUnlocked(userId, topicId) {
     try {
-      const progress = await this.repo.getUserTopicProgress(userId, topicId);
+      const progress = await this.repo.getUserTopicState(userId, topicId);
       
       // Topic is unlocked if:
       // 1. It's the first topic (always unlocked)
