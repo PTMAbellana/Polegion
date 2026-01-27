@@ -314,7 +314,8 @@ class AdaptiveLearningController {
             metadata: {
               type: question.type,
               parameters: question.parameters,
-              generated_at: question.generated_at
+              generated_at: question.generated_at,
+              cognitive_domain: question.cognitive_domain // ✅ FIX: Include for submission tracking
             }
           }
         });

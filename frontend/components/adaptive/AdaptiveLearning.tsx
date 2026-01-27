@@ -208,8 +208,8 @@ export default function AdaptiveLearning({ topicId, topicName: topicNameProp, on
         // Security: Don't log question data (contains correct answers)
         console.log('[AdaptiveLearning] Question received - ID:', questionData.questionId);
         
-        // Backend sends cognitiveDomain (camelCase), store as both for compatibility
-        const cogDomain = questionData.cognitiveDomain || questionData.cognitive_domain || 'knowledge_recall';
+        // ✅ FIX: Get cognitive_domain from metadata (now included in API response)
+        const cogDomain = questionData.metadata?.cognitive_domain || questionData.cognitiveDomain || questionData.cognitive_domain || 'knowledge_recall';
         
         setCurrentQuestion({
           question: questionData.question,
@@ -220,8 +220,8 @@ export default function AdaptiveLearning({ topicId, topicName: topicNameProp, on
           // Store full metadata for submission tracking (radar chart analytics)
           cognitive_domain: cogDomain, // Store as snake_case for backend
           cognitiveDomain: cogDomain,   // Store as camelCase too
-          type: questionData.type,
-          difficulty_level: questionData.difficulty_level,
+          type: questionData.metadata?.type || questionData.type,
+          difficulty_level: questionData.difficulty || questionData.difficulty_level,
           id: questionData.id || questionData.questionId
         });
         

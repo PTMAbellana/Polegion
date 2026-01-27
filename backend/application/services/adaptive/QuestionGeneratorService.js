@@ -1650,8 +1650,9 @@ class QuestionGeneratorService {
     if (topicFilter) {
       // Split the filter by | and check if question type matches any of the filter parts
       const filterParts = topicFilter.split('|');
+      // ✅ FIX: Use contains matching instead of exact/prefix for better template discovery
       filteredTemplates = templates.filter(t => 
-        filterParts.some(part => t.type === part || t.type.startsWith(part + '_'))
+        filterParts.some(part => t.type === part || t.type.includes(part) || part.includes(t.type))
       );
       console.log(`[QuestionGenerator] Topic filter "${topicFilter}" reduced templates from ${templates.length} to ${filteredTemplates.length}`);
       
