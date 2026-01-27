@@ -11,7 +11,10 @@
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:studio": "prisma studio",
-    "prisma:seed": "node prisma/seed.js"
+    "prisma:seed": "node prisma/seed.js",
+    "clean": "npm run clean:cache && npm run clean:build",
+    "clean:cache": "npm cache clean --force && cd frontend && npm cache clean --force && cd ../backend && npm cache clean --force",
+    "clean:build": "rimraf frontend/.next frontend/out backend/dist backend/build .next"
   },
   "keywords": [],
   "author": "",

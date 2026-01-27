@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import DOMPurify from 'dompurify';
 
 interface LearningInteractionProps {
   representationType: 'text' | 'visual' | 'real_world';
@@ -30,15 +31,42 @@ const buttonBaseStyle = {
  * Process question text to handle markdown and formatting
  * - Converts \n to <br> for line breaks
  * - Converts **text** to <strong>text</strong> for bold
+ * - Sanitizes HTML to prevent XSS attacks
  */
 const processQuestionText = (text: string): string => {
   if (!text) return 'Loading question...';
   
-  return text
+  // First do markdown-style replacements
+  const formatted = text
     // Convert escaped newlines to actual line breaks
     .replace(/\\n/g, '<br>')
     // Convert **text** to bold
     .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+  
+  // Then sanitize to prevent XSS (allow only safe HTML tags for math/formatting)
+  // Check if window exists (browser environment) before using DOMPurify
+  if (typeof window !== 'undefined') {
+    return DOMPurify.sanitize(formatted, {
+      ALLOWED_TAGS: ['br', 'strong', 'em', 'u', 'sup', 'sub', 'span'],
+      ALLOWED_ATTR: []
+    });
+  }
+  
+  // Fallback for SSR: basic HTML escaping
+  return formatted
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/&lt;br&gt;/g, '<br>')
+    .replace(/&lt;strong&gt;/g, '<strong>')
+    .replace(/&lt;\/strong&gt;/g, '</strong>')
+    .replace(/&lt;em&gt;/g, '<em>')
+    .replace(/&lt;\/em&gt;/g, '</em>')
+    .replace(/&lt;u&gt;/g, '<u>')
+    .replace(/&lt;\/u&gt;/g, '</u>')
+    .replace(/&lt;sup&gt;/g, '<sup>')
+    .replace(/&lt;\/sup&gt;/g, '</sup>')
+    .replace(/&lt;sub&gt;/g, '<sub>')
+    .replace(/&lt;\/sub&gt;/g, '</sub>');
 };
 
 export default function LearningInteractionRenderer({

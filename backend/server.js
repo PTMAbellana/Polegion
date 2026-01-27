@@ -1,6 +1,8 @@
 const express = require('express')
 const cors = require('cors')
 const bodyParser = require('body-parser')
+const helmet = require('helmet')
+const rateLimit = require('express-rate-limit')
 const { swaggerSpec, swaggerServe, swaggerSetup } = require('./config/swagger')
 require('dotenv').config()
 
@@ -68,6 +70,39 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions))
+
+// Security headers
+app.use(helmet({
+    contentSecurityPolicy: {
+        directives: {
+            defaultSrc: ["'self'"],
+            styleSrc: ["'self'", "'unsafe-inline'"],
+            scriptSrc: ["'self'"],
+            imgSrc: ["'self'", "data:", "https:"],
+        },
+    },
+    frameguard: {
+        action: 'deny'
+    },
+    hsts: {
+        maxAge: 31536000,
+        includeSubDomains: true,
+        preload: true
+    }
+}));
+
+// Rate limiting configuration
+const apiLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100, // 100 requests per IP
+    message: 'Too many requests from this IP, please try again later',
+    standardHeaders: true,
+    legacyHeaders: false,
+});
+
+// Apply general rate limiting to all API routes
+app.use('/api/', apiLimiter);
+
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({
     extended: true

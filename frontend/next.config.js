@@ -9,6 +9,14 @@ const nextConfig = {
         // Also ignore TypeScript errors during build (optional)
         ignoreBuildErrors: true,
     },
+    // Reduce webpack cache to save disk space
+    webpack: (config, { dev, isServer }) => {
+        // Disable webpack caching in development to save disk space
+        if (dev) {
+            config.cache = false;
+        }
+        return config;
+    },
     // Image optimization configuration
     images: {
         formats: ['image/webp', 'image/avif'], // Use modern formats

@@ -19,7 +19,7 @@ const AIQuestionGenerator = require('./AIQuestionGenerator');
 
 class HintGenerationService {
   constructor() {
-    // Use hybrid AI service (OpenAI primary, Groq fallback)
+    // Use hybrid AI service (Groq primary, OpenAI fallback)
     this.aiGenerator = new AIQuestionGenerator();
     
     // Rate limiting state (in-memory for MVP, should use Redis in production)
@@ -29,7 +29,7 @@ class HintGenerationService {
     };
     
     // Quota limits
-    this.DAILY_LIMIT = parseInt(process.env.HINT_DAILY_LIMIT) || 20;
+    this.DAILY_LIMIT = parseInt(process.env.HINT_DAILY_LIMIT) || 1000;
     this.PER_MINUTE_LIMIT = parseInt(process.env.HINT_PER_MINUTE_LIMIT) || 15;
     
     // Cache for identical hint requests
@@ -37,10 +37,11 @@ class HintGenerationService {
     this.CACHE_TTL_MS = 1000 * 60 * 60 * 24; // 24 hours
     
     console.log('[HintService] Initialized:', {
-      provider: this.provider,
-      model: this.provider === 'groq' ? this.groqModel : this.geminiModel,
-      hasGroqKey: !!this.groqApiKey,
-      hasGeminiKey: !!this.geminiApiKey,
+      provider: 'hybrid',
+      primaryModel: process.env.GROQ_MODEL || 'llama-3.3-70b-versatile',
+      fallbackModel: process.env.OPENAI_MODEL || 'gpt-4o-mini',
+      hasGroqKey: !!process.env.GROQ_API_KEY,
+      hasOpenAIKey: !!process.env.OPENAI_API_KEY,
       dailyLimit: this.DAILY_LIMIT,
       perMinuteLimit: this.PER_MINUTE_LIMIT
     });

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import axios from '@/api/axios';
+import { default as Axios } from 'axios';
 import { useAuthStore } from '@/store/authStore';
 import MasteryProgressBar from './MasteryProgressBar';
 import AdaptiveFeedbackBox from './AdaptiveFeedbackBox';
@@ -68,9 +69,10 @@ interface AdaptiveLearningProps {
   onChangeTopic?: () => void;
   userId?: string;
   analytics?: any; // Analytics hook from parent
+  onTopicUnlocked?: () => void; // Callback when a new topic is unlocked
 }
 
-export default function AdaptiveLearning({ topicId, topicName: topicNameProp, onChangeTopic, userId, analytics }: AdaptiveLearningProps) {
+export default function AdaptiveLearning({ topicId, topicName: topicNameProp, onChangeTopic, userId, analytics, onTopicUnlocked }: AdaptiveLearningProps) {
   // Get auth token from store
   const { authToken } = useAuthStore();
   
@@ -174,7 +176,7 @@ export default function AdaptiveLearning({ topicId, topicName: topicNameProp, on
       
       // Skip to next question
       await generateNewQuestion(true);
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('[AdaptiveLearning] Error flagging question:', error);
       setShowFlagConfirm(false);
       // Still skip the question even if flagging fails
@@ -199,13 +201,12 @@ export default function AdaptiveLearning({ topicId, topicName: topicNameProp, on
         timeout: 45000 // 45 seconds for AI generation
       });
       
-      console.log('[AdaptiveLearning] Question API response:', response.data);
+      // Question received from API
       
       if (response.data.success) {
         const questionData = response.data.data;
-        console.log('[AdaptiveLearning] Setting question:', questionData);
-        console.log('[AdaptiveLearning] 🎯 Question cognitive_domain:', questionData.cognitive_domain);
-        console.log('[AdaptiveLearning] 🎯 Question cognitiveDomain:', questionData.cognitiveDomain);
+        // Security: Don't log question data (contains correct answers)
+        console.log('[AdaptiveLearning] Question received - ID:', questionData.questionId);
         
         // Backend sends cognitiveDomain (camelCase), store as both for compatibility
         const cogDomain = questionData.cognitiveDomain || questionData.cognitive_domain || 'knowledge_recall';
@@ -236,11 +237,12 @@ export default function AdaptiveLearning({ topicId, topicName: topicNameProp, on
       } else {
         console.error('[AdaptiveLearning] Question API returned success=false');
       }
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('[AdaptiveLearning] Error generating question:', error);
       
       // Retry with exponential backoff for timeout errors
-      if (retryCount < MAX_RETRIES && (error.code === 'ECONNABORTED' || error.message?.includes('timeout'))) {
+      const isTimeoutError = Axios.isAxiosError(error) && (error.code === 'ECONNABORTED' || error.message?.includes('timeout'));
+      if (retryCount < MAX_RETRIES && isTimeoutError) {
         const delay = Math.pow(2, retryCount) * 1000; // 1s, 2s, 4s
         console.log(`[AdaptiveLearning] Retrying question generation (${retryCount + 1}/${MAX_RETRIES}) after ${delay}ms...`);
         
@@ -249,7 +251,8 @@ export default function AdaptiveLearning({ topicId, topicName: topicNameProp, on
       }
       
       // If all retries failed or other error, show error with functional retry button
-      const errorMessage = error.code === 'ECONNABORTED' 
+      const isTimeout = Axios.isAxiosError(error) && error.code === 'ECONNABORTED';
+      const errorMessage = isTimeout
         ? '⏱️ Question generation is taking longer than usual. This can happen when multiple students are using the system.'
         : '😕 Oops! We couldn\'t load your question.';
       
@@ -292,7 +295,7 @@ export default function AdaptiveLearning({ topicId, topicName: topicNameProp, on
         timeout: 10000 // 10 second timeout to prevent hanging
       });
       
-      console.log('[AdaptiveLearning] 📡 Pending question API response:', pendingResponse.data);
+      // Check for pending question (security: don't log full response with answers)
       
       // Check if we have a valid pending question (not null, not undefined, and has required fields)
       const hasPendingQuestion = pendingResponse.data.success && 
@@ -301,7 +304,7 @@ export default function AdaptiveLearning({ topicId, topicName: topicNameProp, on
       
       if (hasPendingQuestion) {
         const questionData = pendingResponse.data.data;
-        console.log('[AdaptiveLearning] 🔄 Restored pending question from database:', questionData);
+        console.log('[AdaptiveLearning] 🔄 Restored pending question - ID:', questionData.id || questionData.questionId);
         
         // Restore the question state
         const cogDomain = questionData.cognitiveDomain || questionData.cognitive_domain || 'knowledge_recall';
@@ -328,12 +331,15 @@ export default function AdaptiveLearning({ topicId, topicName: topicNameProp, on
       } else {
         console.log('[AdaptiveLearning] 📭 No pending question found in response');
       }
-    } catch (error: any) {
-      console.log('[AdaptiveLearning] ❌ Error checking pending question:', {
+    } catch (error: unknown) {
+      const errorDetails = Axios.isAxiosError(error) ? {
         status: error.response?.status,
         message: error.message,
         url: error.config?.url
-      });
+      } : {
+        message: error instanceof Error ? error.message : 'Unknown error'
+      };
+      console.log('[AdaptiveLearning] ❌ Error checking pending question:', errorDetails);
     }
     
     // If no pending question found or error occurred, generate a new one
@@ -349,14 +355,14 @@ export default function AdaptiveLearning({ topicId, topicName: topicNameProp, on
       if (!sessionId) return;
       
       console.log('[AdaptiveLearning] 🏁 Ending adaptive learning session:', sessionId);
-      await axios.post('/adaptive-analytics/end-session', {
-        sessionId: sessionId,
-        finalMastery: state?.masteryLevel || 0,
+      await axios.post(`/adaptive-analytics/session/${sessionId}/end`, {
+        endingMastery: state?.masteryLevel || 0,
         questionsAttempted: state?.totalAttempts || 0,
-        questionsCorrect: Math.floor((state?.totalAttempts || 0) * (parseFloat(state?.accuracy || '0') / 100))
+        questionsCorrect: Math.floor((state?.totalAttempts || 0) * (parseFloat(state?.accuracy || '0') / 100)),
+        cognitiveDomains: []
       });
       console.log('[AdaptiveLearning] ✅ Session ended successfully');
-    } catch (error) {
+    } catch (error: unknown) {
       console.warn('[AdaptiveLearning] Could not end session tracking:', error);
     }
   };
@@ -423,14 +429,14 @@ export default function AdaptiveLearning({ topicId, topicName: topicNameProp, on
       
       // Don't send sessionId - let backend generate it
       setSessionId('');
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error fetching state:', error);
       setLoading(false); // Ensure loading stops even on error
       // Try to show a fallback or generate a question anyway
       try {
         console.log('[AdaptiveLearning] ⚠️ State fetch failed, trying to generate question anyway');
         await generateNewQuestion();
-      } catch (fallbackError) {
+      } catch (fallbackError: unknown) {
         console.error('Fallback question generation failed:', fallbackError);
       }
     } finally {
@@ -445,16 +451,17 @@ export default function AdaptiveLearning({ topicId, topicName: topicNameProp, on
     const startAdaptiveSession = async () => {
       try {
         console.log('[AdaptiveLearning] 🚀 Starting adaptive learning session for topic:', topicId);
-        const response = await axios.post('/adaptive-analytics/start-session', {
+        const response = await axios.post('/adaptive-analytics/session/start', {
           topicId: topicId,
-          sessionType: 'adaptive_learning'
+          topicName: topicNameProp,
+          startingMastery: state?.masteryLevel || 0
         });
         if (response.data.success) {
-          const sessionId = response.data.sessionId;
+          const sessionId = response.data.data.id;
           setSessionId(sessionId);
           console.log('[AdaptiveLearning] ✅ Session started:', sessionId);
         }
-      } catch (error) {
+      } catch (error: unknown) {
         console.warn('[AdaptiveLearning] Could not start session tracking:', error);
       }
     };
@@ -650,7 +657,7 @@ export default function AdaptiveLearning({ topicId, topicName: topicNameProp, on
               setShowExplanationModal(true);
             }
           }
-        } catch (err) {
+        } catch (err: unknown) {
           console.error('Error generating explanation:', err);
           // Continue even if explanation fails
         }
@@ -695,13 +702,17 @@ export default function AdaptiveLearning({ topicId, topicName: topicNameProp, on
           }
         }
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error submitting answer:', error);
-      console.error('Error response:', error.response?.data);
       
-      // Show error message to user
-      if (error.response?.data?.error) {
-        alert(`Error: ${error.response.data.error}\n${error.response.data.message || ''}`);
+      if (Axios.isAxiosError(error)) {
+        console.error('Error response:', error.response?.data);
+        
+        // Show error message to user
+        const errorData = error.response?.data;
+        if (errorData && typeof errorData === 'object' && 'error' in errorData) {
+          alert(`Error: ${errorData.error}\n${errorData.message || ''}`);
+        }
       }
       
       setAnswerSubmitted(false); // Reset on error so user can retry
@@ -2273,7 +2284,7 @@ export default function AdaptiveLearning({ topicId, topicName: topicNameProp, on
                   } else {
                     setTotalHintCount(prev => prev + 1);
                   }
-                } catch (err) {
+                } catch (err: unknown) {
                   console.error('Error saving hint count:', err);
                   setTotalHintCount(prev => prev + 1);
                 }

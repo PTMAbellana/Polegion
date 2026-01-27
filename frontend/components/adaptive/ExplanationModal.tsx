@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import DOMPurify from 'dompurify';
 
 interface ExplanationModalProps {
   show: boolean;
@@ -19,11 +20,13 @@ interface ExplanationModalProps {
  * - Converts **text** to bold
  * - Properly formats numbered lists
  * - Adds spacing between sections
+ * - Sanitizes HTML to prevent XSS attacks
  */
 const formatExplanationText = (text: string): string => {
   if (!text) return '';
   
-  return text
+  // First do markdown-style replacements
+  const formatted = text
     // Convert **text** to bold
     .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
     // Add line break before bold section headers (for spacing between sections)
@@ -34,6 +37,29 @@ const formatExplanationText = (text: string): string => {
     .replace(/^(<br>\s*)+/, '')
     // Clean up: limit consecutive line breaks to max 2
     .replace(/(<br>\s*){3,}/g, '<br><br>');
+  
+  // Then sanitize to prevent XSS (allow only safe HTML tags)
+  // Check if window exists (browser environment) before using DOMPurify
+  if (typeof window !== 'undefined') {
+    return DOMPurify.sanitize(formatted, {
+      ALLOWED_TAGS: ['br', 'strong', 'em', 'u', 'p', 'span'],
+      ALLOWED_ATTR: []
+    });
+  }
+  
+  // Fallback for SSR: basic HTML escaping
+  return formatted
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/&lt;br&gt;/g, '<br>')
+    .replace(/&lt;strong&gt;/g, '<strong>')
+    .replace(/&lt;\/strong&gt;/g, '</strong>')
+    .replace(/&lt;em&gt;/g, '<em>')
+    .replace(/&lt;\/em&gt;/g, '</em>')
+    .replace(/&lt;u&gt;/g, '<u>')
+    .replace(/&lt;\/u&gt;/g, '</u>')
+    .replace(/&lt;p&gt;/g, '<p>')
+    .replace(/&lt;\/p&gt;/g, '</p>');
 };
 
 /**

@@ -1,4 +1,14 @@
 const express = require("express");
+const { validate } = require('../../middleware/ValidationMiddleware');
+const rateLimit = require('express-rate-limit');
+
+// Strict rate limiter for auth endpoints
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 5, // 5 attempts per IP
+  skipSuccessfulRequests: true,
+  message: 'Too many authentication attempts, please try again later'
+});
 
 class AuthRoutes {
   constructor(authController) {
@@ -68,7 +78,7 @@ class AuthRoutes {
  *       401:
  *         $ref: '#/components/responses/UnauthorizedError'
  */
-    this.router.post("/login", this.authController.loginUser);
+    this.router.post("/login", authLimiter, validate('login'), this.authController.loginUser);
 
 /**
  * @swagger
@@ -187,7 +197,7 @@ class AuthRoutes {
  *                   type: string
  *                   example: "Password should be at least 6 characters long"
  */
-    this.router.post("/register", this.authController.registerUser);
+    this.router.post("/register", authLimiter, validate('signup'), this.authController.registerUser);
 
     /**
      * @swagger
@@ -222,11 +232,11 @@ class AuthRoutes {
      *       400:
      *         $ref: '#/components/responses/BadRequestError'
      */
-    this.router.post("/reset-password", this.authController.resetPassword);
+    this.router.post("/reset-password", authLimiter, validate('resetPassword'), this.authController.resetPassword);
 
-    /**
-     * @swagger
-     * /auth/logout:
+/**
+ * @swagger
+ * /auth/logout:
      *   post:
      *     tags: [Authentication]
      *     summary: User logout
@@ -285,11 +295,11 @@ class AuthRoutes {
      *       401:
      *         $ref: '#/components/responses/UnauthorizedError'
      */
-    this.router.post("/refresh-token", this.authController.refreshToken);
+    this.router.post("/refresh-token", validate('refreshToken'), this.authController.refreshToken);
 
-    /**
-     * @swagger
-     * /auth/reset-password/confirm:
+/**
+ * @swagger
+ * /auth/reset-password/confirm:
      *   post:
      *     tags: [Authentication]
      *     summary: Confirm password reset

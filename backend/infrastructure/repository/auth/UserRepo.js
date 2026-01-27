@@ -175,6 +175,12 @@ class UserRepo extends BaseRepo{
 
     async createUserProfile (userId, userData, email){
         const newUser = userModel.fromInputUser(userData, userId, email).addUsertoJSON()
+        
+        // Log the randomly assigned learning strategy for research tracking
+        if (newUser.learning_strategy) {
+            console.log(`🎲 [RESEARCH] New student assigned to: ${newUser.learning_strategy.toUpperCase()} group`);
+        }
+        
         try {
             const { 
                 data, 
