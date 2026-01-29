@@ -1,29 +1,73 @@
-.landscapeOverlay {
-  display: none;
+.blockerOverlay {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
+  width: 100vw;
+  height: 100vh;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
-  z-index: 99999;
+  z-index: 999999;
   padding: 2rem;
   overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: all;
 }
 
-@media (max-width: 900px) and (orientation: portrait) {
-  .landscapeOverlay {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-}
-
-.landscapeContent {
+.blockerContent {
   text-align: center;
   color: white;
-  max-width: 25rem;
+  max-width: 90%;
+  max-height: 90vh;
   animation: fadeIn 0.5s ease-in;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Compact layout for landscape orientation */
+@media (orientation: landscape) {
+  .blockerContent {
+    max-width: 95%;
+    padding: 0.25rem;
+  }
+  
+  .phoneIcon {
+    margin-bottom: 0.25rem;
+  }
+  
+  .phoneIcon svg {
+    width: 50px;
+    height: 50px;
+  }
+  
+  .title {
+    font-size: 1rem;
+    margin-bottom: 0.25rem;
+  }
+  
+  .message {
+    font-size: 0.8rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .instructions {
+    padding: 0.5rem 0.75rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .instructions p {
+    margin: 0.15rem 0;
+    font-size: 0.75rem;
+  }
+  
+  .hint {
+    font-size: 0.65rem;
+    padding: 0 0.5rem;
+  }
 }
 
 @keyframes fadeIn {
@@ -40,7 +84,7 @@
 .phoneIcon {
   position: relative;
   display: inline-block;
-  margin-bottom: 2rem;
+  margin-bottom: 1rem;
   animation: bounce 2s ease-in-out infinite;
 }
 
@@ -119,18 +163,4 @@
   opacity: 0.8;
   font-style: italic;
   padding: 0 1rem;
-}
-
-/* Smooth transition when orientation changes */
-@media (max-width: 900px) and (orientation: landscape) {
-  .landscapeOverlay {
-    animation: fadeOut 0.3s ease-out forwards;
-  }
-}
-
-@keyframes fadeOut {
-  to {
-    opacity: 0;
-    pointer-events: none;
-  }
 }

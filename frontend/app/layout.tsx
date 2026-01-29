@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { Toaster } from "react-hot-toast";
 import AppProvider from "@/context/AppProvider";
-import GlobalLandscapePrompt from "@/components/GlobalLandscapePrompt";
+import ScreenSizeBlocker from "@/components/ScreenSizeBlocker";
 
 export const metadata: Metadata = {
   title: "Polegion",
@@ -28,7 +28,7 @@ export default function RootLayout({
         <link rel="apple-touch-icon" href="/images/polegionIcon.webp" />
       </head>
       <body>
-        <GlobalLandscapePrompt />
+        <ScreenSizeBlocker />
         <Toaster />
         <AppProvider>
           {children}
