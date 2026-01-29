@@ -25,6 +25,7 @@
     "googleapis": "^150.0.1",
     "groq-sdk": "^0.37.0",
     "hbs": "^4.2.0",
+    "helmet": "^8.0.0",
     "html2canvas": "^1.4.1",
     "jsonwebtoken": "^9.0.2",
     "multer": "^2.0.1",
