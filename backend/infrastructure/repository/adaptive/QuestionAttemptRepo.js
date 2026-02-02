@@ -154,20 +154,22 @@ class QuestionAttemptRepository {
 
       if (error) throw error;
 
-      console.log('[QuestionAttemptRepo] 📊 Raw data from DB - Total attempts:', data?.length || 0);
+      // Logging silenced to reduce Railway log volume (hitting 500 logs/sec limit)
+      // console.log('[QuestionAttemptRepo] 📊 Raw data from DB - Total attempts:', data?.length || 0);
       
       // Log first few attempts for debugging
       if (data && data.length > 0) {
-        console.log('[QuestionAttemptRepo] Sample attempts:');
-        data.slice(0, 3).forEach((attempt, idx) => {
-          console.log(`  Attempt ${idx + 1}:`, {
-            cognitive_domain: attempt.question_metadata?.cognitive_domain,
-            is_correct: attempt.is_correct,
-            metadata_keys: attempt.question_metadata ? Object.keys(attempt.question_metadata) : 'null'
-          });
-        });
+        // console.log('[QuestionAttemptRepo] Sample attempts:');
+        // data.slice(0, 3).forEach((attempt, idx) => {
+        //   console.log(`  Attempt ${idx + 1}:`, {
+        //     cognitive_domain: attempt.question_metadata?.cognitive_domain,
+        //     is_correct: attempt.is_correct,
+        //     metadata_keys: attempt.question_metadata ? Object.keys(attempt.question_metadata) : 'null'
+        //   });
+        // });
       } else {
-        console.warn('[QuestionAttemptRepo] ⚠️ No attempts found in database for this user!');
+        // Silenced - normal for new users
+        // console.warn('[QuestionAttemptRepo] ⚠️ No attempts found in database for this user!');
       }
 
       const domainStats = {};

@@ -40,15 +40,16 @@ class HintGenerationService {
     this.hintCache = new Map();
     this.CACHE_TTL_MS = 1000 * 60 * 60 * 24; // 24 hours
     
-    console.log('[HintService] Initialized:', {
-      provider: 'hybrid',
-      primaryModel: process.env.GROQ_MODEL || 'llama-3.3-70b-versatile',
-      fallbackModel: process.env.OPENAI_MODEL || 'gpt-4o-mini',
-      hasGroqKey: !!process.env.GROQ_API_KEY,
-      hasOpenAIKey: !!process.env.OPENAI_API_KEY,
-      dailyLimit: this.DAILY_LIMIT,
-      perMinuteLimit: this.PER_MINUTE_LIMIT
-    });
+    // Logging silenced to reduce Railway log volume
+    // console.log('[HintService] Initialized:', {
+    //   provider: 'hybrid',
+    //   primaryModel: process.env.GROQ_MODEL || 'llama-3.3-70b-versatile',
+    //   fallbackModel: process.env.OPENAI_MODEL || 'gpt-4o-mini',
+    //   hasGroqKey: !!process.env.GROQ_API_KEY,
+    //   hasOpenAIKey: !!process.env.OPENAI_API_KEY,
+    //   dailyLimit: this.DAILY_LIMIT,
+    //   perMinuteLimit: this.PER_MINUTE_LIMIT
+    // });
   }
 
   /**
@@ -111,7 +112,7 @@ class HintGenerationService {
     const cacheKey = this._getCacheKey(questionText, topicName, representationType);
     const cached = this._getFromCache(cacheKey);
     if (cached) {
-      console.log('[HintService] Cache HIT');
+      // console.log('[HintService] Cache HIT');  // Silenced to reduce log volume
       return {
         hint: cached,
         source: 'ai-cached',
@@ -119,33 +120,12 @@ class HintGenerationService {
       };
     }
 
-    // GUARD 5: Try AI hint generation (hybrid: OpenAI → Groq → Rule-based)
-    try {
-      console.log('[HintService] Requesting AI hint (OpenAI primary, Groq fallback)...');
-      
-      const aiHint = await this.aiGenerator.generateHint(
-        questionText,
-        correctAnswer,
-        studentAnswer,
-        difficultyLevel
-      );
-      
-      if (aiHint) {
-        this._saveToCache(cacheKey, aiHint);
-        this._logRequest(); // Track for rate limiting
-        
-        return {
-          hint: aiHint,
-          source: 'ai',
-          reason: 'AI-generated pedagogical hint'
-        };
-      }
-    } catch (error) {
-      console.error('[HintService] AI hint generation failed:', error.message);
-    }
+    // GUARD 5: AI hint generation disabled (parameters not available)
+    // NOTE: AIQuestionGenerator.generateHint() requires correctAnswer and studentAnswer
+    // which are not available in this context. Using rule-based hints only.
 
-    // FINAL FALLBACK: Rule-based hint
-    console.log('[HintService] Using rule-based fallback');
+    // FINAL FALLBACK: Rule-based hint (always used)
+    // console.log('[HintService] Using rule-based fallback');  // Commented to reduce log volume
     return {
       hint: this._getRuleBasedHint(topicName, difficultyLevel, representationType),
       source: 'rule',
