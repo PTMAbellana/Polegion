@@ -2,20 +2,24 @@
  * AIQuestionGenerator - Hybrid AI Service
  * Supports multiple AI providers with automatic fallback
  * 
- * PRIMARY: OpenAI GPT-4o-mini (academic quality, pedagogical reliability)
- * FALLBACK: Groq Llama 3.1 70B (speed, zero cost)
+ * DESIGN (Code execution order):
+ * 1st attempt: OpenAI GPT-4o-mini
+ * 2nd attempt: Groq Llama 3.3 70B (fallback)
+ * 
+ * PRODUCTION REALITY (Jan 2026 Study):
+ * - OpenAI consistently fails with 429 quota exceeded error
+ * - **Groq Llama 3.3 70B is the ACTUAL provider used for all requests**
+ * - Fallback happens immediately and transparently
  * 
  * DESIGN PRINCIPLES:
- * 1. Use best available model for quality (GPT-4o-mini preferred)
- * 2. Automatic fallback if primary fails or hits limits
- * 3. Cache all generated content to minimize costs
+ * 1. Try OpenAI first (better pedagogy when available)
+ * 2. Automatic fallback to Groq if OpenAI fails or hits limits
+ * 3. Cache all generated content to minimize API calls
  * 4. Rate limiting and cost tracking
  * 5. Validate all AI output before returning
  * 
- * ACADEMIC JUSTIFICATION:
- * - GPT-4o-mini: Widely validated in educational research
- * - Used in adaptive tutoring systems (ASSISTments, Khan Academy)
- * - Peer-reviewed: Brown et al. (2024) - GPT-4 for math education
+ * FOR RESEARCH PAPER:
+ * Report as "GroqCloud Llama 3.3 70B" - this is what students actually received
  */
 
 const OpenAI = require('openai');
@@ -60,8 +64,8 @@ class AIQuestionGenerator {
     };
 
     console.log('[AI] Hybrid AI Generator initialized');
-    console.log('[AI] Primary: OpenAI GPT-4o-mini (academic quality)');
-    console.log('[AI] Fallback: Groq Llama 3.1 70B (speed/cost)');
+    console.log('[AI] Design: Try OpenAI first → Groq fallback');
+    console.log('[AI] Production: Groq Llama 3.3 70B (OpenAI quota exceeded)');
   }
 
   /**

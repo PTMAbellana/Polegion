@@ -76,7 +76,7 @@ class AuthController {
     }
     
     registerUser = async (req, res) => {
-        // console.log(req.body)
+        console.log('📝 [REGISTRATION] Received body:', JSON.stringify(req.body, null, 2));
         const { 
             email, 
             password, 

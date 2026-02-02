@@ -111,7 +111,7 @@ export const useAuthStore = create<AuthState>()(
                         password: formData.password,
                         firstName: formData.firstName,
                         lastName: formData.lastName,
-                        gender: formData.gender.toLowerCase(), // Convert to lowercase to match backend expectation
+                        gender: formData.gender, // Keep capitalized (Male, Female, Other, Prefer not to say)
                         phone: formData.phone,
                         role: userType // Backend expects 'role' instead of 'userType'
                     };

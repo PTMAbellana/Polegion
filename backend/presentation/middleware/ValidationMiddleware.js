@@ -42,7 +42,8 @@ const schemas = {
   signup: Joi.object({
     email: Joi.string().email().required(),
     password: Joi.string().min(6).max(100).required(),
-    fullName: Joi.string().min(1).max(100).required(),
+    firstName: Joi.string().min(1).max(100).required(),
+    lastName: Joi.string().min(1).max(100).required(),
     phone: Joi.string().min(10).max(20).optional(),
     gender: Joi.string().valid('Male', 'Female', 'Other', 'Prefer not to say').optional(),
     role: Joi.string().valid('student', 'teacher', 'admin').default('student')
@@ -130,6 +131,8 @@ const validate = (schemaName) => {
       return next();
     }
 
+    console.log(`🔍 [VALIDATION] Validating "${schemaName}" with body:`, JSON.stringify(req.body, null, 2));
+
     const { error, value } = schema.validate(req.body, { 
       abortEarly: false,
       stripUnknown: true // Remove unknown fields
@@ -141,12 +144,15 @@ const validate = (schemaName) => {
         message: detail.message
       }));
 
+      console.log('❌ [VALIDATION] Failed:', JSON.stringify(details, null, 2));
+
       return res.status(400).json({
         error: 'Validation failed',
         details
       });
     }
 
+    console.log('✅ [VALIDATION] Passed');
     // Replace req.body with validated and sanitized value
     req.body = value;
     next();
