@@ -96,12 +96,14 @@ app.use(helmet({
 }));
 
 // Rate limiting configuration
+// INCREASED FOR 50+ CONCURRENT USERS TEST
 const apiLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 200, // Increased to 200 requests per IP for 50+ concurrent users
+    max: 2000, // Increased to 2000 requests per IP (50 users x ~40 requests each)
     message: 'Too many requests from this IP, please try again later',
     standardHeaders: true,
     legacyHeaders: false,
+    skip: (req) => process.env.NODE_ENV === 'development' // Skip in development
 });
 
 // More permissive rate limit for authentication endpoints (signups/logins)
