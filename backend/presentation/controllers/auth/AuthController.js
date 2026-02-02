@@ -283,14 +283,6 @@ class AuthController {
             return false; // Fail closed - deny registration on error
         }
     }
-        //     })
-        // } catch (error) {
-        //     console.error(error)
-        //     return res.status(401).json({
-        //         error: 'Invalid or expired reset token'
-        //     })
-        // }
-    }
 }
 
 
