@@ -94,10 +94,21 @@ app.use(helmet({
 // Rate limiting configuration
 const apiLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100, // 100 requests per IP
+    max: 200, // Increased to 200 requests per IP for 50+ concurrent users
     message: 'Too many requests from this IP, please try again later',
     standardHeaders: true,
     legacyHeaders: false,
+});
+
+// More permissive rate limit for authentication endpoints (signups/logins)
+// Increased for classroom testing with 50+ concurrent users
+const authLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 500, // 500 auth attempts per IP (supports 50+ concurrent signups/logins)
+    message: 'Too many authentication attempts, please try again later',
+    standardHeaders: true,
+    legacyHeaders: false,
+    skip: (req) => process.env.NODE_ENV === 'development' // Skip in development
 });
 
 // Apply general rate limiting to all API routes
@@ -138,7 +149,7 @@ if (process.env.NODE_ENV === 'production' && process.env.BACKEND_URL) {
 }
 
 //routes
-app.use('/api/auth', authRoutes)
+app.use('/api/auth', authLimiter, authRoutes) // Apply auth rate limiter to auth routes
 app.use('/api/users', userRoutes)
 app.use('/api/castles', castleRoutes)
 app.use('/api/chapter-quizzes', chapterQuizRoutes)
