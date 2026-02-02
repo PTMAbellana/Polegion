@@ -26,8 +26,8 @@ BEGIN
 END;
 $$;
 
--- Grant execute permission to authenticated users
-GRANT EXECUTE ON FUNCTION public.increment_hint_shown(UUID, UUID) TO authenticated;
+-- Grant execute permission to service_role (backend API only)
+-- service_role = the SUPABASE_SERVICE_ROLE_KEY used by your backend server
 GRANT EXECUTE ON FUNCTION public.increment_hint_shown(UUID, UUID) TO service_role;
 
 -- Verification query
