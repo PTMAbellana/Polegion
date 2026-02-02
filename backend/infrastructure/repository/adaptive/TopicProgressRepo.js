@@ -220,20 +220,20 @@ class TopicProgressRepository {
         console.log(`[TopicProgressRepo] ✅ Updated progress for topic ${topicId}`);
       } else {
         // Row doesn't exist - INSERT it with initial values
+        // Note: Only include columns that exist in user_topic_progress table
+        // Columns like correct_answers, hints_shown_count, etc. belong to adaptive_learning_state
         const { data, error } = await this.supabase
           .from('user_topic_progress')
           .insert({
             user_id: userId,
             topic_id: topicId,
             mastery_level: 0,
-            difficulty_level: 1,
-            total_attempts: 0,
-            correct_answers: 0,
-            correct_streak: 0,
-            wrong_streak: 0,
-            hints_shown_count: 0,
             mastery_percentage: 0,
             mastered: false,
+            unlocked: false,
+            attempt_count: 0,
+            longest_correct_streak: 0,
+            hint_shown: false,
             ...updates, // Apply the updates (like unlocked: true)
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString()
