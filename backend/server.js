@@ -30,6 +30,10 @@ const { sessionTracking, trackQuestionAttempt } = require('./presentation/middle
 const app = express()
 const PORT = process.env.PORT || 5000
 
+// Trust proxy - REQUIRED for Railway/Vercel deployments
+// Allows Express to correctly identify client IP from X-Forwarded-For header
+app.set('trust proxy', 1);
+
 //middleware
 // CORS configuration for production
 const allowedOrigins = [
