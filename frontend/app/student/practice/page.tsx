@@ -26,11 +26,11 @@ export default function PracticePage() {
     },
     {
       title: 'Device-Specific Tracking',
-      description: 'Progress saves on this device only—use the same device to track improvement.',
+      description: 'Progress saves on this device only - use the same device to track improvement.',
     },
     {
       title: 'Quick Sessions',
-      description: 'Each set has five questions—perfect for focused practice.',
+      description: 'Each set has five questions - perfect for focused practice.',
     },
   ];
 
@@ -78,7 +78,7 @@ export default function PracticePage() {
             <span className={styles.heroBadge}>Guided Practice Path</span>
             <h1 className={styles.heroTitle}>Build confidence with daily geometry reps</h1>
             <p className={styles.heroSubtitle}>
-              Practice whenever you like—each session creates fresh, curriculum-aligned questions
+              Practice whenever you like - each session creates fresh, curriculum-aligned questions
               that strengthen recall, problem solving, and higher-order thinking.
             </p>
 
@@ -119,7 +119,7 @@ export default function PracticePage() {
             </div>
             <div className={styles.infoNote}>
               <span className={styles.noteIcon}>ℹ️</span>
-              <p>Practice progress is saved on this device only. If you switch devices, your stats won&apos;t transfer.</p>
+              <p>Practice progress is saved on this device only. If you switch devices, your stats won't transfer.</p>
             </div>
           </div>
         </section>
@@ -173,7 +173,7 @@ export default function PracticePage() {
               <li>Say your reasoning out loud to strengthen understanding.</li>
               <li>Note tricky items and revisit the category later.</li>
               <li>Alternate between easier and harder tracks for balance.</li>
-              <li>Celebrate improvements—even small gains matter!</li>
+              <li>Celebrate improvements - even small gains matter!</li>
             </ul>
           </div>
           <div className={styles.ctaPanel}>
