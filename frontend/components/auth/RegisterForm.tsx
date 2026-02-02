@@ -5,7 +5,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
-import Turnstile from '@marsidev/react-turnstile';
+import { Turnstile } from '@marsidev/react-turnstile';
 import { useAuthStore } from '@/store/authStore';
 import { RegisterFormData } from '@/types/forms/auth';
 import { registerSchema } from '@/schemas/authSchemas';
