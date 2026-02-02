@@ -614,7 +614,9 @@ class AdaptiveLearningService {
               mdpAction: action,
               representationType: representationType || 'text',
               masteryLevel, // NEW: Constrains AI to appropriate difficulty
-              unlockedConcepts // NEW: Prevents AI from introducing locked concepts
+              unlockedConcepts, // NEW: Prevents AI from introducing locked concepts
+              correctAnswer: questionData.correctAnswer || '', // From frontend questionData
+              userAnswer: questionData.userAnswer || '' // From frontend questionData
             });
             
             aiHint = hintResult.hint;

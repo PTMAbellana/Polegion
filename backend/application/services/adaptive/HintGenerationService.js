@@ -62,6 +62,8 @@ class HintGenerationService {
    * @param {number} params.wrongStreak - How many consecutive wrong answers
    * @param {string} params.mdpAction - Current MDP action
    * @param {string} params.representationType - 'text', 'visual', 'real_world'
+   * @param {string} params.correctAnswer - The correct answer (optional, for AI hints)
+   * @param {string} params.userAnswer - The user's answer (optional, for AI hints)
    * @returns {Promise<{hint: string, source: 'ai'|'rule', reason: string}>}
    */
   async generateHint({
@@ -70,7 +72,9 @@ class HintGenerationService {
     difficultyLevel,
     wrongStreak = 0,
     mdpAction = '',
-    representationType = 'text'
+    representationType = 'text',
+    correctAnswer = '',
+    userAnswer = ''
   }) {
     // GUARD 1: Only use AI when student is struggling
     if (wrongStreak < 2) {
@@ -120,12 +124,38 @@ class HintGenerationService {
       };
     }
 
-    // GUARD 5: AI hint generation disabled (parameters not available)
-    // NOTE: AIQuestionGenerator.generateHint() requires correctAnswer and studentAnswer
-    // which are not available in this context. Using rule-based hints only.
+    // GUARD 5: Try AI hint generation (hybrid: OpenAI → Groq → Rule-based)
+    // Only attempt AI if we have the required parameters
+    if (correctAnswer && userAnswer) {
+      try {
+        // Logging silenced to reduce log volume
+        // console.log('[HintService] Requesting AI hint (OpenAI primary, Groq fallback)...');
+        
+        const aiHint = await this.aiGenerator.generateHint(
+          questionText,
+          correctAnswer,
+          userAnswer,
+          difficultyLevel
+        );
+        
+        if (aiHint) {
+          this._saveToCache(cacheKey, aiHint);
+          this._logRequest(); // Track for rate limiting
+          
+          return {
+            hint: aiHint,
+            source: 'ai',
+            reason: 'AI-generated pedagogical hint'
+          };
+        }
+      } catch (error) {
+        // Silenced to reduce log volume
+        // console.error('[HintService] AI hint generation failed:', error.message);
+      }
+    }
 
-    // FINAL FALLBACK: Rule-based hint (always used)
-    // console.log('[HintService] Using rule-based fallback');  // Commented to reduce log volume
+    // FINAL FALLBACK: Rule-based hint
+    // console.log('[HintService] Using rule-based fallback');  // Silenced
     return {
       hint: this._getRuleBasedHint(topicName, difficultyLevel, representationType),
       source: 'rule',
