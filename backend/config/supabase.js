@@ -3,10 +3,9 @@ require('dotenv').config()
 
 const supabaseUrl = process.env.SUPABASE_URL
 
-// Use ANON key for production (respects RLS), SERVICE key for dev/admin operations
-const supabaseKey = process.env.NODE_ENV === 'production' 
-    ? process.env.SUPABASE_ANON_KEY 
-    : (process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_ANON_KEY)
+// Always use SERVICE_ROLE key for backend operations (bypasses RLS for admin operations)
+// The backend is trusted - it should have full access to perform admin operations
+const supabaseKey = process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_ANON_KEY
 
 // Determine key type for logging
 const keyType = supabaseKey === process.env.SUPABASE_SERVICE_KEY ? 'service_role' : 'anon'
