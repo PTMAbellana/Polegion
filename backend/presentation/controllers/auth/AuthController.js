@@ -84,9 +84,21 @@ class AuthController {
             lastName,
             gender, 
             phone,
-            role 
+            role,
+            turnstileToken
         } = req.body
     
+        // Verify Cloudflare Turnstile token (bot protection)
+        if (turnstileToken) {
+            const isHuman = await this.verifyTurnstile(turnstileToken, req.ip);
+            if (!isHuman) {
+                return res.status(403).json({
+                    message: 'Bot verification failed',
+                    error: 'Please complete the verification and try again'
+                });
+            }
+        }
+
         try {
             const data = await this.authService.register(
                 email,
@@ -212,6 +224,65 @@ class AuthController {
         //     console.log('result ', result)
         //     return res.status(200).json({
         //         message: 'Password reset successfully'
+        //     })
+        // } catch (error) {
+        //     if (error.status === 422) {
+        //         return res.status(422).json({
+        //             error: error.message
+        //         })
+        //     }
+        //     return res.status(500).json({
+        //         error: error.message
+        //     })
+        // }
+    }
+
+    /**
+     * Verify Cloudflare Turnstile token for bot protection
+     * @param {string} token - The Turnstile token from frontend
+     * @param {string} userIp - The user's IP address
+     * @returns {Promise<boolean>} - True if verification passed, false otherwise
+     */
+    async verifyTurnstile(token, userIp) {
+        if (!token) {
+            console.warn('[Turnstile] No token provided');
+            return false;
+        }
+
+        const secretKey = process.env.TURNSTILE_SECRET_KEY;
+        if (!secretKey) {
+            console.warn('[Turnstile] No secret key configured - skipping verification');
+            return true; // Allow registration to proceed if Turnstile not configured
+        }
+
+        try {
+            const response = await fetch(
+                'https://challenges.cloudflare.com/turnstile/v0/siteverify',
+                {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        secret: secretKey,
+                        response: token,
+                        remoteip: userIp
+                    })
+                }
+            );
+
+            const data = await response.json();
+            
+            if (data.success) {
+                console.log('[Turnstile] ✅ Verification passed');
+                return true;
+            } else {
+                console.warn('[Turnstile] ❌ Verification failed:', data['error-codes']);
+                return false;
+            }
+        } catch (error) {
+            console.error('[Turnstile] Verification error:', error);
+            return false; // Fail closed - deny registration on error
+        }
+    }
         //     })
         // } catch (error) {
         //     console.error(error)

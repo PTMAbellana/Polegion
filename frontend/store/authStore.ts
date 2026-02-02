@@ -102,7 +102,7 @@ export const useAuthStore = create<AuthState>()(
                 }
             },
 
-            register: async (formData: RegisterFormData, userType: 'student' | 'teacher'): Promise<AuthActionResult> => {
+            register: async (formData: RegisterFormData, userType: 'student' | 'teacher', turnstileToken?: string): Promise<AuthActionResult> => {
                 set({ loginLoading: true });
                 try {
                     // Transform frontend form data to match backend API expectations
@@ -113,7 +113,8 @@ export const useAuthStore = create<AuthState>()(
                         lastName: formData.lastName,
                         gender: formData.gender, // Keep capitalized (Male, Female, Other, Prefer not to say)
                         phone: formData.phone,
-                        role: userType // Backend expects 'role' instead of 'userType'
+                        role: userType, // Backend expects 'role' instead of 'userType'
+                        turnstileToken // Add Turnstile token for bot protection
                     };
                     
                     const response = await apiRegister(apiData, userType);

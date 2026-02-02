@@ -5,6 +5,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
+import Turnstile from '@marsidev/react-turnstile';
 import { useAuthStore } from '@/store/authStore';
 import { RegisterFormData } from '@/types/forms/auth';
 import { registerSchema } from '@/schemas/authSchemas';
@@ -27,6 +28,7 @@ export default function RegisterForm(
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState<string>('');
 
   const {
     register,
@@ -42,7 +44,12 @@ export default function RegisterForm(
       return;
     }
 
-    const result = await registerUser(formData, userType);
+    if (!turnstileToken) {
+      toast.error("Please complete the human verification");
+      return;
+    }
+
+    const result = await registerUser(formData, userType, turnstileToken);
     
     if (result.success) {
       let route;
@@ -190,10 +197,30 @@ export default function RegisterForm(
         </ul>
       </div>
 
+      {/* Cloudflare Turnstile Bot Protection */}
+      <div style={{ display: 'flex', justifyContent: 'center', margin: '20px 0' }}>
+        <Turnstile
+          siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || '1x00000000000000000000AA'}
+          onSuccess={(token) => setTurnstileToken(token)}
+          onError={() => {
+            setTurnstileToken('');
+            toast.error('Verification failed. Please try again.');
+          }}
+          onExpire={() => {
+            setTurnstileToken('');
+            toast.error('Verification expired. Please verify again.');
+          }}
+          options={{
+            theme: 'light',
+            size: 'normal'
+          }}
+        />
+      </div>
+
       <button
         type="submit"
         className={styles.registerButton}
-        disabled={loginLoading || !agreedToTerms}
+        disabled={loginLoading || !agreedToTerms || !turnstileToken}
       >
         {loginLoading ? "Registering..." : "Register"}
       </button>
