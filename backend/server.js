@@ -117,8 +117,8 @@ const authLimiter = rateLimit({
     skip: (req) => process.env.NODE_ENV === 'development' // Skip in development
 });
 
-// Apply general rate limiting to all API routes
-app.use('/api/', apiLimiter);
+// DISABLED FOR 50-USER TEST - No API rate limiting
+// app.use('/api/', apiLimiter);
 
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({
